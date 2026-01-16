@@ -742,15 +742,23 @@ h1{
   object-fit: cover;                /* use "contain" if you want no cropping */
 }
 
+/* --- Rank emblem size lock --- */
 .rank-emblem{
-  width:34px;
-  height:34px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.14);
+  width:32px;
+  height:32px;
+
+  display:inline-block;
+  flex-shrink:0;
+
+  object-fit: contain;     /* never crop the emblem */
+  object-position: center;
+
+  /* visual polish */
+  padding:2px;
+  border-radius:10px;
   background: rgba(0,0,0,.18);
-  box-shadow: 0 10px 22px rgba(0,0,0,.35);
-  object-fit: contain;     /* use cover if you want cropping */
-  padding: 4px;            /* remove if you want edge-to-edge */
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow: 0 6px 14px rgba(0,0,0,.35);
 }
 
 /* ---------- Ranks ---------- */
