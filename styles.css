@@ -1246,8 +1246,37 @@ footer{
   }
 }
 
-/* If a real emblem image exists, don't paint placeholder glyphs over it */
-.sigil .mark:has(img)::before,
-.sigil .mark:has(img)::after{
-  content:none;
+/* ===== FIX: show rank PNG emblems, disable placeholder glyph layers ===== */
+.rank .sigil .mark::before,
+.rank .sigil .mark::after{
+  content: none !important;
+  background: none !important;
+  clip-path: none !important;
+}
+
+/* Some placeholder rules are rank-specific; neutralize them too */
+.rank.soft-wind .mark::after,
+.rank.mist-petal .mark::after,
+.rank.initiate .mark::after,
+.rank.mochi-blossom .mark::after,
+.rank.veteran .mark::after,
+.rank.elite .mark::after,
+.rank.petal-keeper .mark::after,
+.rank.dharmapala .mark::after,
+.rank.hall-leader .mark::after,
+.rank.vice-leader .mark::after{
+  content: none !important;
+  background: none !important;
+  clip-path: none !important;
+}
+
+/* Make sure the PNG sits above everything */
+.rank .sigil .mark{ position: relative; }
+.rank .sigil .mark > img.rank-emblem{
+  position: relative;
+  z-index: 3;
+  width: 34px !important;
+  height: 34px !important;
+  display: block !important;
+  object-fit: contain !important;
 }
