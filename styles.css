@@ -22,9 +22,6 @@
 
 /* ---------- Theme tokens ---------- */
 :root{
-  html{
-  font-size: clamp(100%, 1.05vw, 115%);
-}
 
   --bg-0:#07080b;
   --bg-1:#0b0f14;
@@ -138,10 +135,7 @@ body{
   margin:0;
   color:var(--text);
   background:
-    radial-gradient(1200px 900px at 18% 8%, rgba(15,191,155,.12), transparent 55%),
-    radial-gradient(900px 700px at 82% 18%, rgba(217,179,106,.11), transparent 60%),
-    radial-gradient(1000px 800px at 60% 92%, rgba(168,215,255,.09), transparent 60%),
-    linear-gradient(180deg, var(--bg-0), var(--bg-1) 55%, var(--bg-2));
+  url("assets/bg/wuxia-bg.png") center / cover no-repeat fixed;
   font-family:var(--sans);
   line-height:1.5;
   overflow-x:hidden;
