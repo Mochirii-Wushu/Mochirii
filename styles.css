@@ -742,6 +742,17 @@ h1{
   object-fit: cover;                /* use "contain" if you want no cropping */
 }
 
+.rank-emblem{
+  width:34px;
+  height:34px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+  object-fit: contain;     /* use cover if you want cropping */
+  padding: 4px;            /* remove if you want edge-to-edge */
+}
+
 /* ---------- Ranks ---------- */
 .rank{ grid-column: span 4; }
 @media (max-width: 980px){ .rank{ grid-column: span 6; } }
@@ -779,7 +790,7 @@ h1{
 
 /* Mark icons (pure CSS) */
 .sigil .mark::before{
-  content:"";
+  content:"none";
   position:absolute;
   inset:7px;
   border-radius: 10px;
@@ -787,7 +798,7 @@ h1{
   opacity:.6;
 }
 .sigil .mark::after{
-  content:"";
+  content:"none";
   position:absolute;
   left:50%;
   top:50%;
