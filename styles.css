@@ -744,8 +744,8 @@ h1{
 
 /* --- Rank emblem size lock --- */
 .rank-emblem{
-  width:24px;
-  height:24px;
+  width:34px;
+  height:34px;
 
   display:inline-block;
   flex-shrink:0;
@@ -785,8 +785,8 @@ h1{
 }
 
 .sigil .mark{
-  width:34px;
-  height:34px;
+  width:28px;
+  height:28px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,.14);
   background:
