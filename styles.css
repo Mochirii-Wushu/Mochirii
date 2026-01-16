@@ -744,8 +744,8 @@ h1{
 
 /* --- Rank emblem size lock --- */
 .rank-emblem{
-  width:32px;
-  height:32px;
+  width:34px;
+  height:34px;
 
   display:inline-block;
   flex-shrink:0;
@@ -885,6 +885,23 @@ h1{
     radial-gradient(circle at 60% 40%, rgba(240,234,219,.92), transparent 60%),
     conic-gradient(from 210deg, rgba(217,179,106,.70), rgba(217,179,106,.0) 50%, rgba(154,45,60,.22), rgba(154,45,60,.0) 80%, rgba(217,179,106,.70));
   clip-path: polygon(50% 0%, 68% 26%, 95% 35%, 76% 58%, 80% 92%, 50% 76%, 20% 92%, 24% 58%, 5% 35%, 32% 26%);
+}
+
+/* --- HARD OVERRIDE: keep ANY rank sigil image at placeholder size --- */
+.rank .sigil .mark{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.rank .sigil .mark > img,
+.rank .sigil > img{
+  width:34px !important;
+  height:34px !important;
+  max-width:34px !important;
+  max-height:34px !important;
+  display:block !important;
+  object-fit:contain !important;
+  object-position:center !important;
 }
 
 /* ---------- Lists ---------- */
