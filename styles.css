@@ -1245,3 +1245,9 @@ footer{
     transition:none;
   }
 }
+
+/* If a real emblem image exists, don't paint placeholder glyphs over it */
+.sigil .mark:has(img)::before,
+.sigil .mark:has(img)::after{
+  content:none;
+}
