@@ -1246,15 +1246,22 @@ footer{
   }
 }
 
-/* ===== FIX: show rank PNG emblems, disable placeholder glyph layers ===== */
-.rank .sigil .mark::before,
-.rank .sigil .mark::after{
-  content: none !important;
-  background: none !important;
-  clip-path: none !important;
+/* ===== Rank emblem PNGs: make them visible and stop placeholder layers ===== */
+
+/* 1) Ensure the mark remains the correct icon box */
+.rank .sigil .mark{
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* Some placeholder rules are rank-specific; neutralize them too */
+/* 2) Hide ALL placeholder pseudo-glyphs inside rank marks */
+.rank .sigil .mark::before,
+.rank .sigil .mark::after{
+  content:none !important;
+}
+
+/* 3) Also neutralize rank-specific glyph overrides */
 .rank.soft-wind .mark::after,
 .rank.mist-petal .mark::after,
 .rank.initiate .mark::after,
@@ -1265,18 +1272,20 @@ footer{
 .rank.dharmapala .mark::after,
 .rank.hall-leader .mark::after,
 .rank.vice-leader .mark::after{
-  content: none !important;
-  background: none !important;
-  clip-path: none !important;
+  content:none !important;
 }
 
-/* Make sure the PNG sits above everything */
-.rank .sigil .mark{ position: relative; }
+/* 4) Put the PNG above any remaining decoration */
 .rank .sigil .mark > img.rank-emblem{
-  position: relative;
-  z-index: 3;
-  width: 34px !important;
-  height: 34px !important;
-  display: block !important;
-  object-fit: contain !important;
+  width:34px !important;
+  height:34px !important;
+  display:block !important;
+  object-fit:contain !important;
+  position:relative;
+  z-index:2;
+}
+
+/* 5) Optional but recommended: remove the placeholder background only when a PNG exists */
+.rank .sigil .mark{
+  background: none !important;
 }
