@@ -744,8 +744,8 @@ h1{
 
 /* --- Rank emblem size lock --- */
 .rank-emblem{
-  width:34px;
-  height:34px;
+  width:32px;
+  height:32px;
 
   display:inline-block;
   flex-shrink:0;
@@ -885,23 +885,6 @@ h1{
     radial-gradient(circle at 60% 40%, rgba(240,234,219,.92), transparent 60%),
     conic-gradient(from 210deg, rgba(217,179,106,.70), rgba(217,179,106,.0) 50%, rgba(154,45,60,.22), rgba(154,45,60,.0) 80%, rgba(217,179,106,.70));
   clip-path: polygon(50% 0%, 68% 26%, 95% 35%, 76% 58%, 80% 92%, 50% 76%, 20% 92%, 24% 58%, 5% 35%, 32% 26%);
-}
-
-/* --- HARD OVERRIDE: keep ANY rank sigil image at placeholder size --- */
-.rank .sigil .mark{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.rank .sigil .mark > img,
-.rank .sigil > img{
-  width:34px !important;
-  height:34px !important;
-  max-width:34px !important;
-  max-height:34px !important;
-  display:block !important;
-  object-fit:contain !important;
-  object-position:center !important;
 }
 
 /* ---------- Lists ---------- */
@@ -1244,48 +1227,4 @@ footer{
   .toggle::after{
     transition:none;
   }
-}
-
-/* ===== Rank emblem PNGs: make them visible and stop placeholder layers ===== */
-
-/* 1) Ensure the mark remains the correct icon box */
-.rank .sigil .mark{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* 2) Hide ALL placeholder pseudo-glyphs inside rank marks */
-.rank .sigil .mark::before,
-.rank .sigil .mark::after{
-  content:none !important;
-}
-
-/* 3) Also neutralize rank-specific glyph overrides */
-.rank.soft-wind .mark::after,
-.rank.mist-petal .mark::after,
-.rank.initiate .mark::after,
-.rank.mochi-blossom .mark::after,
-.rank.veteran .mark::after,
-.rank.elite .mark::after,
-.rank.petal-keeper .mark::after,
-.rank.dharmapala .mark::after,
-.rank.hall-leader .mark::after,
-.rank.vice-leader .mark::after{
-  content:none !important;
-}
-
-/* 4) Put the PNG above any remaining decoration */
-.rank .sigil .mark > img.rank-emblem{
-  width:34px !important;
-  height:34px !important;
-  display:block !important;
-  object-fit:contain !important;
-  position:relative;
-  z-index:2;
-}
-
-/* 5) Optional but recommended: remove the placeholder background only when a PNG exists */
-.rank .sigil .mark{
-  background: none !important;
 }
