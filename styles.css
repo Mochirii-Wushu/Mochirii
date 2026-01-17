@@ -155,7 +155,7 @@ body{
   inset: 0;
   pointer-events: none;
   z-index: 0;                /* behind everything */
-  background: url("assets/bg/wuxia-bg.png") center / cover no-repeat;
+  background: url("./assets/bg/wuxia-bg.png") center / cover no-repeat;
   opacity: 0.45;               /* tune to taste */
   transform: translateZ(0);
 }
