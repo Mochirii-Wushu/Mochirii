@@ -4,24 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0fbf9b" />
-  <meta name="description" content="Mōchirīī — a cozy, whimsical Where Winds Meet guild. Have a CupCake, Share the Frosting!" />
+  <meta name="description" content="Mōchirīī — a whimsical, cozy Where Winds Meet guild. Have a CupCake, Share the Frosting!" />
   <title>Mōchirīī • Where Winds Meet Guild</title>
-
-  <!-- Social preview (high impact polish) -->
-  <meta property="og:title" content="Mōchirīī • Where Winds Meet Guild" />
-  <meta property="og:description" content="Quiet, cozy guild. Kindness first. Have a CupCake, Share the Frosting!" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://mochirii.com/" />
-  <meta property="og:image" content="https://mochirii.com/assets/og/og-card.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Mōchirīī • Where Winds Meet Guild" />
-  <meta name="twitter:description" content="Quiet, cozy guild. Kindness first. Have a CupCake, Share the Frosting!" />
-  <meta name="twitter:image" content="https://mochirii.com/assets/og/og-card.png" />
-
-  <!-- Favicons (placeholders; keep paths if you add the assets) -->
-  <link rel="icon" href="assets/favicons/favicon.svg" type="image/svg+xml" />
-  <link rel="icon" href="assets/favicons/favicon.png" type="image/png" />
-  <link rel="apple-touch-icon" href="assets/favicons/apple-touch-icon.png" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -29,38 +13,34 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <!-- Background layers -->
-  <div class="bg-wuxia" aria-hidden="true"></div>
-  <div class="ink one" aria-hidden="true"></div>
-  <div class="ink two" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
+  <div class="bg-photo" aria-hidden="true"></div>
+  <div class="bg-ink" aria-hidden="true"></div>
+  <div class="bg-ink-2" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
 
   <header>
     <div class="container">
-      <div class="topbar" role="navigation" aria-label="Primary">
+      <div class="nav" role="navigation" aria-label="Primary">
         <a class="brand" href="#top" aria-label="Back to top">
           <span class="brand-mark" aria-hidden="true"></span>
-          <span>
-            <div class="title"><strong>Mōchirīī</strong></div>
-            <div class="subtitle">Where Winds Meet • Guild</div>
+          <span class="brand-title">
+            <strong>Mōchirīī</strong>
+            <span>Where Winds Meet • Guild</span>
           </span>
         </a>
 
-        <nav class="nav" aria-label="Sections">
-          <a href="#values">Values</a>
-          <a href="#ranks">Ranks</a>
-          <a href="#events">Events</a>
-          <a href="#charter">Charter</a>
-          <a href="#join">Join</a>
+        <nav class="navlinks" aria-label="Sections">
+          <a class="link" href="#values">Values</a>
+          <a class="link" href="#ranks">Ranks</a>
+          <a class="link" href="#events">Events</a>
+          <a class="link" href="#charter">Charter</a>
+          <a class="link" href="#join">Join</a>
 
-          <div class="toggle-wrap" aria-label="Theme controls">
-            <button id="themeToggle" type="button" aria-label="Toggle theme">
-              <span id="themeLabel">Lantern</span>
-            </button>
-          </div>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+            <span id="themeLabel">Lantern</span>
+            <span class="toggle" aria-hidden="true"></span>
+          </button>
 
-          <!-- Single primary CTA (no repetition elsewhere) -->
           <a class="btn primary" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer" aria-label="Join the Discord (opens in new tab)">
             Join Discord
           </a>
@@ -70,23 +50,37 @@
   </header>
 
   <main id="main">
-    <!-- HERO -->
-    <section class="hero" id="top" aria-labelledby="guild-title">
+    <section class="hero" id="top">
       <div class="container">
-        <div class="card" role="region" aria-label="Guild introduction">
-          <div class="pad" style="display:grid; grid-template-columns: 1.25fr .75fr; gap:1rem; align-items:start;">
-            <article>
-              <div class="chip" aria-label="Guild tone">Jade calm • Gold warmth • Cozy discipline</div>
+        <div class="hero-grid">
+          <article class="hero-card" aria-labelledby="guild-title">
+            <div class="hero-inner">
+              <div class="stamp-wrap" aria-hidden="true">
+                <div class="stamp"></div>
+                <div class="stamp-glyph"></div>
+              </div>
 
-              <div class="sp-12"></div>
+              <div class="kicker">
+                <span class="dot" aria-hidden="true"></span>
+                <span>Jade and bamboo gently swoon, lotus dreams in silver moon.</span>
+              </div>
 
               <h1 id="guild-title">Mōchirīī</h1>
 
-              <p class="balance">
+              <p class="subtitle balance">
                 <strong>Motto:</strong> “Have a CupCake, Share the Frosting!”<br />
-                A quiet, cozy home for kind players across every time zone. We keep things sweet, steady, and drama-light.
-                A <strong>30-day Cupcake nap</strong> is fine when you tell us.
+                Quiet, cozy guild. Mōchirīī welcomes pretty people from all over the world to a yummy Cupcake home.
+                No pressure, be sweet like frosting, support each other at all times.
+                <strong>30-day Cupcake nap</strong> ok, if you let us know.
               </p>
+
+              <div class="hero-actions" aria-label="Primary actions">
+                <a class="btn primary" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">
+                  Join the Discord
+                </a>
+                <a class="btn" href="#join">How to Join</a>
+                <a class="btn ghost" href="#charter">Read the Charter</a>
+              </div>
 
               <div class="hero-meta" aria-label="Quick details">
                 <span class="chip">All time zones welcome</span>
@@ -94,255 +88,263 @@
                 <span class="chip">Kindness is Key</span>
                 <span class="chip">No pressure</span>
               </div>
+            </div>
+          </article>
 
-              <!-- No duplicate Join CTA here; keep unique “orientation” actions -->
-              <div class="hero-actions" aria-label="Orientation actions">
-                <a class="btn" href="#join">How to Join</a>
-                <a class="btn ghost" href="#charter">Read the Charter</a>
+          <aside class="aside" aria-labelledby="sigil-title">
+            <img class="emblem-img" src="assets/emblem.png" alt="Mōchirīī guild emblem" width="132" height="132" loading="lazy" decoding="async" />
+
+            <h2 id="sigil-title">Guild Seal</h2>
+            <p class="balance">
+              Silvered jade glows as petaled stillness soothes, and bamboo’s steadfast grace cradles devoted hearts.<br />
+            </p>
+
+            <div class="stats" aria-label="Guild contacts">
+              <div class="stat">
+                <strong>Support</strong>
+                <span id="discordCode">Support@Mochirii.com</span>
               </div>
-            </article>
-
-            <aside class="card aside utility" aria-labelledby="sigil-title">
-              <div class="pad">
-                <img class="emblem-img" src="assets/emblem.png" alt="Mōchirīī guild emblem" width="132" height="132" loading="lazy" decoding="async" />
-                <h2 id="sigil-title" class="h3">Guild Seal</h2>
-                <p class="balance">
-                  Silvered jade, petaled stillness, bamboo’s steadfast grace. A place where skill grows quietly.
-                </p>
-
-                <div class="sp-12"></div>
-
-                <div aria-label="Guild contacts">
-                  <div class="small">Support</div>
-                  <div id="discordCode" class="p-muted">Support@Mochirii.com</div>
-
-                  <div class="sp-10"></div>
-
-                  <div class="small">Guild Leader</div>
-                  <div id="uidText" class="p-muted">Twills • UID 1019675341</div>
-                </div>
-
-                <div class="sp-16"></div>
-
-                <!-- Unique utility actions live here -->
-                <div aria-label="Copy contact info">
-                  <div class="small" id="copyStatus" aria-live="polite"></div>
-                  <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.5rem;">
-                    <button class="btn small" id="copyDiscord" type="button" aria-label="Copy Discord invite link">Copy Discord</button>
-                    <button class="btn small" id="copyUID" type="button" aria-label="Copy Twills UID">Copy UID</button>
-                  </div>
-                </div>
+              <div class="stat">
+                <strong>Guild Leader</strong>
+                <span id="uidText">Twills • UID 1019675341</span>
               </div>
-            </aside>
-          </div>
+            </div>
+
+            <div class="sp-16"></div>
+
+            <div class="contact-row" aria-label="Copy contact info">
+              <div class="copy-note" id="copyStatus" aria-live="polite"></div>
+              <div class="copy-group">
+                <button class="btn small" id="copyDiscord" type="button" aria-label="Copy Discord invite link">
+                  Copy Discord
+                </button>
+                <button class="btn small" id="copyUID" type="button" aria-label="Copy Twills UID">
+                  Copy UID
+                </button>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
 
-    <!-- VALUES -->
-    <section id="values" aria-labelledby="values-title">
+    <section id="values" class="values">
       <div class="container">
-        <header class="section-title">
-          <h2 id="values-title" class="h3">Guild Values</h2>
+        <div class="section-title">
+          <h3 class="h3">Guild Values</h3>
           <p class="balance">Four pillars that keep Mōchirīī cozy even when the world boss is not.</p>
-        </header>
+        </div>
 
-        <div class="values-grid" role="list" aria-label="Guild values">
-          <article class="card module" role="listitem">
+        <div class="grid" role="list" aria-label="Guild values">
+          <article class="card value" role="listitem">
             <div class="pad">
-              <div class="chip">Sweetness</div>
-              <div class="sp-10"></div>
-              <h3 class="h4">Frosting First</h3>
+              <div class="value-top">
+                <div class="value-icon sweet" aria-hidden="true"></div>
+                <span class="chip">Sweetness</span>
+              </div>
+              <h4 class="h4">Frosting First</h4>
               <p class="p-muted">Speak with patience. Assume good faith. Let kindness lead, then let skill follow.</p>
             </div>
           </article>
 
-          <article class="card module" role="listitem">
+          <article class="card value" role="listitem">
             <div class="pad">
-              <div class="chip">Calm</div>
-              <div class="sp-10"></div>
-              <h3 class="h4">Small Conflicts</h3>
-              <p class="p-muted">Resolve issues quietly. Escalate only when needed. Drama stays outside the pavilion.</p>
+              <div class="value-top">
+                <div class="value-icon calm" aria-hidden="true"></div>
+                <span class="chip">Calm</span>
+              </div>
+              <h4 class="h4">Small Conflicts</h4>
+              <p class="p-muted">Resolve issues privately. Escalate only when needed. Drama stays outside the pavilion.</p>
             </div>
           </article>
 
-          <article class="card module" role="listitem">
+          <article class="card value" role="listitem">
             <div class="pad">
-              <div class="chip">Craft</div>
-              <div class="sp-10"></div>
-              <h3 class="h4">Helpful Mastery</h3>
+              <div class="value-top">
+                <div class="value-icon craft" aria-hidden="true"></div>
+                <span class="chip">Craft</span>
+              </div>
+              <h4 class="h4">Helpful Mastery</h4>
               <p class="p-muted">Teach systems. Answer questions. Share knowledge without condescension or ego.</p>
             </div>
           </article>
-        </div>
 
-        <div class="sp-16"></div>
-
-        <div class="card module utility" role="note" aria-label="Value note">
-          <div class="pad">
-            <div class="chip">Consistency</div>
-            <div class="sp-10"></div>
-            <h3 class="h4">Steady is Strong</h3>
-            <p class="p-muted">A reliable presence matters most. Progress comes from calm repetition, not bursts.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RANKS -->
-    <section id="ranks" aria-labelledby="ranks-title">
-      <div class="container">
-        <header class="section-title">
-          <h2 id="ranks-title" class="h3">Ranks</h2>
-          <p class="balance">From Soft Wind to Vice Leader, each step is earned through presence, kindness, and steady effort.</p>
-        </header>
-
-        <div class="ranks-grid" role="list" aria-label="Guild ranks from lowest to highest">
-          <article class="rank soft-wind" role="listitem" aria-label="Soft Wind">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/softwind.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Soft Wind</h3>
-              </div>
-              <span class="chip">New arrival</span>
-            </div>
-            <p><strong>Learn the culture.</strong> Meet the people, settle in. Courtesy and a minimum of <strong>1k guild activity</strong> are the only requirements.</p>
-          </article>
-
-          <article class="rank mist-petal" role="listitem" aria-label="Mist Petal">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/mistpetal.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Mist Petal</h3>
-              </div>
-              <span class="chip">Finding footing</span>
-            </div>
-            <p><strong>Begins engaging.</strong> Shows patience, respect, and a willingness to learn.</p>
-          </article>
-
-          <article class="rank initiate" role="listitem" aria-label="Initiate">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/initiate.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Initiate</h3>
-              </div>
-              <span class="chip">Time-based</span>
-            </div>
-            <p><strong>Member for one month.</strong> The only rank granted purely by time.</p>
-          </article>
-
-          <article class="rank mochi-blossom" role="listitem" aria-label="Mochi Blossom">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/mochiblossom.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Mochi Blossom</h3>
-              </div>
-              <span class="chip">Active member</span>
-            </div>
-            <p><strong>Participates.</strong> Groups when possible, adds to the community’s daily rhythm with a steady, friendly presence.</p>
-          </article>
-
-          <article class="rank veteran" role="listitem" aria-label="Veteran">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/veteran.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Veteran</h3>
-              </div>
-              <span class="chip">Consistency</span>
-            </div>
-            <p><strong>Three months minimum.</strong> Active on most days and reliably helpful. No leadership duties required.</p>
-          </article>
-
-          <article class="rank elite" role="listitem" aria-label="Elite">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/elite.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Elite</h3>
-              </div>
-              <span class="chip">Execution helper</span>
-            </div>
-            <p><strong>Accurate guidance.</strong> Frequently helps with content and questions. Reliable, calm conduct.</p>
-          </article>
-
-          <article class="rank petal-keeper" role="listitem" aria-label="Petal Keeper">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/petalkeeper.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Petal Keeper</h3>
-              </div>
-              <span class="chip">Culture steward</span>
-            </div>
-            <p><strong>Welcomes new members.</strong> Reinforces norms, de-escalates issues, flags concerns early to officers.</p>
-          </article>
-
-          <article class="rank dharmapala" role="listitem" aria-label="Dharmapala">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/dharmapala.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Dharmapala</h3>
-              </div>
-              <span class="chip">Officer</span>
-            </div>
-            <p><strong>Leads content.</strong> Teaches systems, mentors members, prevents drama.</p>
-          </article>
-
-          <article class="rank hall-leader" role="listitem" aria-label="Hall Leader">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/hallleader.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Hall Leader</h3>
-              </div>
-              <span class="chip">Council</span>
-            </div>
-            <p><strong>Strategic oversight.</strong> Guides officers, resolves escalations, protects long-term stability.</p>
-          </article>
-
-          <article class="rank vice-leader" role="listitem" aria-label="Vice Leader">
-            <div class="mark">
-              <div style="display:flex; gap:.75rem; align-items:center;">
-                <img class="rank-emblem" src="assets/ranks/viceleader.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-                <h3 class="h4">Vice Leader</h3>
-              </div>
-              <span class="chip">Highest honor</span>
-            </div>
-            <p><strong>Top trust.</strong> Represents Mōchirīī externally, manages diplomacy, ensures continuity of leadership.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- EVENTS -->
-    <section id="events" aria-labelledby="events-title">
-      <div class="container">
-        <header class="section-title">
-          <h2 id="events-title" class="h3">Events</h2>
-          <p class="balance">Across all zones we play: calm runs, cozy socials, and steady growth.</p>
-        </header>
-
-        <div class="values-grid" role="list" aria-label="Event types">
-          <article class="card module" role="listitem">
+          <article class="card value" role="listitem">
             <div class="pad">
-              <div class="chip">In-game</div>
-              <div class="sp-10"></div>
-              <h3 class="h4">Progression & Instances</h3>
+              <div class="value-top">
+                <div class="value-icon steady" aria-hidden="true"></div>
+                <span class="chip">Consistency</span>
+              </div>
+              <h4 class="h4">Steady is Strong</h4>
+              <p class="p-muted">A reliable presence matters most. Progress comes from calm repetition, not bursts.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="ranks">
+      <div class="container">
+        <div class="section-title">
+          <h3 class="h3">Ranks</h3>
+          <p class="balance">From Soft Wind to Vice Leader, every step is earned through presence, kindness, and steady effort.</p>
+        </div>
+
+        <div class="grid" role="list" aria-label="Guild ranks from lowest to highest">
+          <article class="card rank soft-wind" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/softwind.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Soft Wind</h4>
+              </div>
+              <p><strong>New arrival.</strong> Learn the culture, meet the people, settle in. Courtesy and a minimum of <strong>1k guild activity</strong> are the only requirements.</p>
+            </div>
+          </article>
+
+          <article class="card rank mist-petal" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/mistpetal.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Mist Petal</h4>
+              </div>
+              <p><strong>Finding footing.</strong> Begins engaging in chat and activities. Shows patience, respect, and a willingness to learn.</p>
+            </div>
+          </article>
+
+          <article class="card rank initiate" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/initiate.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Initiate</h4>
+              </div>
+              <p><strong>Time based.</strong> Member for at least one full month. The only rank granted purely by time.</p>
+            </div>
+          </article>
+
+          <article class="card rank mochi-blossom" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/mochiblossom.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Mochi Blossom</h4>
+              </div>
+              <p><strong>Active member.</strong> Participates, groups when possible, and adds to the community’s daily rhythm with a steady, friendly presence.</p>
+            </div>
+          </article>
+
+          <article class="card rank veteran" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/veteran.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Veteran</h4>
+              </div>
+              <p><strong>Consistency.</strong> Member for at least three months. Active on most days and reliably helpful. No leadership duties required.</p>
+            </div>
+          </article>
+
+          <article class="card rank elite" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/elite.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Elite</h4>
+              </div>
+              <p><strong>Execution helper.</strong> Frequently helps with content and questions. Known for accurate guidance, reliability, and calm conduct.</p>
+            </div>
+          </article>
+
+          <article class="card rank petal-keeper" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/petalkeeper.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Petal Keeper</h4>
+              </div>
+              <p><strong>Culture steward.</strong> Welcomes new members, reinforces guild norms, de-escalates minor issues, and flags concerns early to officers.</p>
+            </div>
+          </article>
+
+          <article class="card rank dharmapala" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/dharmapala.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Dharmapala</h4>
+              </div>
+              <p><strong>Officer.</strong> Leads instances and progression content. Teaches systems, mentors members, and prevents drama.</p>
+            </div>
+          </article>
+
+          <article class="card rank hall-leader" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/hallleader.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Hall Leader</h4>
+              </div>
+              <p><strong>Council.</strong> Strategic council that oversees officers, resolves escalated disputes, and protects long-term guild stability.</p>
+            </div>
+          </article>
+
+          <article class="card rank vice-leader" role="listitem">
+            <div class="pad">
+              <div class="sigil">
+                <span class="mark" aria-hidden="true">
+                  <img class="rank-emblem" src="assets/ranks/viceleader.png" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                </span>
+                <h4>Vice Leader</h4>
+              </div>
+              <p><strong>Highest honor.</strong> Top responsibility and trust. Represents Mōchirīī externally, manages diplomacy, and ensures continuity of leadership.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="events" class="events">
+      <div class="container">
+        <div class="section-title">
+          <h3 class="h3">Events</h3>
+          <p class="balance">Across all zones we play, in-game events, guild perks on the way.</p>
+        </div>
+
+        <div class="grid" role="list" aria-label="Event types">
+          <article class="card event" role="listitem">
+            <div class="pad">
+              <span class="event-tag">In-game</span>
+              <div class="sp-12"></div>
+              <h4 class="h4">Progression & Instances</h4>
               <p class="p-muted">Clean runs, calm calls, steady learning. We teach systems and keep the energy friendly.</p>
             </div>
           </article>
 
-          <article class="card module" role="listitem">
+          <article class="card event" role="listitem">
             <div class="pad">
-              <div class="chip">Guild-only</div>
-              <div class="sp-10"></div>
-              <h3 class="h4">Sparring Nights</h3>
-              <p class="p-muted">Low-stakes duels for practice. No ego, no shaming. Skill growth and laughter.</p>
+              <span class="event-tag">Guild-only</span>
+              <div class="sp-12"></div>
+              <h4 class="h4">Sparring Nights</h4>
+              <p class="p-muted">Low-stakes duels for practice. No ego, no shaming. Just skill growth and laughter.</p>
             </div>
           </article>
 
-          <article class="card module" role="listitem">
+          <article class="card event" role="listitem">
             <div class="pad">
-              <div class="chip">Social</div>
-              <div class="sp-10"></div>
-              <h3 class="h4">Tea Chats & Photo Walks</h3>
+              <span class="event-tag">Social</span>
+              <div class="sp-12"></div>
+              <h4 class="h4">Tea Chats & Photo Walks</h4>
               <p class="p-muted">Screenshots, exploration, and cozy conversation. Perfect for new arrivals and veterans.</p>
             </div>
           </article>
@@ -350,115 +352,107 @@
       </div>
     </section>
 
-    <!-- CHARTER -->
-    <section id="charter" aria-labelledby="charter-title">
+    <section id="charter">
       <div class="container">
-        <header class="section-title">
-          <h2 id="charter-title" class="h3">Rules / Charter Highlights</h2>
+        <div class="section-title">
+          <h3 class="h3">Rules / Charter Highlights</h3>
           <p class="balance">Clear and kind, gently aligned. Harmony held, not tightly confined.</p>
-        </header>
+        </div>
 
-        <div style="display:grid; grid-template-columns: 1.35fr .65fr; gap:1rem;">
-          <article class="card reading" aria-label="Guild rules">
+        <div class="grid">
+          <article class="card" style="grid-column: span 7;">
             <div class="pad">
-              <div class="chip">Kindness • Respect • Good manners</div>
-
-              <div class="sp-12"></div>
-
-              <ul style="margin:0; padding-left: 1.15rem;">
+              <div class="rule-knot" aria-hidden="true">Kindness • Respect • Good manners</div>
+              <ul class="clean" aria-label="Guild rules">
                 <li><strong>Respect first:</strong> speak with patience and good faith.</li>
-                <li><strong>Help when you can:</strong> teach, guide, share knowledge without condescension.</li>
-                <li><strong>Keep conflict small:</strong> resolve privately, escalate only when needed.</li>
+                <li><strong>Help when you can:</strong> teach, guide, and share knowledge without condescension.</li>
+                <li><strong>Keep conflict small:</strong> resolve issues privately, escalate only when needed.</li>
                 <li><strong>Represent Mōchirīī well:</strong> your conduct reflects the guild.</li>
-                <li><strong>No rank excuses bad behavior:</strong> titles never outrank principles.</li>
+                <li><strong>No rank excuses bad behavior:</strong> titles don’t outrank principles.</li>
                 <li><strong>Consistency is key:</strong> steady contribution matters most.</li>
               </ul>
             </div>
           </article>
 
-          <aside class="card reading" aria-label="Charter notes">
+          <article class="card" style="grid-column: span 5;">
             <div class="pad">
-              <h3 class="h4">Promotions</h3>
-              <p class="p-muted">Promotions follow observable actions, not requests. Misses get corrected quickly.</p>
+              <h4 class="h4">Promotions</h4>
+              <p class="p-muted">Promotions are based on observable actions, not requests. When something is missed, we aim to correct it quickly.</p>
 
               <div class="sp-16"></div>
 
-              <h3 class="h4">Activity</h3>
+              <h4 class="h4">Activity</h4>
               <p class="p-muted">A <strong>30-day Cupcake nap</strong> is fine when you tell us.</p>
 
               <div class="sp-16"></div>
 
-              <h3 class="h4">Culture</h3>
-              <p class="p-muted">The guild feels safe when everyone keeps their sweetness.</p>
+              <h4 class="h4">Culture</h4>
+              <p class="p-muted">Titles don’t outrank principles. The guild feels safe when everyone keeps their sweetness.</p>
             </div>
-          </aside>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- JOIN -->
-    <section id="join" aria-labelledby="join-title">
+    <section id="join">
       <div class="container">
-        <header class="section-title">
-          <h2 id="join-title" class="h3">Joining is simple</h2>
+        <div class="section-title">
+          <h3 class="h3">Joining is simple</h3>
           <p class="balance">Three steps, no stress. Sweetness encouraged.</p>
-        </header>
+        </div>
 
-        <article class="card join-path" aria-label="Join instructions">
+        <article class="card join-path">
           <div class="pad">
             <div class="join-steps" aria-label="Join steps">
               <div class="card join-step" role="group" aria-label="Step 1">
-                <div class="pad" style="display:flex; gap:1rem;">
-                  <div class="join-node" aria-hidden="true">1</div>
-                  <div>
-                    <h3 class="h4">Join Discord</h3>
-                    <p class="p-muted">Hop in and say hi. Short and simple is perfect.</p>
-                    <ul class="mini-check" aria-label="Intro suggestions">
-                      <li>Time zone</li>
-                      <li>Playstyle</li>
-                      <li>Favorite dessert</li>
-                    </ul>
-                  </div>
+                <div class="join-node" aria-hidden="true">1</div>
+                <div class="join-body">
+                  <h4 class="h4">Join Discord</h4>
+                  <p class="p-muted">Hop in and say hi. Short and simple is perfect.</p>
+                  <p class="p-muted">We love feedback, please share your opinions.</p>
+                  <ul class="mini-check" aria-label="Intro suggestions">
+                    <li>Time zone</li>
+                    <li>Playstyle</li>
+                    <li>Favorite dessert</li>
+                  </ul>
                 </div>
               </div>
 
               <div class="card join-step" role="group" aria-label="Step 2">
-                <div class="pad" style="display:flex; gap:1rem;">
-                  <div class="join-node" aria-hidden="true">2</div>
-                  <div>
-                    <h3 class="h4">Introduce yourself</h3>
-                    <p class="p-muted">No essays required. Frosting energy wins.</p>
-                    <ul class="mini-check" aria-label="Intro suggestions">
-                      <li>New or returning</li>
-                      <li>Goals</li>
-                      <li>Comfort level</li>
-                    </ul>
-                  </div>
+                <div class="join-node" aria-hidden="true">2</div>
+                <div class="join-body">
+                  <h4 class="h4">Introduce yourself</h4>
+                  <p class="p-muted">We like simple hellos. No essays required. Frosting energy wins.</p>
+                  <ul class="mini-check" aria-label="Intro suggestions">
+                    <li>New or returning</li>
+                    <li>Goals</li>
+                    <li>Comfort level</li>
+                  </ul>
                 </div>
               </div>
 
               <div class="card join-step" role="group" aria-label="Step 3">
-                <div class="pad" style="display:flex; gap:1rem;">
-                  <div class="join-node" aria-hidden="true">3</div>
-                  <div>
-                    <h3 class="h4">Request an invite in-game</h3>
-                    <p class="p-muted">Contact <strong>Guild Leader Twills</strong> • UID <strong>1019675341</strong></p>
-                    <ul class="mini-check" aria-label="Invite notes">
-                      <li>Share your IGN</li>
-                      <li>Share your region</li>
-                      <li>We reply ASAP</li>
-                    </ul>
-                  </div>
+                <div class="join-node" aria-hidden="true">3</div>
+                <div class="join-body">
+                  <h4 class="h4">Request an invite in-game</h4>
+                  <p class="p-muted">Contact <strong>Guild Leader Twills</strong> • UID <strong>1019675341</strong></p>
+                  <ul class="mini-check" aria-label="Invite notes">
+                    <li>Tell us your IGN</li>
+                    <li>Tell us your region</li>
+                    <li>We reply ASAP</li>
+                  </ul>
                 </div>
               </div>
             </div>
 
             <div class="sp-16"></div>
 
-            <!-- Unique actions here: utilities + navigation (no duplicate Join CTA) -->
-            <div class="hero-actions" aria-label="Join utilities" style="margin-top:0;">
-              <button class="btn" id="copyDiscord2" type="button" aria-label="Copy Discord invite link">Copy Discord</button>
-              <button class="btn ghost" id="copyUID2" type="button" aria-label="Copy Twills UID">Copy UID</button>
+            <div class="hero-actions" aria-label="Join actions" style="margin-top:0;">
+              <a class="btn primary" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">
+                Join Discord
+              </a>
+              <button class="btn" id="copyDiscord2" type="button">Copy Discord</button>
+              <button class="btn ghost" id="copyUID2" type="button">Copy UID</button>
               <a class="btn ghost" href="#top">Back to Top</a>
             </div>
 
@@ -473,30 +467,30 @@
 
   <footer>
     <div class="container">
-      <div class="card utility" aria-label="Footer">
-        <div class="pad" style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
-          <div>
-            <div class="small" id="copyright"></div>
-            <div class="small" style="margin-top:6px;">Unofficial guild page.</div>
+      <div class="footer-grid">
+        <div>
+          <div class="small" id="copyright"></div>
+          <div class="small" style="margin-top:6px;">
+            Unofficial guild page.
           </div>
+        </div>
 
-          <nav aria-label="Footer links" style="display:flex; gap:.75rem; flex-wrap:wrap;">
-            <a class="chip" href="#values">Values</a>
-            <a class="chip" href="#ranks">Ranks</a>
-            <a class="chip" href="#charter">Charter</a>
-            <a class="chip" href="#join">Join</a>
-          </nav>
+        <div class="footer-links" aria-label="Footer links">
+          <a href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">Discord</a>
+          <a href="#values">Values</a>
+          <a href="#ranks">Ranks</a>
+          <a href="#join">Join</a>
         </div>
       </div>
     </div>
   </footer>
 
-  <!-- Sticky bar: utility only (no duplicate Join) -->
-  <div class="sticky-cta" role="region" aria-label="Quick utilities">
+  <div class="sticky-cta" role="region" aria-label="Quick actions">
     <p class="small">Have a CupCake, Share the Frosting!</p>
     <div class="cta-row">
-      <button class="btn small" id="copyUID3" type="button" aria-label="Copy Twills UID">Copy UID</button>
-      <button class="btn small ghost" id="copyDiscord3" type="button" aria-label="Copy Discord invite link">Copy Discord</button>
+      <a class="btn small primary" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">Join</a>
+      <button class="btn small" id="copyUID3" type="button">Copy UID</button>
+      <button class="btn small ghost" id="copyDiscord3" type="button">Copy Discord</button>
     </div>
     <p class="small" id="copyStatus3" aria-live="polite"></p>
   </div>
@@ -529,22 +523,29 @@
         });
       }
 
-      var DISCORD = "https://discord.com/invite/dPafqMwWPK";
+      var DISCORD_URL = "https://discord.com/invite/dPafqMwWPK";
       var UID = "1019675341";
 
-      function copyText(text, statusEl) {
-        if (!statusEl) return;
-        statusEl.textContent = "";
-        var done = function (ok) {
-          statusEl.textContent = ok ? "Copied." : "Copy failed.";
-        };
+      function announce(targetId, msg) {
+        var el = document.getElementById(targetId);
+        if (el) el.textContent = msg;
+      }
 
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(function () { done(true); }).catch(function () { done(false); });
-          return;
+      function copyText(text, statusIds) {
+        var ids = statusIds || [];
+        function ok() {
+          for (var i = 0; i < ids.length; i++) announce(ids[i], "Copied.");
+          window.setTimeout(function () {
+            for (var j = 0; j < ids.length; j++) announce(ids[j], "");
+          }, 1400);
+        }
+        function fail() {
+          for (var i = 0; i < ids.length; i++) announce(ids[i], "Copy failed. Please copy manually.");
         }
 
-        try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(ok).catch(fail);
+        } else {
           var ta = document.createElement("textarea");
           ta.value = text;
           ta.setAttribute("readonly", "");
@@ -552,42 +553,32 @@
           ta.style.left = "-9999px";
           document.body.appendChild(ta);
           ta.select();
-          var ok = document.execCommand("copy");
+          try {
+            document.execCommand("copy");
+            ok();
+          } catch (e) {
+            fail();
+          }
           document.body.removeChild(ta);
-          done(!!ok);
-        } catch (e) {
-          done(false);
         }
       }
 
-      function bindCopy(btnId, text, statusId) {
-        var btn = document.getElementById(btnId);
-        var status = document.getElementById(statusId);
-        if (!btn) return;
-        btn.addEventListener("click", function () { copyText(text, status); });
+      function bindCopy(btnId, text, statusIds) {
+        var b = document.getElementById(btnId);
+        if (!b) return;
+        b.addEventListener("click", function () {
+          copyText(text, statusIds);
+        });
       }
 
-      bindCopy("copyDiscord", DISCORD, "copyStatus");
-      bindCopy("copyUID", UID, "copyStatus");
+      bindCopy("copyDiscord", DISCORD_URL, ["copyStatus"]);
+      bindCopy("copyUID", UID, ["copyStatus"]);
 
-      bindCopy("copyDiscord2", DISCORD, "copyStatus2");
-      bindCopy("copyUID2", UID, "copyStatus2");
+      bindCopy("copyDiscord2", DISCORD_URL, ["copyStatus2"]);
+      bindCopy("copyUID2", UID, ["copyStatus2"]);
 
-      bindCopy("copyDiscord3", DISCORD, "copyStatus3");
-      bindCopy("copyUID3", UID, "copyStatus3");
-
-      // Set background image + textures (keeps CSS clean and swap-friendly)
-      var bg = document.querySelector(".bg-wuxia");
-      if (bg) bg.style.backgroundImage = "url('assets/wuxia-bg.jpg')";
-
-      var ink1 = document.querySelector(".ink.one");
-      if (ink1) ink1.style.backgroundImage = "url('assets/ink-1.png')";
-
-      var ink2 = document.querySelector(".ink.two");
-      if (ink2) ink2.style.backgroundImage = "url('assets/ink-2.png')";
-
-      var grain = document.querySelector(".grain");
-      if (grain) grain.style.backgroundImage = "url('assets/grain.png')";
+      bindCopy("copyUID3", UID, ["copyStatus3"]);
+      bindCopy("copyDiscord3", DISCORD_URL, ["copyStatus3"]);
     })();
   </script>
 </body>
