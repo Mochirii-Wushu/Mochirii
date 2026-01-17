@@ -80,7 +80,7 @@
      - Only affects card-like surfaces and their typical contents
      - Keep global typography unchanged
      ========================================================= */
-  --card-scale: 1.14; /* Try 1.10–1.22 for your taste */
+  --card-scale: 1.24; /* Try 1.10–1.22 for your taste */
 
   /* Core card padding tokens */
   --card-pad-x: calc(18px * var(--card-scale));
