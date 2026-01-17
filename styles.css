@@ -1,11 +1,8 @@
 /* =========================================================
    Mōchirīī — Where Winds Meet Guild
-   styles.css (Elaborate Edition)
-
-   Notes on fonts:
-   - Uses Google Fonts via @import for an elegant calligraphic mix.
-   - If you prefer zero external calls, remove the @import and
-     self-host the WOFF2 files, or let fallbacks carry it.
+   styles.css (Elaborate Edition) — Revised
+   Adds: shimmer-border hover accent (no pseudo-element conflicts)
+   Removes: overlapping ::after usage on .hero-card and .aside
    ========================================================= */
 
 /* ---------- Font imports (swap for self-host if preferred) ---------- */
@@ -510,6 +507,56 @@ section{ padding: 26px 0; }
   border: 1px solid rgba(255,255,255,.14);
 }
 
+/* =========================================================
+   Shimmer border hover accent (NO conflicts)
+   - .card uses ::after (free)
+   - .hero-card keeps ::before for glow, uses ::after for shimmer
+   - .aside moves prior glow from ::after to ::before, uses ::after for shimmer
+   ========================================================= */
+
+/* Shimmer border pseudo */
+.card::after,
+.hero-card::after,
+.aside::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 180deg,
+    rgba(15,191,155,0),
+    rgba(168,215,255,.35),
+    rgba(217,179,106,.32),
+    rgba(154,45,60,.18),
+    rgba(15,191,155,0)
+  );
+
+  /* Make it a border-only layer */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  opacity: 0;
+  filter: blur(.2px);
+  transition: opacity var(--t-med) ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card:hover::after,
+.hero-card:hover::after,
+.aside:hover::after{
+  opacity: .9;
+  animation: borderSpin 1.8s linear infinite;
+}
+
+@keyframes borderSpin{
+  to{ transform: rotate(360deg); }
+}
+
 /* ---------- Cards ---------- */
 .card{
   border-radius: var(--r-lg);
@@ -548,35 +595,31 @@ section{ padding: 26px 0; }
   position:relative;
 }
 
+/* Hero glow layer consolidated into ::before (frees ::after for shimmer) */
 .hero-card::before{
-  content:"";
-  position:absolute;
-  inset:-70px;
-  background:
-    radial-gradient(260px 240px at 18% 28%, rgba(255,255,255,.10), transparent 60%),
-    radial-gradient(280px 280px at 82% 18%, rgba(168,215,255,.10), transparent 62%),
-    radial-gradient(300px 280px at 70% 84%, rgba(154,45,60,.07), transparent 65%);
-  opacity:.65;
-  transform: rotate(-8deg);
-}
-.hero-card::after{
   content:"";
   position:absolute;
   inset:-90px;
   background:
+    radial-gradient(260px 240px at 18% 28%, rgba(255,255,255,.10), transparent 60%),
+    radial-gradient(280px 280px at 82% 18%, rgba(168,215,255,.10), transparent 62%),
+    radial-gradient(300px 280px at 70% 84%, rgba(154,45,60,.07), transparent 65%),
     radial-gradient(320px 260px at 70% 26%, rgba(168,215,255,.12), transparent 62%),
     radial-gradient(360px 260px at 30% 62%, rgba(217,179,106,.10), transparent 62%),
     radial-gradient(240px 200px at 20% 20%, rgba(15,191,155,.10), transparent 62%);
   opacity:.65;
+  transform: rotate(-8deg);
   animation: heroGlow 10s ease-in-out infinite alternate;
   pointer-events:none;
-}
-@keyframes heroGlow{
-  from{ transform: translate3d(-0.8%, -0.4%, 0) scale(1.02); }
-  to{ transform: translate3d(0.8%, 0.6%, 0) scale(1.06); }
+  z-index: 0;
 }
 
-.hero-inner{ position:relative; padding:30px 28px 26px; }
+@keyframes heroGlow{
+  from{ transform: translate3d(-0.8%, -0.4%, 0) scale(1.02) rotate(-8deg); }
+  to{ transform: translate3d(0.8%, 0.6%, 0) scale(1.06) rotate(-8deg); }
+}
+
+.hero-inner{ position:relative; padding:30px 28px 26px; z-index: 1; }
 
 .kicker{
   display:inline-flex;
@@ -701,7 +744,8 @@ h1{
   overflow:hidden;
 }
 
-.aside::after{
+/* Aside glow moved to ::before (frees ::after for shimmer) */
+.aside::before{
   content:"";
   position:absolute;
   inset:-60px;
@@ -710,8 +754,11 @@ h1{
     radial-gradient(220px 220px at 20% 80%, rgba(168,215,255,.09), transparent 62%);
   opacity:.75;
   transform: rotate(10deg);
+  pointer-events:none;
+  z-index: 0;
 }
-.aside > *{ position:relative; }
+
+.aside > *{ position:relative; z-index: 1; }
 
 .aside h2{
   margin: 0 0 8px;
@@ -1284,13 +1331,21 @@ footer{
 @media (prefers-reduced-motion: reduce){
   .bg-ink,
   .bg-ink-2,
-  .hero-card::after{
+  .hero-card::before{
     animation:none;
   }
   .btn,
   .card,
   .navlinks a.link,
-  .toggle::after{
+  .toggle::after,
+  .card::after,
+  .hero-card::after,
+  .aside::after{
     transition:none;
+  }
+  .card:hover::after,
+  .hero-card:hover::after,
+  .aside:hover::after{
+    animation:none;
   }
 }
