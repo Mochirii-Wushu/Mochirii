@@ -1206,3 +1206,44 @@ footer{
     transition:none;
   }
 }
+
+.rule-knot {
+  font-family: "Great Vibes", cursive;
+  font-size: 1.35rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  color: #c9b98b;
+}
+
+ul.clean {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: "Lora", serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #e8e6df;
+}
+
+ul.clean li {
+  margin-bottom: 1rem;
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+ul.clean li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  color: #bfae7a;
+  font-size: 0.85rem;
+}
+
+ul.clean strong {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
