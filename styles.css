@@ -1283,7 +1283,8 @@ footer{
   }
 }
 
-* {
+/* --- Selection lock (place at very end of styles.css) --- */
+html, body, * {
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
