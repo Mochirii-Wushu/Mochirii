@@ -143,25 +143,6 @@ body{
   text-rendering: geometricPrecision;
 }
 
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:-1;
-  background:
-    radial-gradient(
-      1200px 900px at 50% 30%,
-      rgba(7,8,11,.45),
-      rgba(7,8,11,.78)
-    ),
-    linear-gradient(
-      180deg,
-      rgba(7,8,11,.62),
-      rgba(7,8,11,.82)
-    );
-}
-
 a{ color:inherit; text-decoration:none; }
 
 .container{
