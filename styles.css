@@ -1,14 +1,9 @@
 /* =========================================================
    Mōchirīī — Where Winds Meet Guild
    styles.css (Elaborate Edition)
-
-   Notes on fonts:
-   - Uses Google Fonts via @import for an elegant calligraphic mix.
-   - If you prefer zero external calls, remove the @import and
-     self-host the WOFF2 files, or let fallbacks carry it.
    ========================================================= */
 
-/* ---------- Font imports (swap for self-host if preferred) ---------- */
+/* ---------- Font imports ---------- */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Great+Vibes&display=swap");
 
 /* ---------- Theme tokens ---------- */
@@ -76,31 +71,14 @@
   --grain: .035;
 }
 
-/* Lantern theme (warmer parchment / gold presence) */
+/* Lantern theme */
 html[data-theme="lantern"]{
-  --bg-0:#07080b;
-  --bg-1:#0b0f14;
-  --bg-2:#0f1620;
-
-  --text:#eaeef6;
   --muted:#bcc6d6;
-
-  --jade:#0fbf9b;
-  --jade-2:#0a7e6a;
-
-  --gold:#d9b36a;
-  --gold-2:#a07a37;
-
-  --maroon:#6b1f2a;
-  --maroon-2:#9a2d3c;
-
-  --frost:#a8d7ff;
   --paper:#eadfcb;
-
   --grain: .040;
 }
 
-/* Moon theme (cooler, higher moonlight) */
+/* Moon theme */
 html[data-theme="moon"]{
   --bg-0:#05060a;
   --bg-1:#070a12;
@@ -249,7 +227,7 @@ a{ color:inherit; text-decoration:none; }
   to{ transform: translate3d(-1.1%, 1.1%, 0) scale(1.05); }
 }
 
-/* ---------- Global typography (charter-like consistency) ---------- */
+/* ---------- Global typography ---------- */
 h1, h2, h3, .h3{
   font-family: var(--display);
   letter-spacing: .15px;
@@ -265,7 +243,6 @@ p, .p-base, .p-muted{ font-family: var(--sans); }
   color: rgba(234,238,246,.86);
 }
 
-/* Section title styling now “charter-coherent” by default */
 .section-title .h3{
   font-family: var(--display);
   font-size: 24px;
@@ -276,7 +253,6 @@ p, .p-base, .p-muted{ font-family: var(--sans); }
   color: rgba(183,192,207,.92);
 }
 
-/* A reusable calligraphic accent (use on short labels only) */
 .script-accent{
   font-family: var(--script);
   letter-spacing: .02em;
@@ -479,7 +455,6 @@ section{ padding: 26px 0; }
   max-width: 56ch;
 }
 
-/* Decorative “charter underline” you can use anywhere */
 .section-rule{
   height:1px;
   margin-top:10px;
@@ -500,7 +475,7 @@ section{ padding: 26px 0; }
   gap:14px;
 }
 
-/* ---------- Shared glass surface for text containers ---------- */
+/* ---------- Shared glass surface ---------- */
 .card,
 .hero-card,
 .aside{
@@ -626,7 +601,6 @@ h1{
   gap:10px;
 }
 
-/* Calligraphy stamp / wax seal */
 .stamp-wrap{
   position:absolute;
   right: 18px;
@@ -809,7 +783,6 @@ h1{
   font-family: var(--serif);
 }
 
-/* Sigil row */
 .sigil{
   display:flex;
   align-items:center;
@@ -817,7 +790,6 @@ h1{
   margin-bottom:10px;
 }
 
-/* MARK = single sizing authority for rank icons */
 .sigil .mark{
   width:34px;
   height:34px;
@@ -834,7 +806,6 @@ h1{
   justify-content:center;
 }
 
-/* PNG emblems: always fit the mark box */
 .rank-emblem{
   width:100%;
   height:100%;
@@ -846,7 +817,6 @@ h1{
   z-index:2;
 }
 
-/* Placeholder glyph layer */
 .sigil .mark::before{
   content:"";
   position:absolute;
@@ -870,7 +840,7 @@ h1{
   z-index:1;
 }
 
-/* Rank-specific placeholder glyphs (unchanged) */
+/* Rank-specific placeholder glyphs */
 .rank.soft-wind .mark::after{
   width:16px;height:16px;border-radius:999px;
   background:
@@ -939,7 +909,7 @@ h1{
   clip-path: polygon(50% 0%, 68% 26%, 95% 35%, 76% 58%, 80% 92%, 50% 76%, 20% 92%, 24% 58%, 5% 35%, 32% 26%);
 }
 
-/* ---------- Charter-style lists (now global + consistent) ---------- */
+/* ---------- Charter-style lists ---------- */
 ul.clean{
   list-style: none;
   padding: 0;
@@ -970,7 +940,7 @@ ul.clean strong{
   color: #ffffff;
 }
 
-/* ---------- “Knot tag” (pill + calligraphic movement) ---------- */
+/* ---------- “Knot tag” ---------- */
 .rule-knot{
   display:inline-flex;
   align-items:center;
