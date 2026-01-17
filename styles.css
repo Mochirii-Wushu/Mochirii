@@ -23,6 +23,18 @@
 /* ---------- Theme tokens ---------- */
 :root{
 
+  --glass-a: rgba(7,8,11,.74);
+  --glass-b: rgba(7,8,11,.22);
+
+  /* Reusable glass surface (matches header readability) */
+.glass{
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow-soft);
+}
+
   --card-bg: rgba(10, 12, 18, 0.88);
 
   --bg-0:#07080b;
@@ -450,15 +462,15 @@ section{ padding: 26px 0; }
 /* ---------- Cards ---------- */
 .card{
   border-radius: var(--r-lg);
-  border:1px solid rgba(255,255,255,.14);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
-    var(--card-bg);
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   overflow:hidden;
   position:relative;
+  transition: transform var(--t-fast) ease, border-color var(--t-fast) ease, background var(--t-fast) ease;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow-soft);
 }
 
 .card:hover{
@@ -488,13 +500,14 @@ section{ padding: 26px 0; }
 
 .hero-card{
   border-radius: var(--r-xl);
-  border:1px solid rgba(255,255,255,.12);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
-    var(--card-bg);
-  box-shadow: var(--shadow);
   overflow:hidden;
   position:relative;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow);
 }
 
 .hero-card::before{
@@ -643,13 +656,15 @@ h1{
 /* ---------- Aside card ---------- */
 .aside{
   border-radius: var(--r-xl);
-  border:1px solid rgba(255,255,255,.12);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
-    var(--card-bg);
-  box-shadow: var(--shadow);
   padding:22px 20px 18px;
   position:relative;
+  overflow:hidden;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, var(--glass-a), var(--glass-b));
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow);
 }
 
 .aside::after{
