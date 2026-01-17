@@ -452,14 +452,11 @@
               <a class="btn primary" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">
                 Join Discord
               </a>
-              <button class="btn" id="copyDiscord2" type="button">Copy Discord</button>
-              <button class="btn ghost" id="copyUID2" type="button">Copy UID</button>
               <a class="btn ghost" href="#top">Back to Top</a>
             </div>
 
             <div class="sp-12"></div>
 
-            <p class="small" id="copyStatus2" aria-live="polite"></p>
           </div>
         </article>
       </div>
@@ -490,10 +487,7 @@
     <p class="small">Have a CupCake, Share the Frosting!</p>
     <div class="cta-row">
       <a class="btn small primary" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">Join</a>
-      <button class="btn small" id="copyUID3" type="button">Copy UID</button>
-      <button class="btn small ghost" id="copyDiscord3" type="button">Copy Discord</button>
     </div>
-    <p class="small" id="copyStatus3" aria-live="polite"></p>
   </div>
 
   <script>
@@ -575,12 +569,6 @@
       bindCopy("copyDiscord", DISCORD_URL, ["copyStatus"]);
       bindCopy("copyUID", UID, ["copyStatus"]);
 
-      bindCopy("copyDiscord2", DISCORD_URL, ["copyStatus2"]);
-      bindCopy("copyUID2", UID, ["copyStatus2"]);
-
-      bindCopy("copyUID3", UID, ["copyStatus3"]);
-      bindCopy("copyDiscord3", DISCORD_URL, ["copyStatus3"]);
-    })();
   </script>
 </body>
 </html>
