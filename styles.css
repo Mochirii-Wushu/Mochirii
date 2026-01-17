@@ -1,24 +1,15 @@
 /* =========================================================
    Mōchirīī — Where Winds Meet Guild
-   styles.css (Elaborate Edition, no external dependencies)
+   styles.css (Elaborate Edition)
 
-   Aesthetic: Jade • Bamboo • Lotus • Moon • Lantern Gold • Maroon Seal
-   Features:
-   - Layered ink-wash background + subtle grain
-   - Hero moon/lantern glows (motion-respecting)
-   - Calligraphy stamp / wax seal
-   - Rank cards with tier sigils (PNG emblems supported cleanly)
-   - Values + Events modules
-   - Join “path” onboarding ritual layout
-   - Sticky CTA ribbon
-   - Copy-to-clipboard button styling
-   - Theme toggle support (Moon / Lantern) via data-theme attr
-   - Accessibility polish (skip link, focus rings, contrast)
-
-   HTML should:
-   - link to this file only (no inline CSS)
-   - set <html data-theme="lantern"> or "moon"
+   Notes on fonts:
+   - Uses Google Fonts via @import for an elegant calligraphic mix.
+   - If you prefer zero external calls, remove the @import and
+     self-host the WOFF2 files, or let fallbacks carry it.
    ========================================================= */
+
+/* ---------- Font imports (swap for self-host if preferred) ---------- */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=Great+Vibes&display=swap");
 
 /* ---------- Theme tokens ---------- */
 :root{
@@ -58,8 +49,11 @@
 
   --max: 1160px;
 
-  --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  /* Typography system */
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  --serif: "Cormorant Garamond", ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --display: "Fraunces", "Cormorant Garamond", ui-serif, Georgia, serif;
+  --script: "Great Vibes", "Apple Chancery", "Snell Roundhand", cursive;
 
   /* Motion */
   --t-fast: .12s;
@@ -134,9 +128,7 @@ html[data-theme="moon"]{
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 
-html{
-  background-color: var(--bg-0);
-}
+html{ background-color: var(--bg-0); }
 
 header, main, footer, .sticky-cta{
   position: relative;
@@ -151,13 +143,15 @@ body{
   line-height:1.5;
   overflow-x:hidden;
   text-rendering: geometricPrecision;
+  font-kerning: normal;
+  font-feature-settings: "kern","liga","calt";
 }
 
 .bg-photo{
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;                /* behind everything */
+  z-index: 0;
   background: url("/assets/bg/wuxia-bg.png") center / cover no-repeat;
 }
 
@@ -243,6 +237,39 @@ a{ color:inherit; text-decoration:none; }
   to{ transform: translate3d(-1.1%, 1.1%, 0) scale(1.05); }
 }
 
+/* ---------- Global typography (charter-like consistency) ---------- */
+h1, h2, h3, .h3{
+  font-family: var(--display);
+  letter-spacing: .15px;
+}
+h4, .h4{ font-family: var(--sans); }
+
+p, .p-base, .p-muted{ font-family: var(--sans); }
+
+.prose, .prose p, .prose li{
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(234,238,246,.86);
+}
+
+/* Section title styling now “charter-coherent” by default */
+.section-title .h3{
+  font-family: var(--display);
+  font-size: 24px;
+  line-height: 1.12;
+}
+.section-title p{
+  font-family: var(--serif);
+  color: rgba(183,192,207,.92);
+}
+
+/* A reusable calligraphic accent (use on short labels only) */
+.script-accent{
+  font-family: var(--script);
+  letter-spacing: .02em;
+}
+
 /* ---------- Header / Nav ---------- */
 header{
   position:sticky;
@@ -295,11 +322,12 @@ header{
   gap:1px;
 }
 .brand-title strong{
-  font-family:var(--serif);
+  font-family: var(--display);
   letter-spacing:.3px;
   font-size:15px;
 }
 .brand-title span{
+  font-family: var(--serif);
   font-size:12px;
   color:var(--muted);
 }
@@ -397,9 +425,7 @@ header{
 /* ---------- Typography helpers ---------- */
 .h3{
   margin:0;
-  font-family:var(--serif);
   font-size:22px;
-  letter-spacing:.2px;
 }
 .h4{
   margin:0 0 8px;
@@ -437,9 +463,22 @@ section{ padding: 26px 0; }
 }
 .section-title p{
   margin:0;
-  color:rgba(183,192,207,.92);
   font-size:13px;
   max-width: 56ch;
+}
+
+/* Decorative “charter underline” you can use anywhere */
+.section-rule{
+  height:1px;
+  margin-top:10px;
+  background: linear-gradient(90deg,
+    rgba(15,191,155,0),
+    rgba(15,191,155,.45),
+    rgba(217,179,106,.35),
+    rgba(154,45,60,.22),
+    rgba(15,191,155,0)
+  );
+  opacity:.65;
 }
 
 /* ---------- Layout grid ---------- */
@@ -546,8 +585,8 @@ section{ padding: 26px 0; }
 
 h1{
   margin:14px 0 8px;
-  font-family:var(--serif);
-  font-weight:760;
+  font-family:var(--display);
+  font-weight:800;
   letter-spacing:.2px;
   font-size:44px;
   line-height:1.06;
@@ -559,6 +598,7 @@ h1{
   color:rgba(234,238,246,.86);
   font-size:16px;
   max-width: 62ch;
+  font-family: var(--serif);
 }
 
 .hero-actions{
@@ -616,7 +656,7 @@ h1{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-family:var(--serif);
+  font-family:var(--display);
   letter-spacing:1.2px;
   font-size:11px;
   color: rgba(233,226,210,.78);
@@ -664,7 +704,7 @@ h1{
 .aside h2{
   margin: 0 0 8px;
   text-align:center;
-  font-family:var(--serif);
+  font-family:var(--display);
   letter-spacing:.2px;
   font-size:18px;
 }
@@ -674,6 +714,7 @@ h1{
   color:rgba(234,238,246,.82);
   font-size:13px;
   max-width: 42ch;
+  font-family: var(--serif);
 }
 
 /* Stats */
@@ -690,7 +731,7 @@ h1{
   padding:12px 12px;
 }
 .stat strong{ display:block; font-size:14px; }
-.stat span{ display:block; color:rgba(183,192,207,.90); font-size:12px; margin-top:3px; }
+.stat span{ display:block; color:rgba(183,192,207,.90); font-size:12px; margin-top:3px; font-family: var(--serif); }
 
 /* ---------- Emblem (CSS-built) ---------- */
 .emblem{
@@ -735,7 +776,7 @@ h1{
   border:1px solid rgba(255,255,255,.16);
   box-shadow: 0 18px 50px rgba(0,0,0,.55);
   background: rgba(0,0,0,.18);
-  object-fit: cover; /* switch to contain if you prefer no cropping */
+  object-fit: cover;
 }
 
 /* ---------- Ranks ---------- */
@@ -747,11 +788,13 @@ h1{
   margin:0;
   font-size:16px;
   letter-spacing:.2px;
+  font-family: var(--display);
 }
 .rank p{
   margin:0;
   color:rgba(183,192,207,.92);
   font-size:13px;
+  font-family: var(--serif);
 }
 
 /* Sigil row */
@@ -766,7 +809,7 @@ h1{
 .sigil .mark{
   width:34px;
   height:34px;
-  padding:2px;                 /* keeps PNG nicely inset */
+  padding:2px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,.14);
   background:
@@ -779,7 +822,7 @@ h1{
   justify-content:center;
 }
 
-/* PNG emblems: always fit the mark box (no competing size locks) */
+/* PNG emblems: always fit the mark box */
 .rank-emblem{
   width:100%;
   height:100%;
@@ -788,10 +831,10 @@ h1{
   object-fit:contain;
   object-position:center;
   position:relative;
-  z-index:2;                   /* above placeholder glyphs */
+  z-index:2;
 }
 
-/* Placeholder glyph layer (only visible if you do not supply a PNG) */
+/* Placeholder glyph layer */
 .sigil .mark::before{
   content:"";
   position:absolute;
@@ -815,7 +858,7 @@ h1{
   z-index:1;
 }
 
-/* Rank-specific placeholder glyphs (still work when PNG missing) */
+/* Rank-specific placeholder glyphs (unchanged) */
 .rank.soft-wind .mark::after{
   width:16px;height:16px;border-radius:999px;
   background:
@@ -884,30 +927,57 @@ h1{
   clip-path: polygon(50% 0%, 68% 26%, 95% 35%, 76% 58%, 80% 92%, 50% 76%, 20% 92%, 24% 58%, 5% 35%, 32% 26%);
 }
 
-/* ---------- Lists ---------- */
+/* ---------- Charter-style lists (now global + consistent) ---------- */
 ul.clean{
-  margin:10px 0 0;
-  padding:0 0 0 18px;
-  color:rgba(234,238,246,.90);
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: rgba(232,230,223,.98);
 }
 ul.clean li{
-  margin:8px 0;
-  color:rgba(183,192,207,.96);
-  line-height:1.5;
+  margin: 0 0 1rem 0;
+  position: relative;
+  padding-left: 1.25rem;
+  color: rgba(234,238,246,.86);
+}
+ul.clean li::before{
+  content: "✦";
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  color: rgba(217,179,106,.88);
+  font-size: 0.85rem;
+}
+ul.clean strong{
+  font-family: var(--sans);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: #ffffff;
 }
 
-/* ---------- Charter knot tag ---------- */
+/* ---------- “Knot tag” (pill + calligraphic movement) ---------- */
 .rule-knot{
   display:inline-flex;
   align-items:center;
+  justify-content:center;
   gap:8px;
-  font-size:12px;
-  color:rgba(234,238,246,.84);
-  padding:7px 10px;
-  border-radius:999px;
+
+  padding: 10px 14px;
+  border-radius: 999px;
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.18);
-  margin-top:10px;
+
+  font-family: var(--script);
+  font-size: 1.35rem;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-align: center;
+
+  color: rgba(217,179,106,.92);
+  text-shadow: 0 1px 0 rgba(0,0,0,.45);
 }
 
 /* ---------- Values section ---------- */
@@ -968,6 +1038,7 @@ ul.clean li{
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.18);
   color: rgba(234,238,246,.84);
+  font-family: var(--serif);
 }
 .event-tag::before{
   content:"";
@@ -1053,6 +1124,7 @@ ul.clean li{
   background: rgba(0,0,0,.18);
   border-radius:999px;
   padding:7px 10px;
+  font-family: var(--serif);
 }
 
 /* ---------- Copy buttons + inline contact row ---------- */
@@ -1071,6 +1143,7 @@ ul.clean li{
 .copy-note{
   font-size:12px;
   color: rgba(183,192,207,.90);
+  font-family: var(--serif);
 }
 
 /* ---------- Theme toggle ---------- */
@@ -1086,6 +1159,7 @@ ul.clean li{
 .theme-toggle span{
   font-size:12px;
   color: rgba(234,238,246,.84);
+  font-family: var(--serif);
 }
 .toggle{
   width:46px;
@@ -1139,6 +1213,7 @@ html[data-theme="moon"] .toggle::after{ transform: translateX(20px); }
   margin:0;
   font-size:12px;
   color: rgba(183,192,207,.92);
+  font-family: var(--serif);
 }
 .sticky-cta .cta-row{
   display:flex;
@@ -1171,6 +1246,7 @@ footer{
 .small{
   font-size:12px;
   color:rgba(183,192,207,.88);
+  font-family: var(--serif);
 }
 .footer-links{
   display:flex;
@@ -1205,45 +1281,4 @@ footer{
   .toggle::after{
     transition:none;
   }
-}
-
-.rule-knot {
-  font-family: "Great Vibes", cursive;
-  font-size: 1.35rem;
-  letter-spacing: 0.05em;
-  text-align: center;
-  margin-bottom: 1.25rem;
-  color: #c9b98b;
-}
-
-ul.clean {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-family: "Lora", serif;
-  font-size: 1rem;
-  line-height: 1.75;
-  color: #e8e6df;
-}
-
-ul.clean li {
-  margin-bottom: 1rem;
-  position: relative;
-  padding-left: 1.25rem;
-}
-
-ul.clean li::before {
-  content: "✦";
-  position: absolute;
-  left: 0;
-  top: 0.15rem;
-  color: #bfae7a;
-  font-size: 0.85rem;
-}
-
-ul.clean strong {
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #ffffff;
 }
