@@ -74,6 +74,35 @@
 
   /* Subtle texture intensity */
   --grain: .035;
+
+  /* =========================================================
+     Universal card readability scale
+     - Only affects card-like surfaces and their typical contents
+     - Keep global typography unchanged
+     ========================================================= */
+  --card-scale: 1.14; /* Try 1.10–1.22 for your taste */
+
+  /* Core card padding tokens */
+  --card-pad-x: calc(18px * var(--card-scale));
+  --card-pad-y: calc(18px * var(--card-scale));
+  --card-pad-bottom: calc(16px * var(--card-scale));
+
+  /* Larger card padding (hero/featured) */
+  --card-pad-lg-x: calc(28px * var(--card-scale));
+  --card-pad-lg-y: calc(30px * var(--card-scale));
+  --card-pad-lg-bottom: calc(26px * var(--card-scale));
+
+  /* Card text tokens */
+  --card-font: calc(14px * var(--card-scale));
+  --card-font-sm: calc(13px * var(--card-scale));
+  --card-font-xs: calc(12px * var(--card-scale));
+  --card-prose: calc(15px * var(--card-scale));
+
+  /* Small UI elements inside cards */
+  --pill-pad-y: calc(7px * var(--card-scale));
+  --pill-pad-x: calc(10px * var(--card-scale));
+  --chip-pad-y: calc(8px * var(--card-scale));
+  --chip-pad-x: calc(10px * var(--card-scale));
 }
 
 /* Lantern theme (warmer parchment / gold presence) */
@@ -122,6 +151,13 @@ html[data-theme="moon"]{
   --paper:#f0eadb;
 
   --grain: .030;
+}
+
+/* Keep mobile tidy */
+@media (max-width: 640px){
+  :root{
+    --card-scale: 1.06;
+  }
 }
 
 /* ---------- Base ---------- */
@@ -416,7 +452,7 @@ header{
 .chip{
   font-size:12px;
   color:rgba(234,238,246,.82);
-  padding:8px 10px;
+  padding:var(--chip-pad-y) var(--chip-pad-x);
   border-radius:999px;
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.20);
@@ -498,6 +534,24 @@ section{ padding: 26px 0; }
   border: 1px solid rgba(255,255,255,.14);
 }
 
+/* =========================================================
+   Universal card scaling layer
+   - Makes all card surfaces larger and easier to read
+   ========================================================= */
+.card,
+.hero-card,
+.aside{
+  font-size: var(--card-font);
+}
+.card .p-base, .hero-card .p-base, .aside .p-base{ font-size: var(--card-font); }
+.card .p-muted, .hero-card .p-muted, .aside .p-muted{ font-size: var(--card-font-sm); }
+.card .small, .hero-card .small, .aside .small{ font-size: var(--card-font-xs); }
+
+/* Prose inside cards gets a gentle lift */
+.card .prose, .aside .prose, .hero-card .prose{
+  font-size: var(--card-prose);
+}
+
 /* ---------- Cards ---------- */
 .card{
   border-radius: var(--r-lg);
@@ -511,7 +565,9 @@ section{ padding: 26px 0; }
   border-color: rgba(255,255,255,.18);
   background: linear-gradient(180deg, rgba(7,8,11,.72), rgba(7,8,11,.30));
 }
-.card .pad{ padding:18px 18px 16px; }
+.card .pad{
+  padding: var(--card-pad-y) var(--card-pad-x) var(--card-pad-bottom);
+}
 
 /* ---------- Hero ---------- */
 .hero{
@@ -564,7 +620,10 @@ section{ padding: 26px 0; }
   to{ transform: translate3d(0.8%, 0.6%, 0) scale(1.06); }
 }
 
-.hero-inner{ position:relative; padding:30px 28px 26px; }
+.hero-inner{
+  position:relative;
+  padding: var(--card-pad-lg-y) var(--card-pad-lg-x) var(--card-pad-lg-bottom);
+}
 
 .kicker{
   display:inline-flex;
@@ -572,7 +631,7 @@ section{ padding: 26px 0; }
   gap:10px;
   font-size:12px;
   color:rgba(234,238,246,.85);
-  padding:7px 10px;
+  padding:var(--pill-pad-y) var(--pill-pad-x);
   border-radius:999px;
   border:1px solid rgba(255,255,255,.14);
   background:rgba(255,255,255,.04);
@@ -684,7 +743,7 @@ h1{
 .aside{
   border-radius: var(--r-xl);
   box-shadow: var(--shadow);
-  padding:22px 20px 18px;
+  padding: var(--card-pad-y) var(--card-pad-x) var(--card-pad-bottom);
   position:relative;
   overflow:hidden;
 }
@@ -728,10 +787,16 @@ h1{
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.18);
   border-radius: 16px;
-  padding:12px 12px;
+  padding: calc(12px * var(--card-scale)) calc(12px * var(--card-scale));
 }
-.stat strong{ display:block; font-size:14px; }
-.stat span{ display:block; color:rgba(183,192,207,.90); font-size:12px; margin-top:3px; font-family: var(--serif); }
+.stat strong{ display:block; font-size: calc(14px * var(--card-scale)); }
+.stat span{
+  display:block;
+  color:rgba(183,192,207,.90);
+  font-size: var(--card-font-xs);
+  margin-top:3px;
+  font-family: var(--serif);
+}
 
 /* ---------- Emblem (CSS-built) ---------- */
 .emblem{
@@ -965,13 +1030,13 @@ ul.clean strong{
   justify-content:center;
   gap:8px;
 
-  padding: 10px 14px;
+  padding: calc(10px * var(--card-scale)) calc(14px * var(--card-scale));
   border-radius: 999px;
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.18);
 
   font-family: var(--script);
-  font-size: 1.35rem;
+  font-size: calc(1.35rem * var(--card-scale));
   letter-spacing: 0.03em;
   line-height: 1;
   text-align: center;
@@ -1032,8 +1097,8 @@ ul.clean strong{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  font-size:12px;
-  padding:7px 10px;
+  font-size: var(--card-font-xs);
+  padding:var(--pill-pad-y) var(--pill-pad-x);
   border-radius:999px;
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.18);
@@ -1095,7 +1160,7 @@ ul.clean strong{
   align-items:center;
   justify-content:center;
   font-weight:800;
-  font-size:13px;
+  font-size: calc(13px * var(--card-scale));
   color: rgba(234,238,246,.92);
 }
 .join-step .join-node{
@@ -1103,10 +1168,14 @@ ul.clean strong{
   left: 16px;
   top: 16px;
 }
-.join-step .join-body{ padding:16px 16px 16px 64px; }
+.join-step .join-body{
+  padding: calc(16px * var(--card-scale)) calc(16px * var(--card-scale)) calc(16px * var(--card-scale)) calc(64px * var(--card-scale));
+}
 @media (max-width: 980px){
   .join-step .join-node{ left: 12px; top: 12px; }
-  .join-step .join-body{ padding:14px 14px 14px 60px; }
+  .join-step .join-body{
+    padding: calc(14px * var(--card-scale)) calc(14px * var(--card-scale)) calc(14px * var(--card-scale)) calc(60px * var(--card-scale));
+  }
 }
 
 .mini-check{
@@ -1118,12 +1187,12 @@ ul.clean strong{
   gap:8px;
 }
 .mini-check li{
-  font-size:12px;
+  font-size: var(--card-font-xs);
   color: rgba(183,192,207,.94);
   border:1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.18);
   border-radius:999px;
-  padding:7px 10px;
+  padding:var(--pill-pad-y) var(--pill-pad-x);
   font-family: var(--serif);
 }
 
@@ -1141,7 +1210,7 @@ ul.clean strong{
   flex-wrap:wrap;
 }
 .copy-note{
-  font-size:12px;
+  font-size: var(--card-font-xs);
   color: rgba(183,192,207,.90);
   font-family: var(--serif);
 }
@@ -1157,7 +1226,7 @@ ul.clean strong{
   background: rgba(0,0,0,.18);
 }
 .theme-toggle span{
-  font-size:12px;
+  font-size: var(--card-font-xs);
   color: rgba(234,238,246,.84);
   font-family: var(--serif);
 }
@@ -1197,7 +1266,7 @@ html[data-theme="moon"] .toggle::after{ transform: translateX(20px); }
   display:flex;
   flex-direction:column;
   gap:10px;
-  padding:12px;
+  padding: calc(12px * var(--card-scale));
   border-radius: 18px;
   border:1px solid rgba(255,255,255,.12);
   background:
@@ -1211,7 +1280,7 @@ html[data-theme="moon"] .toggle::after{ transform: translateX(20px); }
 }
 .sticky-cta .small{
   margin:0;
-  font-size:12px;
+  font-size: var(--card-font-xs);
   color: rgba(183,192,207,.92);
   font-family: var(--serif);
 }
