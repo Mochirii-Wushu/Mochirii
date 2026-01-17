@@ -23,6 +23,8 @@
 /* ---------- Theme tokens ---------- */
 :root{
 
+  --card-bg: rgba(10, 12, 18, 0.88);
+
   --bg-0:#07080b;
   --bg-1:#0b0f14;
   --bg-2:#0f1620;
@@ -448,15 +450,17 @@ section{ padding: 26px 0; }
 /* ---------- Cards ---------- */
 .card{
   border-radius: var(--r-lg);
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.14);
   background:
-    radial-gradient(520px 240px at 20% 20%, rgba(255,255,255,.05), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.02));
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+    var(--card-bg);
   box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   overflow:hidden;
   position:relative;
-  transition: transform var(--t-fast) ease, border-color var(--t-fast) ease, background var(--t-fast) ease;
 }
+
 .card:hover{
   transform: translateY(-2px);
   border-color: rgba(255,255,255,.18);
@@ -486,13 +490,13 @@ section{ padding: 26px 0; }
   border-radius: var(--r-xl);
   border:1px solid rgba(255,255,255,.12);
   background:
-    radial-gradient(700px 260px at 25% 15%, rgba(15,191,155,.12), transparent 60%),
-    radial-gradient(520px 260px at 85% 30%, rgba(217,179,106,.10), transparent 58%),
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+    var(--card-bg);
   box-shadow: var(--shadow);
   overflow:hidden;
   position:relative;
 }
+
 .hero-card::before{
   content:"";
   position:absolute;
@@ -641,13 +645,13 @@ h1{
   border-radius: var(--r-xl);
   border:1px solid rgba(255,255,255,.12);
   background:
-    radial-gradient(320px 220px at 30% 20%, rgba(217,179,106,.12), transparent 65%),
-    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+    var(--card-bg);
   box-shadow: var(--shadow);
   padding:22px 20px 18px;
   position:relative;
-  overflow:hidden;
 }
+
 .aside::after{
   content:"";
   position:absolute;
