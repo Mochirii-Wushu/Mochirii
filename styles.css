@@ -23,10 +23,12 @@
 /* ---------- Theme tokens ---------- */
 :root{
 
+:root{
   --glass-a: rgba(7,8,11,.74);
-  --glass-b: rgba(7,8,11,.22);
+  --glass-b: rgba(7,8,11,.32);
+}
 
-  /* Reusable glass surface (matches header readability) */
+/* Reusable glass surface (matches header readability) */
 .glass{
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -1222,4 +1224,19 @@ footer{
   .toggle::after{
     transition:none;
   }
+}
+
+/* ===== FORCE GLASS SURFACES (must be at end of file) ===== */
+.card,
+.hero-card,
+.aside{
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(7,8,11,.74), rgba(7,8,11,.22)) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+
+/* Keep hover from “removing” the glass by swapping backgrounds */
+.card:hover{
+  background: linear-gradient(180deg, rgba(7,8,11,.74), rgba(7,8,11,.22)) !important;
 }
