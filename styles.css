@@ -131,10 +131,19 @@ html[data-theme="moon"]{
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
 
+html{
+  background-color: var(--bg-0);
+}
+
+header, main, footer, .sticky-cta{
+  position: relative;
+  z-index: 1;
+}
+
 body{
   margin:0;
   color:var(--text);
-  background-color:#07080b; /* keep fallback */
+  background: transparent; /* key change */
   font-family:var(--sans);
   line-height:1.5;
   overflow-x:hidden;
@@ -145,7 +154,7 @@ body{
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: -10;                /* behind everything */
+  z-index: 0;                /* behind everything */
   background: url("assets/bg/wuxia-bg.png") center / cover no-repeat;
   opacity: 0.45;               /* tune to taste */
   transform: translateZ(0);
