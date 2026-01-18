@@ -1264,3 +1264,8 @@ footer{
     transition:none;
   }
 }
+
+/* Leaders page background override */
+body.leaders-page .bg-photo{
+  background: url("/assets/bg/leaders-bg.png") center / cover no-repeat;
+}
