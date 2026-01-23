@@ -9,8 +9,8 @@
 /* ---------- Theme tokens ---------- */
 :root{
   /* Glass surface tokens (match header readability) */
-  --glass-a: rgba(7,8,11,.74);
-  --glass-b: rgba(7,8,11,.32);
+--glass-a: rgba(7,8,11,.86);
+--glass-b: rgba(7,8,11,.46);
 
   --bg-0:#07080b;
   --bg-1:#0b0f14;
