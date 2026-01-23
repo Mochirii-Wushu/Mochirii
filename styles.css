@@ -796,9 +796,11 @@ h1{
 }
 
 .rank-emblem{
-  width: clamp(26px, 3vw, 32px);
-  height: clamp(26px, 3vw, 32px);
+  width: 28px;
+  height: 28px;
   object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 
 /* ---------- Charter-style lists ---------- */
