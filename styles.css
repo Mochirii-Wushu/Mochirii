@@ -678,7 +678,7 @@ section{
 
 /* Rank emblem sizing controls */
 :root{
-  --rank-mark-size: 80px;   /* badge size */
+  --rank-mark-size: 54px;   /* badge size */
   --rank-glyph-size: 22px;  /* inner decorative glyph size */
 }
 
