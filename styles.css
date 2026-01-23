@@ -914,6 +914,20 @@ h1{
   clip-path: polygon(50% 0%, 68% 26%, 95% 35%, 76% 58%, 80% 92%, 50% 76%, 20% 92%, 24% 58%, 5% 35%, 32% 26%);
 }
 
+/* Remove rank icon backgrounds (mark wrapper + decorative pseudo-elements) */
+#ranks .sigil .mark{
+  background: transparent;
+  border: none;
+  padding: 0;
+  overflow: visible; /* optional; keeps edges un-clipped */
+  box-shadow: none;  /* optional; future-proof */
+}
+
+#ranks .sigil .mark::before,
+#ranks .sigil .mark::after{
+  content: none;
+}
+
 /* ---------- Charter-style lists ---------- */
 ul.clean{
   list-style: none;
