@@ -972,12 +972,21 @@ ul.clean strong{
   align-items: center;
   justify-content: center;
   overflow: hidden;
+
+  position: relative; /* added */
 }
 
 .value-emblem {
   width: 100%;
   height: 100%;
+  display: block;       /* added */
   object-fit: contain;
+  object-position: center; /* added */
+
+  padding: 6px;         /* added */
+  position: relative;   /* added */
+  z-index: 2;           /* added */
+
   transform: scale(0.92);
   filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
 }
@@ -989,6 +998,7 @@ ul.clean strong{
   gap:10px;
   margin-bottom:10px;
 }
+
 .value-icon{
   width:38px;
   height:38px;
@@ -999,6 +1009,7 @@ ul.clean strong{
     linear-gradient(135deg, rgba(217,179,106,.28), rgba(15,191,155,.38));
   box-shadow: 0 12px 28px rgba(0,0,0,.35);
 }
+
 .value-icon.sweet{
   background:
     radial-gradient(14px 14px at 35% 30%, rgba(240,234,219,.20), transparent 62%),
