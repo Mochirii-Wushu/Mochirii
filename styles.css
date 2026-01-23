@@ -967,6 +967,23 @@ ul.clean strong{
 @media (max-width: 980px){ .values .value{ grid-column: span 6; } }
 @media (max-width: 640px){ .values .value{ grid-column: span 12; } }
 
+/* Value emblems (match rank emblem behavior) */
+.value-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.value-emblem{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  object-position:center;
+  padding:6px;
+}
+
 .value-top{
   display:flex;
   align-items:center;
