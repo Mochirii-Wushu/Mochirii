@@ -977,13 +977,14 @@ ul.clean strong{
 .value-icon{
   width:64px;
   height:64px;
-  border-radius: 20px;
-  border:1px solid rgba(255,255,255,14);
-  background:
-    radial-gradient(14px 14px at 35% 30%, rgba(255,255,255,18), transparent 62%),
-    linear-gradient(135deg, rgba(217,179,106,28), rgba(15,191,155,38));
-  box-shadow: 0 12px 28px rgba(0,0,0,35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
+
 .value-icon.sweet{
   background:
     radial-gradient(14px 14px at 35% 30%, rgba(240,234,219,20), transparent 62%),
