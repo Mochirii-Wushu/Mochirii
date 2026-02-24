@@ -1,246 +1,235 @@
 # Mōchirīī — Guild Website  
 *Where Winds Meet*
 
-This repository contains the official website for **Mōchirīī**, a guild in *Where Winds Meet*.  
-The site is designed to be visually rich, lightweight, and easy to maintain using static files only.
+Official website for **Mōchirīī**, a community-focused guild for *Where Winds Meet*.  
+This site serves as the public hub for guild information, events, culture, and shared media.
 
-It is built for **GitHub Pages**, requires **no backend**, and uses a JSON-driven content system.
-
----
-
-## Design Philosophy
-
-- Image-first layout
-- Minimal text
-- No gradients or decorative borders
-- Visual clarity over density
-- Simple maintenance through structured data
-- Static hosting friendly
-
-The site is meant to feel calm, atmospheric, and alive without visual noise.
+The project is designed to be **static, fast, readable, and data-driven**, with a clear separation between structure, content, and behavior.
 
 ---
 
-## Project Structure
+## Goals
 
-```
+- Provide a calm, welcoming entry point for new members
+- Keep expectations, culture, and coordination transparent
+- Allow non-technical contributors to update content safely via JSON
+- Avoid unnecessary frameworks, build steps, or tooling complexity
+- Remain deployable via GitHub Pages with zero backend dependencies
+
+---
+
+## Tech Stack
+
+- **HTML5** — semantic, accessible markup
+- **CSS** — handcrafted styles in `styles.css`
+- **Vanilla JavaScript** — page-scoped renderers only
+- **JSON** — all page content and copy
+- **GitHub Pages** — static hosting
+
+No frameworks. No bundlers. No transpilers.
+
+---
+
+## Architecture Overview
+
+The site follows a strict separation of concerns:
+
+### 1. Markup (HTML)
+Each page’s `.html` file contains:
+- Structural layout only
+- Placeholder elements with stable IDs
+- No business logic
+- No styling rules
+- No page-specific JavaScript behavior
+
+Example:
+
+index.html
+join.html
+events.html
+
+
+---
+
+### 2. Behavior (JavaScript)
+Each page has a matching JS file that:
+- Fetches its corresponding JSON file
+- Injects content into predefined placeholders
+- Handles page-local interactions only
+
+JavaScript files never:
+- Define layout
+- Control global navigation or footer
+- Contain hardcoded copy
+
+Example:
+
+home.js
+join.js
+
+
+Global behavior (header/footer mounting, shared interactions) lives in:
+
+site.js
+
+
+---
+
+### 3. Content (JSON)
+All text, images, metadata, and lists live in JSON files.
+
+This allows:
+- Easy updates without touching HTML
+- Consistent spacing and rhythm
+- Safer editing by non-developers
+
+Example:
+
+data/home.json
+data/join.json
+data/gallery.json
+
+
+---
+
+## Directory Structure
+
+
 /
-├── index.html
-├── home.js
-├── data/
-│   └── home.json
-├── assets/
-│   └── img/
-│       ├── hero/
-│       ├── bulletins/
-│       ├── tiles/
-│       ├── featured/
-│       ├── gallery/
-│       └── members/
-└── README.md
-```
+├─ index.html
+├─ join.html
+├─ events.html
+├─ styles.css
+├─ site.js
+├─ home.js
+├─ join.js
+│
+├─ data/
+│ ├─ home.json
+│ ├─ join.json
+│ ├─ gallery.json
+│
+├─ assets/
+│ ├─ img/
+│ │ ├─ hero/
+│ │ ├─ join/
+│ │ ├─ gallery/
+│ │ ├─ tiles/
+│ │ ├─ brand/
+│
+└─ README.md
+
 
 ---
 
-## How the Site Works
+## Page Breakdown
 
-### index.html
-Defines:
-- Layout
-- Typography
-- Section structure
+### Home (`index.html`)
+- Guild introduction
+- Hero section with badges
+- Featured bulletin + recent bulletins
+- Four Doors navigation
+- Member spotlight
+- Screenshot gallery with modal viewer
+- Guild seal (fully data-driven)
 
-Contains no dynamic content logic.
+Data source:
 
----
+data/home.json
 
-### home.js
-Handles:
-- Loading `home.json`
-- Rendering all homepage sections
-- Gallery modal behavior
-- Scroll-based animation
-- Graceful fallbacks
-
-This file does not need regular editing.
 
 ---
 
-### home.json (Primary Content File)
+### Join (`join.html`)
+- Joining steps
+- Expectations & culture
+- Quick start links
+- Notes & clarifications
 
-All editable content lives here.
+Spacing and rhythm are controlled purely by CSS stack rules, not JS.
 
-Controls:
-- Hero section
-- Bulletin updates
-- Navigation tiles
-- Spotlight feature
-- Gallery images
-- Footer text
+Data source:
 
-To update the site, edit this file only.
+data/join.json
 
----
-
-## Image Organization
-
-All images live under:
-
-```
-/assets/img/
-```
-
-Recommended structure:
-
-```
-hero/         → main banner image
-bulletins/    → events, raffles, updates
-tiles/        → navigation tiles
-featured/     → spotlight feature
-gallery/      → visual gallery
-members/      → portraits (optional)
-```
-
-### Image Guidelines
-- Use `.webp` when possible
-- Keep file size under 400 KB
-- Prefer strong focal points
-- Avoid text baked into images
 
 ---
 
-## Editing Content
+### Gallery / Album
+- Structured albums
+- Captioned images
+- Taggable items
+- Designed for future filtering or expansion
 
-### Hero Section
-Edit in:
-```json
-"hero": {
-  "image": "...",
-  "descriptor": "...",
-  "badges": []
-}
-```
+Data source:
 
----
+data/gallery.json
 
-### Bulletins
-Located in:
-```json
-"bulletins": []
-```
-
-Supports:
-- events
-- raffles
-- announcements
-- member updates
-
-The item with `"pinned": true` becomes the featured bulletin.
 
 ---
 
-### Navigation Tiles
-Located in:
-```json
-"tiles": []
-```
+## Styling Philosophy
 
-Each tile includes:
-- title
-- subtitle
-- image
-- link
-- label
+- Global rhythm via reusable stack classes
+- Page-specific adjustments gated by `body[data-page="…"]`
+- No inline layout hacks
+- No JS-controlled spacing
+- Predictable vertical flow
 
----
+All styling lives in:
 
-### Spotlight
-Located in:
-```json
-"spotlight": {}
-```
+styles.css
 
-Used for:
-- major announcements
-- promotions
-- seasonal highlights
-
-Only one spotlight displays at a time.
 
 ---
 
-### Gallery
-Located in:
-```json
-"gallery": []
-```
+## Accessibility
 
-- Images only
-- Click to enlarge
-- No captions required
+- Semantic HTML landmarks
+- ARIA labels where appropriate
+- Keyboard-navigable modals
+- Meaningful alt text for all images
+- No essential content hidden behind JS
 
 ---
 
-## Fonts & Styling
+## Content Editing Guidelines
 
-Fonts used:
-- **Zhi Mang Xing** – display / calligraphic
-- **Noto Serif SC** – body text
+When updating content:
 
-Styling principles:
-- No gradients
-- No borders
-- Subtle motion only
-- Image-driven color
-- Consistent spacing
+- Edit **JSON only**
+- Do not add inline HTML inside JSON
+- Preserve array structures (`intro`, `cards`, `items`)
+- Images should be `.webp` where possible
+- Dates should be ISO-compatible when used programmatically
 
----
-
-## Deployment (GitHub Pages)
-
-1. Push repository to GitHub
-2. Open **Settings → Pages**
-3. Set source to:
-   ```
-   Branch: main
-   Folder: /root
-   ```
-4. Save
-
-Your site will be available at:
-```
-https://username.github.io/repository-name/
-```
+If content fails to load, pages degrade gracefully.
 
 ---
 
-## Maintenance Notes
+## Development Notes
 
-- Edit content in `home.json`
-- Replace images as needed
-- No build tools required
-- No frameworks required
-- Works entirely on GitHub Pages
-
----
-
-## Future Expansion
-
-The structure supports:
-- Additional pages (Ranks, Leaders, Codex)
-- Event expiration logic
-- Seasonal themes
-- Member features
-- Multiple galleries
-
-Without changing the core architecture.
+- No build step required
+- Open files directly in browser or via static server
+- Use `git pull --rebase` (recommended) to keep history clean
+- GitHub Pages deploys automatically from `main`
 
 ---
 
-## Final Notes
+## License & Use
 
-If it feels busy, remove something.  
-If it needs explaining, simplify it.  
-If it distracts from the visuals, it doesn’t belong.
+This site is purpose-built for the Mōchirīī guild.
 
-This site is meant to feel composed, calm, and alive.
+Content, branding, and structure are not intended for redistribution without permission.
+
+---
+
+## Maintainers
+
+- Guild leadership
+- Design & architecture maintained in-house
+
+For structural changes, follow existing patterns.  
+Consistency matters more than novelty.
+
+---
