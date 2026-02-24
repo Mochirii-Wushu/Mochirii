@@ -1,0 +1,181 @@
+<!-- index.html — Home -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mōchirīī guild hub for Where Winds Meet." />
+  <title>Mōchirīī • Where Winds Meet Guild</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="preload" as="image" href="./assets/img/hero/hero.webp" />
+</head>
+
+<body data-page="home">
+  <!-- Header mount -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Home hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="heroImage"
+          src="./assets/img/hero/hero.webp"
+          alt="Hero artwork for Mōchirīī guild"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+        <img
+          id="heroAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <div class="home-hero-row">
+        <section class="glass-card glass-card--strong glass-pad hero-intro">
+          <p class="kicker" id="homeKicker">Asia-Pacific Guild</p>
+          <h1 class="display-title" id="homeHeading">Mōchirīī</h1>
+
+          <div id="heroDescriptor" class="prose-stack" aria-live="polite">
+            <p class="muted">Loading…</p>
+          </div>
+
+          <div class="badge-row" id="heroBadges" aria-label="Guild badges"></div>
+
+          <noscript>
+            <p class="muted" style="margin-top:12px;">
+              This page loads bulletin and gallery content with JavaScript enabled.
+            </p>
+          </noscript>
+        </section>
+
+        <aside class="home-guild-seal" aria-label="Guild seal">
+          <img
+            id="sealImage"
+            src="./assets/img/brand/emblem.webp"
+            alt="Mōchirīī guild seal"
+            loading="eager"
+            decoding="async"
+          />
+          <h2 id="sealTitle" class="home-seal-title">Loading…</h2>
+          <p id="sealVerse" class="home-seal-verse muted">Loading…</p>
+        </aside>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+
+      <!-- Bulletin -->
+      <section class="glass-card glass-card--primary glass-pad" aria-label="Guild bulletin">
+        <h2 class="section-title">Guild Bulletin</h2>
+        <p class="muted" id="bulletinIntro">Loading…</p>
+
+        <a id="featuredBulletin" class="home-featured" href="#" aria-label="Featured bulletin">
+          <img
+            id="featuredBulletinImage"
+            src="./assets/img/bulletins/featured.webp"
+            alt=""
+            class="home-featured__img"
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="home-featured__scrim" aria-hidden="true"></div>
+
+          <div class="home-featured__meta">
+            <span id="featuredBulletinType" class="home-pill"></span>
+            <span id="featuredBulletinDate" class="home-date"></span>
+          </div>
+
+          <div class="home-featured__plate">
+            <h3 id="featuredBulletinTitle" class="home-title"></h3>
+            <p id="featuredBulletinSummary" class="home-summary"></p>
+          </div>
+        </a>
+
+        <div id="bulletinList" class="home-bulletins" aria-label="More bulletins"></div>
+      </section>
+
+      <!-- Doors -->
+      <section class="glass-card glass-card--primary glass-pad" style="margin-top:24px;" aria-label="Four doors">
+        <h2 class="section-title">Four Doors</h2>
+        <p class="muted" id="doorsIntro">Loading…</p>
+        <div id="doorsGrid" class="home-doors" aria-label="Door links"></div>
+      </section>
+
+      <!-- Spotlight -->
+      <section class="glass-card glass-card--primary glass-pad" style="margin-top:24px;" aria-label="Member spotlight">
+        <h2 class="section-title">Member Spotlight</h2>
+        <p class="muted" id="spotlightIntro">Loading…</p>
+
+        <a id="spotlightCard" class="home-spotlight" href="#" aria-label="Spotlight card">
+          <img
+            id="spotlightImage"
+            src="./assets/img/featured/spotlight.webp"
+            alt=""
+            class="home-spotlight__img"
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="home-spotlight__scrim" aria-hidden="true"></div>
+
+          <div class="home-spotlight__plate">
+            <span id="spotlightTag" class="home-pill"></span>
+            <h3 id="spotlightTitle" class="home-title"></h3>
+            <p id="spotlightSummary" class="home-summary"></p>
+            <div class="home-link">Spotlight Appreciation</div>
+          </div>
+        </a>
+      </section>
+
+      <!-- Gallery -->
+      <section class="glass-card glass-card--primary glass-pad" style="margin-top:24px;" aria-label="Screenshot spotlight">
+        <h2 class="section-title">Screenshot Spotlight</h2>
+        <p class="muted" id="galleryIntro">Loading…</p>
+        <div id="galleryGrid" class="home-gallery" aria-label="Gallery thumbnails"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Lightbox -->
+  <div
+    id="modalRoot"
+    class="lightbox hidden"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Gallery image viewer"
+  >
+    <div id="modalBackdrop" class="lightbox-backdrop" aria-hidden="true"></div>
+
+    <div class="lightbox-shell" role="document">
+      <button id="modalClose" class="lightbox-close" type="button" aria-label="Close viewer">✕</button>
+
+      <figure class="lightbox-card">
+        <img id="modalImage" src="" alt="" class="lightbox-img" decoding="async" />
+        <figcaption id="modalCaption" class="lightbox-caption"></figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- Footer mount -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./home.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "kicker": "Monthly raffle",
+    "title": "Mōchirīī Monthly Raffles",
+    "intro": "Once a month we run a raffle for active members. Sign up in-game, stay recently active & you're in the draw.",
+    "frequency": "Monthly",
+    "timezoneLabel": "UTC + 8",
+    "badges": ["Sign up in guild menu", "Recent activity required", "Winners announced in game & Discord."],
+    "hero": {
+      "image": "./assets/img/raffles/hero.webp",
+      "atmosphere": "./assets/img/raffles/atmosphere.webp"
+    }
+  },
+
+  "how": [
+    "Sign up for the monthly raffle event in the guild menu.",
+    "Stay active close to event time so the roster reflects your presence.",
+    "Leadership draws winners & posts results with claim instructions."
+  ],
+
+  "rules": [
+    "Eligible members logged in within the previous 2 days of event time.",
+    "Member must be signed up on the monthly event in the guild menu.",
+    "One entry per member unless an announcement specifies bonus entries.",
+    "Winners must claim within the window listed in the Discord post."
+  ],
+
+  "thisMonth": {
+    "date": "2026-02-20",
+    "time": "8:00 PM",
+    "timezone": "UTC + 8",
+    "prizes": [
+      "Exclusive in-game items (as available)",
+      "Guild-funded reward bundle",
+      "Special mention in the next spotlight"
+    ],
+    "notes": "Exact prizes may shift with availability."
+  },
+
+  "links": [
+    {
+      "label": "Raffle channel",
+      "href": "https://discord.com/invite/dPafqMwWPK"
+    },
+    {
+      "label": "Events page",
+      "href": "./events.html"
+    }
+  ],
+
+  "note": [
+    "Leadership is always willing to help whenever possible, even if something may be desired or needed outside of game. Just let us know if you're the winner & we'll do our best to accomodate for you when able to do so."
+  ]
+}

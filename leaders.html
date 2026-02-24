@@ -1,0 +1,132 @@
+<!-- leaders.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mōchirīī leadership roster and contact points for Where Winds Meet." />
+
+  <title>Mōchirīī • Leaders Hall</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="leaders">
+  <!-- Header include -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Leaders hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="leadersHeroImage"
+          src="./assets/img/leaders/hero.webp"
+          alt="Leaders Hall banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+        <!-- stays unused by default (styles.css hides it) -->
+        <img id="leadersAtmosphere" src="" alt="" class="page-hero__atmos" aria-hidden="true" decoding="async" />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
+        <p class="kicker" id="leadersKicker">Leaders</p>
+        <h1 class="display-title" id="leadersHeading">Leaders Hall</h1>
+
+        <div id="leadersIntro" class="prose-stack" style="margin-top:12px;">
+          <p class="muted">Loading…</p>
+        </div>
+
+        <div class="badge-row" id="leadersHeroPills" aria-label="Contact notes"></div>
+
+        <p id="leadersError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </header>
+
+  <main class="page-main" id="main">
+    <div class="container">
+
+      <!-- Guild Leadership panel -->
+      <section>
+        <div class="grid-12 grid-gap">
+          <section class="col-8">
+            <div class="glass-card glass-card--primary glass-pad">
+              <h2 class="section-title" id="leadersPanelTitle">Guild Leadership</h2>
+              <div id="leadersPanelBody" class="prose-stack">
+                <p class="muted">Loading…</p>
+              </div>
+              <p class="muted" id="leadersPanelNote" style="margin-top:14px;"></p>
+            </div>
+          </section>
+
+          <aside class="col-4">
+            <div class="glass-card glass-card--soft glass-pad">
+              <h3 class="section-title section-title--sm" id="leadersPanelBadge">Contact &amp; Profiles</h3>
+              <div class="prose-stack">
+                <img
+                  id="leadersPanelImage"
+                  src="./assets/img/leaders/panel.webp"
+                  alt="Leadership hall artwork"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </div>
+          </aside>
+
+          <div class="col-divider" aria-hidden="true"></div>
+        </div>
+      </section>
+
+<!-- Council -->
+<section style="margin-top:24px;">
+  <div class="leaders-council-intro">
+    <h2 class="section-title" id="leadersGridTitle">The Council</h2>
+    <p class="muted" id="leadersGridDesc">Loading…</p>
+  </div>
+
+  <div
+    id="leadersGrid"
+    class="grid-12 grid-gap"
+    style="margin-top:14px;"
+    aria-label="Leadership roster"
+  >
+    <div class="col-4 glass-card glass-card--soft glass-pad">
+      <p class="muted">Loading leaders…</p>
+    </div>
+  </div>
+</section>
+
+      <!-- Responsibilities -->
+      <section style="margin-top:24px;">
+        <div class="glass-card glass-card--primary glass-pad">
+          <h2 class="section-title" id="respTitle">Responsibilities</h2>
+          <p class="muted" id="respDesc"></p>
+
+          <div id="respGrid" class="grid-12 grid-gap" style="margin-top:14px;" aria-label="Leadership responsibilities">
+            <!-- leaders.js fills cards -->
+          </div>
+
+          <div style="margin-top:18px;">
+            <a href="./index.html" class="footer-link">Return to Home</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer include -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./leaders.js" defer></script>
+</body>
+</html>

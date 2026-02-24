@@ -1,0 +1,103 @@
+{
+  "copy": {
+    "bulletinIntro": "The latest in Mōchirīī news.",
+    "doorsIntro": "What we expect when you join, how progression works, meet the leaders, and learn the culture.",
+    "spotlightIntro": "Shoutout to this month's top guild member.",
+    "galleryIntro": "The latest in Mōchirīī shenanigans."
+  },
+  "hero": {
+    "image": "./assets/img/hero/hero.webp",
+    "atmosphereImage": "",
+    "descriptor": [
+      "Mōchirīī's a place to feel at home, find good company, belong & roam. Born from a wish for a gentler way, A guild shaped for lives that move each day. We carry our duties beyond the screen, Work, rest & worlds in between. Come when able, drift when need, Your place here waits, unchanged in its seat. A quiet, cozy corner where kind hearts stay, A cupcake home where warmth holds sway. Share in the sweetness, arrive as you are, With care in your words & kindness as law. Even long pauses find welcome here, A thirty-day cupcake nap rests clear. Leave us a note, your place still shines, Saved in spirit, in rhythm, in time."
+    ],
+    "badges": [
+      "Recruitment Open",
+      "Cross-Platform",
+      "Community Focused",
+      "In-Game Events"
+    ]
+  },
+  "seal": {
+    "title": "Guild Seal",
+    "image": "./assets/img/brand/emblem.webp",
+    "imageAlt": "Mōchirīī guild seal",
+    "verse": [
+      "Silvered jade softly gleams, where quiet petals fall,",
+      "Bamboo stands in patient grace, a guardian to all.",
+      "Hearts gather here in gentle light, unhurried, warm & true,",
+      "A seal of trust, of shared resolve, where kindred spirits grew."
+    ]
+  },
+  "bulletins": [
+    {
+      "pinned": true,
+      "type": "event",
+      "title": "Monthly guild meeting open to all current members.",
+      "date": "2026-02-28",
+      "image": "./assets/img/bulletins/featured.webp",
+      "imageAlt": "Guild meeting bulletin cover",
+      "href": "./events.html"
+    },
+    {
+      "type": "raffle",
+      "title": "Monthly cosmetics raffle for active guild members.",
+      "date": "2026-02-28",
+      "image": "./assets/img/bulletins/raffle.webp",
+      "imageAlt": "Raffle bulletin cover",
+      "href": "./raffles.html"
+    },
+    {
+      "type": "announcement",
+      "title": "Leadership positions currently open for applications.",
+      "date": "2026-02-01",
+      "image": "./assets/img/bulletins/announcement.webp",
+      "imageAlt": "Leadership announcement cover",
+      "href": "./announcements.html"
+    }
+  ],
+  "tiles": [
+    {
+      "label": "Join",
+      "title": "How to join Mōchirīī & what membership involves.",
+      "image": "./assets/img/tiles/join.webp",
+      "alt": "Join Mōchirīī tile artwork",
+      "href": "./join.html"
+    },
+    {
+      "label": "Ranks",
+      "title": "Guild ranks, progression & how contributions are recognized.",
+      "image": "./assets/img/tiles/ranks.webp",
+      "alt": "Guild ranks and progression tile artwork",
+      "href": "./ranks.html"
+    },
+    {
+      "label": "Leaders",
+      "title": "Leadership roles, responsibilities & points of contact.",
+      "image": "./assets/img/tiles/leaders.webp",
+      "alt": "Guild leadership tile artwork",
+      "href": "./leaders.html"
+    },
+    {
+      "label": "Codex",
+      "title": "Shared values, etiquette & community standards.",
+      "image": "./assets/img/tiles/codex.webp",
+      "alt": "Guild codex and values tile artwork",
+      "href": "./codex.html"
+    }
+  ],
+  "spotlight": {
+    "tag": "Spotlight",
+    "title": "Congratulations to: Klutzz.",
+    "summary": "For being supportive & beautiful!",
+    "image": "./assets/img/featured/spotlight.webp",
+    "imageAlt": "Spotlight cover",
+    "href": "./spotlight.html"
+  },
+  "gallery": [
+    {
+      "image": "./assets/img/gallery/shot-01.webp",
+      "alt": "Guild screenshot"
+    }
+  ]
+}

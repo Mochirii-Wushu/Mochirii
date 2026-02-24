@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Mōchirīī • Events</title>
+  <meta name="description" content="Guild events and gatherings for Mōchirīī in Where Winds Meet." />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="events">
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Events hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="eventsHeroImage"
+          src="./assets/img/events/hero.webp"
+          alt="Events banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+
+        <img
+          id="eventsAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <!-- CHANGE: add center-stack for centered hero layout -->
+      <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
+        <p class="kicker" id="eventsKicker">Guild calendar</p>
+
+        <h1 class="display-title" id="eventsHeading">Events</h1>
+
+        <div class="meta-row" aria-label="Events metadata">
+          <span class="meta-text" id="eventsUpdated"></span>
+          <span class="meta-dot" aria-hidden="true">•</span>
+          <span class="meta-text" id="eventsTimezone"></span>
+        </div>
+
+        <p class="lede" id="eventsIntro">Loading…</p>
+
+        <div class="badge-row" id="eventsBadges" aria-label="Event notes"></div>
+
+        <p id="eventsError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+      <div class="grid-12 grid-gap">
+        <!-- Featured -->
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title">Featured Event</h2>
+
+            <div class="prose-stack">
+              <p class="muted" id="featuredLead">Loading…</p>
+            </div>
+
+            <div id="featuredCard" class="events-featured" aria-live="polite">
+              <!-- events.js renders here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Upcoming -->
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm">Upcoming Events</h3>
+
+            <div id="eventsUpcoming" class="events-upcoming" aria-live="polite">
+              <p class="muted">Loading…</p>
+            </div>
+          </div>
+        </aside>
+
+        <div class="col-divider" aria-hidden="true"></div>
+      </div>
+
+      <!-- Recurring + Participation -->
+      <div class="grid-12 grid-gap" style="margin-top:24px;">
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title">Recurring Events</h2>
+            <p class="muted" id="eventsRhythmIntro"></p>
+
+            <div id="eventsRecurring" class="events-recurring" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm">Participation</h3>
+            <div id="eventsParticipation" class="prose-stack" aria-live="polite"></div>
+
+            <div class="badge-row" style="margin-top:14px;">
+              <span><a href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">Discord RSVP</a></span>
+              <span><a href="./join.html">How to join</a></span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./events.js" defer></script>
+</body>
+</html>

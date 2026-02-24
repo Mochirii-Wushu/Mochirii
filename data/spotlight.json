@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "image": "./assets/img/spotlight/hero.webp",
+    "atmosphereImage": "./assets/img/spotlight/atmosphere.webp",
+    "alt": "Member Spotlight banner artwork"
+  },
+  "spotlight": {
+    "kicker": "Member Spotlight",
+    "title": "This Month: Klutzz",
+    "date": "2026-02-20",
+    "tag": "Appreciation",
+    "intro": "Once a month, we honor one member whose efforts & spirit guide the guild onward together.",
+    "badges": [
+      "Community Pillar",
+      "Helpful Mastery",
+      "Consistent Presence"
+    ],
+"body": [
+  "This month we lift the lantern's light & let it rest on Klutzz in sight",
+  "Klutzz arrives with faithful tread, guiding new paths where steps are led, answering questions with presence clear as belonging settles gently here.",
+  "In gathered hours, awareness stays, conversation warmed in subtle ways, small pauses eased with careful grace so shared play keeps an easy pace."
+],
+"conclusion": "Cheers move softly, carried through, kindness woven where gardens grew across Mōchirīī's paths in flow, a steady warmth we all can know.",
+    "highlights": [
+      "Daily Consistency",
+      "Active Engagement",
+      "Helpful Guidance",
+      "Positive Influence"
+    ]
+  }
+}

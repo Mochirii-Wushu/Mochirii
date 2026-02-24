@@ -1,0 +1,143 @@
+<!-- join.html — Join
+     Responsibilities:
+     - Markup only (structure + mounts + placeholders)
+     - No page-specific behavior here (join.js owns data + rendering)
+     - No global behavior here (site.js mounts header/footer + global behaviors)
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Mōchirīī • Join</title>
+  <meta name="description" content="Join Mōchirīī — steps, expectations & how to get started in Where Winds Meet." />
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="join">
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Join hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="joinHeroImage"
+          src="./assets/img/join/hero.webp"
+          alt="Join Mōchirīī banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+
+        <img
+          id="joinAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro" id="joinHeroCard">
+        <p class="kicker" id="joinKicker">Join</p>
+
+        <h1 class="display-title" id="joinHeading">Join Mōchirīī</h1>
+
+        <div class="meta-row" aria-label="Join metadata">
+          <span class="meta-text" id="joinUpdated"></span>
+          <span class="meta-dot" aria-hidden="true">•</span>
+          <span class="meta-text" id="joinTimezone"></span>
+        </div>
+
+        <p class="lede" id="joinIntro">Loading…</p>
+
+        <div class="badge-row" id="joinBadges" aria-label="Join notes"></div>
+
+        <p id="joinError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+      <div class="grid-12 grid-gap">
+        <!-- The Joining Path -->
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title" id="joinStepsTitle">The Joining Path</h2>
+
+            <div class="prose-stack" id="joinStepsIntro">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <ol id="joinStepsList" class="list-stack" aria-label="Joining steps">
+              <li class="muted">Loading…</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- Quick start -->
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm" id="joinQuickTitle">Quick Start</h3>
+
+            <div id="joinQuickBody" class="prose-stack">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <div class="badge-row" id="joinLinks" aria-label="Join links"></div>
+          </div>
+        </aside>
+
+        <div class="col-divider" aria-hidden="true"></div>
+      </div>
+
+      <!-- Expectations & Culture -->
+      <div class="grid-12 grid-gap" style="margin-top:24px;">
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title" id="joinCultureTitle">Expectations &amp; Culture</h2>
+
+            <div class="prose-stack" id="joinCultureIntro">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <div id="joinCultureCards" class="prose-stack" aria-live="polite">
+              <p class="muted">Loading…</p>
+            </div>
+          </div>
+        </section>
+
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm" id="joinFaqTitle">Notes</h3>
+
+            <div id="joinNotes" class="prose-stack" aria-live="polite">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <div class="badge-row" id="joinNotesBadges" aria-label="Helpful links"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./join.js" defer></script>
+</body>
+</html>

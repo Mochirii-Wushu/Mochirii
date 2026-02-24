@@ -1,0 +1,175 @@
+<!-- ranks.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mōchirīī ranks and progression for Where Winds Meet." />
+
+  <title>Mōchirīī • Ranks &amp; Progression</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="ranks">
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Ranks hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="ranksHeroImage"
+          src="./assets/img/ranks/hero.webp"
+          alt="Ranks and progression banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+        <img
+          id="ranksAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
+        <p class="kicker" id="ranksKicker">Ranks</p>
+        <h1 class="display-title" id="ranksHeading">Ranks &amp; Progression</h1>
+        <p class="lede" id="ranksIntro">Loading…</p>
+
+        <!-- stays as pills (not links) -->
+        <div class="badge-row" id="ranksHeroPills" aria-label="Rank notes"></div>
+
+        <p id="ranksError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+
+      <!-- Progression -->
+      <section>
+        <div class="glass-card glass-card--primary glass-pad">
+          <h2 class="section-title" id="progressionTitle">Progression</h2>
+
+          <!-- pills (not links) -->
+          <div class="badge-row" id="progressionPills" aria-label="Progression categories"></div>
+
+          <div id="progressionBody" class="prose-stack" style="margin-top:14px;">
+            <p class="muted">Loading…</p>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid-12 grid-gap" style="margin-top:24px;">
+        <!-- Senior Leadership -->
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title" id="seniorTitle">Senior Leadership</h2>
+            <p class="muted" id="seniorDesc"></p>
+
+            <div id="seniorRanks" class="prose-stack" style="margin-top:14px;">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <p class="muted" id="seniorNote" style="margin-top:14px;"></p>
+          </div>
+        </section>
+
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm" id="seniorAsideTitle">Direction &amp; Stewardship</h3>
+            <div id="seniorImageWrap" class="prose-stack">
+              <img id="seniorImage" src="./assets/img/ranks/senior.webp" alt="Senior Leadership artwork" />
+            </div>
+          </div>
+        </aside>
+
+        <div class="col-divider" aria-hidden="true"></div>
+      </div>
+
+      <div class="grid-12 grid-gap" style="margin-top:24px;">
+        <!-- Middle Leadership -->
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title" id="middleTitle">Middle Leadership</h2>
+            <p class="muted" id="middleDesc"></p>
+
+            <!-- pills (not links) -->
+            <div class="badge-row" id="middlePills" aria-label="Guardianship and mentorship categories"></div>
+
+            <div id="middleRanks" class="prose-stack" style="margin-top:14px;">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <p class="muted" id="middleNote" style="margin-top:14px;"></p>
+          </div>
+        </section>
+
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm" id="middleAsideTitle">Guardianship &amp; Mentorship</h3>
+            <div class="prose-stack">
+              <img id="middleImage" src="./assets/img/ranks/middle.webp" alt="Middle Leadership artwork" />
+            </div>
+          </div>
+        </aside>
+
+        <div class="col-divider" aria-hidden="true"></div>
+      </div>
+
+      <div class="grid-12 grid-gap" style="margin-top:24px;">
+        <!-- Members -->
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad">
+            <h2 class="section-title" id="membersTitle">Members</h2>
+            <p class="muted" id="membersDesc"></p>
+
+            <!-- pills (not links) -->
+            <div class="badge-row" id="membersPills" aria-label="Fellowship categories"></div>
+
+            <div id="membersRanks" class="prose-stack" style="margin-top:14px;">
+              <p class="muted">Loading…</p>
+            </div>
+
+            <p class="muted" id="membersNote" style="margin-top:14px;"></p>
+
+            <div style="margin-top:18px;">
+              <a href="./index.html" class="footer-link">Return to Home</a>
+            </div>
+          </div>
+        </section>
+
+        <aside class="col-4">
+          <div class="glass-card glass-card--soft glass-pad">
+            <h3 class="section-title section-title--sm" id="membersAsideTitle">Growth &amp; Fellowship</h3>
+            <div class="prose-stack">
+              <img id="membersImage" src="./assets/img/ranks/members.webp" alt="Members artwork" />
+            </div>
+          </div>
+        </aside>
+
+        <div class="col-divider" aria-hidden="true"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./ranks.js" defer></script>
+</body>
+</html>

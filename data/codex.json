@@ -1,0 +1,141 @@
+{
+  "hero": {
+    "kicker": "Codex",
+    "title": "The Codex",
+    "image": "./assets/img/codex/hero.webp",
+    "introBody": [
+      "The Codex holds how Mōchirīī lives, speaks & looks after each other.",
+      "Read it once, revisit it often & use it to keep the guild clear & welcoming."
+    ],
+    "pills": ["Values in practice", "Etiquette with dignity", "Consistency with ease"]
+  },
+
+  "intro": {
+    "badge": "Values & Rhythm",
+    "title": "A shared standard",
+    "image": "./assets/img/codex/values.webp",
+    "body": [
+      "The Codex keeps culture consistent across time zones & playstyles.",
+      "It sets conduct expectations, outlines how disputes gets handled & describes how we keep community life active with room to breathe."
+    ]
+  },
+
+  "tenets": {
+    "title": "Tenets",
+    "description": "These tenets shape our tone in parties, chat & shared spaces.",
+    "image": "./assets/img/codex/tenets.webp",
+    "captionTitle": "Values made practical",
+    "caption": "A shared standard turns good intent into stable conduct when fights get loud.",
+    "pills": ["Tone", "Trust", "Growth"],
+    "note": "Choose one tenet before an event & practice it deliberately.",
+    "items": [
+      {
+        "title": "Harmony",
+        "description": "Keep the group coordinated, share space well & communicate with care."
+      },
+      {
+        "title": "Generosity",
+        "description": "Offer help as an invitation & match the other person's pace."
+      },
+      {
+        "title": "Respect",
+        "description": "Speak thoughtfully, assume good faith & leave room to recover from mistakes."
+      },
+      {
+        "title": "Reliability",
+        "description": "Show up in small, repeatable ways that keep momentum & trust intact."
+      },
+      {
+        "title": "Craft",
+        "description": "Improve with patience & pass knowledge in clear steps that others can follow."
+      },
+      {
+        "title": "Joy",
+        "description": "Keep the guild bright by celebrating wins & making space for laughter."
+      }
+    ]
+  },
+
+  "etiquette": {
+    "badge": "How we treat each other",
+    "title": "Etiquette",
+    "description": "Etiquette protects trust during fast play: chat tone, mentoring habits & how we solve disputes.",
+    "image": "./assets/img/codex/etiquette.webp",
+    "blocks": [
+      {
+        "title": "Chat",
+        "items": [
+          "Keep messages readable, especially during events & calls.",
+          "Welcome new voices with simple replies & helpful context.",
+          "Use teasing with clarity & make it easy to opt out."
+        ]
+      },
+      {
+        "title": "Mentoring",
+        "items": [
+          "Offer help as an invitation & match the learner's pace.",
+          "Ask questions freely & answer with patience & specifics.",
+          "Share builds & tips in a way that leaves room for personal style."
+        ]
+      },
+      {
+        "title": "Repair",
+        "items": [
+          "Move tense topics to private messages early.",
+          "Bring in a hall leader when emotions rise or patterns repeat.",
+          "Restore trust through accountability & one concrete next step."
+        ]
+      }
+    ],
+    "note": "Keep disputes small, private & actionable; return to the work with dignity."
+  },
+
+  "rhythm": {
+    "title": "Rhythm",
+    "description": "Rhythm is our pace: enough structure to meet & grow, enough ease to keep play restorative.",
+    "image": "./assets/img/codex/rituals.webp",
+    "captionTitle": "A gentle pace",
+    "caption": "Mōchirīī favors consistent participation & leaves room for real life.",
+    "pills": ["Gather", "Practice", "Rest"],
+    "note": "Post plans early, communicate changes plainly & keep the shared pace gentle.",
+    "items": [
+      {
+        "title": "Hall Runs",
+        "description": "Posted with time zones & goals; parties form with light role notes & clear start times."
+      },
+      {
+        "title": "Raffles",
+        "description": "A thank-you for presence & spirit; rules stay pinned & winners are announced cleanly."
+      },
+      {
+        "title": "Notices",
+        "description": "Patch notes that affect builds & guild decisions are shared with enough lead time to plan."
+      },
+      {
+        "title": "Quiet Time",
+        "description": "Roam, farm, craft, or chat casually while staying connected to the guild's community."
+      }
+    ]
+  },
+
+  "recognition": {
+    "title": "Recognition",
+    "description": "Recognition is how we say “we see you,” marking effort, care & the kind of consistency that draws others in.",
+    "image": "./assets/img/codex/recognition.webp",
+    "items": [
+      {
+        "title": "Follow-through",
+        "description": "Showing up over time through runs, events, chat help & small acts that keep things moving forward."
+      },
+      {
+        "title": "Service",
+        "description": "Helping others progress, sharing knowledge, organizing parties & making guild spaces easier to use."
+      },
+      {
+        "title": "Composure",
+        "description": "Keeping a clear tone under stress, honoring commitments & protecting harmony in public channels."
+      }
+    ],
+    "ranksHref": "./ranks.html"
+  }
+}

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mōchirīī announcements: updates, schedules, and notices for the guild in Where Winds Meet." />
+  <title>Mōchirīī • Announcements</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="announcements">
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Announcements hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="announcementsHeroImage"
+          src="./assets/img/announcements/hero.webp"
+          alt="Announcements banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+
+        <img
+          id="announcementsAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
+        <p class="kicker" id="announcementsKicker">Announcements</p>
+
+        <h1 class="display-title" id="announcementsHeading">Mōchirīī Announcements</h1>
+
+        <div class="meta-row" aria-label="Announcements metadata">
+          <span class="meta-text" id="announcementsUpdated"></span>
+          <span class="meta-dot" aria-hidden="true">•</span>
+          <span class="meta-text" id="announcementsTagline"></span>
+        </div>
+
+        <p class="lede" id="announcementsIntro">
+          Loading…
+        </p>
+
+        <div class="badge-row" id="announcementsBadges" aria-label="Announcements badges"></div>
+
+        <p id="announcementsError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+      <section class="glass-card glass-card--primary glass-pad">
+        <h2 class="section-title">Latest Notices</h2>
+
+        <div id="announcementsList" class="prose-stack" aria-live="polite">
+          <p class="muted">Loading…</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./announcements.js" defer></script>
+</body>
+</html>

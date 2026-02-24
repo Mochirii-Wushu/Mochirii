@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "title": "Mōchirīī Announcements",
+    "tagline": "Latest in Mōchirīī news.",
+    "intro": "Will try to keep this updated with the latest news & events. Check back often for updates on our schedule, training focus & community activities.",
+    "updated": "2026-02-01",
+    "badges": [
+      "Check weekly",
+      "Times based on UTC +8",
+      "Pinned items first"
+    ],
+    "hero": {
+      "image": "./assets/img/announcements/hero.webp",
+      "atmosphere": "./assets/img/announcements/atmosphere.webp"
+    }
+  },
+  "items": [
+    {
+      "id": "weekly-schedule",
+      "pinned": true,
+      "date": "2026-02-07",
+      "title": "Weekly Schedule Posted",
+      "summary": "These events happen twice every week.",
+      "details": [
+        "Guild Party:  Every Day              - 7:00 PM - 7:30 PM",
+        "Guild Bosses: Mondays   & Wednesdays - 7:30 PM - 9:30 PM",
+        "Duel Nights:  Tuesdays  & Thursdays  - 7:30 PM - 8:30 PM",
+        "Guild Wars:   Saturdays & Sundays    - 8:30 PM - 11:30 PM"
+      ],
+      "tags": ["schedule", "events"]
+    },
+    {
+      "id": "gallery-submissions",
+      "pinned": false,
+      "date": "2026-02-14",
+      "title": "Gallery Submissions Open",
+      "summary": "Send your best screenshots in the Discord gallery channel. We will rotate new shots into the site album.",
+      "details": [
+        "Use .webp when possible",
+        "Add a short caption",
+        "Include location or activity"
+      ],
+      "tags": ["gallery", "community"]
+    },
+    {
+      "id": "training-focus",
+      "pinned": false,
+      "date": "2026-02-21",
+      "title": "Training Focus: Fundamentals",
+      "summary": "This month we tighten basics: movement discipline, spacing, combos, mystics.",
+      "details": [
+        "Brief tips & tricks before events",
+        "One improvement goal per member",
+        "Share 1 tip you learned"
+      ],
+      "tags": ["training", "culture"]
+    }
+  ]
+}

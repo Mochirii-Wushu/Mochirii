@@ -1,0 +1,99 @@
+{
+  "hero": {
+    "kicker": "Join",
+    "title": "Join Mōchirīī",
+    "updated": "2026-02-01",
+    "timezone": "UTC+8",
+    "intro": "Mōchirīī is a quiet, active home for people who enjoy a relaxed community, simple coordination & friendly chat. Join at your pace, learn skills & mechanics with support & settle into events when you feel ready.",
+    "image": "./assets/img/join/hero.webp",
+    "imageAlt": "Join Mōchirīī banner artwork",
+    "atmosphereImage": "",
+    "badges": [
+      "Warm welcome within a day",
+      "Discord optional coordination",
+      "Newcomer-friendly events",
+      "Clear expectations"
+    ]
+  },
+  "steps": {
+    "title": "The Joining Path",
+    "intro": [
+      "These steps get you from arrival to your first smooth run. Leaders handle the setup. Members handle the pace."
+    ],
+    "items": [
+      {
+        "number": "1",
+        "title": "Enter the Hall",
+        "description": "Join the Discord & let a Mod know so we can give you the correct roles, greet you & get you oriented. FYI, you will not be able to see most of the server until verified & after that you won't be able to see the WWM guild section without the proper role. DM a mod or ask in game."
+      },
+      {
+        "number": "2",
+        "title": "Read the Codex & Ranks",
+        "description": "Skim the Codex & Ranks pages so you know our tone, basic etiquette & how support works."
+      },
+      {
+        "number": "3",
+        "title": "Share your IGN & time zone",
+        "description": "Post your in-game name & time zone so we can get you set up. Remember this is a global server."
+      },
+      {
+        "number": "4",
+        "title": "Receive your starting rank",
+        "description": "A leader assigns your starting rank & points you to the right channels, roles & weekly priorities."
+      },
+      {
+        "number": "5",
+        "title": "Join an event",
+        "description": "Pick an upcoming event, RSVP & show up. Ask questions early & you will get answers as soon as we are able."
+      }
+    ]
+  },
+  "quickStart": {
+    "title": "Quick Start",
+    "body": [
+      "Join Discord & post your IGN + time zone.",
+      "RSVP to one event this week, even a small one. Presence builds familiarity fast."
+    ],
+    "links": [
+      { "label": "Join Discord", "href": "https://discord.com/invite/dPafqMwWPK" },
+      { "label": "Events", "href": "./events.html" },
+      { "label": "Guild Codex", "href": "./codex.html" },
+      { "label": "Ranks", "href": "./ranks.html" }
+    ]
+  },
+  "culture": {
+    "title": "Expectations & Culture",
+    "intro": [
+      "Mōchirīī stays comfortable through courtesy, consistent effort & clear communication. Skill grows over time. Conduct shows up immediately."
+    ],
+    "cards": [
+      {
+        "title": "Respect & kindness",
+        "description": "Keep chat clean, assume good intent & treat every member as someone you may run with for a long time."
+      },
+      {
+        "title": "Activity rhythm",
+        "description": "Participation stays flexible. Consistent presence over time matters more than marathon sessions."
+      },
+      {
+        "title": "Helping new members",
+        "description": "Questions belong here. Veterans share tips, builds & mechanics with patience. Leaders step in when guidance helps."
+      },
+      {
+        "title": "Events & updates",
+        "description": "Events & announcements live in Discord as well as our website, with pinned notes for clarity. RSVP early & follow any posted requirements."
+      }
+    ]
+  },
+  "notes": {
+    "title": "Notes",
+    "body": [
+      "Voice chat & even Discord itself is always optional unless an event post says otherwise.",
+      "If you feel lost, tag a leader. Getting unstuck fast keeps the game fun."
+    ],
+    "links": [
+      { "label": "Leaders Hall", "href": "./leaders.html" },
+      { "label": "Home", "href": "./index.html" }
+    ]
+  }
+}

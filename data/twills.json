@@ -1,0 +1,24 @@
+{
+  "hero": {
+    "kicker": "Profile",
+    "image": "./assets/img/profiles/twills/hero.webp"
+  },
+  "profile": {
+    "name": "Twills",
+    "timezone": "UTC+8 (Singapore)",
+    "avatar": "./assets/img/profiles/twills/avatar.webp",
+    "badges": [
+      "Mōchirīī Leader",
+      "Email: twills@mochirii.com",
+      "Discord: faylui",
+      "UID: 1019675341"
+    ],
+    "cardTitle": "Portrait",
+    "bioTitle": "Bio",
+    "bio": [
+      "I drift with banked ardor, a bearing schooled in motion, lured by nocturnes steeped in savor, by avenues that tutor devotion. Journeys turn sacramental, a sampling, a listening rite, where mirth entwines with passersby and tempers fray into light. I attend the taut interstice, a look that consents to stay, a hush that curves the atmosphere, a grin that cants the day. Fervor claims my focus, forbearance secures my trust, discourse decants to candor until sense ascends from dust. Stillness keeps its own lexicon, suspense anneals the skin, nearness bears the harder labor where polished phrases grow thin. I leave an afterglow of ease, a recognition softly known, the recollection of being regarded, borne quietly home.",
+      "If need arises, my door stays open, whether for counsel, witness, unburdening, or truths left spoken. Come as you are, in fracture or flame & leave with your spirit newly held, newly framed.",
+      "Reach me through Email, Discord or in-game, always willing to help, don't be shy, have no shame. You all amazing & beautiful don't forget, one big fam even if never met."
+    ]
+  }
+}

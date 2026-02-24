@@ -1,0 +1,1246 @@
+@import url("https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Noto+Serif+SC:wght@400;500;600&display=swap");
+
+/* =========================================================
+   TOKENS — Design variables (colors, spacing, motion, layout)
+   ========================================================= */
+:root{
+  --font-display:"Zhi Mang Xing", ui-serif, serif;
+  --font-body:"Noto Serif SC", ui-serif, serif;
+
+  --ink0:#070812;
+
+  --ink-0:rgba(255,255,255,.92);
+  --ink-1:rgba(255,255,255,.78);
+  --ink-2:rgba(255,255,255,.60);
+
+  --bg-0:rgba(10,12,14,.82);
+  --bg-1:rgba(10,12,14,.88);
+  --bg-2:rgba(10,12,14,.72);
+
+  --line:rgba(255,255,255,.10);
+
+  --jade:#1f7a63;
+  --lantern:#c8a24b;
+
+  --radius:18px;
+  --shadow:0 18px 55px rgba(0,0,0,.45);
+  --blur:blur(16px);
+  --ease:cubic-bezier(.2,.8,.2,1);
+
+  --container:1200px;
+
+  --dd-gap:10px;
+  --dd-radius:16px;
+  --dd-min:220px;
+
+  --emblem:56px;
+
+  --pill-border:2px;
+}
+
+/* =========================================================
+   BASE — Page defaults, accessibility helpers, global elements
+   ========================================================= */
+html,body{height:100%;}
+html{background:var(--ink0);}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:#000;
+  color:#fff;
+}
+
+a{color:inherit;}
+img{max-width:100%;display:block;}
+
+.sr-only{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+
+:focus-visible{
+  outline:2px solid rgba(255,255,255,.55);
+  outline-offset:2px;
+}
+
+/* =========================================================
+   BACKGROUND — Global fixed backdrop (site-wide)
+   ========================================================= */
+.bg-photo{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:url("./assets/bg/wuxia-bg.png") center / cover no-repeat;
+}
+.bg-ink,.bg-ink-2,.bg-grain{display:none!important;}
+
+/* =========================================================
+   LAYOUT — Containers, grids, responsive columns
+   ========================================================= */
+.container{
+  max-width:var(--container);
+  margin:0 auto;
+  padding:0 16px;
+  position:relative;
+  z-index:10;
+}
+
+.page-main{
+  position:relative;
+  z-index:10;
+  padding:18px 0 84px;
+}
+
+.grid-12{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+}
+
+.grid-gap{gap:24px;}
+.col-8{grid-column:span 8;}
+.col-4{grid-column:span 4;}
+.col-6{grid-column:span 6;}
+.col-12{grid-column:span 12;}
+.col-divider{display:none;}
+
+@media (max-width:980px){
+  .col-8,.col-6,.col-4{grid-column:span 12;}
+}
+
+/* =========================================================
+   HERO — Hero image shell + overlap card positioning
+   ========================================================= */
+.page-hero-shell{position:relative; z-index:10;}
+.page-hero{
+  position:relative;
+  overflow:hidden;
+  border-radius:26px;
+  border:1px solid var(--line);
+  box-shadow:0 26px 70px rgba(0,0,0,.45);
+  background:rgba(0,0,0,.20);
+}
+.page-hero--tall{min-height:52vh;}
+.page-hero__img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.page-hero__atmos{display:none!important;}
+.page-hero__scrim,
+.page-hero__fade{display:none!important;}
+
+.hero-overlap{margin-top:calc(-1 * (22px + 14px)); padding-bottom:16px;}
+
+@media (max-width:640px){
+  .page-hero--tall{min-height:46vh;}
+  .hero-overlap{margin-top:calc(-1 * (18px + 14px));}
+}
+
+/* =========================================================
+   GLASS — Card surfaces, blur, borders, padding
+   ========================================================= */
+.glass-card{
+  border-radius:26px;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+}
+.glass-card--strong{background:var(--bg-1);}
+.glass-card--primary{background:var(--bg-0);}
+.glass-card--soft{background:var(--bg-2);}
+
+.glass-pad{padding:22px;}
+@media (max-width:640px){ .glass-pad{padding:18px;} }
+
+@keyframes border-shift{
+  0%{--card-line:rgba(31,122,99,.34);}
+  50%{--card-line:rgba(200,162,75,.34);}
+  100%{--card-line:rgba(31,122,99,.34);}
+}
+
+/* =========================================================
+   MOTION — Animated border accent on body cards
+   ========================================================= */
+.page-main .glass-card{
+  border:2px solid var(--card-line, var(--line));
+  animation:border-shift 7.5s var(--ease) infinite;
+}
+
+/* =========================================================
+   CENTER — Centered hero layout utility
+   ========================================================= */
+.center-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.center-stack .badge-row{justify-content:center;}
+
+/* =========================================================
+   TYPE — Global typography for hero + sections
+   ========================================================= */
+.kicker{
+  margin:0 0 10px;
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-2);
+}
+
+.display-title{
+  margin:0;
+  font-family:var(--font-display);
+  letter-spacing:.02em;
+  line-height:1.0;
+  font-size:44px;
+  color:var(--ink-0);
+}
+@media (max-width:640px){ .display-title{font-size:36px;} }
+
+.meta-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:10px;
+}
+.meta-text{color:var(--ink-1); font-size:13px;}
+.meta-dot{color:rgba(255,255,255,.35);}
+
+.lede{
+  margin:14px 0 0;
+  color:var(--ink-1);
+  font-size:15px;
+  line-height:1.55;
+  max-width:70ch;
+}
+
+.section-title{
+  margin:0 0 14px;
+  font-family:var(--font-display);
+  font-size:28px;
+  line-height:1.15;
+  color:var(--ink-0);
+}
+.section-title--sm{font-size:24px;}
+
+.muted{color:var(--ink-2);}
+
+/* =========================================================
+   BADGES — Pill row (hero/meta badges; general purpose)
+   ========================================================= */
+.badge-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.badge-row > span{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:var(--pill-border,2px) solid var(--card-line, rgba(255,255,255,.12));
+  background:rgba(0,0,0,.22);
+  color:var(--ink-1);
+  font-size:12px;
+  letter-spacing:.01em;
+  animation:border-shift 7.5s var(--ease) infinite;
+}
+
+/* =========================================================
+   PROSE — Paragraph stacking and readable rhythm
+   ========================================================= */
+.prose-stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  color:var(--ink-1);
+  line-height:1.75;
+}
+.prose-stack p{margin:0;}
+
+/* =========================================================
+   JOIN — Page fixes (join hero badge sizing)
+   ========================================================= */
+body[data-page="join"] #joinBadges > span{
+  font-family:var(--font-body);
+  font-size:14px;
+  letter-spacing:.01em;
+  text-transform:none;
+  line-height:1.2;
+  padding:6px 10px;
+}
+
+body[data-page="join"] #joinBadges > span > a{
+  display:inline;
+  line-height:inherit;
+}
+
+/* =========================================================
+   JOIN — Stack rhythm (consistent spacing between blocks)
+   ========================================================= */
+body[data-page="join"] #joinStepsIntro,
+body[data-page="join"] #joinQuickBody,
+body[data-page="join"] #joinCultureIntro,
+body[data-page="join"] #joinCultureCards,
+body[data-page="join"] #joinNotes{
+  gap:14px;
+}
+
+/* =========================================================
+   JOIN — Culture intro-to-cards spacing (fix first gap)
+   ========================================================= */
+body[data-page="join"] #joinCultureCards{
+  margin-top:14px;
+}
+
+/* =========================================================
+   JOIN — Culture cards (equal title/body spacing)
+   ========================================================= */
+body[data-page="join"] #joinCultureCards > div{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+body[data-page="join"] #joinCultureCards > div > .section-title{
+  margin:0;
+}
+
+body[data-page="join"] #joinCultureCards > div > p{
+  margin:0;
+}
+
+/* =========================================================
+   JOIN — Steps list (match title/body rhythm)
+   ========================================================= */
+body[data-page="join"] #joinStepsList p{
+  margin:10px 0 0;
+}
+
+/* =========================================================
+   LISTS — Bullet-dot list layout used across pages
+   ========================================================= */
+.list-stack{
+  list-style:none;
+  padding:0;
+  margin:14px 0 0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  color:var(--ink-1);
+}
+.list-stack li{
+  position:relative;
+  padding-left:14px;
+}
+.list-stack li::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:.65em;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.55);
+}
+
+/* =========================================================
+   SPOTLIGHT — Shared hero intro width
+   ========================================================= */
+.hero-intro{max-width:72ch;}
+
+/* =========================================================
+   HOME — Guild seal (glass container)
+   ========================================================= */
+body[data-page="home"] .home-guild-seal{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+
+  padding:22px;
+  border-radius:26px;
+  border:1px solid var(--line);
+  background:var(--bg-1);
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+}
+
+body[data-page="home"] .home-guild-seal img{
+  width:96px;
+  height:auto;
+  object-fit:contain;
+  display:block;
+}
+
+body[data-page="home"] .home-seal-verse{
+  margin:0;
+  text-align:center;
+  color:var(--ink-1);
+  font-size:14px;
+  line-height:1.6;
+  max-width:32ch;
+}
+
+body[data-page="home"] .home-hero-row{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  align-items:stretch;
+  gap:18px;
+}
+
+body[data-page="home"] .home-seal-title{
+  margin:0;
+  font-family:var(--font-display);
+  font: size 44px;
+  letter-spacing:.08em;
+  text-transform:none;
+  color:var(--ink-0);
+  text-align:center;
+}
+
+@media (max-width: 760px){
+  body[data-page="home"] .home-hero-row{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   HOME — Spotlight (image clickable; text non-clickable)
+   ========================================================= */
+a.home-spotlight{
+  pointer-events:none;
+  text-decoration:none;
+  color:inherit;
+  cursor:default;
+}
+
+a.home-spotlight img{
+  pointer-events:auto;
+  cursor:pointer;
+}
+
+a.home-spotlight *{
+  text-decoration:none;
+}
+
+/* =========================================================
+   HOME — Bulletins (grid spacing and rhythm)
+   ========================================================= */
+.home-bulletins{
+  display:grid;
+  gap:clamp(12px, 2.2vw, 18px);
+  margin-top:clamp(12px, 2.2vw, 18px);
+}
+
+.home-featured{
+  margin-top:clamp(12px, 2.2vw, 18px);
+  margin-bottom:clamp(12px, 2.2vw, 18px);
+}
+
+.home-bulletin{
+  min-height:110px;
+}
+
+@media (min-width:900px){
+  .home-bulletins{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+.home-featured__meta,
+.home-bulletin__body{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.home-featured__plate{
+  margin-top:8px;
+}
+
+.home-featured__plate .home-title,
+.home-featured__plate .home-summary{
+  margin:0;
+}
+
+.home-featured__plate .home-summary{
+  margin-top:8px;
+}
+
+.home-bulletin__body{
+  padding:clamp(14px, 2.2vw, 18px);
+}
+
+.home-bulletin__date,
+.home-bulletin__title,
+.home-bulletin__summary{
+  margin:0;
+}
+
+/* =========================================================
+   HOME — Bulletins (image clickable; text non-clickable)
+   ========================================================= */
+a.home-featured,
+a.home-bulletin{
+  pointer-events:none;
+  text-decoration:none;
+  color:inherit;
+  cursor:default;
+}
+
+a.home-featured img,
+a.home-bulletin img{
+  pointer-events:auto;
+  cursor:pointer;
+}
+
+a.home-featured *,
+a.home-bulletin *{
+  text-decoration:none;
+}
+
+/* =========================================================
+   HOME — Bulletins (title typography)
+   ========================================================= */
+.home-title,
+.home-bulletin__title{
+  font-family:var(--font-body);
+  font-size:14px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  line-height:1.35;
+  color:var(--ink-1);
+}
+
+@media (max-width:640px){
+  .home-featured .home-title,
+  .home-bulletin__title{
+    font-size:24px;
+  }
+}
+
+/* =========================================================
+   HOME — Bulletins (pill labels; visual only)
+   ========================================================= */
+.home-pill,
+.home-bulletin__tag{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:var(--pill-border,2px) solid var(--card-line, rgba(255,255,255,.12));
+  background:rgba(0,0,0,.22);
+  color:var(--ink-1);
+  animation:border-shift 7.5s var(--ease) infinite;
+  width:fit-content;
+
+  font-family:var(--font-display);
+  font-size:24px;
+  letter-spacing:.04em;
+  text-transform:none;
+
+  pointer-events:none;
+}
+
+/* =========================================================
+   HOME — Doors (grid spacing)
+   ========================================================= */
+.home-doors{
+  display:grid;
+  gap:clamp(12px, 2.2vw, 18px);
+  margin-top:clamp(12px, 2.2vw, 18px);
+}
+
+@media (min-width:900px){
+  .home-doors{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   HOME — Doors (image clickable; text non-clickable)
+   ========================================================= */
+.home-doors a{
+  pointer-events:none;
+  text-decoration:none;
+  color:inherit;
+  cursor:default;
+}
+
+.home-doors a img{
+  pointer-events:auto;
+  cursor:pointer;
+}
+
+.home-doors a *{
+  text-decoration:none;
+}
+
+/* =========================================================
+   HOME — Doors (plate rhythm and typography)
+   ========================================================= */
+.home-door__plate{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.home-door__plate{
+  padding:clamp(14px, 2.2vw, 18px);
+}
+
+.home-door__title,
+.home-door__subtitle{
+  margin:0;
+}
+
+.home-door__title{
+  font-family:var(--font-body);
+  font-size:14px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  line-height:1.35;
+  color:var(--ink-1);
+}
+
+@media (max-width:640px){
+  .home-door__title{
+    font-size:24px;
+  }
+}
+
+/* =========================================================
+   HOME — Doors (label pill; visual only)
+   ========================================================= */
+.home-door__label{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:var(--pill-border,2px) solid var(--card-line, rgba(255,255,255,.12));
+  background:rgba(0,0,0,.22);
+  color:var(--ink-1);
+  animation:border-shift 7.5s var(--ease) infinite;
+  width:fit-content;
+
+  font-family:var(--font-display);
+  font-size:24px;
+  letter-spacing:.04em;
+  text-transform:none;
+
+  pointer-events:none;
+  }
+
+/* =========================================================
+   TWILLS — Profile avatar presentation (page-scoped)
+   ========================================================= */
+  body[data-page="twills"] .profile-avatar{
+  margin-top:12px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+}
+
+/* =========================================================
+   LEADERS — Council intro container (background plate)
+   ========================================================= */
+body[data-page="leaders"] .leaders-council-intro{
+  margin-top:24px;
+  padding:14px 18px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:var(--bg-2);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+}
+
+body[data-page="leaders"] .leaders-council-intro .section-title{
+  margin:0 0 8px;
+}
+
+body[data-page="leaders"] .leaders-council-intro .muted{
+  margin:0;
+}
+
+/* =========================================================
+   GALLERY — Thumbnails: show image only
+   ========================================================= */
+
+/* 1) Kill any tile wrapper background/padding/border and clip */
+#galleryGrid > *,
+#galleryGrid > * > *{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+#galleryGrid a,
+#galleryGrid button,
+#galleryGrid figure,
+#galleryGrid .tile,
+#galleryGrid .thumb,
+#galleryGrid .card{
+  display: block;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+
+  border-radius: 18px;
+  overflow: hidden; /* critical: clips square image corners */
+  line-height: 0;   /* removes tiny inline gaps that can reveal bg */
+}
+
+/* 2) Make the image fill the rounded shape */
+#galleryGrid img{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* crops to fill */
+  border-radius: 18px;   /* rounds the image itself */
+}
+
+/* If your JS sets fixed aspect boxes, this helps prevent “short image in tall box” */
+#galleryGrid a img,
+#galleryGrid figure img,
+#galleryGrid button img{
+  height: 100%;
+}
+
+/* =========================================================
+   LIGHTBOX / MODALS — Clean stacking + click-off-to-close
+   ========================================================= */
+
+/* Show/hide (gallery) */
+#lightbox[aria-hidden="false"]{display:block;}
+#lightbox.hidden{display:none;}
+
+/* Show/hide (home) */
+#modalRoot[aria-hidden="false"]{display:block;}
+#modalRoot.hidden{display:none;}
+
+/* Base overlay for both */
+#lightbox,
+#modalRoot{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+}
+
+/* Backdrops: must be clickable and above the page */
+#lightboxBackdrop,
+#modalBackdrop,
+.lightbox-backdrop{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  cursor:zoom-out;
+  background:rgba(0,0,0,.55);
+}
+
+/* Shell sits above backdrop, but should NOT block backdrop clicks */
+#lightbox .lightbox-shell,
+#modalRoot .lightbox-shell{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  place-items:center;
+  pointer-events:none; /* key: allow clicks to pass through to backdrop */
+}
+
+/* The actual card + close button must still be clickable */
+#lightbox .lightbox-card,
+#lightbox .lightbox-close,
+#modalRoot .lightbox-card,
+#modalRoot .lightbox-close,
+#lightbox #lightboxClose,
+#modalRoot #modalClose{
+  pointer-events:auto;
+}
+
+/* Prevent dimming of the image itself (gallery + home) */
+#lightboxImg,
+#modalImage,
+#lightbox .lightbox-img,
+#modalRoot .lightbox-img,
+#lightbox img,
+#modalRoot img{
+  opacity:1 !important;
+  filter:none !important;
+  mix-blend-mode:normal !important;
+  max-width:100%;
+  height:auto;
+}
+
+/* =========================================================
+   HEADER — Sticky nav, dropdown menu, responsive behavior
+   ========================================================= */
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:200;
+  padding:14px 16px;
+  background:var(--bg-0);
+  border-bottom:1px solid var(--line);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  transition:background .25s var(--ease);
+}
+.site-header[data-state="scrolled"]{background:rgba(10,12,14,.90);}
+
+.header-wrap{
+  max-width:var(--container);
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  position:relative;
+  z-index:201;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:var(--ink-0);
+  position:relative;
+  z-index:202;
+}
+.brand-mark{display:block;}
+.brand-emblem{
+  width:var(--emblem);
+  height:var(--emblem);
+  object-fit:contain;
+}
+.brand-text{display:flex; flex-direction:column; line-height:1.05;}
+.brand-name{font-family:var(--font-display); font-size:28px; letter-spacing:.02em;}
+.brand-sub{margin-top:2px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);}
+
+.nav{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex:1;
+  justify-content:center;
+  flex-wrap:wrap;
+  position:relative;
+  z-index:202;
+}
+
+.nav-link{
+  color:var(--ink-1);
+  text-decoration:none;
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid transparent;
+  background:transparent;
+  cursor:pointer;
+  transition:background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);
+}
+.nav-link:hover{
+  color:var(--ink-0);
+  background:rgba(10,12,14,.40);
+  border-color:rgba(255,255,255,.12);
+  transform:translateY(-.5px);
+}
+.nav-link[aria-current="page"]{
+  color:var(--ink-0);
+  border-color:rgba(255,255,255,.14);
+  background:linear-gradient(90deg, rgba(31,122,99,.24), rgba(200,162,75,.18));
+}
+
+.nav-group{position:relative; display:inline-flex; align-items:center;}
+.nav-trigger{display:inline-flex; align-items:center; gap:8px; appearance:none; -webkit-appearance:none;}
+.nav-caret{font-size:12px; opacity:.8; transform:translateY(1px);}
+
+.nav-menu{
+  position:absolute;
+  left:0;
+  top:calc(100% + var(--dd-gap));
+  min-width:var(--dd-min);
+  padding:10px;
+  border-radius:var(--dd-radius);
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.94);
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  z-index:260;
+}
+
+.nav-item{
+  display:block;
+  padding:10px 12px;
+  border-radius:12px;
+  color:var(--ink-0);
+  text-decoration:none;
+  font-size:13px;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.nav-item:hover{
+  background:rgba(10,12,14,.55);
+  border-color:rgba(255,255,255,.12);
+}
+
+.utils{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  position:relative;
+  z-index:202;
+}
+
+.cta{
+  position:relative;
+  text-decoration:none;
+  color:var(--ink-0);
+  font-weight:600;
+  font-size:13px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(90deg, rgba(31,122,99,.30), rgba(200,162,75,.22));
+  overflow:hidden;
+  transition:transform .2s var(--ease), filter .2s var(--ease);
+}
+.cta:hover{transform:translateY(-.5px); filter:brightness(1.06);}
+.cta-glint{
+  position:absolute;
+  inset:-40%;
+  transform:translateX(-60%) rotate(15deg);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  animation:glint 5.5s var(--ease) infinite;
+  pointer-events:none;
+}
+
+.burger{
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.58);
+  cursor:pointer;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  transition:transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+}
+.burger:hover{
+  transform:translateY(-.5px);
+  background:rgba(10,12,14,.70);
+  border-color:rgba(255,255,255,.14);
+}
+.burger-lines{width:18px; height:12px; position:relative;}
+.burger-lines::before,
+.burger-lines::after{
+  content:"";
+  position:absolute;
+  left:0;
+  width:18px;
+  height:2px;
+  background:var(--ink-0);
+  border-radius:999px;
+}
+.burger-lines::before{top:0;}
+.burger-lines::after{bottom:0;}
+
+@media (max-width:980px){
+  .nav{display:none;}
+  .burger{display:inline-flex;}
+}
+
+/* =========================================================
+   MOBILE — Slide-in menu shell, layout, and scrolling
+   ========================================================= */
+
+.mobile-shell{
+  position:fixed;
+  inset:0;
+  z-index:400;
+  display:grid;
+  pointer-events:none;
+}
+.mobile-shell[hidden]{display:none!important;}
+.mobile-shell[data-open="true"]{pointer-events:auto;}
+
+/* MOBILE — Background scrim */
+.mobile-scrim{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  opacity:0;
+  transition:opacity .18s var(--ease);
+  pointer-events:none;
+}
+.mobile-shell[data-open="true"] .mobile-scrim{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* MOBILE — Slide-in sheet container */
+.mobile-sheet{
+  position:fixed;
+  right:0;
+  top:0;
+  height:100dvh;
+  width:min(360px,92vw);
+  background:rgba(10,12,14,.94);
+  border-left:1px solid var(--line);
+  box-shadow:var(--shadow);
+  transform:translateX(12px);
+  opacity:0;
+  transition:transform .18s var(--ease), opacity .18s var(--ease);
+
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding:14px 14px 16px;
+}
+.mobile-shell[data-open="true"] .mobile-sheet{
+  transform:translateX(0);
+  opacity:1;
+}
+
+/* MOBILE — Top bar (fixed inside sheet) */
+.mobile-top{
+  position:sticky;
+  top:0;
+  z-index:1;
+  background:rgba(10,12,14,.94);
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line);
+}
+
+.brand--mobile .brand-emblem{
+  width:44px;
+  height:44px;
+}
+
+/* MOBILE — Icon buttons */
+.icon-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.58);
+  color:var(--ink-0);
+  cursor:pointer;
+  transition:transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+}
+.icon-btn:hover{
+  transform:translateY(-.5px);
+  background:rgba(10,12,14,.70);
+  border-color:rgba(255,255,255,.14);
+}
+
+/* MOBILE — Scrollable navigation area */
+.mobile-nav{
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+
+  padding-top:12px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.mobile-group-title{
+  font-size:12px;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  color:var(--ink-2);
+  margin:10px 2px 8px;
+}
+
+.mobile-link{
+  display:block;
+  text-decoration:none;
+  color:var(--ink-0);
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.66);
+}
+.mobile-link:hover{
+  background:rgba(10,12,14,.78);
+  border-color:rgba(255,255,255,.14);
+}
+
+/* =========================================================
+   FOOTER — Footer layout, links, and responsive columns
+   ========================================================= */
+.site-footer{
+  position:relative;
+  z-index:10;
+  margin-top:64px;
+  padding:44px 16px 34px;
+  border-top:1px solid var(--line);
+  background:rgba(10,12,14,.88);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+}
+
+.footer-wrap{max-width:var(--container); margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:1.35fr .75fr;gap:16px;align-items:start;}
+
+.footer-brand{display:flex; gap:14px; align-items:flex-start; min-width:0;}
+.footer-brand-link{display:flex; align-items:flex-start; text-decoration:none; gap:14px; min-width:0;}
+.footer-emblem{
+  width:var(--emblem);
+  height:var(--emblem);
+  object-fit:contain;
+  flex:0 0 auto;
+}
+
+.footer-brand-text{min-width:0;}
+.footer-title{font-family:var(--font-display); font-size:30px; letter-spacing:.02em; color:var(--ink-0); line-height:1;}
+.footer-sub{margin-top:3px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2);}
+.footer-desc{
+  margin-top:12px;
+  font-size:14px;
+  line-height:1.55;
+  color:var(--ink-1);
+  max-width:70ch;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+.footer-actions{display:flex; gap:12px; align-items:center; margin-top:14px; flex-wrap:wrap;}
+.footer-cta{
+  position:relative;
+  text-decoration:none;
+  color:var(--ink-0);
+  font-weight:700;
+  font-size:13px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(90deg, rgba(31,122,99,.28), rgba(200,162,75,.20));
+  overflow:hidden;
+  transition:transform .2s var(--ease), filter .2s var(--ease);
+}
+.footer-cta:hover{transform:translateY(-.5px); filter:brightness(1.06);}
+.footer-cta-glint{
+  position:absolute;
+  inset:-40%;
+  transform:translateX(-60%) rotate(15deg);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+  animation:glint 5.5s var(--ease) infinite;
+  pointer-events:none;
+}
+.footer-link{
+  color:var(--ink-1);
+  text-decoration:none;
+  font-size:13px;
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.60);
+}
+.footer-link:hover{background:rgba(10,12,14,.78); color:var(--ink-0);}
+
+.footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:8px; min-width:0;}
+.footer-col{min-width:0;}
+.footer-col-title{font-size:12px; letter-spacing:.10em; text-transform:uppercase; color:var(--ink-2); margin-bottom:10px;}
+.footer-nav{
+  display:block;
+  color:var(--ink-1);
+  text-decoration:none;
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:14px;
+  border:1px solid transparent;
+}
+.footer-nav:hover{background:rgba(10,12,14,.72); border-color:var(--line); color:var(--ink-0);}
+
+.footer-bottom{
+  margin-top:22px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.footer-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--ink-2);
+  font-size:12px;
+  letter-spacing:.02em;
+  min-width:0;
+}
+.footer-meta .dot{flex:0 0 auto;}
+
+@media (max-width:980px){
+  .footer-top{grid-template-columns:1fr;}
+  .footer-cols{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
+@media (max-width:560px){
+  /* Prevent overlap: let the brand area stack and wrap safely */
+  .footer-brand{flex-direction:column; align-items:stretch; gap:12px;}
+  .footer-brand-link{gap:12px;}
+  .footer-brand-text{min-width:0;}
+
+  /* Keep Guild / Culture / Updates horizontal on mobile via swipe row */
+  .footer-cols{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    padding-bottom:6px;
+  }
+  .footer-col{
+    flex:0 0 auto;
+    min-width:160px;
+  }
+
+  /* Bottom line stacks cleanly */
+  .footer-bottom{flex-direction:column; align-items:flex-start;}
+}
+
+/* =========================================================
+   MOTION — Glint animation used on CTA buttons
+   ========================================================= */
+@keyframes glint{
+  0%{transform:translateX(-70%) rotate(15deg);}
+  55%{transform:translateX(120%) rotate(15deg);}
+  100%{transform:translateX(120%) rotate(15deg);}
+}

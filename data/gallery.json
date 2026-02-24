@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "title": "Guild Album",
+    "description": "A shared album of guild moments.",
+    "updated": "2026-02"
+  },
+  "albums": [
+    {
+      "id": "general",
+      "label": "Guild Moments",
+      "items": [
+        {
+          "id": "shot-01",
+          "src": "./assets/img/gallery/shot-01.webp",
+          "alt": "Mōchirīī gathering",
+          "caption": "Mōchirīī gathering after a long night of travel and training.",
+          "tags": ["community", "gathering"]
+        },
+        {
+          "id": "shot-02",
+          "src": "./assets/img/gallery/shot-02.webp",
+          "alt": "Progression run",
+          "caption": "Progression run through contested territory.",
+          "tags": ["progression", "pve"]
+        },
+        {
+          "id": "shot-03",
+          "src": "./assets/img/gallery/shot-03.webp",
+          "alt": "Scenic landmark",
+          "caption": "A quiet landmark discovered during open-world wandering.",
+          "tags": ["scenery", "exploration"]
+        },
+        {
+          "id": "shot-04",
+          "src": "./assets/img/gallery/shot-04.webp",
+          "alt": "Duel night",
+          "caption": "Friendly duels held after scheduled guild activities.",
+          "tags": ["pvp", "training"]
+        },
+        {
+          "id": "shot-05",
+          "src": "./assets/img/gallery/shot-05.webp",
+          "alt": "Evening training session",
+          "caption": "Evening training session under lantern light.",
+          "tags": ["training", "atmosphere"]
+        },
+        {
+          "id": "shot-06",
+          "src": "./assets/img/gallery/shot-06.webp",
+          "alt": "Mountain overlook",
+          "caption": "A high overlook reached after a long climb.",
+          "tags": ["scenery", "travel"]
+        },
+        {
+          "id": "shot-07",
+          "src": "./assets/img/gallery/shot-07.webp",
+          "alt": "Guild formation",
+          "caption": "Guild formation before moving into hostile ground.",
+          "tags": ["coordination", "strategy"]
+        },
+        {
+          "id": "shot-08",
+          "src": "./assets/img/gallery/shot-08.webp",
+          "alt": "Marketplace pause",
+          "caption": "A pause in the marketplace between objectives.",
+          "tags": ["slice-of-life", "social"]
+        },
+        {
+          "id": "shot-09",
+          "src": "./assets/img/gallery/shot-09.webp",
+          "alt": "River crossing",
+          "caption": "Crossing the river as a group during open exploration.",
+          "tags": ["travel", "group"]
+        },
+        {
+          "id": "shot-10",
+          "src": "./assets/img/gallery/shot-10.webp",
+          "alt": "Night skyline",
+          "caption": "City skyline observed during a night cycle.",
+          "tags": ["scenery", "night"]
+        },
+        {
+          "id": "shot-11",
+          "src": "./assets/img/gallery/shot-11.webp",
+          "alt": "Courtyard gathering",
+          "caption": "Quiet gathering in a courtyard after events concluded.",
+          "tags": ["community", "rest"]
+        },
+        {
+          "id": "shot-12",
+          "src": "./assets/img/gallery/shot-12.webp",
+          "alt": "Forest path",
+          "caption": "Forest paths taken during casual roaming.",
+          "tags": ["exploration", "nature"]
+        },
+        {
+          "id": "shot-13",
+          "src": "./assets/img/gallery/shot-13.webp",
+          "alt": "Distant horizon",
+          "caption": "Watching the horizon while waiting for others to arrive.",
+          "tags": ["atmosphere", "pause"]
+        },
+        {
+          "id": "shot-14",
+          "src": "./assets/img/gallery/shot-14.webp",
+          "alt": "Training circle",
+          "caption": "Training circle focused on fundamentals.",
+          "tags": ["training", "discipline"]
+        },
+        {
+          "id": "shot-15",
+          "src": "./assets/img/gallery/shot-15.webp",
+          "alt": "Festival lights",
+          "caption": "Festival lights encountered during seasonal events.",
+          "tags": ["festival", "culture"]
+        },
+        {
+          "id": "shot-16",
+          "src": "./assets/img/gallery/shot-16.webp",
+          "alt": "Bridge crossing",
+          "caption": "Crossing a stone bridge at dawn.",
+          "tags": ["travel", "morning"]
+        },
+        {
+          "id": "shot-17",
+          "src": "./assets/img/gallery/shot-17.webp",
+          "alt": "Group rest",
+          "caption": "Resting together after extended travel.",
+          "tags": ["community", "rest"]
+        },
+        {
+          "id": "shot-18",
+          "src": "./assets/img/gallery/shot-18.webp",
+          "alt": "Rainfall moment",
+          "caption": "A sudden rainfall during open exploration.",
+          "tags": ["weather", "atmosphere"]
+        },
+        {
+          "id": "shot-19",
+          "src": "./assets/img/gallery/shot-19.webp",
+          "alt": "Campfire pause",
+          "caption": "Campfire pause before logging out for the night.",
+          "tags": ["camp", "quiet"]
+        },
+        {
+          "id": "shot-20",
+          "src": "./assets/img/gallery/shot-20.webp",
+          "alt": "Final lookout",
+          "caption": "Final lookout before returning to town.",
+          "tags": ["closure", "journey"]
+        },
+        {
+          "id": "shot-21",
+          "src": "./assets/img/gallery/shot-21.webp",
+          "alt": "Breezey day",
+          "caption": "Sunset evening",
+          "tags": ["deep", "thought"]
+        }
+      ]
+    }
+  ]
+}

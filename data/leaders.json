@@ -1,0 +1,108 @@
+{
+  "hero": {
+    "kicker": "Leaders",
+    "title": "Leaders Hall",
+    "image": "./assets/img/leaders/hero.webp",
+    "introBody": [
+      "Leadership in Mōchirīī is based around 6 core principles. Each one with their own responsibilities, but all working together to keep the guild organized, fair & enjoyable for everyone."
+    ],
+    "pills": [
+      "Start with your Hall Leader",
+      "Fast, fair resolution",
+      "Escalation stays clear"
+    ]
+  },
+
+  "panel": {
+    "title": "Guild Leadership",
+    "badge": "Contact & Profiles",
+    "image": "./assets/img/leaders/panel.webp",
+    "body": [
+            "Leaders may keep a short profile page for themselves for introductions, preferred roles & the best way to reach them if they choose to do so. Keep it in-game & keep it safe. No personal info, please."
+    ],
+    "note": "Members start with their hall leader for most questions. Requests that affect multiple halls move to the vice leader. Matters that shape policy, long-term direction, or unresolved outcomes move to the guild leader."
+  },
+
+  "council": {
+    "title": "The Council",
+    "description": "These are the contact points for support, planning & keeping the guild's community consistent & fair."
+  },
+
+  "leaders": [
+    {
+      "role": "Leader",
+      "name": "Twills",
+      "availability": "Primary point of direction",
+      "image": "./assets/img/leaders/leader.webp",
+      "alt": "Guild Leader portrait",
+      "summary": "Oversees vision, culture & long-term direction for Mōchirīī.",
+      "profileHref": "./twills.html",
+      "profileLabel": "Open profile"
+    },
+    {
+      "role": "Vice Leader",
+      "name": "Vice Leader",
+      "availability": "Operations & coordination",
+      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "alt": "Vice Leader portrait",
+      "summary": "Keeps operations consistent, coordinates halls & resolves issues that need broader alignment."
+    },
+    {
+      "role": "Hall Leader",
+      "name": "Hall Leader",
+      "availability": "Hall & group oversight",
+      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "alt": "Hall Leader portrait",
+      "summary": "First contact for member support, event coordination & keeping the hall active & welcoming."
+    },
+    {
+      "role": "Dharmapala",
+      "name": "Isawisima",
+      "availability": "Community guidance",
+      "image": "./assets/img/leaders/dharmapala.webp",
+      "alt": "Dharmapala portrait",
+      "summary": "Protects fairness & tone, helps mediate conflict & keeps standards consistent across halls."
+    },
+    {
+      "role": "Lotus Warden",
+      "name": "Lotus Warden",
+      "availability": "Member support",
+      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "alt": "Lotus Warden portrait",
+      "summary": "Supports member well-being, guides new arrivals & helps keep morale alive during busy weeks."
+    },
+    {
+      "role": "Petal Keeper",
+      "name": "Petal Keeper",
+      "availability": "Culture & activity support",
+      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "alt": "Petal Keeper portrait",
+      "summary": "Keeps daily community spaces active, welcomes arrivals & helps members find their footing quickly."
+    }
+  ],
+
+  "responsibilities": {
+    "title": "Responsibilities",
+    "description": "Members receive clear direction, fair decisions & reliable support. Leadership maintains structure, protects culture & stays present & accountable. Members participate in good faith, communicate responsibly & contribute to the community's shared pace.",
+    "items": [
+      {
+        "title": "Direction & strategy",
+        "description": "Sets goals, priorities & long-term focus for the guild.",
+        "image": "./assets/img/leaders/responsibilities-01.webp",
+        "alt": "Direction & strategy visual panel"
+      },
+      {
+        "title": "Ops & coordination",
+        "description": "Organizes events, manages roles & keeps daily systems running smoothly.",
+        "image": "./assets/img/leaders/responsibilities-02.webp",
+        "alt": "Ops & coordination visual panel"
+      },
+      {
+        "title": "Culture & people",
+        "description": "Maintains standards, resolves conflicts & sustains morale & cohesion.",
+        "image": "./assets/img/leaders/responsibilities-03.webp",
+        "alt": "Culture & people visual panel"
+      }
+    ]
+  }
+}

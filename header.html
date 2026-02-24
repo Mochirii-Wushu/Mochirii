@@ -1,0 +1,163 @@
+<!-- header.html -->
+<header id="site-header" class="site-header" data-state="top">
+  <div class="header-wrap">
+    <a class="brand" href="./index.html" aria-label="Mōchirīī Home">
+      <span class="brand-mark" aria-hidden="true">
+        <img
+          class="brand-emblem"
+          src="./assets/img/brand/emblem.webp"
+          alt=""
+          width="56"
+          height="56"
+          loading="eager"
+          decoding="async"
+        />
+      </span>
+      <span class="brand-text">
+        <span class="brand-name">Mōchirīī</span>
+        <span class="brand-sub">Where Winds Meet Guild</span>
+      </span>
+    </a>
+
+    <nav class="nav" aria-label="Primary">
+      <div class="nav-group" data-dropdown data-open="false">
+        <button
+          class="nav-link nav-trigger"
+          type="button"
+          data-dropdown-btn
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="nav-menu-guild"
+        >
+          Guild <span class="nav-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="nav-menu" id="nav-menu-guild" role="menu" hidden data-dropdown-menu>
+          <a class="nav-item" role="menuitem" href="./index.html" data-nav="home">Home</a>
+          <a class="nav-item" role="menuitem" href="./spotlight.html" data-nav="spotlight">Spotlight</a>
+          <a class="nav-item" role="menuitem" href="./gallery.html" data-nav="gallery">Gallery</a>
+        </div>
+      </div>
+
+      <div class="nav-group" data-dropdown data-open="false">
+        <button
+          class="nav-link nav-trigger"
+          type="button"
+          data-dropdown-btn
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="nav-menu-culture"
+        >
+          Culture <span class="nav-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="nav-menu" id="nav-menu-culture" role="menu" hidden data-dropdown-menu>
+          <a class="nav-item" role="menuitem" href="./join.html" data-nav="join">Join</a>
+          <a class="nav-item" role="menuitem" href="./ranks.html" data-nav="ranks">Ranks</a>
+          <a class="nav-item" role="menuitem" href="./leaders.html" data-nav="leaders">Leaders</a>
+          <a class="nav-item" role="menuitem" href="./codex.html" data-nav="codex">Codex</a>
+          <a class="nav-item" role="menuitem" href="./spotify.html" data-nav="spotify">Playlists</a>
+        </div>
+      </div>
+
+      <div class="nav-group" data-dropdown data-open="false">
+        <button
+          class="nav-link nav-trigger"
+          type="button"
+          data-dropdown-btn
+          aria-haspopup="menu"
+          aria-expanded="false"
+          aria-controls="nav-menu-updates"
+        >
+          Updates <span class="nav-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="nav-menu" id="nav-menu-updates" role="menu" hidden data-dropdown-menu>
+          <a class="nav-item" role="menuitem" href="./announcements.html" data-nav="announcements">Announcements</a>
+          <a class="nav-item" role="menuitem" href="./events.html" data-nav="events">Events</a>
+          <a class="nav-item" role="menuitem" href="./raffles.html" data-nav="raffles">Raffles</a>
+        </div>
+      </div>
+
+      <a class="nav-link" href="./recruitment.html" data-nav="recruitment">Recruitment</a>
+    </nav>
+
+    <div class="utils">
+      <a
+        class="cta"
+        href="https://discord.com/invite/dPafqMwWPK"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Join Mōchirīī"
+      >
+        Join <span class="cta-glint" aria-hidden="true"></span>
+      </a>
+
+      <button
+        class="burger"
+        type="button"
+        id="menu-btn"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <span class="burger-lines" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mobile-shell" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+    <div class="mobile-scrim" data-close></div>
+    <div class="mobile-sheet" role="document">
+      <div class="mobile-top">
+        <a class="brand brand--mobile" href="./index.html" aria-label="Mōchirīī Home">
+          <span class="brand-mark" aria-hidden="true">
+            <img
+              class="brand-emblem"
+              src="./assets/img/brand/emblem.webp"
+              alt=""
+              width="44"
+              height="44"
+              decoding="async"
+            />
+          </span>
+          <span class="brand-text">
+            <span class="brand-name">Mōchirīī</span>
+            <span class="brand-sub">Where Winds Meet Guild</span>
+          </span>
+        </a>
+
+        <button class="icon-btn" type="button" data-close aria-label="Close menu">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
+
+      <nav class="mobile-nav" aria-label="Primary mobile">
+        <div class="mobile-group">
+          <div class="mobile-group-title">Guild</div>
+          <a class="mobile-link" href="./index.html">Home</a>
+          <a class="mobile-link" href="./spotlight.html">Spotlight</a>
+          <a class="mobile-link" href="./gallery.html">Gallery</a>
+        </div>
+
+        <div class="mobile-group">
+          <div class="mobile-group-title">Culture</div>
+          <a class="mobile-link" href="./join.html">Join</a>
+          <a class="mobile-link" href="./ranks.html">Ranks</a>
+          <a class="mobile-link" href="./leaders.html">Leaders</a>
+          <a class="mobile-link" href="./codex.html">Codex</a>
+          <a class="mobile-link" href="./spotify.html">Playlists</a>
+        </div>
+
+        <div class="mobile-group">
+          <div class="mobile-group-title">Updates</div>
+          <a class="mobile-link" href="./announcements.html">Announcements</a>
+          <a class="mobile-link" href="./events.html">Events</a>
+          <a class="mobile-link" href="./raffles.html">Raffles</a>
+        </div>
+
+        <div class="mobile-group">
+          <div class="mobile-group-title">Notes</div>
+          <a class="mobile-link" href="./recruitment.html">Recruitment</a>
+        </div>
+      </nav>
+    </div>
+  </div>
+</header>

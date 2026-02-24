@@ -1,0 +1,188 @@
+<!-- spotify.html — Playlists (markup only; page-specific mounts + placeholders) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mōchirīī Spotify playlists & listening room." />
+  <title>Mōchirīī • Playlists</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="preload" as="image" href="./assets/img/spotify/hero.webp" />
+
+  <!-- Page-only layout rules (kept local to avoid cross-page coupling) -->
+  <style>
+    .spotify-toolbar{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+    }
+    .spotify-search{
+      flex: 1 1 260px;
+      min-width: 220px;
+    }
+    .spotify-search input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.25);
+      color: inherit;
+      outline: none;
+    }
+    .spotify-chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .spotify-chip{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      cursor:pointer;
+      user-select:none;
+      font: 500 12px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      opacity:.92;
+    }
+    .spotify-chip[aria-pressed="true"]{
+      background: rgba(255,255,255,.10);
+      border-color: rgba(255,255,255,.22);
+      opacity:1;
+    }
+    .spotify-grid{
+      display:grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap:16px;
+      margin-top:16px;
+    }
+    .spotify-card{
+      grid-column: span 6;
+    }
+    .spotify-card__head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .spotify-card__title{
+      margin:0;
+      font: 700 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    .spotify-card__meta{
+      margin-top:6px;
+      opacity:.78;
+      font: 500 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+    .spotify-embed{
+      overflow:hidden;
+      border-radius:12px;
+    }
+    .spotify-embed iframe{
+      display:block;
+    }
+    .spotify-empty{
+      padding:14px;
+      border-radius:12px;
+      border:1px dashed rgba(255,255,255,.20);
+      opacity:.85;
+      margin-top:16px;
+    }
+    @media (max-width: 980px){
+      .spotify-card{ grid-column: span 12; }
+    }
+  </style>
+</head>
+
+<body data-page="spotify">
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Playlists hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="spotifyHeroImage"
+          src="./assets/img/spotify/hero.webp"
+          alt="Playlists banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+        <img
+          id="spotifyHeroAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro">
+        <p class="kicker">Listening room</p>
+        <h1 class="display-title">Playlists</h1>
+        <div class="prose-stack">
+          <p class="muted">
+            Spotify music for reading, exploring & late-night shenanigans.
+          </p>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+
+      <section class="glass-card glass-card--primary glass-pad" aria-label="Spotify playlists">
+        <h2 class="section-title">Collection</h2>
+        <p class="muted" id="spotifyIntro">Loading…</p>
+
+        <div class="spotify-toolbar" aria-label="Playlist tools">
+          <div class="spotify-search">
+            <label class="muted" for="spotifySearch" style="display:block; margin-bottom:6px;">Search</label>
+            <input id="spotifySearch" type="search" placeholder="Type a title, mood, or tag…" autocomplete="off" />
+          </div>
+
+          <div class="spotify-chips" id="spotifyChips" aria-label="Tag filters">
+            <!-- spotify.js -->
+          </div>
+        </div>
+
+        <div class="spotify-grid" id="spotifyGrid" aria-label="Playlist embeds">
+          <!-- spotify.js -->
+        </div>
+
+        <div class="spotify-empty" id="spotifyEmpty" hidden>
+          <p class="muted" style="margin:0;">No matches. Try clearing filters or using fewer keywords.</p>
+        </div>
+
+        <noscript>
+          <p class="muted" style="margin-top:12px;">
+            This page loads playlists from a JSON file. Enable JavaScript to view embeds.
+          </p>
+        </noscript>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./spotify.js" defer></script>
+</body>
+</html>

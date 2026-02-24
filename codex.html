@@ -1,0 +1,232 @@
+<!-- codex.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="The Mōchirīī Codex: values, etiquette, and guild rhythm for Where Winds Meet." />
+  <title>Mōchirīī • Codex</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="codex">
+  <!-- Header include -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Codex hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="codexHeroImage"
+          src="./assets/img/codex/hero.webp"
+          alt="The Codex banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+        <img id="codexAtmosphere" src="" alt="" class="page-hero__atmos" aria-hidden="true" decoding="async" />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
+        <p class="kicker" id="codexKicker">Codex</p>
+        <h1 class="display-title" id="codexHeading">The Codex</h1>
+
+        <div id="codexIntro" class="prose-stack" style="margin-top:12px;">
+          <p class="muted">Loading…</p>
+        </div>
+
+        <div class="badge-row" id="codexHeroPills" aria-label="Codex summary pills"></div>
+
+        <p id="codexError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </header>
+
+  <main class="page-main" id="main">
+    <div class="container">
+
+      <!-- Intro panel -->
+      <section>
+        <div class="grid-12 grid-gap">
+          <aside class="col-4">
+            <div class="glass-card glass-card--soft glass-pad">
+              <h2 class="section-title section-title--sm" id="introBadge">Values &amp; Rhythm</h2>
+              <img
+                id="introImage"
+                src="./assets/img/codex/values.webp"
+                alt="Codex artwork"
+                loading="lazy"
+                decoding="async"
+                style="margin-top:12px;"
+              />
+            </div>
+          </aside>
+
+          <section class="col-8">
+            <div class="glass-card glass-card--primary glass-pad">
+              <h2 class="section-title" id="introTitle">A living guide</h2>
+              <div id="introBody" class="prose-stack">
+                <p class="muted">Loading…</p>
+              </div>
+            </div>
+          </section>
+
+          <div class="col-divider" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- Tenets -->
+      <section style="margin-top:24px;">
+        <div class="grid-12 grid-gap">
+          <section class="col-12">
+            <div class="glass-card glass-card--primary glass-pad">
+              <h2 class="section-title" id="tenetsTitle">Tenets</h2>
+              <p class="muted" id="tenetsDesc"></p>
+
+              <div class="grid-12 grid-gap" style="margin-top:14px;">
+                <div class="col-6">
+                  <div class="glass-card glass-card--soft glass-pad">
+                    <img id="tenetsImage" src="./assets/img/codex/tenets.webp" alt="Tenets artwork" loading="lazy" decoding="async" />
+                    <h3 class="section-title section-title--sm" id="tenetsCapTitle" style="margin-top:12px;"></h3>
+                    <p class="muted" id="tenetsCapDesc"></p>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="glass-card glass-card--soft glass-pad">
+                    <div class="badge-row" id="tenetsPills" aria-label="Tenets categories"></div>
+                    <div id="tenetsGrid" class="grid-12 grid-gap" style="margin-top:12px;">
+                      <!-- codex.js fills cards -->
+                    </div>
+                    <p class="muted" id="tenetsNote" style="margin-top:12px;"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="col-divider" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- Etiquette -->
+      <section style="margin-top:24px;">
+        <div class="grid-12 grid-gap">
+          <aside class="col-4">
+            <div class="glass-card glass-card--soft glass-pad">
+              <h2 class="section-title section-title--sm" id="etiquetteBadge">How we treat each other</h2>
+              <img
+                id="etiquetteImage"
+                src="./assets/img/codex/etiquette.webp"
+                alt="Etiquette artwork"
+                loading="lazy"
+                decoding="async"
+                style="margin-top:12px;"
+              />
+            </div>
+          </aside>
+
+          <section class="col-8">
+            <div class="glass-card glass-card--primary glass-pad">
+              <h2 class="section-title" id="etiquetteTitle">Etiquette</h2>
+              <p class="muted" id="etiquetteDesc"></p>
+
+              <div id="etiquetteBlocks" class="grid-12 grid-gap" style="margin-top:14px;">
+                <!-- codex.js fills blocks -->
+              </div>
+
+              <p class="muted" id="etiquetteNote" style="margin-top:12px;"></p>
+            </div>
+          </section>
+
+          <div class="col-divider" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- Rhythm -->
+      <section style="margin-top:24px;">
+        <div class="grid-12 grid-gap">
+          <section class="col-12">
+            <div class="glass-card glass-card--primary glass-pad">
+              <h2 class="section-title" id="rhythmTitle">Rhythm</h2>
+              <p class="muted" id="rhythmDesc"></p>
+
+              <div class="grid-12 grid-gap" style="margin-top:14px;">
+                <div class="col-6">
+                  <div class="glass-card glass-card--soft glass-pad">
+                    <img id="rhythmImage" src="./assets/img/codex/rituals.webp" alt="Guild rhythm artwork" loading="lazy" decoding="async" />
+                    <h3 class="section-title section-title--sm" id="rhythmCapTitle" style="margin-top:12px;"></h3>
+                    <p class="muted" id="rhythmCapDesc"></p>
+                  </div>
+                </div>
+
+                <div class="col-6">
+                  <div class="glass-card glass-card--soft glass-pad">
+                    <div class="badge-row" id="rhythmPills" aria-label="Rhythm categories"></div>
+                    <div id="rhythmGrid" class="grid-12 grid-gap" style="margin-top:12px;">
+                      <!-- codex.js fills cards -->
+                    </div>
+                    <p class="muted" id="rhythmNote" style="margin-top:12px;"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="col-divider" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <!-- Recognition -->
+      <section style="margin-top:24px;">
+        <div class="glass-card glass-card--primary glass-pad">
+          <h2 class="section-title" id="recTitle">Recognition</h2>
+          <p class="muted" id="recDesc"></p>
+
+          <div class="grid-12 grid-gap" style="margin-top:14px;">
+            <aside class="col-4">
+              <div class="glass-card glass-card--soft glass-pad">
+                <img
+                  id="recImage"
+                  src="./assets/img/codex/recognition.webp"
+                  alt="Recognition artwork"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </aside>
+
+            <section class="col-8">
+              <div id="recGrid" class="grid-12 grid-gap">
+                <!-- codex.js fills cards -->
+              </div>
+
+              <div style="margin-top:16px;">
+                <a id="recLink" href="./ranks.html" class="footer-link">View Ranks</a>
+              </div>
+            </section>
+          </div>
+
+          <div style="margin-top:18px;">
+            <a href="./index.html" class="footer-link">Return to Home</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer include -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./codex.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mōchirīī gallery: guild screenshots and shared moments from Where Winds Meet." />
+  <title>Mōchirīī • Gallery</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="gallery">
+  <!-- Header -->
+  <div id="header"></div>
+
+  <!-- Background -->
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <!-- Hero -->
+  <header class="page-hero-shell" aria-label="Gallery hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          id="galleryHeroImage"
+          src="./assets/img/gallery/hero.webp"
+          alt="Gallery banner artwork"
+          class="page-hero__img"
+          loading="eager"
+          decoding="async"
+        />
+
+        <img
+          id="galleryAtmosphere"
+          src=""
+          alt=""
+          class="page-hero__atmos"
+          decoding="async"
+          aria-hidden="true"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
+        <p class="kicker">Gallery</p>
+
+     <h1 class="display-title" id="galleryTitle">Guild Album</h1>
+
+     <p class="lede" id="galleryDesc">
+       A shared album of guild moments.
+     </p>
+
+        <div class="badge-row" aria-label="Gallery tips">
+          <span>Tip: click any image to view it full size.</span>
+        </div>
+      </section>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page-main" id="main">
+    <div class="container">
+      <section class="glass-card glass-card--primary glass-pad center-stack">
+        <h2 class="section-title">Gallery</h2>
+
+        <p class="muted" id="galleryIntro">
+          Send screenshots to Discord gallery channel to be added to our site here.
+        </p>
+
+        <!-- Grid mount (gallery.js renders items here from gallery.json) -->
+        <div id="galleryGrid" class="gallery-grid" aria-live="polite">
+          <!-- populated by gallery.js -->
+        </div>
+
+        <p id="galleryError" class="sr-only" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Lightbox (gallery.js controls this) -->
+  <div
+    id="lightbox"
+    class="lightbox hidden"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Image viewer"
+  >
+    <div id="lightboxBackdrop" class="lightbox-backdrop" data-close></div>
+
+    <div class="lightbox-shell" role="document">
+      <button
+        id="lightboxClose"
+        class="lightbox-close"
+        type="button"
+        data-close
+        aria-label="Close viewer"
+      >
+        ✕
+      </button>
+
+      <figure class="lightbox-card">
+        <img
+          id="lightboxImg"
+          src=""
+          alt=""
+          class="lightbox-img"
+          decoding="async"
+        />
+        <figcaption
+          id="lightboxCaption"
+          class="lightbox-caption"
+        ></figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+
+  <script src="./site.js" defer></script>
+  <script src="./gallery.js" defer></script>
+</body>
+</html>
