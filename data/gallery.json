@@ -155,6 +155,569 @@
           "alt": "Breezey day",
           "caption": "Sunset evening",
           "tags": ["deep", "thought"]
+        },
+
+        /* shots 22–100 */
+
+        {
+          "id": "shot-22",
+          "src": "./assets/img/gallery/shot-22.webp",
+          "alt": "Morning departure",
+          "caption": "Preparing supplies before setting out at first light.",
+          "tags": ["travel", "morning"]
+        },
+        {
+          "id": "shot-23",
+          "src": "./assets/img/gallery/shot-23.webp",
+          "alt": "Quiet shoreline",
+          "caption": "Standing along the shoreline during a calm interval.",
+          "tags": ["scenery", "quiet"]
+        },
+        {
+          "id": "shot-24",
+          "src": "./assets/img/gallery/shot-24.webp",
+          "alt": "Roadside pause",
+          "caption": "Brief rest taken along a winding road.",
+          "tags": ["travel", "pause"]
+        },
+        {
+          "id": "shot-25",
+          "src": "./assets/img/gallery/shot-25.webp",
+          "alt": "Training reflections",
+          "caption": "Reviewing techniques after a focused session.",
+          "tags": ["training", "reflection"]
+        },
+        {
+          "id": "shot-26",
+          "src": "./assets/img/gallery/shot-26.webp",
+          "alt": "Open plains",
+          "caption": "Wide plains crossed during extended travel.",
+          "tags": ["scenery", "journey"]
+        },
+        {
+          "id": "shot-27",
+          "src": "./assets/img/gallery/shot-27.webp",
+          "alt": "Night watch",
+          "caption": "Keeping watch while others rest.",
+          "tags": ["night", "duty"]
+        },
+        {
+          "id": "shot-28",
+          "src": "./assets/img/gallery/shot-28.webp",
+          "alt": "Lantern path",
+          "caption": "Lantern-lit paths through a quiet district.",
+          "tags": ["atmosphere", "night"]
+        },
+        {
+          "id": "shot-29",
+          "src": "./assets/img/gallery/shot-29.webp",
+          "alt": "Group planning",
+          "caption": "Discussing routes and timing before departure.",
+          "tags": ["strategy", "coordination"]
+        },
+        {
+          "id": "shot-30",
+          "src": "./assets/img/gallery/shot-30.webp",
+          "alt": "Hilltop view",
+          "caption": "Observing the valley from a high hilltop.",
+          "tags": ["scenery", "overlook"]
+        },
+
+        {
+          "id": "shot-31",
+          "src": "./assets/img/gallery/shot-31.webp",
+          "alt": "Shared meal",
+          "caption": "Sharing food between activities.",
+          "tags": ["community", "rest"]
+        },
+        {
+          "id": "shot-32",
+          "src": "./assets/img/gallery/shot-32.webp",
+          "alt": "Quiet street",
+          "caption": "Walking through a town during off hours.",
+          "tags": ["slice-of-life", "quiet"]
+        },
+        {
+          "id": "shot-33",
+          "src": "./assets/img/gallery/shot-33.webp",
+          "alt": "Riverbank rest",
+          "caption": "Pausing along the riverbank to regroup.",
+          "tags": ["nature", "pause"]
+        },
+        {
+          "id": "shot-34",
+          "src": "./assets/img/gallery/shot-34.webp",
+          "alt": "Weapon practice",
+          "caption": "Practicing forms in a cleared space.",
+          "tags": ["training", "discipline"]
+        },
+        {
+          "id": "shot-35",
+          "src": "./assets/img/gallery/shot-35.webp",
+          "alt": "Evening glow",
+          "caption": "Light fading as the evening settles.",
+          "tags": ["atmosphere", "evening"]
+        },
+        {
+          "id": "shot-36",
+          "src": "./assets/img/gallery/shot-36.webp",
+          "alt": "Mountain path",
+          "caption": "Navigating narrow paths through higher ground.",
+          "tags": ["travel", "terrain"]
+        },
+        {
+          "id": "shot-37",
+          "src": "./assets/img/gallery/shot-37.webp",
+          "alt": "Quiet exchange",
+          "caption": "Brief conversations before moving on.",
+          "tags": ["social", "moment"]
+        },
+        {
+          "id": "shot-38",
+          "src": "./assets/img/gallery/shot-38.webp",
+          "alt": "Weather shift",
+          "caption": "Clouds gathering ahead of a change in weather.",
+          "tags": ["weather", "atmosphere"]
+        },
+        {
+          "id": "shot-39",
+          "src": "./assets/img/gallery/shot-39.webp",
+          "alt": "Camp breakdown",
+          "caption": "Packing up camp at dawn.",
+          "tags": ["camp", "morning"]
+        },
+        {
+          "id": "shot-40",
+          "src": "./assets/img/gallery/shot-40.webp",
+          "alt": "Town approach",
+          "caption": "Approaching town after a long route.",
+          "tags": ["travel", "arrival"]
+        },
+
+        {
+          "id": "shot-41",
+          "src": "./assets/img/gallery/shot-41.webp",
+          "alt": "Courtyard rest",
+          "caption": "Sitting quietly between activities.",
+          "tags": ["rest", "community"]
+        },
+        {
+          "id": "shot-42",
+          "src": "./assets/img/gallery/shot-42.webp",
+          "alt": "Practice ring",
+          "caption": "Rotating partners during training drills.",
+          "tags": ["training", "coordination"]
+        },
+        {
+          "id": "shot-43",
+          "src": "./assets/img/gallery/shot-43.webp",
+          "alt": "Forest clearing",
+          "caption": "Clearing reached during off-path travel.",
+          "tags": ["exploration", "nature"]
+        },
+        {
+          "id": "shot-44",
+          "src": "./assets/img/gallery/shot-44.webp",
+          "alt": "Distant lights",
+          "caption": "Lights visible far beyond the road.",
+          "tags": ["night", "scenery"]
+        },
+        {
+          "id": "shot-45",
+          "src": "./assets/img/gallery/shot-45.webp",
+          "alt": "Group alignment",
+          "caption": "Final alignment before moving out.",
+          "tags": ["coordination", "focus"]
+        },
+        {
+          "id": "shot-46",
+          "src": "./assets/img/gallery/shot-46.webp",
+          "alt": "Quiet climb",
+          "caption": "Ascending in silence along a steep route.",
+          "tags": ["travel", "effort"]
+        },
+        {
+          "id": "shot-47",
+          "src": "./assets/img/gallery/shot-47.webp",
+          "alt": "Shared laughter",
+          "caption": "Moments of laughter between objectives.",
+          "tags": ["community", "social"]
+        },
+        {
+          "id": "shot-48",
+          "src": "./assets/img/gallery/shot-48.webp",
+          "alt": "Weathered road",
+          "caption": "Following a road worn smooth by time.",
+          "tags": ["journey", "history"]
+        },
+        {
+          "id": "shot-49",
+          "src": "./assets/img/gallery/shot-49.webp",
+          "alt": "Sun break",
+          "caption": "Sun breaking through cloud cover.",
+          "tags": ["weather", "light"]
+        },
+        {
+          "id": "shot-50",
+          "src": "./assets/img/gallery/shot-50.webp",
+          "alt": "Midday rest",
+          "caption": "Stopping briefly during midday travel.",
+          "tags": ["rest", "travel"]
+        },
+
+        {
+          "id": "shot-51",
+          "src": "./assets/img/gallery/shot-51.webp",
+          "alt": "Silent watch",
+          "caption": "Maintaining awareness while others move ahead.",
+          "tags": ["focus", "duty"]
+        },
+        {
+          "id": "shot-52",
+          "src": "./assets/img/gallery/shot-52.webp",
+          "alt": "Open gate",
+          "caption": "Passing through an open gate into new ground.",
+          "tags": ["transition", "travel"]
+        },
+        {
+          "id": "shot-53",
+          "src": "./assets/img/gallery/shot-53.webp",
+          "alt": "Riverside trail",
+          "caption": "Following a narrow trail beside the river.",
+          "tags": ["nature", "travel"]
+        },
+        {
+          "id": "shot-54",
+          "src": "./assets/img/gallery/shot-54.webp",
+          "alt": "Evening regroup",
+          "caption": "Regrouping as daylight fades.",
+          "tags": ["coordination", "evening"]
+        },
+        {
+          "id": "shot-55",
+          "src": "./assets/img/gallery/shot-55.webp",
+          "alt": "Quiet preparation",
+          "caption": "Preparing equipment before the next stage.",
+          "tags": ["focus", "planning"]
+        },
+        {
+          "id": "shot-56",
+          "src": "./assets/img/gallery/shot-56.webp",
+          "alt": "Village edge",
+          "caption": "Standing at the edge of a small village.",
+          "tags": ["slice-of-life", "arrival"]
+        },
+        {
+          "id": "shot-57",
+          "src": "./assets/img/gallery/shot-57.webp",
+          "alt": "Nightfall",
+          "caption": "Night settling across the landscape.",
+          "tags": ["night", "atmosphere"]
+        },
+        {
+          "id": "shot-58",
+          "src": "./assets/img/gallery/shot-58.webp",
+          "alt": "Torchlight",
+          "caption": "Moving forward guided by torchlight.",
+          "tags": ["night", "travel"]
+        },
+        {
+          "id": "shot-59",
+          "src": "./assets/img/gallery/shot-59.webp",
+          "alt": "Group pause",
+          "caption": "Pausing briefly to confirm direction.",
+          "tags": ["coordination", "pause"]
+        },
+        {
+          "id": "shot-60",
+          "src": "./assets/img/gallery/shot-60.webp",
+          "alt": "Open square",
+          "caption": "Gathering in an open square between tasks.",
+          "tags": ["community", "social"]
+        },
+
+        {
+          "id": "shot-61",
+          "src": "./assets/img/gallery/shot-61.webp",
+          "alt": "Morning mist",
+          "caption": "Mist lifting as the day begins.",
+          "tags": ["morning", "weather"]
+        },
+        {
+          "id": "shot-62",
+          "src": "./assets/img/gallery/shot-62.webp",
+          "alt": "Trail markers",
+          "caption": "Following worn trail markers.",
+          "tags": ["navigation", "travel"]
+        },
+        {
+          "id": "shot-63",
+          "src": "./assets/img/gallery/shot-63.webp",
+          "alt": "Focused practice",
+          "caption": "Practicing techniques with quiet focus.",
+          "tags": ["training", "focus"]
+        },
+        {
+          "id": "shot-64",
+          "src": "./assets/img/gallery/shot-64.webp",
+          "alt": "Distant peak",
+          "caption": "A distant peak visible beyond the valley.",
+          "tags": ["scenery", "landmark"]
+        },
+        {
+          "id": "shot-65",
+          "src": "./assets/img/gallery/shot-65.webp",
+          "alt": "Shared direction",
+          "caption": "Confirming shared direction before moving on.",
+          "tags": ["coordination", "group"]
+        },
+        {
+          "id": "shot-66",
+          "src": "./assets/img/gallery/shot-66.webp",
+          "alt": "Stone steps",
+          "caption": "Climbing worn stone steps.",
+          "tags": ["travel", "terrain"]
+        },
+        {
+          "id": "shot-67",
+          "src": "./assets/img/gallery/shot-67.webp",
+          "alt": "Quiet lookout",
+          "caption": "Standing watch over the surrounding area.",
+          "tags": ["scenery", "duty"]
+        },
+        {
+          "id": "shot-68",
+          "src": "./assets/img/gallery/shot-68.webp",
+          "alt": "Passing crowd",
+          "caption": "Moving through a passing crowd.",
+          "tags": ["social", "movement"]
+        },
+        {
+          "id": "shot-69",
+          "src": "./assets/img/gallery/shot-69.webp",
+          "alt": "Rain-soaked road",
+          "caption": "Traveling along a rain-soaked road.",
+          "tags": ["weather", "travel"]
+        },
+        {
+          "id": "shot-70",
+          "src": "./assets/img/gallery/shot-70.webp",
+          "alt": "Evening camp",
+          "caption": "Setting camp as evening settles.",
+          "tags": ["camp", "evening"]
+        },
+
+        {
+          "id": "shot-71",
+          "src": "./assets/img/gallery/shot-71.webp",
+          "alt": "Quiet planning",
+          "caption": "Reviewing plans in low voices.",
+          "tags": ["strategy", "focus"]
+        },
+        {
+          "id": "shot-72",
+          "src": "./assets/img/gallery/shot-72.webp",
+          "alt": "Open road",
+          "caption": "A long road stretching ahead.",
+          "tags": ["journey", "travel"]
+        },
+        {
+          "id": "shot-73",
+          "src": "./assets/img/gallery/shot-73.webp",
+          "alt": "Group alignment",
+          "caption": "Aligning roles before engagement.",
+          "tags": ["coordination", "preparation"]
+        },
+        {
+          "id": "shot-74",
+          "src": "./assets/img/gallery/shot-74.webp",
+          "alt": "Sunset ridge",
+          "caption": "Standing along a ridge at sunset.",
+          "tags": ["scenery", "evening"]
+        },
+        {
+          "id": "shot-75",
+          "src": "./assets/img/gallery/shot-75.webp",
+          "alt": "Quiet waters",
+          "caption": "Still water reflecting the sky.",
+          "tags": ["scenery", "quiet"]
+        },
+        {
+          "id": "shot-76",
+          "src": "./assets/img/gallery/shot-76.webp",
+          "alt": "Gear check",
+          "caption": "Final gear check before departure.",
+          "tags": ["preparation", "focus"]
+        },
+        {
+          "id": "shot-77",
+          "src": "./assets/img/gallery/shot-77.webp",
+          "alt": "Shared pace",
+          "caption": "Maintaining a steady shared pace.",
+          "tags": ["group", "travel"]
+        },
+        {
+          "id": "shot-78",
+          "src": "./assets/img/gallery/shot-78.webp",
+          "alt": "Lantern rest",
+          "caption": "Resting beneath lantern light.",
+          "tags": ["rest", "night"]
+        },
+        {
+          "id": "shot-79",
+          "src": "./assets/img/gallery/shot-79.webp",
+          "alt": "Open clearing",
+          "caption": "Gathering briefly in an open clearing.",
+          "tags": ["community", "pause"]
+        },
+        {
+          "id": "shot-80",
+          "src": "./assets/img/gallery/shot-80.webp",
+          "alt": "Trail junction",
+          "caption": "Choosing a path at a trail junction.",
+          "tags": ["navigation", "decision"]
+        },
+
+        {
+          "id": "shot-81",
+          "src": "./assets/img/gallery/shot-81.webp",
+          "alt": "Morning stretch",
+          "caption": "Stretching before resuming travel.",
+          "tags": ["morning", "preparation"]
+        },
+        {
+          "id": "shot-82",
+          "src": "./assets/img/gallery/shot-82.webp",
+          "alt": "Passing bridge",
+          "caption": "Crossing a narrow wooden bridge.",
+          "tags": ["travel", "crossing"]
+        },
+        {
+          "id": "shot-83",
+          "src": "./assets/img/gallery/shot-83.webp",
+          "alt": "Quiet exchange",
+          "caption": "Short exchanges between movements.",
+          "tags": ["social", "moment"]
+        },
+        {
+          "id": "shot-84",
+          "src": "./assets/img/gallery/shot-84.webp",
+          "alt": "High vantage",
+          "caption": "Observing routes from a high vantage.",
+          "tags": ["scenery", "strategy"]
+        },
+        {
+          "id": "shot-85",
+          "src": "./assets/img/gallery/shot-85.webp",
+          "alt": "Weather hold",
+          "caption": "Waiting out a brief weather shift.",
+          "tags": ["weather", "pause"]
+        },
+        {
+          "id": "shot-86",
+          "src": "./assets/img/gallery/shot-86.webp",
+          "alt": "Late arrival",
+          "caption": "Arriving later than planned.",
+          "tags": ["journey", "arrival"]
+        },
+        {
+          "id": "shot-87",
+          "src": "./assets/img/gallery/shot-87.webp",
+          "alt": "Quiet regroup",
+          "caption": "Regrouping after extended travel.",
+          "tags": ["community", "rest"]
+        },
+        {
+          "id": "shot-88",
+          "src": "./assets/img/gallery/shot-88.webp",
+          "alt": "Torch circle",
+          "caption": "Standing together by torchlight.",
+          "tags": ["night", "community"]
+        },
+        {
+          "id": "shot-89",
+          "src": "./assets/img/gallery/shot-89.webp",
+          "alt": "Open horizon",
+          "caption": "Looking out across an open horizon.",
+          "tags": ["scenery", "reflection"]
+        },
+        {
+          "id": "shot-90",
+          "src": "./assets/img/gallery/shot-90.webp",
+          "alt": "Final approach",
+          "caption": "Final approach toward destination.",
+          "tags": ["journey", "closure"]
+        },
+
+        {
+          "id": "shot-91",
+          "src": "./assets/img/gallery/shot-91.webp",
+          "alt": "Quiet arrival",
+          "caption": "Arriving without ceremony.",
+          "tags": ["arrival", "quiet"]
+        },
+        {
+          "id": "shot-92",
+          "src": "./assets/img/gallery/shot-92.webp",
+          "alt": "Shared rest",
+          "caption": "Resting together after completion.",
+          "tags": ["community", "rest"]
+        },
+        {
+          "id": "shot-93",
+          "src": "./assets/img/gallery/shot-93.webp",
+          "alt": "Evening reflection",
+          "caption": "Reflecting quietly as evening settles.",
+          "tags": ["reflection", "evening"]
+        },
+        {
+          "id": "shot-94",
+          "src": "./assets/img/gallery/shot-94.webp",
+          "alt": "Lantern fade",
+          "caption": "Lantern light fading into night.",
+          "tags": ["night", "atmosphere"]
+        },
+        {
+          "id": "shot-95",
+          "src": "./assets/img/gallery/shot-95.webp",
+          "alt": "Silent road",
+          "caption": "A silent road after traffic clears.",
+          "tags": ["quiet", "travel"]
+        },
+        {
+          "id": "shot-96",
+          "src": "./assets/img/gallery/shot-96.webp",
+          "alt": "Last watch",
+          "caption": "Final watch before rest.",
+          "tags": ["duty", "night"]
+        },
+        {
+          "id": "shot-97",
+          "src": "./assets/img/gallery/shot-97.webp",
+          "alt": "Closing circle",
+          "caption": "Standing together before parting.",
+          "tags": ["community", "closure"]
+        },
+        {
+          "id": "shot-98",
+          "src": "./assets/img/gallery/shot-98.webp",
+          "alt": "Dawn return",
+          "caption": "Returning as dawn breaks.",
+          "tags": ["morning", "return"]
+        },
+        {
+          "id": "shot-99",
+          "src": "./assets/img/gallery/shot-99.webp",
+          "alt": "Quiet settlement",
+          "caption": "Settling back into routine.",
+          "tags": ["rest", "transition"]
+        },
+        {
+          "id": "shot-100",
+          "src": "./assets/img/gallery/shot-100.webp",
+          "alt": "Album close",
+          "caption": "Closing the album on a calm note.",
+          "tags": ["closure", "memory"]
         }
       ]
     }
