@@ -4,7 +4,7 @@
     "title": "Leaders Hall",
     "image": "./assets/img/leaders/hero.webp",
     "introBody": [
-      "Leadership in Mōchirīī is based around 6 core principles. Each one with their own responsibilities, but all working together to keep the guild organized, fair & enjoyable for everyone."
+      "Leadership in Mōchirīī is based around a few core principles. Each one with their own responsibilities, but all working together to keep the guild organized, fair & enjoyable for everyone."
     ],
     "pills": [
       "Start with your Hall Leader",
@@ -67,7 +67,7 @@
       "role": "Lotus Warden",
       "name": "Lotus Warden",
       "availability": "Member support",
-      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "image": "./assets/img/leaders/lotus_warden.webp",
       "alt": "Lotus Warden portrait",
       "summary": "Supports member well-being, guides new arrivals & helps keep morale alive during busy weeks."
     },
@@ -75,7 +75,7 @@
       "role": "Petal Keeper",
       "name": "Petal Keeper",
       "availability": "Culture & activity support",
-      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "image": "./assets/img/leaders/petal_keeper.webp",
       "alt": "Petal Keeper portrait",
       "summary": "Keeps daily community spaces active, welcomes arrivals & helps members find their footing quickly."
     }
