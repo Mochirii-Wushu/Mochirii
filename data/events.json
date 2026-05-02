@@ -2,7 +2,7 @@
   "meta": {
     "kicker": "Guild calendar",
     "title": "Events",
-    "intro": "Events keep our community consistent: clear start times, goals & coordination.",
+    "intro": "Events keep our Where Winds Meet community consistent: clear start times, goals, and friendly coordination.",
     "updated": "2026-02-01",
     "timezoneLabel": "UTC+8",
     "badges": ["RSVP in Discord or the in-game guild event"],
@@ -12,7 +12,7 @@
     }
   },
   "featured": {
-    "lead": "This month's featured activity is about recruiting & helping people get stronger for late game content.",
+    "lead": "This month's featured activity is about welcoming members and helping people get stronger for late-game content.",
     "tag": "Featured",
     "date": "2026-02-01",
     "time": "7:00 PM",
@@ -22,7 +22,7 @@
     "href": "https://discord.com/invite/dPafqMwWPK",
     "linkLabel": "RSVP & details in Discord",
     "bullets": [
-      "Our goal should always be trying to bring in new members when open slots allow while also doing our best to make everyone feel at home in the Mōchirīī family"
+      "When open slots allow, we welcome new members while doing our best to make everyone feel at home in the Mōchirīī family."
     ]
   },
   "upcoming": [
@@ -40,7 +40,7 @@
     "intro": "These run on a daily, weekly or monthly basis. Times are confirmed in Discord each week.",
     "items": [
       {
-        "title": "Sect dailies, guild activites, trials, hero realms, etc.",
+        "title": "Sect dailies, guild activities, trials, hero realms, and more.",
         "summary": "Scheduled windows for members to join when possible to form full teams."
       }
     ]

@@ -1,16 +1,16 @@
 {
   "copy": {
-    "bulletinIntro": "The latest in Mōchirīī news.",
-    "doorsIntro": "What we expect when you join, how progression works, meet the leaders, and learn the culture.",
+    "bulletinIntro": "Latest guild news, event notes, raffles, and calls for helping hands.",
+    "doorsIntro": "Start here for the join path, ranks, leaders, and the shared culture that keeps Mōchirīī steady.",
     "spotlightIntro": "Shoutout to this month's top guild member.",
-    "galleryIntro": "The latest in Mōchirīī shenanigans."
+    "galleryIntro": "Screenshots from Mōchirīī runs, quiet wandering, and guild shenanigans."
   },
   "hero": {
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",
     "descriptor": [
-      "Mōchirīī is a cozy Where Winds Meet guild for players who want steady events, helpful progression, and a softer place to land between adventures.",
-      "Come when able, drift when needed, and keep kindness in your words. If you want a warm wuxia home with clear expectations, start with Discord or the joining path."
+      "Mōchirīī is a cozy Where Winds Meet guild for players who want friendly company, relaxed events, helpful progression, and a softer place to land between adventures.",
+      "Join through Discord, read the joining path, and settle in at a humane pace. Come when able, drift when needed, and keep kindness in your words."
     ],
     "badges": [
       "Recruitment Open",
@@ -60,28 +60,28 @@
   "tiles": [
     {
       "label": "Join",
-      "title": "How to join Mōchirīī & what membership involves.",
+      "title": "How to join Mōchirīī, enter Discord, and get oriented.",
       "image": "./assets/img/tiles/join.webp",
       "alt": "Join Mōchirīī tile artwork",
       "href": "./join.html"
     },
     {
       "label": "Ranks",
-      "title": "Guild ranks, progression & how contributions are recognized.",
+      "title": "How ranks work and how steady contribution is recognized.",
       "image": "./assets/img/tiles/ranks.webp",
       "alt": "Guild ranks and progression tile artwork",
       "href": "./ranks.html"
     },
     {
       "label": "Leaders",
-      "title": "Leadership roles, responsibilities & points of contact.",
+      "title": "Leadership roles, responsibilities, and who to contact.",
       "image": "./assets/img/tiles/leaders.webp",
       "alt": "Guild leadership tile artwork",
       "href": "./leaders.html"
     },
     {
       "label": "Codex",
-      "title": "Shared values, etiquette & community standards.",
+      "title": "Shared values, etiquette, and community standards.",
       "image": "./assets/img/tiles/codex.webp",
       "alt": "Guild codex and values tile artwork",
       "href": "./codex.html"
