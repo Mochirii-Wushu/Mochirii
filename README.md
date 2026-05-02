@@ -215,6 +215,7 @@ For detailed content, date, asset, gallery, link, tone, and PR validation conven
 - Open files directly in browser or via static server
 - Use `git pull --rebase` (recommended) to keep history clean
 - GitHub Pages deploys automatically from `main`
+- Optional Lighthouse audits can be run manually from GitHub Actions using **Manual Lighthouse audit**; they are not required PR gates.
 
 ---
 

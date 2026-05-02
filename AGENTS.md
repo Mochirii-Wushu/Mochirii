@@ -9,3 +9,4 @@
 - Keep public URLs and page filenames stable unless fixing a confirmed broken reference.
 - Prefer dependency-free Node scripts and plain browser APIs.
 - Load `utils.js` before `site.js` and page scripts when using shared browser helpers.
+- Keep Lighthouse audits optional/manual unless the user explicitly asks for score gates.
