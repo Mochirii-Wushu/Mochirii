@@ -26,12 +26,33 @@ function cleanRef(ref) {
 }
 
 function addRef(file, lineNumber, raw) {
-  const ref = cleanRef(raw);
+  let ref = cleanRef(raw);
   if (!ref || ref === "." || ref === "..") return;
-  if (/^(https?:)?\/\//i.test(ref)) return;
+  if (/^https?:\/\//i.test(ref)) {
+    let url;
+    try {
+      url = new URL(ref);
+    } catch {
+      return;
+    }
+    if (!/^(www\.)?mochirii\.com$/i.test(url.hostname)) return;
+    ref = url.pathname.replace(/^\/+/, "");
+    if (!ref) return;
+  }
+  if (/^\/\//.test(ref)) return;
   if (/^(mailto|tel):/i.test(ref)) return;
   if (ref.startsWith("#")) return;
-  if (ref.startsWith("./assets/") || ref.startsWith("assets/") || ref.startsWith("./data/") || ref.startsWith("data/")) {
+  if (ref.startsWith("/")) ref = ref.replace(/^\/+/, "");
+  if (
+    ref.startsWith("./assets/") ||
+    ref.startsWith("assets/") ||
+    ref.startsWith("./data/") ||
+    ref.startsWith("data/") ||
+    ref === "favicon.ico" ||
+    ref.endsWith(".html") ||
+    ref.endsWith(".xml") ||
+    ref.endsWith(".txt")
+  ) {
     refs.push({ file, lineNumber, ref: ref.replace(/^\.\//, "") });
   }
 }
@@ -69,4 +90,3 @@ if (missing.length) {
 }
 
 console.log(`Local references OK (${seen.size} refs checked).`);
-
