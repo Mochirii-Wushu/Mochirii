@@ -8,7 +8,7 @@
     "check:assets": "node scripts/check-assets.mjs",
     "check:js": "node scripts/check-js.mjs",
     "check:json": "node scripts/check-json.mjs",
-    "check:refs": "node scripts/check-refs.mjs"
+    "check:refs": "node scripts/check-refs.mjs",
+    "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs"
   }
 }
-

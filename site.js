@@ -473,25 +473,47 @@ function pageKeyFromFile(file) {
         e.stopPropagation();
 
         const looksLikeImage = (s) => /\.(png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(s);
+        const dataValue = (el, name) => String(el?.getAttribute?.(name) || "").trim();
 
-        const link = pickedImg.closest("a") || galleryItem?.closest("a");
+        const fullHolder =
+          e.target.closest("[data-full]") ||
+          galleryItem?.closest?.("[data-full]") ||
+          galleryItem;
+
+        const fallbackHolder =
+          e.target.closest("[data-fullsrc], [data-large]") ||
+          galleryItem?.closest?.("[data-fullsrc], [data-large]") ||
+          galleryItem;
+
+        const link =
+          e.target.closest("a[href]") ||
+          pickedImg.closest("a[href]") ||
+          galleryItem?.closest?.("a[href]") ||
+          galleryItem?.querySelector?.("a[href]");
         const href = link?.getAttribute("href") || "";
 
         const dataFull =
-          pickedImg.getAttribute("data-full") ||
-          pickedImg.getAttribute("data-src") ||
-          pickedImg.getAttribute("data-fullsrc") ||
-          pickedImg.getAttribute("data-large") ||
+          dataValue(fullHolder, "data-full") ||
+          dataValue(galleryItem, "data-full") ||
+          dataValue(pickedImg, "data-full") ||
+          dataValue(fallbackHolder, "data-fullsrc") ||
+          dataValue(fallbackHolder, "data-large") ||
+          dataValue(pickedImg, "data-fullsrc") ||
+          dataValue(pickedImg, "data-large") ||
           "";
 
         const fullSrc =
           dataFull ||
           (looksLikeImage(href) ? href : "") ||
+          dataValue(pickedImg, "data-src") ||
           pickedImg.currentSrc ||
           pickedImg.src;
 
         const altText = pickedImg.getAttribute("alt") || "";
-        const capText = pickedImg.getAttribute("data-caption") || "";
+        const capText =
+          dataValue(galleryItem, "data-caption") ||
+          dataValue(pickedImg, "data-caption") ||
+          "";
 
         try {
           open(fullSrc, altText, capText);
