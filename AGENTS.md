@@ -6,6 +6,7 @@
 - Do not delete or rewrite asset directories unless usage is verified and the change is intentionally scoped.
 - Run validation before completing work: `npm run check` plus any task-specific smoke checks. Individual checks: `npm run check:js`, `npm run check:json`, `npm run check:refs`, `npm run check:assets`.
 - Consult `docs/content-guide.md` before content, JSON, date, gallery, or asset edits.
+- Use `docs/roadmap.md` for future branch ideas; keep roadmap items scoped instead of turning them into broad refactors.
 - Keep public URLs and page filenames stable unless fixing a confirmed broken reference.
 - Prefer dependency-free Node scripts and plain browser APIs.
 - Load `utils.js` before `site.js` and page scripts when using shared browser helpers.
