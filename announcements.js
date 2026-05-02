@@ -21,7 +21,7 @@
   }
 
   async function fetchJSON(url) {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
     return res.json();
   }
@@ -32,7 +32,7 @@
     const [y, m, d] = s.split("-").map((n) => Number(n));
     const dt = new Date(Date.UTC(y, m - 1, d));
     if (Number.isNaN(dt.getTime())) return s;
-    return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+    return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit", timeZone: "UTC" });
   }
 
   function applyHero(meta) {

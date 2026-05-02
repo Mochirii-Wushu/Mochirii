@@ -22,8 +22,7 @@
     "title": "A Note From Twills",
     "description": "For those of you who don't like to read.",
     "sources": [
-      { "src": "./assets/audio/mochiriiiiii.mp3", "type": "audio/mpeg" },
-      { "src": "./assets/audio/mochiriiiiii.ogg", "type": "audio/ogg" }
+      { "src": "./assets/audio/mochiriiiiii.mp3", "type": "audio/mpeg" }
     ]
   },
 

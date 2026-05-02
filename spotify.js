@@ -148,7 +148,7 @@
 
   async function load() {
     try {
-      const res = await fetch("./data/spotify.json", { cache: "no-store" });
+      const res = await fetch("./data/spotify.json");
       if (!res.ok) throw new Error(`Failed to load spotify.json (${res.status})`);
       const data = await res.json();
 

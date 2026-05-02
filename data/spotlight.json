@@ -1,7 +1,7 @@
 {
   "hero": {
     "image": "./assets/img/spotlight/hero.webp",
-    "atmosphereImage": "./assets/img/spotlight/atmosphere.webp",
+    "atmosphereImage": "",
     "alt": "Member Spotlight banner artwork"
   },
   "spotlight": {

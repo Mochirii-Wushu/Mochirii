@@ -1,0 +1,14 @@
+{
+  "name": "mochirii-guild-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Static guild website for Mōchirīī in Where Winds Meet.",
+  "scripts": {
+    "check": "node scripts/check-all.mjs",
+    "check:assets": "node scripts/check-assets.mjs",
+    "check:js": "node scripts/check-js.mjs",
+    "check:json": "node scripts/check-json.mjs",
+    "check:refs": "node scripts/check-refs.mjs"
+  }
+}
+

@@ -361,8 +361,8 @@ function pageKeyFromFile(file) {
       (e) => {
         // Catch clicks on an entire gallery item, not just the <img>
         const galleryItem =
-          e.target.closest("#galleryGrid a, #galleryGrid .gallery-item, #galleryGrid .gallery-card, #galleryGrid .gallery-thumb") ||
-          e.target.closest(".gallery-grid a, .gallery-grid .gallery-item, .gallery-grid .gallery-card, .gallery-grid .gallery-thumb");
+          e.target.closest("#galleryGrid a, #galleryGrid button, #galleryGrid .gallery-item, #galleryGrid .gallery-card, #galleryGrid .gallery-thumb, #galleryGrid .home-thumb") ||
+          e.target.closest(".gallery-grid a, .gallery-grid button, .gallery-grid .gallery-item, .gallery-grid .gallery-card, .gallery-grid .gallery-thumb");
 
         const homeGalleryImg = e.target.closest(".home-gallery img");
         const galleryImg = e.target.closest("#galleryGrid img, .gallery-grid img");
@@ -416,7 +416,7 @@ function pageKeyFromFile(file) {
     if (!mountEl) return null;
 
     try {
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url);
       if (!res.ok) return null;
       mountEl.innerHTML = await res.text();
       return mountEl;
