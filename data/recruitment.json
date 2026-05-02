@@ -7,38 +7,37 @@
 
   "meta": {
     "kicker": "Recruitment",
-    "heading": "Mōchirīī Recruitment Tips",
+    "heading": "Mōchirīī Recruitment & Membership",
     "author": "From Twills",
     "updated": "2026-02-01",
-    "intro": "Tips for growing a consistent, welcoming community through respectful outreach & thoughtful follow-through.",
+    "intro": "A public guide to who fits Mōchirīī, how joining works, and how members can help the guild grow with care.",
     "badges": [
-      "Retention first",
-      "Clear invites",
-      "Quiet consistency"
+      "Where Winds Meet",
+      "Kind conduct",
+      "Steady presence"
     ]
   },
 
   "audio": {
     "title": "A Note From Twills",
-    "description": "For those of you who don't like to read.",
+    "description": "Prefer listening? Twills' note covers the same spirit in a softer format.",
     "sources": [
       { "src": "./assets/audio/mochiriiiiii.mp3", "type": "audio/mpeg" }
     ]
   },
 
   "content": {
-    "title": "Recruitment Notes",
+    "title": "Who We Are Looking For",
     "paragraphs": [
-      "Let's take a moment to talk about recruiting, because it matters deeply to the long-term strength of Mōchirīī. This is for everyone who cares about the guild's future, whether you arrived recently or have been here long enough to feel at home. Recruiting is a skill that grows through practice, observation, and intention. Every conversation teaches you something. Every interaction sharpens your sense of what brings people in and what helps them stay.",
-      "As you listen, take what resonates and try it in your own way. The most important part is participation. Even one new member matters. If each of us brought in a single person, the guild would grow faster than we expect. That one person might become a long-term veteran, a future leader, or someone who quietly supports others and keeps the guild steady during slower seasons.",
-      "Growth and quality rise together. Numbers give a guild energy. Energy creates presence. Presence builds confidence. A living guild draws people in because it feels active and welcoming. Some members stay casually, some grow into core contributors, and some step forward as leaders over time. Patterns emerge only through motion. Momentum gives us that motion.",
-      "A healthy guild thrives around a strong, steady population. That gives room for events, mentorship, leadership development, and different playstyles to coexist naturally. When people log in and see life around them, they feel connected. That sense of connection keeps communities strong.",
-      "Recruiting happens in many ways. Forum posts still matter, especially when they stay current and reflect real activity. Playing together matters even more. Shared experiences create trust. When runs feel smooth and friendly, people remember that. Conversations begin naturally. Community grows from there. Sometimes recruiting is as simple as paying attention. When someone mentions looking for a guild, reaching out with curiosity and care opens the door. Announcements also have their place during quieter periods. Clear, respectful messages create opportunities for conversation and connection.",
-      "When recruiting feels slow, the answer usually lies in retention. People stay when they feel seen, guided, and included. Structure supports that feeling. Organization gives people a place to belong and a path to follow.",
-      "To everyone helping with recruitment, your effort matters. Every message, every conversation, every invitation strengthens the guild. To those in leadership, remember that today's dedicated members shape tomorrow's direction. Support them. Help them find their footing. Give them space to grow into themselves."
+      "Mōchirīī is a cozy Where Winds Meet guild for players who want friendly company, practical help, relaxed events, and a community that feels alive without becoming another obligation.",
+      "You may fit well here if you are kind in chat, patient with newer players, willing to ask questions, and comfortable joining events at a steady but humane pace. Skill grows over time; conduct shows up right away.",
+      "Joining starts in Discord. Say hello, share your in-game name and time zone, and ask for WWM guild access. A mod or leader will verify you, assign the right role, and point you toward the channels and event notes that matter first.",
+      "Activity is flexible, but communication matters. Show up when you can, RSVP when an event needs planning, and tell a leader before a longer break or Cupcake nap so no one has to guess where you went.",
+      "Members help recruitment by making runs feel smooth and welcoming. Invite respectfully, answer questions clearly, and remember that retention matters more than raw numbers. People stay when they feel seen, guided, and included.",
+      "Leadership is here to support the guild's rhythm: mod help, hall coordination, event setup, conflict repair, and long-term direction. If you are unsure who to contact, start with a mod or leader in Discord and we will route you gently."
     ],
     "conclusion": [
-      "Mōchirīī is meant to feel warm, alive, and welcoming. We build that together, one person at a time. Let's continue growing something worth staying for."
+      "Mōchirīī is meant to feel warm, alive, and welcoming. If that sounds like the kind of wuxia home you want, join Discord, read the joining path, and come say hello."
     ]
   }
 }
