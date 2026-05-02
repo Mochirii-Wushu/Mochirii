@@ -100,7 +100,7 @@
   }
 
   async function fetchJSON(url) {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url);
     if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
     return res.json();
   }
@@ -108,9 +108,10 @@
   function fmtMonth(iso) {
     const s = String(iso ?? "").trim();
     if (!s) return "";
-    const d = new Date(s);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const d = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : new Date(s);
     if (Number.isNaN(d.getTime())) return s;
-    return d.toLocaleDateString("en-US", { year: "numeric", month: "long" });
+    return d.toLocaleDateString("en-US", { year: "numeric", month: "long", timeZone: "UTC" });
   }
 
   function showError(msg) {

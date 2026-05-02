@@ -21,9 +21,10 @@
   const fmtDate = (iso) => {
     const s = safeText(iso, "");
     if (!s) return "";
-    const d = new Date(s);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const d = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : new Date(s);
     if (Number.isNaN(d.getTime())) return s;
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit" });
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit", timeZone: "UTC" });
   };
 
   const setText = (sel, value, fallback = "") => {
@@ -135,7 +136,7 @@
 
   // DATA
   async function loadData() {
-    const res = await fetch(DATA_URL, { cache: "no-cache" });
+    const res = await fetch(DATA_URL);
     if (!res.ok) throw new Error(`Failed to load ${DATA_URL} (${res.status})`);
     return res.json();
   }

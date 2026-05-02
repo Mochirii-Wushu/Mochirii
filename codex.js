@@ -125,7 +125,7 @@ function listBlock(title, items) {
   }
 
   async function loadData() {
-    const res = await fetch(DATA_URL, { cache: "no-store" });
+    const res = await fetch(DATA_URL);
     const raw = await res.text();
     if (!res.ok) throw new Error(`Failed to load ${DATA_URL} (${res.status}).`);
     try {

@@ -8,7 +8,7 @@
     "badges": ["Sign up in guild menu", "Recent activity required", "Winners announced in game & Discord."],
     "hero": {
       "image": "./assets/img/raffles/hero.webp",
-      "atmosphere": "./assets/img/raffles/atmosphere.webp"
+      "atmosphere": ""
     }
   },
 

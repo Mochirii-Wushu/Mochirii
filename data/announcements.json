@@ -11,7 +11,7 @@
     ],
     "hero": {
       "image": "./assets/img/announcements/hero.webp",
-      "atmosphere": "./assets/img/announcements/atmosphere.webp"
+      "atmosphere": ""
     }
   },
   "items": [

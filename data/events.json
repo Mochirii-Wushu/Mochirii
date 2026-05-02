@@ -8,7 +8,7 @@
     "badges": ["RSVP in Discord or the in-game guild event"],
     "hero": {
       "image": "./assets/img/events/hero.webp",
-      "atmosphere": "./assets/img/events/atmosphere.webp"
+      "atmosphere": ""
     }
   },
   "featured": {
