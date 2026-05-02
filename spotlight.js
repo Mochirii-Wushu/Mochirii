@@ -9,37 +9,18 @@
 
   // SELECTORS
   const $ = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
   // HELPERS
-  const safeText = (v, fallback = "") => {
-    const s = (v ?? "").toString().trim();
-    return s ? s : fallback;
-  };
-
-  const safeArray = (v) => (Array.isArray(v) ? v : []);
+  const safeText = U.text;
+  const safeArray = U.asArray;
 
   const fmtDate = (iso) => {
-    const s = safeText(iso, "");
-    if (!s) return "";
-    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const d = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : new Date(s);
-    if (Number.isNaN(d.getTime())) return s;
-    return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "2-digit", timeZone: "UTC" });
+    return U.formatDateUTC(iso, { year: "numeric", month: "long", day: "2-digit" });
   };
 
-  const setText = (sel, value, fallback = "") => {
-    const node = $(sel);
-    if (!node) return;
-    node.textContent = safeText(value, fallback);
-  };
-
-  const setImg = (sel, src, alt) => {
-    const img = $(sel);
-    if (!img) return;
-    const s = safeText(src, "");
-    if (s) img.src = s;
-    if (typeof alt === "string") img.alt = alt;
-  };
+  const setText = U.setText;
+  const setImg = U.setImg;
 
   const showError = (msg) => {
     const err = $("#spotlightError");
@@ -136,9 +117,7 @@
 
   // DATA
   async function loadData() {
-    const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error(`Failed to load ${DATA_URL} (${res.status})`);
-    return res.json();
+    return U.fetchJson(DATA_URL);
   }
 
   (async function run() {

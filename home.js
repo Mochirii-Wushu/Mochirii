@@ -6,43 +6,20 @@
 
   const JSON_URL = "./data/home.json";
   const $ = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
   /* Helpers */
-  function setText(el, value) {
-    if (!el) return;
-    el.textContent = value ?? "";
-  }
-
-  function esc(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
-  function safeArray(v) {
-    return Array.isArray(v) ? v : [];
-  }
-
-  async function fetchJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
-    return res.json();
-  }
+  const setText = U.setText;
+  const esc = U.escapeHtml;
+  const safeArray = U.asArray;
+  const fetchJSON = U.fetchJson;
 
   function fmtDate(iso) {
-    const s = String(iso ?? "").trim();
-    if (!s) return "";
-    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const d = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : new Date(s);
-    if (Number.isNaN(d.getTime())) return s;
-    return d.toLocaleDateString("en-US", {
+    return U.formatDateUTC(iso, {
+      locale: "en-US",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      timeZone: "UTC",
     });
   }
 

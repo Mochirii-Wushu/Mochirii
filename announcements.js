@@ -5,34 +5,14 @@
   const JSON_URL = "./data/announcements.json";
 
   const $ = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
-  function setText(el, value) {
-    if (!el) return;
-    el.textContent = value ?? "";
-  }
-
-  function esc(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
-  async function fetchJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
-    return res.json();
-  }
+  const setText = U.setText;
+  const esc = U.escapeHtml;
+  const fetchJSON = U.fetchJson;
 
   function formatDate(iso) {
-    const s = String(iso || "").trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-    const [y, m, d] = s.split("-").map((n) => Number(n));
-    const dt = new Date(Date.UTC(y, m - 1, d));
-    if (Number.isNaN(dt.getTime())) return s;
-    return dt.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit", timeZone: "UTC" });
+    return U.formatDateUTC(iso, { year: "numeric", month: "short", day: "2-digit" });
   }
 
   function applyHero(meta) {

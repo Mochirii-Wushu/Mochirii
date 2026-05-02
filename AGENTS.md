@@ -7,3 +7,4 @@
 - Run validation before completing work: `npm run check` plus any task-specific smoke checks. Individual checks: `npm run check:js`, `npm run check:json`, `npm run check:refs`, `npm run check:assets`.
 - Keep public URLs and page filenames stable unless fixing a confirmed broken reference.
 - Prefer dependency-free Node scripts and plain browser APIs.
+- Load `utils.js` before `site.js` and page scripts when using shared browser helpers.

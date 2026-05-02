@@ -8,26 +8,11 @@
   const JSON_URL = "./data/raffles.json";
 
   const q = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
-  function setText(el, value) {
-    if (!el) return;
-    el.textContent = value ?? "";
-  }
-
-  function esc(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
-  async function loadJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
-    return res.json();
-  }
+  const setText = U.setText;
+  const esc = U.escapeHtml;
+  const loadJSON = U.fetchJson;
 
   function renderBadges(mount, items) {
     if (!mount) return;

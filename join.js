@@ -9,23 +9,11 @@
 
   const DATA_URL = "./data/join.json";
   const qs = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
-  function safeText(v, fallback = "") {
-    const s = (v ?? "").toString().trim();
-    return s.length ? s : fallback;
-  }
-
-  function setText(sel, value) {
-    const el = qs(sel);
-    if (el) el.textContent = value ?? "";
-  }
-
-  function setImg(sel, src, alt) {
-    const img = qs(sel);
-    if (!img) return;
-    if (src !== undefined) img.src = src;
-    if (alt !== undefined) img.alt = alt;
-  }
+  const safeText = U.text;
+  const setText = U.setText;
+  const setImg = U.setImg;
 
   function clearAndAppend(parent, nodes) {
     if (!parent) return;
@@ -34,10 +22,7 @@
     list.forEach((n) => parent.appendChild(n));
   }
 
-  function isExternalHref(href) {
-    const h = String(href || "");
-    return /^https?:\/\//i.test(h);
-  }
+  const isExternalHref = U.isExternalHttpUrl;
 
   function makeBadge(text, href) {
     const span = document.createElement("span");
@@ -99,19 +84,10 @@
     return wrap;
   }
 
-  async function fetchJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
-    return res.json();
-  }
+  const fetchJSON = U.fetchJson;
 
   function fmtMonth(iso) {
-    const s = String(iso ?? "").trim();
-    if (!s) return "";
-    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const d = m ? new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))) : new Date(s);
-    if (Number.isNaN(d.getTime())) return s;
-    return d.toLocaleDateString("en-US", { year: "numeric", month: "long", timeZone: "UTC" });
+    return U.formatDateUTC(iso, { locale: "en-US", year: "numeric", month: "long" });
   }
 
   function showError(msg) {

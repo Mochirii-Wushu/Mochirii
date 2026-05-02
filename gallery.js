@@ -7,26 +7,11 @@
   const JSON_URL = "./data/gallery.json";
 
   const $ = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
-  function esc(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
-  function setText(el, value) {
-    if (!el) return;
-    el.textContent = value ?? "";
-  }
-
-  async function fetchJSON(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`);
-    return res.json();
-  }
+  const esc = U.escapeHtml;
+  const setText = U.setText;
+  const fetchJSON = U.fetchJson;
 
   function buildItemButton(item) {
     const full = String(item?.full ?? item?.src ?? "").trim();
