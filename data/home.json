@@ -10,7 +10,7 @@
     "atmosphereImage": "",
     "descriptor": [
       "Mōchirīī is a cozy Where Winds Meet guild for players who want friendly company, relaxed events, helpful progression, and a softer place to land between adventures.",
-      "Join through Discord, read the joining path, and settle in at a humane pace. Come when able, drift when needed, and keep kindness in your words."
+      "Join through Discord, read the joining path, and settle in at a humane pace. Check event notes when you can, RSVP when a run needs planning, and keep kindness in your words."
     ],
     "badges": [
       "Recruitment Open",
@@ -81,7 +81,7 @@
     },
     {
       "label": "Codex",
-      "title": "Shared values, etiquette, and community standards.",
+      "title": "Shared values, etiquette, event rhythm, and community standards.",
       "image": "./assets/img/tiles/codex.webp",
       "alt": "Guild codex and values tile artwork",
       "href": "./codex.html"

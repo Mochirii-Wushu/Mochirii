@@ -5,7 +5,7 @@
     "image": "./assets/img/codex/hero.webp",
     "introBody": [
       "The Codex holds how Mōchirīī lives, speaks & looks after each other.",
-      "Read it once, revisit it often & use it to keep the guild clear & welcoming."
+      "Read it once, revisit it often & use it to keep the guild clear, welcoming & easy to join."
     ],
     "pills": ["Values in practice", "Etiquette with dignity", "Consistency with ease"]
   },
@@ -16,7 +16,7 @@
     "image": "./assets/img/codex/values.webp",
     "body": [
       "The Codex keeps culture consistent across time zones & playstyles.",
-      "It sets conduct expectations, outlines how disputes gets handled & describes how we keep community life active with room to breathe."
+      "It sets conduct expectations, outlines how disputes get handled & describes how we keep community life active with room to breathe."
     ]
   },
 
@@ -85,6 +85,15 @@
           "Bring in a hall leader when emotions rise or patterns repeat.",
           "Restore trust through accountability & one concrete next step."
         ]
+      },
+      {
+        "title": "Guild Code",
+        "items": [
+          "Be kind in public spaces and make room for new members.",
+          "Respect real-life schedules, time zones & longer Cupcake naps.",
+          "Join events when available without pressuring casual members.",
+          "Ask leadership for help when a conflict or concern needs care."
+        ]
       }
     ],
     "note": "Keep disputes small, private & actionable; return to the work with dignity."
@@ -101,7 +110,7 @@
     "items": [
       {
         "title": "Hall Runs",
-        "description": "Posted with time zones & goals; parties form with light role notes & clear start times."
+        "description": "Posted with time zones, goals & RSVP notes when planning is needed; parties form with light role notes & clear start times."
       },
       {
         "title": "Raffles",
@@ -113,7 +122,7 @@
       },
       {
         "title": "Quiet Time",
-        "description": "Roam, farm, craft, or chat casually while staying connected to the guild's community."
+        "description": "Roam, farm, craft, or chat casually while staying connected to the guild's community at a pace that still leaves room for real life."
       }
     ]
   },
