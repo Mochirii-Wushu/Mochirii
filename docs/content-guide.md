@@ -1,0 +1,91 @@
+# Mōchirīī Website Content Guide
+
+## 1. Site Structure
+
+This is a static HTML/CSS/vanilla JavaScript site.
+
+- Page shells live in root `.html` files.
+- Page content lives mostly in `data/*.json`.
+- Shared header and footer markup live in `header.html` and `footer.html`, then load through `site.js`.
+- Shared browser helpers live in `utils.js`; keep it loaded before `site.js` and page scripts.
+- Images, audio, icons, and Lottie placeholders live under `assets/`.
+
+Keep the static architecture unless a future task explicitly calls for a larger change.
+
+## 2. Editing JSON Content
+
+- Keep JSON valid: no trailing commas, comments, or unquoted keys.
+- Preserve existing keys and array shapes unless you also update the matching page script.
+- Keep public copy concise enough for cards, hero sections, and mobile layouts.
+- Avoid inline HTML inside JSON; page scripts render text safely.
+- Prefer existing content patterns from nearby entries before inventing a new structure.
+- Run `npm run check` after editing.
+
+## 3. Dates
+
+- Use `YYYY-MM-DD` for date-only values.
+- Date rendering is UTC-safe, so date-only values should not shift backward in US time zones.
+- Avoid natural-language dates in structured date fields.
+- After editing events or announcements, spot-check rendered dates locally.
+
+## 4. Images and Assets
+
+- Use optimized WebP where practical.
+- Preserve PNG only when transparency or source quality requires it.
+- Do not commit huge originals unless they are intentionally needed for deployment.
+- Keep alt text meaningful for public images.
+- Run `node scripts/check-assets.mjs` and `node scripts/check-refs.mjs` after asset edits.
+- Do not delete assets without confirming they are unused or safely replaced.
+
+## 5. Gallery Rules
+
+- Gallery grid images should use `assets/img/gallery/thumbs/`.
+- Lightbox/full images should use the optimized full gallery path, not `/thumbs/`.
+- Preserve `data-full` or the equivalent full-image field when editing gallery cards.
+- Regression check: opening a gallery item must not load a `/thumbs/` image in the lightbox.
+- Run `npm run smoke:gallery` when gallery behavior changes, with a local server running on port `8765`.
+
+## 6. Links
+
+- Keep local links relative and stable unless fixing a confirmed broken reference.
+- External links in HTML should use `target="_blank"` with `rel="noopener noreferrer"` when they open new tabs.
+- Keep the Discord CTA consistent unless the invite URL intentionally changes.
+- Ignore external third-party previews during local reference validation, but verify local assets with `node scripts/check-refs.mjs`.
+
+## 7. Tone and Copy
+
+- Tone should stay cozy, clear, wuxia-inspired, and welcoming.
+- New visitors should understand the guild, the game, and the join path quickly.
+- Keep the Cupcake identity readable rather than cryptic.
+- Do not claim official affiliation with Where Winds Meet unless that is verified and intentionally approved.
+- Avoid generic MMO boilerplate; write like Mōchirīī has a real home and rhythm.
+
+## 8. Validation Before PR
+
+Run these for most changes:
+
+```sh
+npm run check
+git diff --check
+```
+
+Run these when relevant:
+
+```sh
+npm run check:production
+npm run smoke:gallery
+node scripts/check-assets.mjs
+node scripts/check-refs.mjs
+node scripts/check-json.mjs
+node scripts/check-js.mjs
+```
+
+Keep `npm run check:production` separate from local validation. It depends on the live site and network access.
+
+## 9. Branching
+
+- Use one scoped branch per change.
+- Open a PR into `main`.
+- Do not make direct feature edits on `main`.
+- Use merge commits unless project policy changes.
+- Merge only after validation passes and any relevant smoke test is documented.
