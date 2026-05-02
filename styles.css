@@ -257,6 +257,41 @@ img{max-width:100%;display:block;}
   animation:border-shift 7.5s var(--ease) infinite;
 }
 
+.hero-cta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+
+.hero-cta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.60);
+  color:var(--ink-0);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:700;
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+}
+
+.hero-cta--primary{
+  background:linear-gradient(90deg, rgba(31,122,99,.32), rgba(200,162,75,.24));
+  border-color:rgba(255,255,255,.16);
+}
+
+.hero-cta:hover,
+.hero-cta:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(200,162,75,.42);
+  background:rgba(10,12,14,.78);
+}
+
 /* =========================================================
    PROSE — Paragraph stacking and readable rhythm
    ========================================================= */
