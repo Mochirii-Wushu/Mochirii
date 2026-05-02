@@ -1,0 +1,3 @@
+reports/lighthouse/
+.lighthouseci/
+*.lhr.json
