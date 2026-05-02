@@ -1,0 +1,46 @@
+name: Manual Lighthouse audit
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Lighthouse audits
+        run: |
+          set -euo pipefail
+          mkdir -p reports/lighthouse
+
+          npx --yes lighthouse "https://mochirii.com/" \
+            --output=html --output=json \
+            --output-path=reports/lighthouse/home \
+            --chrome-flags="--headless --no-sandbox"
+
+          npx --yes lighthouse "https://mochirii.com/recruitment.html" \
+            --output=html --output=json \
+            --output-path=reports/lighthouse/recruitment \
+            --chrome-flags="--headless --no-sandbox"
+
+          npx --yes lighthouse "https://mochirii.com/gallery.html" \
+            --output=html --output=json \
+            --output-path=reports/lighthouse/gallery \
+            --chrome-flags="--headless --no-sandbox"
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: reports/lighthouse/
