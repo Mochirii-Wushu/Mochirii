@@ -29,21 +29,22 @@
   }
 
   function buildItemButton(item) {
-    const src = String(item?.src ?? "").trim();
-    if (!src) return null;
+    const full = String(item?.full ?? item?.src ?? "").trim();
+    const thumb = String(item?.thumb ?? item?.src ?? "").trim();
+    if (!full || !thumb) return null;
 
     const alt = String(item?.alt ?? item?.caption ?? "Gallery image");
     const caption = String(item?.caption ?? "");
 
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "gallery-thumb"; // your CSS can style this (or leave it unused)
-    btn.dataset.full = src;
+    btn.className = "gallery-thumb";
+    btn.dataset.full = full;
     btn.dataset.caption = caption;
 
     btn.innerHTML = `
       <img
-        src="${esc(src)}"
+        src="${esc(thumb)}"
         alt="${esc(alt)}"
         loading="lazy"
         decoding="async"
