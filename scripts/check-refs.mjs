@@ -2,7 +2,16 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const ignoreDirs = new Set([".git", "node_modules", "assets"]);
+const ignoreDirs = new Set([
+  ".git",
+  ".lighthouseci",
+  "assets",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "reports",
+]);
 const sourceExt = new Set([".html", ".css", ".js", ".json"]);
 const refs = [];
 
