@@ -233,6 +233,7 @@
         const src = String(it?.image ?? "").trim();
         if (!src) return;
 
+        const full = String(it?.full ?? src);
         const alt = String(it?.alt ?? "Guild screenshot");
         const caption = String(it?.caption ?? "");
 
@@ -246,6 +247,7 @@
             class="home-thumb__img"
             src="${esc(src)}"
             alt="${esc(alt)}"
+            data-full="${esc(full)}"
             data-caption="${esc(caption)}"
             loading="lazy"
             decoding="async"

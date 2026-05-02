@@ -14,273 +14,468 @@
           "src": "./assets/img/gallery/shot-01.webp",
           "alt": "Mōchirīī gathering",
           "caption": "Mōchirīī gathering after a long night of travel and training.",
-          "tags": ["community", "gathering"]
+          "tags": [
+            "community",
+            "gathering"
+          ],
+          "full": "./assets/img/gallery/shot-01.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-01.webp"
         },
         {
           "id": "shot-02",
           "src": "./assets/img/gallery/shot-02.webp",
           "alt": "Progression run",
           "caption": "Progression run through contested territory.",
-          "tags": ["progression", "pve"]
+          "tags": [
+            "progression",
+            "pve"
+          ],
+          "full": "./assets/img/gallery/shot-02.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-02.webp"
         },
         {
           "id": "shot-03",
           "src": "./assets/img/gallery/shot-03.webp",
           "alt": "Scenic landmark",
           "caption": "A quiet landmark discovered during open-world wandering.",
-          "tags": ["scenery", "exploration"]
+          "tags": [
+            "scenery",
+            "exploration"
+          ],
+          "full": "./assets/img/gallery/shot-03.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-03.webp"
         },
         {
           "id": "shot-04",
           "src": "./assets/img/gallery/shot-04.webp",
           "alt": "Duel night",
           "caption": "Friendly duels held after scheduled guild activities.",
-          "tags": ["pvp", "training"]
+          "tags": [
+            "pvp",
+            "training"
+          ],
+          "full": "./assets/img/gallery/shot-04.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-04.webp"
         },
         {
           "id": "shot-05",
           "src": "./assets/img/gallery/shot-05.webp",
           "alt": "Evening training session",
           "caption": "Evening training session under lantern light.",
-          "tags": ["training", "atmosphere"]
+          "tags": [
+            "training",
+            "atmosphere"
+          ],
+          "full": "./assets/img/gallery/shot-05.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-05.webp"
         },
         {
           "id": "shot-06",
           "src": "./assets/img/gallery/shot-06.webp",
           "alt": "Mountain overlook",
           "caption": "A high overlook reached after a long climb.",
-          "tags": ["scenery", "travel"]
+          "tags": [
+            "scenery",
+            "travel"
+          ],
+          "full": "./assets/img/gallery/shot-06.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-06.webp"
         },
         {
           "id": "shot-07",
           "src": "./assets/img/gallery/shot-07.webp",
           "alt": "Guild formation",
           "caption": "Guild formation before moving into hostile ground.",
-          "tags": ["coordination", "strategy"]
+          "tags": [
+            "coordination",
+            "strategy"
+          ],
+          "full": "./assets/img/gallery/shot-07.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-07.webp"
         },
         {
           "id": "shot-08",
           "src": "./assets/img/gallery/shot-08.webp",
           "alt": "Marketplace pause",
           "caption": "A pause in the marketplace between objectives.",
-          "tags": ["slice-of-life", "social"]
+          "tags": [
+            "slice-of-life",
+            "social"
+          ],
+          "full": "./assets/img/gallery/shot-08.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-08.webp"
         },
         {
           "id": "shot-09",
           "src": "./assets/img/gallery/shot-09.webp",
           "alt": "River crossing",
           "caption": "Crossing the river as a group during open exploration.",
-          "tags": ["travel", "group"]
+          "tags": [
+            "travel",
+            "group"
+          ],
+          "full": "./assets/img/gallery/shot-09.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-09.webp"
         },
         {
           "id": "shot-10",
           "src": "./assets/img/gallery/shot-10.webp",
           "alt": "Night skyline",
           "caption": "City skyline observed during a night cycle.",
-          "tags": ["scenery", "night"]
+          "tags": [
+            "scenery",
+            "night"
+          ],
+          "full": "./assets/img/gallery/shot-10.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-10.webp"
         },
         {
           "id": "shot-11",
           "src": "./assets/img/gallery/shot-11.webp",
           "alt": "Courtyard gathering",
           "caption": "Quiet gathering in a courtyard after events concluded.",
-          "tags": ["community", "rest"]
+          "tags": [
+            "community",
+            "rest"
+          ],
+          "full": "./assets/img/gallery/shot-11.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-11.webp"
         },
         {
           "id": "shot-12",
           "src": "./assets/img/gallery/shot-12.webp",
           "alt": "Forest path",
           "caption": "Forest paths taken during casual roaming.",
-          "tags": ["exploration", "nature"]
+          "tags": [
+            "exploration",
+            "nature"
+          ],
+          "full": "./assets/img/gallery/shot-12.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-12.webp"
         },
         {
           "id": "shot-13",
           "src": "./assets/img/gallery/shot-13.webp",
           "alt": "Distant horizon",
           "caption": "Watching the horizon while waiting for others to arrive.",
-          "tags": ["atmosphere", "pause"]
+          "tags": [
+            "atmosphere",
+            "pause"
+          ],
+          "full": "./assets/img/gallery/shot-13.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-13.webp"
         },
         {
           "id": "shot-14",
           "src": "./assets/img/gallery/shot-14.webp",
           "alt": "Training circle",
           "caption": "Training circle focused on fundamentals.",
-          "tags": ["training", "discipline"]
+          "tags": [
+            "training",
+            "discipline"
+          ],
+          "full": "./assets/img/gallery/shot-14.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-14.webp"
         },
         {
           "id": "shot-15",
           "src": "./assets/img/gallery/shot-15.webp",
           "alt": "Festival lights",
           "caption": "Festival lights encountered during seasonal events.",
-          "tags": ["festival", "culture"]
+          "tags": [
+            "festival",
+            "culture"
+          ],
+          "full": "./assets/img/gallery/shot-15.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-15.webp"
         },
         {
           "id": "shot-16",
           "src": "./assets/img/gallery/shot-16.webp",
           "alt": "Bridge crossing",
           "caption": "Crossing a stone bridge at dawn.",
-          "tags": ["travel", "morning"]
+          "tags": [
+            "travel",
+            "morning"
+          ],
+          "full": "./assets/img/gallery/shot-16.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-16.webp"
         },
         {
           "id": "shot-17",
           "src": "./assets/img/gallery/shot-17.webp",
           "alt": "Group rest",
           "caption": "Resting together after extended travel.",
-          "tags": ["community", "rest"]
+          "tags": [
+            "community",
+            "rest"
+          ],
+          "full": "./assets/img/gallery/shot-17.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-17.webp"
         },
         {
           "id": "shot-18",
           "src": "./assets/img/gallery/shot-18.webp",
           "alt": "Rainfall moment",
           "caption": "A sudden rainfall during open exploration.",
-          "tags": ["weather", "atmosphere"]
+          "tags": [
+            "weather",
+            "atmosphere"
+          ],
+          "full": "./assets/img/gallery/shot-18.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-18.webp"
         },
         {
           "id": "shot-19",
           "src": "./assets/img/gallery/shot-19.webp",
           "alt": "Campfire pause",
           "caption": "Campfire pause before logging out for the night.",
-          "tags": ["camp", "quiet"]
+          "tags": [
+            "camp",
+            "quiet"
+          ],
+          "full": "./assets/img/gallery/shot-19.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-19.webp"
         },
         {
           "id": "shot-20",
           "src": "./assets/img/gallery/shot-20.webp",
           "alt": "Final lookout",
           "caption": "Final lookout before returning to town.",
-          "tags": ["closure", "journey"]
+          "tags": [
+            "closure",
+            "journey"
+          ],
+          "full": "./assets/img/gallery/shot-20.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-20.webp"
         },
         {
           "id": "shot-21",
           "src": "./assets/img/gallery/shot-21.webp",
           "alt": "Breezey day",
           "caption": "Sunset evening",
-          "tags": ["deep", "thought"]
+          "tags": [
+            "deep",
+            "thought"
+          ],
+          "full": "./assets/img/gallery/shot-21.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-21.webp"
         },
         {
           "id": "shot-22",
           "src": "./assets/img/gallery/shot-22.webp",
           "alt": "Morning departure",
           "caption": "Preparing supplies before setting out at first light.",
-          "tags": ["travel", "morning"]
+          "tags": [
+            "travel",
+            "morning"
+          ],
+          "full": "./assets/img/gallery/shot-22.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-22.webp"
         },
         {
           "id": "shot-23",
           "src": "./assets/img/gallery/shot-23.webp",
           "alt": "Quiet shoreline",
           "caption": "Standing along the shoreline during a calm interval.",
-          "tags": ["scenery", "quiet"]
+          "tags": [
+            "scenery",
+            "quiet"
+          ],
+          "full": "./assets/img/gallery/shot-23.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-23.webp"
         },
         {
           "id": "shot-24",
           "src": "./assets/img/gallery/shot-24.webp",
           "alt": "Roadside pause",
           "caption": "Brief rest taken along a winding road.",
-          "tags": ["travel", "pause"]
+          "tags": [
+            "travel",
+            "pause"
+          ],
+          "full": "./assets/img/gallery/shot-24.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-24.webp"
         },
         {
           "id": "shot-25",
           "src": "./assets/img/gallery/shot-25.webp",
           "alt": "Training reflections",
           "caption": "Reviewing techniques after a focused session.",
-          "tags": ["training", "reflection"]
+          "tags": [
+            "training",
+            "reflection"
+          ],
+          "full": "./assets/img/gallery/shot-25.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-25.webp"
         },
         {
           "id": "shot-26",
           "src": "./assets/img/gallery/shot-26.webp",
           "alt": "Open plains",
           "caption": "Wide plains crossed during extended travel.",
-          "tags": ["scenery", "journey"]
+          "tags": [
+            "scenery",
+            "journey"
+          ],
+          "full": "./assets/img/gallery/shot-26.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-26.webp"
         },
         {
           "id": "shot-27",
           "src": "./assets/img/gallery/shot-27.webp",
           "alt": "Night watch",
           "caption": "Keeping watch while others rest.",
-          "tags": ["night", "duty"]
+          "tags": [
+            "night",
+            "duty"
+          ],
+          "full": "./assets/img/gallery/shot-27.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-27.webp"
         },
         {
           "id": "shot-28",
           "src": "./assets/img/gallery/shot-28.webp",
           "alt": "Lantern path",
           "caption": "Lantern-lit paths through a quiet district.",
-          "tags": ["atmosphere", "night"]
+          "tags": [
+            "atmosphere",
+            "night"
+          ],
+          "full": "./assets/img/gallery/shot-28.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-28.webp"
         },
         {
           "id": "shot-29",
           "src": "./assets/img/gallery/shot-29.webp",
           "alt": "Group planning",
           "caption": "Discussing routes and timing before departure.",
-          "tags": ["strategy", "coordination"]
+          "tags": [
+            "strategy",
+            "coordination"
+          ],
+          "full": "./assets/img/gallery/shot-29.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-29.webp"
         },
         {
           "id": "shot-30",
           "src": "./assets/img/gallery/shot-30.webp",
           "alt": "Hilltop view",
           "caption": "Observing the valley from a high hilltop.",
-          "tags": ["scenery", "overlook"]
+          "tags": [
+            "scenery",
+            "overlook"
+          ],
+          "full": "./assets/img/gallery/shot-30.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-30.webp"
         },
         {
           "id": "shot-31",
           "src": "./assets/img/gallery/shot-31.webp",
           "alt": "Shared meal",
           "caption": "Sharing food between activities.",
-          "tags": ["community", "rest"]
+          "tags": [
+            "community",
+            "rest"
+          ],
+          "full": "./assets/img/gallery/shot-31.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-31.webp"
         },
         {
           "id": "shot-32",
           "src": "./assets/img/gallery/shot-32.webp",
           "alt": "Quiet street",
           "caption": "Walking through a town during off hours.",
-          "tags": ["slice-of-life", "quiet"]
+          "tags": [
+            "slice-of-life",
+            "quiet"
+          ],
+          "full": "./assets/img/gallery/shot-32.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-32.webp"
         },
         {
           "id": "shot-33",
           "src": "./assets/img/gallery/shot-33.webp",
           "alt": "Riverbank rest",
           "caption": "Pausing along the riverbank to regroup.",
-          "tags": ["nature", "pause"]
+          "tags": [
+            "nature",
+            "pause"
+          ],
+          "full": "./assets/img/gallery/shot-33.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-33.webp"
         },
         {
           "id": "shot-34",
           "src": "./assets/img/gallery/shot-34.webp",
           "alt": "Weapon practice",
           "caption": "Practicing forms in a cleared space.",
-          "tags": ["training", "discipline"]
+          "tags": [
+            "training",
+            "discipline"
+          ],
+          "full": "./assets/img/gallery/shot-34.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-34.webp"
         },
         {
           "id": "shot-35",
           "src": "./assets/img/gallery/shot-35.webp",
           "alt": "Evening glow",
           "caption": "Light fading as the evening settles.",
-          "tags": ["atmosphere", "evening"]
+          "tags": [
+            "atmosphere",
+            "evening"
+          ],
+          "full": "./assets/img/gallery/shot-35.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-35.webp"
         },
         {
           "id": "shot-36",
           "src": "./assets/img/gallery/shot-36.webp",
           "alt": "Mountain path",
           "caption": "Navigating narrow paths through higher ground.",
-          "tags": ["travel", "terrain"]
+          "tags": [
+            "travel",
+            "terrain"
+          ],
+          "full": "./assets/img/gallery/shot-36.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-36.webp"
         },
         {
           "id": "shot-37",
           "src": "./assets/img/gallery/shot-37.webp",
           "alt": "Quiet exchange",
           "caption": "Brief conversations before moving on.",
-          "tags": ["social", "moment"]
+          "tags": [
+            "social",
+            "moment"
+          ],
+          "full": "./assets/img/gallery/shot-37.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-37.webp"
         },
         {
           "id": "shot-38",
           "src": "./assets/img/gallery/shot-38.webp",
           "alt": "Weather shift",
           "caption": "Clouds gathering ahead of a change in weather.",
-          "tags": ["weather", "atmosphere"]
+          "tags": [
+            "weather",
+            "atmosphere"
+          ],
+          "full": "./assets/img/gallery/shot-38.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-38.webp"
         },
         {
           "id": "shot-39",
           "src": "./assets/img/gallery/shot-39.webp",
           "alt": "Camp breakdown",
           "caption": "Packing up camp at dawn.",
-          "tags": ["camp", "morning"]
+          "tags": [
+            "camp",
+            "morning"
+          ],
+          "full": "./assets/img/gallery/shot-39.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-39.webp"
         }
       ]
     }

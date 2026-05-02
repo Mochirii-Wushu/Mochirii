@@ -96,7 +96,8 @@
   },
   "gallery": [
     {
-      "image": "./assets/img/gallery/shot-23.webp",
+      "image": "./assets/img/gallery/thumbs/shot-23.webp",
+      "full": "./assets/img/gallery/shot-23.webp",
       "alt": "Guild screenshot"
     }
   ]
