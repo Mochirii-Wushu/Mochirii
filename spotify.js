@@ -32,21 +32,22 @@
     const s = String(input || "").trim();
     if (!s) return "";
 
-    if (s.includes("open.spotify.com/embed/")) return s;
-
     try {
       const url = new URL(s);
-      if (!url.hostname.includes("spotify.com")) return s;
+      if (url.hostname !== "open.spotify.com") return "";
 
       const parts = url.pathname.split("/").filter(Boolean);
-      const kind = parts[0];
-      const id = parts[1];
-      if (kind && id) {
-        return `https://open.spotify.com/embed/${kind}/${id}?utm_source=generator`;
+      const allowedKinds = new Set(["album", "artist", "episode", "playlist", "show", "track"]);
+      const isEmbed = parts[0] === "embed";
+      const kind = isEmbed ? parts[1] : parts[0];
+      const id = isEmbed ? parts[2] : parts[1];
+
+      if (allowedKinds.has(kind) && id) {
+        return `https://open.spotify.com/embed/${kind}/${encodeURIComponent(id)}?utm_source=generator`;
       }
-      return s;
+      return "";
     } catch {
-      return s;
+      return "";
     }
   }
 
@@ -105,7 +106,7 @@
 
     const filtered = state.items.filter(matches);
 
-    els.grid.innerHTML = filtered
+    const cards = filtered
       .map((it) => {
         const title = escapeHtml(it.title || "Untitled");
         const subtitle = escapeHtml(it.subtitle || "");
@@ -114,6 +115,8 @@
         const height = Number(it.height) > 0 ? Number(it.height) : 352;
 
         const src = toEmbedSrc(it.embed || it.url);
+        if (!src) return "";
+
         const safeSrc = escapeHtml(src);
 
         return `
@@ -141,9 +144,12 @@
         </article>
       `;
       })
+      .filter(Boolean);
+
+    els.grid.innerHTML = cards
       .join("");
 
-    els.empty.hidden = filtered.length > 0;
+    els.empty.hidden = cards.length > 0;
   }
 
   async function load() {

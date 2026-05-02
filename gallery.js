@@ -67,64 +67,6 @@
     gridEl.appendChild(frag);
   }
 
-  function initLightbox() {
-    const root = $("#lightbox");
-    const img = $("#lightboxImg");
-    const cap = $("#lightboxCaption");
-
-    const isOpen = () => root && !root.classList.contains("hidden");
-
-    const open = (src, caption, alt) => {
-      if (!root || !img) return;
-      img.src = src || "";
-      img.alt = alt || caption || "Gallery image";
-      setText(cap, caption || "");
-      root.classList.remove("hidden");
-      root.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    };
-
-    const close = () => {
-      if (!root || !img) return;
-      root.classList.add("hidden");
-      root.setAttribute("aria-hidden", "true");
-      img.src = "";
-      img.alt = "";
-      setText(cap, "");
-      document.body.style.overflow = "";
-    };
-
-    // Click-off + close button via data-close (matches your HTML)
-    root?.addEventListener("click", (e) => {
-      const t = e.target;
-      if (t && t.closest && t.closest("[data-close]")) close();
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && isOpen()) close();
-    });
-
-    return { open, close };
-  }
-
-  function wireGridClicks(gridEl, lightbox) {
-    if (!gridEl || !lightbox) return;
-
-    gridEl.addEventListener("click", (e) => {
-      const btn = e.target?.closest?.("button[data-full]");
-      if (!btn) return;
-
-      e.preventDefault();
-
-      const src = btn.dataset.full || "";
-      const caption = btn.dataset.caption || "";
-      const thumbImg = $("img", btn);
-      const alt = thumbImg?.getAttribute("alt") || caption || "Gallery image";
-
-      lightbox.open(src, caption, alt);
-    });
-  }
-
   function flattenItems(data) {
     const albums = Array.isArray(data?.albums) ? data.albums : [];
     const first = albums[0];
@@ -147,14 +89,11 @@
     const grid = $("#galleryGrid");
     if (!grid) return;
 
-    const lightbox = initLightbox();
-
     try {
       const data = await fetchJSON(JSON_URL);
       applyMeta(data);
       const items = flattenItems(data);
       renderGrid(grid, items);
-      wireGridClicks(grid, lightbox);
     } catch (err) {
       console.error(err);
       const errEl = $("#galleryError");

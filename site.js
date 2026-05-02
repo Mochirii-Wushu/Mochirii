@@ -6,6 +6,49 @@
   const FOOTER_URL = "./footer.html";
 
   const $ = (sel, root = document) => root.querySelector(sel);
+  const FOCUSABLE_SELECTOR = [
+    "a[href]",
+    "button:not([disabled])",
+    "input:not([disabled])",
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    "[tabindex]:not([tabindex='-1'])",
+  ].join(",");
+
+  function getFocusable(root) {
+    if (!root) return [];
+    return Array.from(root.querySelectorAll(FOCUSABLE_SELECTOR)).filter((el) => {
+      if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
+      if (el.closest("[hidden]")) return false;
+      return el.getClientRects().length > 0;
+    });
+  }
+
+  function trapTabKey(e, root) {
+    if (e.key !== "Tab" || !root) return;
+
+    const focusable = getFocusable(root);
+    if (!focusable.length) {
+      e.preventDefault();
+      root.focus?.({ preventScroll: true });
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+
+    if (!root.contains(active)) {
+      e.preventDefault();
+      (e.shiftKey ? last : first).focus({ preventScroll: true });
+    } else if (e.shiftKey && active === first) {
+      e.preventDefault();
+      last.focus({ preventScroll: true });
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus({ preventScroll: true });
+    }
+  }
 
   function currentFile() {
     const p = window.location.pathname || "";
@@ -65,23 +108,36 @@ function pageKeyFromFile(file) {
     const shell = $("#mobile-menu", headerRoot);
     if (!btn || !shell) return;
 
+    let lastFocus = null;
+    let closeTimer = null;
+
     const openMenu = () => {
+      lastFocus = document.activeElement;
+      if (closeTimer) window.clearTimeout(closeTimer);
       shell.hidden = false;
+      shell.removeAttribute("aria-hidden");
       shell.dataset.open = "true";
       btn.setAttribute("aria-expanded", "true");
+      btn.setAttribute("aria-label", "Close menu");
       document.body.style.overflow = "hidden";
-      const firstLink = shell.querySelector(".mobile-link");
-      if (firstLink) firstLink.focus({ preventScroll: true });
+      const target = shell.querySelector("button[data-close]") || getFocusable(shell)[0];
+      if (target) target.focus({ preventScroll: true });
     };
 
-    const closeMenu = () => {
+    const closeMenu = ({ returnFocus = true } = {}) => {
       shell.dataset.open = "false";
       btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("aria-label", "Open menu");
       document.body.style.overflow = "";
-      window.setTimeout(() => {
+      closeTimer = window.setTimeout(() => {
         shell.hidden = true;
+        shell.setAttribute("aria-hidden", "true");
       }, 180);
-      btn.focus({ preventScroll: true });
+      if (returnFocus) {
+        const focusTarget = lastFocus && typeof lastFocus.focus === "function" ? lastFocus : btn;
+        focusTarget.focus({ preventScroll: true });
+      }
+      lastFocus = null;
     };
 
     btn.addEventListener("click", () => {
@@ -96,12 +152,13 @@ function pageKeyFromFile(file) {
     const nav = shell.querySelector(".mobile-nav");
     if (nav) {
       nav.addEventListener("click", (e) => {
-        if (e.target.closest("a")) closeMenu();
+        if (e.target.closest("a")) closeMenu({ returnFocus: false });
       });
     }
 
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !shell.hidden) closeMenu();
+      if (!shell.hidden) trapTabKey(e, shell);
     });
   }
 
@@ -175,7 +232,7 @@ function pageKeyFromFile(file) {
           e.preventDefault();
           e.stopPropagation();
           openGroup(g);
-          const first = menu.querySelector("a,button,[role='menuitem']");
+          const first = menu.querySelector("a,button");
           if (first) first.focus({ preventScroll: true });
         }
       });
@@ -238,10 +295,43 @@ function pageKeyFromFile(file) {
       root.querySelector("figcaption, .lightbox-caption, [data-caption]");
 
     if (!backdrop || !closeBtn || !img) return;
+    if (!root.hasAttribute("tabindex")) root.setAttribute("tabindex", "-1");
 
     let lastFocus = null;
     let scrollY = 0;
     let prevBody = null;
+    let inertTargets = [];
+
+    const setOutsideInert = (active) => {
+      if (typeof HTMLElement === "undefined" || !("inert" in HTMLElement.prototype)) return;
+
+      if (active) {
+        inertTargets = Array.from(document.body.children)
+          .filter((el) => el !== root && !el.contains(root) && !root.contains(el))
+          .filter((el) => !["SCRIPT", "STYLE"].includes(el.tagName))
+          .map((el) => ({
+            el,
+            inert: el.inert,
+            ariaHidden: el.getAttribute("aria-hidden"),
+          }));
+
+        inertTargets.forEach(({ el }) => {
+          el.inert = true;
+          el.setAttribute("aria-hidden", "true");
+        });
+        return;
+      }
+
+      inertTargets.forEach(({ el, inert, ariaHidden }) => {
+        el.inert = inert;
+        if (ariaHidden === null) {
+          el.removeAttribute("aria-hidden");
+        } else {
+          el.setAttribute("aria-hidden", ariaHidden);
+        }
+      });
+      inertTargets = [];
+    };
 
     const lockScroll = () => {
       scrollY = window.scrollY || 0;
@@ -292,6 +382,7 @@ function pageKeyFromFile(file) {
       root.style.zIndex = "9999";
       root.style.display = "block";
       root.style.pointerEvents = "auto";
+      setOutsideInert(true);
 
       backdrop.style.position = "absolute";
       backdrop.style.inset = "0";
@@ -319,6 +410,7 @@ function pageKeyFromFile(file) {
       backdrop.style.background = "";
       backdrop.style.pointerEvents = "";
 
+      setOutsideInert(false);
       unlockScroll();
 
       if (lastFocus && typeof lastFocus.focus === "function") {
@@ -352,7 +444,9 @@ function pageKeyFromFile(file) {
     });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && root.getAttribute("aria-hidden") === "false") hide();
+      if (root.getAttribute("aria-hidden") !== "false") return;
+      if (e.key === "Escape") hide();
+      trapTabKey(e, root);
     });
 
     // CAPTURE-PHASE: grab gallery clicks before gallery.js can lock the page
