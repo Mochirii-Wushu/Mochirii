@@ -205,6 +205,8 @@ When updating content:
 
 If content fails to load, pages degrade gracefully.
 
+For detailed content, date, asset, gallery, link, tone, and PR validation conventions, see [`docs/content-guide.md`](docs/content-guide.md).
+
 ---
 
 ## Development Notes
