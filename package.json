@@ -9,6 +9,7 @@
     "check:js": "node scripts/check-js.mjs",
     "check:json": "node scripts/check-json.mjs",
     "check:refs": "node scripts/check-refs.mjs",
+    "check:production": "node scripts/check-production.mjs",
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs"
   }
 }
