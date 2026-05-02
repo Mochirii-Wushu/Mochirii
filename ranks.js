@@ -6,6 +6,7 @@
 
   const DATA_URL = "./data/ranks.json";
   const qs = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
   function safeText(v, fb = "") {
     const s = (v ?? "").toString().trim();
@@ -120,15 +121,7 @@
   }
 
   async function loadData() {
-    const res = await fetch(DATA_URL);
-    const text = await res.text();
-    if (!res.ok) throw new Error(`Failed to load ${DATA_URL} (${res.status}).`);
-    try {
-      return JSON.parse(text);
-    } catch {
-      const head = text.slice(0, 80).replace(/\s+/g, " ").trim();
-      throw new Error(`Invalid JSON in ${DATA_URL}. First bytes: "${head}"`);
-    }
+    return U.fetchJson(DATA_URL);
   }
 
   (async () => {

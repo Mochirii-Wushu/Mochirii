@@ -19,45 +19,11 @@
     tags: ["All"],
   };
 
-  function escapeHtml(s) {
-    return String(s)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
-  function toEmbedSrc(input) {
-    const s = String(input || "").trim();
-    if (!s) return "";
-
-    try {
-      const url = new URL(s);
-      if (url.hostname !== "open.spotify.com") return "";
-
-      const parts = url.pathname.split("/").filter(Boolean);
-      const allowedKinds = new Set(["album", "artist", "episode", "playlist", "show", "track"]);
-      const isEmbed = parts[0] === "embed";
-      const kind = isEmbed ? parts[1] : parts[0];
-      const id = isEmbed ? parts[2] : parts[1];
-
-      if (allowedKinds.has(kind) && id) {
-        return `https://open.spotify.com/embed/${kind}/${encodeURIComponent(id)}?utm_source=generator`;
-      }
-      return "";
-    } catch {
-      return "";
-    }
-  }
-
-  function normalizeTags(tags) {
-    const arr = Array.isArray(tags) ? tags : [];
-    return arr
-      .map((t) => String(t).trim())
-      .filter(Boolean)
-      .slice(0, 12);
-  }
+  const U = window.MochiriiUtils;
+  const escapeHtml = U.escapeHtml;
+  const normalizeTags = U.normalizeTags;
+  const toEmbedSrc = U.toSpotifyEmbedSrc;
+  const fetchJSON = U.fetchJson;
 
   function buildTagIndex(items) {
     const set = new Set(["All"]);
@@ -154,9 +120,7 @@
 
   async function load() {
     try {
-      const res = await fetch("./data/spotify.json");
-      if (!res.ok) throw new Error(`Failed to load spotify.json (${res.status})`);
-      const data = await res.json();
+      const data = await fetchJSON("./data/spotify.json");
 
       const items = Array.isArray(data.items) ? data.items : [];
       state.items = items.map((it) => ({

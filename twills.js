@@ -6,6 +6,7 @@
 
   const DATA_URL = "./data/twills.json";
   const $ = (sel, root = document) => root.querySelector(sel);
+  const U = window.MochiriiUtils;
 
   function text(v, fallback = "") {
     const s = String(v ?? "").trim();
@@ -67,15 +68,7 @@
   }
 
   async function loadJSON() {
-    const res = await fetch(DATA_URL);
-    const raw = await res.text();
-    if (!res.ok) throw new Error(`Failed to load ${DATA_URL} (${res.status}).`);
-    try {
-      return JSON.parse(raw);
-    } catch {
-      const head = raw.slice(0, 80).replace(/\s+/g, " ").trim();
-      throw new Error(`Invalid JSON in ${DATA_URL}. First bytes: "${head}"`);
-    }
+    return U.fetchJson(DATA_URL);
   }
 
   (async () => {
