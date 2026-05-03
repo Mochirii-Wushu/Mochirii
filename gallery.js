@@ -34,7 +34,15 @@
       .replace(/^-+|-+$/g, "");
 
   function getItemCategory(item) {
-    return normalizeSlug(item?.category);
+    return getItemCategories(item)[0] || "";
+  }
+
+  function getItemCategories(item) {
+    const values = Array.isArray(item?.categories) && item.categories.length
+      ? item.categories
+      : [item?.category];
+
+    return [...new Set(values.map((value) => normalizeSlug(value)).filter(Boolean))];
   }
 
   function hasCategory(categories, slug) {
@@ -142,28 +150,30 @@
   }
 
   function buildCategories(data, items) {
-    const used = new Set(
-      items
-        .map((item) => getItemCategory(item))
-        .filter(Boolean)
-    );
+    const counts = new Map([[ALL_CATEGORY, items.length]]);
+
+    items.forEach((item) => {
+      getItemCategories(item).forEach((slug) => {
+        counts.set(slug, (counts.get(slug) || 0) + 1);
+      });
+    });
 
     const declared = asArray(data?.categories)
       .map((category) => {
         const slug = normalizeSlug(category?.slug);
         const label = text(category?.label, toTitle(slug));
-        return slug && used.has(slug) ? { slug, label } : null;
+        return slug && counts.has(slug) ? { slug, label, count: counts.get(slug) } : null;
       })
       .filter(Boolean);
 
     const seen = new Set(declared.map((category) => category.slug));
-    const inferred = [...used]
-      .filter((slug) => !seen.has(slug))
+    const inferred = [...counts.keys()]
+      .filter((slug) => slug !== ALL_CATEGORY && !seen.has(slug))
       .sort()
-      .map((slug) => ({ slug, label: toTitle(slug) }));
+      .map((slug) => ({ slug, label: toTitle(slug), count: counts.get(slug) }));
 
     return [
-      { slug: ALL_CATEGORY, label: "All" },
+      { slug: ALL_CATEGORY, label: "All", count: counts.get(ALL_CATEGORY) },
       ...declared,
       ...inferred,
     ];
@@ -193,7 +203,8 @@
       btn.className = "gallery-filter";
       btn.dataset.category = category.slug;
       btn.setAttribute("aria-pressed", category.slug === activeCategory ? "true" : "false");
-      btn.textContent = category.label;
+      btn.setAttribute("aria-label", `${category.label}, ${category.count} ${category.count === 1 ? "image" : "images"}`);
+      btn.textContent = `${category.label} · ${category.count}`;
       btn.addEventListener("click", () => onSelect(category.slug));
       frag.appendChild(btn);
     });
@@ -209,7 +220,7 @@
 
   function filterItems(items, category) {
     if (category === ALL_CATEGORY) return items;
-    return items.filter((item) => getItemCategory(item) === category);
+    return items.filter((item) => getItemCategories(item).includes(category));
   }
 
   function formatCount(count, total, categoryLabel) {
