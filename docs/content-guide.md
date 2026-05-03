@@ -60,6 +60,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - For Join-specific onboarding, checklist, link, and accessibility conventions, see [`docs/join-guide.md`](join-guide.md).
 - For Codex-specific conduct, values, and protected-content conventions, see [`docs/codex-guide.md`](codex-guide.md).
 - For Ranks-specific progression, hierarchy, image, tone, and accessibility conventions, see [`docs/ranks-guide.md`](ranks-guide.md).
+- For Leaders-specific roster, profile-link, image, tone, and accessibility conventions, see [`docs/leaders-guide.md`](leaders-guide.md).
 - Tone should stay cozy, clear, wuxia-inspired, and welcoming.
 - New visitors should understand the guild, the game, and the join path quickly.
 - Keep the Cupcake identity readable rather than cryptic.
