@@ -2,7 +2,7 @@
   "hero": {
     "kicker": "Ranks",
     "title": "Ranks & Progression",
-    "intro": "Our ranks describe how we support each other. Leadership keeps the halls reliable, middle leaders guard culture & momentum & members grow through presence, kindness & shared community.",
+    "intro": "Our ranks describe how we support each other. Leadership keeps the halls reliable, middle leaders guard culture & momentum, and members grow through presence, kindness & shared runs.",
     "image": "./assets/img/ranks/hero.webp",
     "atmosphereImage": "",
     "pills": [
@@ -28,32 +28,32 @@
   "tiers": {
     "senior": {
       "title": "Senior Leadership",
-      "description": "Top leaders responsible for the well-being of members & the overall vision & direction of the guild.",
+      "description": "Top leaders care for member well-being and guide the overall vision & direction of the guild.",
       "image": "./assets/img/ranks/senior.webp",
       "ranks": [
         {
           "name": "Guild Leader",
           "body": [
-            "A leader is the core vision & direction of the guild. The members are the body & without them, there is no guild."
+            "A leader carries the guild's vision & direction. The members are the body; without them, there is no guild."
           ]
         },
         {
           "name": "Vice Leader",
           "body": [
-            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They help coordinate across halls & ensure the guild's vision is executed effectively."
+            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help the guild's vision become practical care."
           ]
         },
         {
           "name": "Hall Leader",
           "body": [
-            "Hall leaders are responsible for the well-being of members within their hall. They oversee daily operations, support middle leadership & ensure a positive environment for all members."
+            "Hall leaders look after members within their hall. They oversee daily operations, support middle leadership & help every hall feel steady and welcoming."
           ]
         }
       ]
     },
     "middle": {
       "title": "Middle Leadership",
-      "description": "Team leaders responsible for directly leading guild teams & responding to issues that arise within the guild.",
+      "description": "Team leaders guide guild teams directly and respond when members need help finding the next clear step.",
       "image": "./assets/img/ranks/middle.webp",
       "pills": [
         "Onboarding support",
@@ -64,7 +64,7 @@
         {
           "name": "Dharmapala",
           "body": [
-            "Dharmapala are the core of middle leadership, the guardians of the guild's culture & daily pace."
+            "Dharmapala are the core of middle leadership, guarding the guild's culture & daily pace."
           ]
         },
         {
@@ -76,7 +76,7 @@
         {
           "name": "Petal Keeper",
           "body": [
-            "Petal Keepers are the consistent presence in the guild, supporting members through consistent participation, helpful presence & kind conduct. They help maintain a positive environment for all members."
+            "Petal Keepers are a steady presence in the guild, supporting members through participation, helpfulness & kind conduct. They help keep the shared space positive for everyone."
           ]
         }
       ]
@@ -95,25 +95,25 @@
         {
           "name": "Mochi Blossom",
           "body": [
-            "Mochi Blossoms are the veterans of the guild before entering into leadership roles. They have been around long enough to see the guild through multiple seasons & they have contributed to the guild's culture & community in meaningful ways."
+            "Mochi Blossoms are veterans of the guild before entering leadership roles. They have seen the guild through multiple seasons & contributed to its culture in meaningful ways."
           ]
         },
         {
           "name": "Young Bamboo",
           "body": [
-            "Young Bamboo are the third rank of members, they've been around a while, have contributed to the guild with room still left to grow into long term veterans."
+            "Young Bamboo are the third rank of members. They have stayed awhile, contributed to the guild, and still have room to grow into long-term veterans."
           ]
         },
         {
           "name": "Softwind",
           "body": [
-            "Softwind are the second rank of members, they have been around long enough to get a feel for the guild's culture & community, but they are still in the early stages of their journey with room to grow into veterans."
+            "Softwind are the second rank of members. They know the guild's culture & community, while still early enough in the journey to keep growing."
           ]
         },
         {
           "name": "Rice Sprout",
           "body": [
-            "Rice Sprout is the first rank of members, they are new to the guild but have shown potential through their participation & conduct. They are in the early stages of learning the guild's culture & community."
+            "Rice Sprout is the first rank of members. They are new to the guild and have shown promise through participation, conduct & care."
           ]
         }
       ]

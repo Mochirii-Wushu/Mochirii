@@ -21,7 +21,7 @@
 
   "audio": {
     "title": "A Note From Twills",
-    "description": "Prefer listening? Twills' note covers the same spirit in a softer format.",
+    "description": "Prefer listening? Twills' note carries the same invitation in a softer voice.",
     "sources": [
       { "src": "./assets/audio/mochiriiiiii.mp3", "type": "audio/mpeg" }
     ]

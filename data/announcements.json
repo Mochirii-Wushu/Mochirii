@@ -1,8 +1,8 @@
 {
   "meta": {
     "title": "Mōchirīī Announcements",
-    "tagline": "Latest in Mōchirīī news.",
-    "intro": "Will try to keep this updated with the latest news & events. Check back often for updates on our schedule, training focus & community activities.",
+    "tagline": "Latest notes from the hall.",
+    "intro": "Check here for schedule notes, training focus, and community updates that help everyone keep pace together.",
     "updated": "2026-02-01",
     "badges": [
       "Check weekly",
@@ -20,7 +20,7 @@
       "pinned": true,
       "date": "2026-02-07",
       "title": "Weekly Schedule Posted",
-      "summary": "These events happen twice every week.",
+      "summary": "These windows help members gather, plan, and make room for shared runs.",
       "details": [
         "Guild Party:  Every Day              - 7:00 PM - 7:30 PM",
         "Guild Bosses: Mondays   & Wednesdays - 7:30 PM - 9:30 PM",
@@ -34,7 +34,7 @@
       "pinned": false,
       "date": "2026-02-14",
       "title": "Gallery Submissions Open",
-      "summary": "Send your best screenshots in the Discord gallery channel. We will rotate new shots into the site album.",
+      "summary": "Send your best screenshots in the Discord gallery channel. Small moments from the road can become part of the site album.",
       "details": [
         "Use .webp when possible",
         "Add a short caption",
@@ -47,7 +47,7 @@
       "pinned": false,
       "date": "2026-02-21",
       "title": "Training Focus: Fundamentals",
-      "summary": "This month we tighten basics: movement discipline, spacing, combos, mystics.",
+      "summary": "This month we steady the basics: movement discipline, spacing, combos, and mystics.",
       "details": [
         "Brief tips & tricks before events",
         "One improvement goal per member",

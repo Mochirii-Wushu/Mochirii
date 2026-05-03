@@ -1,5 +1,5 @@
 {
-  "intro": "A curated listening playlist for pretty guildies.",
+  "intro": "A quiet listening room for guild planning, reading, and soft hours between runs.",
   "items": [
     {
       "title": "Guild Album - Ambient Rotation",
@@ -8,7 +8,7 @@
       "tags": ["Ambient", "Focus", "Atmosphere"],
       "embed": "https://open.spotify.com/embed/album/2GDgMnMjBf1GXVKPQUzsR7?utm_source=generator",
       "height": 352,
-      "description": "A continuous album stream intended for reading, planning & coordination."
+      "description": "A continuous album stream for reading, planning & calm coordination."
     },
     {
       "title": "Guild Album - Evening Drift",
@@ -26,7 +26,7 @@
       "tags": ["Ambient", "Night", "Flow"],
       "embed": "https://open.spotify.com/embed/album/7hHtZyabiHgej67ie0Q5JZ?utm_source=generator",
       "height": 352,
-      "description": "A subdued album intended for long listening stretches & uninterrupted focus."
+      "description": "A subdued album for long listening stretches & uninterrupted focus."
     },
     {
       "title": "Guild Artist - Featured Rotation",
@@ -62,7 +62,7 @@
       "tags": ["Ambient", "Artist", "Stillness"],
       "embed": "https://open.spotify.com/embed/artist/4XBG26mgvzGqT09eopG4d9?utm_source=generator",
       "height": 352,
-      "description": "Sparse, slow compositions intended for quiet focus & mental rest."
+      "description": "Sparse, slow compositions for quiet focus & mental rest."
     },
     {
       "title": "Guild Track - Night Walk",
@@ -71,7 +71,7 @@
       "tags": ["Ambient", "Night", "Focus"],
       "embed": "https://open.spotify.com/embed/track/3fuyYaLhZ2RoP9eWpvfP1H?utm_source=generator",
       "height": 152,
-      "description": "A short piece intended for late hours & reduced tempo."
+      "description": "A short piece for late hours & reduced tempo."
     }
   ]
 }
