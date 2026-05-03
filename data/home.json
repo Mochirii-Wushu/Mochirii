@@ -1,7 +1,7 @@
 {
   "copy": {
-    "bulletinIntro": "Guild news, event notes, raffles, and small calls that keep the hall moving.",
-    "doorsIntro": "Step through the join path, ranks, leaders, and Codex that keep Mōchirīī warm and steady.",
+    "bulletinIntro": "Hall notes, event calls, raffles, and small updates that keep the guild moving.",
+    "doorsIntro": "Step through the join path, ranks, leaders, and Codex that keep Mōchirīī rooted and clear.",
     "spotlightIntro": "A warm shoutout for a member whose care helps the hall feel alive.",
     "galleryIntro": "Screenshots from shared runs, quiet wandering, and the little moments that become guild memory."
   },
@@ -9,8 +9,8 @@
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",
     "descriptor": [
-      "Mōchirīī is a cozy Where Winds Meet guild for players who like friendly company, relaxed events, helpful runs, and a soft place to rest between adventures.",
-      "Step in through Discord, read the joining path, and grow with us at your own pace. Check event notes, RSVP when planning helps, and bring a little warmth to the hall."
+      "Mōchirīī is a cozy guild hall for players who like friendly company, relaxed events, helpful runs, and a soft place to rest between adventures.",
+      "Step in through Discord, read the joining path, and grow with us at your own pace. Check event notes, RSVP when planning helps, and bring a little lantern warmth to the hall."
     ],
     "badges": [
       "Recruitment Open",
@@ -34,7 +34,7 @@
     {
       "pinned": true,
       "type": "event",
-      "title": "Monthly guild meeting for current members to gather, plan, and be heard.",
+      "title": "Monthly hall meeting for current members to gather, plan, and be heard.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/featured.webp",
       "imageAlt": "Guild meeting bulletin cover",
@@ -42,7 +42,7 @@
     },
     {
       "type": "raffle",
-      "title": "Monthly cosmetics raffle for active members who keep the hall alive.",
+      "title": "Monthly cosmetics raffle for active members who keep the table bright.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/raffle.webp",
       "imageAlt": "Raffle bulletin cover",
@@ -50,7 +50,7 @@
     },
     {
       "type": "announcement",
-      "title": "Leadership roles are open for members ready to guide with care.",
+      "title": "Leadership roles are open for members ready to carry a lantern with care.",
       "date": "2026-02-01",
       "image": "./assets/img/bulletins/announcement.webp",
       "imageAlt": "Leadership announcement cover",
@@ -67,7 +67,7 @@
     },
     {
       "label": "Ranks",
-      "title": "See how steady presence, care, and contribution are recognized.",
+      "title": "See how patient presence, care, and contribution are recognized.",
       "image": "./assets/img/tiles/ranks.webp",
       "alt": "Guild ranks and progression tile artwork",
       "href": "./ranks.html"

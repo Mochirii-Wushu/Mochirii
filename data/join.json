@@ -4,7 +4,7 @@
     "title": "Join Mōchirīī",
     "updated": "2026-02-01",
     "timezone": "UTC+8",
-    "intro": "Mōchirīī is a quiet, active Where Winds Meet home for players who enjoy relaxed company, simple coordination, and small greetings that matter. Join through Discord, share your in-game name and time zone, learn the guild rhythm, and step into events when you feel ready.",
+    "intro": "Mōchirīī is a quiet, active guild home for players who enjoy relaxed company, simple coordination, and small greetings that matter. Join through Discord, share your in-game name and time zone, learn the guild rhythm, and step into events when you feel ready.",
     "image": "./assets/img/join/hero.webp",
     "imageAlt": "Join Mōchirīī banner artwork",
     "atmosphereImage": "",
@@ -24,7 +24,7 @@
       {
         "number": "1",
         "title": "Enter the Hall",
-        "description": "Join Discord and let a mod know you are here for the Where Winds Meet guild. Verification opens the wider server, and the WWM guild section appears once the right role is set. If you feel stuck, DM a mod or ask in game; one clear greeting can open the door."
+        "description": "Join Discord and let a mod know you are here for the guild. Verification opens the wider server, and the game channels appear once the right role is set. If you feel stuck, DM a mod or ask in game; one clear greeting can open the door."
       },
       {
         "number": "2",
@@ -97,7 +97,7 @@
   "culture": {
     "title": "Expectations & Culture",
     "intro": [
-      "Mōchirīī stays comfortable through courtesy, steady effort & clear communication. Skill grows over time; care can show up in the first message."
+      "Mōchirīī stays comfortable through courtesy, patient effort & clear communication. Skill grows over time; care can show up in the first message."
     ],
     "cards": [
       {

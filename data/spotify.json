@@ -1,5 +1,5 @@
 {
-  "intro": "A quiet listening room for guild planning, reading, and soft hours between runs.",
+  "intro": "A quiet listening room for reading, planning, and soft hours between runs.",
   "items": [
     {
       "title": "Guild Album - Ambient Rotation",
@@ -8,7 +8,7 @@
       "tags": ["Ambient", "Focus", "Atmosphere"],
       "embed": "https://open.spotify.com/embed/album/2GDgMnMjBf1GXVKPQUzsR7?utm_source=generator",
       "height": 352,
-      "description": "A steady album stream for reading, planning & calm coordination."
+      "description": "A calm album stream for reading, planning & quiet coordination."
     },
     {
       "title": "Guild Album - Evening Drift",
@@ -26,7 +26,7 @@
       "tags": ["Ambient", "Night", "Flow"],
       "embed": "https://open.spotify.com/embed/album/7hHtZyabiHgej67ie0Q5JZ?utm_source=generator",
       "height": 352,
-      "description": "A subdued album for long listening stretches & steady focus."
+      "description": "A subdued album for long listening stretches & calm focus."
     },
     {
       "title": "Guild Artist - Featured Rotation",

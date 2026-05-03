@@ -66,7 +66,16 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - Avoid generic AI-like phrasing, corporate language, forced rhyme, and direct references from source poems.
 - Do not alter the protected long-form recruitment body or the guild seal poem.
 
-## 8. Validation Before PR
+## 8. Xianxia House Style, Page Purpose, and Vocabulary
+
+- Mōchirīī copy should feel like a warm xianxia guild hall: clear, kind, lightly rhythmic, and rooted in shared effort.
+- Each page should have a distinct job. Home invites, Join orients, Events schedules, Gallery remembers, Ranks explains progression, Leaders directs contact, Codex defines conduct, Recruitment preserves philosophy, and side pages keep their own focus.
+- Use cultivation, path, hall, lantern, jade, lotus, bamboo, moon, frost, and qi imagery sparingly. Clear meaning comes first.
+- Keep Cupcake warmth as a playful thread, not a repeated motif.
+- The exact phrase “Where Winds Meet” may remain in titles, metadata, JSON-LD, validation scripts, docs, reports, header, and footer. Avoid it in regular visible body copy outside header/footer when a clear phrase like the game, the Jianghu, the guild road, or the path works better.
+- Do not imitate named authors, copy poem/article phrases, force rhyme, blur functional labels, or repeat the same vocabulary across pages without purpose.
+
+## 9. Validation Before PR
 
 Run these for most changes:
 
@@ -88,7 +97,7 @@ node scripts/check-js.mjs
 
 Keep `npm run check:production` separate from local validation. It depends on the live site and network access.
 
-## 9. Branching
+## 10. Branching
 
 - Use one scoped branch per change.
 - Open a PR into `main`.

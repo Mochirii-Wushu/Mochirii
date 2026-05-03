@@ -2,14 +2,14 @@
   "hero": {
     "kicker": "Ranks",
     "title": "Ranks & Progression",
-    "intro": "Our ranks describe how we support each other. Leadership keeps the halls steady, middle leaders guard culture & momentum, and members grow through presence, kindness & shared runs.",
+    "intro": "Our ranks describe how trust grows. Leadership keeps the halls rooted, middle leaders guard culture & momentum, and members rise through presence, kindness & shared runs.",
     "image": "./assets/img/ranks/hero.webp",
     "atmosphereImage": "",
     "pills": [
       "Observed over time",
       "Culture-first",
       "Clear escalation",
-      "Steady recognition"
+      "Patient recognition"
     ]
   },
   "progression": {
@@ -28,7 +28,7 @@
   "tiers": {
     "senior": {
       "title": "Senior Leadership",
-      "description": "Top leaders care for member well-being and guide the guild's long road.",
+      "description": "Top leaders care for member well-being and guide the guild's long path.",
       "image": "./assets/img/ranks/senior.webp",
       "ranks": [
         {
@@ -40,13 +40,13 @@
         {
           "name": "Vice Leader",
           "body": [
-            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help direction become practical care."
+            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help direction become practical support."
           ]
         },
         {
           "name": "Hall Leader",
           "body": [
-            "Hall leaders look after members within their hall. They oversee daily operations, support middle leadership & help every hall feel steady and welcoming."
+            "Hall leaders look after members within their hall. They oversee daily needs, support middle leadership & help every hall feel rooted and welcoming."
           ]
         }
       ]
@@ -76,7 +76,7 @@
         {
           "name": "Petal Keeper",
           "body": [
-            "Petal Keepers are a steady presence in the guild, supporting members through participation, helpfulness & kind conduct. They help keep the shared space positive for everyone."
+            "Petal Keepers are a patient presence in the guild, supporting members through participation, helpfulness & kind conduct. They help keep the shared space positive for everyone."
           ]
         }
       ]
