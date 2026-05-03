@@ -7,6 +7,7 @@
 - Run validation before completing work: `npm run check` plus any task-specific smoke checks. Individual checks: `npm run check:js`, `npm run check:json`, `npm run check:refs`, `npm run check:assets`.
 - Consult `docs/content-guide.md` before content, JSON, date, gallery, or asset edits.
 - Preserve protected copy: the long-form recruitment body in `data/recruitment.json` and the guild seal poem in `data/home.json`.
+- Keep exact game-name usage in regular visible body copy limited; titles, metadata, validation scripts, docs, header, and footer may retain it.
 - Use `docs/roadmap.md` for future branch ideas; keep roadmap items scoped instead of turning them into broad refactors.
 - Keep public URLs and page filenames stable unless fixing a confirmed broken reference.
 - Prefer dependency-free Node scripts and plain browser APIs.

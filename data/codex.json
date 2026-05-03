@@ -15,7 +15,7 @@
     "title": "A shared standard",
     "image": "./assets/img/codex/values.webp",
     "body": [
-      "The Codex keeps culture steady across time zones & playstyles.",
+      "The Codex keeps culture rooted across time zones & playstyles.",
       "It sets conduct expectations, explains how disputes get handled & describes how we keep guild life active with room to breathe."
     ]
   },
@@ -25,7 +25,7 @@
     "description": "These tenets shape our tone in parties, chat & shared spaces so every run has a little more trust beneath it.",
     "image": "./assets/img/codex/tenets.webp",
     "captionTitle": "Values made practical",
-    "caption": "A shared standard turns good intent into steady conduct when fights get loud.",
+    "caption": "A shared standard turns good intent into grounded conduct when fights get loud.",
     "pills": ["Tone", "Trust", "Growth"],
     "note": "Choose one tenet before an event & carry it into the run with care.",
     "items": [
@@ -104,7 +104,7 @@
     "description": "Rhythm is our pace: enough structure to meet & grow, enough ease to keep play restful.",
     "image": "./assets/img/codex/rituals.webp",
     "captionTitle": "A gentle pace",
-    "caption": "Mōchirīī favors consistent participation & leaves room for real life.",
+    "caption": "Mōchirīī favors patient participation & leaves room for real life.",
     "pills": ["Gather", "Practice", "Rest"],
     "note": "Post plans early, communicate changes plainly & keep the shared pace gentle.",
     "items": [

@@ -4,11 +4,11 @@
     "title": "Leaders Hall",
     "image": "./assets/img/leaders/hero.webp",
     "introBody": [
-      "Leadership in Mōchirīī rests on shared care. Each role carries its own work, and all of them help keep the guild fair, steady & enjoyable for everyone."
+      "Leadership in Mōchirīī rests on shared care. Each role carries its own work, and all of them help keep the guild fair, calm & enjoyable for everyone."
     ],
     "pills": [
       "Start with your Hall Leader",
-      "Steady, fair resolution",
+      "Calm, fair resolution",
       "Escalation stays clear"
     ]
   },
@@ -25,7 +25,7 @@
 
   "council": {
     "title": "The Council",
-    "description": "These are the contact points for support, planning & keeping the guild steady and fair."
+    "description": "These are the contact points for support, planning & keeping the guild calm and fair."
   },
 
   "leaders": [
@@ -45,7 +45,7 @@
       "availability": "Operations & coordination",
       "image": "./assets/img/leaders/leader-silhouette.webp",
       "alt": "Vice Leader portrait",
-      "summary": "Keeps hall work steady, coordinates leaders & helps resolve issues that reach beyond one group."
+      "summary": "Keeps hall work clear, coordinates leaders & helps resolve issues that reach beyond one group."
     },
     {
       "role": "Hall Leader",
@@ -61,7 +61,7 @@
       "availability": "Community guidance",
       "image": "./assets/img/leaders/dharmapala.webp",
       "alt": "Dharmapala portrait",
-      "summary": "Protects fairness & tone, helps mediate conflict & keeps standards steady across halls."
+      "summary": "Protects fairness & tone, helps mediate conflict & keeps standards clear across halls."
     },
     {
       "role": "Lotus Warden",
@@ -77,7 +77,7 @@
       "availability": "Culture & activity support",
       "image": "./assets/img/leaders/petal_keeper.webp",
       "alt": "Petal Keeper portrait",
-      "summary": "Keeps daily community spaces active, welcomes arrivals & helps members find their footing quickly."
+      "summary": "Keeps daily spaces active, welcomes arrivals & helps members find their footing quickly."
     }
   ],
 
@@ -99,7 +99,7 @@
       },
       {
         "title": "Culture & people",
-        "description": "Maintains standards, resolves conflicts & sustains morale so the hall stays steady.",
+        "description": "Maintains standards, resolves conflicts & sustains morale so the hall stays calm.",
         "image": "./assets/img/leaders/responsibilities-03.webp",
         "alt": "Culture & people visual panel"
       }
