@@ -213,6 +213,8 @@ For Codex data, conduct, tone, protected-content, accessibility, and smoke-test 
 
 For Events data, date, filter, accessibility, and smoke-test conventions, see [`docs/events-guide.md`](docs/events-guide.md).
 
+For Ranks data, hierarchy, image, tone, accessibility, and smoke-test conventions, see [`docs/ranks-guide.md`](docs/ranks-guide.md).
+
 For Gallery image, category, tag, caption, URL state, cache-query, and smoke-test conventions, see [`docs/gallery-guide.md`](docs/gallery-guide.md).
 
 For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/roadmap.md).
