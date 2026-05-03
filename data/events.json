@@ -2,7 +2,7 @@
   "meta": {
     "kicker": "Guild calendar",
     "title": "Events",
-    "intro": "Events gather the guild around posted times, simple goals, and kind coordination so shared runs feel calm instead of rushed.",
+    "intro": "Events gather the guild around posted times, goals, and RSVP notes so runs feel calm instead of rushed.",
     "updated": "2026-02-01",
     "timezoneLabel": "UTC+8",
     "badges": ["RSVP in Discord when planning is needed"],
@@ -12,7 +12,7 @@
     }
   },
   "featured": {
-    "lead": "Featured activities show where the guild is gathering right now, from welcoming new members to helping friends prepare for harder trials.",
+    "lead": "Featured activities show where the guild is gathering, from welcoming members to helping friends prepare for trials.",
     "tag": "Featured",
     "date": "2026-02-01",
     "time": "7:00 PM",
@@ -22,7 +22,7 @@
     "href": "https://discord.com/invite/dPafqMwWPK",
     "linkLabel": "RSVP & details in Discord",
     "bullets": [
-      "When open slots allow, we welcome new members and help each player find a place at the Mōchirīī table.",
+      "When slots allow, we welcome members and help each player find a place at the Mōchirīī table.",
       "Check Discord for final timing, requirements, and party assignments before the run."
     ]
   },
@@ -32,24 +32,24 @@
       "time": "5:00 PM",
       "timezone": "UTC+8",
       "title": "Guild Hero's Realm: Weekly Coordination",
-      "summary": "A relaxed window for the guild hero's realm. Show up, ask questions & we'll do our best to match groups with patience.",
+      "summary": "A window for the guild hero's realm. Show up, ask questions & we'll match groups with patience.",
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK"
     }
   ],
   "recurring": {
-    "intro": "Recurring activities happen as schedules allow. Discord carries the final timing each week, and the site keeps the rhythm clear so members know what to watch for.",
+    "intro": "Recurring activities happen as schedules allow. Discord carries final timing; the site keeps the rhythm clear.",
     "items": [
       {
         "title": "Sect dailies, guild activities, trials, hero realms, and more.",
-        "summary": "Posted windows help members gather when possible, form full teams, and keep runs calm."
+        "summary": "Posted windows help members gather, form teams, and keep runs calm."
       }
     ]
   },
   "participation": [
     {
       "title": "How to participate",
-      "body": "All members are welcome. RSVP in Discord or the in-game guild event when planning is needed. Showing up on time helps leaders form balanced groups & keeps runs smooth for everyone."
+      "body": "All members are welcome. RSVP in Discord or the in-game guild event when planning is needed. Showing up on time helps leaders form groups & keeps runs smooth for everyone."
     }
   ]
 }

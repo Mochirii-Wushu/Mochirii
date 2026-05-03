@@ -5,7 +5,7 @@
     "image": "./assets/img/codex/hero.webp",
     "introBody": [
       "The Codex holds how Mōchirīī speaks, gathers & looks after each other.",
-      "Read it once, revisit it often & use it to keep the guild clear, kind & easy to join."
+      "Read it once, revisit it often & use it to keep conduct clear."
     ],
     "pills": ["Values in practice", "Etiquette with dignity", "Consistency with ease"]
   },
@@ -22,7 +22,7 @@
 
   "tenets": {
     "title": "Tenets",
-    "description": "These tenets shape our tone in parties, chat & shared spaces so every run has a little more trust beneath it.",
+    "description": "These tenets shape our tone in parties, chat & guild spaces so every run carries more trust.",
     "image": "./assets/img/codex/tenets.webp",
     "captionTitle": "Values made practical",
     "caption": "A shared standard turns good intent into grounded conduct when fights get loud.",
@@ -96,7 +96,7 @@
         ]
       }
     ],
-    "note": "Keep disputes small, private & actionable; return to the road with dignity."
+    "note": "Keep disputes private and actionable; return to the road with dignity."
   },
 
   "rhythm": {
@@ -106,7 +106,7 @@
     "captionTitle": "A gentle pace",
     "caption": "Mōchirīī favors patient participation & leaves room for real life.",
     "pills": ["Gather", "Practice", "Rest"],
-    "note": "Post plans early, communicate changes plainly & keep the shared pace gentle.",
+    "note": "Post plans early, communicate changes plainly & keep the pace in reach.",
     "items": [
       {
         "title": "Hall Runs",
@@ -122,14 +122,14 @@
       },
       {
         "title": "Quiet Time",
-        "description": "Roam, farm, craft, or chat casually while staying connected to the guild at a pace that still leaves room for real life."
+        "description": "Roam, farm, craft, or chat while staying connected to the guild at a pace that leaves room for real life."
       }
     ]
   },
 
   "recognition": {
     "title": "Recognition",
-    "description": "Recognition is how we say “we see you,” marking effort, care & the kind of consistency that helps others feel known.",
+    "description": "Recognition is how we say “we see you,” marking effort, care & consistency that helps others feel known.",
     "image": "./assets/img/codex/recognition.webp",
     "items": [
       {

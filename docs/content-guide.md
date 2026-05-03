@@ -33,7 +33,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - Use optimized WebP where practical.
 - Preserve PNG only when transparency or source quality requires it.
 - Do not commit huge originals unless they are intentionally needed for deployment.
-- Keep alt text meaningful for public images.
+- Keep alt text useful for public images.
 - Run `node scripts/check-assets.mjs` and `node scripts/check-refs.mjs` after asset edits.
 - Do not delete assets without confirming they are unused or safely replaced.
 
@@ -59,6 +59,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - Keep the Cupcake identity readable rather than cryptic.
 - Do not claim official affiliation with Where Winds Meet unless that is verified and intentionally approved.
 - Avoid generic MMO boilerplate; write like Mōchirīī has a real home and rhythm.
+- Prefer nouns and verbs over adjective stacks; remove descriptors that repeat, decorate, or slow the line.
 - Favor concrete guild images: shared runs, small greetings, warm halls, gentle cheer, and a little Cupcake sweetness.
 - Use rhyme, repeated sounds, and soft cadence only when they feel natural. Do not turn public guidance into verse.
 - Use Cupcake warmth sparingly; do not make every section dessert-themed or unclear.

@@ -2,7 +2,7 @@
   "hero": {
     "kicker": "Ranks",
     "title": "Ranks & Progression",
-    "intro": "Our ranks describe how trust grows. Leadership keeps the halls rooted, middle leaders guard culture & momentum, and members rise through presence, kindness & shared runs.",
+    "intro": "Our ranks describe how trust grows. Leadership keeps the halls rooted, middle leaders guard culture & momentum, and members rise through presence, kindness & runs.",
     "image": "./assets/img/ranks/hero.webp",
     "atmosphereImage": "",
     "pills": [
@@ -17,18 +17,18 @@
     "pills": [
       "Consistency",
       "Reliability",
-      "Helpful presence",
-      "Respectful conduct"
+      "Helpfulness",
+      "Respect"
     ],
     "body": [
-      "Progression reflects consistent conduct & community presence over time. Short bursts matter less than habits that return.",
+      "Progression reflects conduct & community presence over time. Short bursts matter less than habits that return.",
       "Questions & small issues start with middle leadership. Hall leaders handle hall-wide needs. Vice leaders coordinate across halls. Long-term direction & policy rest with the guild leader."
     ]
   },
   "tiers": {
     "senior": {
       "title": "Senior Leadership",
-      "description": "Top leaders care for member well-being and guide the guild's long path.",
+      "description": "Senior leaders care for member well-being and guide the guild's path.",
       "image": "./assets/img/ranks/senior.webp",
       "ranks": [
         {
@@ -40,20 +40,20 @@
         {
           "name": "Vice Leader",
           "body": [
-            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help direction become practical support."
+            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help direction become action."
           ]
         },
         {
           "name": "Hall Leader",
           "body": [
-            "Hall leaders look after members within their hall. They oversee daily needs, support middle leadership & help every hall feel rooted and welcoming."
+            "Hall leaders look after members within their hall. They oversee daily needs, support middle leadership & help every hall stay rooted."
           ]
         }
       ]
     },
     "middle": {
       "title": "Middle Leadership",
-      "description": "Team leaders guide guild teams directly and respond when members need help finding the next clear step.",
+      "description": "Team leaders guide guild teams directly and respond when members need help finding the next step.",
       "image": "./assets/img/ranks/middle.webp",
       "pills": [
         "Onboarding support",
@@ -70,20 +70,20 @@
         {
           "name": "Lotus Warden",
           "body": [
-            "Lotus Wardens are the first line of support for members, helping with onboarding, answering questions & keeping the guild's culture alive through daily interactions."
+            "Lotus Wardens are the first line of support for members, helping with onboarding, answering questions & keeping culture alive day to day."
           ]
         },
         {
           "name": "Petal Keeper",
           "body": [
-            "Petal Keepers are a patient presence in the guild, supporting members through participation, helpfulness & kind conduct. They help keep the shared space positive for everyone."
+            "Petal Keepers support participation, answer with patience & keep the shared space useful for everyone."
           ]
         }
       ]
     },
     "members": {
       "title": "Members",
-      "description": "The heart of Mōchirīī. Member ranks are observed through consistent participation, conduct & contribution over time.",
+      "description": "The heart of Mōchirīī. Member ranks are observed through participation, conduct & contribution over time.",
       "image": "./assets/img/ranks/members.webp",
       "pills": [
         "Participation over time",

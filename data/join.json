@@ -4,55 +4,55 @@
     "title": "Join Mōchirīī",
     "updated": "2026-02-01",
     "timezone": "UTC+8",
-    "intro": "Mōchirīī is a quiet, active guild home for players who enjoy relaxed company, simple coordination, and small greetings that matter. Join through Discord, share your in-game name and time zone, learn the guild rhythm, and step into events when you feel ready.",
+    "intro": "Mōchirīī is a guild home for players who enjoy company, coordination, and greetings that matter. Join through Discord, share your in-game name and time zone, learn the guild rhythm, and step into events when ready.",
     "image": "./assets/img/join/hero.webp",
     "imageAlt": "Join Mōchirīī banner artwork",
     "atmosphereImage": "",
     "badges": [
-      "Warm welcome within a day",
-      "Discord-guided onboarding",
-      "Newcomer-friendly events",
-      "Gentle ground rules"
+      "Welcome within a day",
+      "Discord onboarding",
+      "Newcomer support",
+      "Ground rules"
     ]
   },
   "steps": {
     "title": "The Joining Path",
     "intro": [
-      "These steps carry you from first hello to your first smooth run. Leaders handle setup; you bring your in-game name, time zone, and a little warmth while roles are assigned."
+      "These steps carry you from hello to first run. Leaders handle setup; you bring your in-game name, time zone, and patience while roles are assigned."
     ],
     "items": [
       {
         "number": "1",
         "title": "Enter the Hall",
-        "description": "Join Discord and let a mod know you are here for the guild. Verification opens the wider server, and the game channels appear once the right role is set. If you feel stuck, DM a mod or ask in game; one clear greeting can open the door."
+        "description": "Join Discord and tell a mod you are here for the guild. Verification opens the server, and the game channels appear once your role is set. If you feel stuck, DM a mod or ask in game; one greeting can open the door."
       },
       {
         "number": "2",
         "title": "Read the Codex & Ranks",
-        "description": "Skim the Codex and Ranks pages so you know our tone, basic etiquette, leadership path, and how support works before you settle in."
+        "description": "Skim the Codex and Ranks pages so you know our tone, etiquette, leadership path, and support flow before you settle in."
       },
       {
         "number": "3",
         "title": "Share your IGN & time zone",
-        "description": "Post your in-game name and time zone so leaders can match you with the right channels, roles, and event windows. Mōchirīī is global, so clear time zones help everyone avoid guesswork."
+        "description": "Post your in-game name and time zone so leaders can match you with channels, roles, and event windows. Mōchirīī is global, so time zones help everyone avoid guesswork."
       },
       {
         "number": "4",
         "title": "Receive your starting rank",
-        "description": "A leader gives your starting rank and points you to the channels, roles, and weekly notes that matter first."
+        "description": "A leader gives your starting rank and points you to the channels, roles, and weekly notes you need first."
       },
       {
         "number": "5",
         "title": "Join an event",
-        "description": "Pick an upcoming event, RSVP if planning is needed, and show up when you can. Ask questions early so the run starts calmly and everyone can share the road."
+        "description": "Pick an upcoming event, RSVP if planning is needed, and show up when you can. Ask questions early so the run starts well and everyone can share the road."
       }
     ]
   },
   "quickStart": {
     "title": "Quick Start",
     "body": [
-      "Join Discord, request WWM access, and post your IGN plus time zone.",
-      "Read the Codex, then RSVP to an upcoming event if your schedule allows. A little presence warms the hall quickly, and questions are welcome."
+      "Join Discord, request guild access, and post your IGN plus time zone.",
+      "Read the Codex, then RSVP to an upcoming event if your schedule allows. Presence warms the hall quickly, and questions are welcome."
     ],
     "links": [
       { "label": "Join Discord", "href": "https://discord.com/invite/dPafqMwWPK" },
@@ -64,7 +64,7 @@
   "checklist": {
     "eyebrow": "Before You Join",
     "title": "New Cupcake Checklist",
-    "intro": "A quick way to step in prepared, calm, and easy to welcome.",
+    "intro": "A quick way to step in ready to be welcomed.",
     "items": [
       {
         "title": "Join the Discord",
@@ -97,7 +97,7 @@
   "culture": {
     "title": "Expectations & Culture",
     "intro": [
-      "Mōchirīī stays comfortable through courtesy, patient effort & clear communication. Skill grows over time; care can show up in the first message."
+      "Mōchirīī stays kind through courtesy, effort & clear communication. Skill grows over time; care can show up in the first message."
     ],
     "cards": [
       {
@@ -106,7 +106,7 @@
       },
       {
         "title": "Activity rhythm",
-        "description": "Participation stays flexible. Consistent presence, RSVPs for planned runs, and clear notice during breaks matter more than marathon sessions."
+        "description": "Participation stays flexible. Presence, RSVPs for planned runs, and notice during breaks matter more than marathon sessions."
       },
       {
         "title": "Helping new members",
@@ -123,7 +123,7 @@
     "body": [
       "Voice chat is optional unless an event post says otherwise. Discord is the clearest place for roles, announcements, and coordination.",
       "Need a break? Tell a leader before a longer Cupcake nap so roles and expectations stay clear.",
-      "If you feel lost, tag a leader. Getting unstuck quickly keeps the game light and the hall welcoming."
+      "If you feel lost, tag a leader. Getting unstuck keeps the game light and the hall open."
     ],
     "links": [
       { "label": "Leaders Hall", "href": "./leaders.html" },
