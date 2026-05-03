@@ -9,6 +9,7 @@
 - Preserve protected copy exactly: `data/recruitment.json` `content.paragraphs`, `data/recruitment.json` `content.conclusion`, and `data/home.json` `seal.verse`.
 - Keep Mōchirīī copy clear, xianxia-inspired, noun/verb led, lightly rhythmic, and human. Use Cupcake warmth sparingly, keep functional labels plain, and avoid generic AI-like phrasing, adjective padding, forced rhyme, copied poem/article phrasing, or named-author imitation.
 - Keep exact game-name usage out of regular visible body copy outside header/footer; titles, metadata, SEO, JSON-LD, validation scripts, docs, internal code, header, and footer may retain it.
+- For Join work, follow `docs/join-guide.md`; preserve onboarding clarity, checklist behavior, Discord/Codex/Events links, shared helper safety, accessible CTAs, and mobile readability.
 - For Codex work, follow `docs/codex-guide.md`; preserve protected verse boundaries, keep rules direct, avoid duplicated Join/Recruitment/Events content, and keep Codex conduct readable.
 - For Events work, follow `docs/events-guide.md`; preserve UTC-safe dates, Upcoming/Past/All filters, sorting, accessible filter buttons, and empty-state behavior.
 - Gallery grids use thumbnails; gallery lightboxes must open full images, not `/thumbs/`.
