@@ -59,10 +59,12 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - Keep the Cupcake identity readable rather than cryptic.
 - Do not claim official affiliation with Where Winds Meet unless that is verified and intentionally approved.
 - Avoid generic MMO boilerplate; write like Mōchirīī has a real home and rhythm.
-- Favor warm, lightly rhythmic, community-centered copy about kindness, belonging, shared effort, and gentle motivation.
+- Favor concrete guild images: shared runs, small greetings, warm halls, gentle cheer, and a little Cupcake sweetness.
+- Use rhyme, repeated sounds, and soft cadence only when they feel natural. Do not turn public guidance into verse.
 - Use Cupcake warmth sparingly; do not make every section dessert-themed or unclear.
 - Keep functional labels plain, such as Join Discord, Read the Codex, View Events, Upcoming, Past, and All.
-- Do not copy poem references directly, and do not alter the protected long-form recruitment body or the guild seal poem.
+- Avoid generic AI-like phrasing, corporate language, forced rhyme, and direct references from source poems.
+- Do not alter the protected long-form recruitment body or the guild seal poem.
 
 ## 8. Validation Before PR
 

@@ -8,7 +8,7 @@
       "tags": ["Ambient", "Focus", "Atmosphere"],
       "embed": "https://open.spotify.com/embed/album/2GDgMnMjBf1GXVKPQUzsR7?utm_source=generator",
       "height": 352,
-      "description": "A continuous album stream for reading, planning & calm coordination."
+      "description": "A steady album stream for reading, planning & calm coordination."
     },
     {
       "title": "Guild Album - Evening Drift",
@@ -17,7 +17,7 @@
       "tags": ["Ambient", "Evening", "Calm"],
       "embed": "https://open.spotify.com/embed/album/70G9dgVWkyBweJ3kJYJm0Y?utm_source=generator",
       "height": 352,
-      "description": "A slower album set for wind-down sessions & quiet guild hours."
+      "description": "A slower album set for winding down & quiet guild hours."
     },
     {
       "title": "Guild Album - Quiet Current",
@@ -26,7 +26,7 @@
       "tags": ["Ambient", "Night", "Flow"],
       "embed": "https://open.spotify.com/embed/album/7hHtZyabiHgej67ie0Q5JZ?utm_source=generator",
       "height": 352,
-      "description": "A subdued album for long listening stretches & uninterrupted focus."
+      "description": "A subdued album for long listening stretches & steady focus."
     },
     {
       "title": "Guild Artist - Featured Rotation",
@@ -35,7 +35,7 @@
       "tags": ["Ambient", "Artist", "Discovery"],
       "embed": "https://open.spotify.com/embed/artist/4TcOznbEZBqev21LzAH4KE?utm_source=generator",
       "height": 352,
-      "description": "An artist profile for broader exploration & continuous ambient discovery."
+      "description": "An artist profile for wandering through gentle ambient sounds."
     },
     {
       "title": "Guild Artist - Quiet Explorations",
@@ -44,7 +44,7 @@
       "tags": ["Ambient", "Artist", "Minimal"],
       "embed": "https://open.spotify.com/embed/artist/3Qixo9YdP8BDSOID2uHeyl?utm_source=generator",
       "height": 352,
-      "description": "A restrained artist catalog suited for slow listening & uninterrupted sessions."
+      "description": "A restrained artist catalog for slow listening & calm sessions."
     },
     {
       "title": "Guild Artist - Soft Horizons",
@@ -53,7 +53,7 @@
       "tags": ["Ambient", "Artist", "Drift"],
       "embed": "https://open.spotify.com/embed/artist/7hmSHY9HVVQKejpGbPbo16?utm_source=generator",
       "height": 352,
-      "description": "Gentle ambient works for extended listening & low-motion evenings."
+      "description": "Gentle ambient works for long listening & low-motion evenings."
     },
     {
       "title": "Guild Artist - Still Air",
@@ -62,7 +62,7 @@
       "tags": ["Ambient", "Artist", "Stillness"],
       "embed": "https://open.spotify.com/embed/artist/4XBG26mgvzGqT09eopG4d9?utm_source=generator",
       "height": 352,
-      "description": "Sparse, slow compositions for quiet focus & mental rest."
+      "description": "Sparse, slow pieces for quiet focus & mental rest."
     },
     {
       "title": "Guild Track - Night Walk",
@@ -71,7 +71,7 @@
       "tags": ["Ambient", "Night", "Focus"],
       "embed": "https://open.spotify.com/embed/track/3fuyYaLhZ2RoP9eWpvfP1H?utm_source=generator",
       "height": 152,
-      "description": "A short piece for late hours & reduced tempo."
+      "description": "A short piece for late hours & a slower tempo."
     }
   ]
 }

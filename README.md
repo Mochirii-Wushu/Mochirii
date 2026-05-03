@@ -4,7 +4,7 @@
 Official website for **Mōchirīī**, a community-focused guild for *Where Winds Meet*.  
 This site serves as the public hub for guild information, events, culture, and shared media.
 
-The project is designed to be **static, fast, readable, and data-driven**, with a clear separation between structure, content, and behavior.
+The project stays **static, fast, readable, and data-driven**, with a clear separation between structure, content, and behavior.
 
 ---
 

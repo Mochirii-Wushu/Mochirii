@@ -15,7 +15,7 @@
   "how": [
     "Sign up for the monthly raffle event in the guild menu.",
     "Stay active close to event time so the roster reflects your presence.",
-    "Leadership draws winners & posts results with claim instructions."
+    "Leadership draws winners & posts results with clear claim steps."
   ],
 
   "rules": [
@@ -32,7 +32,7 @@
     "prizes": [
       "Exclusive in-game items (as available)",
       "Guild-funded reward bundle",
-      "Special mention in the next spotlight"
+    "Special mention in the next spotlight"
     ],
     "notes": "Exact prizes may shift with availability."
   },
@@ -49,6 +49,6 @@
   ],
 
   "note": [
-    "Leadership is willing to help where possible. If you win and need support with timing or claiming, let us know and we'll do our best to accommodate you."
+    "If you win and need help with timing or claiming, let leadership know. We will do our best to help the prize land smoothly."
   ]
 }
