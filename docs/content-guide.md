@@ -23,6 +23,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 
 ## 3. Dates
 
+- For Events-specific date and filter conventions, see [`docs/events-guide.md`](events-guide.md).
 - Use `YYYY-MM-DD` for date-only values.
 - Date rendering is UTC-safe, so date-only values should not shift backward in US time zones.
 - Avoid natural-language dates in structured date fields.
