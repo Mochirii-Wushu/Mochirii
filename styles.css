@@ -1170,8 +1170,10 @@ body[data-page="gallery"] .gallery-empty{
 }
 
 @media (max-width:480px){
-  body[data-page="gallery"] .gallery-filter{
+  body[data-page="gallery"] .gallery-filter,
+  body[data-page="gallery"] .gallery-copy-link{
     flex:1 1 auto;
+    min-height:44px;
   }
 }
 
