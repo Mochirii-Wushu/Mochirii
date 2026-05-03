@@ -100,7 +100,17 @@
         <!-- Upcoming -->
         <aside class="col-4">
           <div class="glass-card glass-card--soft glass-pad">
-            <h3 class="section-title section-title--sm">Upcoming Events</h3>
+            <h3 class="section-title section-title--sm" id="eventsBoardTitle">Event Board</h3>
+
+            <div class="events-toolbar" aria-labelledby="eventsBoardTitle">
+              <div class="events-filters" role="group" aria-label="Filter events">
+                <button class="events-filter" type="button" data-events-filter="upcoming" aria-pressed="true">Upcoming</button>
+                <button class="events-filter" type="button" data-events-filter="past" aria-pressed="false">Past</button>
+                <button class="events-filter" type="button" data-events-filter="all" aria-pressed="false">All</button>
+              </div>
+
+              <p class="events-count muted" id="eventsCount" aria-live="polite"></p>
+            </div>
 
             <div id="eventsUpcoming" class="events-upcoming" aria-live="polite">
               <p class="muted">Loading…</p>
