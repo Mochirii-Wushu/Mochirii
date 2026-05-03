@@ -1061,6 +1061,12 @@ body[data-page="leaders"] .leaders-council-intro .muted{
   margin:0;
 }
 
+@media (max-width:640px){
+  body[data-page="leaders"] #respGrid article > div:first-child{
+    aspect-ratio:4 / 3 !important;
+  }
+}
+
 /* =========================================================
    GALLERY — Responsive thumbnail grid
    ========================================================= */
