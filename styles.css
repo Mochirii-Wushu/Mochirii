@@ -344,6 +344,18 @@ body[data-page="join"] #joinBadges > span > a{
 }
 
 /* =========================================================
+   JOIN — Link tap targets
+   ========================================================= */
+body[data-page="join"] #joinLinks > span > a,
+body[data-page="join"] #joinNotesBadges > span > a{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  margin:-6px -10px;
+  padding:6px 10px;
+}
+
+/* =========================================================
    JOIN — Stack rhythm (consistent spacing between blocks)
    ========================================================= */
 body[data-page="join"] #joinStepsIntro,
@@ -460,7 +472,7 @@ body[data-page="join"] .join-checklist__text{
 
 body[data-page="join"] .join-checklist__link{
   width:fit-content;
-  min-height:30px;
+  min-height:44px;
   display:inline-flex;
   align-items:center;
   color:var(--lantern);
