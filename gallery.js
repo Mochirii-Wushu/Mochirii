@@ -16,6 +16,7 @@
   const text = U.text;
 
   const ALL_CATEGORY = "all";
+  const CATEGORY_PARAM = "category";
 
   const toTitle = (slug) =>
     String(slug || "")
@@ -32,6 +33,44 @@
 
   function getItemCategory(item) {
     return normalizeSlug(item?.category);
+  }
+
+  function hasCategory(categories, slug) {
+    return categories.some((category) => category.slug === slug);
+  }
+
+  function normalizeCategory(categories, value) {
+    const slug = normalizeSlug(value);
+    return slug && hasCategory(categories, slug) ? slug : ALL_CATEGORY;
+  }
+
+  function readCategoryFromUrl(categories) {
+    const params = new URLSearchParams(window.location.search);
+    const hasParam = params.has(CATEGORY_PARAM);
+    const requested = normalizeSlug(params.get(CATEGORY_PARAM));
+    const valid = requested && hasCategory(categories, requested);
+
+    return {
+      category: valid ? requested : ALL_CATEGORY,
+      hasParam,
+      valid: !hasParam || Boolean(valid),
+    };
+  }
+
+  function updateCategoryUrl(category, { replace = false } = {}) {
+    const url = new URL(window.location.href);
+    if (category === ALL_CATEGORY) {
+      url.searchParams.delete(CATEGORY_PARAM);
+    } else {
+      url.searchParams.set(CATEGORY_PARAM, category);
+    }
+
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (next === current) return;
+
+    const method = replace ? "replaceState" : "pushState";
+    window.history[method]({ galleryCategory: category }, "", next);
   }
 
   function buildItemButton(item) {
@@ -169,10 +208,11 @@
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
       const categories = buildCategories(data, items);
-      let activeCategory = ALL_CATEGORY;
+      const initialState = readCategoryFromUrl(categories);
+      let activeCategory = initialState.category;
 
-      const applyFilter = (category) => {
-        activeCategory = category || ALL_CATEGORY;
+      const applyFilter = (category, { updateUrl = false, replaceUrl = false } = {}) => {
+        activeCategory = normalizeCategory(categories, category);
         const visibleItems = filterItems(items, activeCategory);
         const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
 
@@ -182,10 +222,20 @@
         if (count) setText(count, formatCount(visibleItems.length, items.length, activeLabel));
         if (empty) empty.hidden = visibleItems.length > 0;
         grid.hidden = visibleItems.length === 0;
+
+        if (updateUrl || replaceUrl) {
+          updateCategoryUrl(activeCategory, { replace: replaceUrl });
+        }
       };
 
-      renderFilters(filters, categories, activeCategory, applyFilter);
-      applyFilter(activeCategory);
+      renderFilters(filters, categories, activeCategory, (category) => {
+        applyFilter(category, { updateUrl: true });
+      });
+      applyFilter(activeCategory, { replaceUrl: initialState.hasParam && !initialState.valid });
+
+      window.addEventListener("popstate", () => {
+        applyFilter(readCategoryFromUrl(categories).category);
+      });
     } catch (err) {
       console.error(err);
       const errEl = $("#galleryError");
