@@ -207,6 +207,8 @@ If content fails to load, pages degrade gracefully.
 
 For detailed content, date, asset, gallery, link, tone, and PR validation conventions, see [`docs/content-guide.md`](docs/content-guide.md).
 
+For Join onboarding, checklist, link, tone, accessibility, and smoke-test conventions, see [`docs/join-guide.md`](docs/join-guide.md).
+
 For Codex data, conduct, tone, protected-content, accessibility, and smoke-test conventions, see [`docs/codex-guide.md`](docs/codex-guide.md).
 
 For Events data, date, filter, accessibility, and smoke-test conventions, see [`docs/events-guide.md`](docs/events-guide.md).
