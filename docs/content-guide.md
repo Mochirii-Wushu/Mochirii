@@ -43,6 +43,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - Lightbox/full images should use the optimized full gallery path, not `/thumbs/`.
 - Preserve `data-full` or the equivalent full-image field when editing gallery cards.
 - Regression check: opening a gallery item must not load a `/thumbs/` image in the lightbox.
+- When Gallery CSS or JS changes affect visible behavior, update the Gallery page's small `?v=` query on its CSS/JS references so production edges fetch the new files after `gallery.html` refreshes.
 - Run `npm run smoke:gallery` when gallery behavior changes, with a local server running on port `8765`.
 
 ## 6. Links
