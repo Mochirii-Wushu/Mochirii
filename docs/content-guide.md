@@ -39,6 +39,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 
 ## 5. Gallery Rules
 
+- For detailed Gallery maintenance conventions, see [`docs/gallery-guide.md`](gallery-guide.md).
 - Gallery grid images should use `assets/img/gallery/thumbs/`.
 - Lightbox/full images should use the optimized full gallery path, not `/thumbs/`.
 - Preserve `data-full` or the equivalent full-image field when editing gallery cards.

@@ -10,6 +10,7 @@
 - Keep Mōchirīī copy clear, xianxia-inspired, noun/verb led, lightly rhythmic, and human. Use Cupcake warmth sparingly, keep functional labels plain, and avoid generic AI-like phrasing, adjective padding, forced rhyme, copied poem/article phrasing, or named-author imitation.
 - Keep exact game-name usage out of regular visible body copy outside header/footer; titles, metadata, SEO, JSON-LD, validation scripts, docs, internal code, header, and footer may retain it.
 - Gallery grids use thumbnails; gallery lightboxes must open full images, not `/thumbs/`.
+- For Gallery work, follow `docs/gallery-guide.md`; preserve category URL state, Copy link behavior, data-derived counts, and cache query updates.
 - Use `docs/roadmap.md` for future branch ideas; keep roadmap items scoped instead of turning them into broad refactors.
 - Keep public URLs and page filenames stable unless fixing a confirmed broken reference.
 - Prefer dependency-free Node scripts and plain browser APIs.
