@@ -495,6 +495,96 @@ body[data-page="join"] .join-checklist__link:focus-visible{
 }
 
 /* =========================================================
+   EVENTS — Archive filters and event board
+   ========================================================= */
+body[data-page="events"] .events-toolbar{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin:0 0 16px;
+}
+
+body[data-page="events"] .events-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+body[data-page="events"] .events-filter{
+  min-height:36px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.20);
+  color:var(--ink-1);
+  font:inherit;
+  font-size:13px;
+  cursor:pointer;
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
+}
+
+body[data-page="events"] .events-filter:hover,
+body[data-page="events"] .events-filter:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(200,162,75,.42);
+  color:var(--ink-0);
+}
+
+body[data-page="events"] .events-filter[aria-pressed="true"]{
+  border-color:rgba(200,162,75,.56);
+  background:linear-gradient(90deg, rgba(31,122,99,.34), rgba(200,162,75,.22));
+  color:var(--ink-0);
+}
+
+body[data-page="events"] .events-count{
+  margin:0;
+  font-size:13px;
+  line-height:1.45;
+}
+
+body[data-page="events"] .events-upcoming{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+body[data-page="events"] .events-list__item,
+body[data-page="events"] .events-empty{
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.18);
+}
+
+body[data-page="events"] .events-list__item{
+  padding:14px;
+}
+
+body[data-page="events"] .events-list__item .section-title{
+  margin-bottom:10px;
+}
+
+body[data-page="events"] .events-list__item .muted{
+  margin:0;
+  line-height:1.55;
+}
+
+body[data-page="events"] .events-empty{
+  margin:0;
+  padding:14px;
+  line-height:1.6;
+}
+
+@media (max-width:480px){
+  body[data-page="events"] .events-filter{
+    flex:1 1 auto;
+    justify-content:center;
+  }
+}
+
+/* =========================================================
    LISTS — Bullet-dot list layout used across pages
    ========================================================= */
 .list-stack{

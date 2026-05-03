@@ -10,9 +10,86 @@
   const setText = U.setText;
   const esc = U.escapeHtml;
   const fetchJSON = U.fetchJson;
+  const safeArray = U.asArray;
+
+  const FILTERS = {
+    upcoming: {
+      label: "Upcoming",
+      empty: "No upcoming events are posted yet. Watch Discord; the next gathering will find its hour.",
+    },
+    past: {
+      label: "Past",
+      empty: "No past events are archived yet. The hall is ready for new memories.",
+    },
+    all: {
+      label: "All",
+      empty: "No events are posted yet. Discord carries the freshest word when the hall begins to gather.",
+    },
+  };
+
+  const state = {
+    events: [],
+    activeFilter: "upcoming",
+  };
 
   function formatDate(iso) {
     return U.formatDateUTC(iso, { year: "numeric", month: "short", day: "2-digit" });
+  }
+
+  function parseDateOnlyUTC(value) {
+    const match = String(value || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const date = new Date(Date.UTC(year, month, day));
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function todayUTC() {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  }
+
+  function eventTimestamp(item) {
+    return parseDateOnlyUTC(item?.date)?.getTime() ?? 0;
+  }
+
+  function eventStatus(item) {
+    const eventDate = parseDateOnlyUTC(item?.date);
+    if (!eventDate) return "upcoming";
+    return eventDate.getTime() >= todayUTC().getTime() ? "upcoming" : "past";
+  }
+
+  function normalizeEvents(items) {
+    return safeArray(items)
+      .map((item, index) => ({
+        ...item,
+        _index: index,
+        _status: eventStatus(item),
+      }))
+      .filter((item) => item?.title || item?.summary || item?.date);
+  }
+
+  function filteredEvents(events, filter) {
+    const list = filter === "all" ? events : events.filter((item) => item._status === filter);
+    const direction = filter === "past" ? -1 : 1;
+
+    return [...list].sort((a, b) => {
+      if (filter === "all" && a._status !== b._status) {
+        return a._status === "upcoming" ? -1 : 1;
+      }
+
+      const delta = eventTimestamp(a) - eventTimestamp(b);
+      if (delta !== 0) {
+        const allDirection = filter === "all" && a._status === "past" ? -1 : direction;
+        return delta * allDirection;
+      }
+
+      return a._index - b._index;
+    });
   }
 
   function applyHero(meta) {
@@ -91,12 +168,20 @@
     `;
   }
 
-  function renderUpcoming(mount, items) {
+  function renderEventBoard(mount, items, filter) {
     if (!mount) return;
 
-    const list = Array.isArray(items) ? items : [];
+    const list = filteredEvents(items, filter);
+    const count = $("#eventsCount");
+    const filterMeta = FILTERS[filter] || FILTERS.upcoming;
+
+    if (count) {
+      const noun = list.length === 1 ? "event" : "events";
+      count.textContent = list.length ? `${filterMeta.label}: ${list.length} ${noun}` : `${filterMeta.label}: none posted`;
+    }
+
     if (!list.length) {
-      mount.innerHTML = `<p class="muted">No upcoming events posted yet.</p>`;
+      mount.innerHTML = `<p class="events-empty muted">${esc(filterMeta.empty)}</p>`;
       return;
     }
 
@@ -104,8 +189,8 @@
 
     list.forEach((it) => {
       const card = document.createElement("section");
-      card.className = "glass-card glass-card--soft glass-pad";
-      const metaLine = [it?.date, it?.time, it?.timezone].filter(Boolean).join(" • ");
+      card.className = "events-list__item";
+      const metaLine = [formatDate(it?.date), it?.time, it?.timezone].filter(Boolean).join(" • ");
 
       card.innerHTML = `
         <p class="kicker">${esc(metaLine)}</p>
@@ -134,6 +219,25 @@
 
     mount.innerHTML = "";
     mount.appendChild(frag);
+  }
+
+  function setActiveFilter(filter) {
+    state.activeFilter = FILTERS[filter] ? filter : "upcoming";
+
+    document.querySelectorAll("[data-events-filter]").forEach((button) => {
+      const active = button.getAttribute("data-events-filter") === state.activeFilter;
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    renderEventBoard($("#eventsUpcoming"), state.events, state.activeFilter);
+  }
+
+  function initFilters() {
+    document.querySelectorAll("[data-events-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setActiveFilter(button.getAttribute("data-events-filter"));
+      });
+    });
   }
 
   function renderRecurring(introEl, mount, recurring) {
@@ -198,8 +302,12 @@
 
       setText($("#featuredLead"), data?.featured?.lead || "");
 
+      state.events = normalizeEvents(data?.upcoming);
+      state.activeFilter = "upcoming";
+
       renderFeatured($("#featuredCard"), data?.featured);
-      renderUpcoming($("#eventsUpcoming"), data?.upcoming);
+      initFilters();
+      setActiveFilter(state.activeFilter);
       renderRecurring($("#eventsRhythmIntro"), $("#eventsRecurring"), data?.recurring || {});
       renderParticipation($("#eventsParticipation"), data?.participation);
 
