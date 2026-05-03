@@ -511,7 +511,7 @@ body[data-page="events"] .events-filters{
 }
 
 body[data-page="events"] .events-filter{
-  min-height:36px;
+  min-height:44px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -575,6 +575,14 @@ body[data-page="events"] .events-empty{
   margin:0;
   padding:14px;
   line-height:1.6;
+}
+
+body[data-page="events"] .badge-row > span > a{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  margin:-6px -10px;
+  padding:6px 10px;
 }
 
 @media (max-width:480px){
