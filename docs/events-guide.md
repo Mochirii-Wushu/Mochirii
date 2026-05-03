@@ -1,0 +1,178 @@
+# Events Maintenance Guide
+
+## 1. Purpose
+
+The Events page is for schedule browsing, participation cues, upcoming and past event visibility, and event history where event data exists.
+
+Events should not duplicate:
+
+- Join onboarding
+- Recruitment philosophy
+- Codex rules
+- Announcements
+- Gallery memories
+
+Keep this page focused on times, RSVP notes, runs, and the rhythm of gathering.
+
+## 2. Data Source
+
+- Events data lives in `data/events.json`.
+- Keep JSON valid: no trailing commas, comments, or unquoted keys.
+- Preserve the current schema unless the matching renderer is updated in the same scoped task.
+- Add only fields that `events.js` actually supports.
+- Do not invent fixed schedules.
+- Keep event copy concise and page-specific.
+
+Current data shape:
+
+- `meta`: page kicker, title, intro, updated date, timezone label, badges, and hero image paths.
+- `featured`: featured-event lead, tag, date, time, timezone, title, image, optional `href`, optional `linkLabel`, and `bullets`.
+- `upcoming`: the event-board source array. Each item may include `date`, `time`, `timezone`, `title`, `summary`, `image`, and `href`.
+- `recurring`: recurring-events intro and an `items` array with `title` and `summary`.
+- `participation`: participation blocks with `title` and `body`.
+
+Not currently implemented:
+
+- Event category, type, or status fields.
+- Separate `past` archive array.
+- Event URL query state.
+- RSVP-specific fields beyond existing links and copy.
+
+## 3. Date Rules
+
+- Use `YYYY-MM-DD` for date-only values.
+- Date rendering must remain UTC-safe.
+- Dates must not shift one day earlier in US time zones.
+- `events.js` parses date-only values with a strict UTC pattern before classifying events.
+- Invalid or missing event dates are treated as upcoming by the current renderer.
+- Event-board dates are rendered with `MochiriiUtils.formatDateUTC`.
+- Featured event dates currently render as the raw `featured.date` string in the featured meta line.
+
+Current sorting:
+
+- Upcoming sorts soonest first.
+- Past sorts newest first.
+- All shows upcoming events first, then past events.
+- Within All, upcoming dates sort soonest first and past dates sort newest first.
+- If dates match, original data order is preserved.
+
+## 4. Filters
+
+Current filters:
+
+- Upcoming
+- Past
+- All
+
+Filter behavior:
+
+- The default filter is Upcoming.
+- Filtering happens in place and does not reload the page.
+- Filters do not currently write to the URL.
+- Buttons are real `button` elements.
+- Active state uses `aria-pressed`.
+- The event count updates in a polite live region.
+- The event board renders only items from `data.events.upcoming`, classified by date.
+
+## 5. Empty States
+
+Empty states are short and built into `events.js` for Upcoming, Past, and All.
+
+Keep empty states:
+
+- Short and clear.
+- Lightly Mōchirīī in tone.
+- Free of forced rhyme.
+- Sparse with Cupcake language.
+- Free of "Where Winds Meet" in visible Events body copy.
+
+## 6. Copy and Tone
+
+Events copy should use page-specific vocabulary:
+
+- hour
+- gathering
+- schedule
+- run
+- return
+- RSVP
+- notice
+
+Keep labels plain:
+
+- Upcoming
+- Past
+- All
+- View Events
+- Join Discord, if used
+
+Avoid duplicating:
+
+- Recruitment philosophy
+- Join checklist
+- Codex rules
+- Gallery memory language
+
+## 7. Links and RSVP
+
+Current link behavior:
+
+- `featured.href` renders as an external featured-event link when present.
+- `featured.linkLabel` controls the featured-event link text; if absent, the renderer uses `Open details`.
+- Event-board item `href` renders as an external details link when present.
+- If an event-board item has no `href`, the renderer falls back to the Discord invite URL.
+- Event-board link text is currently `Open details`.
+- The Participation card includes static links for Discord RSVP and How to join.
+- External rendered links use `target="_blank"` and `rel="noopener noreferrer"`.
+
+Do not add unsupported link fields without updating and validating the renderer in a separate scoped task.
+
+## 8. Accessibility
+
+- Event filters use real buttons.
+- Active filter state uses `aria-pressed`.
+- Focus states must remain visible.
+- Filter controls should remain keyboard reachable.
+- Touch targets should remain usable on mobile.
+- The event count and event board use polite live regions.
+- Empty states should be readable.
+- Mobile layouts should not create horizontal overflow.
+
+## 9. Validation
+
+Run:
+
+```sh
+npm run check
+git diff --check
+node scripts/check-json.mjs
+node scripts/check-js.mjs
+node scripts/check-refs.mjs
+node scripts/check-assets.mjs
+npm run check:production
+```
+
+Use `npm run smoke:gallery` only as a general regression check when relevant to the repo baseline.
+
+## 10. Manual Events Smoke Checklist
+
+- Open `/events.html`.
+- Confirm the Upcoming filter works.
+- Confirm the Past filter works.
+- Confirm the All filter works.
+- Confirm empty states render when applicable.
+- Confirm date order is correct.
+- Confirm no date shifts one day earlier in US time zones.
+- Confirm links work.
+- Confirm filters are keyboard reachable.
+- Confirm `aria-pressed` updates.
+- Check mobile widths at 360px, 390px, and 768px for horizontal overflow.
+- Confirm there are no console-breaking errors.
+
+## 11. Protected Content
+
+Events work must not alter:
+
+- `data/recruitment.json` `content.paragraphs`
+- `data/recruitment.json` `content.conclusion`
+- `data/home.json` `seal.verse`
