@@ -13,6 +13,7 @@
 - For Codex work, follow `docs/codex-guide.md`; preserve protected verse boundaries, keep rules direct, avoid duplicated Join/Recruitment/Events content, and keep Codex conduct readable.
 - For Events work, follow `docs/events-guide.md`; preserve UTC-safe dates, Upcoming/Past/All filters, sorting, accessible filter buttons, and empty-state behavior.
 - For Ranks work, follow `docs/ranks-guide.md`. Preserve rank order, group hierarchy, emblem/image conventions, concise duty copy, and mobile readability.
+- For Leaders work, follow `docs/leaders-guide.md`. Preserve leader order, role/group conventions, image conventions, concise stewardship copy, and mobile readability.
 - Gallery grids use thumbnails; gallery lightboxes must open full images, not `/thumbs/`.
 - For Gallery work, follow `docs/gallery-guide.md`; preserve category URL state, Copy link behavior, data-derived counts, and cache query updates.
 - Use `docs/roadmap.md` for future branch ideas; keep roadmap items scoped instead of turning them into broad refactors.
