@@ -1,16 +1,16 @@
 {
   "copy": {
-    "bulletinIntro": "Latest guild news, event notes, raffles, and calls for helping hands.",
-    "doorsIntro": "Start here for the join path, ranks, leaders, and the shared culture that keeps Mōchirīī steady.",
-    "spotlightIntro": "Shoutout to this month's top guild member.",
-    "galleryIntro": "Screenshots from Mōchirīī runs, quiet wandering, and guild shenanigans."
+    "bulletinIntro": "Guild news, event notes, raffles, and small calls that keep the hall moving.",
+    "doorsIntro": "Step into the join path, ranks, leaders, and Codex that keep Mōchirīī warm and steady.",
+    "spotlightIntro": "A warm shoutout for a member whose care helps the hall feel alive.",
+    "galleryIntro": "Screenshots from shared runs, quiet wandering, and the little moments that become guild memory."
   },
   "hero": {
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",
     "descriptor": [
-      "Mōchirīī is a cozy Where Winds Meet guild for players who want friendly company, relaxed events, helpful progression, and a softer place to land between adventures.",
-      "Join through Discord, read the joining path, and settle in at a humane pace. Check event notes when you can, RSVP when a run needs planning, and keep kindness in your words."
+      "Mōchirīī is a cozy Where Winds Meet guild for players who want friendly company, relaxed events, helpful progression, and a soft place to land between adventures.",
+      "Step in through Discord, read the joining path, and grow with us at a humane pace. Check event notes when you can, RSVP when a run needs planning, and bring a little warmth to the hall."
     ],
     "badges": [
       "Recruitment Open",
@@ -34,7 +34,7 @@
     {
       "pinned": true,
       "type": "event",
-      "title": "Monthly guild meeting open to all current members.",
+      "title": "Monthly guild meeting for current members to gather, plan, and be heard.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/featured.webp",
       "imageAlt": "Guild meeting bulletin cover",
@@ -42,7 +42,7 @@
     },
     {
       "type": "raffle",
-      "title": "Monthly cosmetics raffle for active guild members.",
+      "title": "Monthly cosmetics raffle for active members who keep the hall alive.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/raffle.webp",
       "imageAlt": "Raffle bulletin cover",
@@ -50,7 +50,7 @@
     },
     {
       "type": "announcement",
-      "title": "Leadership positions currently open for applications.",
+      "title": "Leadership roles are open for members ready to guide with care.",
       "date": "2026-02-01",
       "image": "./assets/img/bulletins/announcement.webp",
       "imageAlt": "Leadership announcement cover",
@@ -60,28 +60,28 @@
   "tiles": [
     {
       "label": "Join",
-      "title": "How to join Mōchirīī, enter Discord, and get oriented.",
+      "title": "Step into Mōchirīī, join Discord, and get oriented.",
       "image": "./assets/img/tiles/join.webp",
       "alt": "Join Mōchirīī tile artwork",
       "href": "./join.html"
     },
     {
       "label": "Ranks",
-      "title": "How ranks work and how steady contribution is recognized.",
+      "title": "See how steady presence, care, and contribution are recognized.",
       "image": "./assets/img/tiles/ranks.webp",
       "alt": "Guild ranks and progression tile artwork",
       "href": "./ranks.html"
     },
     {
       "label": "Leaders",
-      "title": "Leadership roles, responsibilities, and who to contact.",
+      "title": "Find the people who guide halls, answer questions, and keep the road clear.",
       "image": "./assets/img/tiles/leaders.webp",
       "alt": "Guild leadership tile artwork",
       "href": "./leaders.html"
     },
     {
       "label": "Codex",
-      "title": "Shared values, etiquette, event rhythm, and community standards.",
+      "title": "Read the values, etiquette, event rhythm, and community standards we share.",
       "image": "./assets/img/tiles/codex.webp",
       "alt": "Guild codex and values tile artwork",
       "href": "./codex.html"
@@ -90,7 +90,7 @@
   "spotlight": {
     "tag": "Spotlight",
     "title": "Congratulations to: Isawisima.",
-    "summary": "For being supportive & beautiful!",
+    "summary": "For bringing support, warmth, and a steady spark.",
     "image": "./assets/img/featured/spotlight.webp",
     "imageAlt": "Spotlight cover",
     "href": "./spotlight.html"

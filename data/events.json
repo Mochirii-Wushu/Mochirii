@@ -2,7 +2,7 @@
   "meta": {
     "kicker": "Guild calendar",
     "title": "Events",
-    "intro": "Events keep our Where Winds Meet community consistent: posted start times, clear goals, and friendly coordination without turning play into a chore.",
+    "intro": "Events gather our Where Winds Meet community around posted start times, clear goals, and friendly coordination so shared runs feel calm instead of rushed.",
     "updated": "2026-02-01",
     "timezoneLabel": "UTC+8",
     "badges": ["RSVP in Discord when planning is needed"],
@@ -12,7 +12,7 @@
     }
   },
   "featured": {
-    "lead": "Featured activities highlight the current guild focus, from welcoming new members to helping people prepare for harder content.",
+    "lead": "Featured activities show where the guild is placing its care right now, from welcoming new members to helping friends prepare for harder content.",
     "tag": "Featured",
     "date": "2026-02-01",
     "time": "7:00 PM",
@@ -22,7 +22,7 @@
     "href": "https://discord.com/invite/dPafqMwWPK",
     "linkLabel": "RSVP & details in Discord",
     "bullets": [
-      "When open slots allow, we welcome new members while doing our best to make everyone feel at home in the Mōchirīī family.",
+      "When open slots allow, we welcome new members and help every player find a place in the Mōchirīī hall.",
       "Check Discord for final timing, requirements, and party assignments before the run."
     ]
   },
@@ -32,13 +32,13 @@
       "time": "5:00 PM",
       "timezone": "UTC+8",
       "title": "Guild Hero's Realm: Weekly Coordination",
-      "summary": "A relaxed coordination window for the guild hero's realm. Show up, ask questions & we'll do our best to match groups.",
+      "summary": "A relaxed coordination window for the guild hero's realm. Show up, ask questions & we'll do our best to match groups with care.",
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK"
     }
   ],
   "recurring": {
-    "intro": "Recurring activities happen as schedules allow. Discord carries the final timing each week, and the site summarizes the rhythm so members know what to watch for.",
+    "intro": "Recurring activities happen as schedules allow. Discord carries the final timing each week, and the site keeps the rhythm clear so members know what to watch for.",
     "items": [
       {
         "title": "Sect dailies, guild activities, trials, hero realms, and more.",

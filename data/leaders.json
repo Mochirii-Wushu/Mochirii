@@ -4,7 +4,7 @@
     "title": "Leaders Hall",
     "image": "./assets/img/leaders/hero.webp",
     "introBody": [
-      "Leadership in Mōchirīī is based around a few core principles. Each one with their own responsibilities, but all working together to keep the guild organized, fair & enjoyable for everyone."
+      "Leadership in Mōchirīī rests on shared care. Each role carries its own work, but all of them help keep the guild organized, fair & enjoyable for everyone."
     ],
     "pills": [
       "Start with your Hall Leader",
@@ -18,7 +18,7 @@
     "badge": "Contact & Profiles",
     "image": "./assets/img/leaders/panel.webp",
     "body": [
-            "Leaders may keep a short profile page for themselves for introductions, preferred roles & the best way to reach them if they choose to do so. Keep it in-game & keep it safe. No personal info, please."
+            "Leaders may keep a short profile page for introductions, preferred roles & the best way to reach them. Keep it in-game, keep it safe, and leave personal info out."
     ],
     "note": "Members start with their hall leader for most questions. Requests that affect multiple halls move to the vice leader. Matters that shape policy, long-term direction, or unresolved outcomes move to the guild leader."
   },
@@ -45,7 +45,7 @@
       "availability": "Operations & coordination",
       "image": "./assets/img/leaders/leader-silhouette.webp",
       "alt": "Vice Leader portrait",
-      "summary": "Keeps operations consistent, coordinates halls & resolves issues that need broader alignment."
+      "summary": "Keeps operations consistent, coordinates halls & helps resolve issues that need broader alignment."
     },
     {
       "role": "Hall Leader",
@@ -83,7 +83,7 @@
 
   "responsibilities": {
     "title": "Responsibilities",
-    "description": "Members receive clear direction, fair decisions & reliable support. Leadership maintains structure, protects culture & stays present & accountable. Members participate in good faith, communicate responsibly & contribute to the community's shared pace.",
+    "description": "Members receive clear direction, fair decisions & reliable support. Leadership maintains structure, protects culture & stays present. Members participate in good faith, communicate responsibly & contribute to the community's shared pace.",
     "items": [
       {
         "title": "Direction & strategy",
@@ -99,7 +99,7 @@
       },
       {
         "title": "Culture & people",
-        "description": "Maintains standards, resolves conflicts & sustains morale & cohesion.",
+        "description": "Maintains standards, resolves conflicts & sustains morale so the hall stays steady.",
         "image": "./assets/img/leaders/responsibilities-03.webp",
         "alt": "Culture & people visual panel"
       }

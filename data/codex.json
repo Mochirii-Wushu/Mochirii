@@ -4,7 +4,7 @@
     "title": "The Codex",
     "image": "./assets/img/codex/hero.webp",
     "introBody": [
-      "The Codex holds how Mōchirīī lives, speaks & looks after each other.",
+      "The Codex holds how Mōchirīī speaks, gathers & looks after each other.",
       "Read it once, revisit it often & use it to keep the guild clear, welcoming & easy to join."
     ],
     "pills": ["Values in practice", "Etiquette with dignity", "Consistency with ease"]
@@ -16,18 +16,18 @@
     "image": "./assets/img/codex/values.webp",
     "body": [
       "The Codex keeps culture consistent across time zones & playstyles.",
-      "It sets conduct expectations, outlines how disputes get handled & describes how we keep community life active with room to breathe."
+      "It sets conduct expectations, explains how disputes get handled & describes how we keep community life active with room to breathe."
     ]
   },
 
   "tenets": {
     "title": "Tenets",
-    "description": "These tenets shape our tone in parties, chat & shared spaces.",
+    "description": "These tenets shape our tone in parties, chat & shared spaces so every run has a little more trust beneath it.",
     "image": "./assets/img/codex/tenets.webp",
     "captionTitle": "Values made practical",
-    "caption": "A shared standard turns good intent into stable conduct when fights get loud.",
+    "caption": "A shared standard turns good intent into steady conduct when fights get loud.",
     "pills": ["Tone", "Trust", "Growth"],
-    "note": "Choose one tenet before an event & practice it deliberately.",
+    "note": "Choose one tenet before an event & practice it with care.",
     "items": [
       {
         "title": "Harmony",
@@ -96,7 +96,7 @@
         ]
       }
     ],
-    "note": "Keep disputes small, private & actionable; return to the work with dignity."
+    "note": "Keep disputes small, private & actionable; return to the road with dignity."
   },
 
   "rhythm": {
@@ -129,12 +129,12 @@
 
   "recognition": {
     "title": "Recognition",
-    "description": "Recognition is how we say “we see you,” marking effort, care & the kind of consistency that draws others in.",
+    "description": "Recognition is how we say “we see you,” marking effort, care & the kind of consistency that helps others feel they belong.",
     "image": "./assets/img/codex/recognition.webp",
     "items": [
       {
         "title": "Follow-through",
-        "description": "Showing up over time through runs, events, chat help & small acts that keep things moving forward."
+        "description": "Showing up over time through runs, events, chat help & small acts that keep the hall moving forward."
       },
       {
         "title": "Service",
