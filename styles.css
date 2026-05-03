@@ -1188,6 +1188,11 @@ body[data-page="gallery"] .gallery-empty{
   box-shadow:var(--shadow);
 }
 
+body[data-page="gallery"] .lightbox-card{
+  box-sizing:border-box;
+  width:min(92vw, 1160px);
+}
+
 .lightbox-img{
   max-height:calc(86vh - 88px);
   object-fit:contain;
