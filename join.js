@@ -12,6 +12,7 @@
   const U = window.MochiriiUtils;
 
   const safeText = U.text;
+  const safeArray = U.asArray;
   const setText = U.setText;
   const setImg = U.setImg;
 
@@ -84,6 +85,52 @@
     return wrap;
   }
 
+  function buildChecklistItem(item, idx) {
+    const li = document.createElement("li");
+    li.className = "join-checklist__item";
+
+    const marker = document.createElement("span");
+    marker.className = "join-checklist__marker";
+    marker.setAttribute("aria-hidden", "true");
+    marker.textContent = String(idx + 1).padStart(2, "0");
+    li.appendChild(marker);
+
+    const body = document.createElement("div");
+    body.className = "join-checklist__body";
+
+    const h = document.createElement("h3");
+    h.className = "join-checklist__title";
+    h.textContent = safeText(item?.title, "Checklist item");
+    body.appendChild(h);
+
+    const text = safeText(item?.text, "");
+    if (text) {
+      const p = document.createElement("p");
+      p.className = "join-checklist__text";
+      p.textContent = text;
+      body.appendChild(p);
+    }
+
+    const href = safeText(item?.href, "");
+    const label = safeText(item?.label, "");
+    if (href && label) {
+      const a = document.createElement("a");
+      a.className = "join-checklist__link";
+      a.href = href;
+      a.textContent = label;
+
+      if (isExternalHref(href)) {
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+      }
+
+      body.appendChild(a);
+    }
+
+    li.appendChild(body);
+    return li;
+  }
+
   const fetchJSON = U.fetchJson;
 
   function fmtMonth(iso) {
@@ -150,19 +197,26 @@
   function applyQuickStart(data) {
     setText("#joinQuickTitle", data.quickStart?.title);
 
-    const body = Array.isArray(data.quickStart?.body)
-      ? data.quickStart.body.map((t) => {
-          const p = document.createElement("p");
-          p.textContent = t;
-          return p;
-        })
-      : [];
+    const body = safeArray(data.quickStart?.body).map((t) => {
+      const p = document.createElement("p");
+      p.textContent = t;
+      return p;
+    });
     clearAndAppend(qs("#joinQuickBody"), body);
 
-    const links = Array.isArray(data.quickStart?.links)
-      ? data.quickStart.links.map((l) => makeBadge(l.label, l.href))
-      : [];
+    const links = safeArray(data.quickStart?.links).map((l) => makeBadge(l.label, l.href));
     clearAndAppend(qs("#joinLinks"), links);
+  }
+
+  function applyChecklist(data) {
+    const checklist = data.checklist || {};
+
+    setText("#joinChecklistEyebrow", checklist.eyebrow);
+    setText("#joinChecklistTitle", checklist.title);
+    setText("#joinChecklistIntro", checklist.intro);
+
+    const items = safeArray(checklist.items).map(buildChecklistItem);
+    clearAndAppend(qs("#joinChecklistItems"), items);
   }
 
   function applyCulture(data) {
@@ -205,6 +259,7 @@
       applyHero(data);
       applySteps(data);
       applyQuickStart(data);
+      applyChecklist(data);
       applyCulture(data);
       applyNotes(data);
       clearError();

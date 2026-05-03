@@ -61,6 +61,39 @@
       { "label": "Ranks", "href": "./ranks.html" }
     ]
   },
+  "checklist": {
+    "eyebrow": "Before You Join",
+    "title": "New Cupcake Checklist",
+    "intro": "A quick way to make sure you are ready to step into Mōchirīī.",
+    "items": [
+      {
+        "title": "Join the Discord",
+        "text": "Use Discord for announcements, event planning, and the fastest path into the guild.",
+        "href": "https://discord.com/invite/dPafqMwWPK",
+        "label": "Open Discord"
+      },
+      {
+        "title": "Know your in-game name or UID",
+        "text": "Have your character name or UID ready so leadership can find you quickly."
+      },
+      {
+        "title": "Read the Codex",
+        "text": "Review the guild's conduct, values, and expectations before settling in.",
+        "href": "./codex.html",
+        "label": "Read the Codex"
+      },
+      {
+        "title": "Check event expectations",
+        "text": "Events are announced as scheduled. Join when you can, communicate when life gets busy, and keep the atmosphere friendly.",
+        "href": "./events.html",
+        "label": "View Events"
+      },
+      {
+        "title": "Say hello",
+        "text": "A simple greeting helps everyone recognize you and makes your first steps easier."
+      }
+    ]
+  },
   "culture": {
     "title": "Expectations & Culture",
     "intro": [
