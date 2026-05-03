@@ -1,7 +1,7 @@
 {
   "copy": {
     "bulletinIntro": "Guild news, event notes, raffles, and small calls that keep the hall moving.",
-    "doorsIntro": "Step into the join path, ranks, leaders, and Codex that keep Mōchirīī warm and steady.",
+    "doorsIntro": "Step through the join path, ranks, leaders, and Codex that keep Mōchirīī warm and steady.",
     "spotlightIntro": "A warm shoutout for a member whose care helps the hall feel alive.",
     "galleryIntro": "Screenshots from shared runs, quiet wandering, and the little moments that become guild memory."
   },
@@ -9,14 +9,14 @@
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",
     "descriptor": [
-      "Mōchirīī is a cozy Where Winds Meet guild for players who want friendly company, relaxed events, helpful progression, and a soft place to land between adventures.",
-      "Step in through Discord, read the joining path, and grow with us at a humane pace. Check event notes when you can, RSVP when a run needs planning, and bring a little warmth to the hall."
+      "Mōchirīī is a cozy Where Winds Meet guild for players who like friendly company, relaxed events, helpful runs, and a soft place to rest between adventures.",
+      "Step in through Discord, read the joining path, and grow with us at your own pace. Check event notes, RSVP when planning helps, and bring a little warmth to the hall."
     ],
     "badges": [
       "Recruitment Open",
       "Cross-Platform",
-      "Community Focused",
-      "In-Game Events"
+      "Kind Company",
+      "Shared Runs"
     ]
   },
   "seal": {
@@ -74,7 +74,7 @@
     },
     {
       "label": "Leaders",
-      "title": "Find the people who guide halls, answer questions, and keep the road clear.",
+      "title": "Find the people who answer questions, guide halls, and keep the road clear.",
       "image": "./assets/img/tiles/leaders.webp",
       "alt": "Guild leadership tile artwork",
       "href": "./leaders.html"

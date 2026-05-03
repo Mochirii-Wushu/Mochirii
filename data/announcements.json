@@ -1,8 +1,8 @@
 {
   "meta": {
     "title": "Mōchirīī Announcements",
-    "tagline": "Latest notes from the hall.",
-    "intro": "Check here for schedule notes, training focus, and community updates that help everyone keep pace together.",
+    "tagline": "Fresh notes from the hall.",
+    "intro": "Check here for schedule notes, training focus, and guild updates that help everyone keep pace together.",
     "updated": "2026-02-01",
     "badges": [
       "Check weekly",
@@ -20,7 +20,7 @@
       "pinned": true,
       "date": "2026-02-07",
       "title": "Weekly Schedule Posted",
-      "summary": "These windows help members gather, plan, and make room for shared runs.",
+      "summary": "These windows help members gather, plan, and make room for shared runs without rushing the room.",
       "details": [
         "Guild Party:  Every Day              - 7:00 PM - 7:30 PM",
         "Guild Bosses: Mondays   & Wednesdays - 7:30 PM - 9:30 PM",

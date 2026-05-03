@@ -4,7 +4,7 @@
     "title": "Join Mōchirīī",
     "updated": "2026-02-01",
     "timezone": "UTC+8",
-    "intro": "Mōchirīī is a quiet, active Where Winds Meet home for players who enjoy relaxed company, simple coordination, and a place where small greetings matter. Join through Discord, share your in-game name and time zone, learn the guild rhythm, and step into events when you feel ready.",
+    "intro": "Mōchirīī is a quiet, active Where Winds Meet home for players who enjoy relaxed company, simple coordination, and small greetings that matter. Join through Discord, share your in-game name and time zone, learn the guild rhythm, and step into events when you feel ready.",
     "image": "./assets/img/join/hero.webp",
     "imageAlt": "Join Mōchirīī banner artwork",
     "atmosphereImage": "",
@@ -12,7 +12,7 @@
       "Warm welcome within a day",
       "Discord-guided onboarding",
       "Newcomer-friendly events",
-      "Clear expectations"
+      "Gentle ground rules"
     ]
   },
   "steps": {
@@ -24,7 +24,7 @@
       {
         "number": "1",
         "title": "Enter the Hall",
-        "description": "Join Discord and let a mod know you are here for the Where Winds Meet guild. Verification opens the wider server, and the WWM guild section appears after the proper role is assigned. If you feel stuck, DM a mod or ask in game; one clear greeting can open the door."
+        "description": "Join Discord and let a mod know you are here for the Where Winds Meet guild. Verification opens the wider server, and the WWM guild section appears once the right role is set. If you feel stuck, DM a mod or ask in game; one clear greeting can open the door."
       },
       {
         "number": "2",
@@ -39,7 +39,7 @@
       {
         "number": "4",
         "title": "Receive your starting rank",
-        "description": "A leader assigns your starting rank and points you to the channels, roles, and weekly notes that matter first."
+        "description": "A leader gives your starting rank and points you to the channels, roles, and weekly notes that matter first."
       },
       {
         "number": "5",
@@ -52,7 +52,7 @@
     "title": "Quick Start",
     "body": [
       "Join Discord, request WWM access, and post your IGN plus time zone.",
-      "Read the Codex, then RSVP to an upcoming event if your schedule allows. Presence builds familiarity fast, and questions are welcome in the hall."
+      "Read the Codex, then RSVP to an upcoming event if your schedule allows. A little presence warms the hall quickly, and questions are welcome."
     ],
     "links": [
       { "label": "Join Discord", "href": "https://discord.com/invite/dPafqMwWPK" },
@@ -64,11 +64,11 @@
   "checklist": {
     "eyebrow": "Before You Join",
     "title": "New Cupcake Checklist",
-    "intro": "A quick way to make sure you are ready to step into the hall.",
+    "intro": "A quick way to step in prepared, calm, and easy to welcome.",
     "items": [
       {
         "title": "Join the Discord",
-        "text": "Use Discord for announcements, event planning, and the fastest path into the guild home.",
+        "text": "Use Discord for announcements, event planning, and the clearest path into the guild home.",
         "href": "https://discord.com/invite/dPafqMwWPK",
         "label": "Open Discord"
       },
@@ -78,13 +78,13 @@
       },
       {
         "title": "Read the Codex",
-        "text": "Review the guild's conduct, values, and expectations before settling in.",
+        "text": "Review the guild's conduct, values, and expectations before you settle in.",
         "href": "./codex.html",
         "label": "Read the Codex"
       },
       {
         "title": "Check event expectations",
-        "text": "Events are announced as scheduled. Join when you can, communicate when life gets busy, and keep the atmosphere friendly.",
+        "text": "Events are announced as scheduled. Join when you can, speak up when life gets busy, and keep the atmosphere friendly.",
         "href": "./events.html",
         "label": "View Events"
       },
@@ -97,7 +97,7 @@
   "culture": {
     "title": "Expectations & Culture",
     "intro": [
-      "Mōchirīī stays comfortable through courtesy, steady effort & clear communication. Skill grows over time; care shows up from the first message."
+      "Mōchirīī stays comfortable through courtesy, steady effort & clear communication. Skill grows over time; care can show up in the first message."
     ],
     "cards": [
       {
@@ -114,7 +114,7 @@
       },
       {
         "title": "Events & updates",
-        "description": "Events and announcements live in Discord as well as on the website, with pinned notes for clarity. RSVP early when asked and follow any posted requirements."
+        "description": "Events and announcements live in Discord as well as on the website, with pinned notes for clarity. RSVP early when asked and follow posted requirements."
       }
     ]
   },

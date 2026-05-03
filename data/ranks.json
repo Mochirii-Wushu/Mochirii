@@ -2,14 +2,14 @@
   "hero": {
     "kicker": "Ranks",
     "title": "Ranks & Progression",
-    "intro": "Our ranks describe how we support each other. Leadership keeps the halls reliable, middle leaders guard culture & momentum, and members grow through presence, kindness & shared runs.",
+    "intro": "Our ranks describe how we support each other. Leadership keeps the halls steady, middle leaders guard culture & momentum, and members grow through presence, kindness & shared runs.",
     "image": "./assets/img/ranks/hero.webp",
     "atmosphereImage": "",
     "pills": [
       "Observed over time",
       "Culture-first",
       "Clear escalation",
-      "Consistent recognition"
+      "Steady recognition"
     ]
   },
   "progression": {
@@ -21,26 +21,26 @@
       "Respectful conduct"
     ],
     "body": [
-      "Progression reflects consistent conduct & community presence over time. Short bursts matter less than repeatable habits.",
+      "Progression reflects consistent conduct & community presence over time. Short bursts matter less than habits that return.",
       "Questions & small issues start with middle leadership. Hall leaders handle hall-wide needs. Vice leaders coordinate across halls. Long-term direction & policy rest with the guild leader."
     ]
   },
   "tiers": {
     "senior": {
       "title": "Senior Leadership",
-      "description": "Top leaders care for member well-being and guide the overall vision & direction of the guild.",
+      "description": "Top leaders care for member well-being and guide the guild's long road.",
       "image": "./assets/img/ranks/senior.webp",
       "ranks": [
         {
           "name": "Guild Leader",
           "body": [
-            "A leader carries the guild's vision & direction. The members are the body; without them, there is no guild."
+            "A leader carries the guild's direction. The members are the body; without them, there is no guild."
           ]
         },
         {
           "name": "Vice Leader",
           "body": [
-            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help the guild's vision become practical care."
+            "The vice leader is the guild's right hand, supporting the leader & stepping in when needed. They coordinate across halls and help direction become practical care."
           ]
         },
         {
@@ -95,7 +95,7 @@
         {
           "name": "Mochi Blossom",
           "body": [
-            "Mochi Blossoms are veterans of the guild before entering leadership roles. They have seen the guild through multiple seasons & contributed to its culture in meaningful ways."
+            "Mochi Blossoms are veterans of the guild before entering leadership roles. They have seen the guild through multiple seasons & helped shape its culture with care."
           ]
         },
         {
