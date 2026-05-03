@@ -1,3 +1,15 @@
 reports/lighthouse/
 .lighthouseci/
 *.lhr.json
+
+# Local environment values; .env.example stays commit-safe.
+.env
+.env.*
+!.env.example
+
+# Local Supabase CLI/runtime state. Keep config and migrations trackable.
+supabase/.branches/
+supabase/.temp/
+supabase/functions/.env
+supabase/functions/.env.*
+!supabase/functions/.env.example
