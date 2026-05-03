@@ -83,7 +83,11 @@
         </p>
 
         <div class="gallery-toolbar" aria-label="Gallery browsing">
-          <div id="galleryFilters" class="gallery-filters" aria-label="Gallery categories"></div>
+          <div class="gallery-controls">
+            <div id="galleryFilters" class="gallery-filters" aria-label="Gallery categories"></div>
+            <button id="galleryCopyLink" class="gallery-copy-link" type="button">Copy link</button>
+          </div>
+          <p id="galleryShareStatus" class="gallery-share-status muted" role="status" aria-live="polite" aria-atomic="true"></p>
           <p id="galleryCount" class="gallery-count muted" role="status" aria-live="polite"></p>
         </div>
 

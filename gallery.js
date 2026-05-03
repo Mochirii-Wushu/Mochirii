@@ -17,6 +17,8 @@
 
   const ALL_CATEGORY = "all";
   const CATEGORY_PARAM = "category";
+  const COPY_SUCCESS = "Link copied";
+  const COPY_FAILURE = "Copy failed";
 
   const toTitle = (slug) =>
     String(slug || "")
@@ -71,6 +73,44 @@
 
     const method = replace ? "replaceState" : "pushState";
     window.history[method]({ galleryCategory: category }, "", next);
+  }
+
+  function setShareStatus(statusEl, message) {
+    if (!statusEl) return;
+    window.clearTimeout(setShareStatus.timer);
+    statusEl.textContent = "";
+    window.setTimeout(() => {
+      statusEl.textContent = message;
+      setShareStatus.timer = window.setTimeout(() => {
+        statusEl.textContent = "";
+      }, 2400);
+    }, 0);
+  }
+
+  function fallbackCopyText(value) {
+    const field = document.createElement("textarea");
+    field.value = value;
+    field.setAttribute("readonly", "");
+    field.style.position = "fixed";
+    field.style.top = "-999px";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+
+    try {
+      return document.execCommand("copy");
+    } finally {
+      field.remove();
+    }
+  }
+
+  async function copyText(value) {
+    if (navigator.clipboard?.writeText && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+
+    return fallbackCopyText(value);
   }
 
   function buildItemButton(item) {
@@ -207,6 +247,8 @@
       const filters = $("#galleryFilters");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
+      const copyLink = $("#galleryCopyLink");
+      const shareStatus = $("#galleryShareStatus");
       const categories = buildCategories(data, items);
       const initialState = readCategoryFromUrl(categories);
       let activeCategory = initialState.category;
@@ -222,6 +264,7 @@
         if (count) setText(count, formatCount(visibleItems.length, items.length, activeLabel));
         if (empty) empty.hidden = visibleItems.length > 0;
         grid.hidden = visibleItems.length === 0;
+        if (shareStatus) shareStatus.textContent = "";
 
         if (updateUrl || replaceUrl) {
           updateCategoryUrl(activeCategory, { replace: replaceUrl });
@@ -235,6 +278,15 @@
 
       window.addEventListener("popstate", () => {
         applyFilter(readCategoryFromUrl(categories).category);
+      });
+
+      copyLink?.addEventListener("click", async () => {
+        try {
+          const copied = await copyText(window.location.href);
+          setShareStatus(shareStatus, copied ? COPY_SUCCESS : COPY_FAILURE);
+        } catch {
+          setShareStatus(shareStatus, COPY_FAILURE);
+        }
       });
     } catch (err) {
       console.error(err);
