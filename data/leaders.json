@@ -4,12 +4,12 @@
     "title": "Leaders Hall",
     "image": "./assets/img/leaders/hero.webp",
     "introBody": [
-      "Leadership in Mōchirīī rests on shared care. Each role carries its own work, and all of them help keep the guild fair, calm & enjoyable for everyone."
+      "Leadership in Mōchirīī rests on care. Each role carries its own work, and all help keep the guild fair and calm."
     ],
     "pills": [
       "Start with your Hall Leader",
-      "Calm, fair resolution",
-      "Escalation stays clear"
+      "Fair resolution",
+      "Escalation path"
     ]
   },
 
@@ -25,7 +25,7 @@
 
   "council": {
     "title": "The Council",
-    "description": "These are the contact points for support, planning & keeping the guild calm and fair."
+    "description": "These are contact points for support, planning & calm decisions."
   },
 
   "leaders": [
@@ -53,7 +53,7 @@
       "availability": "Hall & group oversight",
       "image": "./assets/img/leaders/leader-silhouette.webp",
       "alt": "Hall Leader portrait",
-      "summary": "First contact for member support, event coordination & keeping the hall active & welcoming."
+      "summary": "First contact for support, event coordination & hall activity."
     },
     {
       "role": "Dharmapala",
@@ -69,7 +69,7 @@
       "availability": "Member support",
       "image": "./assets/img/leaders/lotus_warden.webp",
       "alt": "Lotus Warden portrait",
-      "summary": "Supports member well-being, guides new arrivals & helps keep morale alive during busy weeks."
+      "summary": "Supports member well-being, guides arrivals & helps morale during busy weeks."
     },
     {
       "role": "Petal Keeper",
@@ -77,13 +77,13 @@
       "availability": "Culture & activity support",
       "image": "./assets/img/leaders/petal_keeper.webp",
       "alt": "Petal Keeper portrait",
-      "summary": "Keeps daily spaces active, welcomes arrivals & helps members find their footing quickly."
+      "summary": "Keeps daily spaces active, welcomes arrivals & helps members find footing."
     }
   ],
 
   "responsibilities": {
     "title": "Responsibilities",
-      "description": "Members receive clear direction, fair decisions & reliable support. Leadership keeps structure, protects culture & stays present. Members participate in good faith, communicate responsibly & contribute to the guild's shared pace.",
+      "description": "Members receive direction, fair decisions & support. Leadership keeps structure, protects culture & stays present. Members participate in good faith, communicate responsibly & contribute to the guild's pace.",
     "items": [
       {
         "title": "Direction & strategy",
@@ -93,7 +93,7 @@
       },
       {
         "title": "Ops & coordination",
-        "description": "Organizes events, manages roles & keeps daily guild work running smoothly.",
+        "description": "Organizes events, manages roles & keeps daily guild work moving.",
         "image": "./assets/img/leaders/responsibilities-02.webp",
         "alt": "Ops & coordination visual panel"
       },

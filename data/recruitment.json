@@ -14,14 +14,14 @@
     "badges": [
       "The Jianghu",
       "Kind conduct",
-      "Steady presence",
+      "Presence",
       "Discord onboarding"
     ]
   },
 
   "audio": {
     "title": "A Note From Twills",
-    "description": "Prefer listening? Twills' note carries the same invitation in a softer voice, steady and close to the hall.",
+    "description": "Prefer listening? Twills' note carries the same invitation in a voice close to the hall.",
     "sources": [
       { "src": "./assets/audio/mochiriiiiii.mp3", "type": "audio/mpeg" }
     ]

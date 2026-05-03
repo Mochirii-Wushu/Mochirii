@@ -2,7 +2,7 @@
   "meta": {
     "kicker": "Monthly raffle",
     "title": "Mōchirīī Monthly Raffles",
-    "intro": "Once a month we run a raffle for active members as a small thank-you for keeping the hall lively. Sign up in-game, stay recently active & you're in the draw.",
+    "intro": "Once a month we run a raffle for active members as thanks for keeping the hall lively. Sign up in-game, stay recently active & you're in the draw.",
     "frequency": "Monthly",
     "timezoneLabel": "UTC + 8",
     "badges": ["Sign up in guild menu", "Recent activity required", "Winners announced in game & Discord."],
@@ -15,7 +15,7 @@
   "how": [
     "Sign up for the monthly raffle event in the guild menu.",
     "Stay active close to event time so the roster reflects your presence.",
-    "Leadership draws winners & posts results with clear claim steps."
+    "Leadership draws winners & posts results with claim steps."
   ],
 
   "rules": [
@@ -32,7 +32,7 @@
     "prizes": [
       "Exclusive in-game items (as available)",
       "Guild-funded reward bundle",
-    "Special mention in the next spotlight"
+      "Special mention in the next spotlight"
     ],
     "notes": "Exact prizes may shift with availability."
   },
@@ -49,6 +49,6 @@
   ],
 
   "note": [
-    "If you win and need help with timing or claiming, let leadership know. We will do our best to help the prize land smoothly."
+    "If you win and need help with timing or claiming, let leadership know. We will do our best to help the prize land."
   ]
 }

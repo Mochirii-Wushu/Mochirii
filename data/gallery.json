@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Guild Album",
-    "description": "Shared runs, quiet roads, and little guild moments worth keeping.",
+    "description": "Shared runs, road scenes, and guild moments worth keeping.",
     "updated": "2026-02"
   },
   "albums": [
@@ -49,7 +49,7 @@
           "id": "shot-04",
           "src": "./assets/img/gallery/shot-04.webp",
           "alt": "Duel night",
-          "caption": "Friendly duels after guild activities, sharp blades and easy laughs.",
+          "caption": "Duels after guild activities, sharp blades and easy laughs.",
           "tags": [
             "pvp",
             "training"
@@ -169,7 +169,7 @@
           "id": "shot-14",
           "src": "./assets/img/gallery/shot-14.webp",
           "alt": "Training circle",
-          "caption": "A training circle for steady fundamentals.",
+          "caption": "A training circle for fundamentals.",
           "tags": [
             "training",
             "discipline"
@@ -253,7 +253,7 @@
           "id": "shot-21",
           "src": "./assets/img/gallery/shot-21.webp",
           "alt": "Breezy day",
-          "caption": "A soft sunset pause before the road moved on.",
+          "caption": "Sunset pause before the road moved on.",
           "tags": [
             "deep",
             "thought"
@@ -289,7 +289,7 @@
           "id": "shot-24",
           "src": "./assets/img/gallery/shot-24.webp",
           "alt": "Roadside pause",
-          "caption": "A brief rest along a winding road.",
+          "caption": "Resting along a winding road.",
           "tags": [
             "travel",
             "pause"
@@ -313,7 +313,7 @@
           "id": "shot-26",
           "src": "./assets/img/gallery/shot-26.webp",
           "alt": "Open plains",
-          "caption": "Wide plains crossed on a long travel day.",
+          "caption": "Plains crossed on a long travel day.",
           "tags": [
             "scenery",
             "journey"
@@ -337,7 +337,7 @@
           "id": "shot-28",
           "src": "./assets/img/gallery/shot-28.webp",
           "alt": "Lantern path",
-          "caption": "Lantern-lit paths through a quiet district.",
+          "caption": "Lanterns along a quiet district path.",
           "tags": [
             "atmosphere",
             "night"
