@@ -57,6 +57,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 
 ## 7. Tone and Copy
 
+- For Codex-specific conduct, values, and protected-content conventions, see [`docs/codex-guide.md`](codex-guide.md).
 - Tone should stay cozy, clear, wuxia-inspired, and welcoming.
 - New visitors should understand the guild, the game, and the join path quickly.
 - Keep the Cupcake identity readable rather than cryptic.
