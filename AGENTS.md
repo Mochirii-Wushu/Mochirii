@@ -1,13 +1,15 @@
 # Repository Guidance
 
-- This is a static HTML/CSS/vanilla JavaScript guild website. Do not add a framework or bundler unless explicitly requested.
-- Avoid direct feature work on `main`; create a scoped branch and keep it reviewable.
+- This is a static HTML/CSS/vanilla JavaScript guild website. Do not add frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
+- Use one scoped branch per task. Do not edit `main` directly, and avoid broad refactors during content or feature work.
 - Preserve the current Mōchirīī wuxia/glass visual identity while improving clarity, speed, and accessibility.
 - Do not delete or rewrite asset directories unless usage is verified and the change is intentionally scoped.
-- Run validation before completing work: `npm run check` plus any task-specific smoke checks. Individual checks: `npm run check:js`, `npm run check:json`, `npm run check:refs`, `npm run check:assets`.
+- Run validation before completing work: `npm run check`, `git diff --check`, and task-specific smoke checks. Use `npm run check:production` when production behavior matters and `npm run smoke:gallery` when gallery behavior might regress.
 - Consult `docs/content-guide.md` before content, JSON, date, gallery, or asset edits.
-- Preserve protected copy: the long-form recruitment body in `data/recruitment.json` and the guild seal poem in `data/home.json`.
-- Keep exact game-name usage in regular visible body copy limited; titles, metadata, validation scripts, docs, header, and footer may retain it.
+- Preserve protected copy exactly: `data/recruitment.json` `content.paragraphs`, `data/recruitment.json` `content.conclusion`, and `data/home.json` `seal.verse`.
+- Keep Mōchirīī copy clear, xianxia-inspired, noun/verb led, lightly rhythmic, and human. Use Cupcake warmth sparingly, keep functional labels plain, and avoid generic AI-like phrasing, adjective padding, forced rhyme, copied poem/article phrasing, or named-author imitation.
+- Keep exact game-name usage out of regular visible body copy outside header/footer; titles, metadata, SEO, JSON-LD, validation scripts, docs, internal code, header, and footer may retain it.
+- Gallery grids use thumbnails; gallery lightboxes must open full images, not `/thumbs/`.
 - Use `docs/roadmap.md` for future branch ideas; keep roadmap items scoped instead of turning them into broad refactors.
 - Keep public URLs and page filenames stable unless fixing a confirmed broken reference.
 - Prefer dependency-free Node scripts and plain browser APIs.
