@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Guild Album",
-    "description": "Shared runs, road scenes, and guild moments worth keeping.",
+    "description": "Portraits, gatherings, and road scenes from the guild album.",
     "updated": "2026-02"
   },
   "albums": [
@@ -12,8 +12,8 @@
         {
           "id": "shot-01",
           "src": "./assets/img/gallery/shot-01.webp",
-          "alt": "Mōchirīī gathering",
-          "caption": "Mōchirīī gathered after a long night of travel and training.",
+          "alt": "Figure among glowing flowers",
+          "caption": "A lone figure among violet blooms and blue glow.",
           "tags": [
             "community",
             "gathering"
@@ -24,8 +24,8 @@
         {
           "id": "shot-02",
           "src": "./assets/img/gallery/shot-02.webp",
-          "alt": "Progression run",
-          "caption": "A progression run through rough ground, taken one pull at a time.",
+          "alt": "Dark-armored figure in smoke",
+          "caption": "A dark-armored figure in a smoky cave.",
           "tags": [
             "progression",
             "pve"
@@ -36,8 +36,8 @@
         {
           "id": "shot-03",
           "src": "./assets/img/gallery/shot-03.webp",
-          "alt": "Scenic landmark",
-          "caption": "A quiet landmark found while wandering the open road.",
+          "alt": "White-robed spark pose",
+          "caption": "Sparks flare around a white-robed pose.",
           "tags": [
             "scenery",
             "exploration"
@@ -48,8 +48,8 @@
         {
           "id": "shot-04",
           "src": "./assets/img/gallery/shot-04.webp",
-          "alt": "Duel night",
-          "caption": "Duels after guild activities, sharp blades and easy laughs.",
+          "alt": "Cave gathering before a horned figure",
+          "caption": "A cave gathering before a horned figure.",
           "tags": [
             "pvp",
             "training"
@@ -60,8 +60,8 @@
         {
           "id": "shot-05",
           "src": "./assets/img/gallery/shot-05.webp",
-          "alt": "Evening training session",
-          "caption": "Evening training under lantern light.",
+          "alt": "Two figures in a dark cave",
+          "caption": "A dark cave with one figure standing and one down.",
           "tags": [
             "training",
             "atmosphere"
@@ -72,8 +72,8 @@
         {
           "id": "shot-06",
           "src": "./assets/img/gallery/shot-06.webp",
-          "alt": "Mountain overlook",
-          "caption": "A high overlook after a long climb.",
+          "alt": "Cave group beneath a flame ring",
+          "caption": "A close cave pose beneath a ring of flame.",
           "tags": [
             "scenery",
             "travel"
@@ -84,8 +84,8 @@
         {
           "id": "shot-07",
           "src": "./assets/img/gallery/shot-07.webp",
-          "alt": "Guild formation",
-          "caption": "Guild formation before stepping into hostile ground.",
+          "alt": "Courtyard circle around tea",
+          "caption": "A courtyard circle around tea and green flame.",
           "tags": [
             "coordination",
             "strategy"
@@ -96,8 +96,8 @@
         {
           "id": "shot-08",
           "src": "./assets/img/gallery/shot-08.webp",
-          "alt": "Marketplace pause",
-          "caption": "A marketplace pause between objectives.",
+          "alt": "Courtyard table gathering",
+          "caption": "A courtyard table with figures gathered low.",
           "tags": [
             "slice-of-life",
             "social"
@@ -108,8 +108,8 @@
         {
           "id": "shot-09",
           "src": "./assets/img/gallery/shot-09.webp",
-          "alt": "River crossing",
-          "caption": "Crossing the river together on an open exploration run.",
+          "alt": "Courtyard pair by a brazier",
+          "caption": "Two seats by the brazier, green flame rising.",
           "tags": [
             "travel",
             "group"
@@ -120,8 +120,8 @@
         {
           "id": "shot-10",
           "src": "./assets/img/gallery/shot-10.webp",
-          "alt": "Night skyline",
-          "caption": "A city skyline watched under night air.",
+          "alt": "Low courtyard table gathering",
+          "caption": "A low table, four seats, and an easy pause.",
           "tags": [
             "scenery",
             "night"
@@ -132,8 +132,8 @@
         {
           "id": "shot-11",
           "src": "./assets/img/gallery/shot-11.webp",
-          "alt": "Courtyard gathering",
-          "caption": "A quiet courtyard gathering after events wound down.",
+          "alt": "Figure under a red sky",
+          "caption": "A lone figure facing a red, broken sky.",
           "tags": [
             "community",
             "rest"
@@ -144,8 +144,8 @@
         {
           "id": "shot-12",
           "src": "./assets/img/gallery/shot-12.webp",
-          "alt": "Forest path",
-          "caption": "Forest paths from a casual roam.",
+          "alt": "Umbrella in a misty clash",
+          "caption": "An umbrella raised against mist and rushing force.",
           "tags": [
             "exploration",
             "nature"
@@ -156,8 +156,8 @@
         {
           "id": "shot-13",
           "src": "./assets/img/gallery/shot-13.webp",
-          "alt": "Distant horizon",
-          "caption": "Watching the horizon while waiting for friends to arrive.",
+          "alt": "Figure beneath blue stars",
+          "caption": "A lone figure beneath blue stars and hanging script.",
           "tags": [
             "atmosphere",
             "pause"
@@ -168,8 +168,8 @@
         {
           "id": "shot-14",
           "src": "./assets/img/gallery/shot-14.webp",
-          "alt": "Training circle",
-          "caption": "A training circle for fundamentals.",
+          "alt": "Weapon portrait",
+          "caption": "A weapon held across a steady portrait.",
           "tags": [
             "training",
             "discipline"
@@ -180,8 +180,8 @@
         {
           "id": "shot-15",
           "src": "./assets/img/gallery/shot-15.webp",
-          "alt": "Festival lights",
-          "caption": "Festival lights from a seasonal evening.",
+          "alt": "Three hooded figures",
+          "caption": "Three bright hoods lined up for a playful pose.",
           "tags": [
             "festival",
             "culture"
@@ -192,8 +192,8 @@
         {
           "id": "shot-16",
           "src": "./assets/img/gallery/shot-16.webp",
-          "alt": "Bridge crossing",
-          "caption": "Crossing a stone bridge at dawn.",
+          "alt": "Fur-cloaked figure beneath night branches",
+          "caption": "A fur-cloaked figure beneath night branches.",
           "tags": [
             "travel",
             "morning"
@@ -204,8 +204,8 @@
         {
           "id": "shot-17",
           "src": "./assets/img/gallery/shot-17.webp",
-          "alt": "Group rest",
-          "caption": "Resting together after a long road.",
+          "alt": "Moonlit silhouette",
+          "caption": "A lone silhouette before moonlit water.",
           "tags": [
             "community",
             "rest"
@@ -216,8 +216,8 @@
         {
           "id": "shot-18",
           "src": "./assets/img/gallery/shot-18.webp",
-          "alt": "Rainfall moment",
-          "caption": "A sudden rainfall while the road stayed open.",
+          "alt": "Red-robed night figure",
+          "caption": "A red-robed figure under stars and cloud.",
           "tags": [
             "weather",
             "atmosphere"
@@ -228,8 +228,8 @@
         {
           "id": "shot-19",
           "src": "./assets/img/gallery/shot-19.webp",
-          "alt": "Campfire pause",
-          "caption": "A campfire pause before logging out for the night.",
+          "alt": "Training yard balance",
+          "caption": "Two figures balanced above the training yard.",
           "tags": [
             "camp",
             "quiet"
@@ -240,8 +240,8 @@
         {
           "id": "shot-20",
           "src": "./assets/img/gallery/shot-20.webp",
-          "alt": "Final lookout",
-          "caption": "One last lookout before returning to town.",
+          "alt": "Weapon bearers at a gate",
+          "caption": "Two weapon-bearers at the gate.",
           "tags": [
             "closure",
             "journey"
@@ -252,8 +252,8 @@
         {
           "id": "shot-21",
           "src": "./assets/img/gallery/shot-21.webp",
-          "alt": "Breezy day",
-          "caption": "Sunset pause before the road moved on.",
+          "alt": "Sunset ridge over purple flowers",
+          "caption": "A ridge at sunset over purple flowers.",
           "tags": [
             "deep",
             "thought"
@@ -264,8 +264,8 @@
         {
           "id": "shot-22",
           "src": "./assets/img/gallery/shot-22.webp",
-          "alt": "Morning departure",
-          "caption": "Preparing supplies before first light.",
+          "alt": "Courtyard dancers",
+          "caption": "Dancers turn before the courtyard gate.",
           "tags": [
             "travel",
             "morning"
@@ -276,8 +276,8 @@
         {
           "id": "shot-23",
           "src": "./assets/img/gallery/shot-23.webp",
-          "alt": "Quiet shoreline",
-          "caption": "Standing along the shoreline in a calm hour.",
+          "alt": "Party by a lit doorway",
+          "caption": "A full party lined up by the lit doorway.",
           "tags": [
             "scenery",
             "quiet"
@@ -288,8 +288,8 @@
         {
           "id": "shot-24",
           "src": "./assets/img/gallery/shot-24.webp",
-          "alt": "Roadside pause",
-          "caption": "Resting along a winding road.",
+          "alt": "Masked figure in purple flowers",
+          "caption": "A masked figure standing in purple flowers.",
           "tags": [
             "travel",
             "pause"
@@ -300,8 +300,8 @@
         {
           "id": "shot-25",
           "src": "./assets/img/gallery/shot-25.webp",
-          "alt": "Training reflections",
-          "caption": "Reviewing techniques after focused practice.",
+          "alt": "Group with fans and instruments",
+          "caption": "Fans, instruments, and companions packed into one frame.",
           "tags": [
             "training",
             "reflection"
@@ -312,8 +312,8 @@
         {
           "id": "shot-26",
           "src": "./assets/img/gallery/shot-26.webp",
-          "alt": "Open plains",
-          "caption": "Plains crossed on a long travel day.",
+          "alt": "Seated figure between drums",
+          "caption": "A seated pause between drums beneath blue branches.",
           "tags": [
             "scenery",
             "journey"
@@ -324,8 +324,8 @@
         {
           "id": "shot-27",
           "src": "./assets/img/gallery/shot-27.webp",
-          "alt": "Night watch",
-          "caption": "Keeping watch while others rest.",
+          "alt": "Pair near bamboo at dusk",
+          "caption": "Two figures near bamboo at dusk.",
           "tags": [
             "night",
             "duty"
@@ -336,8 +336,8 @@
         {
           "id": "shot-28",
           "src": "./assets/img/gallery/shot-28.webp",
-          "alt": "Lantern path",
-          "caption": "Lanterns along a quiet district path.",
+          "alt": "Seated night portrait",
+          "caption": "A seated night portrait with a small white companion.",
           "tags": [
             "atmosphere",
             "night"
@@ -348,8 +348,8 @@
         {
           "id": "shot-29",
           "src": "./assets/img/gallery/shot-29.webp",
-          "alt": "Group planning",
-          "caption": "Discussing routes and timing before departure.",
+          "alt": "Companions by rock and evening light",
+          "caption": "Two companions framed by rock and evening light.",
           "tags": [
             "strategy",
             "coordination"
@@ -360,8 +360,8 @@
         {
           "id": "shot-30",
           "src": "./assets/img/gallery/shot-30.webp",
-          "alt": "Hilltop view",
-          "caption": "Watching the valley from a high hilltop.",
+          "alt": "Figures by dark water",
+          "caption": "Two figures facing lantern reflections on dark water.",
           "tags": [
             "scenery",
             "overlook"
@@ -372,8 +372,8 @@
         {
           "id": "shot-31",
           "src": "./assets/img/gallery/shot-31.webp",
-          "alt": "Shared meal",
-          "caption": "Sharing food between activities.",
+          "alt": "Parasol beside water",
+          "caption": "A parasol and lantern reflections beside the water.",
           "tags": [
             "community",
             "rest"
@@ -384,8 +384,8 @@
         {
           "id": "shot-32",
           "src": "./assets/img/gallery/shot-32.webp",
-          "alt": "Quiet street",
-          "caption": "Walking through town in the off hours.",
+          "alt": "Portrait by stone and sunset sky",
+          "caption": "A close portrait beside stone and sunset sky.",
           "tags": [
             "slice-of-life",
             "quiet"
@@ -396,8 +396,8 @@
         {
           "id": "shot-33",
           "src": "./assets/img/gallery/shot-33.webp",
-          "alt": "Riverbank rest",
-          "caption": "Pausing along the riverbank to regroup.",
+          "alt": "Companions seated against sunset",
+          "caption": "Two companions seated against a wide sunset.",
           "tags": [
             "nature",
             "pause"
@@ -408,8 +408,8 @@
         {
           "id": "shot-34",
           "src": "./assets/img/gallery/shot-34.webp",
-          "alt": "Weapon practice",
-          "caption": "Practicing forms in a cleared space.",
+          "alt": "Companions backlit by sunset",
+          "caption": "Two companions backlit by a bright sunset.",
           "tags": [
             "training",
             "discipline"
@@ -420,8 +420,8 @@
         {
           "id": "shot-35",
           "src": "./assets/img/gallery/shot-35.webp",
-          "alt": "Evening glow",
-          "caption": "Light fading as evening settles.",
+          "alt": "Rockside sunset portrait",
+          "caption": "A rockside portrait under pink evening sky.",
           "tags": [
             "atmosphere",
             "evening"
@@ -432,8 +432,8 @@
         {
           "id": "shot-36",
           "src": "./assets/img/gallery/shot-36.webp",
-          "alt": "Mountain path",
-          "caption": "Navigating narrow paths through higher ground.",
+          "alt": "Companions above a valley at dusk",
+          "caption": "Two companions above the valley at dusk.",
           "tags": [
             "travel",
             "terrain"
@@ -444,8 +444,8 @@
         {
           "id": "shot-37",
           "src": "./assets/img/gallery/shot-37.webp",
-          "alt": "Quiet exchange",
-          "caption": "Brief conversations before moving on.",
+          "alt": "Figures looking toward a mountaintop pagoda",
+          "caption": "Two figures looking toward a mountaintop pagoda.",
           "tags": [
             "social",
             "moment"
@@ -456,8 +456,8 @@
         {
           "id": "shot-38",
           "src": "./assets/img/gallery/shot-38.webp",
-          "alt": "Weather shift",
-          "caption": "Clouds gathering ahead of a weather shift.",
+          "alt": "Low-angle portrait beneath open sky",
+          "caption": "A low-angle portrait beneath open sky.",
           "tags": [
             "weather",
             "atmosphere"
@@ -468,8 +468,8 @@
         {
           "id": "shot-39",
           "src": "./assets/img/gallery/shot-39.webp",
-          "alt": "Camp breakdown",
-          "caption": "Packing up camp at dawn.",
+          "alt": "Pale-sky portrait with a blade",
+          "caption": "A pale-sky portrait with a blade in hand.",
           "tags": [
             "camp",
             "morning"
