@@ -82,6 +82,15 @@
           Send screenshots to the Discord gallery channel when a run, view, or tiny guild moment feels worth saving.
         </p>
 
+        <div class="gallery-toolbar" aria-label="Gallery browsing">
+          <div id="galleryFilters" class="gallery-filters" aria-label="Gallery categories"></div>
+          <p id="galleryCount" class="gallery-count muted" role="status" aria-live="polite"></p>
+        </div>
+
+        <p id="galleryEmpty" class="gallery-empty" role="status" hidden>
+          No images in this category yet.
+        </p>
+
         <!-- Grid mount (gallery.js renders items here from gallery.json) -->
         <div id="galleryGrid" class="gallery-grid" aria-live="polite">
           <!-- populated by gallery.js -->

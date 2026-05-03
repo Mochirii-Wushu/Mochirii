@@ -4,6 +4,28 @@
     "description": "Portraits, gatherings, and road scenes from the guild album.",
     "updated": "2026-02"
   },
+  "categories": [
+    {
+      "slug": "portraits",
+      "label": "Portraits"
+    },
+    {
+      "slug": "gatherings",
+      "label": "Gatherings"
+    },
+    {
+      "slug": "action",
+      "label": "Action"
+    },
+    {
+      "slug": "scenery",
+      "label": "Scenery"
+    },
+    {
+      "slug": "companions",
+      "label": "Companions"
+    }
+  ],
   "albums": [
     {
       "id": "general",
@@ -14,6 +36,7 @@
           "src": "./assets/img/gallery/shot-01.webp",
           "alt": "Figure among glowing flowers",
           "caption": "A lone figure among violet blooms and blue glow.",
+          "category": "portraits",
           "tags": [
             "community",
             "gathering"
@@ -26,6 +49,7 @@
           "src": "./assets/img/gallery/shot-02.webp",
           "alt": "Dark-armored figure in smoke",
           "caption": "A dark-armored figure in a smoky cave.",
+          "category": "portraits",
           "tags": [
             "progression",
             "pve"
@@ -38,6 +62,7 @@
           "src": "./assets/img/gallery/shot-03.webp",
           "alt": "White-robed spark pose",
           "caption": "Sparks flare around a white-robed pose.",
+          "category": "portraits",
           "tags": [
             "scenery",
             "exploration"
@@ -50,6 +75,7 @@
           "src": "./assets/img/gallery/shot-04.webp",
           "alt": "Cave gathering before a horned figure",
           "caption": "A cave gathering before a horned figure.",
+          "category": "gatherings",
           "tags": [
             "pvp",
             "training"
@@ -62,6 +88,7 @@
           "src": "./assets/img/gallery/shot-05.webp",
           "alt": "Two figures in a dark cave",
           "caption": "A dark cave with one figure standing and one down.",
+          "category": "action",
           "tags": [
             "training",
             "atmosphere"
@@ -74,6 +101,7 @@
           "src": "./assets/img/gallery/shot-06.webp",
           "alt": "Cave group beneath a flame ring",
           "caption": "A close cave pose beneath a ring of flame.",
+          "category": "gatherings",
           "tags": [
             "scenery",
             "travel"
@@ -86,6 +114,7 @@
           "src": "./assets/img/gallery/shot-07.webp",
           "alt": "Courtyard circle around tea",
           "caption": "A courtyard circle around tea and green flame.",
+          "category": "gatherings",
           "tags": [
             "coordination",
             "strategy"
@@ -98,6 +127,7 @@
           "src": "./assets/img/gallery/shot-08.webp",
           "alt": "Courtyard table gathering",
           "caption": "A courtyard table with figures gathered low.",
+          "category": "gatherings",
           "tags": [
             "slice-of-life",
             "social"
@@ -110,6 +140,7 @@
           "src": "./assets/img/gallery/shot-09.webp",
           "alt": "Courtyard pair by a brazier",
           "caption": "Two seats by the brazier, green flame rising.",
+          "category": "gatherings",
           "tags": [
             "travel",
             "group"
@@ -122,6 +153,7 @@
           "src": "./assets/img/gallery/shot-10.webp",
           "alt": "Low courtyard table gathering",
           "caption": "A low table, four seats, and an easy pause.",
+          "category": "gatherings",
           "tags": [
             "scenery",
             "night"
@@ -134,6 +166,7 @@
           "src": "./assets/img/gallery/shot-11.webp",
           "alt": "Figure under a red sky",
           "caption": "A lone figure facing a red, broken sky.",
+          "category": "portraits",
           "tags": [
             "community",
             "rest"
@@ -146,6 +179,7 @@
           "src": "./assets/img/gallery/shot-12.webp",
           "alt": "Umbrella in a misty clash",
           "caption": "An umbrella raised against mist and rushing force.",
+          "category": "action",
           "tags": [
             "exploration",
             "nature"
@@ -158,6 +192,7 @@
           "src": "./assets/img/gallery/shot-13.webp",
           "alt": "Figure beneath blue stars",
           "caption": "A lone figure beneath blue stars and hanging script.",
+          "category": "portraits",
           "tags": [
             "atmosphere",
             "pause"
@@ -170,6 +205,7 @@
           "src": "./assets/img/gallery/shot-14.webp",
           "alt": "Weapon portrait",
           "caption": "A weapon held across a steady portrait.",
+          "category": "portraits",
           "tags": [
             "training",
             "discipline"
@@ -182,6 +218,7 @@
           "src": "./assets/img/gallery/shot-15.webp",
           "alt": "Three hooded figures",
           "caption": "Three bright hoods lined up for a playful pose.",
+          "category": "gatherings",
           "tags": [
             "festival",
             "culture"
@@ -194,6 +231,7 @@
           "src": "./assets/img/gallery/shot-16.webp",
           "alt": "Fur-cloaked figure beneath night branches",
           "caption": "A fur-cloaked figure beneath night branches.",
+          "category": "portraits",
           "tags": [
             "travel",
             "morning"
@@ -206,6 +244,7 @@
           "src": "./assets/img/gallery/shot-17.webp",
           "alt": "Moonlit silhouette",
           "caption": "A lone silhouette before moonlit water.",
+          "category": "portraits",
           "tags": [
             "community",
             "rest"
@@ -218,6 +257,7 @@
           "src": "./assets/img/gallery/shot-18.webp",
           "alt": "Red-robed night figure",
           "caption": "A red-robed figure under stars and cloud.",
+          "category": "portraits",
           "tags": [
             "weather",
             "atmosphere"
@@ -230,6 +270,7 @@
           "src": "./assets/img/gallery/shot-19.webp",
           "alt": "Training yard balance",
           "caption": "Two figures balanced above the training yard.",
+          "category": "action",
           "tags": [
             "camp",
             "quiet"
@@ -242,6 +283,7 @@
           "src": "./assets/img/gallery/shot-20.webp",
           "alt": "Weapon bearers at a gate",
           "caption": "Two weapon-bearers at the gate.",
+          "category": "action",
           "tags": [
             "closure",
             "journey"
@@ -254,6 +296,7 @@
           "src": "./assets/img/gallery/shot-21.webp",
           "alt": "Sunset ridge over purple flowers",
           "caption": "A ridge at sunset over purple flowers.",
+          "category": "scenery",
           "tags": [
             "deep",
             "thought"
@@ -266,6 +309,7 @@
           "src": "./assets/img/gallery/shot-22.webp",
           "alt": "Courtyard dancers",
           "caption": "Dancers turn before the courtyard gate.",
+          "category": "gatherings",
           "tags": [
             "travel",
             "morning"
@@ -278,6 +322,7 @@
           "src": "./assets/img/gallery/shot-23.webp",
           "alt": "Party by a lit doorway",
           "caption": "A full party lined up by the lit doorway.",
+          "category": "gatherings",
           "tags": [
             "scenery",
             "quiet"
@@ -290,6 +335,7 @@
           "src": "./assets/img/gallery/shot-24.webp",
           "alt": "Masked figure in purple flowers",
           "caption": "A masked figure standing in purple flowers.",
+          "category": "portraits",
           "tags": [
             "travel",
             "pause"
@@ -302,6 +348,7 @@
           "src": "./assets/img/gallery/shot-25.webp",
           "alt": "Group with fans and instruments",
           "caption": "Fans, instruments, and companions packed into one frame.",
+          "category": "gatherings",
           "tags": [
             "training",
             "reflection"
@@ -314,6 +361,7 @@
           "src": "./assets/img/gallery/shot-26.webp",
           "alt": "Seated figure between drums",
           "caption": "A seated pause between drums beneath blue branches.",
+          "category": "portraits",
           "tags": [
             "scenery",
             "journey"
@@ -326,6 +374,7 @@
           "src": "./assets/img/gallery/shot-27.webp",
           "alt": "Pair near bamboo at dusk",
           "caption": "Two figures near bamboo at dusk.",
+          "category": "scenery",
           "tags": [
             "night",
             "duty"
@@ -338,6 +387,7 @@
           "src": "./assets/img/gallery/shot-28.webp",
           "alt": "Seated night portrait",
           "caption": "A seated night portrait with a small white companion.",
+          "category": "portraits",
           "tags": [
             "atmosphere",
             "night"
@@ -350,6 +400,7 @@
           "src": "./assets/img/gallery/shot-29.webp",
           "alt": "Companions by rock and evening light",
           "caption": "Two companions framed by rock and evening light.",
+          "category": "companions",
           "tags": [
             "strategy",
             "coordination"
@@ -362,6 +413,7 @@
           "src": "./assets/img/gallery/shot-30.webp",
           "alt": "Figures by dark water",
           "caption": "Two figures facing lantern reflections on dark water.",
+          "category": "scenery",
           "tags": [
             "scenery",
             "overlook"
@@ -374,6 +426,7 @@
           "src": "./assets/img/gallery/shot-31.webp",
           "alt": "Parasol beside water",
           "caption": "A parasol and lantern reflections beside the water.",
+          "category": "gatherings",
           "tags": [
             "community",
             "rest"
@@ -386,6 +439,7 @@
           "src": "./assets/img/gallery/shot-32.webp",
           "alt": "Portrait by stone and sunset sky",
           "caption": "A close portrait beside stone and sunset sky.",
+          "category": "portraits",
           "tags": [
             "slice-of-life",
             "quiet"
@@ -398,6 +452,7 @@
           "src": "./assets/img/gallery/shot-33.webp",
           "alt": "Companions seated against sunset",
           "caption": "Two companions seated against a wide sunset.",
+          "category": "companions",
           "tags": [
             "nature",
             "pause"
@@ -410,6 +465,7 @@
           "src": "./assets/img/gallery/shot-34.webp",
           "alt": "Companions backlit by sunset",
           "caption": "Two companions backlit by a bright sunset.",
+          "category": "companions",
           "tags": [
             "training",
             "discipline"
@@ -422,6 +478,7 @@
           "src": "./assets/img/gallery/shot-35.webp",
           "alt": "Rockside sunset portrait",
           "caption": "A rockside portrait under pink evening sky.",
+          "category": "portraits",
           "tags": [
             "atmosphere",
             "evening"
@@ -434,6 +491,7 @@
           "src": "./assets/img/gallery/shot-36.webp",
           "alt": "Companions above a valley at dusk",
           "caption": "Two companions above the valley at dusk.",
+          "category": "companions",
           "tags": [
             "travel",
             "terrain"
@@ -446,6 +504,7 @@
           "src": "./assets/img/gallery/shot-37.webp",
           "alt": "Figures looking toward a mountaintop pagoda",
           "caption": "Two figures looking toward a mountaintop pagoda.",
+          "category": "scenery",
           "tags": [
             "social",
             "moment"
@@ -458,6 +517,7 @@
           "src": "./assets/img/gallery/shot-38.webp",
           "alt": "Low-angle portrait beneath open sky",
           "caption": "A low-angle portrait beneath open sky.",
+          "category": "portraits",
           "tags": [
             "weather",
             "atmosphere"
@@ -470,6 +530,7 @@
           "src": "./assets/img/gallery/shot-39.webp",
           "alt": "Pale-sky portrait with a blade",
           "caption": "A pale-sky portrait with a blade in hand.",
+          "category": "portraits",
           "tags": [
             "camp",
             "morning"
