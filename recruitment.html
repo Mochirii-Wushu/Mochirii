@@ -89,7 +89,14 @@
             <p class="muted" id="recruitmentAudioDesc">Loading…</p>
 
             <div style="width:100%; margin-top:12px;">
-              <audio id="recruitmentAudio" controls preload="none" style="width:100%;">
+              <audio
+                id="recruitmentAudio"
+                controls
+                preload="none"
+                style="width:100%;"
+                aria-labelledby="recruitmentAudioTitle"
+                aria-describedby="recruitmentAudioDesc"
+              >
                 <!-- sources inserted by recruitment.js -->
                 Your browser does not support the audio element.
               </audio>
