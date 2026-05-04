@@ -62,6 +62,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - For Ranks-specific progression, hierarchy, image, tone, and accessibility conventions, see [`docs/ranks-guide.md`](ranks-guide.md).
 - For Leaders-specific roster, profile-link, image, tone, and accessibility conventions, see [`docs/leaders-guide.md`](leaders-guide.md).
 - For Twills/Profile-specific protected body text, contact detail, image, tone, and accessibility conventions, see [`docs/twills-guide.md`](twills-guide.md).
+- For Recruitment-specific protected body/conclusion, audio, tone, and accessibility conventions, see [`docs/recruitment-guide.md`](recruitment-guide.md).
 - Tone should stay cozy, clear, wuxia-inspired, and welcoming.
 - New visitors should understand the guild, the game, and the join path quickly.
 - Keep the Cupcake identity readable rather than cryptic.

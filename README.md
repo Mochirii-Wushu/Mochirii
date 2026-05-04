@@ -219,6 +219,8 @@ For Leaders roster, profile-link, image, tone, accessibility, and smoke-test con
 
 For Twills/Profile protected body text, contact detail, image, tone, accessibility, and smoke-test conventions, see [`docs/twills-guide.md`](docs/twills-guide.md).
 
+For Recruitment protected body/conclusion, audio, tone, accessibility, and smoke-test conventions, see [`docs/recruitment-guide.md`](docs/recruitment-guide.md).
+
 For Gallery image, category, tag, caption, URL state, cache-query, and smoke-test conventions, see [`docs/gallery-guide.md`](docs/gallery-guide.md).
 
 For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/roadmap.md).
