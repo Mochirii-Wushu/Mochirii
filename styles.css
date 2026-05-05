@@ -1258,6 +1258,194 @@ body[data-page="home"] .section-title{
 }
 
 /* =========================================================
+   RECRUITMENT — Visual readability pilot
+   ========================================================= */
+body[data-page="recruitment"]{
+  --recruit-lantern:rgba(218,181,94,.68);
+  --recruit-lantern-soft:rgba(218,181,94,.18);
+  --recruit-lotus:rgba(222,151,177,.46);
+  --recruit-lotus-soft:rgba(222,151,177,.14);
+  --recruit-jade:rgba(48,178,143,.42);
+  --recruit-jade-soft:rgba(31,122,99,.16);
+  --recruit-panel:rgba(15,12,10,.84);
+  --recruit-panel-strong:rgba(18,14,11,.92);
+  --recruit-ink:rgba(255,246,232,.86);
+  --recruit-muted:rgba(255,238,210,.68);
+}
+
+body[data-page="recruitment"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(12,9,7,.10), rgba(12,9,7,.18)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.40), rgba(222,151,177,.16) 46%, rgba(48,178,143,.24)) border-box;
+  box-shadow:
+    0 30px 82px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 44px rgba(218,181,94,.10);
+}
+
+body[data-page="recruitment"] .hero-intro,
+body[data-page="recruitment"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  animation:none;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 12% 0%, var(--recruit-lantern-soft), transparent 36%),
+    linear-gradient(155deg, var(--recruit-panel-strong), var(--recruit-panel)) padding-box,
+    linear-gradient(135deg, var(--recruit-lantern), rgba(255,255,255,.08) 42%, var(--recruit-jade)) border-box;
+  box-shadow:
+    0 24px 66px rgba(0,0,0,.48),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.09);
+}
+
+body[data-page="recruitment"] .hero-intro::before,
+body[data-page="recruitment"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 88% 12%, rgba(222,151,177,.12), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 50%);
+}
+
+body[data-page="recruitment"] .hero-intro{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(218,181,94,.20), transparent 34%),
+    radial-gradient(circle at 88% 14%, rgba(222,151,177,.15), transparent 34%),
+    linear-gradient(155deg, rgba(18,14,11,.93), rgba(10,9,9,.82)) padding-box,
+    linear-gradient(135deg, var(--recruit-lantern), rgba(222,151,177,.28), rgba(48,178,143,.24)) border-box;
+}
+
+body[data-page="recruitment"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="recruitment"] .glass-pad{
+  padding:clamp(20px, 3vw, 30px);
+}
+
+body[data-page="recruitment"] .kicker,
+body[data-page="recruitment"] .meta-text,
+body[data-page="recruitment"] .muted{
+  color:var(--recruit-muted);
+}
+
+body[data-page="recruitment"] .display-title,
+body[data-page="recruitment"] .section-title{
+  text-shadow:0 10px 26px rgba(218,181,94,.16);
+}
+
+body[data-page="recruitment"] .badge-row > span{
+  animation:none;
+  border:1px solid rgba(218,181,94,.34);
+  background:
+    linear-gradient(135deg, rgba(218,181,94,.16), rgba(222,151,177,.10));
+  color:var(--recruit-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="recruitment"] .col-4 .glass-card{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.22), transparent 48%),
+    linear-gradient(160deg, rgba(20,15,11,.92), rgba(9,8,8,.78)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.64), rgba(222,151,177,.22) 56%, rgba(48,178,143,.18)) border-box;
+}
+
+body[data-page="recruitment"] #recruitmentAudioTitle{
+  margin-bottom:10px;
+}
+
+body[data-page="recruitment"] #recruitmentAudioDesc{
+  max-width:34ch;
+  line-height:1.65;
+}
+
+body[data-page="recruitment"] #recruitmentAudio{
+  display:block;
+  min-height:44px;
+  color-scheme:dark;
+  border-radius:999px;
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.30));
+}
+
+body[data-page="recruitment"] #recruitmentAudio:focus-visible{
+  outline:2px solid rgba(255,246,232,.78);
+  outline-offset:4px;
+  box-shadow:
+    0 0 0 3px rgba(218,181,94,.22),
+    0 0 0 5px rgba(222,151,177,.14);
+}
+
+body[data-page="recruitment"] .col-8 .glass-card{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(222,151,177,.12), transparent 38%),
+    linear-gradient(160deg, rgba(17,13,10,.92), rgba(7,7,7,.82)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.50), rgba(255,255,255,.08) 45%, rgba(48,178,143,.25)) border-box;
+}
+
+body[data-page="recruitment"] #recruitmentBody{
+  max-width:72ch;
+  color:var(--recruit-ink);
+  font-size:clamp(1rem, .98rem + .14vw, 1.075rem);
+  line-height:1.82;
+  gap:clamp(16px, 1.8vw, 22px);
+}
+
+body[data-page="recruitment"] #recruitmentBody p{
+  text-wrap:pretty;
+}
+
+body[data-page="recruitment"] #recruitmentConclusion{
+  margin-top:clamp(22px, 3vw, 32px) !important;
+  max-width:72ch;
+  padding:clamp(16px, 2.4vw, 22px);
+  border-radius:22px;
+  border:1px solid rgba(222,151,177,.30);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(222,151,177,.16), transparent 42%),
+    linear-gradient(135deg, rgba(218,181,94,.12), rgba(0,0,0,.18));
+  color:rgba(255,246,232,.90);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.26);
+}
+
+body[data-page="recruitment"] #recruitmentConclusion p{
+  margin:0;
+  line-height:1.78;
+}
+
+@media (min-width:981px){
+  body[data-page="recruitment"] .col-4 .glass-card{
+    margin-top:clamp(14px, 4vw, 34px);
+  }
+}
+
+@media (max-width:640px){
+  body[data-page="recruitment"] .hero-intro{
+    text-align:left;
+    align-items:flex-start;
+  }
+
+  body[data-page="recruitment"] .hero-intro .badge-row{
+    justify-content:flex-start;
+  }
+
+  body[data-page="recruitment"] #recruitmentBody{
+    line-height:1.78;
+  }
+}
+
+/* =========================================================
    TWILLS — Profile avatar presentation (page-scoped)
    ========================================================= */
   body[data-page="twills"] .profile-avatar{
