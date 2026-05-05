@@ -4,8 +4,8 @@
     "title": "The Codex",
     "image": "./assets/img/codex/hero.webp",
     "introBody": [
-      "The Codex holds how Mōchirīī speaks, gathers & looks after each other.",
-      "Read it once, revisit it often & use it to keep conduct clear."
+      "The Codex is about how Mōchirīī speaks, gathers & looks after each other.",
+      "Read it once, revisit it often & use it to remind yourself to be nice."
     ],
     "pills": ["Values in practice", "Etiquette with dignity", "Consistency with ease"]
   },
@@ -16,22 +16,22 @@
     "image": "./assets/img/codex/values.webp",
     "body": [
       "The Codex keeps culture rooted across time zones & playstyles.",
-      "It sets conduct expectations, explains how disputes get handled & describes how we keep guild life active with room to breathe."
+      "It sets expectations, explains how disputes get handled & describes how we keep guild life active & enjoyable for everyone."
     ]
   },
 
   "tenets": {
     "title": "Tenets",
-    "description": "These tenets shape our tone in parties, chat & guild spaces so every run carries more trust.",
+    "description": "These tenets shape our tone in parties, chat & guild spaces so every member feels welcomed.",
     "image": "./assets/img/codex/tenets.webp",
     "captionTitle": "Values made practical",
-    "caption": "A shared standard turns good intent into grounded conduct when fights get loud.",
+    "caption": "A shared standard turns good intent into grounded conduct when disputes happen.",
     "pills": ["Tone", "Trust", "Growth"],
-    "note": "Choose one tenet before an event & carry it into the run with care.",
+    "note": "Choose one tenet before an event & carry it into the team together.",
     "items": [
       {
         "title": "Harmony",
-        "description": "Keep the group coordinated, share space well & communicate with care."
+        "description": "Stay coordinated, be nice & communicate clearly."
       },
       {
         "title": "Generosity",
@@ -51,7 +51,7 @@
       },
       {
         "title": "Joy",
-        "description": "Keep the guild bright by celebrating wins & making space for laughter."
+        "description": "Keep the guild bright by celebrating wins & having fun together."
       }
     ]
   },
@@ -65,9 +65,9 @@
       {
         "title": "Chat",
         "items": [
-          "Keep messages readable, especially during events & calls.",
-          "Welcome new voices with simple replies & helpful context.",
-          "Use teasing with clarity & make it easy to opt out."
+          "Keep messages simple, especially during events.",
+          "Welcome new members with simple replies & helpful feedback.",
+          "Be mindful with sarcasm & make it easy to opt out."
         ]
       },
       {
@@ -89,14 +89,14 @@
       {
         "title": "Guild Code",
         "items": [
-          "Be kind in public spaces and make room for new members.",
+          "Be kind in public spaces & make room for new members.",
           "Respect real-life schedules, time zones & longer breaks.",
           "Join events when available without pressuring casual members.",
-          "Ask leadership for help when a conflict or concern needs care."
+          "Ask leadership for help when a conflict or concern needs attention."
         ]
       }
     ],
-    "note": "Keep disputes private and actionable; return to the road with dignity."
+    "note": "Keep disputes private & actionable; return to the road with dignity."
   },
 
   "rhythm": {
@@ -134,7 +134,7 @@
     "items": [
       {
         "title": "Follow-through",
-        "description": "Showing up over time through runs, events, chat help & small acts that keep the hall moving forward."
+        "description": "Showing up over time through team play, events, chat help & small acts that keep the guild moving forward."
       },
       {
         "title": "Service",

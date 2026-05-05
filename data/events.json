@@ -2,7 +2,7 @@
   "meta": {
     "kicker": "Guild calendar",
     "title": "Events",
-    "intro": "Events gather the guild around posted times, goals, and RSVP notes so runs feel calm instead of rushed.",
+    "intro": "Events gather the guild around posted times, goals & RSVP notes so runs feel calm instead of rushed.",
     "updated": "2026-02-01",
     "timezoneLabel": "UTC+8",
     "badges": ["RSVP in Discord when planning is needed"],
@@ -22,8 +22,8 @@
     "href": "https://discord.com/invite/dPafqMwWPK",
     "linkLabel": "RSVP & details in Discord",
     "bullets": [
-      "When slots allow, we welcome members and help each player find a place at the Mōchirīī table.",
-      "Check Discord for final timing, requirements, and party assignments before the run."
+      "When slots allow, we welcome members & help each player find a place in Mōchirīī.",
+      "Check Discord for final timing, requirements & party assignments before events."
     ]
   },
   "upcoming": [
@@ -32,7 +32,7 @@
       "time": "5:00 PM",
       "timezone": "UTC+8",
       "title": "Guild Hero's Realm: Weekly Coordination",
-      "summary": "A window for the guild hero's realm. Show up, ask questions & we'll match groups with patience.",
+      "summary": "A window for the guild hero's realm. Show up, ask questions & we'll match groups together.",
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK"
     }
@@ -41,8 +41,8 @@
     "intro": "Recurring activities happen as schedules allow. Discord carries final timing; the site keeps the rhythm clear.",
     "items": [
       {
-        "title": "Sect dailies, guild activities, trials, hero realms, and more.",
-        "summary": "Posted windows help members gather, form teams, and keep runs calm."
+        "title": "Sect dailies, guild activities, trials, hero realms & more.",
+        "summary": "Posted windows help members gather, form teams & keep teams running smoothly."
       }
     ]
   },
