@@ -1,16 +1,16 @@
 {
   "copy": {
-    "bulletinIntro": "Hall notes, event calls, raffles, and updates keep the guild moving.",
-    "doorsIntro": "Step through the join path, ranks, leaders, and Codex that keep Mōchirīī on the path.",
-    "spotlightIntro": "A shoutout for a member whose care keeps the hall alive.",
-    "galleryIntro": "Screenshots from runs, quiet roads, and moments that become guild memory."
+    "bulletinIntro": "Hall notes, event calls, raffles & little scroll updates keep the guild lanterns glowing.",
+    "doorsIntro": "Step through the join path, ranks, leaders & Codex that guide Mōchirīī along its cupcake-sweet cultivation road.",
+    "spotlightIntro": "A warm shoutout for a guildmate whose care keeps the hall bright, cozy & full of frosting charm.",
+    "galleryIntro": "Screenshots from runs, quiet roads, lantern-lit detours & small moments that become guild memory."
   },
   "hero": {
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",
     "descriptor": [
-      "Mōchirīī is a guild hall for players who want company, events, runs, and rest between adventures.",
-      "Step in through Discord, read the joining path, and grow at your own pace. Check event notes, RSVP when planning helps, and bring lantern warmth to the hall."
+      "Mōchirīī is a cozy little guild hall for travelers seeking company, events, runs & a soft cupcake-sweet place to rest along the cultivation road.",
+      "Step through Discord, follow the joining path & grow at your own pace beneath the lantern glow. Read the event notes, RSVP when plans need shaping & bring a little frosting warmth to the hall as we wander onward together."
     ],
     "badges": [
       "Recruitment Open",
@@ -34,7 +34,7 @@
     {
       "pinned": true,
       "type": "event",
-      "title": "Monthly hall meeting to gather, plan, and be heard.",
+      "title": "Monthly hall meeting to gather, plan & be heard.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/featured.webp",
       "imageAlt": "Guild meeting bulletin cover",
@@ -60,37 +60,37 @@
   "tiles": [
     {
       "label": "Join",
-      "title": "Step into Mōchirīī, join Discord, and get oriented.",
+      "title": "Step into Mōchirīī, join Discord & get oriented.",
       "image": "./assets/img/tiles/join.webp",
       "alt": "Join Mōchirīī tile artwork",
       "href": "./join.html"
     },
     {
       "label": "Ranks",
-      "title": "See how presence, care, and contribution are recognized.",
+      "title": "See how presence, care & contribution are recognized.",
       "image": "./assets/img/tiles/ranks.webp",
-      "alt": "Guild ranks and progression tile artwork",
+      "alt": "Guild ranks & progression tile artwork",
       "href": "./ranks.html"
     },
     {
       "label": "Leaders",
-      "title": "Find the people who answer questions, guide halls, and keep the road clear.",
+      "title": "Find the people who answer questions, guide halls & keep the road clear.",
       "image": "./assets/img/tiles/leaders.webp",
       "alt": "Guild leadership tile artwork",
       "href": "./leaders.html"
     },
     {
       "label": "Codex",
-      "title": "Read the values, etiquette, event rhythm, and community standards we share.",
+      "title": "Read the values, etiquette, event rhythm & community standards we share.",
       "image": "./assets/img/tiles/codex.webp",
-      "alt": "Guild codex and values tile artwork",
+      "alt": "Guild codex & values tile artwork",
       "href": "./codex.html"
     }
   ],
   "spotlight": {
     "tag": "Spotlight",
-    "title": "Congratulations to: Isawisima.",
-    "summary": "For support and a steady spark.",
+    "title": "Congratulations to: Meenari.",
+    "summary": "For support & a pretty amazing spark.",
     "image": "./assets/img/featured/spotlight.webp",
     "imageAlt": "Spotlight cover",
     "href": "./spotlight.html"
