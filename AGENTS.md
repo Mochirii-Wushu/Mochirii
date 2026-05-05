@@ -16,6 +16,7 @@
 - For Leaders work, follow `docs/leaders-guide.md`. Preserve leader order, role/group conventions, image conventions, concise stewardship copy, and mobile readability.
 - For Twills/Profile work, follow `docs/twills-guide.md`. Preserve the protected Twills body text, profile purpose, intentional public contact details, image/link conventions, concise personal voice, and mobile readability.
 - For Recruitment work, follow `docs/recruitment-guide.md`. Preserve `data/recruitment.json` `content.paragraphs` and `content.conclusion` exactly; non-body fields may change only when supported by `recruitment.js` and validated.
+- For Home/Shell work, follow `docs/home-shell-guide.md`. Preserve the guild seal poem, shared script order, header/footer/nav behavior, Supabase signed-out safety, cache-query conventions, and mobile readability.
 - Gallery grids use thumbnails; gallery lightboxes must open full images, not `/thumbs/`.
 - For Gallery work, follow `docs/gallery-guide.md`; preserve category URL state, Copy link behavior, data-derived counts, and cache query updates.
 - Use `docs/roadmap.md` for future branch ideas; keep roadmap items scoped instead of turning them into broad refactors.
