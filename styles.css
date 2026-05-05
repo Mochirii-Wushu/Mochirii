@@ -597,6 +597,14 @@ body[data-page="events"] .badge-row > span > a{
   padding:6px 10px;
 }
 
+body[data-page="raffles"] #rafflesLinks > span > a{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  margin:-6px -10px;
+  padding:6px 10px;
+}
+
 @media (max-width:480px){
   body[data-page="events"] .events-filter{
     flex:1 1 auto;
