@@ -40,12 +40,20 @@
     }
     .spotify-search input{
       width:100%;
+      min-height:44px;
+      box-sizing:border-box;
       padding:10px 12px;
       border-radius:12px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.25);
       color: inherit;
       outline: none;
+    }
+    .spotify-search input:focus-visible{
+      outline:2px solid rgba(200,162,75,.72);
+      outline-offset:2px;
+      border-color:rgba(200,162,75,.44);
+      background:rgba(10,12,14,.72);
     }
     .spotify-chips{
       display:flex;
@@ -54,7 +62,13 @@
       align-items:center;
     }
     .spotify-chip{
-      padding:8px 10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:44px;
+      min-height:44px;
+      box-sizing:border-box;
+      padding:10px 12px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.18);
