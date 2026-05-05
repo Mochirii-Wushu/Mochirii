@@ -207,6 +207,8 @@ If content fails to load, pages degrade gracefully.
 
 For detailed content, date, asset, gallery, link, tone, and PR validation conventions, see [`docs/content-guide.md`](docs/content-guide.md).
 
+For Home data, shared header/footer/nav behavior, script order, protected seal poem, and shell smoke-test conventions, see [`docs/home-shell-guide.md`](docs/home-shell-guide.md).
+
 For Join onboarding, checklist, link, tone, accessibility, and smoke-test conventions, see [`docs/join-guide.md`](docs/join-guide.md).
 
 For Codex data, conduct, tone, protected-content, accessibility, and smoke-test conventions, see [`docs/codex-guide.md`](docs/codex-guide.md).

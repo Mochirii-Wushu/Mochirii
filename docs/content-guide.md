@@ -8,6 +8,7 @@ This is a static HTML/CSS/vanilla JavaScript site.
 - Page content lives mostly in `data/*.json`.
 - Shared header and footer markup live in `header.html` and `footer.html`, then load through `site.js`.
 - Shared browser helpers live in `utils.js`; keep it loaded before `site.js` and page scripts.
+- For Home and shared shell conventions, see [`docs/home-shell-guide.md`](home-shell-guide.md).
 - Images, audio, icons, and Lottie placeholders live under `assets/`.
 
 Keep the static architecture unless a future task explicitly calls for a larger change.
