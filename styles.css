@@ -2329,7 +2329,13 @@ body[data-page="recruitment"] #recruitmentConclusion p{
 /* =========================================================
    TWILLS — Profile avatar presentation (page-scoped)
    ========================================================= */
-  body[data-page="twills"] .profile-avatar{
+body[data-page="twills"] .hero-intro,
+body[data-page="twills"] .page-main .glass-card,
+body[data-page="twills"] .badge-row > span{
+  animation:none;
+}
+
+body[data-page="twills"] .profile-avatar{
   margin-top:12px;
   border-radius:18px;
   border:1px solid rgba(255,255,255,.10);
