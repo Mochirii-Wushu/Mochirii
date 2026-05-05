@@ -223,6 +223,8 @@ For Twills/Profile protected body text, contact detail, image, tone, accessibili
 
 For Recruitment protected body/conclusion, audio, tone, accessibility, and smoke-test conventions, see [`docs/recruitment-guide.md`](docs/recruitment-guide.md).
 
+For Announcements, Raffles, Spotify, and Spotlight data, embed, link, tone, accessibility, and smoke-test conventions, see [`docs/side-pages-guide.md`](docs/side-pages-guide.md).
+
 For Gallery image, category, tag, caption, URL state, cache-query, and smoke-test conventions, see [`docs/gallery-guide.md`](docs/gallery-guide.md).
 
 For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/roadmap.md).
