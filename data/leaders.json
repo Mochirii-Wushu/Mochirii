@@ -4,7 +4,7 @@
     "title": "Leaders Hall",
     "image": "./assets/img/leaders/hero.webp",
     "introBody": [
-      "Leadership in Mōchirīī rests on care. Each role carries its own work, and all help keep the guild fair and calm."
+      "Leadership in Mōchirīī is about being consistently active & supportive of others. Each role carries its own work & all help keep the guild fair."
     ],
     "pills": [
       "Start with your Hall Leader",
@@ -18,14 +18,14 @@
     "badge": "Contact & Profiles",
     "image": "./assets/img/leaders/panel.webp",
     "body": [
-      "Leaders may keep a short profile page for introductions, preferred roles & the best way to reach them. Keep it in-game, keep it safe, and leave personal info out."
+      "Leaders may keep a short profile page for introductions, preferred roles & the best way to reach them. Keep it in-game, keep it safe & leave personal info out."
     ],
     "note": "Members start with their hall leader for most questions. Requests that affect multiple halls move to the vice leader. Matters that shape policy, long-term direction, or unresolved outcomes move to the guild leader."
   },
 
   "council": {
     "title": "The Council",
-    "description": "These are contact points for support, planning & calm decisions."
+    "description": "These are contact points for support, planning & smooth decisions."
   },
 
   "leaders": [
@@ -35,7 +35,7 @@
       "availability": "Primary point of direction",
       "image": "./assets/img/leaders/leader.webp",
       "alt": "Guild Leader portrait",
-      "summary": "Guides culture, care & long-term direction for Mōchirīī.",
+      "summary": "Guides culture & long-term direction for Mōchirīī.",
       "profileHref": "./twills.html",
       "profileLabel": "Open profile"
     },
@@ -45,7 +45,7 @@
       "availability": "Operations & coordination",
       "image": "./assets/img/leaders/leader-silhouette.webp",
       "alt": "Vice Leader portrait",
-      "summary": "Keeps hall work clear, coordinates leaders & helps resolve issues that reach beyond one group."
+      "summary": "Coordinates leaders & helps resolve issues that reach beyond one group."
     },
     {
       "role": "Hall Leader",
@@ -61,7 +61,7 @@
       "availability": "Community guidance",
       "image": "./assets/img/leaders/dharmapala.webp",
       "alt": "Dharmapala portrait",
-      "summary": "Protects fairness & tone, helps mediate conflict & keeps standards clear across halls."
+      "summary": "Protects fairness, helps mediate conflict & keeps standards clear."
     },
     {
       "role": "Lotus Warden",
@@ -69,7 +69,7 @@
       "availability": "Member support",
       "image": "./assets/img/leaders/lotus_warden.webp",
       "alt": "Lotus Warden portrait",
-      "summary": "Supports member well-being, guides arrivals & helps morale during busy weeks."
+      "summary": "Supports member well-being, guides arrivals & helps morale."
     },
     {
       "role": "Petal Keeper",
@@ -99,7 +99,7 @@
       },
       {
         "title": "Culture & people",
-        "description": "Maintains standards, resolves conflicts & sustains morale so the hall stays calm.",
+        "description": "Maintains standards, resolves conflicts & sustains morale.",
         "image": "./assets/img/leaders/responsibilities-03.webp",
         "alt": "Culture & people visual panel"
       }

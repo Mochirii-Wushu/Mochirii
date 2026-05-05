@@ -4,7 +4,7 @@
     "title": "Join Mōchirīī",
     "updated": "2026-02-01",
     "timezone": "UTC+8",
-    "intro": "Mōchirīī is a guild home for players who enjoy company, coordination & greetings that matter. Join through Discord, share your in-game name & time zone, learn the guild rhythm & step into events when ready.",
+    "intro": "Mōchirīī is a guild home for players who enjoy company, coordination & pretty greetings. Join through Discord, share your in-game name & time zone, learn the guild rhythm & step into events when ready.",
     "image": "./assets/img/join/hero.webp",
     "imageAlt": "Join Mōchirīī banner artwork",
     "atmosphereImage": "",
@@ -52,7 +52,7 @@
     "title": "Quick Start",
     "body": [
       "Join Discord, request guild access & post your IGN plus time zone.",
-      "Read the Codex, then RSVP to an upcoming event if your schedule allows. Presence warms the hall quickly & questions are welcome."
+      "Read the Codex, then RSVP to an upcoming event if your schedule allows. Presence matters & questions are welcome."
     ],
     "links": [
       { "label": "Join Discord", "href": "https://discord.com/invite/dPafqMwWPK" },
@@ -122,8 +122,8 @@
     "title": "Notes",
     "body": [
       "Voice chat is optional unless an event post says otherwise. Discord is the clearest place for roles, announcements & coordination.",
-      "Need a break? Tell a leader before a longer Cupcake nap so roles & expectations stay clear.",
-      "If you feel lost, tag a leader. Getting unstuck keeps the game light & the hall open."
+      "Need a break? Tell a leader before a longer Cupcake nap so roles & expectations remain for you.",
+      "If you feel lost, tag a leader. Getting unstuck keeps the game fun."
     ],
     "links": [
       { "label": "Leaders Hall", "href": "./leaders.html" },

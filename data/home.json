@@ -42,7 +42,7 @@
     },
     {
       "type": "raffle",
-      "title": "Monthly cosmetics raffle for members who keep the table bright.",
+      "title": "Monthly cosmetics raffle for members who keep the guild bright.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/raffle.webp",
       "imageAlt": "Raffle bulletin cover",
@@ -50,7 +50,7 @@
     },
     {
       "type": "announcement",
-      "title": "Leadership roles are open for members ready to carry a lantern with care.",
+      "title": "Leadership roles are open for members ready to carry a lantern for others.",
       "date": "2026-02-01",
       "image": "./assets/img/bulletins/announcement.webp",
       "imageAlt": "Leadership announcement cover",
@@ -67,7 +67,7 @@
     },
     {
       "label": "Ranks",
-      "title": "See how presence, care & contribution are recognized.",
+      "title": "See how presence & contribution are recognized.",
       "image": "./assets/img/tiles/ranks.webp",
       "alt": "Guild ranks & progression tile artwork",
       "href": "./ranks.html"
