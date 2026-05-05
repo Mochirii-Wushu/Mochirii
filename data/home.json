@@ -100,6 +100,21 @@
       "image": "./assets/img/gallery/thumbs/shot-23.webp",
       "full": "./assets/img/gallery/shot-23.webp",
       "alt": "Guild screenshot"
+    },
+    {
+      "image": "./assets/img/gallery/thumbs/shot-57.webp",
+      "full": "./assets/img/gallery/shot-57.webp",
+      "alt": "Three figures in ornate robes seated together on stone steps."
+    },
+    {
+      "image": "./assets/img/gallery/thumbs/shot-60.webp",
+      "full": "./assets/img/gallery/shot-60.webp",
+      "alt": "Two figures posed closely together in a bright indoor portrait."
+    },
+    {
+      "image": "./assets/img/gallery/thumbs/shot-65.webp",
+      "full": "./assets/img/gallery/shot-65.webp",
+      "alt": "Three figures standing beside a pale horse under a full moon."
     }
   ]
 }
