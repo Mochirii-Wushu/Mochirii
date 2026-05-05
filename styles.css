@@ -1040,6 +1040,224 @@ body[data-page="home"] .home-seal-title{
 }
 
 /* =========================================================
+   HOME — Visual system pilot (page-scoped ornament)
+   ========================================================= */
+body[data-page="home"]{
+  --home-jade:rgba(48,178,143,.62);
+  --home-jade-soft:rgba(31,122,99,.24);
+  --home-lantern:rgba(218,181,94,.66);
+  --home-lantern-soft:rgba(200,162,75,.22);
+  --home-moon:rgba(220,232,226,.38);
+  --home-frost:rgba(142,205,196,.28);
+  --home-lotus:rgba(222,151,177,.48);
+  --home-panel:rgba(8,11,12,.82);
+  --home-panel-strong:rgba(10,13,13,.90);
+  --home-rim-a:var(--home-jade);
+  --home-rim-b:var(--home-lantern);
+}
+
+body[data-page="home"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)) padding-box,
+    linear-gradient(135deg, rgba(220,232,226,.36), rgba(48,178,143,.24), rgba(218,181,94,.34)) border-box;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.46),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+body[data-page="home"] .hero-intro,
+body[data-page="home"] .home-guild-seal,
+body[data-page="home"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  animation:none;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(48,178,143,.15), transparent 34%),
+    linear-gradient(180deg, rgba(15,18,18,.92), var(--home-panel)) padding-box,
+    linear-gradient(135deg, var(--home-rim-a), rgba(220,232,226,.16), var(--home-rim-b)) border-box;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.46),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(0,0,0,.36);
+}
+
+body[data-page="home"] .hero-intro::before,
+body[data-page="home"] .home-guild-seal::before,
+body[data-page="home"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 88% 12%, rgba(218,181,94,.12), transparent 28%);
+}
+
+body[data-page="home"] .hero-intro{
+  --home-rim-a:var(--home-jade);
+  --home-rim-b:var(--home-lantern);
+}
+
+body[data-page="home"] .home-guild-seal{
+  --home-rim-a:var(--home-lotus);
+  --home-rim-b:var(--home-moon);
+  background:
+    radial-gradient(circle at 50% 16%, rgba(222,151,177,.16), transparent 34%),
+    radial-gradient(circle at 50% 54%, rgba(48,178,143,.10), transparent 42%),
+    linear-gradient(180deg, rgba(16,18,18,.92), rgba(8,10,11,.84)) padding-box,
+    linear-gradient(140deg, var(--home-lotus), rgba(220,232,226,.22), var(--home-lantern)) border-box;
+}
+
+body[data-page="home"] .home-guild-seal img{
+  filter:drop-shadow(0 12px 24px rgba(0,0,0,.46));
+}
+
+body[data-page="home"] .home-seal-title{
+  text-shadow:0 10px 26px rgba(222,151,177,.20);
+}
+
+body[data-page="home"] .page-main section[aria-label="Guild bulletin"]{
+  --home-rim-a:var(--home-lantern);
+  --home-rim-b:var(--home-jade);
+}
+
+body[data-page="home"] .page-main section[aria-label="Four doors"]{
+  --home-rim-a:var(--home-jade);
+  --home-rim-b:var(--home-frost);
+}
+
+body[data-page="home"] .page-main section[aria-label="Member spotlight"]{
+  --home-rim-a:var(--home-lotus);
+  --home-rim-b:var(--home-lantern);
+}
+
+body[data-page="home"] .page-main section[aria-label="Screenshot spotlight"]{
+  --home-rim-a:var(--home-moon);
+  --home-rim-b:var(--home-frost);
+}
+
+body[data-page="home"] .badge-row > span,
+body[data-page="home"] .home-pill,
+body[data-page="home"] .home-bulletin__tag,
+body[data-page="home"] .home-door__label{
+  animation:none;
+  border:1px solid rgba(218,181,94,.38);
+  background:
+    linear-gradient(135deg, rgba(48,178,143,.18), rgba(218,181,94,.13));
+  color:rgba(255,255,255,.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 8px 20px rgba(0,0,0,.26);
+}
+
+body[data-page="home"] .hero-cta{
+  min-height:44px;
+  border-color:rgba(220,232,226,.18);
+  background:rgba(8,10,11,.68);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-page="home"] .hero-cta--primary{
+  border-color:rgba(218,181,94,.36);
+  background:
+    linear-gradient(135deg, rgba(31,122,99,.44), rgba(200,162,75,.30));
+}
+
+body[data-page="home"] .hero-cta:hover,
+body[data-page="home"] .hero-cta:focus-visible{
+  border-color:rgba(218,181,94,.58);
+  background:rgba(13,17,16,.84);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.30),
+    0 0 0 1px rgba(218,181,94,.16);
+}
+
+body[data-page="home"] .home-featured,
+body[data-page="home"] .home-spotlight,
+body[data-page="home"] .home-bulletin,
+body[data-page="home"] .home-door,
+body[data-page="home"] .home-thumb{
+  --home-card-rim:rgba(220,232,226,.14);
+  border:1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(10,13,13,.82), rgba(4,6,7,.86)) padding-box,
+    linear-gradient(135deg, var(--home-card-rim), rgba(255,255,255,.06), rgba(218,181,94,.18)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 16px 38px rgba(0,0,0,.28);
+}
+
+body[data-page="home"] .home-featured{
+  --home-card-rim:rgba(218,181,94,.46);
+}
+
+body[data-page="home"] .home-spotlight{
+  --home-card-rim:rgba(222,151,177,.42);
+}
+
+body[data-page="home"] .home-door{
+  --home-card-rim:rgba(48,178,143,.28);
+}
+
+body[data-page="home"] .home-thumb{
+  --home-card-rim:rgba(142,205,196,.30);
+}
+
+body[data-page="home"] .home-featured:hover,
+body[data-page="home"] .home-featured:focus-visible,
+body[data-page="home"] .home-spotlight:hover,
+body[data-page="home"] .home-spotlight:focus-visible,
+body[data-page="home"] .home-bulletin:hover,
+body[data-page="home"] .home-bulletin:focus-visible,
+body[data-page="home"] .home-door:hover,
+body[data-page="home"] .home-door:focus-visible,
+body[data-page="home"] .home-thumb:hover,
+body[data-page="home"] .home-thumb:focus-visible{
+  border-color:transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 18px 44px rgba(0,0,0,.34),
+    0 0 0 1px rgba(218,181,94,.18);
+}
+
+body[data-page="home"] .home-featured:focus-visible,
+body[data-page="home"] .home-spotlight:focus-visible,
+body[data-page="home"] .home-bulletin:focus-visible,
+body[data-page="home"] .home-door:focus-visible,
+body[data-page="home"] .home-thumb:focus-visible,
+body[data-page="home"] .hero-cta:focus-visible{
+  outline:2px solid rgba(255,255,255,.70);
+  outline-offset:3px;
+}
+
+body[data-page="home"] .home-featured__scrim,
+body[data-page="home"] .home-spotlight__scrim,
+body[data-page="home"] .home-bulletin__scrim,
+body[data-page="home"] .home-door__scrim,
+body[data-page="home"] .home-thumb__scrim{
+  background:
+    radial-gradient(circle at 18% 12%, rgba(218,181,94,.16), transparent 32%),
+    linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.76));
+}
+
+body[data-page="home"] .home-featured__plate,
+body[data-page="home"] .home-spotlight__plate{
+  border:1px solid rgba(220,232,226,.16);
+  background:
+    linear-gradient(180deg, rgba(13,16,16,.80), rgba(5,7,8,.76));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 12px 28px rgba(0,0,0,.34);
+}
+
+body[data-page="home"] .section-title{
+  text-shadow:0 8px 22px rgba(0,0,0,.36);
+}
+
+/* =========================================================
    TWILLS — Profile avatar presentation (page-scoped)
    ========================================================= */
   body[data-page="twills"] .profile-avatar{
