@@ -4,7 +4,10 @@
 
   if (document.body?.dataset?.page !== "home") return;
 
-  const JSON_URL = "./data/home.json";
+  const HOME_JSON_URL = "./data/home.json";
+  const GALLERY_JSON_URL = "./data/gallery.json";
+  const HOME_GALLERY_COUNT = 4;
+  const VALID_GALLERY_CATEGORIES = new Set(["portraits", "gatherings", "action", "scenery", "companions"]);
   const $ = (sel, root = document) => root.querySelector(sel);
   const U = window.MochiriiUtils;
 
@@ -13,6 +16,14 @@
   const esc = U.escapeHtml;
   const safeArray = U.asArray;
   const fetchJSON = U.fetchJson;
+
+  function normalizeSlug(value) {
+    return String(value ?? "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
 
   function fmtDate(iso) {
     return U.formatDateUTC(iso, {
@@ -198,6 +209,70 @@
   }
 
   /* Gallery */
+  function galleryHref(category) {
+    const slug = normalizeSlug(category);
+    return VALID_GALLERY_CATEGORIES.has(slug)
+      ? `./gallery.html?category=${encodeURIComponent(slug)}`
+      : "./gallery.html";
+  }
+
+  function getGalleryCategory(item) {
+    const firstCategory = Array.isArray(item?.categories) ? item.categories[0] : item?.category;
+    return normalizeSlug(firstCategory);
+  }
+
+  function flattenGalleryItems(data) {
+    return safeArray(data?.albums).flatMap((album) => safeArray(album?.items));
+  }
+
+  function normalizeGalleryItem(item) {
+    const full = String(item?.full ?? item?.src ?? "").trim();
+    const thumb = String(item?.thumb ?? "").trim();
+    const src = thumb || full;
+    if (!src || !full) return null;
+
+    const category = getGalleryCategory(item);
+    const alt = String(item?.alt ?? item?.caption ?? "Gallery image");
+    const caption = String(item?.caption ?? "");
+    const key = String(item?.id ?? full ?? src);
+
+    return {
+      key,
+      image: src,
+      full,
+      alt,
+      caption,
+      href: galleryHref(category),
+    };
+  }
+
+  function shuffleItems(items) {
+    const shuffled = [...items];
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    return shuffled;
+  }
+
+  function pickGallerySpotlightItems(data, count = HOME_GALLERY_COUNT) {
+    const seen = new Set();
+    const usable = flattenGalleryItems(data)
+      .map(normalizeGalleryItem)
+      .filter(Boolean)
+      .filter((item) => {
+        const duplicateKey = item.full || item.image || item.key;
+        if (seen.has(duplicateKey)) return false;
+        seen.add(duplicateKey);
+        return true;
+      });
+
+    if (usable.length < count) return [];
+    return shuffleItems(usable).slice(0, count);
+  }
+
   function renderGallery(items) {
     const root = $("#galleryGrid");
     if (!root) return;
@@ -236,6 +311,61 @@
       });
   }
 
+  function renderGallerySpotlightLinks(items) {
+    const root = $("#galleryGrid");
+    if (!root) return;
+
+    root.innerHTML = "";
+
+    safeArray(items)
+      .slice(0, HOME_GALLERY_COUNT)
+      .forEach((it) => {
+        const src = String(it?.image ?? "").trim();
+        if (!src) return;
+
+        const alt = String(it?.alt ?? "Gallery image");
+        const caption = String(it?.caption ?? "");
+        const href = String(it?.href ?? "./gallery.html");
+
+        const link = document.createElement("a");
+        link.className = "home-thumb";
+        link.href = href;
+        link.dataset.homeGalleryLink = "true";
+        link.dataset.caption = caption;
+        link.setAttribute("aria-label", caption ? `View Gallery category: ${caption}` : "View Gallery category");
+        if (caption) link.title = caption;
+
+        link.innerHTML = `
+          <img
+            class="home-thumb__img"
+            src="${esc(src)}"
+            alt="${esc(alt)}"
+            data-caption="${esc(caption)}"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="home-thumb__scrim" aria-hidden="true"></span>
+        `;
+
+        root.appendChild(link);
+      });
+  }
+
+  async function rotateGallerySpotlight() {
+    try {
+      const data = await fetchJSON(GALLERY_JSON_URL);
+      const selected = pickGallerySpotlightItems(data);
+      if (selected.length === HOME_GALLERY_COUNT) renderGallerySpotlightLinks(selected);
+    } catch (err) {
+      console.warn("Home Gallery spotlight kept fallback data.", err);
+    }
+  }
+
+  function preserveGallerySpotlightLinkClick(e) {
+    if (!e.target.closest("#galleryGrid [data-home-gallery-link]")) return;
+    e.stopImmediatePropagation();
+  }
+
   function pickFeatured(bulletins) {
     const arr = safeArray(bulletins);
     return arr.find((b) => b && b.pinned === true) || arr[0] || null;
@@ -244,7 +374,7 @@
   /* Boot */
   async function boot() {
     try {
-      const data = await fetchJSON(JSON_URL);
+      const data = await fetchJSON(HOME_JSON_URL);
 
       setText($("#bulletinIntro"), data?.copy?.bulletinIntro || "The latest in Mōchirīī news.");
       setText(
@@ -266,6 +396,7 @@
       renderDoors(data?.tiles);
       renderSpotlight(data?.spotlight);
       renderGallery(data?.gallery);
+      rotateGallerySpotlight();
     } catch (err) {
       console.error(err);
       const heroDesc = $("#heroDescriptor");
@@ -273,5 +404,6 @@
     }
   }
 
+  document.addEventListener("click", preserveGallerySpotlightLinkClick, true);
   document.addEventListener("DOMContentLoaded", boot);
 })();
