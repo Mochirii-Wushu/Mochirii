@@ -223,6 +223,17 @@
     return items.filter((item) => getItemCategories(item).includes(category));
   }
 
+  function shuffleGalleryItems(items) {
+    const shuffled = [...items];
+
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+    }
+
+    return shuffled;
+  }
+
   function formatCount(count, total, categoryLabel) {
     const noun = count === 1 ? "image" : "images";
     if (!categoryLabel || categoryLabel === "All") return `Showing ${count} of ${total} ${total === 1 ? "image" : "images"}.`;
@@ -255,6 +266,7 @@
       const data = await fetchJSON(JSON_URL);
       applyMeta(data);
       const items = flattenItems(data);
+      const displayItems = shuffleGalleryItems(items);
       const filters = $("#galleryFilters");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
@@ -266,7 +278,7 @@
 
       const applyFilter = (category, { updateUrl = false, replaceUrl = false } = {}) => {
         activeCategory = normalizeCategory(categories, category);
-        const visibleItems = filterItems(items, activeCategory);
+        const visibleItems = filterItems(displayItems, activeCategory);
         const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
 
         renderGrid(grid, visibleItems);
