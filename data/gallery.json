@@ -1011,6 +1011,50 @@
           ],
           "full": "./assets/img/gallery/shot-70.webp",
           "thumb": "./assets/img/gallery/thumbs/shot-70.webp"
+        },
+        {
+          "id": "shot-71",
+          "src": "./assets/img/gallery/shot-71.webp",
+          "alt": "Figure reaching from a low pose beneath pink-blossomed trees.",
+          "caption": "Petals scatter over a low sweeping reach.",
+          "category": "action",
+          "tags": [
+            "action",
+            "petals",
+            "blossoms"
+          ],
+          "full": "./assets/img/gallery/shot-71.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-71.webp"
+        },
+        {
+          "id": "shot-72",
+          "src": "./assets/img/gallery/shot-72.webp",
+          "alt": "Night view of a courtyard complex with bridges, lanterns, and purple trees.",
+          "caption": "Lantern bridges thread through a night courtyard.",
+          "category": "scenery",
+          "tags": [
+            "scenery",
+            "lanterns",
+            "night",
+            "courtyard"
+          ],
+          "full": "./assets/img/gallery/shot-72.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-72.webp"
+        },
+        {
+          "id": "shot-73",
+          "src": "./assets/img/gallery/shot-73.webp",
+          "alt": "Solo figure standing on a wooden balcony with a bright sunset over distant hills.",
+          "caption": "A balcony portrait stands before the low sun.",
+          "category": "portraits",
+          "tags": [
+            "portrait",
+            "solo",
+            "sunset",
+            "balcony"
+          ],
+          "full": "./assets/img/gallery/shot-73.webp",
+          "thumb": "./assets/img/gallery/thumbs/shot-73.webp"
         }
       ]
     }
