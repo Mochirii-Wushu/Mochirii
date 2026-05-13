@@ -135,7 +135,6 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "gallery-thumb";
-    if (item?.source === "member-submission") btn.classList.add("gallery-thumb--member");
     btn.dataset.full = full;
     btn.dataset.caption = caption;
     if (category) btn.dataset.category = category;
@@ -147,7 +146,6 @@
         loading="lazy"
         decoding="async"
       />
-      ${item?.source === "member-submission" ? '<span class="gallery-thumb__badge">Member Submission</span>' : ""}
     `;
 
     return btn;
@@ -251,12 +249,23 @@
     return items;
   }
 
+  function buildMemberCaption(title, caption) {
+    const cleanTitle = text(title, "");
+    const cleanCaption = text(caption, "");
+
+    if (cleanTitle && cleanCaption) return `${cleanTitle} — ${cleanCaption}`;
+    if (cleanTitle) return cleanTitle;
+    if (cleanCaption) return cleanCaption;
+    return "Member submission";
+  }
+
   function approvedSubmissionToItem(submission) {
     const signedUrl = String(submission?.signed_url || "").trim();
     if (!signedUrl) return null;
 
     const title = text(submission?.title, "");
-    const caption = text(submission?.caption, title || "Member submission");
+    const rawCaption = text(submission?.caption, "");
+    const caption = buildMemberCaption(title, rawCaption);
     const category = normalizeSlug(submission?.category) || MEMBER_CATEGORY;
     const categories = category === MEMBER_CATEGORY ? [MEMBER_CATEGORY] : [category, MEMBER_CATEGORY];
 
@@ -265,11 +274,11 @@
       src: signedUrl,
       full: signedUrl,
       thumb: signedUrl,
-      alt: title || caption || "Member gallery submission",
+      alt: title || rawCaption || "Approved member gallery image",
       caption,
       category,
       categories,
-      source: "member-submission",
+      source: "member",
       created_at: submission?.created_at || "",
       reviewed_at: submission?.reviewed_at || "",
       uploader: submission?.uploader_display_name || "",
@@ -317,7 +326,6 @@
       const staticItems = flattenItems(data);
       const approvedItems = await loadApprovedSubmissionItems();
       const items = [...staticItems, ...approvedItems];
-      const displayItems = [...shuffleGalleryItems(staticItems), ...approvedItems];
       const filters = $("#galleryFilters");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
@@ -329,7 +337,7 @@
 
       const applyFilter = (category, { updateUrl = false, replaceUrl = false } = {}) => {
         activeCategory = normalizeCategory(categories, category);
-        const visibleItems = filterItems(displayItems, activeCategory);
+        const visibleItems = shuffleGalleryItems(filterItems(items, activeCategory));
         const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
 
         renderGrid(grid, visibleItems);

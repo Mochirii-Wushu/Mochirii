@@ -3160,23 +3160,6 @@ body[data-page="gallery"] .gallery-thumb:focus-visible img{
   filter:saturate(1.04) contrast(1.03);
 }
 
-body[data-page="gallery"] .gallery-thumb__badge{
-  position:absolute;
-  left:10px;
-  bottom:10px;
-  z-index:2;
-  max-width:calc(100% - 20px);
-  padding:5px 8px;
-  border-radius:999px;
-  border:1px solid rgba(220,235,255,.24);
-  background:rgba(5,8,13,.72);
-  color:rgba(235,242,255,.88);
-  font-size:11px;
-  line-height:1.2;
-  letter-spacing:0;
-  box-shadow:0 8px 18px rgba(0,0,0,.22);
-}
-
 @media (min-width:760px){
   .gallery-grid{grid-template-columns:repeat(3, minmax(0, 1fr));}
 }

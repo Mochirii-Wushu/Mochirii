@@ -361,7 +361,7 @@ The function returns public-safe fields, safe uploader display names, and short-
 
 Pending, rejected, and archived submissions are not returned by the approved feed. If a private object cannot receive a signed URL, the function returns a safe per-item preview error and the browser skips that item.
 
-`gallery.js` still renders the static `data/gallery.json` Gallery first. Approved member submissions are appended after the static items and receive a `member-submissions` category in addition to their submitted category when present. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions. Localhost static previews skip the remote approved feed by default; add `?approvedFeed=1` when intentionally testing against a served/deployed feed.
+`gallery.js` normalizes approved member submissions into the same item model as the static `data/gallery.json` Gallery before rendering. Static items and approved member submissions are combined, filtered, and shuffled together, so approved uploads participate in the normal random Gallery rotation. Member submissions use their submitted title and/or caption in the existing lightbox and receive a `member-submissions` category in addition to their submitted category when present. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions. Localhost static previews skip the remote approved feed by default; add `?approvedFeed=1` when intentionally testing against a served/deployed feed.
 
 ## Local Testing Flow
 
