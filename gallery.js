@@ -8,6 +8,7 @@
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const U = window.MochiriiUtils;
+  const S = window.MochiriiSupabase;
 
   const asArray = U.asArray;
   const esc = U.escapeHtml;
@@ -19,6 +20,7 @@
   const CATEGORY_PARAM = "category";
   const COPY_SUCCESS = "Link copied";
   const COPY_FAILURE = "Copy failed";
+  const MEMBER_CATEGORY = "member-submissions";
 
   const toTitle = (slug) =>
     String(slug || "")
@@ -133,6 +135,7 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "gallery-thumb";
+    if (item?.source === "member-submission") btn.classList.add("gallery-thumb--member");
     btn.dataset.full = full;
     btn.dataset.caption = caption;
     if (category) btn.dataset.category = category;
@@ -144,6 +147,7 @@
         loading="lazy"
         decoding="async"
       />
+      ${item?.source === "member-submission" ? '<span class="gallery-thumb__badge">Member Submission</span>' : ""}
     `;
 
     return btn;
@@ -247,6 +251,51 @@
     return items;
   }
 
+  function approvedSubmissionToItem(submission) {
+    const signedUrl = String(submission?.signed_url || "").trim();
+    if (!signedUrl) return null;
+
+    const title = text(submission?.title, "");
+    const caption = text(submission?.caption, title || "Member submission");
+    const category = normalizeSlug(submission?.category) || MEMBER_CATEGORY;
+    const categories = category === MEMBER_CATEGORY ? [MEMBER_CATEGORY] : [category, MEMBER_CATEGORY];
+
+    return {
+      id: `member-${submission?.id || signedUrl}`,
+      src: signedUrl,
+      full: signedUrl,
+      thumb: signedUrl,
+      alt: title || caption || "Member gallery submission",
+      caption,
+      category,
+      categories,
+      source: "member-submission",
+      created_at: submission?.created_at || "",
+      reviewed_at: submission?.reviewed_at || "",
+      uploader: submission?.uploader_display_name || "",
+    };
+  }
+
+  function shouldLoadApprovedFeed() {
+    const host = window.location.hostname;
+    if (new URLSearchParams(window.location.search).has("approvedFeed")) return true;
+    return !["127.0.0.1", "localhost", "0.0.0.0"].includes(host);
+  }
+
+  async function loadApprovedSubmissionItems() {
+    if (!shouldLoadApprovedFeed()) return [];
+    if (typeof S?.listApprovedGallerySubmissions !== "function") return [];
+
+    const result = await S.listApprovedGallerySubmissions();
+    if (!result.ok) {
+      console.warn("Approved member gallery feed failed.", result.error || result.message);
+      return [];
+    }
+
+    const submissions = Array.isArray(result.data?.submissions) ? result.data.submissions : [];
+    return submissions.map(approvedSubmissionToItem).filter(Boolean);
+  }
+
   function applyMeta(data) {
     const metaTitle = String(data?.meta?.title ?? "").trim();
     const metaDesc = String(data?.meta?.description ?? "").trim();
@@ -265,8 +314,10 @@
     try {
       const data = await fetchJSON(JSON_URL);
       applyMeta(data);
-      const items = flattenItems(data);
-      const displayItems = shuffleGalleryItems(items);
+      const staticItems = flattenItems(data);
+      const approvedItems = await loadApprovedSubmissionItems();
+      const items = [...staticItems, ...approvedItems];
+      const displayItems = [...shuffleGalleryItems(staticItems), ...approvedItems];
       const filters = $("#galleryFilters");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");

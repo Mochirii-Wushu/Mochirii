@@ -659,6 +659,10 @@
     });
   }
 
+  async function listApprovedGallerySubmissions() {
+    return invokeEdgeFunction("list-approved-gallery-submissions", {});
+  }
+
   function isRecentVerification(value) {
     if (!value) return false;
     const time = new Date(value).getTime();
@@ -911,6 +915,7 @@
     checkLeaderGalleryModerationAccess,
     listGalleryReviewQueue,
     moderateGallerySubmission,
+    listApprovedGallerySubmissions,
     request,
     select,
     insert,
