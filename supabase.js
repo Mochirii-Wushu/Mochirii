@@ -601,6 +601,64 @@
     }
   }
 
+  async function invokeEdgeFunction(functionName, body = {}) {
+    try {
+      const instance = requireClient();
+      const { data, error } = await instance.functions.invoke(functionName, { body });
+
+      if (error) {
+        const payload = await parseFunctionError(error);
+        return createResult({
+          ok: false,
+          status: error.context?.status || 0,
+          statusText: error.context?.statusText || "Function Error",
+          data: payload,
+          error: createError(payload || error),
+          count: null,
+          message: payload?.message || error.message || "Supabase Edge Function request failed.",
+        });
+      }
+
+      if (data?.ok === false) {
+        return createResult({
+          ok: false,
+          status: 200,
+          statusText: "Function Error",
+          data,
+          error: createError(data),
+          count: null,
+          message: data.message || "Supabase Edge Function request failed.",
+        });
+      }
+
+      return okResult(data?.data ?? data, data?.message || null);
+    } catch (error) {
+      return failedResult(error);
+    }
+  }
+
+  async function checkLeaderGalleryModerationAccess() {
+    return invokeEdgeFunction("list-gallery-review-queue", { checkOnly: true });
+  }
+
+  async function listGalleryReviewQueue() {
+    return invokeEdgeFunction("list-gallery-review-queue", {});
+  }
+
+  async function moderateGallerySubmission(submissionId, action, reason = "") {
+    const cleanAction = String(action || "").trim().toLowerCase();
+
+    if (!["approved", "rejected"].includes(cleanAction)) {
+      return failedResult("Moderation action must be approved or rejected.");
+    }
+
+    return invokeEdgeFunction("moderate-gallery-submission", {
+      submission_id: String(submissionId || "").trim(),
+      action: cleanAction,
+      reason: String(reason || "").trim(),
+    });
+  }
+
   function isRecentVerification(value) {
     if (!value) return false;
     const time = new Date(value).getTime();
@@ -850,6 +908,9 @@
     renderAuthNavState,
     uploadMemberGalleryImage,
     listMyGallerySubmissions,
+    checkLeaderGalleryModerationAccess,
+    listGalleryReviewQueue,
+    moderateGallerySubmission,
     request,
     select,
     insert,

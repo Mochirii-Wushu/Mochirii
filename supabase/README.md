@@ -47,6 +47,9 @@ It also exposes Auth/profile/gallery helpers:
 - `renderAuthNavState()`
 - `uploadMemberGalleryImage(file, metadata)`
 - `listMyGallerySubmissions()`
+- `checkLeaderGalleryModerationAccess()`
+- `listGalleryReviewQueue()`
+- `moderateGallerySubmission(submissionId, action, reason)`
 
 Script order on pages with Auth or upload behavior is:
 
@@ -69,8 +72,8 @@ In Supabase Dashboard:
 3. Add the Discord Client ID.
 4. Add the Discord Client Secret.
 5. Set the production Site URL to the public site URL.
-6. Add production redirect URLs for Account, Auth, and Submit Image.
-7. Add local development redirect URLs for Account, Auth, and Submit Image.
+6. Add production redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
+7. Add local development redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
 8. Confirm the callback URL in Discord Developer Portal matches:
 
 ```text
@@ -83,9 +86,11 @@ Recommended redirect URLs:
 https://mochirii.com/auth.html
 https://mochirii.com/account.html
 https://mochirii.com/gallery-submit.html
+https://mochirii.com/leader-dashboard.html
 http://127.0.0.1:8765/auth.html
 http://127.0.0.1:8765/account.html
 http://127.0.0.1:8765/gallery-submit.html
+http://127.0.0.1:8765/leader-dashboard.html
 ```
 
 The browser login uses:
@@ -115,6 +120,12 @@ Mōchirīī - WWM = 1468659807736299520
 ✅Verified = 1078630751077142615
 ```
 
+Moderator role used by gallery moderation:
+
+```text
+Moderator = 1078630751165222984
+```
+
 Role IDs are enforcement data. Role names are documentation and user-facing explanation only.
 
 ## Required Edge Function Secrets
@@ -125,6 +136,8 @@ Recommended local/production values:
 DISCORD_GUILD_ID=1078630751077142608
 DISCORD_REQUIRED_ROLE_IDS=1468659807736299520,1078630751077142615
 DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
+DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
+DISCORD_MODERATOR_ROLE_NAMES=Moderator
 DISCORD_BOT_TOKEN=<set manually, never commit>
 ```
 
@@ -134,6 +147,8 @@ Local serve example:
 
 ```sh
 supabase functions serve verify-discord-member --env-file supabase/functions/.env.local
+supabase functions serve list-gallery-review-queue --env-file supabase/functions/.env.local
+supabase functions serve moderate-gallery-submission --env-file supabase/functions/.env.local
 ```
 
 Production secret examples:
@@ -142,6 +157,8 @@ Production secret examples:
 supabase secrets set DISCORD_GUILD_ID=1078630751077142608
 supabase secrets set DISCORD_REQUIRED_ROLE_IDS=1468659807736299520,1078630751077142615
 supabase secrets set DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
+supabase secrets set DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
+supabase secrets set DISCORD_MODERATOR_ROLE_NAMES=Moderator
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
 ```
 
@@ -175,6 +192,8 @@ Remote-mutating Edge Function deployment:
 
 ```sh
 supabase functions deploy verify-discord-member
+supabase functions deploy list-gallery-review-queue
+supabase functions deploy moderate-gallery-submission
 ```
 
 Recommended production sequence after dashboard setup and secrets are complete:
@@ -185,6 +204,8 @@ supabase db push --dry-run
 supabase db push
 supabase migration list
 supabase functions deploy verify-discord-member
+supabase functions deploy list-gallery-review-queue
+supabase functions deploy moderate-gallery-submission
 ```
 
 If the linked project requires a database password in the shell, set it locally without committing it. Fish shell example:
@@ -241,9 +262,19 @@ The website does not assign Discord roles in this phase.
 - original filename, MIME type, and size
 - optional title/caption/category
 - moderation status
-- review fields for a future leader workflow
+- review fields for moderator approval or decline actions
 
 Uploads stay `pending` and do not appear in the public Gallery in this phase.
+
+`gallery_moderation_events` stores privileged moderation audit records:
+
+- submission id
+- moderator id
+- action: `approved`, `rejected`, or `archived`
+- optional reason
+- event creation time
+
+Browser clients do not receive direct insert, update, or delete privileges for moderation events. Trusted Edge Functions write these rows with service-role credentials after Discord Moderator verification.
 
 ## Storage Bucket Plan
 
@@ -287,6 +318,12 @@ No public read access is granted.
 - browser users cannot approve, reject, archive, review, or delete submissions in this phase.
 - service_role can manage rows from trusted backend/admin workflows.
 
+`gallery_moderation_events`:
+
+- RLS is enabled.
+- anon and authenticated browser clients receive no direct table privileges.
+- service_role can manage rows from trusted Edge Functions.
+
 Storage `member-gallery`:
 
 - authenticated active verified members can upload only into their own first path segment.
@@ -294,6 +331,19 @@ Storage `member-gallery`:
 - authenticated active verified members can update/delete only their own objects.
 - anon receives no access.
 - bucket remains private.
+
+## Gallery Moderation Architecture
+
+Leader moderation uses two Edge Functions:
+
+- `list-gallery-review-queue`
+- `moderate-gallery-submission`
+
+Both functions require a signed-in Supabase user JWT and then verify Discord server membership against guild `1078630751077142608`. The moderator check requires role ID `1078630751165222984` from `DISCORD_MODERATOR_ROLE_IDS`. The role name secret is documentation only; role names are never trusted for enforcement. If moderation secrets are missing or do not match the expected guild or role ID, the functions fail closed.
+
+`list-gallery-review-queue` loads only pending `gallery_submissions`, joins safe uploader profile display fields, and creates short-lived signed URLs for private `member-gallery` objects. The Storage bucket stays private and no public read policy is added.
+
+`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission. It updates `gallery_submissions.status`, `reviewed_by`, `reviewed_at`, and `rejection_reason`, then records a `gallery_moderation_events` row. Approved submissions are still not public Gallery items; publishing approved images is deferred to a later scoped workflow.
 
 ## Local Testing Flow
 
@@ -306,6 +356,7 @@ node --check supabase.js
 node --check auth.js
 node --check account.js
 node --check gallery-submit.js
+node --check leader-dashboard.js
 supabase db reset
 supabase migration list
 ```
@@ -323,6 +374,13 @@ For production smoke:
 npm run check:production
 ```
 
+For Edge Function loading checks without deployment:
+
+```sh
+deno check --import-map=supabase/functions/list-gallery-review-queue/deno.json supabase/functions/list-gallery-review-queue/index.ts
+deno check --import-map=supabase/functions/moderate-gallery-submission/deno.json supabase/functions/moderate-gallery-submission/index.ts
+```
+
 ## Manual Discord Role-Granting Flow
 
 1. A visitor joins the Discord server from existing website Join links.
@@ -335,6 +393,14 @@ npm run check:production
 6. The website calls `verify-discord-member`.
 7. If both roles are present and the member is not pending, the website profile becomes active for uploads.
 
+For moderators, leadership grants the Discord Moderator role:
+
+```text
+1078630751165222984
+```
+
+The Leader Dashboard appears from the Account page only after server-side moderator verification succeeds.
+
 ## Deferred Plans
 
 Deferred role-assignment automation:
@@ -343,14 +409,8 @@ Deferred role-assignment automation:
 - Keep bot tokens server-side only.
 - Require explicit leadership/security approval before assigning roles from website actions.
 
-Deferred leader approval dashboard:
-
-- Add leader-only moderation screens.
-- Require server-side authorization for moderation actions.
-- Allow approve/reject/archive and rejection notes.
-
 Deferred public gallery publishing:
 
 - Add an approval-to-public publishing workflow.
-- Keep pending submissions out of `data/gallery.json` until intentionally approved.
+- Keep pending and approved private submissions out of `data/gallery.json` until an explicit publishing workflow exists.
 - Preserve current public Gallery captions and image paths unless a later scoped task changes them.
