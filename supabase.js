@@ -641,8 +641,11 @@
     return invokeEdgeFunction("list-gallery-review-queue", { checkOnly: true });
   }
 
-  async function listGalleryReviewQueue() {
-    return invokeEdgeFunction("list-gallery-review-queue", {});
+  async function listGalleryReviewQueue(options = {}) {
+    const status = typeof options === "string" ? options : options.status;
+    return invokeEdgeFunction("list-gallery-review-queue", {
+      status: String(status || "pending").trim().toLowerCase() || "pending",
+    });
   }
 
   async function moderateGallerySubmission(submissionId, action, reason = "") {

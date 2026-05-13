@@ -10,7 +10,46 @@ import {
 
 const SIGNED_URL_SECONDS = 10 * 60;
 const QUEUE_LIMIT = 50;
+const EVENT_LIMIT = 250;
 const MEMBER_GALLERY_BUCKET = "member-gallery";
+const VALID_STATUSES = new Set(["pending", "approved", "rejected", "archived"]);
+
+function normalizeStatus(value: unknown): string {
+  const status = safeString(value, 20)?.toLowerCase() || "pending";
+  return VALID_STATUSES.has(status) ? status : "pending";
+}
+
+function emptySummary(status: string) {
+  return {
+    status,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    archived: 0,
+    total: 0,
+    shown: 0,
+  };
+}
+
+function displayName(profile: JsonRecord | null | undefined): string {
+  return (
+    safeString(profile?.discord_global_name, 100) ||
+    safeString(profile?.display_name, 40) ||
+    safeString(profile?.discord_username, 80) ||
+    "Mochirii Member"
+  );
+}
+
+function profileSummary(profile: JsonRecord | null | undefined): JsonRecord | null {
+  if (!profile) return null;
+
+  return {
+    displayName: displayName(profile),
+    discordUsername: safeString(profile.discord_username, 80),
+    discordGlobalName: safeString(profile.discord_global_name, 100),
+    discordUserId: safeString(profile.discord_user_id, 40),
+  };
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -39,12 +78,56 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  const { data: submissionData, error: submissionError } = await access.adminClient
+  const requestedStatus = normalizeStatus(bodyResult.body.status);
+  const summary = emptySummary(requestedStatus);
+  const countResults = await Promise.all(
+    [...VALID_STATUSES].map(async (status) => ({
+      status,
+      result: await access.adminClient
+        .from("gallery_submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", status),
+    })),
+  );
+
+  for (const { status, result } of countResults) {
+    if (result.error) {
+      console.error("list-gallery-review-queue count lookup failed", {
+        status,
+        code: result.error.code,
+        message: result.error.message,
+      });
+
+      return jsonResponse(
+        {
+          ok: false,
+          error: "submission_count_failed",
+          message: "Gallery moderation counts could not be loaded.",
+        },
+        500,
+      );
+    }
+
+    const count = Number(result.count || 0);
+    summary[status as "pending" | "approved" | "rejected" | "archived"] = count;
+    summary.total += count;
+  }
+
+  let submissionQuery = access.adminClient
     .from("gallery_submissions")
-    .select("id,user_id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,created_at")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true })
+    .select("id,user_id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at")
+    .eq("status", requestedStatus)
     .limit(QUEUE_LIMIT);
+
+  if (requestedStatus === "pending") {
+    submissionQuery = submissionQuery.order("created_at", { ascending: true });
+  } else {
+    submissionQuery = submissionQuery
+      .order("reviewed_at", { ascending: false })
+      .order("created_at", { ascending: false });
+  }
+
+  const { data: submissionData, error: submissionError } = await submissionQuery;
 
   if (submissionError) {
     console.error("list-gallery-review-queue submission lookup failed", {
@@ -63,10 +146,57 @@ Deno.serve(async (req: Request) => {
   }
 
   const submissions = Array.isArray(submissionData) ? submissionData as JsonRecord[] : [];
-  const userIds = [
+  const submissionIds = [
     ...new Set(
       submissions
-        .map((submission) => safeString(submission.user_id, 80))
+        .map((submission) => safeString(submission.id, 80))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
+  const eventsBySubmissionId = new Map<string, JsonRecord[]>();
+  const moderationEvents: JsonRecord[] = [];
+
+  if (submissionIds.length > 0) {
+    const { data: eventData, error: eventError } = await access.adminClient
+      .from("gallery_moderation_events")
+      .select("id,submission_id,moderator_id,action,reason,created_at")
+      .in("submission_id", submissionIds)
+      .order("created_at", { ascending: false })
+      .limit(EVENT_LIMIT);
+
+    if (eventError) {
+      console.error("list-gallery-review-queue event lookup failed", {
+        code: eventError.code,
+        message: eventError.message,
+      });
+
+      return jsonResponse(
+        {
+          ok: false,
+          error: "moderation_event_lookup_failed",
+          message: "Moderation event history could not be loaded.",
+        },
+        500,
+      );
+    }
+
+    moderationEvents.push(...(Array.isArray(eventData) ? eventData as JsonRecord[] : []));
+    moderationEvents.forEach((event) => {
+      const submissionId = safeString(event.submission_id, 80);
+      if (!submissionId) return;
+      const current = eventsBySubmissionId.get(submissionId) || [];
+      current.push(event);
+      eventsBySubmissionId.set(submissionId, current);
+    });
+  }
+
+  const userIds = [
+    ...new Set(
+      [
+        ...submissions.map((submission) => safeString(submission.user_id, 80)),
+        ...submissions.map((submission) => safeString(submission.reviewed_by, 80)),
+        ...moderationEvents.map((event) => safeString(event.moderator_id, 80)),
+      ]
         .filter((value): value is string => Boolean(value)),
     ),
   ];
@@ -105,47 +235,58 @@ Deno.serve(async (req: Request) => {
   for (const submission of submissions) {
     const bucket = safeString(submission.storage_bucket, 80) || MEMBER_GALLERY_BUCKET;
     const storagePath = safeString(submission.storage_path, 1000);
+    const submissionId = safeString(submission.id, 80);
+    let signedPreviewUrl: string | null = null;
+    let previewError: string | null = null;
 
     if (bucket !== MEMBER_GALLERY_BUCKET || !storagePath) {
       console.warn("list-gallery-review-queue skipped invalid storage reference", {
-        submissionId: safeString(submission.id, 80),
+        submissionId,
         bucket,
         hasStoragePath: Boolean(storagePath),
       });
-      continue;
-    }
+      previewError = "invalid_storage_reference";
+    } else {
+      const { data: signedData, error: signedError } = await access.adminClient.storage
+        .from(bucket)
+        .createSignedUrl(storagePath, SIGNED_URL_SECONDS);
 
-    const { data: signedData, error: signedError } = await access.adminClient.storage
-      .from(bucket)
-      .createSignedUrl(storagePath, SIGNED_URL_SECONDS);
-
-    if (signedError || !signedData?.signedUrl) {
-      console.error("list-gallery-review-queue signed URL creation failed", {
-        submissionId: safeString(submission.id, 80),
-        message: signedError?.message || "Missing signed URL",
-      });
-
-      return jsonResponse(
-        {
-          ok: false,
-          error: "signed_url_failed",
-          message: "A pending image preview could not be prepared.",
-        },
-        500,
-      );
+      if (signedError || !signedData?.signedUrl) {
+        console.warn("list-gallery-review-queue signed URL creation failed", {
+          submissionId,
+          message: signedError?.message || "Missing signed URL",
+        });
+        previewError = "preview_unavailable";
+      } else {
+        signedPreviewUrl = signedData.signedUrl;
+      }
     }
 
     const userId = safeString(submission.user_id, 80) || "";
     const profile = profilesById.get(userId) || {};
+    const reviewerId = safeString(submission.reviewed_by, 80);
+    const reviewer = reviewerId ? profilesById.get(reviewerId) || null : null;
+    const events = (eventsBySubmissionId.get(submissionId || "") || []).map((event) => {
+      const moderatorId = safeString(event.moderator_id, 80);
+      return {
+        id: safeString(event.id, 80),
+        action: safeString(event.action, 20),
+        reason: safeString(event.reason, 500),
+        createdAt: safeString(event.created_at, 80),
+        moderator: moderatorId ? profileSummary(profilesById.get(moderatorId) || null) : null,
+      };
+    });
 
     queue.push({
-      id: safeString(submission.id, 80),
+      id: submissionId,
+      status: safeString(submission.status, 20) || requestedStatus,
       uploader: {
-        displayName: safeString(profile.display_name, 40) || "Mochirii Member",
+        displayName: displayName(profile),
         discordUsername: safeString(profile.discord_username, 80),
         discordGlobalName: safeString(profile.discord_global_name, 100),
         discordUserId: safeString(profile.discord_user_id, 40),
       },
+      reviewer: profileSummary(reviewer),
       title: safeString(submission.title, 80),
       caption: safeString(submission.caption, 300),
       category: safeString(submission.category, 40),
@@ -153,17 +294,30 @@ Deno.serve(async (req: Request) => {
       mimeType: safeString(submission.mime_type, 80),
       sizeBytes: Number(submission.size_bytes || 0),
       createdAt: safeString(submission.created_at, 80),
-      signedPreviewUrl: signedData.signedUrl,
+      reviewedAt: safeString(submission.reviewed_at, 80),
+      updatedAt: safeString(submission.updated_at, 80),
+      rejectionReason: safeString(submission.rejection_reason, 500),
+      storageBucket: bucket,
+      storagePath,
+      signedPreviewUrl,
+      previewError,
+      moderationEvents: events,
     });
   }
+
+  summary.shown = queue.length;
 
   return jsonResponse({
     ok: true,
     data: {
       submissions: queue,
       count: queue.length,
+      status: requestedStatus,
+      summary,
       signedUrlSeconds: SIGNED_URL_SECONDS,
     },
-    message: queue.length ? "Pending gallery submissions loaded." : "No pending gallery submissions.",
+    message: queue.length
+      ? `${requestedStatus} gallery submissions loaded.`
+      : `No ${requestedStatus} gallery submissions.`,
   });
 });

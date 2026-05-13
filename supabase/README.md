@@ -345,9 +345,19 @@ Leader moderation uses two Edge Functions:
 
 Both functions require a signed-in Supabase user JWT and then verify Discord server membership against guild `1078630751077142608`. The moderator check requires role ID `1078630751165222984` from `DISCORD_MODERATOR_ROLE_IDS`. The role name secret is documentation only; role names are never trusted for enforcement. If moderation secrets are missing or do not match the expected guild or role ID, the functions fail closed.
 
-`list-gallery-review-queue` loads only pending `gallery_submissions`, joins safe uploader profile display fields, and creates short-lived signed URLs for private `member-gallery` objects. The Storage bucket stays private and no public read policy is added.
+`list-gallery-review-queue` is moderator-only. It supports `pending`, `approved`, `rejected`, and `archived` queue filters, returns dashboard counts, joins safe uploader/moderator profile display fields, includes recent `gallery_moderation_events`, and creates short-lived signed URLs for private `member-gallery` objects. The Storage bucket stays private and no public read policy is added.
 
 `moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission. It updates `gallery_submissions.status`, `reviewed_by`, `reviewed_at`, and `rejection_reason`, then records a `gallery_moderation_events` row. Approved submissions become eligible for the approved public Gallery feed; they are not written into `data/gallery.json`.
+
+The website Leader Dashboard uses those functions to show queue tabs, submission details, signed private previews, rejection reasons, and compact moderation history. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
+
+When this moderation-polish branch is released, deploy only the changed moderator queue function after review:
+
+```sh
+supabase functions deploy list-gallery-review-queue
+```
+
+No database migration is required for this polish pass.
 
 ## Approved Public Gallery Feed
 

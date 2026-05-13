@@ -157,11 +157,21 @@
   async function saveProfile(event) {
     event.preventDefault();
     const form = event.currentTarget;
-    setBusy(true);
     setError("#profileError", "");
+    setText("#profileStatus", "");
+
+    let payload;
+    try {
+      payload = payloadFromForm(form);
+    } catch (error) {
+      setError("#profileError", error?.message || "Profile form could not be read.");
+      return;
+    }
+
+    setBusy(true);
     setText("#profileStatus", "Saving profile.");
 
-    const result = await S.updateCurrentProfile(payloadFromForm(form));
+    const result = await S.updateCurrentProfile(payload);
     if (!result.ok) {
       setError("#profileError", result.message || "Profile could not be saved.");
       setText("#profileStatus", "");
