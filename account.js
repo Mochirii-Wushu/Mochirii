@@ -91,6 +91,15 @@
     );
   }
 
+  async function renderLeaderDashboardLink() {
+    const link = $("#leaderDashboardLink");
+    if (!link) return;
+
+    link.hidden = true;
+    const access = await S.checkLeaderGalleryModerationAccess();
+    link.hidden = !access.ok;
+  }
+
   async function loadAccount() {
     setBusy(true);
     setError("#verifyError", "");
@@ -100,6 +109,7 @@
     if (!auth.ok) {
       $("#signedOutPanel").hidden = false;
       $("#accountPanel").hidden = true;
+      $("#leaderDashboardLink").hidden = true;
       setBusy(false);
       return;
     }
@@ -113,6 +123,7 @@
       currentProfile = profileResult.data || {};
       renderProfileForm(currentProfile);
       renderStatus();
+      await renderLeaderDashboardLink();
     } else {
       setError("#verifyError", profileResult.message || "Profile could not be loaded.");
     }

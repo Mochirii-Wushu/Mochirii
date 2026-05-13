@@ -66,6 +66,7 @@ function pageKeyFromFile(file) {
   if (f.includes("leaders")) return "leaders";
   if (f.includes("codex")) return "codex";
   if (f.includes("recruitment")) return "recruitment";
+  if (f.includes("leader-dashboard")) return "leader-dashboard";
   if (f.includes("gallery-submit")) return "gallery-submit";
   if (f.includes("account")) return "account";
   if (f.includes("auth")) return "auth";

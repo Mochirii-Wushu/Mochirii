@@ -10,3 +10,15 @@ entrypoint = "./functions/verify-discord-member/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/verify-discord-member/*.html" ]
+
+[functions.list-gallery-review-queue]
+enabled = true
+verify_jwt = true
+import_map = "./functions/list-gallery-review-queue/deno.json"
+entrypoint = "./functions/list-gallery-review-queue/index.ts"
+
+[functions.moderate-gallery-submission]
+enabled = true
+verify_jwt = true
+import_map = "./functions/moderate-gallery-submission/deno.json"
+entrypoint = "./functions/moderate-gallery-submission/index.ts"
