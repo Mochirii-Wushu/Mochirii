@@ -3568,9 +3568,94 @@ body[data-page="gallery-submit"] .muted{
   color:rgba(220,255,242,.92);
 }
 
+.submission-status--pending{
+  border-color:rgba(218,181,94,.34);
+  color:rgba(255,238,190,.94);
+}
+
 .submission-status--rejected{
   border-color:rgba(255,110,110,.34);
   color:rgba(255,226,226,.92);
+}
+
+.submission-status--archived{
+  border-color:rgba(220,235,255,.20);
+  color:rgba(229,238,235,.74);
+}
+
+.queue-tabs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.queue-tab{
+  min-height:38px;
+  padding:9px 12px;
+  border-radius:999px;
+  border:1px solid rgba(220,235,255,.14);
+  background:rgba(0,0,0,.18);
+  color:var(--auth-muted);
+  cursor:pointer;
+  font:inherit;
+  font-size:13px;
+  line-height:1.2;
+  transition:border-color .16s ease, color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.queue-tab:hover,
+.queue-tab:focus-visible{
+  border-color:rgba(220,235,255,.36);
+  color:var(--ink-0);
+  background:rgba(255,255,255,.06);
+}
+
+.queue-tab:focus-visible{
+  outline:2px solid rgba(220,235,255,.72);
+  outline-offset:3px;
+}
+
+.queue-tab[aria-pressed="true"]{
+  border-color:rgba(48,178,143,.42);
+  color:rgba(220,255,242,.95);
+  background:rgba(48,178,143,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.queue-tab:disabled{
+  cursor:not-allowed;
+  opacity:.62;
+  transform:none;
+}
+
+.moderation-summary{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:10px;
+}
+
+.moderation-summary__card{
+  min-width:0;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(220,235,255,.11);
+  background:rgba(0,0,0,.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.moderation-summary__card span{
+  display:block;
+  color:var(--auth-muted);
+  font-size:11px;
+  line-height:1.2;
+}
+
+.moderation-summary__card strong{
+  display:block;
+  margin-top:5px;
+  color:var(--ink-0);
+  font-size:20px;
+  line-height:1;
 }
 
 .review-list{
@@ -3607,6 +3692,15 @@ body[data-page="gallery-submit"] .muted{
   object-fit:cover;
 }
 
+.review-preview__empty{
+  display:grid;
+  min-height:220px;
+  place-items:center;
+  padding:18px;
+  color:var(--auth-muted);
+  text-align:center;
+}
+
 .review-details{
   display:flex;
   flex-direction:column;
@@ -3638,7 +3732,7 @@ body[data-page="gallery-submit"] .muted{
 
 .review-meta{
   display:grid;
-  grid-template-columns:repeat(4, minmax(0, 1fr));
+  grid-template-columns:repeat(3, minmax(0, 1fr));
   gap:10px;
   margin:0;
 }
@@ -3669,6 +3763,80 @@ body[data-page="gallery-submit"] .muted{
   min-height:82px;
 }
 
+.review-decision{
+  padding:11px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,110,110,.20);
+  background:rgba(120,20,20,.16);
+}
+
+.review-storage{
+  border-radius:14px;
+  border:1px solid rgba(220,235,255,.10);
+  background:rgba(0,0,0,.12);
+  color:var(--auth-muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+.review-storage summary{
+  cursor:pointer;
+  padding:10px 12px;
+}
+
+.review-storage code{
+  display:block;
+  padding:0 12px 12px;
+  color:var(--ink-1);
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+
+.review-history{
+  display:grid;
+  gap:8px;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(220,235,255,.10);
+  background:rgba(0,0,0,.13);
+}
+
+.review-history h4{
+  margin:0;
+  color:var(--ink-0);
+  font-size:13px;
+  line-height:1.3;
+}
+
+.review-history ol{
+  display:grid;
+  gap:8px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.review-history li{
+  min-width:0;
+  padding:9px 10px;
+  border-radius:12px;
+  background:rgba(255,255,255,.035);
+}
+
+.review-history li > div{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--ink-0);
+  font-size:12px;
+  line-height:1.35;
+}
+
+.review-history li p{
+  margin-top:4px;
+}
+
 @media (max-width:720px){
   .auth-panel__head,
   .submission-item__head,
@@ -3679,7 +3847,8 @@ body[data-page="gallery-submit"] .muted{
 
   .status-grid,
   .review-item,
-  .review-meta{
+  .review-meta,
+  .moderation-summary{
     grid-template-columns:1fr;
   }
 }
