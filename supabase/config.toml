@@ -22,3 +22,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/moderate-gallery-submission/deno.json"
 entrypoint = "./functions/moderate-gallery-submission/index.ts"
+
+[functions.list-approved-gallery-submissions]
+enabled = true
+verify_jwt = false
+import_map = "./functions/list-approved-gallery-submissions/deno.json"
+entrypoint = "./functions/list-approved-gallery-submissions/index.ts"

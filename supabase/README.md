@@ -50,6 +50,7 @@ It also exposes Auth/profile/gallery helpers:
 - `checkLeaderGalleryModerationAccess()`
 - `listGalleryReviewQueue()`
 - `moderateGallerySubmission(submissionId, action, reason)`
+- `listApprovedGallerySubmissions()`
 
 Script order on pages with Auth or upload behavior is:
 
@@ -149,6 +150,7 @@ Local serve example:
 supabase functions serve verify-discord-member --env-file supabase/functions/.env.local
 supabase functions serve list-gallery-review-queue --env-file supabase/functions/.env.local
 supabase functions serve moderate-gallery-submission --env-file supabase/functions/.env.local
+supabase functions serve list-approved-gallery-submissions --env-file supabase/functions/.env.local
 ```
 
 Production secret examples:
@@ -194,6 +196,7 @@ Remote-mutating Edge Function deployment:
 supabase functions deploy verify-discord-member
 supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
+supabase functions deploy list-approved-gallery-submissions
 ```
 
 Recommended production sequence after dashboard setup and secrets are complete:
@@ -206,6 +209,7 @@ supabase migration list
 supabase functions deploy verify-discord-member
 supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
+supabase functions deploy list-approved-gallery-submissions
 ```
 
 If the linked project requires a database password in the shell, set it locally without committing it. Fish shell example:
@@ -343,7 +347,21 @@ Both functions require a signed-in Supabase user JWT and then verify Discord ser
 
 `list-gallery-review-queue` loads only pending `gallery_submissions`, joins safe uploader profile display fields, and creates short-lived signed URLs for private `member-gallery` objects. The Storage bucket stays private and no public read policy is added.
 
-`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission. It updates `gallery_submissions.status`, `reviewed_by`, `reviewed_at`, and `rejection_reason`, then records a `gallery_moderation_events` row. Approved submissions are still not public Gallery items; publishing approved images is deferred to a later scoped workflow.
+`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission. It updates `gallery_submissions.status`, `reviewed_by`, `reviewed_at`, and `rejection_reason`, then records a `gallery_moderation_events` row. Approved submissions become eligible for the approved public Gallery feed; they are not written into `data/gallery.json`.
+
+## Approved Public Gallery Feed
+
+Approved member submissions appear on `gallery.html` through the public Edge Function:
+
+- `list-approved-gallery-submissions`
+
+This is the only Gallery Edge Function with `verify_jwt = false`. It is publicly callable because the public Gallery page needs to load without sign-in, but it uses server-side credentials only inside the Edge runtime and queries only `gallery_submissions` rows where `status = 'approved'`.
+
+The function returns public-safe fields, safe uploader display names, and short-lived signed URLs for private `member-gallery` objects. The Storage bucket remains private; no public bucket or anonymous Storage read policy is added.
+
+Pending, rejected, and archived submissions are not returned by the approved feed. If a private object cannot receive a signed URL, the function returns a safe per-item preview error and the browser skips that item.
+
+`gallery.js` still renders the static `data/gallery.json` Gallery first. Approved member submissions are appended after the static items and receive a `member-submissions` category in addition to their submitted category when present. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions. Localhost static previews skip the remote approved feed by default; add `?approvedFeed=1` when intentionally testing against a served/deployed feed.
 
 ## Local Testing Flow
 
@@ -379,6 +397,7 @@ For Edge Function loading checks without deployment:
 ```sh
 deno check --import-map=supabase/functions/list-gallery-review-queue/deno.json supabase/functions/list-gallery-review-queue/index.ts
 deno check --import-map=supabase/functions/moderate-gallery-submission/deno.json supabase/functions/moderate-gallery-submission/index.ts
+deno check --import-map=supabase/functions/list-approved-gallery-submissions/deno.json supabase/functions/list-approved-gallery-submissions/index.ts
 ```
 
 ## Manual Discord Role-Granting Flow
@@ -411,6 +430,6 @@ Deferred role-assignment automation:
 
 Deferred public gallery publishing:
 
-- Add an approval-to-public publishing workflow.
-- Keep pending and approved private submissions out of `data/gallery.json` until an explicit publishing workflow exists.
+- Add an optional curated static-publishing workflow if approved member submissions ever need permanent static Gallery records.
+- Keep pending, rejected, and archived private submissions out of `data/gallery.json`.
 - Preserve current public Gallery captions and image paths unless a later scoped task changes them.
