@@ -365,6 +365,8 @@ Pending, rejected, and archived submissions are not returned by the approved fee
 
 If an older approved `gallery_submissions` row has blank `title` and `caption` values, the public lightbox will use the `Member submission` fallback until a Moderator or operator updates that row in Supabase. Future uploads preserve non-empty title and caption values from `gallery-submit.html` into `gallery_submissions`.
 
+Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; approved member uploads use their Supabase `created_at` value. The default Gallery order is `Random mix`, preserving the rotating shuffle behavior. Visitors may choose `Newest first` or `Oldest first`; static images and approved member submissions are sorted together. Approved member submissions still render through signed URLs from the private `member-gallery` bucket, and pending or rejected submissions remain hidden.
+
 ## Local Testing Flow
 
 Recommended local checks:

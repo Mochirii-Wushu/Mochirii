@@ -2979,7 +2979,8 @@ body[data-page="gallery"] .gallery-filters{
 }
 
 body[data-page="gallery"] .gallery-filter,
-body[data-page="gallery"] .gallery-copy-link{
+body[data-page="gallery"] .gallery-copy-link,
+body[data-page="gallery"] .gallery-order__select{
   min-height:42px;
   display:inline-flex;
   align-items:center;
@@ -3003,7 +3004,9 @@ body[data-page="gallery"] .gallery-copy-link{
 body[data-page="gallery"] .gallery-filter:hover,
 body[data-page="gallery"] .gallery-filter:focus-visible,
 body[data-page="gallery"] .gallery-copy-link:hover,
-body[data-page="gallery"] .gallery-copy-link:focus-visible{
+body[data-page="gallery"] .gallery-copy-link:focus-visible,
+body[data-page="gallery"] .gallery-order__select:hover,
+body[data-page="gallery"] .gallery-order__select:focus-visible{
   transform:translateY(-1px);
   border-color:var(--gallery-frost);
   color:var(--ink-0);
@@ -3017,7 +3020,8 @@ body[data-page="gallery"] .gallery-copy-link:focus-visible{
 }
 
 body[data-page="gallery"] .gallery-filter:focus-visible,
-body[data-page="gallery"] .gallery-copy-link:focus-visible{
+body[data-page="gallery"] .gallery-copy-link:focus-visible,
+body[data-page="gallery"] .gallery-order__select:focus-visible{
   outline-color:rgba(220,235,255,.78);
   box-shadow:
     0 1px 0 rgba(255,255,255,.08) inset,
@@ -3041,6 +3045,26 @@ body[data-page="gallery"] .gallery-filter[aria-pressed="true"]{
 body[data-page="gallery"] .gallery-copy-link{
   border-style:solid;
   border-color:rgba(218,181,94,.24);
+}
+
+body[data-page="gallery"] .gallery-order{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:42px;
+}
+
+body[data-page="gallery"] .gallery-order__label{
+  color:rgba(220,235,255,.72);
+  font-size:13px;
+  line-height:1.35;
+  white-space:nowrap;
+}
+
+body[data-page="gallery"] .gallery-order__select{
+  min-width:142px;
+  border-color:rgba(134,185,210,.24);
 }
 
 body[data-page="gallery"] .gallery-share-status{
@@ -3170,9 +3194,15 @@ body[data-page="gallery"] .gallery-thumb:focus-visible img{
 
 @media (max-width:480px){
   body[data-page="gallery"] .gallery-filter,
-  body[data-page="gallery"] .gallery-copy-link{
+  body[data-page="gallery"] .gallery-copy-link,
+  body[data-page="gallery"] .gallery-order,
+  body[data-page="gallery"] .gallery-order__select{
     flex:1 1 auto;
     min-height:44px;
+  }
+
+  body[data-page="gallery"] .gallery-order{
+    flex-wrap:wrap;
   }
 }
 
