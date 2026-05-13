@@ -259,13 +259,20 @@
     return "Member submission";
   }
 
+  function buildMemberLightboxCaption(title, caption, uploaderName) {
+    const base = buildMemberCaption(title, caption);
+    const uploader = text(uploaderName, "");
+    return uploader ? `${base} · Submitted by ${uploader}` : base;
+  }
+
   function approvedSubmissionToItem(submission) {
     const signedUrl = String(submission?.signed_url || "").trim();
     if (!signedUrl) return null;
 
     const title = text(submission?.title, "");
     const rawCaption = text(submission?.caption, "");
-    const caption = buildMemberCaption(title, rawCaption);
+    const uploaderName = text(submission?.uploader_discord_name, "") || text(submission?.uploader_display_name, "");
+    const caption = buildMemberLightboxCaption(title, rawCaption, uploaderName);
     const category = normalizeSlug(submission?.category) || MEMBER_CATEGORY;
     const categories = category === MEMBER_CATEGORY ? [MEMBER_CATEGORY] : [category, MEMBER_CATEGORY];
 
@@ -281,7 +288,7 @@
       source: "member",
       created_at: submission?.created_at || "",
       reviewed_at: submission?.reviewed_at || "",
-      uploader: submission?.uploader_display_name || "",
+      uploader: uploaderName,
     };
   }
 

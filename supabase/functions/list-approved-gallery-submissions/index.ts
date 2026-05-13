@@ -154,10 +154,18 @@ Deno.serve(async (req: Request) => {
 
     const userId = safeString(submission.user_id, 80) || "";
     const profile = profilesById.get(userId) || {};
+    const discordGlobalName = safeString(profile.discord_global_name, 100);
+    const discordUsername = safeString(profile.discord_username, 80);
+    const profileDisplayName = safeString(profile.display_name, 40);
     const uploaderDisplayName =
-      safeString(profile.discord_global_name, 100) ||
-      safeString(profile.display_name, 40) ||
-      safeString(profile.discord_username, 80) ||
+      discordGlobalName ||
+      profileDisplayName ||
+      discordUsername ||
+      "Mochirii Member";
+    const uploaderDiscordName =
+      discordGlobalName ||
+      discordUsername ||
+      profileDisplayName ||
       "Mochirii Member";
 
     const item: JsonRecord = {
@@ -170,6 +178,7 @@ Deno.serve(async (req: Request) => {
       created_at: safeString(submission.created_at, 80),
       reviewed_at: safeString(submission.reviewed_at, 80),
       uploader_display_name: uploaderDisplayName,
+      uploader_discord_name: uploaderDiscordName,
       signed_url: signedData?.signedUrl || null,
     };
 
