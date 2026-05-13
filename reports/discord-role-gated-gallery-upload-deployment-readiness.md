@@ -71,7 +71,7 @@ Local constraint inspection confirmed:
 - `gallery_submissions.storage_bucket` is constrained to `member-gallery`.
 - `gallery_submissions.storage_path` must begin with `user_id::text || '/'`.
 - MIME type is constrained to JPEG, PNG, or WebP.
-- size is constrained to `> 0 and <= 5242880`.
+- size is constrained to `> 0 and <= 52428800` after `20260513193110_increase_member_gallery_upload_limit_to_50mb.sql`.
 - status is constrained to `pending`, `approved`, `rejected`, `archived`.
 - `(storage_bucket, storage_path)` is unique.
 
@@ -193,17 +193,22 @@ No committed real Discord bot token, Discord client secret, Supabase service-rol
 
 Initial audit found the migration created the private `member-gallery` bucket but did not pin file size and MIME type restrictions.
 
-Fix made:
+Initial fix made:
 
 - patched the bucket insert/update to set `file_size_limit = 5242880`
 - patched `allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp']::text[]`
 
-Local post-reset query confirmed:
+Current upload limit update:
+
+- `20260513193110_increase_member_gallery_upload_limit_to_50mb.sql` updates `file_size_limit = 52428800`
+- MIME types remain `image/jpeg`, `image/png`, and `image/webp`
+
+Current local post-reset query confirms:
 
 ```text
 id = member-gallery
 public = false
-file_size_limit = 5242880
+file_size_limit = 52428800
 allowed_mime_types = image/jpeg,image/png,image/webp
 ```
 
@@ -279,12 +284,18 @@ Because `REMOTE_DEPLOYMENT_ALLOWED=false`, no remote-changing command was run.
 
 Issue: Storage bucket migration did not pin upload file size and MIME types.
 
-Fix:
+Initial fix:
 
 - added `file_size_limit = 5242880`
 - added `allowed_mime_types = image/jpeg,image/png,image/webp`
 - reran `supabase db reset`
 - confirmed the bucket restrictions locally
+
+Current upload-limit update:
+
+- added follow-up migration `20260513193110_increase_member_gallery_upload_limit_to_50mb.sql`
+- updated `gallery_submissions_size_bytes_check` to `size_bytes > 0 and size_bytes <= 52428800`
+- updated `member-gallery.file_size_limit` to `52428800`
 
 Issue: Edge Function trusted configured guild/role secret values without fail-closed drift detection.
 

@@ -256,7 +256,7 @@ member-gallery
 The bucket is restricted to image uploads only:
 
 ```text
-file_size_limit = 5242880
+file_size_limit = 52428800
 allowed_mime_types = image/jpeg, image/png, image/webp
 ```
 

@@ -45,7 +45,7 @@
       <section class="glass-card glass-card--strong glass-pad hero-intro center-stack">
         <p class="kicker">Gallery Upload</p>
         <h1 class="display-title">Submit Image</h1>
-        <p class="lede">Verified active members can send images into a private pending queue. Nothing submitted here appears in the public Gallery yet.</p>
+        <p class="lede">Verified active members can send images into a private pending queue. Nothing submitted here appears in the public Gallery until Moderator approval.</p>
       </section>
     </div>
   </header>
@@ -60,7 +60,7 @@
           </div>
           <p class="status-pill" id="uploadGateState">Loading</p>
         </div>
-        <p class="muted" id="uploadGateMessage">Checking sign-in and Discord verification.</p>
+        <p class="muted" id="uploadGateMessage">Checking sign-in & Discord verification.</p>
         <div class="auth-actions" id="uploadGateActions">
           <a class="hero-cta hero-cta--primary" href="./auth.html" id="uploadLoginLink" hidden>Login</a>
           <button class="hero-cta hero-cta--primary" type="button" id="refreshVerification" hidden>Check Discord verification</button>
@@ -83,7 +83,7 @@
           <form class="glass-card glass-card--primary glass-pad auth-form upload-form" id="uploadForm">
             <p class="kicker">Pending Moderation</p>
             <h2 class="section-title">Upload Image</h2>
-            <p class="muted">Accepted file types are JPEG, PNG, and WebP. The browser limit is 5 MB; database and Storage policies enforce access again server-side.</p>
+            <p class="muted">Accepted file types are JPEG, PNG & WebP. The browser limit is 50 MB.</p>
 
             <label class="form-field">
               <span>Image file</span>
