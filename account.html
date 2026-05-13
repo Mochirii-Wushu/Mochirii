@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mōchirīī Account • Guild Verification</title>
+  <meta name="description" content="View Discord verification, member status, and safe profile fields for a Mōchirīī website account." />
+  <link rel="canonical" href="https://mochirii.com/account.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Mōchirīī" />
+  <meta property="og:title" content="Mōchirīī Account • Guild Verification" />
+  <meta property="og:description" content="View Discord verification, member status, and safe profile fields for a Mōchirīī website account." />
+  <meta property="og:url" content="https://mochirii.com/account.html" />
+  <meta property="og:image" content="https://mochirii.com/assets/img/leaders/panel.webp" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Mōchirīī Account • Guild Verification" />
+  <meta name="twitter:description" content="View Discord verification, member status, and safe profile fields for a Mōchirīī website account." />
+  <meta name="twitter:image" content="https://mochirii.com/assets/img/leaders/panel.webp" />
+  <meta name="theme-color" content="#0a0c0e" />
+  <link rel="icon" href="./favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="./assets/img/brand/apple-touch-icon.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body data-page="account">
+  <div id="header"></div>
+  <div class="bg-photo" aria-hidden="true"></div>
+
+  <header class="page-hero-shell" aria-label="Account hero">
+    <div class="container">
+      <section class="page-hero page-hero--tall">
+        <img
+          src="./assets/img/leaders/panel.webp"
+          alt="Guild account banner artwork"
+          class="page-hero__img"
+          width="1536"
+          height="1024"
+          loading="eager"
+          decoding="async"
+        />
+      </section>
+    </div>
+
+    <div class="container hero-overlap">
+      <section class="glass-card glass-card--strong glass-pad hero-intro">
+        <p class="kicker">Guild Account</p>
+        <h1 class="display-title">Account</h1>
+        <p class="lede">Check Discord verification, review member status, and keep safe profile details current.</p>
+      </section>
+    </div>
+  </header>
+
+  <main class="page-main" id="main">
+    <div class="container">
+      <section class="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel" hidden>
+        <p class="kicker">Sign In Required</p>
+        <h2 class="section-title">Login with Discord</h2>
+        <p class="muted">A website account is required before Discord membership and role verification can be checked.</p>
+        <div class="auth-actions">
+          <a class="hero-cta hero-cta--primary" href="./auth.html">Login</a>
+        </div>
+      </section>
+
+      <div class="grid-12 grid-gap" id="accountPanel" hidden>
+        <section class="col-8">
+          <div class="glass-card glass-card--primary glass-pad auth-panel">
+            <div class="auth-panel__head">
+              <div>
+                <p class="kicker">Verification</p>
+                <h2 class="section-title">Discord Access</h2>
+              </div>
+              <p class="status-pill" id="memberStatus">Loading</p>
+            </div>
+
+            <dl class="status-grid" aria-label="Account verification status">
+              <div>
+                <dt>Discord identity</dt>
+                <dd id="discordIdentity">Loading</dd>
+              </div>
+              <div>
+                <dt>Discord verification</dt>
+                <dd id="discordVerification">Loading</dd>
+              </div>
+              <div>
+                <dt>Required roles</dt>
+                <dd id="requiredRoles">Loading</dd>
+              </div>
+              <div>
+                <dt>Last checked</dt>
+                <dd id="lastChecked">Loading</dd>
+              </div>
+            </dl>
+
+            <div class="auth-actions">
+              <button class="hero-cta hero-cta--primary" type="button" id="verifyButton">Check Discord verification</button>
+              <a class="hero-cta" href="./gallery-submit.html" id="submitLink" hidden>Submit Image</a>
+              <button class="hero-cta" type="button" id="signOutButton">Sign out</button>
+            </div>
+
+            <div class="requirement-list" aria-label="Upload access requirements">
+              <h3 class="section-title section-title--sm">Upload access needs</h3>
+              <ul class="list-stack">
+                <li>Join the Discord server.</li>
+                <li>Complete Discord server verification.</li>
+                <li>Have Mōchirīī - WWM.</li>
+                <li>Have ✅Verified.</li>
+              </ul>
+            </div>
+
+            <p class="auth-status muted" id="verifyStatus" role="status" aria-live="polite"></p>
+            <p class="auth-error" id="verifyError" role="alert" hidden></p>
+          </div>
+        </section>
+
+        <aside class="col-4">
+          <form class="glass-card glass-card--soft glass-pad auth-form" id="profileForm">
+            <p class="kicker">Profile</p>
+            <h2 class="section-title section-title--sm">Editable Fields</h2>
+
+            <label class="form-field">
+              <span>Display name</span>
+              <input id="display_name" name="display_name" maxlength="40" minlength="2" autocomplete="nickname" required />
+            </label>
+
+            <label class="form-field">
+              <span>Game UID</span>
+              <input id="game_uid" name="game_uid" maxlength="40" autocomplete="off" />
+            </label>
+
+            <label class="form-field">
+              <span>Discord handle</span>
+              <input id="discord_handle" name="discord_handle" maxlength="80" autocomplete="off" />
+            </label>
+
+            <label class="form-field">
+              <span>Region</span>
+              <input id="region" name="region" maxlength="80" autocomplete="off" />
+            </label>
+
+            <label class="form-field">
+              <span>Timezone</span>
+              <input id="timezone" name="timezone" maxlength="80" autocomplete="off" />
+            </label>
+
+            <label class="form-field">
+              <span>Avatar URL</span>
+              <input id="avatar_url" name="avatar_url" maxlength="500" inputmode="url" autocomplete="url" />
+            </label>
+
+            <label class="form-field">
+              <span>Bio</span>
+              <textarea id="bio" name="bio" maxlength="500" rows="5"></textarea>
+            </label>
+
+            <div class="auth-actions">
+              <button class="hero-cta hero-cta--primary" type="submit">Save profile</button>
+            </div>
+
+            <p class="auth-status muted" id="profileStatus" role="status" aria-live="polite"></p>
+            <p class="auth-error" id="profileError" role="alert" hidden></p>
+          </form>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer"></div>
+
+  <script src="./utils.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="./supabase.js" defer></script>
+  <script src="./site.js" defer></script>
+  <script src="./account.js" defer></script>
+</body>
+</html>
