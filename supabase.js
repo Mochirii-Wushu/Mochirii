@@ -11,7 +11,7 @@
   const DISCORD_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
   const DISCORD_REQUIRED_ROLE_NAMES = ["Mōchirīī - WWM", "✅Verified"];
   const MEMBER_GALLERY_BUCKET = "member-gallery";
-  const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+  const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
   const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
   const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
   const SAFE_PROFILE_FIELDS = {
@@ -750,7 +750,7 @@
       throw new Error("Upload a JPEG, PNG, or WebP image.");
     }
     if (file.size <= 0) throw new Error("The selected file is empty.");
-    if (file.size > MAX_UPLOAD_BYTES) throw new Error("Images must be 5 MB or smaller.");
+    if (file.size > MAX_UPLOAD_BYTES) throw new Error("Images must be 50 MB or smaller.");
   }
 
   async function uploadMemberGalleryImage(file, metadata = {}) {
