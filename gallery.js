@@ -18,9 +18,12 @@
 
   const ALL_CATEGORY = "all";
   const CATEGORY_PARAM = "category";
+  const SORT_PARAM = "sort";
   const COPY_SUCCESS = "Link copied";
   const COPY_FAILURE = "Copy failed";
   const MEMBER_CATEGORY = "member-submissions";
+  const DEFAULT_SORT = "random";
+  const SORT_MODES = new Set([DEFAULT_SORT, "newest", "oldest"]);
 
   const toTitle = (slug) =>
     String(slug || "")
@@ -56,25 +59,39 @@
     return slug && hasCategory(categories, slug) ? slug : ALL_CATEGORY;
   }
 
-  function readCategoryFromUrl(categories) {
+  function normalizeSort(value) {
+    const sort = text(value, "").toLowerCase();
+    return SORT_MODES.has(sort) ? sort : DEFAULT_SORT;
+  }
+
+  function readGalleryStateFromUrl(categories) {
     const params = new URLSearchParams(window.location.search);
-    const hasParam = params.has(CATEGORY_PARAM);
+    const hasCategoryParam = params.has(CATEGORY_PARAM);
     const requested = normalizeSlug(params.get(CATEGORY_PARAM));
     const valid = requested && hasCategory(categories, requested);
+    const hasSortParam = params.has(SORT_PARAM);
+    const requestedSort = text(params.get(SORT_PARAM), "").toLowerCase();
+    const validSort = SORT_MODES.has(requestedSort);
 
     return {
       category: valid ? requested : ALL_CATEGORY,
-      hasParam,
-      valid: !hasParam || Boolean(valid),
+      sort: validSort ? requestedSort : DEFAULT_SORT,
+      hasParam: hasCategoryParam || hasSortParam,
+      valid: (!hasCategoryParam || Boolean(valid)) && (!hasSortParam || validSort),
     };
   }
 
-  function updateCategoryUrl(category, { replace = false } = {}) {
+  function updateGalleryUrl(category, sort, { replace = false } = {}) {
     const url = new URL(window.location.href);
     if (category === ALL_CATEGORY) {
       url.searchParams.delete(CATEGORY_PARAM);
     } else {
       url.searchParams.set(CATEGORY_PARAM, category);
+    }
+    if (sort === DEFAULT_SORT) {
+      url.searchParams.delete(SORT_PARAM);
+    } else {
+      url.searchParams.set(SORT_PARAM, sort);
     }
 
     const next = `${url.pathname}${url.search}${url.hash}`;
@@ -220,6 +237,10 @@
     });
   }
 
+  function updateSortState(sortEl, activeSort) {
+    if (sortEl) sortEl.value = activeSort;
+  }
+
   function filterItems(items, category) {
     if (category === ALL_CATEGORY) return items;
     return items.filter((item) => getItemCategories(item).includes(category));
@@ -236,6 +257,28 @@
     return shuffled;
   }
 
+  function sortTime(item) {
+    const time = Date.parse(item?.sortTimestamp || "");
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function compareItemId(a, b) {
+    return String(a?.id || "").localeCompare(String(b?.id || ""));
+  }
+
+  function orderGalleryItems(items, sortMode) {
+    if (sortMode === DEFAULT_SORT) return shuffleGalleryItems(items);
+
+    return [...items].sort((a, b) => {
+      const aTime = sortTime(a);
+      const bTime = sortTime(b);
+      if (aTime !== bTime) {
+        return sortMode === "newest" ? bTime - aTime : aTime - bTime;
+      }
+      return compareItemId(a, b);
+    });
+  }
+
   function formatCount(count, total, categoryLabel) {
     const noun = count === 1 ? "image" : "images";
     if (!categoryLabel || categoryLabel === "All") return `Showing ${count} of ${total} ${total === 1 ? "image" : "images"}.`;
@@ -247,6 +290,14 @@
     const first = albums[0];
     const items = Array.isArray(first?.items) ? first.items : [];
     return items;
+  }
+
+  function normalizeStaticItem(item) {
+    return {
+      ...item,
+      source: "static",
+      sortTimestamp: text(item?.galleryAddedAt, ""),
+    };
   }
 
   function buildMemberCaption(title, caption) {
@@ -286,6 +337,7 @@
       category,
       categories,
       source: "member",
+      sortTimestamp: submission?.created_at || "",
       created_at: submission?.created_at || "",
       reviewed_at: submission?.reviewed_at || "",
       uploader: uploaderName,
@@ -330,25 +382,29 @@
     try {
       const data = await fetchJSON(JSON_URL);
       applyMeta(data);
-      const staticItems = flattenItems(data);
+      const staticItems = flattenItems(data).map(normalizeStaticItem);
       const approvedItems = await loadApprovedSubmissionItems();
       const items = [...staticItems, ...approvedItems];
       const filters = $("#galleryFilters");
+      const sortSelect = $("#gallerySort");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
       const copyLink = $("#galleryCopyLink");
       const shareStatus = $("#galleryShareStatus");
       const categories = buildCategories(data, items);
-      const initialState = readCategoryFromUrl(categories);
+      const initialState = readGalleryStateFromUrl(categories);
       let activeCategory = initialState.category;
+      let activeSort = initialState.sort;
 
-      const applyFilter = (category, { updateUrl = false, replaceUrl = false } = {}) => {
+      const applyGalleryState = (category, sort, { updateUrl = false, replaceUrl = false } = {}) => {
         activeCategory = normalizeCategory(categories, category);
-        const visibleItems = shuffleGalleryItems(filterItems(items, activeCategory));
+        activeSort = normalizeSort(sort);
+        const visibleItems = orderGalleryItems(filterItems(items, activeCategory), activeSort);
         const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
 
         renderGrid(grid, visibleItems);
         updateFilterState(filters, activeCategory);
+        updateSortState(sortSelect, activeSort);
 
         if (count) setText(count, formatCount(visibleItems.length, items.length, activeLabel));
         if (empty) empty.hidden = visibleItems.length > 0;
@@ -356,17 +412,21 @@
         if (shareStatus) shareStatus.textContent = "";
 
         if (updateUrl || replaceUrl) {
-          updateCategoryUrl(activeCategory, { replace: replaceUrl });
+          updateGalleryUrl(activeCategory, activeSort, { replace: replaceUrl });
         }
       };
 
       renderFilters(filters, categories, activeCategory, (category) => {
-        applyFilter(category, { updateUrl: true });
+        applyGalleryState(category, activeSort, { updateUrl: true });
       });
-      applyFilter(activeCategory, { replaceUrl: initialState.hasParam && !initialState.valid });
+      sortSelect?.addEventListener("change", () => {
+        applyGalleryState(activeCategory, sortSelect.value, { updateUrl: true });
+      });
+      applyGalleryState(activeCategory, activeSort, { replaceUrl: initialState.hasParam && !initialState.valid });
 
       window.addEventListener("popstate", () => {
-        applyFilter(readCategoryFromUrl(categories).category);
+        const nextState = readGalleryStateFromUrl(categories);
+        applyGalleryState(nextState.category, nextState.sort);
       });
 
       copyLink?.addEventListener("click", async () => {
