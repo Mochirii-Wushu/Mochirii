@@ -66,6 +66,9 @@ function pageKeyFromFile(file) {
   if (f.includes("leaders")) return "leaders";
   if (f.includes("codex")) return "codex";
   if (f.includes("recruitment")) return "recruitment";
+  if (f.includes("gallery-submit")) return "gallery-submit";
+  if (f.includes("account")) return "account";
+  if (f.includes("auth")) return "auth";
   if (f.includes("gallery")) return "gallery";
   if (f.includes("spotlight")) return "spotlight";
   if (f.includes("spotify")) return "spotify";
@@ -559,6 +562,7 @@ function pageKeyFromFile(file) {
       setFooterYear(footerRoot);
     }
 
+    await window.MochiriiSupabase?.renderAuthNavState?.();
     initLightbox();
   }
 
