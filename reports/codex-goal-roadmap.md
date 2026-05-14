@@ -300,7 +300,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-refs.mjs`; `npm run check:production`; local and production metadata inspection; optional manual Discord preview checklist.
 - Definition of done: Report states whether member pages should be indexed, whether source metadata is healthy, whether production metadata matches source, and which manual preview checks remain.
 - Merge gate: No copy rewrite beyond metadata labels/descriptions; no protected data changes; validation passes.
-- Status: Not started.
+- Status: In review on `qa/seo-social-preview-member-pages-review`. Report: `reports/seo-social-preview-member-pages-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/131>. Merge commit: pending. Validation summary: source/production metadata inspection, indexing decision, local metadata fix, sitemap membership check, robots review, preview image path review, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and asset diff checks passed. Blockers: none found. Next recommended item: G13 `docs/supabase-cost-usage-runbook`.
 
 ### G13 - Supabase Cost Usage Runbook
 
@@ -384,7 +384,7 @@ After each workstream PR merges:
 | G09 | `qa/production-member-workflow-smoke` | Complete - PR #125, merge `491298fe3e8355b54e4de97eb9f8844f6e073437` |
 | G10 | `qa/secrets-and-public-config-review` | Complete - PR #127, merge `3f71a01d705b35e0d7688fd4761caba064784030` |
 | G11 | `chore/document-large-audio-exception` | Complete - PR #129, merge `2c49147d7089c47cfaf9c6606412eb7a796d258a` |
-| G12 | `qa/seo-social-preview-member-pages-review` | Not started |
+| G12 | `qa/seo-social-preview-member-pages-review` | In review - metadata fix drafted, PR pending |
 | G13 | `docs/supabase-cost-usage-runbook` | Not started |
 | G14 | `docs/member-gallery-cleanup-plan` | Not started |
 | G15 | `qa/post-goal-cross-site-regression-review` | Not started |
