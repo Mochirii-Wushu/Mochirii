@@ -236,7 +236,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery` if links or shared references are changed.
 - Definition of done: A leader can follow the runbook without knowing implementation details, and the guide never exposes tokens, service-role keys, private URLs, or unsafe admin shortcuts.
 - Merge gate: Docs only, links resolve, no secret-like values, validation passes.
-- Status: Not started.
+- Status: In review on `docs/member-gallery-moderation-runbook`. Runbook: `docs/member-gallery-moderation-runbook.md`. PR: pending. Merge commit: pending. Validation summary: moderator workflow docs drafted with access prerequisites, queue handling, approval/rejection guidance, audit expectations, common errors, escalation boundaries, no-secret safety notes, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and secret-pattern scan passed. Blockers: none found. Next recommended item: G09 `qa/production-member-workflow-smoke`.
 
 ### G09 - Production Member Workflow Smoke
 
@@ -380,7 +380,7 @@ After each workstream PR merges:
 | G05 | `qa/account-member-dashboard-review` | Complete - PR #117, merge `67c3c741553bcc4a2305ecc85e732b24db7af626` |
 | G06 | `qa/gallery-approved-feed-integration-review` | Complete - PR #119, merge `f979529ceed0cfadf69513cf2435da2a88d665b0` |
 | G07 | `qa/gallery-behavior-matrix-suite` | Complete - PR #121, merge `2f37cffedebbb99f67c586001e941d1bd8341389` |
-| G08 | `docs/member-gallery-moderation-runbook` | Not started |
+| G08 | `docs/member-gallery-moderation-runbook` | In review - runbook drafted, PR pending |
 | G09 | `qa/production-member-workflow-smoke` | Not started |
 | G10 | `qa/secrets-and-public-config-review` | Not started |
 | G11 | `chore/document-large-audio-exception` | Not started |
