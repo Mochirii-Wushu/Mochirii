@@ -284,7 +284,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery`.
 - Definition of done: Future validation runs have a clear source-of-truth note explaining that the MP3 warning is accepted unless the user reopens audio optimization.
 - Merge gate: Docs/report only; no audio file churn; validation passes with known warning.
-- Status: In review on `chore/document-large-audio-exception`. Report: `reports/large-audio-exception.md`. PR: pending. Merge commit: pending. Validation summary: durable content-guide note, large-audio exception report, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and asset diff checks passed with the expected MP3 warning only. Blockers: none found. Next recommended item: G12 `qa/seo-social-preview-member-pages-review`.
+- Status: In review on `chore/document-large-audio-exception`. Report: `reports/large-audio-exception.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/129>. Merge commit: pending. Validation summary: durable content-guide note, large-audio exception report, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and asset diff checks passed with the expected MP3 warning only. Blockers: none found. Next recommended item: G12 `qa/seo-social-preview-member-pages-review`.
 
 ### G12 - SEO Social Preview Member Pages Review
 

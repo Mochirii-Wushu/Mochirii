@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `chore/document-large-audio-exception`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/129>
 Goal: G11
 Mode: Documentation-only
 
