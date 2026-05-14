@@ -316,7 +316,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery` if links changed.
 - Definition of done: Runbook explains what to monitor, what thresholds matter, what not to mutate without approval, and how to separate normal usage from runaway behavior.
 - Merge gate: Docs only; no secret exposure; no unsupported cost claims presented as verified current billing data.
-- Status: Not started.
+- Status: Complete. Branch: `docs/supabase-cost-usage-runbook`. Runbook: `docs/supabase-cost-usage-runbook.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/133>. Merge commit: `9d54ba2f9d3c2191d94bb6cd46239959cbece3f4`. Validation summary: official Supabase pricing, cost-control, Storage size, egress, MAU, Storage file-limit, and changelog docs reviewed; runbook added with usage drivers, dashboard checks, thresholds, cleanup implications, safe command boundaries, incident response, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, secret-pattern review, and post-merge validation passed. Blockers: none found; runbook intentionally avoids treating current pricing as permanent billing guidance. Next recommended item: G14 `docs/member-gallery-cleanup-plan`.
 
 ### G14 - Member Gallery Cleanup Plan
 
@@ -385,7 +385,7 @@ After each workstream PR merges:
 | G10 | `qa/secrets-and-public-config-review` | Complete - PR #127, merge `3f71a01d705b35e0d7688fd4761caba064784030` |
 | G11 | `chore/document-large-audio-exception` | Complete - PR #129, merge `2c49147d7089c47cfaf9c6606412eb7a796d258a` |
 | G12 | `qa/seo-social-preview-member-pages-review` | Complete - PR #131, merge `c9fc6c1f17dc36ae87ca67e391582b3210339673` |
-| G13 | `docs/supabase-cost-usage-runbook` | Not started |
+| G13 | `docs/supabase-cost-usage-runbook` | Complete - PR #133, merge `9d54ba2f9d3c2191d94bb6cd46239959cbece3f4` |
 | G14 | `docs/member-gallery-cleanup-plan` | Not started |
 | G15 | `qa/post-goal-cross-site-regression-review` | Not started |
 
