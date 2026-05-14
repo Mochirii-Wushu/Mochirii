@@ -4,7 +4,7 @@
     "title": "Join Mōchirīī",
     "updated": "2026-02-01",
     "timezone": "UTC+8",
-    "intro": "Mōchirīī is a guild home for players who enjoy company, coordination & pretty greetings. Join through Discord, share your in-game name & time zone, learn the guild rhythm & step into events when ready.",
+    "intro": "Mōchirīī is a guild home for players who enjoy good company & pretty greetings. Optional Discord, always welcome.",
     "image": "./assets/img/join/hero.webp",
     "imageAlt": "Join Mōchirīī banner artwork",
     "atmosphereImage": "",
@@ -51,11 +51,10 @@
   "quickStart": {
     "title": "Quick Start",
     "body": [
-      "Join Discord, request guild access & post your IGN plus time zone.",
-      "Read the Codex, then RSVP to an upcoming event if your schedule allows. Presence matters & questions are welcome."
+      "Come say hello.",
+      "Presence matters & questions always welcome."
     ],
     "links": [
-      { "label": "Join Discord", "href": "https://discord.com/invite/dPafqMwWPK" },
       { "label": "Events", "href": "./events.html" },
       { "label": "Guild Codex", "href": "./codex.html" },
       { "label": "Ranks", "href": "./ranks.html" }
@@ -68,13 +67,13 @@
     "items": [
       {
         "title": "Join the Discord",
-        "text": "Use Discord for announcements, event planning & the clearest path into the guild home.",
+        "text": "Use Discord for announcements, event planning & the having fun.",
         "href": "https://discord.com/invite/dPafqMwWPK",
         "label": "Open Discord"
       },
       {
         "title": "Know your in-game name or UID",
-        "text": "Have your character name or UID ready so leadership can find you quickly & welcome you by name."
+        "text": "Let us know your IGN so we can find you quickly & welcome you by name."
       },
       {
         "title": "Read the Codex",
