@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/account-member-dashboard-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/117>
 Goal: G05
 Mode: QA with one narrow confirmed fix
 
