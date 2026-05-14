@@ -4,6 +4,8 @@ This runbook is for leaders reviewing member Gallery submissions through the web
 
 It does not contain secrets, tokens, private URLs, or deployment credentials.
 
+Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/123>
+
 ## 1. What Moderation Controls
 
 Member Gallery moderation decides whether uploaded member images move from the private review queue into the approved public Gallery feed.
