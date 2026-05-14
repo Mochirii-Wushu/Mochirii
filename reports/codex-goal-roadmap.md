@@ -188,7 +188,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node --check account.js`; `node --check supabase.js` if touched; `npm run check:production`; `npm run smoke:gallery`; focused mocked Account browser smoke.
 - Definition of done: Report confirms Account states, accessible status/error messaging, safe profile fields, and no private Storage URL exposure.
 - Merge gate: Account remains browser-safe and signed-out-safe; no data/protected content changes; validation passes.
-- Status: In review on `qa/account-member-dashboard-review`. Report: `reports/account-member-dashboard-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/117>. Merge commit: pending. Validation summary: Account source inspection, live signed-out smoke, mocked Account state matrix, verification feedback regression fix proof, private storage path exposure checks, `npm run check`, `git diff --check`, `node --check account.js`, `node --check supabase.js`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, and protected-data diff checks passed. Blockers: no approved live member/moderator test account/session available, so positive production Account mutations remain deferred to G09 or an approved test-account workflow. Next recommended item: G06 `qa/gallery-approved-feed-integration-review`.
+- Status: Complete. Branch: `qa/account-member-dashboard-review`. Report: `reports/account-member-dashboard-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/117>. Merge commit: `67c3c741553bcc4a2305ecc85e732b24db7af626`. Validation summary: Account source inspection, live signed-out smoke, mocked Account state matrix, verification feedback regression fix proof, private storage path exposure checks, `npm run check`, `git diff --check`, `node --check account.js`, `node --check supabase.js`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and post-merge validation passed. Blockers: no approved live member/moderator test account/session available, so positive production Account mutations remain deferred to G09 or an approved test-account workflow. Next recommended item: G06 `qa/gallery-approved-feed-integration-review`.
 
 ### G06 - Gallery Approved Feed Integration Review
 
@@ -377,7 +377,7 @@ After each workstream PR merges:
 | G02 | `qa/supabase-edge-functions-review` | Complete - PR #111, merge `b487e323751b812492d8e0d330f640dcb0cd23d6` |
 | G03 | `qa/member-gallery-upload-limit-review` | Complete - PR #113, merge `31bdf4c307b676447ad41d4d3a44368994cefb56` |
 | G04 | `qa/member-gallery-end-to-end-review` | Complete - PR #115, merge `723f39bdfff813439cb3c09fec8b40c2b5ae264e` |
-| G05 | `qa/account-member-dashboard-review` | In review - report drafted, PR pending |
+| G05 | `qa/account-member-dashboard-review` | Complete - PR #117, merge `67c3c741553bcc4a2305ecc85e732b24db7af626` |
 | G06 | `qa/gallery-approved-feed-integration-review` | Not started |
 | G07 | `qa/gallery-behavior-matrix-suite` | Not started |
 | G08 | `docs/member-gallery-moderation-runbook` | Not started |
