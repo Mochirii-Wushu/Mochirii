@@ -384,13 +384,17 @@
     setText("#verifyStatus", "Checking Discord membership and required roles.", "");
 
     const result = await S.verifyDiscordMembership();
-    if (!result.ok) {
-      setError("#verifyError", result.message || "Discord verification failed.");
-    } else {
-      setText("#verifyStatus", result.data?.message || "Discord verification checked.", "");
-    }
-
+    const message = result.ok
+      ? result.data?.message || result.message || "Discord verification checked."
+      : result.message || "Discord verification failed.";
     await loadAccount();
+
+    if (!result.ok) {
+      setError("#verifyError", message);
+      setText("#verifyStatus", "", "");
+    } else {
+      setText("#verifyStatus", message, "");
+    }
   }
 
   function payloadFromForm(form) {
