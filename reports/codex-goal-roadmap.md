@@ -252,7 +252,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `npm run check:production`; `npm run smoke:gallery`; live browser checks for listed pages; redirect URL verification; secret scan if any docs are touched.
 - Definition of done: Report lists exact live URLs checked, account state limitations, pass/fail result per workflow, and required manual Supabase/Discord settings if any are missing.
 - Merge gate: No production mutation beyond approved test account actions; no data changes; no unresolved blocker hidden as pass.
-- Status: In review on `qa/production-member-workflow-smoke`. Report: `reports/production-member-workflow-smoke.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/125>. Merge commit: pending. Validation summary: live production signed-out Auth, Account, Gallery Submit, Leader Dashboard, Gallery, approved-feed Gallery, OAuth redirect-start, public member-submission filter, private Storage path visibility checks, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and secret-pattern scan passed. Blockers: no approved production test account credentials, so live role verification, profile update, upload, and moderation mutations were not attempted. Next recommended item: G10 `qa/secrets-and-public-config-review`.
+- Status: Complete. Branch: `qa/production-member-workflow-smoke`. Report: `reports/production-member-workflow-smoke.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/125>. Merge commit: `491298fe3e8355b54e4de97eb9f8844f6e073437`. Validation summary: live production signed-out Auth, Account, Gallery Submit, Leader Dashboard, Gallery, approved-feed Gallery, OAuth redirect-start, public member-submission filter, private Storage path visibility checks, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, secret-pattern scan, and post-merge validation passed. Blockers: no approved production test account credentials, so live role verification, profile update, upload, and moderation mutations were not attempted. Next recommended item: G10 `qa/secrets-and-public-config-review`.
 
 ### G10 - Secrets And Public Config Review
 
@@ -381,7 +381,7 @@ After each workstream PR merges:
 | G06 | `qa/gallery-approved-feed-integration-review` | Complete - PR #119, merge `f979529ceed0cfadf69513cf2435da2a88d665b0` |
 | G07 | `qa/gallery-behavior-matrix-suite` | Complete - PR #121, merge `2f37cffedebbb99f67c586001e941d1bd8341389` |
 | G08 | `docs/member-gallery-moderation-runbook` | Complete - PR #123, merge `1c4825106a71145521c42c1897ba49de6096e0a6` |
-| G09 | `qa/production-member-workflow-smoke` | In review - report drafted, PR pending |
+| G09 | `qa/production-member-workflow-smoke` | Complete - PR #125, merge `491298fe3e8355b54e4de97eb9f8844f6e073437` |
 | G10 | `qa/secrets-and-public-config-review` | Not started |
 | G11 | `chore/document-large-audio-exception` | Not started |
 | G12 | `qa/seo-social-preview-member-pages-review` | Not started |
