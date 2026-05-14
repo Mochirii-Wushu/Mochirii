@@ -417,6 +417,8 @@ Both functions require a signed-in Supabase user JWT and then verify Discord ser
 
 The website Leader Dashboard uses those functions to show queue tabs, submission details, signed private previews, rejection reasons, and compact moderation history. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
 
+For the human moderator workflow, see `docs/member-gallery-moderation-runbook.md`.
+
 When this moderation-polish branch is released, deploy only the changed moderator queue function after review:
 
 ```sh
