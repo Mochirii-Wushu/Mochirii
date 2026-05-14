@@ -268,7 +268,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; secret scan with patterns for `sb_secret_`, `service_role`, `DISCORD_BOT_TOKEN`, `client_secret`, JWT/database URLs, webhook URLs, and accidental `.env`.
 - Definition of done: Report classifies each hit as public-safe, placeholder, documentation-only, or blocker, and no real secret remains committed.
 - Merge gate: Hard stop on any real secret until removed and rotated as needed; no broad refactor.
-- Status: In review on `qa/secrets-and-public-config-review`. Report: `reports/secrets-and-public-config-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/127>. Merge commit: pending. Validation summary: tracked env inventory, ignored/untracked env path check, secret-pattern scan, high-entropy assignment scan, public browser config review, Supabase function config review, hit classification, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, and protected-data diff checks passed. Blockers: none found. Next recommended item: G11 `chore/document-large-audio-exception`.
+- Status: Complete. Branch: `qa/secrets-and-public-config-review`. Report: `reports/secrets-and-public-config-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/127>. Merge commit: `3f71a01d705b35e0d7688fd4761caba064784030`. Validation summary: tracked env inventory, ignored/untracked env path check, secret-pattern scan, high-entropy assignment scan, public browser config review, Supabase function config review, hit classification, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and post-merge validation passed. Blockers: none found. Next recommended item: G11 `chore/document-large-audio-exception`.
 
 ### G11 - Document Large Audio Exception
 
@@ -382,7 +382,7 @@ After each workstream PR merges:
 | G07 | `qa/gallery-behavior-matrix-suite` | Complete - PR #121, merge `2f37cffedebbb99f67c586001e941d1bd8341389` |
 | G08 | `docs/member-gallery-moderation-runbook` | Complete - PR #123, merge `1c4825106a71145521c42c1897ba49de6096e0a6` |
 | G09 | `qa/production-member-workflow-smoke` | Complete - PR #125, merge `491298fe3e8355b54e4de97eb9f8844f6e073437` |
-| G10 | `qa/secrets-and-public-config-review` | In review - report drafted, PR pending |
+| G10 | `qa/secrets-and-public-config-review` | Complete - PR #127, merge `3f71a01d705b35e0d7688fd4761caba064784030` |
 | G11 | `chore/document-large-audio-exception` | Not started |
 | G12 | `qa/seo-social-preview-member-pages-review` | Not started |
 | G13 | `docs/supabase-cost-usage-runbook` | Not started |
