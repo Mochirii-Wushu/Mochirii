@@ -156,7 +156,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node --check gallery-submit.js`; `node --check supabase.js` if touched; `npm run check:production`; `npm run smoke:gallery`; optional local mock upload gate test; secret scan if Supabase docs change.
 - Definition of done: Report states the effective browser, database, and Storage limits; MIME type alignment; expected failure messages; and whether production bucket settings need manual confirmation.
 - Merge gate: No hidden limit change; no data changes; no Supabase mutation unless a separate approved branch handles it.
-- Status: Not started.
+- Status: In review on `qa/member-gallery-upload-limit-review`. Report: `reports/member-gallery-upload-limit-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/113>. Merge commit: pending. Validation summary: `npm run check`, `git diff --check`, `node --check gallery-submit.js`, `node --check supabase.js`, `node scripts/check-json.mjs`, `node scripts/check-js.mjs`, `node scripts/check-refs.mjs`, `node scripts/check-assets.mjs`, `npm run check:production`, `npm run smoke:gallery`, source scan, migration review, README review, prior report drift scan, read-only production SQL for Storage bucket and constraints, local browser smoke, and protected-data diff checks passed. Blockers: none found. Next recommended item: G04 `qa/member-gallery-end-to-end-review`.
 
 ### G04 - Member Gallery End-To-End Review
 
@@ -375,7 +375,7 @@ After each workstream PR merges:
 | --- | --- | --- |
 | G01 | `qa/supabase-production-security-review` | Complete - PR #109, merge `99f49fad255b7fd9eadfeadd0ba175f8a9bc75e4` |
 | G02 | `qa/supabase-edge-functions-review` | Complete - PR #111, merge `b487e323751b812492d8e0d330f640dcb0cd23d6` |
-| G03 | `qa/member-gallery-upload-limit-review` | Not started |
+| G03 | `qa/member-gallery-upload-limit-review` | In review - PR #113 open |
 | G04 | `qa/member-gallery-end-to-end-review` | Not started |
 | G05 | `qa/account-member-dashboard-review` | Not started |
 | G06 | `qa/gallery-approved-feed-integration-review` | Not started |
