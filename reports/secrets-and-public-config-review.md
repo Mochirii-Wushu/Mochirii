@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/secrets-and-public-config-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/127>
 Goal: G10
 Mode: QA/report-only
 
