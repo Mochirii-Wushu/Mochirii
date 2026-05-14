@@ -62,6 +62,12 @@ Script order on pages with Auth or upload behavior is:
 <script src="./page.js" defer></script>
 ```
 
+## Account Page UX
+
+`account.html` summarizes the signed-in member's profile state, Discord verification state, upload eligibility, profile completeness, and recent gallery submission statuses. It uses existing browser-safe helpers and the signed-in user's own RLS-limited `gallery_submissions` rows. Profile completeness is informational only; it does not block saving, Discord verification, or gallery upload eligibility.
+
+The Account page does not expose private Storage URLs. It shows submission text metadata and moderation status only. Upload permission remains enforced by `verify-discord-member`, `member_profiles`, `gallery_submissions` RLS, and private `member-gallery` Storage policies.
+
 ## Discord Auth Setup
 
 Discord login through Supabase Auth proves identity only. It does not prove guild membership or role ownership. Guild membership and role checks happen in the `verify-discord-member` Edge Function.
