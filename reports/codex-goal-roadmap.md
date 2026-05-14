@@ -172,7 +172,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node --check` for any touched JS; `npm run check:production`; `npm run smoke:gallery`; browser smoke for signed-out, signed-in-mocked, denied, eligible, pending, approved, rejected, and error states where feasible.
 - Definition of done: Report documents each state, the evidence collected, limitations from missing live credentials, and the exact follow-up branch for any blocker.
 - Merge gate: No broad behavior changes; no unreviewed upload or moderation permission changes; validation passes.
-- Status: Not started.
+- Status: In review on `qa/member-gallery-end-to-end-review`. Report: `reports/member-gallery-end-to-end-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/115>. Merge commit: pending. Validation summary: member workflow source inspection, mocked browser state matrix, upload success regression repro/fix proof, `npm run check`, `git diff --check`, workflow `node --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, and protected-data diff checks passed. Blockers: no approved live test account/session available, so positive live upload/moderation remains deferred to G09 or an approved test-account workflow. Next recommended item: G05 `qa/account-member-dashboard-review`.
 
 ### G05 - Account Member Dashboard Review
 
@@ -376,7 +376,7 @@ After each workstream PR merges:
 | G01 | `qa/supabase-production-security-review` | Complete - PR #109, merge `99f49fad255b7fd9eadfeadd0ba175f8a9bc75e4` |
 | G02 | `qa/supabase-edge-functions-review` | Complete - PR #111, merge `b487e323751b812492d8e0d330f640dcb0cd23d6` |
 | G03 | `qa/member-gallery-upload-limit-review` | Complete - PR #113, merge `31bdf4c307b676447ad41d4d3a44368994cefb56` |
-| G04 | `qa/member-gallery-end-to-end-review` | Not started |
+| G04 | `qa/member-gallery-end-to-end-review` | In review - report drafted, PR pending |
 | G05 | `qa/account-member-dashboard-review` | Not started |
 | G06 | `qa/gallery-approved-feed-integration-review` | Not started |
 | G07 | `qa/gallery-behavior-matrix-suite` | Not started |
