@@ -238,6 +238,10 @@ Verify remote secrets without printing secret values:
 supabase secrets list
 ```
 
+## Operational Runbooks
+
+- Cost and usage monitoring: [`docs/supabase-cost-usage-runbook.md`](../docs/supabase-cost-usage-runbook.md)
+
 Do not commit `supabase/functions/.env.local`.
 
 ## Deployment Commands
