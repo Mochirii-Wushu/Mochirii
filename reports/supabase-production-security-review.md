@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/supabase-production-security-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/109>
 Goal: G01
 Mode: read-only QA/report
 
