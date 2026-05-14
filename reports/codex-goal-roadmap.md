@@ -220,7 +220,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery`; any new script if approved.
 - Definition of done: Matrix exists with clear expected behavior and pass/fail evidence, and any automated script is dependency-free and documented.
 - Merge gate: No broad Gallery redesign; no data or image churn; smoke remains green.
-- Status: In review on `qa/gallery-behavior-matrix-suite`. Report: `reports/gallery-behavior-matrix-suite.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/121>. Merge commit: pending. Validation summary: 16-check temporary Gallery behavior matrix passed for categories, invalid URL cleanup, sorting, copy link, Back/Forward, lightbox pointer/keyboard, approved-feed failure fallback, responsive no-overflow, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, and protected-data diff checks. Blockers: none found. Next recommended item: G08 `docs/member-gallery-moderation-runbook`.
+- Status: Complete. Branch: `qa/gallery-behavior-matrix-suite`. Report: `reports/gallery-behavior-matrix-suite.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/121>. Merge commit: `2f37cffedebbb99f67c586001e941d1bd8341389`. Validation summary: 16-check temporary Gallery behavior matrix passed for categories, invalid URL cleanup, sorting, copy link, Back/Forward, lightbox pointer/keyboard, approved-feed failure fallback, responsive no-overflow, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and post-merge validation. Blockers: none found. Next recommended item: G08 `docs/member-gallery-moderation-runbook`.
 
 ### G08 - Member Gallery Moderation Runbook
 
@@ -379,7 +379,7 @@ After each workstream PR merges:
 | G04 | `qa/member-gallery-end-to-end-review` | Complete - PR #115, merge `723f39bdfff813439cb3c09fec8b40c2b5ae264e` |
 | G05 | `qa/account-member-dashboard-review` | Complete - PR #117, merge `67c3c741553bcc4a2305ecc85e732b24db7af626` |
 | G06 | `qa/gallery-approved-feed-integration-review` | Complete - PR #119, merge `f979529ceed0cfadf69513cf2435da2a88d665b0` |
-| G07 | `qa/gallery-behavior-matrix-suite` | In review - report drafted, PR pending |
+| G07 | `qa/gallery-behavior-matrix-suite` | Complete - PR #121, merge `2f37cffedebbb99f67c586001e941d1bd8341389` |
 | G08 | `docs/member-gallery-moderation-runbook` | Not started |
 | G09 | `qa/production-member-workflow-smoke` | Not started |
 | G10 | `qa/secrets-and-public-config-review` | Not started |
