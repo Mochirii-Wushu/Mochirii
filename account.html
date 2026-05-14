@@ -19,7 +19,7 @@
   <meta name="theme-color" content="#0a0c0e" />
   <link rel="icon" href="./favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="./assets/img/brand/apple-touch-icon.png" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=2026-05-account-polish" />
 </head>
 
 <body data-page="account">
@@ -62,21 +62,55 @@
       </section>
 
       <div class="grid-12 grid-gap" id="accountPanel" hidden>
-        <section class="col-8">
+        <section class="col-8 account-main">
+          <div class="glass-card glass-card--primary glass-pad auth-panel account-overview-card">
+            <div class="auth-panel__head">
+              <div>
+                <p class="kicker">Account Overview</p>
+                <h2 class="section-title">Member State</h2>
+              </div>
+              <p class="status-pill" id="memberStatus">Loading</p>
+            </div>
+
+            <dl class="status-grid account-overview-grid" aria-label="Account overview">
+              <div>
+                <dt>Display name</dt>
+                <dd id="overviewDisplayName">Loading</dd>
+              </div>
+              <div>
+                <dt>Discord identity</dt>
+                <dd id="discordIdentity">Loading</dd>
+              </div>
+              <div>
+                <dt>Member status</dt>
+                <dd id="overviewMemberStatus">Loading</dd>
+              </div>
+              <div>
+                <dt>Upload eligibility</dt>
+                <dd id="uploadEligibility">Loading</dd>
+              </div>
+              <div>
+                <dt>Last Discord check</dt>
+                <dd id="lastChecked">Loading</dd>
+              </div>
+              <div>
+                <dt>Profile setup</dt>
+                <dd id="overviewProfileCompletion">Loading</dd>
+              </div>
+            </dl>
+
+            <p class="auth-status muted" id="uploadGuidance" role="status" aria-live="polite"></p>
+          </div>
+
           <div class="glass-card glass-card--primary glass-pad auth-panel">
             <div class="auth-panel__head">
               <div>
                 <p class="kicker">Verification</p>
                 <h2 class="section-title">Discord Access</h2>
               </div>
-              <p class="status-pill" id="memberStatus">Loading</p>
             </div>
 
             <dl class="status-grid" aria-label="Account verification status">
-              <div>
-                <dt>Discord identity</dt>
-                <dd id="discordIdentity">Loading</dd>
-              </div>
               <div>
                 <dt>Discord verification</dt>
                 <dd id="discordVerification">Loading</dd>
@@ -86,16 +120,45 @@
                 <dd id="requiredRoles">Loading</dd>
               </div>
               <div>
-                <dt>Last checked</dt>
-                <dd id="lastChecked">Loading</dd>
+                <dt>Moderator access</dt>
+                <dd id="moderatorAccess">Checking</dd>
+              </div>
+              <div>
+                <dt>Next step</dt>
+                <dd id="nextStep">Loading</dd>
               </div>
             </dl>
 
-            <div class="auth-actions">
-              <button class="hero-cta hero-cta--primary" type="button" id="verifyButton">Check Discord verification</button>
-              <a class="hero-cta" href="./gallery-submit.html" id="submitLink" hidden>Submit Image</a>
-              <a class="hero-cta" href="./leader-dashboard.html" id="leaderDashboardLink" hidden>Leader Dashboard</a>
-              <button class="hero-cta" type="button" id="signOutButton">Sign out</button>
+            <div class="account-action-grid" aria-label="Account actions">
+              <button class="account-action-card account-action-card--button" type="button" id="verifyButton">
+                <span>Check Verification</span>
+                <small>Refresh Discord membership and role status.</small>
+              </button>
+              <a class="account-action-card" href="./gallery-submit.html" id="submitLink" hidden>
+                <span>Submit Image</span>
+                <small>Send an image to the private review queue.</small>
+              </a>
+              <a class="account-action-card" href="./gallery.html">
+                <span>Public Gallery</span>
+                <small>View approved images and gallery sorting.</small>
+              </a>
+              <a
+                class="account-action-card"
+                href="https://discord.com/invite/dPafqMwWPK"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>Join Discord</span>
+                <small>Open the live guild hub.</small>
+              </a>
+              <a class="account-action-card" href="./leader-dashboard.html" id="leaderDashboardLink" hidden>
+                <span>Leader Dashboard</span>
+                <small>Review member gallery submissions.</small>
+              </a>
+              <button class="account-action-card account-action-card--button" type="button" id="signOutButton">
+                <span>Sign Out</span>
+                <small>End this browser session.</small>
+              </button>
             </div>
 
             <div class="requirement-list" aria-label="Upload access requirements">
@@ -111,9 +174,38 @@
             <p class="auth-status muted" id="verifyStatus" role="status" aria-live="polite"></p>
             <p class="auth-error" id="verifyError" role="alert" hidden></p>
           </div>
+
+          <section class="glass-card glass-card--primary glass-pad auth-panel" aria-labelledby="accountSubmissionsTitle">
+            <div class="auth-panel__head">
+              <div>
+                <p class="kicker">My Gallery</p>
+                <h2 class="section-title" id="accountSubmissionsTitle">Submission Summary</h2>
+              </div>
+              <a class="hero-cta" href="./gallery-submit.html">Open Upload Page</a>
+            </div>
+
+            <div class="account-summary-grid" id="gallerySubmissionSummary" aria-label="Gallery submission status summary">
+              <p class="muted">Loading submission summary.</p>
+            </div>
+
+            <div class="submission-list" id="accountSubmissionsList" aria-live="polite">
+              <p class="muted">Loading recent submissions.</p>
+            </div>
+            <p class="auth-error" id="accountSubmissionsError" role="alert" hidden></p>
+          </section>
         </section>
 
         <aside class="col-4">
+          <section class="glass-card glass-card--soft glass-pad auth-panel profile-completion-panel" aria-labelledby="profileCompletionTitle">
+            <p class="kicker">Profile Setup</p>
+            <h2 class="section-title section-title--sm" id="profileCompletionTitle">Completeness</h2>
+            <div class="profile-progress" aria-hidden="true">
+              <span id="profileCompletionBar"></span>
+            </div>
+            <p class="auth-status muted" id="profileCompletionText">Loading profile setup.</p>
+            <ul class="list-stack account-missing-list" id="profileMissingList"></ul>
+          </section>
+
           <form class="glass-card glass-card--soft glass-pad auth-form" id="profileForm">
             <p class="kicker">Profile</p>
             <h2 class="section-title section-title--sm">Editable Fields</h2>
@@ -171,6 +263,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="./supabase.js" defer></script>
   <script src="./site.js" defer></script>
-  <script src="./account.js" defer></script>
+  <script src="./account.js?v=2026-05-account-polish" defer></script>
 </body>
 </html>
