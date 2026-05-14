@@ -124,7 +124,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery`; read-only Supabase checks if authenticated access exists; secret scan.
 - Definition of done: Report states which production access paths were checked, which were blocked by missing credentials, whether anon/service-role boundaries look safe, and whether any follow-up implementation branch is required.
 - Merge gate: No data diffs, no secrets, no mutating Supabase commands, validation passes, and any unresolved production security concern is clearly called out.
-- Status: Not started.
+- Status: In review on `qa/supabase-production-security-review`. Report: `reports/supabase-production-security-review.md`. PR: pending. Merge commit: pending. Validation summary: baseline checks passed before the branch; read-only public Supabase probes, signed-out browser smoke, secret scan, and protected-data diff checks completed during review. Blockers: no P0 public blocker found; dashboard-only checks require authenticated Supabase access and are documented in the report. Next recommended item: G02 `qa/supabase-edge-functions-review`.
 
 ### G02 - Supabase Edge Functions Review
 
@@ -373,7 +373,7 @@ After each workstream PR merges:
 
 | ID | Branch | Status |
 | --- | --- | --- |
-| G01 | `qa/supabase-production-security-review` | Not started |
+| G01 | `qa/supabase-production-security-review` | In review - report drafted, PR pending |
 | G02 | `qa/supabase-edge-functions-review` | Not started |
 | G03 | `qa/member-gallery-upload-limit-review` | Not started |
 | G04 | `qa/member-gallery-end-to-end-review` | Not started |
