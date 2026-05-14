@@ -182,10 +182,12 @@
       return;
     }
 
+    const successMessage =
+      "Image submitted for moderation. It will not appear in the public Gallery until a later approval workflow exists.";
     form.reset();
-    setText("#uploadStatus", "Image submitted for moderation. It will not appear in the public Gallery until a later approval workflow exists.");
     await checkAccess();
     await loadSubmissions();
+    setText("#uploadStatus", successMessage);
     setBusy(false);
   }
 
