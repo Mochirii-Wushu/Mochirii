@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/gallery-approved-feed-integration-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/119>
 Goal: G06
 Mode: QA/report-only
 
