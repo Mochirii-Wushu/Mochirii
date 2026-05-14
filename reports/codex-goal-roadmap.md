@@ -140,7 +140,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-js.mjs`; `npm run check:production`; `npm run smoke:gallery`; `deno check` for changed functions if Deno is available; function serve/load checks if safe; secret scan.
 - Definition of done: Report confirms auth mode per function, fail-closed paths, secret boundaries, public approved-feed behavior, moderator-only behavior, and deployment status or blockers.
 - Merge gate: No Edge Function deployment unless separately approved; no database mutation; validation passes; any code fix is narrow and function-scoped.
-- Status: In review on `qa/supabase-edge-functions-review`. Report: `reports/supabase-edge-functions-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/111>. Merge commit: pending. Validation summary: `npm run check`, `git diff --check`, `node scripts/check-json.mjs`, `node scripts/check-js.mjs`, `node scripts/check-refs.mjs`, `node scripts/check-assets.mjs`, `npm run check:production`, `npm run smoke:gallery`, local config/source inspection, read-only deployment list, public function probes, secret scan, and protected-data diff checks passed. Blockers: none found; `deno` is not installed and no function source changed. Next recommended item: G03 `qa/member-gallery-upload-limit-review`.
+- Status: Complete. Branch: `qa/supabase-edge-functions-review`. Report: `reports/supabase-edge-functions-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/111>. Merge commit: `b487e323751b812492d8e0d330f640dcb0cd23d6`. Validation summary: `npm run check`, `git diff --check`, `node scripts/check-json.mjs`, `node scripts/check-js.mjs`, `node scripts/check-refs.mjs`, `node scripts/check-assets.mjs`, `npm run check:production`, `npm run smoke:gallery`, local config/source inspection, read-only deployment list, public function probes, secret scan, protected-data diff checks, and post-merge validation passed. Blockers: none found; `deno` is not installed and no function source changed. Next recommended item: G03 `qa/member-gallery-upload-limit-review`.
 
 ### G03 - Member Gallery Upload Limit Review
 
@@ -374,7 +374,7 @@ After each workstream PR merges:
 | ID | Branch | Status |
 | --- | --- | --- |
 | G01 | `qa/supabase-production-security-review` | Complete - PR #109, merge `99f49fad255b7fd9eadfeadd0ba175f8a9bc75e4` |
-| G02 | `qa/supabase-edge-functions-review` | In review - PR #111 open |
+| G02 | `qa/supabase-edge-functions-review` | Complete - PR #111, merge `b487e323751b812492d8e0d330f640dcb0cd23d6` |
 | G03 | `qa/member-gallery-upload-limit-review` | Not started |
 | G04 | `qa/member-gallery-end-to-end-review` | Not started |
 | G05 | `qa/account-member-dashboard-review` | Not started |
