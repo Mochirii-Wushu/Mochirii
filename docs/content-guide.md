@@ -39,6 +39,14 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 - Run `node scripts/check-assets.mjs` and `node scripts/check-refs.mjs` after asset edits.
 - Do not delete assets without confirming they are unused or safely replaced.
 
+### Recruitment Audio Exception
+
+`assets/audio/mochiriiiiii.mp3` is intentionally above the normal large-asset warning threshold because the original Recruitment audio quality was restored at the user's request.
+
+Validation may warn that this file is over the large-asset threshold. Treat that warning as accepted unless the user explicitly reopens audio optimization. Do not re-encode, downsample, replace, or remove this MP3 in unrelated branches.
+
+The restoration source of truth is [`reports/audio-original-restore.md`](../reports/audio-original-restore.md).
+
 ## 5. Gallery Rules
 
 - For detailed Gallery maintenance conventions, see [`docs/gallery-guide.md`](gallery-guide.md).
