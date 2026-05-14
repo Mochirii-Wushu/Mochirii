@@ -332,7 +332,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery` if links changed.
 - Definition of done: Plan identifies cleanup policies, risks, manual approval points, and future implementation branches without deleting or mutating any production data.
 - Merge gate: Docs/report only; no destructive cleanup work; validation passes.
-- Status: Not started.
+- Status: Complete. Branch: `docs/member-gallery-cleanup-plan`. Plan: `docs/member-gallery-cleanup-plan.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/135>. Merge commit: `d0285bf2e47bfdf99b3a914dc911f7632cbd7968`. Validation summary: official Supabase Storage deletion, Storage schema, access-control, and usage docs reviewed; docs-only cleanup plan added with retention posture, inventory fields, approval gates, future branch sequence, signed URL expectations, risk controls, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, secret-pattern review, and post-merge validation passed. Blockers: none found; no destructive cleanup work was performed. Next recommended item: G15 `qa/post-goal-cross-site-regression-review`.
 
 ### G15 - Post-Goal Cross-Site Regression Review
 
@@ -386,7 +386,7 @@ After each workstream PR merges:
 | G11 | `chore/document-large-audio-exception` | Complete - PR #129, merge `2c49147d7089c47cfaf9c6606412eb7a796d258a` |
 | G12 | `qa/seo-social-preview-member-pages-review` | Complete - PR #131, merge `c9fc6c1f17dc36ae87ca67e391582b3210339673` |
 | G13 | `docs/supabase-cost-usage-runbook` | Complete - PR #133, merge `9d54ba2f9d3c2191d94bb6cd46239959cbece3f4` |
-| G14 | `docs/member-gallery-cleanup-plan` | Not started |
+| G14 | `docs/member-gallery-cleanup-plan` | Complete - PR #135, merge `d0285bf2e47bfdf99b3a914dc911f7632cbd7968` |
 | G15 | `qa/post-goal-cross-site-regression-review` | Not started |
 
 ## 11. First Recommended Goal
