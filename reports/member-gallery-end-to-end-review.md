@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/member-gallery-end-to-end-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/115>
 Goal: G04
 Mode: QA with one narrow confirmed fix
 
