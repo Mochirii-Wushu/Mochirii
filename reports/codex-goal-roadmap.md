@@ -348,7 +348,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery`; browser smoke at `360`, `390`, `768`, and `1440` for all sitemap routes; protected data diffs.
 - Definition of done: Report documents page-by-page pass/fail, fixes if any, residual risks, production status, and recommended stable tag if clean.
 - Merge gate: No unresolved regression, no protected content change, no unexpected files, validation passes.
-- Status: Not started.
+- Status: Complete. Branch: `qa/post-goal-cross-site-regression-review`. Report: `reports/post-goal-cross-site-regression-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/137>. Merge commit: `82eb2ce25e2d12b016a470be02965d887db116d9`. Validation summary: 68 browser route/viewport checks, 17 mobile shell checks, targeted Home/Join/Gallery/Events/Recruitment/Spotify/member signed-out checks, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and post-merge validation passed. Blockers: none found; live signed-in member/moderator mutations remain credential-gated and were not attempted. Next recommended item: all G01-G15 items complete; recommended release hygiene tag `v2.6.0-member-gallery-goal-baseline`.
 
 ## 9. Update Protocol After Every PR
 
@@ -387,7 +387,7 @@ After each workstream PR merges:
 | G12 | `qa/seo-social-preview-member-pages-review` | Complete - PR #131, merge `c9fc6c1f17dc36ae87ca67e391582b3210339673` |
 | G13 | `docs/supabase-cost-usage-runbook` | Complete - PR #133, merge `9d54ba2f9d3c2191d94bb6cd46239959cbece3f4` |
 | G14 | `docs/member-gallery-cleanup-plan` | Complete - PR #135, merge `d0285bf2e47bfdf99b3a914dc911f7632cbd7968` |
-| G15 | `qa/post-goal-cross-site-regression-review` | Not started |
+| G15 | `qa/post-goal-cross-site-regression-review` | Complete - PR #137, merge `82eb2ce25e2d12b016a470be02965d887db116d9` |
 
 ## 11. First Recommended Goal
 
