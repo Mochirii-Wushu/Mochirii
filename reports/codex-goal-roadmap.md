@@ -204,7 +204,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node --check gallery.js`; `node --check supabase.js` if touched; `npm run check:production`; `npm run smoke:gallery`; browser smoke for static-only and approved-feed failure states.
 - Definition of done: Report confirms static gallery still works, approved feed fails gracefully, signed URLs are not persisted into data files, and lightbox opens full images.
 - Merge gate: Gallery smoke passes; no caption/image/data changes; no public leak of private Storage paths beyond intended short-lived signed URLs.
-- Status: In review on `qa/gallery-approved-feed-integration-review`. Report: `reports/gallery-approved-feed-integration-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/119>. Merge commit: pending. Validation summary: Gallery source inspection, static-only browser smoke, approved-feed failure smoke, approved-feed success smoke, signed URL/private Storage path exposure checks, lightbox full-image checks, `npm run check`, `git diff --check`, `node --check gallery.js`, `node --check supabase.js`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, and protected-data diff checks passed. Blockers: none found; live production approved-feed response remains deferred to G09 or an approved production smoke. Next recommended item: G07 `qa/gallery-behavior-matrix-suite`.
+- Status: Complete. Branch: `qa/gallery-approved-feed-integration-review`. Report: `reports/gallery-approved-feed-integration-review.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/119>. Merge commit: `f979529ceed0cfadf69513cf2435da2a88d665b0`. Validation summary: Gallery source inspection, static-only browser smoke, approved-feed failure smoke, approved-feed success smoke, signed URL/private Storage path exposure checks, lightbox full-image checks, `npm run check`, `git diff --check`, `node --check gallery.js`, `node --check supabase.js`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and post-merge validation passed. Blockers: none found; live production approved-feed response remains deferred to G09 or an approved production smoke. Next recommended item: G07 `qa/gallery-behavior-matrix-suite`.
 
 ### G07 - Gallery Behavior Matrix Suite
 
@@ -378,7 +378,7 @@ After each workstream PR merges:
 | G03 | `qa/member-gallery-upload-limit-review` | Complete - PR #113, merge `31bdf4c307b676447ad41d4d3a44368994cefb56` |
 | G04 | `qa/member-gallery-end-to-end-review` | Complete - PR #115, merge `723f39bdfff813439cb3c09fec8b40c2b5ae264e` |
 | G05 | `qa/account-member-dashboard-review` | Complete - PR #117, merge `67c3c741553bcc4a2305ecc85e732b24db7af626` |
-| G06 | `qa/gallery-approved-feed-integration-review` | In review - report drafted, PR pending |
+| G06 | `qa/gallery-approved-feed-integration-review` | Complete - PR #119, merge `f979529ceed0cfadf69513cf2435da2a88d665b0` |
 | G07 | `qa/gallery-behavior-matrix-suite` | Not started |
 | G08 | `docs/member-gallery-moderation-runbook` | Not started |
 | G09 | `qa/production-member-workflow-smoke` | Not started |
