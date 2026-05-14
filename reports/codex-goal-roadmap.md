@@ -284,7 +284,7 @@ Run the workstreams in this order unless a production incident changes priority:
 - Validation: `npm run check`; `git diff --check`; `node scripts/check-json.mjs`; `node scripts/check-js.mjs`; `node scripts/check-refs.mjs`; `node scripts/check-assets.mjs`; `npm run check:production`; `npm run smoke:gallery`.
 - Definition of done: Future validation runs have a clear source-of-truth note explaining that the MP3 warning is accepted unless the user reopens audio optimization.
 - Merge gate: Docs/report only; no audio file churn; validation passes with known warning.
-- Status: Not started.
+- Status: In review on `chore/document-large-audio-exception`. Report: `reports/large-audio-exception.md`. PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/129>. Merge commit: pending. Validation summary: durable content-guide note, large-audio exception report, `npm run check`, `git diff --check`, JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, protected-data diff checks, and asset diff checks passed with the expected MP3 warning only. Blockers: none found. Next recommended item: G12 `qa/seo-social-preview-member-pages-review`.
 
 ### G12 - SEO Social Preview Member Pages Review
 
@@ -383,7 +383,7 @@ After each workstream PR merges:
 | G08 | `docs/member-gallery-moderation-runbook` | Complete - PR #123, merge `1c4825106a71145521c42c1897ba49de6096e0a6` |
 | G09 | `qa/production-member-workflow-smoke` | Complete - PR #125, merge `491298fe3e8355b54e4de97eb9f8844f6e073437` |
 | G10 | `qa/secrets-and-public-config-review` | Complete - PR #127, merge `3f71a01d705b35e0d7688fd4761caba064784030` |
-| G11 | `chore/document-large-audio-exception` | Not started |
+| G11 | `chore/document-large-audio-exception` | In review - documentation drafted, PR pending |
 | G12 | `qa/seo-social-preview-member-pages-review` | Not started |
 | G13 | `docs/supabase-cost-usage-runbook` | Not started |
 | G14 | `docs/member-gallery-cleanup-plan` | Not started |
