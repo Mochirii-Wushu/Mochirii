@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/seo-social-preview-member-pages-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/131>
 Goal: G12
 Mode: Metadata/indexing review with narrow fix
 
