@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/member-gallery-upload-limit-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/113>
 Goal: G03
 Mode: QA/report-only
 
