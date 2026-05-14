@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/gallery-behavior-matrix-suite`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/121>
 Goal: G07
 Mode: QA/report-only
 
