@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/supabase-edge-functions-review`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/111>
 Goal: G02
 Mode: QA/report-first
 
