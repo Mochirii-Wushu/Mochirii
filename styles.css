@@ -2035,6 +2035,67 @@ body[data-page="home"] .page-main section[aria-label="Four doors"]{
   --home-rim-b:var(--home-frost);
 }
 
+body[data-page="home"] .home-discord-widget{
+  --home-rim-a:var(--home-jade);
+  --home-rim-b:var(--home-lantern);
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(280px, 350px);
+  align-items:center;
+  gap:clamp(18px, 4vw, 34px);
+  margin-top:24px;
+}
+
+body[data-page="home"] .home-discord-widget__copy{
+  max-width:48ch;
+}
+
+body[data-page="home"] .home-discord-widget__copy .muted{
+  margin:0;
+  line-height:1.65;
+}
+
+body[data-page="home"] .home-discord-widget__actions{
+  margin-top:18px;
+}
+
+body[data-page="home"] .discord-widget-frame{
+  box-sizing:border-box;
+  width:min(100%, 350px);
+  min-height:500px;
+  margin-left:auto;
+  overflow:hidden;
+  border-radius:20px;
+  border:1px solid rgba(220,232,226,.16);
+  background:linear-gradient(180deg, rgba(10,13,13,.84), rgba(4,6,7,.88));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 16px 38px rgba(0,0,0,.30);
+}
+
+body[data-page="home"] .discord-widget-frame iframe{
+  display:block;
+  width:100%;
+  max-width:350px;
+  height:500px;
+  border:0;
+}
+
+@media (max-width:640px){
+  body[data-page="home"] .home-discord-widget{
+    grid-template-columns:1fr;
+    justify-items:center;
+    text-align:center;
+  }
+
+  body[data-page="home"] .home-discord-widget__actions{
+    justify-content:center;
+  }
+
+  body[data-page="home"] .discord-widget-frame{
+    margin-inline:auto;
+  }
+}
+
 body[data-page="home"] .page-main section[aria-label="Member spotlight"]{
   --home-rim-a:var(--home-lotus);
   --home-rim-b:var(--home-lantern);
