@@ -2,6 +2,7 @@
 
 Date: 2026-05-14
 Branch: `qa/production-member-workflow-smoke`
+PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/125>
 Goal: G09
 Mode: Production QA/report-only
 
