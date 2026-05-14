@@ -135,6 +135,61 @@ Moderator = 1078630751165222984
 
 Role IDs are enforcement data. Role names are documentation and user-facing explanation only.
 
+## Discord Integration Hub
+
+Discord remains the live community layer: chat, voice, forum conversations, scheduled event notifications, and immediate coordination stay inside Discord. The website remains the structured guild layer for profiles, gallery, records, applications, event archives, approved summaries, public presentation, and leader workflows. Supabase stores identity, permissions, sync/cache tables, moderation state, and audit logs. Reaper and/or Supabase Edge Functions are the secure Discord bridge; browser JavaScript must not hold bot tokens, webhook URLs, client secrets, or service-role keys.
+
+`discord_resources` is the service-managed registry for known Discord resources: the guild, roles, channels, forums, threads, scheduled events, webhooks, bots, and safe external targets. It stores IDs, labels, optional parent IDs, optional public/deep links, descriptions, enabled state, and non-secret metadata so future page scripts and Edge Functions do not hardcode every Discord resource.
+
+`discord_sync_log` records future sync attempts and bridge jobs: scheduled-event imports, forum/thread index updates, webhook notifications, slash-command entry points, role checks, manual tests, and skipped or failed attempts. Log details must stay operational and redacted; never store tokens, webhook URLs, private conversations, or unrestricted message content.
+
+Known foundation resources:
+
+```text
+Guild: 1078630751077142608
+Upload role, Mōchirīī - WWM: 1468659807736299520
+Upload role, ✅Verified: 1078630751077142615
+Moderator role: 1078630751165222984
+```
+
+Required secret categories for later branches:
+
+- Discord bot token for Reaper or trusted Edge Functions.
+- Discord webhook URLs for approved notification targets.
+- Discord client secret in Supabase Auth provider settings only.
+- Supabase service-role or secret keys in trusted Edge runtime only.
+- Environment-specific channel/forum IDs for sync targets.
+
+Future feature order should stay incremental:
+
+1. Scheduled Event metadata sync.
+2. Webhook notification records and sends.
+3. Forum/thread metadata index.
+4. Slash-command entry points through Reaper.
+5. RSVP and participation history after event records exist.
+
+Never mirror:
+
+- full chat logs
+- private conversations
+- unrestricted Discord message content
+
+Safe to sync when a later branch explicitly scopes it:
+
+- scheduled event metadata
+- forum/thread metadata
+- Discord deep links
+- approved summaries
+- webhook notification records
+
+These require explicit later branches and review:
+
+- scheduled event sync
+- webhook notifications
+- forum index
+- slash commands
+- role assignment automation
+
 ## Required Edge Function Secrets
 
 Recommended local/production values:
@@ -146,6 +201,11 @@ DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 DISCORD_MODERATOR_ROLE_NAMES=Moderator
 DISCORD_BOT_TOKEN=<set manually, never commit>
+DISCORD_WEBHOOK_GALLERY_APPROVED=<set manually, never commit>
+DISCORD_WEBHOOK_MOD_LOG=<set manually, never commit>
+DISCORD_EVENTS_CHANNEL_ID=<set per environment>
+DISCORD_FORUM_GUIDES_CHANNEL_ID=<set per environment>
+DISCORD_FORUM_ANNOUNCEMENTS_CHANNEL_ID=<set per environment>
 ```
 
 The Edge Function also needs access to Supabase server credentials in the trusted Edge runtime. Keep service-role or secret keys server-side only.
