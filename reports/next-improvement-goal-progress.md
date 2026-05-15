@@ -11,8 +11,8 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 | ID | Branch | Status | PR | Merge commit | Next |
 | --- | --- | --- | --- | --- | --- |
 | N01 | `qa/supabase-ci-and-parity-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/141> | `019aa3cc50592d419b9cc7d25b7d902788dd27ee` | N02 |
-| N02 | `qa/member-workflow-test-account-matrix` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | Pending | N03 |
-| N03 | `qa/gallery-approved-feed-regression-matrix` | Pending | Pending | Pending | N04 |
+| N02 | `qa/member-workflow-test-account-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | `4504d37962c9e0ca828d4b1c21954d2fadb4dd16` | N03 |
+| N03 | `qa/gallery-approved-feed-regression-matrix` | In progress | Pending | Pending | N04 |
 | N04 | `qa/accessibility-name-and-member-pages-review` | Pending | Pending | Pending | N05 |
 | N05 | `qa/content-schema-and-style-guardrails` | Pending | Pending | Pending | Final validation |
 
@@ -30,5 +30,14 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/member-workflow-test-account-matrix`
 - Report: `reports/member-workflow-test-account-matrix.md`
-- Current state: report drafted, validated, and opened as PR #142; merge pending.
+- Current state: complete and merged.
+- Merge commit: `4504d37962c9e0ca828d4b1c21954d2fadb4dd16`
+- Validation summary: `npm run check`, `git diff --check`, individual JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, local and production signed-out member page checks, production OAuth redirect-start check, protected diff checks, and post-merge validation passed. Known MP3 warning only.
 - Blockers or limitations: live positive-path OAuth, role verification, upload, moderation, and cleanup require approved test credentials and explicit mutation boundaries.
+
+## N03 Notes
+
+- Branch: `qa/gallery-approved-feed-regression-matrix`
+- Report: `reports/gallery-approved-feed-regression-matrix.md`
+- Current state: in progress.
+- Blockers or limitations: live approved-feed reads are safe, but any pending/rejected leak proof beyond public-source/probe evidence remains constrained by not mutating production data.
