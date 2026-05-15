@@ -24,8 +24,8 @@ This tracker records the Supabase parity hardening milestone as scoped branches 
 | C02 | `qa/supabase-auth-boundary-smoke` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/156> | `3076af009da6acd66b5bf51c5180a3a9198bf825` | C03 |
 | C03 | `qa/supabase-edge-function-contract-smoke` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/157> | `a17d93fa47d674a01ac5b2fa041c74c9bf9deae7` | C04 |
 | C04 | `docs/supabase-manual-parity-runbook` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/158> | `4d830d8340cb31036eaeb80773573874b43d4fe9` | C05 |
-| C05 | `qa/post-supabase-parity-hardening-regression` | In progress | Pending | Pending | C06 |
-| C06 | `v2.9.0-supabase-parity-hardening-baseline` | Pending | n/a | Pending | Final validation |
+| C05 | `qa/post-supabase-parity-hardening-regression` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/159> | `8154dc75069ccb2d5c0d64868307bedf016a4cad` | C06 |
+| C06 | `v2.9.0-supabase-parity-hardening-baseline` | Complete | n/a | `fbfd0b030eef70e0ef2981316ec57535c8bebaab` | Final validation |
 
 ## C01 Notes
 
@@ -79,7 +79,20 @@ This tracker records the Supabase parity hardening milestone as scoped branches 
 
 - Branch: `qa/post-supabase-parity-hardening-regression`
 - Report: `reports/post-supabase-parity-hardening-regression.md`
-- Current state: in progress.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/159>
+- Merge commit: `8154dc75069ccb2d5c0d64868307bedf016a4cad`
+- Current state: complete.
 - Planned review: confirm the Supabase parity scripts and runbook remain safe, local-friendly where intended, non-mutating, and non-brittle.
-- Validation summary: full standard branch validation, `npm run check:supabase-config`, `npm run smoke:supabase-auth-boundary`, `npm run smoke:supabase-edge-functions`, and both Gallery smokes passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
-- Blockers or limitations: none so far.
+- Validation summary: full standard branch validation, `npm run check:supabase-config`, `npm run smoke:supabase-auth-boundary`, `npm run smoke:supabase-edge-functions`, both Gallery smokes, CI validation, and post-merge validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: C06 `v2.9.0-supabase-parity-hardening-baseline`.
+
+## C06 Notes
+
+- Tag: `v2.9.0-supabase-parity-hardening-baseline`
+- Tag object: `fbfd0b030eef70e0ef2981316ec57535c8bebaab`
+- Tagged commit: `8154dc75069ccb2d5c0d64868307bedf016a4cad`
+- Current state: complete.
+- Validation summary: pre-tag `npm run check`, `git diff --check`, `npm run check:production`, `npm run smoke:gallery`, `npm run smoke:gallery-approved-feed`, `npm run check:supabase-config`, `npm run smoke:supabase-auth-boundary`, and `npm run smoke:supabase-edge-functions` passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: final validation and summary.
