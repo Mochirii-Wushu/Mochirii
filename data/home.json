@@ -1,22 +1,22 @@
 {
   "copy": {
-    "bulletinIntro": "Hall notes, event calls, raffles & little scroll updates keep the guild lanterns glowing.",
-    "doorsIntro": "Step through the join path, ranks, leaders & Codex that guide Mōchirīī along its cupcake-sweet cultivation road.",
-    "spotlightIntro": "A warm shoutout for a guildmate whose care keeps the hall bright, cozy & full of frosting charm.",
-    "galleryIntro": "Screenshots from runs, quiet roads, lantern-lit detours & small moments that become guild memory."
+    "bulletinIntro": "Hall notes, events, raffles & little scroll updates keep the guild lanterns glowing.",
+    "doorsIntro": "Explore the ways that guide Mōchirīī along its wanderers filled path.",
+    "spotlightIntro": "A warm shoutout for a members whose pretty presence keeps the guild bright, cozy & full of frosting charm.",
+    "galleryIntro": "Screenshots from baddie smashing, pretty roads, lantern-lit detours & small moments that become guild memory."
   },
   "hero": {
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",
     "descriptor": [
-      "Mōchirīī is a cozy little guild hall for travelers seeking company, events, runs & a soft cupcake-sweet place to rest along the cultivation road.",
-      "Step through Discord, follow the joining path & grow at your own pace beneath the lantern glow. Read the event notes, RSVP when plans need shaping & bring a little frosting warmth to the hall as we wander onward together."
+      "Mōchirīī is a cozy little guild for wanderers seeking friendly company, whimsicalevents, baddie smashing battles & a soft cupcake-sweet place to rest along the cultivation road.",
+      "Optional Discord, come follow the joining path & grow at your own pace beneath the lantern glow. Read the event notes, RSVP to events that interest you & bring a little frosting warmth to the guild as we wander onward together."
     ],
     "badges": [
       "Recruitment Open",
       "Cross-Platform",
-      "Kind Company",
-      "Shared Runs"
+      "Casual Members",
+      "Always Welcome"
     ]
   },
   "seal": {
@@ -34,7 +34,7 @@
     {
       "pinned": true,
       "type": "event",
-      "title": "Monthly hall meeting to gather, plan & be heard.",
+      "title": "Monthly gatherings open to all members to be heard.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/featured.webp",
       "imageAlt": "Guild meeting bulletin cover",
@@ -42,7 +42,7 @@
     },
     {
       "type": "raffle",
-      "title": "Monthly cosmetics raffle for members who keep the guild bright.",
+      "title": "Monthly cosmetics raffle open to all members who sign up each month.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/raffle.webp",
       "imageAlt": "Raffle bulletin cover",
@@ -74,7 +74,7 @@
     },
     {
       "label": "Leaders",
-      "title": "Find the people who answer questions, guide halls & keep the road clear.",
+      "title": "Find the people who answer questions, guide others & keep the peace & prosperity.",
       "image": "./assets/img/tiles/leaders.webp",
       "alt": "Guild leadership tile artwork",
       "href": "./leaders.html"
