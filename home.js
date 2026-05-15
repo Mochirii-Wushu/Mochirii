@@ -7,7 +7,14 @@
   const HOME_JSON_URL = "./data/home.json";
   const GALLERY_JSON_URL = "./data/gallery.json";
   const HOME_GALLERY_COUNT = 4;
-  const VALID_GALLERY_CATEGORIES = new Set(["portraits", "gatherings", "action", "scenery", "companions"]);
+  const GALLERY_CATEGORY_LABELS = {
+    portraits: "Portraits",
+    gatherings: "Gatherings",
+    action: "Action",
+    scenery: "Scenery",
+    companions: "Companions",
+  };
+  const VALID_GALLERY_CATEGORIES = new Set(Object.keys(GALLERY_CATEGORY_LABELS));
   const $ = (sel, root = document) => root.querySelector(sel);
   const U = window.MochiriiUtils;
 
@@ -16,6 +23,14 @@
   const esc = U.escapeHtml;
   const safeArray = U.asArray;
   const fetchJSON = U.fetchJson;
+
+  function cleanLabel(value) {
+    return String(value ?? "").trim().replace(/\s+/g, " ");
+  }
+
+  function joinLabel(parts) {
+    return parts.map(cleanLabel).filter(Boolean).join(" - ");
+  }
 
   function normalizeSlug(value) {
     return String(value ?? "")
@@ -44,6 +59,10 @@
       meta: "Update",
     };
     return map[t] || "Update";
+  }
+
+  function galleryCategoryLabel(slug) {
+    return GALLERY_CATEGORY_LABELS[slug] || "Gallery";
   }
 
   /* Hero */
@@ -115,7 +134,13 @@
     const title = $("#featuredBulletinTitle");
     const summary = $("#featuredBulletinSummary");
 
-    if (a) a.href = String(item?.href ?? "#");
+    if (a) {
+      a.href = String(item?.href ?? "#");
+      a.setAttribute(
+        "aria-label",
+        joinLabel(["Featured bulletin", typeLabel(item?.type), fmtDate(item?.date), item?.title, item?.summary]),
+      );
+    }
 
     if (img) {
       img.src = String(item?.image ?? "./assets/img/bulletins/featured.webp");
@@ -196,7 +221,13 @@
     const title = $("#spotlightTitle");
     const summary = $("#spotlightSummary");
 
-    if (card) card.href = String(spotlight?.href ?? "#");
+    if (card) {
+      card.href = String(spotlight?.href ?? "#");
+      card.setAttribute(
+        "aria-label",
+        joinLabel(["Member spotlight", spotlight?.tag, spotlight?.title, spotlight?.summary, "Spotlight Appreciation"]),
+      );
+    }
 
     if (img) {
       img.src = String(spotlight?.image ?? "./assets/img/featured/spotlight.webp");
@@ -242,6 +273,8 @@
       full,
       alt,
       caption,
+      category,
+      categoryLabel: galleryCategoryLabel(category),
       href: galleryHref(category),
     };
   }
@@ -292,7 +325,7 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "home-thumb";
-        btn.setAttribute("aria-label", caption ? `Open image: ${caption}` : "Open image");
+        btn.setAttribute("aria-label", `Open image: ${cleanLabel(caption || alt || "Guild screenshot")}`);
 
         btn.innerHTML = `
           <img
@@ -325,6 +358,8 @@
 
         const alt = String(it?.alt ?? "Gallery image");
         const caption = String(it?.caption ?? "");
+        const categoryLabel = cleanLabel(it?.categoryLabel ?? "Gallery");
+        const labelText = cleanLabel(caption || alt || "Gallery image");
         const href = String(it?.href ?? "./gallery.html");
 
         const link = document.createElement("a");
@@ -332,7 +367,7 @@
         link.href = href;
         link.dataset.homeGalleryLink = "true";
         link.dataset.caption = caption;
-        link.setAttribute("aria-label", caption ? `View Gallery category: ${caption}` : "View Gallery category");
+        link.setAttribute("aria-label", `View ${categoryLabel} Gallery images: ${labelText}`);
         if (caption) link.title = caption;
 
         link.innerHTML = `
