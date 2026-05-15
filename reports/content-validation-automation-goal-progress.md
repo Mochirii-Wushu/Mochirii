@@ -22,8 +22,8 @@ This tracker records the content validation automation milestone as scoped branc
 | B01 | `qa/gallery-approved-feed-smoke-automation` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/150> | `adff8dbbaeb293cedd27efdc97dc9534f947993c` | B02 |
 | B02 | `qa/protected-content-hash-checks` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/151> | `d162a715046cfe5f6fc243d9cd79b45f92f95ca6` | B03 |
 | B03 | `qa/json-schema-style-guardrails` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/152> | `9249c861f4417eca9b2210615e4f6a2da980fcb5` | B04 |
-| B04 | `qa/post-guardrails-regression-review` | In progress | Pending | Pending | B05 |
-| B05 | `v2.8.0-content-validation-automation-baseline` | Pending | n/a | Pending | Final validation |
+| B04 | `qa/post-guardrails-regression-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/153> | `cfe4488dde6f55310b9680d11ebf7e075943638b` | B05 |
+| B05 | `v2.8.0-content-validation-automation-baseline` | Complete | n/a | `1f624aff15043616e9f5d3584a42beb95ea5a8bc` | Final validation |
 
 ## B01 Notes
 
@@ -65,7 +65,20 @@ This tracker records the content validation automation milestone as scoped branc
 
 - Branch: `qa/post-guardrails-regression-review`
 - Report: `reports/post-guardrails-regression-review.md`
-- Current state: in progress.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/153>
+- Merge commit: `cfe4488dde6f55310b9680d11ebf7e075943638b`
+- Current state: complete.
 - Review summary: guardrail wiring is stable, failures are actionable, subjective content checks are deferred, browser smokes remain explicit, and public site validation still passes.
-- Validation summary: `npm run check:protected-content`, `npm run check:content`, `npm run smoke:gallery-approved-feed`, full standard branch validation, and public smoke checks passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
-- Blockers or limitations: none so far.
+- Validation summary: `npm run check:protected-content`, `npm run check:content`, `npm run smoke:gallery-approved-feed`, full standard branch validation, CI validation, post-merge validation, and public smoke checks passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: B05 `v2.8.0-content-validation-automation-baseline`.
+
+## B05 Notes
+
+- Tag: `v2.8.0-content-validation-automation-baseline`
+- Tag object: `1f624aff15043616e9f5d3584a42beb95ea5a8bc`
+- Tagged commit: `cfe4488dde6f55310b9680d11ebf7e075943638b`
+- Current state: complete.
+- Validation summary: pre-tag `npm run check`, `git diff --check`, `npm run check:production`, `npm run smoke:gallery`, `npm run check:protected-content`, `npm run check:content`, and `npm run smoke:gallery-approved-feed` passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: final validation and milestone summary.
