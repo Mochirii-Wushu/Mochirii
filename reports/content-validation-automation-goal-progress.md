@@ -20,8 +20,8 @@ This tracker records the content validation automation milestone as scoped branc
 | ID | Branch or tag | Status | PR | Merge commit or tag object | Next |
 | --- | --- | --- | --- | --- | --- |
 | B01 | `qa/gallery-approved-feed-smoke-automation` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/150> | `adff8dbbaeb293cedd27efdc97dc9534f947993c` | B02 |
-| B02 | `qa/protected-content-hash-checks` | In progress | Pending | Pending | B03 |
-| B03 | `qa/json-schema-style-guardrails` | Pending | Pending | Pending | B04 |
+| B02 | `qa/protected-content-hash-checks` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/151> | `d162a715046cfe5f6fc243d9cd79b45f92f95ca6` | B03 |
+| B03 | `qa/json-schema-style-guardrails` | In progress | Pending | Pending | B04 |
 | B04 | `qa/post-guardrails-regression-review` | Pending | Pending | Pending | B05 |
 | B05 | `v2.8.0-content-validation-automation-baseline` | Pending | n/a | Pending | Final validation |
 
@@ -41,7 +41,19 @@ This tracker records the content validation automation milestone as scoped branc
 
 - Branch: `qa/protected-content-hash-checks`
 - Report: `reports/protected-content-hash-checks.md`
-- Current state: in progress.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/151>
+- Merge commit: `d162a715046cfe5f6fc243d9cd79b45f92f95ca6`
+- Current state: complete.
 - Planned automation: SHA-256 protected-content hash check wired into `npm run check`.
-- Validation summary: `npm run check:protected-content` and standard branch validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Validation summary: `npm run check:protected-content`, branch validation, CI validation, and post-merge validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: B03 `qa/json-schema-style-guardrails`.
+
+## B03 Notes
+
+- Branch: `qa/json-schema-style-guardrails`
+- Report: `reports/json-schema-style-guardrails.md`
+- Current state: in progress.
+- Planned automation: objective content guardrails wired into `npm run check`.
+- Validation summary: `npm run check:content`, `npm run check:protected-content`, standard branch validation, and `npm run smoke:gallery-approved-feed` passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
 - Blockers or limitations: none so far.
