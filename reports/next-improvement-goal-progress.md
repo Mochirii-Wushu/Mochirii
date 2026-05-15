@@ -12,7 +12,7 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 | --- | --- | --- | --- | --- | --- |
 | N01 | `qa/supabase-ci-and-parity-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/141> | `019aa3cc50592d419b9cc7d25b7d902788dd27ee` | N02 |
 | N02 | `qa/member-workflow-test-account-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | `4504d37962c9e0ca828d4b1c21954d2fadb4dd16` | N03 |
-| N03 | `qa/gallery-approved-feed-regression-matrix` | In progress | Pending | Pending | N04 |
+| N03 | `qa/gallery-approved-feed-regression-matrix` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/143> | Pending | N04 |
 | N04 | `qa/accessibility-name-and-member-pages-review` | Pending | Pending | Pending | N05 |
 | N05 | `qa/content-schema-and-style-guardrails` | Pending | Pending | Pending | Final validation |
 
@@ -39,5 +39,5 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/gallery-approved-feed-regression-matrix`
 - Report: `reports/gallery-approved-feed-regression-matrix.md`
-- Current state: in progress.
+- Current state: report drafted, validated, and opened as PR #143; merge pending.
 - Blockers or limitations: live approved-feed reads are safe, but any pending/rejected leak proof beyond public-source/probe evidence remains constrained by not mutating production data.
