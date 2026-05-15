@@ -12,6 +12,7 @@
     "check:json": "node scripts/check-json.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:refs": "node scripts/check-refs.mjs",
+    "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
     "check:production": "node scripts/check-production.mjs",
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",
     "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs"
