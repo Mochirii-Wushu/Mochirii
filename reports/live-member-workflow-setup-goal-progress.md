@@ -13,8 +13,8 @@ This tracker records setup-only runway work. It does not authorize live OAuth, u
 | E01 | `docs/live-member-test-account-setup-runbook` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/163> | `3b4e233a70d2e665fd75da8e4c0e017e461318f5` | None | E02 |
 | E02 | `chore/live-member-qa-local-template` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/164> | `3cd1669061b9dd9eb9c6764b1c278cb0c2a9d074` | None | E03 |
 | E03 | `qa/live-member-workflow-preflight-check` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/165> | `1c03ef9bbdf0f16d02887313814b1a2f8b81fd6f` | None | E04 |
-| E04 | `qa/post-live-member-setup-regression-review` | In progress | Pending | Pending | None | E05 |
-| E05 | `v3.0.0-live-member-workflow-setup-baseline` | Pending | n/a | Pending | Requires E01-E04 complete | Final validation |
+| E04 | `qa/post-live-member-setup-regression-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/166> | `1303092fb1426416abbe840d0058fded84f2c65b` | None | E05 |
+| E05 | `v3.0.0-live-member-workflow-setup-baseline` | Complete | n/a | `170d40f44cb18d706aa6df975e376f0dd2503344` | None | Final validation |
 
 ## E01 Notes
 
@@ -55,10 +55,22 @@ This tracker records setup-only runway work. It does not authorize live OAuth, u
 
 - Branch: `qa/post-live-member-setup-regression-review`
 - Report: `reports/post-live-member-setup-regression-review.md`
-- Current state: in progress.
-- Validation summary: pending branch validation.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/166>
+- Merge commit: `1303092fb1426416abbe840d0058fded84f2c65b`
+- Current state: complete.
+- Validation summary: `npm run check:live-member-workflow-preflight`, full standard branch validation, CI validation, and post-merge validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
 - Blockers or limitations: none for report-only regression review. D02/D03 remain blocked until approved disposable credentials are provided.
-- Next item: E05 `v3.0.0-live-member-workflow-setup-baseline` after E04 PR merge and post-merge validation.
+- Next item: E05 `v3.0.0-live-member-workflow-setup-baseline`.
+
+## E05 Notes
+
+- Tag: `v3.0.0-live-member-workflow-setup-baseline`
+- Tag object: `170d40f44cb18d706aa6df975e376f0dd2503344`
+- Tagged commit: `1303092fb1426416abbe840d0058fded84f2c65b`
+- Current state: complete.
+- Validation summary: pre-tag `npm run check`, `git diff --check`, `npm run check:production`, `npm run smoke:gallery`, `npm run smoke:gallery-approved-feed`, `npm run smoke:supabase-auth-boundary`, `npm run smoke:supabase-edge-functions`, `npm run check:supabase-config`, and `npm run check:live-member-workflow-preflight` passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: live workflow QA remains credential-blocked. This tag is setup readiness only, not proof of live OAuth/upload/moderation completion.
+- Next item: final validation and summary.
 
 ## Credential Status
 
