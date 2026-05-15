@@ -13,7 +13,7 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 | N01 | `qa/supabase-ci-and-parity-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/141> | `019aa3cc50592d419b9cc7d25b7d902788dd27ee` | N02 |
 | N02 | `qa/member-workflow-test-account-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | `4504d37962c9e0ca828d4b1c21954d2fadb4dd16` | N03 |
 | N03 | `qa/gallery-approved-feed-regression-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/143> | `2dc9a1b00adf8ed6d2dfbcd3eb953918cc496e79` | N04 |
-| N04 | `qa/accessibility-name-and-member-pages-review` | In progress | Pending | Pending | N05 |
+| N04 | `qa/accessibility-name-and-member-pages-review` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/144> | Pending | N05 |
 | N05 | `qa/content-schema-and-style-guardrails` | Pending | Pending | Pending | Final validation |
 
 ## N01 Notes
@@ -48,4 +48,4 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/accessibility-name-and-member-pages-review`
 - Report: `reports/accessibility-name-and-member-pages-review.md`
-- Current state: in progress.
+- Current state: report drafted, validated, and opened as PR #144; merge pending.
