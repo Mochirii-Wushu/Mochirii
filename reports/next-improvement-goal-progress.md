@@ -11,7 +11,7 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 | ID | Branch | Status | PR | Merge commit | Next |
 | --- | --- | --- | --- | --- | --- |
 | N01 | `qa/supabase-ci-and-parity-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/141> | `019aa3cc50592d419b9cc7d25b7d902788dd27ee` | N02 |
-| N02 | `qa/member-workflow-test-account-matrix` | In progress | Pending | Pending | N03 |
+| N02 | `qa/member-workflow-test-account-matrix` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | Pending | N03 |
 | N03 | `qa/gallery-approved-feed-regression-matrix` | Pending | Pending | Pending | N04 |
 | N04 | `qa/accessibility-name-and-member-pages-review` | Pending | Pending | Pending | N05 |
 | N05 | `qa/content-schema-and-style-guardrails` | Pending | Pending | Pending | Final validation |
@@ -30,5 +30,5 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/member-workflow-test-account-matrix`
 - Report: `reports/member-workflow-test-account-matrix.md`
-- Current state: in progress.
+- Current state: report drafted, validated, and opened as PR #142; merge pending.
 - Blockers or limitations: live positive-path OAuth, role verification, upload, moderation, and cleanup require approved test credentials and explicit mutation boundaries.
