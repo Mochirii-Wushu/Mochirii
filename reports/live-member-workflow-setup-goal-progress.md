@@ -11,8 +11,8 @@ This tracker records setup-only runway work. It does not authorize live OAuth, u
 | ID | Branch or tag | Status | PR | Merge commit or tag object | Blockers | Next |
 | --- | --- | --- | --- | --- | --- | --- |
 | E01 | `docs/live-member-test-account-setup-runbook` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/163> | `3b4e233a70d2e665fd75da8e4c0e017e461318f5` | None | E02 |
-| E02 | `chore/live-member-qa-local-template` | In progress | Pending | Pending | None | E03 |
-| E03 | `qa/live-member-workflow-preflight-check` | Pending | Pending | Pending | Requires E02 merge | E04 |
+| E02 | `chore/live-member-qa-local-template` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/164> | `3cd1669061b9dd9eb9c6764b1c278cb0c2a9d074` | None | E03 |
+| E03 | `qa/live-member-workflow-preflight-check` | In progress | Pending | Pending | None | E04 |
 | E04 | `qa/post-live-member-setup-regression-review` | Pending | Pending | Pending | Requires E03 merge | E05 |
 | E05 | `v3.0.0-live-member-workflow-setup-baseline` | Pending | n/a | Pending | Requires E01-E04 complete | Final validation |
 
@@ -31,10 +31,23 @@ This tracker records setup-only runway work. It does not authorize live OAuth, u
 
 - Branch: `chore/live-member-qa-local-template`
 - Report: `reports/live-member-qa-local-template.md`
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/164>
+- Merge commit: `3cd1669061b9dd9eb9c6764b1c278cb0c2a9d074`
+- Current state: complete.
+- Validation summary: full standard branch validation, CI validation, and post-merge validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none for local-template documentation. `.env.live-member-qa` is already ignored by the existing `.env.*` rule, so no `.gitignore` change is needed.
+- Next item: E03 `qa/live-member-workflow-preflight-check`.
+
+## E03 Notes
+
+- Branch: `qa/live-member-workflow-preflight-check`
+- Report: `reports/live-member-workflow-preflight-check.md`
+- Script: `scripts/check-live-member-workflow-preflight.mjs`
+- Package script: `check:live-member-workflow-preflight`
 - Current state: in progress.
 - Validation summary: pending branch validation.
-- Blockers or limitations: none for local-template documentation. `.env.live-member-qa` is already ignored by the existing `.env.*` rule, so no `.gitignore` change is needed.
-- Next item: E03 `qa/live-member-workflow-preflight-check` after E02 PR merge and post-merge validation.
+- Blockers or limitations: none. Normal mode is credential-free and should pass without live test accounts.
+- Next item: E04 `qa/post-live-member-setup-regression-review` after E03 PR merge and post-merge validation.
 
 ## Credential Status
 
