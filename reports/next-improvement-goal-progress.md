@@ -12,8 +12,8 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 | --- | --- | --- | --- | --- | --- |
 | N01 | `qa/supabase-ci-and-parity-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/141> | `019aa3cc50592d419b9cc7d25b7d902788dd27ee` | N02 |
 | N02 | `qa/member-workflow-test-account-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | `4504d37962c9e0ca828d4b1c21954d2fadb4dd16` | N03 |
-| N03 | `qa/gallery-approved-feed-regression-matrix` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/143> | Pending | N04 |
-| N04 | `qa/accessibility-name-and-member-pages-review` | Pending | Pending | Pending | N05 |
+| N03 | `qa/gallery-approved-feed-regression-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/143> | `2dc9a1b00adf8ed6d2dfbcd3eb953918cc496e79` | N04 |
+| N04 | `qa/accessibility-name-and-member-pages-review` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/144> | Pending | N05 |
 | N05 | `qa/content-schema-and-style-guardrails` | Pending | Pending | Pending | Final validation |
 
 ## N01 Notes
@@ -39,5 +39,13 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/gallery-approved-feed-regression-matrix`
 - Report: `reports/gallery-approved-feed-regression-matrix.md`
-- Current state: report drafted, validated, and opened as PR #143; merge pending.
+- Current state: complete and merged.
+- Merge commit: `2dc9a1b00adf8ed6d2dfbcd3eb953918cc496e79`
+- Validation summary: `npm run check`, `git diff --check`, individual JSON/JS/ref/asset checks, `npm run check:production`, `npm run smoke:gallery`, static and approved-feed browser matrices, public approved-feed response shape checks, protected diff checks, and post-merge validation passed. Known MP3 warning only.
 - Blockers or limitations: live approved-feed reads are safe, but any pending/rejected leak proof beyond public-source/probe evidence remains constrained by not mutating production data.
+
+## N04 Notes
+
+- Branch: `qa/accessibility-name-and-member-pages-review`
+- Report: `reports/accessibility-name-and-member-pages-review.md`
+- Current state: report drafted, validated, and opened as PR #144; merge pending.
