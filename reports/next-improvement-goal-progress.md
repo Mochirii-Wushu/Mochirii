@@ -14,7 +14,7 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 | N02 | `qa/member-workflow-test-account-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/142> | `4504d37962c9e0ca828d4b1c21954d2fadb4dd16` | N03 |
 | N03 | `qa/gallery-approved-feed-regression-matrix` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/143> | `2dc9a1b00adf8ed6d2dfbcd3eb953918cc496e79` | N04 |
 | N04 | `qa/accessibility-name-and-member-pages-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/144> | `49fd1784d2ae6ccd889c8e16ef28143d3b7deb2a` | N05 |
-| N05 | `qa/content-schema-and-style-guardrails` | In progress | Pending | Pending | Final validation |
+| N05 | `qa/content-schema-and-style-guardrails` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/145> | Pending | Final validation |
 
 ## N01 Notes
 
@@ -57,4 +57,4 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/content-schema-and-style-guardrails`
 - Report: `reports/content-schema-and-style-guardrails.md`
-- Current state: in progress.
+- Current state: report drafted, validated, and opened as PR #145; merge pending.
