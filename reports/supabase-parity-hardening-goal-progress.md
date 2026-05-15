@@ -22,8 +22,8 @@ This tracker records the Supabase parity hardening milestone as scoped branches 
 | --- | --- | --- | --- | --- | --- |
 | C01 | `qa/supabase-public-config-and-secret-guardrails` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/155> | `8caed644ee7e7879738f87751ff96ea6e1e43114` | C02 |
 | C02 | `qa/supabase-auth-boundary-smoke` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/156> | `3076af009da6acd66b5bf51c5180a3a9198bf825` | C03 |
-| C03 | `qa/supabase-edge-function-contract-smoke` | In progress | Pending | Pending | C04 |
-| C04 | `docs/supabase-manual-parity-runbook` | Pending | Pending | Pending | C05 |
+| C03 | `qa/supabase-edge-function-contract-smoke` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/157> | `a17d93fa47d674a01ac5b2fa041c74c9bf9deae7` | C04 |
+| C04 | `docs/supabase-manual-parity-runbook` | In progress | Pending | Pending | C05 |
 | C05 | `qa/post-supabase-parity-hardening-regression` | Pending | Pending | Pending | C06 |
 | C06 | `v2.9.0-supabase-parity-hardening-baseline` | Pending | n/a | Pending | Final validation |
 
@@ -55,7 +55,19 @@ This tracker records the Supabase parity hardening milestone as scoped branches 
 
 - Branch: `qa/supabase-edge-function-contract-smoke`
 - Report: `reports/supabase-edge-function-contract-smoke.md`
-- Current state: in progress.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/157>
+- Merge commit: `a17d93fa47d674a01ac5b2fa041c74c9bf9deae7`
+- Current state: complete.
 - Planned automation: explicit network smoke for protected function fail-closed responses and public approved-feed response shape.
-- Validation summary: `npm run smoke:supabase-edge-functions`, full standard branch validation, `npm run check:supabase-config`, `npm run smoke:supabase-auth-boundary`, and both Gallery smokes passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Validation summary: `npm run smoke:supabase-edge-functions`, full standard branch validation, `npm run check:supabase-config`, `npm run smoke:supabase-auth-boundary`, both Gallery smokes, CI validation, and post-merge validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: C04 `docs/supabase-manual-parity-runbook`.
+
+## C04 Notes
+
+- Branch: `docs/supabase-manual-parity-runbook`
+- Report: `reports/supabase-manual-parity-runbook.md`
+- Current state: in progress.
+- Planned documentation: durable checklist for dashboard-only, credential-gated, and approval-gated Supabase parity checks.
+- Validation summary: full standard branch validation, `npm run check:supabase-config`, `npm run smoke:supabase-auth-boundary`, `npm run smoke:supabase-edge-functions`, and both Gallery smokes passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
 - Blockers or limitations: none so far.
