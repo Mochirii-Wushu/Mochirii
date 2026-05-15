@@ -1,0 +1,42 @@
+{
+  "algorithm": "sha256",
+  "serialization": "stable-json-v1",
+  "fields": [
+    {
+      "id": "home.seal.verse",
+      "file": "data/home.json",
+      "path": [
+        "seal",
+        "verse"
+      ],
+      "sha256": "6f662fd00cfefd4727cd4d21431d11cc36f942360647d1c781affb83e2ee58e1"
+    },
+    {
+      "id": "recruitment.content.paragraphs",
+      "file": "data/recruitment.json",
+      "path": [
+        "content",
+        "paragraphs"
+      ],
+      "sha256": "95be33bd983815eea0f44e74a38ab7a115f23c23ae6fa40039e8cbb02c26fb3e"
+    },
+    {
+      "id": "recruitment.content.conclusion",
+      "file": "data/recruitment.json",
+      "path": [
+        "content",
+        "conclusion"
+      ],
+      "sha256": "2085d44fb151369cfe75e8f5c83bde5470da2cbfb9f3ada147901aa889b42fee"
+    },
+    {
+      "id": "twills.profile.bio",
+      "file": "data/twills.json",
+      "path": [
+        "profile",
+        "bio"
+      ],
+      "sha256": "15933d24e9b325948fc74de7e05e4c8f84b1b8c06e2d7a657bf416fc9bf28503"
+    }
+  ]
+}
