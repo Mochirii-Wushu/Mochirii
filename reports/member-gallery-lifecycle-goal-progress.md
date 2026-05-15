@@ -11,8 +11,8 @@ This tracker records report-only and non-mutating QA work. It does not authorize
 | ID | Branch or tag | Status | PR | Merge commit or tag object | Deferred credential-gated status | Blockers | Next |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | F01 | `docs/defer-live-member-workflow-qa` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/168> | `9b6e94b1a4e6792997e2d9fc5449a1540e7cd074` | D02/D03 deferred | None | F02 |
-| F02 | `docs/member-gallery-lifecycle-cleanup-plan` | In progress | Pending | Pending | D02/D03 deferred | None | F03 |
-| F03 | `qa/member-gallery-cleanup-safety-review` | Pending | Pending | Pending | D02/D03 deferred | Requires F02 merge | F04 |
+| F02 | `docs/member-gallery-lifecycle-cleanup-plan` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/169> | `6d1f2ae3bf73c72316c591f0b3a3c7481c58cb07` | D02/D03 deferred | None | F03 |
+| F03 | `qa/member-gallery-cleanup-safety-review` | Branch validation passed | Pending | Pending | D02/D03 deferred | None | F04 |
 | F04 | `qa/gallery-approved-feed-lifecycle-regression` | Pending | Pending | Pending | D02/D03 deferred | Requires F03 merge | F05 |
 | F05 | `v3.1.0-member-gallery-lifecycle-planning-baseline` | Pending | n/a | Pending | D02/D03 deferred | Requires F01-F04 complete | Final validation |
 
@@ -32,11 +32,23 @@ This tracker records report-only and non-mutating QA work. It does not authorize
 
 - Branch: `docs/member-gallery-lifecycle-cleanup-plan`
 - Report: `reports/member-gallery-lifecycle-cleanup-plan-v2.md`
-- Current state: in progress.
-- Validation summary: pending branch validation.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/169>
+- Merge commit: `6d1f2ae3bf73c72316c591f0b3a3c7481c58cb07`
+- Current state: complete.
+- Validation summary: full standard branch validation, CI validation, and post-merge validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
 - Deferred credential-gated status: D02 and D03 remain deferred.
 - Blockers or limitations: none for report-only lifecycle planning. No cleanup, mutation, or Storage deletion is performed.
-- Next item: F03 `qa/member-gallery-cleanup-safety-review` after F02 PR merge and post-merge validation.
+- Next item: F03 `qa/member-gallery-cleanup-safety-review`.
+
+## F03 Notes
+
+- Branch: `qa/member-gallery-cleanup-safety-review`
+- Report: `reports/member-gallery-cleanup-safety-review.md`
+- Current state: branch validation passed; PR pending.
+- Validation summary: full standard branch validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Deferred credential-gated status: D02 and D03 remain deferred.
+- Blockers or limitations: none for report-only cleanup safety review. No cleanup, mutation, Edge Function deployment, or Storage deletion is performed.
+- Next item: F04 `qa/gallery-approved-feed-lifecycle-regression` after F03 PR merge and post-merge validation.
 
 ## Credential-Gated QA Status
 
