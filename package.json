@@ -11,6 +11,7 @@
     "check:json": "node scripts/check-json.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:production": "node scripts/check-production.mjs",
-    "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs"
+    "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",
+    "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs"
   }
 }
