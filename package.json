@@ -10,6 +10,7 @@
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",
     "check:js": "node scripts/check-js.mjs",
     "check:json": "node scripts/check-json.mjs",
+    "check:live-member-workflow-preflight": "node scripts/check-live-member-workflow-preflight.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
