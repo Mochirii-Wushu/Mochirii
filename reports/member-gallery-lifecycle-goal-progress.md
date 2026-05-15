@@ -13,8 +13,8 @@ This tracker records report-only and non-mutating QA work. It does not authorize
 | F01 | `docs/defer-live-member-workflow-qa` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/168> | `9b6e94b1a4e6792997e2d9fc5449a1540e7cd074` | D02/D03 deferred | None | F02 |
 | F02 | `docs/member-gallery-lifecycle-cleanup-plan` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/169> | `6d1f2ae3bf73c72316c591f0b3a3c7481c58cb07` | D02/D03 deferred | None | F03 |
 | F03 | `qa/member-gallery-cleanup-safety-review` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/170> | `f8d18b5049e3444ae5e22d94e0d378eb2616d125` | D02/D03 deferred | None | F04 |
-| F04 | `qa/gallery-approved-feed-lifecycle-regression` | Branch validation passed | Pending | Pending | D02/D03 deferred | None | F05 |
-| F05 | `v3.1.0-member-gallery-lifecycle-planning-baseline` | Pending | n/a | Pending | D02/D03 deferred | Requires F01-F04 complete | Final validation |
+| F04 | `qa/gallery-approved-feed-lifecycle-regression` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/171> | `31786b6f6cff5d93891c9699409b3ede73e2bbda` | D02/D03 deferred | None | F05 |
+| F05 | `v3.1.0-member-gallery-lifecycle-planning-baseline` | Complete | n/a | tag `8537c2654920250f04674daad5760139ebea0c5b`; commit `31786b6f6cff5d93891c9699409b3ede73e2bbda` | D02/D03 deferred | None | Final validation |
 
 ## F01 Notes
 
@@ -56,11 +56,24 @@ This tracker records report-only and non-mutating QA work. It does not authorize
 
 - Branch: `qa/gallery-approved-feed-lifecycle-regression`
 - Report: `reports/gallery-approved-feed-lifecycle-regression.md`
-- Current state: branch validation passed; PR pending.
-- Validation summary: full standard branch validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/171>
+- Merge commit: `31786b6f6cff5d93891c9699409b3ede73e2bbda`
+- Current state: complete.
+- Validation summary: full standard branch validation, CI validation, and pre-tag validation passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
 - Deferred credential-gated status: D02 and D03 remain deferred.
 - Blockers or limitations: none for report-only approved-feed lifecycle regression. No Gallery data change, Supabase mutation, or Storage deletion is performed.
-- Next item: F05 `v3.1.0-member-gallery-lifecycle-planning-baseline` after F04 PR merge and post-merge validation.
+- Next item: F05 `v3.1.0-member-gallery-lifecycle-planning-baseline`.
+
+## F05 Notes
+
+- Tag: `v3.1.0-member-gallery-lifecycle-planning-baseline`
+- Tag object: `8537c2654920250f04674daad5760139ebea0c5b`
+- Tagged commit: `31786b6f6cff5d93891c9699409b3ede73e2bbda`
+- Current state: complete.
+- Validation summary: pre-tag validation passed. Final validation remains to be run after this tracker closeout merges. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Deferred credential-gated status: D02 and D03 remain deferred.
+- Blockers or limitations: live credentialed QA is still blocked until disposable test member and moderator accounts are available. This tag is the non-credentialed member Gallery lifecycle planning baseline, not the live workflow QA baseline.
+- Next item: final validation and closeout summary.
 
 ## Credential-Gated QA Status
 
