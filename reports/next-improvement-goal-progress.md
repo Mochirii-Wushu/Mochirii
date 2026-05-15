@@ -10,7 +10,7 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 | ID | Branch | Status | PR | Merge commit | Next |
 | --- | --- | --- | --- | --- | --- |
-| N01 | `qa/supabase-ci-and-parity-review` | In progress | Pending | Pending | N02 |
+| N01 | `qa/supabase-ci-and-parity-review` | PR open | <https://github.com/Mochirii-Wushu/Mochirii/pull/141> | Pending | N02 |
 | N02 | `qa/member-workflow-test-account-matrix` | Pending | Pending | Pending | N03 |
 | N03 | `qa/gallery-approved-feed-regression-matrix` | Pending | Pending | Pending | N04 |
 | N04 | `qa/accessibility-name-and-member-pages-review` | Pending | Pending | Pending | N05 |
@@ -20,6 +20,6 @@ This tracker records N01 through N05 as separate scoped branches. Protected cont
 
 - Branch: `qa/supabase-ci-and-parity-review`
 - Report: `reports/supabase-ci-and-parity-review.md`
-- Current state: report drafted; validation and PR pending.
+- Current state: report drafted, validated, and opened as PR #141; merge pending.
 - Blockers or limitations: no blocker found so far. Deno is not installed locally; dashboard-only and live member checks remain credential-gated/manual.
 - Safety: no Supabase mutation, no Edge Function deployment, no data/protected content changes, no secrets.
