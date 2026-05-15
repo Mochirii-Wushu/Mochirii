@@ -20,8 +20,8 @@ This tracker records the Supabase parity hardening milestone as scoped branches 
 
 | ID | Branch or tag | Status | PR | Merge commit or tag object | Next |
 | --- | --- | --- | --- | --- | --- |
-| C01 | `qa/supabase-public-config-and-secret-guardrails` | In progress | Pending | Pending | C02 |
-| C02 | `qa/supabase-auth-boundary-smoke` | Pending | Pending | Pending | C03 |
+| C01 | `qa/supabase-public-config-and-secret-guardrails` | Complete | <https://github.com/Mochirii-Wushu/Mochirii/pull/155> | `8caed644ee7e7879738f87751ff96ea6e1e43114` | C02 |
+| C02 | `qa/supabase-auth-boundary-smoke` | In progress | Pending | Pending | C03 |
 | C03 | `qa/supabase-edge-function-contract-smoke` | Pending | Pending | Pending | C04 |
 | C04 | `docs/supabase-manual-parity-runbook` | Pending | Pending | Pending | C05 |
 | C05 | `qa/post-supabase-parity-hardening-regression` | Pending | Pending | Pending | C06 |
@@ -31,7 +31,19 @@ This tracker records the Supabase parity hardening milestone as scoped branches 
 
 - Branch: `qa/supabase-public-config-and-secret-guardrails`
 - Report: `reports/supabase-public-config-and-secret-guardrails.md`
-- Current state: in progress.
+- PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/155>
+- Merge commit: `8caed644ee7e7879738f87751ff96ea6e1e43114`
+- Current state: complete.
 - Planned automation: local secret/public-config scanner wired into `npm run check`.
-- Validation summary: `npm run check:supabase-config`, full standard branch validation, and both Gallery smokes passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Validation summary: `npm run check:supabase-config`, full standard branch validation, CI validation, post-merge validation, and both Gallery smokes passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
+- Blockers or limitations: none.
+- Next item: C02 `qa/supabase-auth-boundary-smoke`.
+
+## C02 Notes
+
+- Branch: `qa/supabase-auth-boundary-smoke`
+- Report: `reports/supabase-auth-boundary-smoke.md`
+- Current state: in progress.
+- Planned automation: local signed-out browser smoke with mocked Supabase Auth client.
+- Validation summary: `npm run smoke:supabase-auth-boundary`, full standard branch validation, `npm run check:supabase-config`, and both Gallery smokes passed. The known `assets/audio/mochiriiiiii.mp3` large-asset warning remained intentional.
 - Blockers or limitations: none so far.

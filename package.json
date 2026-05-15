@@ -15,6 +15,7 @@
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
     "check:production": "node scripts/check-production.mjs",
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",
-    "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs"
+    "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs",
+    "smoke:supabase-auth-boundary": "node scripts/smoke-supabase-auth-boundary.mjs"
   }
 }
