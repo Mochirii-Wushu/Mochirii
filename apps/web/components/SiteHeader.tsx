@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getCurrentUser, onAuthStateChange } from "@/lib/supabase/auth";
+import { getCurrentProfile, profileIsActive } from "@/lib/supabase/profile";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -60,6 +62,7 @@ const notesLinks: NavItem[] = [
   { href: "/auth", label: "Login", nav: "auth", auth: "signed-out" },
   { href: "/account", label: "Account", nav: "account", auth: "signed-in" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
+  { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "signed-in" },
 ];
 
 const focusableSelector = [
@@ -85,6 +88,13 @@ function getFocusable(root: HTMLElement | null) {
     if (el.closest("[hidden]")) return false;
     return el.getClientRects().length > 0;
   });
+}
+
+function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMember: boolean }) {
+  if (item.auth === "signed-out") return authState.signedIn;
+  if (item.auth === "signed-in") return !authState.signedIn;
+  if (item.auth === "verified") return !authState.activeMember;
+  return false;
 }
 
 function InternalNavLink({
@@ -131,6 +141,7 @@ export function SiteHeader() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [authState, setAuthState] = useState({ signedIn: false, activeMember: false });
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileShellRef = useRef<HTMLDivElement>(null);
@@ -142,6 +153,36 @@ export function SiteHeader() {
     update();
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const refreshAuthState = async () => {
+      const userResult = await getCurrentUser();
+      if (!userResult.ok || !userResult.data?.user) {
+        if (!cancelled) setAuthState({ signedIn: false, activeMember: false });
+        return;
+      }
+
+      const profileResult = await getCurrentProfile();
+      if (!cancelled) {
+        setAuthState({
+          signedIn: true,
+          activeMember: profileResult.ok && profileIsActive(profileResult.data),
+        });
+      }
+    };
+
+    void Promise.resolve().then(() => refreshAuthState());
+    const subscription = onAuthStateChange(() => {
+      void refreshAuthState();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.data?.subscription?.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -314,28 +355,15 @@ export function SiteHeader() {
             );
           })}
 
-          <InternalNavLink
-            className="nav-link"
-            item={notesLinks[0]}
-            activeKey={activeKey}
-          />
-          <InternalNavLink
-            className="nav-link nav-auth-link"
-            item={notesLinks[1]}
-            activeKey={activeKey}
-          />
-          <InternalNavLink
-            className="nav-link nav-auth-link"
-            item={notesLinks[2]}
-            activeKey={activeKey}
-            hidden
-          />
-          <InternalNavLink
-            className="nav-link nav-auth-link"
-            item={notesLinks[3]}
-            activeKey={activeKey}
-            hidden
-          />
+          {notesLinks.map((item) => (
+            <InternalNavLink
+              className={`nav-link${item.auth ? " nav-auth-link" : ""}`}
+              item={item}
+              activeKey={activeKey}
+              key={item.nav}
+              hidden={navItemHidden(item, authState)}
+            />
+          ))}
         </nav>
 
         <div className="utils">
@@ -440,28 +468,16 @@ export function SiteHeader() {
 
             <div className="mobile-group">
               <div className="mobile-group-title">Notes</div>
-              <InternalNavLink
-                className="mobile-link"
-                item={notesLinks[0]}
-                onClick={() => closeMobile()}
-              />
-              <InternalNavLink
-                className="mobile-link"
-                item={notesLinks[1]}
-                onClick={() => closeMobile()}
-              />
-              <InternalNavLink
-                className="mobile-link"
-                item={notesLinks[2]}
-                onClick={() => closeMobile()}
-                hidden
-              />
-              <InternalNavLink
-                className="mobile-link"
-                item={notesLinks[3]}
-                onClick={() => closeMobile()}
-                hidden
-              />
+              {notesLinks.map((item) => (
+                <InternalNavLink
+                  className="mobile-link"
+                  item={item}
+                  activeKey={activeKey}
+                  key={item.nav}
+                  onClick={() => closeMobile()}
+                  hidden={navItemHidden(item, authState)}
+                />
+              ))}
             </div>
           </nav>
         </div>
