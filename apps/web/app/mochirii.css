@@ -1581,7 +1581,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 /* =========================================================
    HOME — Guild seal (glass container)
    ========================================================= */
-body[data-page="home"] .home-guild-seal{
+.home-guild-seal{
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -1596,14 +1596,15 @@ body[data-page="home"] .home-guild-seal{
   -webkit-backdrop-filter:var(--blur);
 }
 
-body[data-page="home"] .home-guild-seal img{
+.home-guild-seal img{
   width:96px;
+  max-width:100%;
   height:auto;
   object-fit:contain;
   display:block;
 }
 
-body[data-page="home"] .home-seal-verse{
+.home-seal-verse{
   margin:0;
   text-align:center;
   color:var(--ink-1);
@@ -1612,14 +1613,14 @@ body[data-page="home"] .home-seal-verse{
   max-width:32ch;
 }
 
-body[data-page="home"] .home-hero-row{
+.home-hero-row{
   display:grid;
   grid-template-columns: 1fr auto;
   align-items:stretch;
   gap:18px;
 }
 
-body[data-page="home"] .home-seal-title{
+.home-seal-title{
   margin:0;
   font-family:var(--font-display);
   font-size:44px;
@@ -1630,7 +1631,7 @@ body[data-page="home"] .home-seal-title{
 }
 
 @media (max-width: 760px){
-  body[data-page="home"] .home-hero-row{
+  .home-hero-row{
     grid-template-columns: 1fr;
   }
 }
