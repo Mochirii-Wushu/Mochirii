@@ -26,9 +26,22 @@ type GalleryItem = {
   galleryAddedAt?: string;
 };
 
+type SortMode = "random" | "newest" | "oldest";
+type NormalizedGalleryItem = Omit<GalleryItem, "alt" | "caption" | "categories" | "full" | "thumb"> & {
+  alt: string;
+  caption: string;
+  categories: string[];
+  full: string;
+  originalIndex: number;
+  sortTimestamp: number;
+  stableKey: string;
+  stableSequence: number;
+  thumb: string;
+};
+
 const allCategory = "all";
-const defaultSort = "random";
-const sortModes = new Set([defaultSort, "newest", "oldest"]);
+const defaultSort: SortMode = "random";
+const sortModes = new Set<SortMode>([defaultSort, "newest", "oldest"]);
 const focusableSelector = [
   "a[href]",
   "button:not([disabled])",
@@ -68,9 +81,84 @@ function itemCategories(item: GalleryItem) {
   return [...new Set(values.map(normalizeSlug).filter(Boolean))];
 }
 
-function sortTime(item: GalleryItem) {
+function normalizeSort(value: unknown): SortMode {
+  const sort = text(value).toLowerCase();
+  return sortModes.has(sort as SortMode) ? (sort as SortMode) : defaultSort;
+}
+
+function getSortTimestamp(item: GalleryItem) {
   const time = Date.parse(text(item.galleryAddedAt));
   return Number.isFinite(time) ? time : 0;
+}
+
+function extractNumericSequence(value: unknown) {
+  const clean = text(value);
+  if (!clean) return null;
+
+  const named = clean.match(/(?:^|[\\/_-])(?:shot|image|img)[-_]?(\d+)(?=$|[.\\/_-])/i);
+  if (named) return Number.parseInt(named[1], 10);
+
+  const matches = [...clean.matchAll(/(\d+)/g)];
+  const fallback = matches.at(-1)?.[1];
+  return fallback ? Number.parseInt(fallback, 10) : null;
+}
+
+function getStableSequence(item: GalleryItem, originalIndex: number) {
+  const candidates = [item.id, item.full, item.src, item.thumb];
+
+  for (const candidate of candidates) {
+    const sequence = extractNumericSequence(candidate);
+    if (sequence !== null && Number.isFinite(sequence)) return sequence;
+  }
+
+  return originalIndex + 1;
+}
+
+function compareGalleryItems(a: NormalizedGalleryItem, b: NormalizedGalleryItem, sort: Exclude<SortMode, "random">) {
+  const direction = sort === "newest" ? -1 : 1;
+  const timeDelta = a.sortTimestamp - b.sortTimestamp;
+  if (timeDelta !== 0) return direction * timeDelta;
+
+  const sequenceDelta = a.stableSequence - b.stableSequence;
+  if (sequenceDelta !== 0) return direction * sequenceDelta;
+
+  const indexDelta = a.originalIndex - b.originalIndex;
+  if (indexDelta !== 0) return direction * indexDelta;
+
+  return a.stableKey.localeCompare(b.stableKey);
+}
+
+function createRandomSeed() {
+  const values = new Uint32Array(1);
+  globalThis.crypto?.getRandomValues(values);
+
+  if (values[0]) return values[0];
+
+  return (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
+}
+
+function seededRandom(seed: number) {
+  let state = seed >>> 0;
+
+  return () => {
+    state += 0x6d2b79f5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffleWithSeed<T>(items: T[], seed: number) {
+  const shuffled = [...items];
+  const random = seededRandom(seed);
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+
+  return shuffled;
 }
 
 function getFocusable(root: HTMLElement | null) {
@@ -116,9 +204,10 @@ export function GalleryBrowser({
   items: GalleryItem[];
 }) {
   const [activeCategory, setActiveCategory] = useState(allCategory);
-  const [activeSort, setActiveSort] = useState(defaultSort);
+  const [activeSort, setActiveSort] = useState<SortMode>(defaultSort);
+  const [randomSeed, setRandomSeed] = useState<number | null>(null);
   const [shareStatus, setShareStatus] = useState("");
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openItemKey, setOpenItemKey] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
@@ -126,16 +215,31 @@ export function GalleryBrowser({
   const usableItems = useMemo(
     () =>
       items
-        .map((item) => ({
-          ...item,
-          full: publicPath(item.full || item.src),
-          thumb: publicPath(item.thumb || item.src || item.full),
-          alt: text(item.alt || item.caption, "Gallery image"),
-          caption: text(item.caption),
-        }))
+        .map((item, originalIndex): NormalizedGalleryItem => {
+          const full = publicPath(item.full || item.src);
+          const thumb = publicPath(item.thumb || item.src || item.full);
+
+          return {
+            ...item,
+            full,
+            thumb,
+            alt: text(item.alt || item.caption, "Gallery image"),
+            caption: text(item.caption),
+            categories: itemCategories(item),
+            originalIndex,
+            sortTimestamp: getSortTimestamp(item),
+            stableKey: text(item.id || full || thumb, `gallery-${originalIndex}`),
+            stableSequence: getStableSequence({ ...item, full, thumb }, originalIndex),
+          };
+        })
         .filter((item) => item.full && item.thumb),
     [items],
   );
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setRandomSeed(createRandomSeed()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const filterCategories = useMemo(() => {
     const counts = new Map([[allCategory, usableItems.length]]);
@@ -161,23 +265,23 @@ export function GalleryBrowser({
   }, [categories, usableItems]);
 
   const visibleItems = useMemo(() => {
+    if (activeSort === defaultSort) {
+      const randomized = randomSeed === null ? usableItems : shuffleWithSeed(usableItems, randomSeed);
+      return activeCategory === allCategory
+        ? randomized
+        : randomized.filter((item) => item.categories.includes(activeCategory));
+    }
+
     const filtered =
       activeCategory === allCategory
         ? usableItems
-        : usableItems.filter((item) => itemCategories(item).includes(activeCategory));
+        : usableItems.filter((item) => item.categories.includes(activeCategory));
 
-    if (activeSort === "newest" || activeSort === "oldest") {
-      return [...filtered].sort((a, b) => {
-        const delta = sortTime(a) - sortTime(b);
-        if (delta !== 0) return activeSort === "newest" ? -delta : delta;
-        return text(a.id).localeCompare(text(b.id));
-      });
-    }
+    const sortMode = activeSort === "oldest" ? "oldest" : "newest";
+    return [...filtered].sort((a, b) => compareGalleryItems(a, b, sortMode));
+  }, [activeCategory, activeSort, randomSeed, usableItems]);
 
-    return filtered;
-  }, [activeCategory, activeSort, usableItems]);
-
-  const openItem = openIndex === null ? null : visibleItems[openIndex] || null;
+  const openItem = openItemKey === null ? null : visibleItems.find((item) => item.stableKey === openItemKey) || null;
   const activeLabel = filterCategories.find((category) => category.slug === activeCategory)?.label || "All";
   const countText =
     activeLabel === "All"
@@ -185,7 +289,7 @@ export function GalleryBrowser({
       : `Showing ${visibleItems.length} ${visibleItems.length === 1 ? "image" : "images"} in ${activeLabel}.`;
 
   const closeModal = useCallback(() => {
-    setOpenIndex(null);
+    setOpenItemKey(null);
     window.setTimeout(() => {
       lastFocusRef.current?.focus({ preventScroll: true });
       lastFocusRef.current = null;
@@ -196,11 +300,11 @@ export function GalleryBrowser({
     const readState = () => {
       const params = new URLSearchParams(window.location.search);
       const category = normalizeSlug(params.get("category"));
-      const sort = text(params.get("sort")).toLowerCase();
+      const sort = normalizeSort(params.get("sort"));
       const validCategory = filterCategories.some((item) => item.slug === category);
 
       setActiveCategory(category && validCategory ? category : allCategory);
-      setActiveSort(sortModes.has(sort) ? sort : defaultSort);
+      setActiveSort(sort);
     };
 
     readState();
@@ -256,15 +360,15 @@ export function GalleryBrowser({
   };
 
   const chooseSort = (sort: string) => {
-    const nextSort = sortModes.has(sort) ? sort : defaultSort;
+    const nextSort = normalizeSort(sort);
     setActiveSort(nextSort);
     setShareStatus("");
     updateUrl(activeCategory, nextSort);
   };
 
-  const openModal = (index: number) => {
+  const openModal = (item: NormalizedGalleryItem) => {
     lastFocusRef.current = document.activeElement as HTMLElement | null;
-    setOpenIndex(index);
+    setOpenItemKey(item.stableKey);
   };
 
   const trapTab = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -348,15 +452,15 @@ export function GalleryBrowser({
       </p>
 
       <div id="galleryGrid" className="gallery-grid" aria-live="polite" hidden={visibleItems.length === 0}>
-        {visibleItems.map((item, index) => (
+        {visibleItems.map((item) => (
           <button
             className="gallery-thumb"
             type="button"
             data-full={item.full}
             data-caption={item.caption}
             data-category={itemCategories(item)[0] || undefined}
-            key={text(item.id, item.full)}
-            onClick={() => openModal(index)}
+            key={item.stableKey}
+            onClick={() => openModal(item)}
           >
             <img src={item.thumb} alt={item.alt} loading="lazy" decoding="async" />
           </button>
