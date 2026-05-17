@@ -5,6 +5,7 @@ import {
   HomeGalleryLightbox,
   type GallerySpotlightItem,
 } from "@/components/HomeGalleryLightbox";
+import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 
 type HomeData = typeof homeData;
 type GalleryData = typeof galleryData;
@@ -254,6 +255,7 @@ export default function Home() {
 
   return (
     <>
+      <BodyPageMarker page="home" />
       <header className="page-hero-shell" aria-label="Home hero">
         <div className="container">
           <section className="page-hero page-hero--tall">
