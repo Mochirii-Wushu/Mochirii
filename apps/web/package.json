@@ -7,7 +7,7 @@
     "clean": "rm -rf .next .vercel/output",
     "build:clean": "npm run clean && next build",
     "build": "next build",
-    "vercel:build:local": "npm run clean && vercel build --prod",
+    "vercel:build:local": "npm run clean && cd ../.. && vercel build --prod --cwd apps/web",
     "start": "next start",
     "lint": "eslint"
   },

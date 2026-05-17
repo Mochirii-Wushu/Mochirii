@@ -29,7 +29,7 @@ npm run build:clean
 npm run vercel:build:local
 ```
 
-`npm run clean` removes only `.next` and `.vercel/output`; it does not remove `.vercel/project.json` or local env files.
+`npm run clean` removes only `.next` and `.vercel/output`; it does not remove `.vercel/project.json` or local env files. `npm run vercel:build:local` runs the same root command documented below: `vercel build --prod --cwd apps/web`.
 
 ## Vercel Setup
 
@@ -41,14 +41,14 @@ apps/web
 
 Dashboard settings remain manual. This branch does not change Vercel project settings, DNS, production domains, Supabase settings, or Discord settings.
 
-The safest local workflow remains the linked `apps/web` workflow:
+The safest local workflow is to pull settings for the linked app, clean generated output, then run the Vercel build from the repository root with `--cwd apps/web`:
 
 ```sh
 cd apps/web
-vercel link
 vercel pull --environment=preview --yes
 npm run clean
-vercel build --prod
+cd ../..
+vercel build --prod --cwd apps/web
 ```
 
 Root-level `vercel link --repo` was tested as a reversible monorepo-link cleanup path, but it prompts for confirmation before linking the repository to Vercel projects. Do not answer that prompt or relink the project without an operator present. Dashboard Root Directory remains the authoritative production/preview setting.
@@ -119,14 +119,16 @@ git diff --check
 cd apps/web
 npm run lint
 npm run build
-vercel build --prod
+
+cd ../..
+vercel build --prod --cwd apps/web
 ```
 
 ## Accepted or Deferred Warnings
 
 - `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. It is preserved exactly as-is because audio quality is preferred over file-size optimization. This is not a Vercel blocker. Do not compress, re-encode, replace, delete, externalize, or otherwise optimize this audio without explicit user approval.
 - A local `vercel build --prod` can warn if `.next` exists. Run `npm run vercel:build:local` to clean local generated output first.
-- Local `vercel build --prod` may still log a non-blocking `outputFileTracingRoot` / `turbopack.root` mismatch from Vercel CLI's linked `apps/web` root. `next build` and Vercel dashboard builds use the repo-root Turbopack config needed for the dashboard Root Directory flow.
+- The previous local `outputFileTracingRoot` / `turbopack.root` mismatch is fixed by matching `turbopack.root` to the `apps/web` project root used by `vercel build --prod --cwd apps/web`.
 - Vercel Development env is intentionally skipped for now. Production and Preview envs are what matter for current deployed and PR-preview builds.
 
 ## Vercel Verification
