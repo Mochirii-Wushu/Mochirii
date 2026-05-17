@@ -5,6 +5,8 @@ const root = process.cwd();
 const ignoreDirs = new Set([
   ".git",
   ".lighthouseci",
+  ".next",
+  ".vercel",
   "assets",
   "build",
   "coverage",

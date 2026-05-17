@@ -491,7 +491,15 @@ export function GalleryBrowser({
             ✕
           </button>
           <figure className="lightbox-card">
-            <img id="lightboxImg" src={openItem?.full || ""} alt={openItem?.alt || ""} className="lightbox-img" decoding="async" />
+            {openItem ? (
+              <img
+                id="lightboxImg"
+                src={openItem.full}
+                alt={openItem.alt}
+                className="lightbox-img"
+                decoding="async"
+              />
+            ) : null}
             <figcaption id="lightboxCaption" className="lightbox-caption">
               {openItem?.caption || openItem?.alt || ""}
             </figcaption>
