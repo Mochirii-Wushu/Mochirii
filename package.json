@@ -17,6 +17,7 @@
     "check:production": "node scripts/check-production.mjs",
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",
     "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs",
+    "smoke:vercel-production": "node scripts/smoke-vercel-production.mjs",
     "smoke:supabase-auth-boundary": "node scripts/smoke-supabase-auth-boundary.mjs",
     "smoke:supabase-edge-functions": "node scripts/smoke-supabase-edge-functions.mjs"
   }

@@ -210,6 +210,16 @@ vercel pull --environment=preview --yes
 
 Report env names only as present or missing. Do not print values.
 
+## DNS Cutover
+
+DNS cutover is deferred. Current Vercel production review URL is:
+
+```text
+https://mochirii.vercel.app
+```
+
+Custom-domain cutover for `mochirii.com` requires explicit approval and a manual DNS/Vercel/Supabase checklist. See [`../../docs/dns-cutover-readiness-and-rollback.md`](../../docs/dns-cutover-readiness-and-rollback.md).
+
 ## Deferred
 
 - Server-side Supabase SSR/cookie behavior unless a route proves it needs server-side auth.
