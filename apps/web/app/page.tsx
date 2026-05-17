@@ -1,10 +1,8 @@
 import { Fragment } from "react";
 import homeData from "@/public/data/home.json";
 import galleryData from "@/public/data/gallery.json";
-import {
-  HomeGalleryLightbox,
-  type GallerySpotlightItem,
-} from "@/components/HomeGalleryLightbox";
+import { HomeGallerySpotlight } from "@/components/HomeGallerySpotlight";
+import { type GallerySpotlightItem } from "@/components/HomeGalleryLightbox";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 
 type HomeData = typeof homeData;
@@ -138,12 +136,9 @@ function normalizeGalleryItem(
   };
 }
 
-function pickGallerySpotlightItems(
-  data: GalleryData,
-  fallback: HomeData["gallery"],
-): GallerySpotlightItem[] {
+function getGallerySpotlightCandidates(data: GalleryData): GallerySpotlightItem[] {
   const seen = new Set<string>();
-  const galleryItems = data.albums
+  return data.albums
     .flatMap((album) => album.items)
     .map((item) => normalizeGalleryItem(item))
     .filter((item): item is GallerySpotlightItem & { href: string; addedAt: string } => Boolean(item))
@@ -151,12 +146,10 @@ function pickGallerySpotlightItems(
       if (seen.has(item.full)) return false;
       seen.add(item.full);
       return true;
-    })
-    .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
-    .slice(0, 4);
+    });
+}
 
-  if (galleryItems.length === 4) return galleryItems;
-
+function getFallbackGallerySpotlightItems(fallback: HomeData["gallery"]): GallerySpotlightItem[] {
   return fallback
     .map((item, index) => ({
       key: `home-gallery-${index}`,
@@ -250,7 +243,8 @@ export default function Home() {
   const sealVerse = homeData.seal.verse.map(cleanLabel).filter(Boolean);
   const featured = pickFeatured(homeData.bulletins);
   const secondaryBulletins = homeData.bulletins.filter((item) => item !== featured);
-  const galleryItems = pickGallerySpotlightItems(galleryData, homeData.gallery);
+  const galleryItems = getGallerySpotlightCandidates(galleryData);
+  const fallbackGalleryItems = getFallbackGallerySpotlightItems(homeData.gallery);
   const spotlight = homeData.spotlight;
 
   return (
@@ -459,7 +453,7 @@ export default function Home() {
             <p className="muted" id="galleryIntro">
               {homeData.copy.galleryIntro}
             </p>
-            <HomeGalleryLightbox items={galleryItems} />
+            <HomeGallerySpotlight candidates={galleryItems} fallbackItems={fallbackGalleryItems} />
           </section>
         </div>
       </main>
