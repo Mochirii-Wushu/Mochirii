@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "image": "./assets/img/spotlight/hero.webp",
+    "atmosphereImage": "",
+    "alt": "Member Spotlight banner artwork"
+  },
+  "spotlight": {
+    "kicker": "Member Spotlight",
+    "title": "This Month: Meenari",
+    "date": "2026-03-01",
+    "tag": "Appreciation",
+    "intro": "Once a month, we honor one member whose effort, enthusiasm & spirit help the guild move together.",
+    "badges": [
+      "Community Pillar",
+      "Cheerful Presence",
+      "Always Helpful"
+    ],
+    "body": [
+      "This month we lift a lantern for Meenari & the spark they bring to the guild.",
+      "They answer questions, welcome new members & help others feel at home.",
+      "In busy hours, that presence matters: one kind reply can turn a new name into someone remembered."
+    ],
+    "conclusion": "Thank you so much for the patience & pretty acts that keep Mōchirīī moving forward together.",
+    "highlights": [
+      "Shows Up Often",
+      "Always Warm & Friendly",
+      "Helpful Guidance",
+      "Brightens the Guild"
+    ]
+  }
+}

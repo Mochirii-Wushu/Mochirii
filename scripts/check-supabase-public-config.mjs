@@ -3,7 +3,11 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const allowedEnvFiles = new Set([".env.example", "supabase/functions/.env.example"]);
+const allowedEnvFiles = new Set([
+  ".env.example",
+  "apps/web/.env.example",
+  "supabase/functions/.env.example",
+]);
 const expectedProjectRef = "deyvmtncimmcinldjyqe";
 const expectedUrl = `https://${expectedProjectRef}.supabase.co`;
 

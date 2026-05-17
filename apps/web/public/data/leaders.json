@@ -1,0 +1,108 @@
+{
+  "hero": {
+    "kicker": "Leaders",
+    "title": "Leaders Hall",
+    "image": "./assets/img/leaders/hero.webp",
+    "introBody": [
+      "Leadership in Mōchirīī is about being consistently active & supportive of others. Each role carries its own work & all help keep the guild fair."
+    ],
+    "pills": [
+      "Start with your Hall Leader",
+      "Fair resolution",
+      "Escalation path"
+    ]
+  },
+
+  "panel": {
+    "title": "Guild Leadership",
+    "badge": "Contact & Profiles",
+    "image": "./assets/img/leaders/panel.webp",
+    "body": [
+      "Leaders may keep a short profile page for introductions, preferred roles & the best way to reach them. Keep it in-game, keep it safe & leave personal info out."
+    ],
+    "note": "Members start with their hall leader for most questions. Requests that affect multiple halls move to the vice leader. Matters that shape policy, long-term direction, or unresolved outcomes move to the guild leader."
+  },
+
+  "council": {
+    "title": "The Council",
+    "description": "These are contact points for support, planning & smooth decisions."
+  },
+
+  "leaders": [
+    {
+      "role": "Leader",
+      "name": "Twills",
+      "availability": "Primary point of direction",
+      "image": "./assets/img/leaders/leader.webp",
+      "alt": "Guild Leader portrait",
+      "summary": "Guides culture & long-term direction for Mōchirīī.",
+      "profileHref": "./twills.html",
+      "profileLabel": "Open profile"
+    },
+    {
+      "role": "Vice Leader",
+      "name": "Vice Leader",
+      "availability": "Operations & coordination",
+      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "alt": "Vice Leader portrait",
+      "summary": "Coordinates leaders & helps resolve issues that reach beyond one group."
+    },
+    {
+      "role": "Hall Leader",
+      "name": "Hall Leader",
+      "availability": "Hall & group oversight",
+      "image": "./assets/img/leaders/leader-silhouette.webp",
+      "alt": "Hall Leader portrait",
+      "summary": "First contact for support, event coordination & hall activity."
+    },
+    {
+      "role": "Dharmapala",
+      "name": "Isawisima",
+      "availability": "Community guidance",
+      "image": "./assets/img/leaders/dharmapala.webp",
+      "alt": "Dharmapala portrait",
+      "summary": "Protects fairness, helps mediate conflict & keeps standards clear."
+    },
+    {
+      "role": "Lotus Warden",
+      "name": "Sinbell",
+      "availability": "Member support",
+      "image": "./assets/img/leaders/lotus_warden.webp",
+      "alt": "Lotus Warden portrait",
+      "summary": "Supports member well-being, guides arrivals & helps morale."
+    },
+    {
+      "role": "Petal Keeper",
+      "name": "Meenari",
+      "availability": "Culture & activity support",
+      "image": "./assets/img/leaders/petal_keeper.webp",
+      "alt": "Petal Keeper portrait",
+      "summary": "Keeps daily spaces active, welcomes arrivals & helps members find footing."
+    }
+  ],
+
+  "responsibilities": {
+    "title": "Responsibilities",
+      "description": "Members receive direction, fair decisions & support. Leadership keeps structure, protects culture & stays present. Members participate in good faith, communicate responsibly & contribute to the guild's pace.",
+    "items": [
+      {
+        "title": "Direction & strategy",
+        "description": "Sets goals, priorities & the long road for the guild.",
+        "image": "./assets/img/leaders/responsibilities-01.webp",
+        "alt": "Direction & strategy visual panel"
+      },
+      {
+        "title": "Ops & coordination",
+        "description": "Organizes events, manages roles & keeps daily guild work moving.",
+        "image": "./assets/img/leaders/responsibilities-02.webp",
+        "alt": "Ops & coordination visual panel"
+      },
+      {
+        "title": "Culture & people",
+        "description": "Maintains standards, resolves conflicts & sustains morale.",
+        "image": "./assets/img/leaders/responsibilities-03.webp",
+        "alt": "Culture & people visual panel"
+      }
+    ]
+  }
+}
