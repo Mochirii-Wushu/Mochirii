@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import "./mochirii.css";
@@ -59,6 +60,7 @@ export default function RootLayout({
         <div className="bg-photo" aria-hidden="true" />
         {children}
         <SiteFooter />
+        <Analytics />
       </body>
     </html>
   );
