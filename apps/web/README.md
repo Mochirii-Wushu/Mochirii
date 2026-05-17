@@ -62,11 +62,36 @@ Do not print or commit secret values. `.env.example` contains names only.
 - Homepage converted from `index.html` and `home.js` DOM mutation to React rendering.
 - Legacy `.html` redirects configured in `next.config.ts`.
 
+## Migrated in Phase 2
+
+- Public/static routes migrated into App Router pages:
+  `/join`, `/ranks`, `/leaders`, `/codex`, `/events`, `/announcements`,
+  `/raffles`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
+- Route content continues to render from the copied JSON files in `public/data/`.
+- Public client-side interactions migrated where needed: gallery filters/query links/lightbox, event filters, and Spotify filtering.
+- Legacy `.html` redirects for migrated pages are verified in `next.config.ts`.
+
+Phase 2 validation:
+
+```sh
+cd ../..
+npm run check
+npm run check:json
+npm run check:refs
+npm run check:production
+git diff --check
+
+cd apps/web
+npm run lint
+npm run build
+vercel build --prod
+```
+
 ## Deferred
 
 - Authentication and account behavior.
 - Server-side Supabase behavior.
 - Discord integrations.
-- Non-home page migrations.
+- Uploads, moderation, account, and leader-dashboard behavior.
 - Vercel dashboard automation.
 - Production DNS and cutover.
