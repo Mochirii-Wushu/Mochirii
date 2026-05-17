@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const projectRoot = dirname(fileURLToPath(import.meta.url));
+const appRoot = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = join(appRoot, "../..");
 
 const legacyHtmlRedirects = [
   ["/index.html", "/"],
@@ -26,7 +27,7 @@ const legacyHtmlRedirects = [
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: projectRoot,
+    root: workspaceRoot,
   },
   async redirects() {
     return legacyHtmlRedirects.map(([source, destination]) => ({

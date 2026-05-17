@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "clean": "rm -rf .next .vercel/output",
+    "build:clean": "npm run clean && next build",
     "build": "next build",
+    "vercel:build:local": "npm run clean && vercel build --prod",
     "start": "next start",
     "lint": "eslint"
   },

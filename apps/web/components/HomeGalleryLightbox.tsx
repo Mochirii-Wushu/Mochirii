@@ -167,13 +167,15 @@ export function HomeGalleryLightbox({
           </button>
 
           <figure className="lightbox-card">
-            <img
-              id="modalImage"
-              src={openItem?.full || ""}
-              alt={openItem?.alt || ""}
-              className="lightbox-img"
-              decoding="async"
-            />
+            {openItem ? (
+              <img
+                id="modalImage"
+                src={openItem.full}
+                alt={openItem.alt}
+                className="lightbox-img"
+                decoding="async"
+              />
+            ) : null}
             <figcaption id="modalCaption" className="lightbox-caption">
               {modalCaption}
             </figcaption>

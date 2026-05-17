@@ -1,6 +1,6 @@
-# Mochirii Next.js Phase 1 App
+# Mochirii Next.js App
 
-This app is the Phase 1 Vercel-ready Next.js scaffold for Mochirii. The existing root GitHub Pages static site remains intact and is not cut over by this app.
+This app is the Vercel-ready Next.js surface for Mochirii. The existing root GitHub Pages static site remains intact, and DNS cutover is still deferred.
 
 ## Local Development
 
@@ -19,6 +19,17 @@ cd apps/web
 npm run lint
 npm run build
 ```
+
+Optional local cleanup scripts:
+
+```sh
+cd apps/web
+npm run clean
+npm run build:clean
+npm run vercel:build:local
+```
+
+`npm run clean` removes only `.next` and `.vercel/output`; it does not remove `.vercel/project.json` or local env files.
 
 ## Vercel Setup
 
@@ -51,6 +62,26 @@ NEXT_PUBLIC_SITE_URL
 ```
 
 Do not print or commit secret values. `.env.example` contains names only.
+
+## Migrated Routes
+
+Current Next routes:
+
+- `/`
+- `/join`
+- `/ranks`
+- `/leaders`
+- `/codex`
+- `/events`
+- `/announcements`
+- `/raffles`
+- `/gallery`
+- `/spotlight`
+- `/spotify`
+- `/recruitment`
+- `/twills`
+
+Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
 ## Migrated in Phase 1
 
@@ -87,6 +118,26 @@ npm run build
 vercel build --prod
 ```
 
+## Accepted or Deferred Warnings
+
+- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. It is preserved for current Recruitment audio behavior.
+- A local `vercel build --prod` can warn if `.next` exists. Run `npm run vercel:build:local` to clean local generated output first.
+- Local `vercel build --prod` may still log a non-blocking `outputFileTracingRoot` / `turbopack.root` mismatch from Vercel CLI's linked `apps/web` root; confirm dashboard deployment logs after the PR.
+- Vercel Development env was missing `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` during the cleanup audit. Add it manually before relying on Development env pulls.
+
+## Vercel Verification
+
+```sh
+cd apps/web
+vercel whoami
+vercel env ls production
+vercel env ls preview
+vercel env ls development
+vercel pull --environment=preview --yes
+```
+
+Report env names only as present or missing. Do not print values.
+
 ## Deferred
 
 - Authentication and account behavior.
@@ -95,3 +146,5 @@ vercel build --prod
 - Uploads, moderation, account, and leader-dashboard behavior.
 - Vercel dashboard automation.
 - Production DNS and cutover.
+
+See `docs/next-phase-3-auth-member-workflow.md` for the Phase 3 auth/member/gallery workflow migration plan.
