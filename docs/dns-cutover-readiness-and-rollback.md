@@ -157,26 +157,33 @@ Manual Supabase Dashboard path:
 
 - Authentication -> URL Configuration
 
+### Supabase Redirect Planning
+
 Eventual Site URL after cutover:
 
 - `https://mochirii.com`
 
-Redirect URLs should include:
+Preview/local redirect URLs:
 
-- `https://mochirii.com/**`
-- `https://www.mochirii.com/**`
 - `https://mochirii.vercel.app/**`
 - `https://*-mochirii.vercel.app/**`
 - `http://localhost:3000/**`
 
-Exact final route targets recommended:
+Broad custom-domain wildcards may be useful during transition:
+
+- `https://mochirii.com/**`
+- `https://www.mochirii.com/**`
+
+Exact hardened final production redirect URLs after cutover:
 
 - `https://mochirii.com/auth`
 - `https://mochirii.com/account`
 - `https://mochirii.com/gallery-submit`
 - `https://mochirii.com/leader-dashboard`
+- `https://www.mochirii.com/auth` if `www` serves app traffic.
+- `https://www.mochirii.com/account` if `www` serves app traffic.
 
-Keep Vercel and local URLs during the transition until rollback risk is gone.
+Keep Vercel and local URLs during the transition until rollback risk is gone. Broad production wildcards may be useful during transition, but exact production redirect URLs are the hardened final state.
 
 Supabase behavior that must stay unchanged:
 
@@ -221,6 +228,190 @@ Discord verification behavior to test after cutover:
 - Auth returns to `/account`.
 - `verify-discord-member` can read the Discord identity through Supabase Auth.
 - Required role checks still distinguish unverified, verified, active member, and moderator states.
+
+## Current DNS Inventory Snapshot
+
+Snapshot time: `2026-05-17T22:16:31Z`
+
+Tools used:
+
+- `dig`
+- `curl`
+- `whois`
+- `jq`
+- `gh`
+- `git`
+- `rg`
+
+Commands used:
+
+- `dig mochirii.com NS/SOA/A/AAAA/CNAME/MX/TXT/CAA +noall +answer`
+- `dig www.mochirii.com CNAME/A/AAAA/TXT +noall +answer`
+- `dig @1.1.1.1` and `dig @8.8.8.8` for apex and `www` cross-checks.
+- `dig _dmarc.mochirii.com TXT +noall +answer`
+- `dig selector1._domainkey.mochirii.com TXT/CNAME +noall +answer`
+- `dig selector2._domainkey.mochirii.com TXT/CNAME +noall +answer`
+- `dig default._domainkey.mochirii.com TXT/CNAME +noall +answer`
+- `dig protonmail._domainkey.mochirii.com TXT/CNAME +noall +answer`
+- `dig google._domainkey.mochirii.com TXT/CNAME +noall +answer`
+- `dig api.mochirii.com A/CNAME +noall +answer`
+- `dig photos.mochirii.com A/CNAME +noall +answer`
+- `dig gallery.mochirii.com A/CNAME +noall +answer`
+- `dig discord.mochirii.com A/CNAME +noall +answer`
+- `whois mochirii.com`
+- `curl -sL https://rdap.org/domain/mochirii.com`
+- `curl -I http://mochirii.com`
+- `curl -I https://mochirii.com`
+- `curl -I http://www.mochirii.com`
+- `curl -I https://www.mochirii.com`
+- `gh api repos/Mochirii-Wushu/Mochirii/pages`
+- `gh repo view Mochirii-Wushu/Mochirii --json nameWithOwner,defaultBranchRef,homepageUrl,url`
+- `test -f CNAME && cat CNAME`
+- `git ls-files | grep -E '(^|/)CNAME$'`
+- `rg` for `mochirii.com`, `github.io`, `CNAME`, and GitHub Pages references.
+
+Confidence labels:
+
+- `CONFIRMED_PUBLIC_DNS`: observed from public DNS, WHOIS/RDAP, or HTTP response data.
+- `CONFIRMED_REPO`: observed from tracked repository files.
+- `CONFIRMED_GITHUB_API`: observed from GitHub API or GitHub CLI API output.
+- `INFERRED`: reasoned from multiple public observations, but not directly proven by a dashboard.
+- `MANUAL_CONFIRMATION_REQUIRED`: not provable from the allowed public/repo sources.
+
+GitHub Pages direct-record reference set used for comparison:
+
+- A: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+- AAAA: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
+
+### Current DNS Summary
+
+| Item | Value | Source | Confidence | Notes |
+| --- | --- | --- | --- | --- |
+| Registrar | Cloudflare, Inc.; IANA ID `1910` | `whois`; RDAP | CONFIRMED_PUBLIC_DNS | Public registration data confirms the registrar. |
+| Registration status | `client transfer prohibited` | `whois`; RDAP | CONFIRMED_PUBLIC_DNS | No dashboard access used. |
+| DNSSEC | signed delegation | `whois`; RDAP `secureDNS.delegationSigned=true` | CONFIRMED_PUBLIC_DNS | Do not alter DNSSEC during cutover without explicit approval. |
+| Authoritative nameservers | `igor.ns.cloudflare.com.`, `naomi.ns.cloudflare.com.` | `dig NS`; `whois`; RDAP | CONFIRMED_PUBLIC_DNS | Current NS set is Cloudflare-branded. |
+| Inferred DNS provider | Cloudflare DNS likely | authoritative nameservers | INFERRED | Registrar and DNS provider can differ; dashboard confirmation is still required. |
+| Cloudflare proxy classification | Cloudflare proxy likely | Cloudflare A/AAAA-looking answers; `server: cloudflare`; `cf-ray`; Cloudflare nameservers | INFERRED | Public data cannot prove orange-cloud dashboard state. |
+| Apex web origin | GitHub Pages behind Cloudflare likely | GitHub Pages API/CNAME; HTTP `x-github-request-id`, Fastly headers, and Cloudflare headers | INFERRED | Direct DNS answers are Cloudflare proxy IPs, not GitHub Pages IPs. |
+| GitHub Pages custom domain | `mochirii.com` | GitHub Pages API | CONFIRMED_GITHUB_API | API reports Pages `status: built`, `cname: mochirii.com`, source `main` `/`. |
+| Repository CNAME file | `CNAME` contains `mochirii.com` | tracked `CNAME` file | CONFIRMED_REPO | Keep root static files and CNAME available for rollback until stabilization. |
+| Repository homepage URL | `https://mochirii.vercel.app` | GitHub repo API | CONFIRMED_GITHUB_API | Repo metadata points to the Vercel production review URL. |
+| GitHub Pages A classification | no direct GitHub Pages A match; proxied / ambiguous | public DNS vs GitHub Pages reference A values | INFERRED | Current A records are Cloudflare IPs, so direct GitHub Pages A comparison is hidden by proxying. |
+| GitHub Pages AAAA classification | no direct GitHub Pages AAAA match; proxied / ambiguous | public DNS vs GitHub Pages reference AAAA values | INFERRED | Current AAAA records are Cloudflare IPs, so direct GitHub Pages AAAA comparison is hidden by proxying. |
+| `www` routing intent | `https://www.mochirii.com` redirects to `https://mochirii.com/` | `curl -I` | CONFIRMED_PUBLIC_DNS | Whether `www` should remain redirect-only or serve app traffic is a cutover decision. |
+
+### Current Observed Public DNS Snapshot
+
+| Host | Type | Value | TTL | Resolver / Source | Confidence | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `mochirii.com` | NS | `igor.ns.cloudflare.com.` | `86400`; `21600` from `8.8.8.8` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | TTL variance observed between resolvers. |
+| `mochirii.com` | NS | `naomi.ns.cloudflare.com.` | `86400`; `21600` from `8.8.8.8` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | TTL variance observed between resolvers. |
+| `mochirii.com` | SOA | `igor.ns.cloudflare.com. dns.cloudflare.com. 2404491762 10000 2400 604800 1800` | `1800` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Cloudflare SOA. |
+| `mochirii.com` | A | `104.21.70.47` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Cloudflare-fronted web record. |
+| `mochirii.com` | A | `172.67.219.251` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Cloudflare-fronted web record. |
+| `mochirii.com` | AAAA | `2606:4700:3030::ac43:dbfb` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Cloudflare-fronted web record. |
+| `mochirii.com` | AAAA | `2606:4700:3035::6815:462f` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Cloudflare-fronted web record. |
+| `mochirii.com` | CNAME | no public answer | n/a | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Apex CNAME/ALIAS/ANAME dashboard state cannot be proven from public DNS. |
+| `mochirii.com` | MX | `10 mail.protonmail.ch.` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Email record. Do not touch. |
+| `mochirii.com` | MX | `20 mailsec.protonmail.ch.` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Email record. Do not touch. |
+| `mochirii.com` | TXT | `v=spf1 include:_spf.protonmail.ch -all` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | SPF. Do not touch. |
+| `mochirii.com` | TXT | `openai-domain-verification=dv-7wrk9X8LfsQRks41kOG5G5jI` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Verification TXT. Do not touch unless the owner approves. |
+| `mochirii.com` | TXT | `protonmail-verification=55f321dbe5e35efd1b6fdbb8b3be9e3a7eca934f` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Proton verification TXT. Do not touch. |
+| `mochirii.com` | CAA | no public answer | n/a | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | No observed CAA record; do not add one during cutover unless separately approved. |
+| `www.mochirii.com` | CNAME | no public answer | n/a | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | `www` currently resolves through A/AAAA, likely Cloudflare proxied. |
+| `www.mochirii.com` | A | `104.21.70.47` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Same visible Cloudflare A set as apex. |
+| `www.mochirii.com` | A | `172.67.219.251` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Same visible Cloudflare A set as apex. |
+| `www.mochirii.com` | AAAA | `2606:4700:3030::ac43:dbfb` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Same visible Cloudflare AAAA set as apex. |
+| `www.mochirii.com` | AAAA | `2606:4700:3035::6815:462f` | `300` | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | Same visible Cloudflare AAAA set as apex. |
+| `www.mochirii.com` | TXT | no public answer | n/a | system resolver; `1.1.1.1`; `8.8.8.8` | CONFIRMED_PUBLIC_DNS | No observed `www` TXT. |
+| `_dmarc.mochirii.com` | TXT | `v=DMARC1; p=quarantine; rua=mailto:dmarc@mochirii.com; ruf=mailto:dmarc@mochirii.com; fo=1` | `300` | system resolver | CONFIRMED_PUBLIC_DNS | DMARC. Do not touch. |
+| `protonmail._domainkey.mochirii.com` | CNAME | `protonmail.domainkey.daf6yajm373drajzjqjvbaedayzfr3yeglwbrbv5eby4j5kbhhl6a.domains.proton.ch.` | `300` | system resolver | CONFIRMED_PUBLIC_DNS | DKIM selector. Do not touch. |
+| `protonmail._domainkey.mochirii.com` | TXT | resolved via Proton CNAME target; DKIM public key observed at target | `1200` at Proton target | system resolver | CONFIRMED_PUBLIC_DNS | Preserve the CNAME; the long DKIM key is hosted at Proton. |
+| `selector1._domainkey.mochirii.com` | TXT/CNAME | no public answer | n/a | system resolver | CONFIRMED_PUBLIC_DNS | No observed record. |
+| `selector2._domainkey.mochirii.com` | TXT/CNAME | no public answer | n/a | system resolver | CONFIRMED_PUBLIC_DNS | No observed record. |
+| `default._domainkey.mochirii.com` | TXT/CNAME | no public answer | n/a | system resolver | CONFIRMED_PUBLIC_DNS | No observed record. |
+| `google._domainkey.mochirii.com` | TXT/CNAME | no public answer | n/a | system resolver | CONFIRMED_PUBLIC_DNS | No observed record. |
+
+### Current Apex And WWW HTTP Behavior
+
+| URL | Status | Location | Server / headers | Source | Confidence | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `http://mochirii.com` | `301` | `https://mochirii.com/` | `server: cloudflare`, `cf-ray` | `curl -I` | CONFIRMED_PUBLIC_DNS | HTTP redirects to HTTPS apex. |
+| `https://mochirii.com` | `200` | n/a | `server: cloudflare`, `x-github-request-id`, Fastly cache headers | `curl -I` | CONFIRMED_PUBLIC_DNS | HTTPS apex serves current GitHub Pages site through Cloudflare. |
+| `http://www.mochirii.com` | `301` | `https://www.mochirii.com/` | `server: cloudflare`, `cf-ray` | `curl -I` | CONFIRMED_PUBLIC_DNS | HTTP redirects to HTTPS `www`. |
+| `https://www.mochirii.com` | `301` | `https://mochirii.com/` | `server: cloudflare`, `x-github-request-id`, Fastly cache headers | `curl -I` | CONFIRMED_PUBLIC_DNS | `www` redirects to apex over HTTPS. |
+
+### GitHub Pages State
+
+| Item | Value | Source | Confidence | Notes |
+| --- | --- | --- | --- | --- |
+| Pages status | `built` | `gh api repos/Mochirii-Wushu/Mochirii/pages` | CONFIRMED_GITHUB_API | Current GitHub Pages site is built. |
+| Pages custom domain | `mochirii.com` | `gh api repos/Mochirii-Wushu/Mochirii/pages` | CONFIRMED_GITHUB_API | Matches tracked `CNAME`. |
+| Pages source | branch `main`, path `/` | `gh api repos/Mochirii-Wushu/Mochirii/pages` | CONFIRMED_GITHUB_API | Root static files remain the rollback source. |
+| Pages public flag | `true` | `gh api repos/Mochirii-Wushu/Mochirii/pages` | CONFIRMED_GITHUB_API | Do not change Pages settings in this readiness phase. |
+| Pages HTTPS enforced | `false` | `gh api repos/Mochirii-Wushu/Mochirii/pages` | CONFIRMED_GITHUB_API | Cloudflare currently provides the visible HTTPS behavior; dashboard confirmation required before changing anything. |
+| Tracked CNAME | `mochirii.com` | `CNAME`; `git ls-files` | CONFIRMED_REPO | Do not remove during cutover readiness work. |
+| Default Pages domain | likely `mochirii-wushu.github.io/Mochirii/` before custom domain | repository owner/name convention | INFERRED | Not directly returned by the GitHub API output used here; use GitHub Pages dashboard/API if this matters for rollback. |
+
+### Future Cutover Action Table
+
+| Host | Type | Current state | Future action | Final value | Source | Confidence | Cutover action |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `mochirii.com` | A/AAAA or Vercel-required apex record | Cloudflare-fronted records currently serve GitHub Pages | Replace or adjust only after Vercel domain setup is approved | Use exact value shown in Vercel Project -> Settings -> Domains | public DNS; Vercel checklist | MANUAL_CONFIRMATION_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
+| `mochirii.com` | CNAME/ALIAS/ANAME | no public CNAME answer; dashboard state unknown | Follow Vercel dashboard instructions if it requires apex flattening/ALIAS/ANAME | Use exact value shown in Vercel Project -> Settings -> Domains | public DNS; Vercel checklist | MANUAL_CONFIRMATION_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
+| `www.mochirii.com` | A/AAAA/CNAME | Cloudflare-fronted records currently redirect to apex | Configure according to chosen `www` behavior and Vercel dashboard instructions | Use exact value shown in Vercel Project -> Settings -> Domains | public DNS; HTTP behavior; Vercel checklist | MANUAL_CONFIRMATION_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
+| `mochirii.com` | MX | ProtonMail MX records | Leave unchanged | `10 mail.protonmail.ch.`; `20 mailsec.protonmail.ch.` | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | TXT | SPF and verification TXT records | Leave unchanged | Existing public TXT values | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `_dmarc.mochirii.com` | TXT | DMARC quarantine policy | Leave unchanged | Existing DMARC TXT value | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `protonmail._domainkey.mochirii.com` | CNAME | ProtonMail DKIM selector | Leave unchanged | Existing Proton DKIM CNAME target | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | CAA | no public answer | Leave unchanged unless certificate policy is separately approved | n/a | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+
+### Records To Preserve
+
+| Record / Host | Type | Current observed value | TTL | Purpose | Source | Confidence | Cutover action |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `mochirii.com` | MX | `10 mail.protonmail.ch.` | `300` | ProtonMail inbound mail | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | MX | `20 mailsec.protonmail.ch.` | `300` | ProtonMail inbound mail fallback | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | TXT | `v=spf1 include:_spf.protonmail.ch -all` | `300` | SPF email authorization | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | TXT | `protonmail-verification=55f321dbe5e35efd1b6fdbb8b3be9e3a7eca934f` | `300` | ProtonMail domain verification | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | TXT | `openai-domain-verification=dv-7wrk9X8LfsQRks41kOG5G5jI` | `300` | OpenAI domain verification | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `_dmarc.mochirii.com` | TXT | `v=DMARC1; p=quarantine; rua=mailto:dmarc@mochirii.com; ruf=mailto:dmarc@mochirii.com; fo=1` | `300` | DMARC reporting and policy | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `protonmail._domainkey.mochirii.com` | CNAME | `protonmail.domainkey.daf6yajm373drajzjqjvbaedayzfr3yeglwbrbv5eby4j5kbhhl6a.domains.proton.ch.` | `300` | ProtonMail DKIM selector | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `mochirii.com` | CAA | no public answer | n/a | Certificate authority policy | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH unless certificate policy is separately approved |
+| `CNAME` repository file | file | `mochirii.com` | n/a | GitHub Pages custom-domain rollback reference | repo | CONFIRMED_REPO | DO NOT TOUCH until after stabilization |
+
+### Records Likely To Change During Future Cutover
+
+- Apex `mochirii.com` web record should change according to Vercel Project -> Settings -> Domains.
+- `www.mochirii.com` should change according to Vercel Project -> Settings -> Domains and the approved `www` behavior.
+- Use exact Vercel-provided DNS records at cutover time.
+- Do not touch MX, SPF, DKIM, DMARC, CAA, verification TXT, email, or unrelated records.
+- Do not invent final Vercel DNS targets in this repository.
+
+### Unrelated Subdomains And Do-Not-Touch List
+
+Allowed-source repo search found only `www.mochirii.com` references in this cutover document. Public A/CNAME checks for the listed known/discussed hosts `api.mochirii.com`, `photos.mochirii.com`, `gallery.mochirii.com`, and `discord.mochirii.com` returned no public answers. That does not prove the full zone lacks those hosts.
+
+| Host | Classification | Observed records | Source | Confidence | Cutover action |
+| --- | --- | --- | --- | --- | --- |
+| `www.mochirii.com` | website/custom-domain related | Cloudflare-fronted A/AAAA; HTTPS redirects to apex | public DNS; HTTP | CONFIRMED_PUBLIC_DNS | Change only if the approved Vercel cutover plan includes `www`. |
+| `api.mochirii.com` | unknown / manual confirmation required | no public A/CNAME answer from allowed check | public DNS; repo search | MANUAL_CONFIRMATION_REQUIRED | DO NOT TOUCH unless found in provider dashboard and explicitly scoped. |
+| `photos.mochirii.com` | unknown / manual confirmation required | no public A/CNAME answer from allowed check | public DNS; repo search | MANUAL_CONFIRMATION_REQUIRED | DO NOT TOUCH unless found in provider dashboard and explicitly scoped. |
+| `gallery.mochirii.com` | unknown / manual confirmation required | no public A/CNAME answer from allowed check | public DNS; repo search | MANUAL_CONFIRMATION_REQUIRED | DO NOT TOUCH unless found in provider dashboard and explicitly scoped. |
+| `discord.mochirii.com` | unknown / manual confirmation required | no public A/CNAME answer from allowed check | public DNS; repo search | MANUAL_CONFIRMATION_REQUIRED | DO NOT TOUCH unless found in provider dashboard and explicitly scoped. |
+
+### Manual Confirmation Required
+
+- Actual DNS provider dashboard and account owner.
+- Full current zone export.
+- Current TTLs as shown by the provider dashboard, because resolver TTLs can vary.
+- Cloudflare proxy orange-cloud state if Cloudflare is the DNS provider.
+- Whether Cloudflare page rules, redirects, workers, cache rules, SSL/TLS mode, or DNSSEC settings affect `mochirii.com`.
+- Exact Vercel-provided DNS records after adding `mochirii.com` and any `www` domain in Vercel.
+- Whether `www` should redirect to apex or serve app traffic.
+- Email provider requirements, including whether additional Proton DKIM selectors exist in the dashboard but were not returned by the allowed public checks.
+- Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
 
 ## DNS Provider Inventory Template
 
