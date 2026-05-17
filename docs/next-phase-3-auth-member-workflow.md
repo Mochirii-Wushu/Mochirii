@@ -2,7 +2,7 @@
 
 ## 1. Phase 3 Scope
 
-Phase 3 is future work. It should migrate the deferred auth/member workflows from the root static site into the existing Next.js App Router app under `apps/web`.
+Phase 3 migrates the deferred auth/member workflows from the root static site into the existing Next.js App Router app under `apps/web`.
 
 Route migration order:
 
@@ -11,7 +11,30 @@ Route migration order:
 3. `/gallery-submit`
 4. `/leader-dashboard`
 
-No Phase 3 implementation is included in the current cleanup PR. The root GitHub Pages files should stay intact until the Next implementation is validated in Vercel preview and production review.
+The root GitHub Pages files should stay intact until the Next implementation is validated in Vercel preview and production review.
+
+## Supabase-First Architecture Rule
+
+Supabase remains the authority for Auth, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation, and audit records. Vercel/Next owns routing, React UI, rendering, redirects, and thin browser-safe integration with Supabase.
+
+Existing Supabase Edge Functions should continue to be invoked from the Next app. Do not recreate `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, or `list-approved-gallery-submissions` as Vercel route handlers in this phase.
+
+Do not add Vercel service-role or Discord bot secrets unless a later approved change explicitly requires them. Browser-safe Supabase calls may use `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; service-role keys, secret keys, Discord bot tokens, and OAuth client secrets must stay in Supabase Edge Functions or explicitly server-only code.
+
+RLS and Storage policies remain central and must not be bypassed by client code. DNS cutover remains deferred until Phase 3 is validated and explicitly approved.
+
+## Phase 3 Implementation Status
+
+This branch migrates the deferred member workflow routes into `apps/web` while leaving the root GitHub Pages files intact:
+
+- `/auth`
+- `/account`
+- `/gallery-submit`
+- `/leader-dashboard`
+
+The Next implementation adds browser-safe helpers under `apps/web/lib/supabase/` and member workflow components under `apps/web/components/member-workflow/`. The helpers keep the existing static-site behavior close to `supabase.js`: Supabase Auth runs in the browser with the publishable key, user-owned profile and submission reads remain subject to RLS, uploads go through the private `member-gallery` bucket, and privileged verification/moderation still invokes existing Supabase Edge Functions.
+
+No Supabase migrations, Supabase Edge Functions, dashboard settings, Discord settings, DNS settings, Vercel settings, or root GitHub Pages auth/member/upload/moderation files are changed in this phase.
 
 ## 2. Non-Goals
 
@@ -21,7 +44,7 @@ No Phase 3 implementation is included in the current cleanup PR. The root GitHub
 - Do not expose service-role, secret, Discord bot, or OAuth client secret values to the browser.
 - Do not change Supabase, Discord, Vercel, GitHub Pages, GitHub, or DNS dashboard settings without explicit approval.
 - Do not broaden public route migration or redesign the public pages.
-- Do not start Phase 3 during pre-Phase-3 cleanup.
+- Do not move Supabase Edge Function authority into Vercel route handlers.
 
 ## 3. Route Migration Order
 
@@ -97,7 +120,7 @@ Public browser env names for the Next app:
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_SITE_URL`
 
-Server-only names currently implied by Edge Functions or future Next server boundaries:
+Existing Supabase Edge Function secret or non-browser names are not required in Vercel/Next by this branch. They are listed here only as backend-boundary reminders and must not be exposed to browser code:
 
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEYS`
@@ -114,14 +137,19 @@ Only public publishable keys may be exposed to browser code. Service-role, secre
 
 ## 10. Supabase Redirect URL Checklist
 
-Before Phase 3 preview testing, confirm Supabase Auth URL Configuration allows:
+Before Phase 3 preview testing, manually confirm Supabase Auth URL Configuration allows:
 
-- `http://localhost:3000/auth`
-- `http://localhost:3000/account`
 - `http://localhost:3000/**`
-- `https://mochirii.vercel.app/auth`
-- `https://mochirii.vercel.app/account`
+- `https://mochirii.vercel.app/**`
 - Vercel preview URL pattern for the project/team.
+- Future `https://mochirii.com/**` only after DNS cutover is approved.
+
+Confirm these route targets are accepted:
+
+- `/auth`
+- `/account`
+- `/gallery-submit`
+- `/leader-dashboard`
 
 Keep legacy root static callback URLs allowed until the static auth pages are retired:
 
@@ -140,12 +168,13 @@ Do not change this during Phase 3 implementation unless the Supabase project or 
 
 ## 12. Client/Server Boundary Plan
 
-Initial Next implementation should use:
+The initial Next implementation uses:
 
 - Client components only for browser auth state, form interactions, file selection, modal state, and upload progress.
 - Shared `apps/web/lib/supabase` helpers for browser-safe Supabase client creation.
-- Edge Functions or Next route handlers for privileged Discord/member/moderation actions.
-- Server-only modules for any service-role or Discord bot access.
+- Existing Supabase Edge Functions for privileged Discord/member/moderation actions.
+- No Next route handlers for `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, or `moderate-gallery-submission`.
+- No Supabase SSR cookie middleware in this phase; server-side auth can be evaluated later only if a real route need appears.
 
 Do not import server-only credentials into Client Components.
 
@@ -159,15 +188,18 @@ Do not import server-only credentials into Client Components.
 - File input validation before upload.
 - Public, non-sensitive form state and accessibility behavior.
 
-## 14. What Should Move Server-Side Later
+## 14. What Stayed In Supabase
 
-- Discord membership checks.
-- Moderator-role checks.
-- Moderation queue reads.
-- Submission approval/rejection writes.
+- Discord membership checks through `verify-discord-member`.
+- Moderator-role checks through existing moderation Edge Function helpers.
+- Moderation queue reads through `list-gallery-review-queue`.
+- Submission approval/rejection writes through `moderate-gallery-submission`.
+- Approved submission feed reads through `list-approved-gallery-submissions`.
 - Signed preview URL creation.
-- Any future transformation, image processing, or notification/webhook work.
+- Gallery moderation audit records.
 - Any code path needing service-role, secret key, Discord bot token, or OAuth client secret values.
+
+Future server-side Next auth can be considered only if preview testing proves a route cannot be made safe with the current browser-session and Supabase Edge Function model.
 
 ## 15. RLS and Security Assumptions To Verify
 
@@ -212,7 +244,9 @@ git diff --check
 cd apps/web
 npm run lint
 npm run build
-vercel build --prod
+
+cd ../..
+vercel build --prod --cwd apps/web
 ```
 
 Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
@@ -238,6 +272,7 @@ Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`,
 - Revert the Phase 3 PR if Vercel preview reveals auth/session regressions.
 - Leave Supabase Edge Functions and migrations unchanged unless a separate approved backend migration is needed.
 - Keep legacy redirect URLs allowed until rollback risk is gone.
+- If needed, temporarily remove the `.html` redirects for Phase 3 routes in a follow-up PR so the root static pages can keep serving those workflows while Next is repaired.
 
 ## 21. DNS Cutover Prerequisites
 
