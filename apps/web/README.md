@@ -41,13 +41,17 @@ apps/web
 
 Dashboard settings remain manual. This branch does not change Vercel project settings, DNS, production domains, Supabase settings, or Discord settings.
 
-Local linking is intentionally deferred unless the operator chooses to run it:
+The safest local workflow remains the linked `apps/web` workflow:
 
 ```sh
 cd apps/web
 vercel link
-vercel pull --environment=preview
+vercel pull --environment=preview --yes
+npm run clean
+vercel build --prod
 ```
+
+Root-level `vercel link --repo` was tested as a reversible monorepo-link cleanup path, but it prompts for confirmation before linking the repository to Vercel projects. Do not answer that prompt or relink the project without an operator present. Dashboard Root Directory remains the authoritative production/preview setting.
 
 Do not commit `.vercel/`.
 
@@ -120,10 +124,10 @@ vercel build --prod
 
 ## Accepted or Deferred Warnings
 
-- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. It is preserved for current Recruitment audio behavior.
+- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. It is preserved exactly as-is because audio quality is preferred over file-size optimization. This is not a Vercel blocker. Do not compress, re-encode, replace, delete, externalize, or otherwise optimize this audio without explicit user approval.
 - A local `vercel build --prod` can warn if `.next` exists. Run `npm run vercel:build:local` to clean local generated output first.
-- Local `vercel build --prod` may still log a non-blocking `outputFileTracingRoot` / `turbopack.root` mismatch from Vercel CLI's linked `apps/web` root; confirm dashboard deployment logs after the PR.
-- Vercel Development env was missing `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` during the cleanup audit. Add it manually before relying on Development env pulls.
+- Local `vercel build --prod` may still log a non-blocking `outputFileTracingRoot` / `turbopack.root` mismatch from Vercel CLI's linked `apps/web` root. `next build` and Vercel dashboard builds use the repo-root Turbopack config needed for the dashboard Root Directory flow.
+- Vercel Development env is intentionally skipped for now. Production and Preview envs are what matter for current deployed and PR-preview builds.
 
 ## Vercel Verification
 

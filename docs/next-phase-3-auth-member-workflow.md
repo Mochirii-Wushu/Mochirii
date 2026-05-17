@@ -2,7 +2,7 @@
 
 ## 1. Phase 3 Scope
 
-Phase 3 should migrate the deferred auth/member workflows from the root static site into the existing Next.js App Router app under `apps/web`.
+Phase 3 is future work. It should migrate the deferred auth/member workflows from the root static site into the existing Next.js App Router app under `apps/web`.
 
 Route migration order:
 
@@ -11,7 +11,7 @@ Route migration order:
 3. `/gallery-submit`
 4. `/leader-dashboard`
 
-The root GitHub Pages files should stay intact until the Next implementation is validated in Vercel preview and production review.
+No Phase 3 implementation is included in the current cleanup PR. The root GitHub Pages files should stay intact until the Next implementation is validated in Vercel preview and production review.
 
 ## 2. Non-Goals
 
@@ -21,6 +21,7 @@ The root GitHub Pages files should stay intact until the Next implementation is 
 - Do not expose service-role, secret, Discord bot, or OAuth client secret values to the browser.
 - Do not change Supabase, Discord, Vercel, GitHub Pages, GitHub, or DNS dashboard settings without explicit approval.
 - Do not broaden public route migration or redesign the public pages.
+- Do not start Phase 3 during pre-Phase-3 cleanup.
 
 ## 3. Route Migration Order
 
@@ -38,7 +39,19 @@ The root GitHub Pages files should stay intact until the Next implementation is 
 
 Shared shell dependencies remain `header.html`, `footer.html`, `utils.js`, and `site.js`.
 
-## 5. Current Supabase Tables Referenced
+## 5. Supabase Helper Files Involved
+
+- `supabase.js`: browser-safe helper used by the current root static auth/member/upload/moderation pages.
+- `supabase/config.toml`: local Supabase function configuration.
+- `supabase/functions/_shared/discord-api.ts`: Discord API helpers for Edge Functions.
+- `supabase/functions/_shared/gallery-moderation.ts`: shared moderation access helpers.
+- `supabase/functions/verify-discord-member/index.ts`
+- `supabase/functions/list-approved-gallery-submissions/index.ts`
+- `supabase/functions/list-gallery-review-queue/index.ts`
+- `supabase/functions/moderate-gallery-submission/index.ts`
+- `supabase/migrations/*`: current table, RLS, Storage bucket, and Discord integration schema.
+
+## 6. Current Supabase Tables Referenced
 
 - `auth.users`
 - `auth.identities`
@@ -54,7 +67,7 @@ Current Storage bucket:
 
 - `member-gallery`, private, image-only, 50 MB file limit.
 
-## 6. Current Supabase Edge Functions Referenced
+## 7. Current Supabase Edge Functions Referenced
 
 - `verify-discord-member`
 - `list-approved-gallery-submissions`
@@ -63,7 +76,7 @@ Current Storage bucket:
 
 `verify-discord-member`, `list-gallery-review-queue`, and `moderate-gallery-submission` require a valid user JWT. `list-approved-gallery-submissions` is currently configured without JWT verification for public approved-gallery reads.
 
-## 7. Current Discord OAuth and Member Verification Flow
+## 8. Current Discord OAuth and Member Verification Flow
 
 Current browser flow:
 
@@ -76,7 +89,7 @@ Current browser flow:
 7. Upload access requires active `member_status`, recent Discord verification, and required roles.
 8. Moderator access requires the configured moderator Discord role and uses Edge Functions instead of direct browser table writes.
 
-## 8. Required Env Vars
+## 9. Required Env Vars
 
 Public browser env names for the Next app:
 
@@ -99,67 +112,7 @@ Server-only names currently implied by Edge Functions or future Next server boun
 
 Only public publishable keys may be exposed to browser code. Service-role, secret, and Discord bot values must stay server-side only.
 
-## 9. Client/Server Boundary Plan
-
-Initial Next implementation should use:
-
-- Client components only for browser auth state, form interactions, file selection, modal state, and upload progress.
-- Shared `apps/web/lib/supabase` helpers for browser-safe Supabase client creation.
-- Edge Functions or Next route handlers for privileged Discord/member/moderation actions.
-- Server-only modules for any service-role or Discord bot access.
-
-Do not import server-only credentials into Client Components.
-
-## 10. What Stays Client-Side Initially
-
-- Supabase Auth client initialization with public publishable key.
-- OAuth sign-in trigger.
-- Signed-in/signed-out UI state.
-- User-owned `member_profiles` reads and allowed editable profile updates, subject to RLS.
-- User-owned `gallery_submissions` history reads, subject to RLS.
-- File input validation before upload.
-- Public, non-sensitive form state and accessibility behavior.
-
-## 11. What Should Move Server-Side Later
-
-- Discord membership checks.
-- Moderator-role checks.
-- Moderation queue reads.
-- Submission approval/rejection writes.
-- Signed preview URL creation.
-- Any future transformation, image processing, or notification/webhook work.
-- Any code path needing service-role, secret key, Discord bot token, or OAuth client secret values.
-
-## 12. RLS and Security Assumptions To Verify
-
-- `member_profiles` has RLS enabled and users can only read/update their own permitted fields.
-- `gallery_submissions` has RLS enabled and users can only read their own submissions.
-- Upload inserts require active status, recent verification, required roles, and a `member-gallery` path scoped to the user ID.
-- Moderation tables remain service-role only unless a reviewed policy is added.
-- Storage policies continue to require authenticated ownership and active verified membership.
-- JWT claims from user-editable metadata are not trusted for authorization decisions.
-- Service-role/secret keys are never imported into browser bundles.
-
-## 13. Upload and Storage Security Risks
-
-- Preserve MIME allow-list checks for JPEG, PNG, and WebP.
-- Preserve 50 MB maximum file size unless explicitly changed.
-- Keep the bucket private.
-- Keep paths user-scoped by authenticated user ID.
-- Avoid overwriting existing files unless RLS policies explicitly support it.
-- Confirm rejected/deleted submission cleanup behavior.
-- Consider server-side image validation or transformation later if abuse risk increases.
-
-## 14. Moderation Workflow Risks
-
-- Moderator status must come from Discord role verification or a trusted server-side table, not client claims.
-- Signed preview URLs must be short-lived.
-- Rejection reasons must be bounded and escaped in UI.
-- Moderation actions should keep audit records in `gallery_moderation_events`.
-- Failed approval should not expose private storage paths publicly.
-- Approved gallery publishing should have a clear rollback path.
-
-## 15. Required Supabase Redirect URLs
+## 10. Supabase Redirect URL Checklist
 
 Before Phase 3 preview testing, confirm Supabase Auth URL Configuration allows:
 
@@ -177,7 +130,7 @@ Keep legacy root static callback URLs allowed until the static auth pages are re
 
 Supabase recommends exact production redirect URLs and preview/local wildcards only where needed.
 
-## 16. Required Discord Callback URL
+## 11. Discord Callback URL Checklist
 
 If Discord OAuth is managed through Supabase Auth, the Discord application redirect URI should remain the Supabase callback for the project:
 
@@ -185,7 +138,67 @@ If Discord OAuth is managed through Supabase Auth, the Discord application redir
 
 Do not change this during Phase 3 implementation unless the Supabase project or Discord application configuration changes with explicit approval.
 
-## 17. Validation Plan
+## 12. Client/Server Boundary Plan
+
+Initial Next implementation should use:
+
+- Client components only for browser auth state, form interactions, file selection, modal state, and upload progress.
+- Shared `apps/web/lib/supabase` helpers for browser-safe Supabase client creation.
+- Edge Functions or Next route handlers for privileged Discord/member/moderation actions.
+- Server-only modules for any service-role or Discord bot access.
+
+Do not import server-only credentials into Client Components.
+
+## 13. What Stays Client-Side Initially
+
+- Supabase Auth client initialization with public publishable key.
+- OAuth sign-in trigger.
+- Signed-in/signed-out UI state.
+- User-owned `member_profiles` reads and allowed editable profile updates, subject to RLS.
+- User-owned `gallery_submissions` history reads, subject to RLS.
+- File input validation before upload.
+- Public, non-sensitive form state and accessibility behavior.
+
+## 14. What Should Move Server-Side Later
+
+- Discord membership checks.
+- Moderator-role checks.
+- Moderation queue reads.
+- Submission approval/rejection writes.
+- Signed preview URL creation.
+- Any future transformation, image processing, or notification/webhook work.
+- Any code path needing service-role, secret key, Discord bot token, or OAuth client secret values.
+
+## 15. RLS and Security Assumptions To Verify
+
+- `member_profiles` has RLS enabled and users can only read/update their own permitted fields.
+- `gallery_submissions` has RLS enabled and users can only read their own submissions.
+- Upload inserts require active status, recent verification, required roles, and a `member-gallery` path scoped to the user ID.
+- Moderation tables remain service-role only unless a reviewed policy is added.
+- Storage policies continue to require authenticated ownership and active verified membership.
+- JWT claims from user-editable metadata are not trusted for authorization decisions.
+- Service-role/secret keys are never imported into browser bundles.
+
+## 16. Upload and Storage Security Risks
+
+- Preserve MIME allow-list checks for JPEG, PNG, and WebP.
+- Preserve 50 MB maximum file size unless explicitly changed.
+- Keep the bucket private.
+- Keep paths user-scoped by authenticated user ID.
+- Avoid overwriting existing files unless RLS policies explicitly support it.
+- Confirm rejected/deleted submission cleanup behavior.
+- Consider server-side image validation or transformation later if abuse risk increases.
+
+## 17. Moderation Workflow Risks
+
+- Moderator status must come from Discord role verification or a trusted server-side table, not client claims.
+- Signed preview URLs must be short-lived.
+- Rejection reasons must be bounded and escaped in UI.
+- Moderation actions should keep audit records in `gallery_moderation_events`.
+- Failed approval should not expose private storage paths publicly.
+- Approved gallery publishing should have a clear rollback path.
+
+## 18. Validation Plan
 
 Run before opening a Phase 3 PR:
 
@@ -204,7 +217,7 @@ vercel build --prod
 
 Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
 
-## 18. Browser Smoke Plan
+## 19. Browser Smoke Plan
 
 - Signed-out `/auth` shows Discord login.
 - Discord login starts OAuth and returns to `/account`.
@@ -218,7 +231,7 @@ Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`,
 - Approve/reject actions update the queue and audit history.
 - Redirects from `.html` URLs continue to resolve.
 
-## 19. Rollback Plan
+## 20. Rollback Plan
 
 - Keep root static auth/member files untouched.
 - Keep DNS on the current approved surface until explicit cutover.
@@ -226,7 +239,7 @@ Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`,
 - Leave Supabase Edge Functions and migrations unchanged unless a separate approved backend migration is needed.
 - Keep legacy redirect URLs allowed until rollback risk is gone.
 
-## 20. DNS Cutover Prerequisites
+## 21. DNS Cutover Prerequisites
 
 DNS cutover should wait until:
 
@@ -238,7 +251,7 @@ DNS cutover should wait until:
 - Rollback plan is accepted.
 - The user explicitly approves cutover.
 
-## 21. Decision Points Requiring User Approval
+## 22. Decision Points Requiring User Approval
 
 - Whether to keep all privileged behavior in Supabase Edge Functions or move some into Next route handlers.
 - Whether to use Supabase SSR cookie helpers or keep the current browser-session approach initially.
