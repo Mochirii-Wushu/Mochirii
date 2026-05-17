@@ -1,0 +1,466 @@
+import { Fragment } from "react";
+import homeData from "@/public/data/home.json";
+import galleryData from "@/public/data/gallery.json";
+import {
+  HomeGalleryLightbox,
+  type GallerySpotlightItem,
+} from "@/components/HomeGalleryLightbox";
+
+type HomeData = typeof homeData;
+type GalleryData = typeof galleryData;
+type Bulletin = HomeData["bulletins"][number];
+type DoorTile = HomeData["tiles"][number];
+type GalleryAlbumItem = GalleryData["albums"][number]["items"][number];
+
+const htmlRouteMap = new Map<string, string>([
+  ["index.html", "/"],
+  ["join.html", "/join"],
+  ["gallery.html", "/gallery"],
+  ["leaders.html", "/leaders"],
+  ["ranks.html", "/ranks"],
+  ["codex.html", "/codex"],
+  ["events.html", "/events"],
+  ["announcements.html", "/announcements"],
+  ["raffles.html", "/raffles"],
+  ["recruitment.html", "/recruitment"],
+  ["auth.html", "/auth"],
+  ["account.html", "/account"],
+  ["gallery-submit.html", "/gallery-submit"],
+  ["spotify.html", "/spotify"],
+  ["spotlight.html", "/spotlight"],
+  ["twills.html", "/twills"],
+  ["leader-dashboard.html", "/leader-dashboard"],
+]);
+
+function cleanLabel(value: unknown) {
+  return String(value ?? "").trim().replace(/\s+/g, " ");
+}
+
+function optionalText(record: object, key: string) {
+  const value = (record as Record<string, unknown>)[key];
+  return typeof value === "string" ? value : "";
+}
+
+function publicPath(value: unknown, fallback = "") {
+  const raw = String(value ?? "").trim() || fallback;
+  if (!raw) return "";
+  if (/^(https?:|mailto:|tel:|#|\/)/i.test(raw)) return raw;
+  if (raw.startsWith("./")) return `/${raw.slice(2)}`;
+  return `/${raw}`;
+}
+
+function cleanRoute(value: unknown, fallback = "#") {
+  const raw = String(value ?? "").trim() || fallback;
+  if (/^(https?:|mailto:|tel:|#)/i.test(raw)) return raw;
+
+  const match = raw.match(/^(?:\.\/|\/)?([^?#]+\.html)([?#].*)?$/i);
+  if (!match) return raw.startsWith("./") ? raw.slice(1) : raw;
+
+  const mapped = htmlRouteMap.get(match[1].toLowerCase());
+  return mapped ? `${mapped}${match[2] || ""}` : raw;
+}
+
+function formatDateUTC(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+
+  const date = new Date(`${raw}T00:00:00Z`);
+  if (Number.isNaN(date.valueOf())) return raw;
+
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function typeLabel(value: unknown) {
+  const type = cleanLabel(value).toLowerCase();
+  const labels: Record<string, string> = {
+    event: "Event",
+    raffle: "Raffle",
+    announcement: "Announcement",
+    member: "Member",
+    meta: "Update",
+  };
+
+  return labels[type] || "Update";
+}
+
+function joinLabel(parts: unknown[]) {
+  return parts.map(cleanLabel).filter(Boolean).join(" - ");
+}
+
+function pickFeatured(bulletins: Bulletin[]) {
+  return bulletins.find((item) => item.pinned === true) || bulletins[0] || null;
+}
+
+function normalizeSlug(value: unknown) {
+  return cleanLabel(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function galleryCategory(item: GalleryAlbumItem) {
+  if ("categories" in item && Array.isArray(item.categories)) {
+    return normalizeSlug(item.categories[0]);
+  }
+
+  return normalizeSlug(item.category);
+}
+
+function galleryHref(category: string) {
+  return category ? `/gallery?category=${encodeURIComponent(category)}` : "/gallery";
+}
+
+function normalizeGalleryItem(
+  item: GalleryAlbumItem,
+): GallerySpotlightItem & { href: string; addedAt: string } | null {
+  const full = publicPath(item.full || item.src);
+  const image = publicPath(item.thumb || item.src || item.full);
+  if (!full || !image) return null;
+
+  const category = galleryCategory(item);
+  const alt = cleanLabel(item.alt || item.caption || "Gallery image");
+  const caption = cleanLabel(item.caption);
+
+  return {
+    key: cleanLabel(item.id || full || image),
+    image,
+    full,
+    alt,
+    caption,
+    href: galleryHref(category),
+    addedAt: cleanLabel(item.galleryAddedAt),
+  };
+}
+
+function pickGallerySpotlightItems(
+  data: GalleryData,
+  fallback: HomeData["gallery"],
+): GallerySpotlightItem[] {
+  const seen = new Set<string>();
+  const galleryItems = data.albums
+    .flatMap((album) => album.items)
+    .map((item) => normalizeGalleryItem(item))
+    .filter((item): item is GallerySpotlightItem & { href: string; addedAt: string } => Boolean(item))
+    .filter((item) => {
+      if (seen.has(item.full)) return false;
+      seen.add(item.full);
+      return true;
+    })
+    .sort((a, b) => b.addedAt.localeCompare(a.addedAt))
+    .slice(0, 4);
+
+  if (galleryItems.length === 4) return galleryItems;
+
+  return fallback
+    .map((item, index) => ({
+      key: `home-gallery-${index}`,
+      image: publicPath(item.image),
+      full: publicPath(item.full || item.image),
+      alt: cleanLabel(item.alt || "Guild screenshot"),
+      caption: cleanLabel(optionalText(item, "caption")),
+    }))
+    .filter((item) => item.image && item.full);
+}
+
+function Descriptor({ lines }: { lines: string[] }) {
+  if (!lines.length) {
+    return <p className="muted">No description provided.</p>;
+  }
+
+  return lines.map((line) => <p key={line}>{line}</p>);
+}
+
+function SealVerse({ lines }: { lines: string[] }) {
+  if (!lines.length) return <>—</>;
+
+  return (
+    <>
+      {lines.map((line, index) => (
+        <Fragment key={line}>
+          {line}
+          {index < lines.length - 1 ? <br /> : null}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+function BulletinList({ items }: { items: Bulletin[] }) {
+  return (
+    <div id="bulletinList" className="home-bulletins" aria-label="More bulletins">
+      {items.slice(0, 5).map((item) => (
+        <a className="home-bulletin" href={cleanRoute(item.href)} key={item.title}>
+          <div className="home-bulletin__media">
+            <img
+              className="home-bulletin__img"
+              src={publicPath(item.image, "/assets/img/bulletins/featured.webp")}
+              alt={cleanLabel(item.imageAlt || "Bulletin cover")}
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="home-bulletin__scrim" aria-hidden="true" />
+            <div className="home-bulletin__tag">{typeLabel(item.type)}</div>
+          </div>
+          <div className="home-bulletin__body">
+            <div className="home-bulletin__date">{formatDateUTC(item.date)}</div>
+            <div className="home-bulletin__title">{item.title}</div>
+            <div className="home-bulletin__summary">{optionalText(item, "summary")}</div>
+          </div>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function DoorGrid({ tiles }: { tiles: DoorTile[] }) {
+  return (
+    <div id="doorsGrid" className="home-doors" aria-label="Door links">
+      {tiles.slice(0, 4).map((tile) => (
+        <a className="home-door" href={cleanRoute(tile.href)} key={tile.label}>
+          <div className="home-door__media">
+            <img
+              className="home-door__img"
+              src={publicPath(tile.image)}
+              alt={cleanLabel(tile.alt)}
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="home-door__scrim" aria-hidden="true" />
+            <div className="home-door__label">{tile.label}</div>
+          </div>
+          <div className="home-door__plate">
+            <div className="home-door__title">{tile.title}</div>
+            <div className="home-door__subtitle">{optionalText(tile, "subtitle")}</div>
+          </div>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+export default function Home() {
+  const heroDescriptor = homeData.hero.descriptor.map(cleanLabel).filter(Boolean);
+  const heroBadges = homeData.hero.badges.map(cleanLabel).filter(Boolean);
+  const sealVerse = homeData.seal.verse.map(cleanLabel).filter(Boolean);
+  const featured = pickFeatured(homeData.bulletins);
+  const secondaryBulletins = homeData.bulletins.filter((item) => item !== featured);
+  const galleryItems = pickGallerySpotlightItems(galleryData, homeData.gallery);
+  const spotlight = homeData.spotlight;
+
+  return (
+    <>
+      <header className="page-hero-shell" aria-label="Home hero">
+        <div className="container">
+          <section className="page-hero page-hero--tall">
+            <img
+              id="heroImage"
+              src={publicPath(homeData.hero.image, "/assets/img/hero/hero.webp")}
+              alt="Hero artwork for Mōchirīī guild"
+              className="page-hero__img"
+              width="1536"
+              height="1024"
+              loading="eager"
+              decoding="async"
+            />
+            {homeData.hero.atmosphereImage ? (
+              <img
+                id="heroAtmosphere"
+                src={publicPath(homeData.hero.atmosphereImage)}
+                alt=""
+                className="page-hero__atmos"
+                decoding="async"
+                aria-hidden="true"
+              />
+            ) : null}
+          </section>
+        </div>
+
+        <div className="container hero-overlap">
+          <div className="home-hero-row">
+            <section className="glass-card glass-card--strong glass-pad hero-intro">
+              <p className="kicker" id="homeKicker">Jianghu Guild Hall</p>
+              <h1 className="display-title" id="homeHeading">Mōchirīī</h1>
+
+              <div id="heroDescriptor" className="prose-stack" aria-live="polite">
+                <Descriptor lines={heroDescriptor} />
+              </div>
+
+              <div className="badge-row" id="heroBadges" aria-label="Guild badges">
+                {heroBadges.slice(0, 8).map((badge) => (
+                  <span key={badge}>{badge}</span>
+                ))}
+              </div>
+
+              <div className="hero-cta-row" aria-label="Primary actions">
+                <a
+                  className="hero-cta hero-cta--primary"
+                  href="https://discord.com/invite/dPafqMwWPK"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Join Discord
+                </a>
+                <a className="hero-cta" href="/join">
+                  How to Join
+                </a>
+              </div>
+            </section>
+
+            <aside className="home-guild-seal" aria-label="Guild seal">
+              <img
+                id="sealImage"
+                src={publicPath(homeData.seal.image, "/assets/img/brand/emblem.webp")}
+                alt={cleanLabel(homeData.seal.imageAlt || "Mōchirīī guild seal")}
+                width="1024"
+                height="1024"
+                loading="eager"
+                decoding="async"
+              />
+              <h2 id="sealTitle" className="home-seal-title">
+                {homeData.seal.title}
+              </h2>
+              <p id="sealVerse" className="home-seal-verse muted">
+                <SealVerse lines={sealVerse} />
+              </p>
+            </aside>
+          </div>
+        </div>
+      </header>
+
+      <main className="page-main" id="main">
+        <div className="container">
+          <section
+            className="glass-card glass-card--primary glass-pad"
+            aria-label="Guild bulletin"
+          >
+            <h2 className="section-title">Guild Bulletin</h2>
+            <p className="muted" id="bulletinIntro">
+              {homeData.copy.bulletinIntro}
+            </p>
+
+            {featured ? (
+              <a
+                id="featuredBulletin"
+                className="home-featured"
+                href={cleanRoute(featured.href)}
+                aria-label={joinLabel([
+                  "Featured bulletin",
+                  typeLabel(featured.type),
+                  formatDateUTC(featured.date),
+                  featured.title,
+                  optionalText(featured, "summary"),
+                ])}
+              >
+                <img
+                  id="featuredBulletinImage"
+                  src={publicPath(featured.image, "/assets/img/bulletins/featured.webp")}
+                  alt={cleanLabel(featured.imageAlt)}
+                  className="home-featured__img"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="home-featured__scrim" aria-hidden="true" />
+
+                <div className="home-featured__meta">
+                  <span id="featuredBulletinType" className="home-pill">
+                    {typeLabel(featured.type)}
+                  </span>
+                  <span id="featuredBulletinDate" className="home-date">
+                    {formatDateUTC(featured.date)}
+                  </span>
+                </div>
+
+                <div className="home-featured__plate">
+                  <h3 id="featuredBulletinTitle" className="home-title">
+                    {featured.title}
+                  </h3>
+                  <p id="featuredBulletinSummary" className="home-summary">
+                    {optionalText(featured, "summary")}
+                  </p>
+                </div>
+              </a>
+            ) : null}
+
+            <BulletinList items={secondaryBulletins} />
+          </section>
+
+          <section
+            className="glass-card glass-card--primary glass-pad"
+            style={{ marginTop: 24 }}
+            aria-label="Four doors"
+          >
+            <h2 className="section-title">Four Doors</h2>
+            <p className="muted" id="doorsIntro">
+              {homeData.copy.doorsIntro}
+            </p>
+            <DoorGrid tiles={homeData.tiles} />
+          </section>
+
+          <section
+            className="glass-card glass-card--primary glass-pad"
+            style={{ marginTop: 24 }}
+            aria-label="Member spotlight"
+          >
+            <h2 className="section-title">Member Spotlight</h2>
+            <p className="muted" id="spotlightIntro">
+              {homeData.copy.spotlightIntro}
+            </p>
+
+            <a
+              id="spotlightCard"
+              className="home-spotlight"
+              href={cleanRoute(spotlight.href)}
+              aria-label={joinLabel([
+                "Member spotlight",
+                spotlight.tag,
+                spotlight.title,
+                spotlight.summary,
+                "Spotlight Appreciation",
+              ])}
+            >
+              <img
+                id="spotlightImage"
+                src={publicPath(spotlight.image, "/assets/img/featured/spotlight.webp")}
+                alt={cleanLabel(spotlight.imageAlt)}
+                className="home-spotlight__img"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="home-spotlight__scrim" aria-hidden="true" />
+
+              <div className="home-spotlight__plate">
+                <span id="spotlightTag" className="home-pill">
+                  {spotlight.tag}
+                </span>
+                <h3 id="spotlightTitle" className="home-title">
+                  {spotlight.title}
+                </h3>
+                <p id="spotlightSummary" className="home-summary">
+                  {spotlight.summary}
+                </p>
+                <div className="home-link">Spotlight Appreciation</div>
+              </div>
+            </a>
+          </section>
+
+          <section
+            className="glass-card glass-card--primary glass-pad"
+            style={{ marginTop: 24 }}
+            aria-label="Screenshot spotlight"
+          >
+            <h2 className="section-title">Screenshot Spotlight</h2>
+            <p className="muted" id="galleryIntro">
+              {homeData.copy.galleryIntro}
+            </p>
+            <HomeGalleryLightbox items={galleryItems} />
+          </section>
+        </div>
+      </main>
+    </>
+  );
+}
