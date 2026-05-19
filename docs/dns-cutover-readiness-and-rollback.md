@@ -77,14 +77,22 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 
 ## Production Verification Snapshot
 
-Latest readiness verification before this document:
+Latest post-PR-183 production verification:
 
 - Vercel production URL: `https://mochirii.vercel.app`
-- Deployment ID: `dpl_vSg6q5gP4PFw35wGKfpm7o4B1J8i`
+- Deployment ID: `dpl_12d12HX9a9xpTRZXtbkbXraTm6Uj`
 - Target: `production`
-- Commit: `f5e7d98`
+- Commit: `a33ac30fbe303c9e865c94b81887e7100c706333`
 - Status: `Ready`
 - Build result: success
+- PR #183 shared lightbox overlay and scroll-lock fix is included in production.
+- Homepage Screenshot Spotlight full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
+- Gallery full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
+- Homepage Screenshot Spotlight randomization remains working: four thumbnails render, hard refresh changes the selected set/order, selection stays stable in-session, and thumbnails open matching full images.
+- Gallery sorting/random behavior remains working: newest starts `shot-73`, `shot-72`, `shot-71`; oldest starts `shot-01`, `shot-02`, `shot-03`; random changes after hard refresh and stays stable in-session.
+- Public routes, legacy redirects, and Phase 3 member workflow routes remain production-ready on `https://mochirii.vercel.app`.
+- No empty image `src` warnings were observed on `/`, `/gallery`, or `/spotlight`.
+- DNS cutover remains deferred.
 
 Warnings to keep in view:
 
@@ -99,6 +107,9 @@ Before cutover approval, confirm:
 - Vercel production at `https://mochirii.vercel.app` is Ready.
 - Vercel production serves all clean public routes with HTTP 200.
 - Vercel production redirects all legacy `.html` routes to clean routes.
+- Homepage and gallery lightboxes remain fixed full-viewport overlays with no page-left shift and no footer/header overlap regression.
+- Homepage Screenshot Spotlight randomization remains stable in-session and changes across hard refreshes.
+- Gallery newest, oldest, and random sort behavior remains unchanged.
 - `/auth` shows Discord login UI.
 - `/account`, `/gallery-submit`, and `/leader-dashboard` show signed-out/access-check states without crashing.
 - Discord OAuth works on Vercel production or a fresh Preview with the same public env values.
