@@ -286,6 +286,7 @@ Confidence labels:
 - `CONFIRMED_PUBLIC_DNS`: observed from public DNS, WHOIS/RDAP, or HTTP response data.
 - `CONFIRMED_REPO`: observed from tracked repository files.
 - `CONFIRMED_GITHUB_API`: observed from GitHub API or GitHub CLI API output.
+- `CONFIRMED_CLOUDFLARE_DASHBOARD`: observed from user-provided Cloudflare dashboard confirmation with sensitive values redacted.
 - `INFERRED`: reasoned from multiple public observations, but not directly proven by a dashboard.
 - `MANUAL_CONFIRMATION_REQUIRED`: not provable from the allowed public/repo sources.
 
@@ -302,8 +303,10 @@ GitHub Pages direct-record reference set used for comparison:
 | Registration status | `client transfer prohibited` | `whois`; RDAP | CONFIRMED_PUBLIC_DNS | No dashboard access used. |
 | DNSSEC | signed delegation | `whois`; RDAP `secureDNS.delegationSigned=true` | CONFIRMED_PUBLIC_DNS | Do not alter DNSSEC during cutover without explicit approval. |
 | Authoritative nameservers | `igor.ns.cloudflare.com.`, `naomi.ns.cloudflare.com.` | `dig NS`; `whois`; RDAP | CONFIRMED_PUBLIC_DNS | Current NS set is Cloudflare-branded. |
-| Inferred DNS provider | Cloudflare DNS likely | authoritative nameservers | INFERRED | Registrar and DNS provider can differ; dashboard confirmation is still required. |
-| Cloudflare proxy classification | Cloudflare proxy likely | Cloudflare A/AAAA-looking answers; `server: cloudflare`; `cf-ray`; Cloudflare nameservers | INFERRED | Public data cannot prove orange-cloud dashboard state. |
+| DNS provider | Cloudflare DNS | user-provided Cloudflare dashboard confirmation; authoritative nameservers | CONFIRMED_CLOUDFLARE_DASHBOARD | Dashboard confirmation identifies Cloudflare as the DNS provider. |
+| Cloudflare proxy classification | Apex A records and `www` CNAME are orange-cloud proxied | user-provided Cloudflare dashboard confirmation; Cloudflare HTTP headers | CONFIRMED_CLOUDFLARE_DASHBOARD | Mail, security, and verification records are DNS only. |
+| Apex dashboard web records | four `mochirii.com` A records, Proxied, TTL Auto; IP values redacted | user-provided Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | Preserve until an approved cutover uses exact Vercel-provided records. |
+| `www` dashboard web record | `www` CNAME, Proxied, TTL Auto; target redacted | user-provided Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | Preserve until an approved cutover defines final `www` behavior. |
 | Apex web origin | GitHub Pages behind Cloudflare likely | GitHub Pages API/CNAME; HTTP `x-github-request-id`, Fastly headers, and Cloudflare headers | INFERRED | Direct DNS answers are Cloudflare proxy IPs, not GitHub Pages IPs. |
 | GitHub Pages custom domain | `mochirii.com` | GitHub Pages API | CONFIRMED_GITHUB_API | API reports Pages `status: built`, `cname: mochirii.com`, source `main` `/`. |
 | Repository CNAME file | `CNAME` contains `mochirii.com` | tracked `CNAME` file | CONFIRMED_REPO | Keep root static files and CNAME available for rollback until stabilization. |
@@ -369,13 +372,15 @@ GitHub Pages direct-record reference set used for comparison:
 
 | Host | Type | Current state | Future action | Final value | Source | Confidence | Cutover action |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `mochirii.com` | A/AAAA or Vercel-required apex record | Cloudflare-fronted records currently serve GitHub Pages | Replace or adjust only after Vercel domain setup is approved | Use exact value shown in Vercel Project -> Settings -> Domains | public DNS; Vercel checklist | MANUAL_CONFIRMATION_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
-| `mochirii.com` | CNAME/ALIAS/ANAME | no public CNAME answer; dashboard state unknown | Follow Vercel dashboard instructions if it requires apex flattening/ALIAS/ANAME | Use exact value shown in Vercel Project -> Settings -> Domains | public DNS; Vercel checklist | MANUAL_CONFIRMATION_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
-| `www.mochirii.com` | A/AAAA/CNAME | Cloudflare-fronted records currently redirect to apex | Configure according to chosen `www` behavior and Vercel dashboard instructions | Use exact value shown in Vercel Project -> Settings -> Domains | public DNS; HTTP behavior; Vercel checklist | MANUAL_CONFIRMATION_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
+| `mochirii.com` | A/AAAA or Vercel-required apex record | Dashboard shows four proxied A records with Auto TTL; IP values redacted | Replace or adjust only after Vercel domain setup is approved | Use exact value shown in Vercel Project -> Settings -> Domains | Cloudflare dashboard confirmation; public DNS; Vercel checklist | CONFIRMED_CLOUDFLARE_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
+| `mochirii.com` | CNAME/ALIAS/ANAME | Dashboard-confirmed current apex web records are A records; no public CNAME answer | Follow Vercel dashboard instructions if it requires apex flattening/ALIAS/ANAME | Use exact value shown in Vercel Project -> Settings -> Domains | Cloudflare dashboard confirmation; public DNS; Vercel checklist | CONFIRMED_CLOUDFLARE_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
+| `www.mochirii.com` | CNAME | Dashboard shows proxied `www` CNAME with Auto TTL; target redacted | Configure according to chosen `www` behavior and Vercel dashboard instructions | Use exact value shown in Vercel Project -> Settings -> Domains | Cloudflare dashboard confirmation; public DNS; HTTP behavior; Vercel checklist | CONFIRMED_CLOUDFLARE_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
 | `mochirii.com` | MX | ProtonMail MX records | Leave unchanged | `10 mail.protonmail.ch.`; `20 mailsec.protonmail.ch.` | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `mochirii.com` | TXT | SPF and verification TXT records | Leave unchanged | Existing public TXT values | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `_dmarc.mochirii.com` | TXT | DMARC quarantine policy | Leave unchanged | Existing DMARC TXT value | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `protonmail._domainkey.mochirii.com` | CNAME | ProtonMail DKIM selector | Leave unchanged | Existing Proton DKIM CNAME target | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `protonmail2._domainkey.mochirii.com` | CNAME | ProtonMail DKIM selector | Leave unchanged | Existing dashboard value redacted | Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | DO NOT TOUCH |
+| `protonmail3._domainkey.mochirii.com` | CNAME | ProtonMail DKIM selector | Leave unchanged | Existing dashboard value redacted | Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | DO NOT TOUCH |
 | `mochirii.com` | CAA | no public answer | Leave unchanged unless certificate policy is separately approved | n/a | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 
 ### Records To Preserve
@@ -389,6 +394,8 @@ GitHub Pages direct-record reference set used for comparison:
 | `mochirii.com` | TXT | `openai-domain-verification=dv-7wrk9X8LfsQRks41kOG5G5jI` | `300` | OpenAI domain verification | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `_dmarc.mochirii.com` | TXT | `v=DMARC1; p=quarantine; rua=mailto:dmarc@mochirii.com; ruf=mailto:dmarc@mochirii.com; fo=1` | `300` | DMARC reporting and policy | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `protonmail._domainkey.mochirii.com` | CNAME | `protonmail.domainkey.daf6yajm373drajzjqjvbaedayzfr3yeglwbrbv5eby4j5kbhhl6a.domains.proton.ch.` | `300` | ProtonMail DKIM selector | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
+| `protonmail2._domainkey.mochirii.com` | CNAME | redacted in dashboard screenshot | Auto | ProtonMail DKIM selector | Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | DO NOT TOUCH |
+| `protonmail3._domainkey.mochirii.com` | CNAME | redacted in dashboard screenshot | Auto | ProtonMail DKIM selector | Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | DO NOT TOUCH |
 | `mochirii.com` | CAA | no public answer | n/a | Certificate authority policy | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH unless certificate policy is separately approved |
 | `CNAME` repository file | file | `mochirii.com` | n/a | GitHub Pages custom-domain rollback reference | repo | CONFIRMED_REPO | DO NOT TOUCH until after stabilization |
 
@@ -412,16 +419,23 @@ Allowed-source repo search found only `www.mochirii.com` references in this cuto
 | `gallery.mochirii.com` | unknown / manual confirmation required | no public A/CNAME answer from allowed check | public DNS; repo search | MANUAL_CONFIRMATION_REQUIRED | DO NOT TOUCH unless found in provider dashboard and explicitly scoped. |
 | `discord.mochirii.com` | unknown / manual confirmation required | no public A/CNAME answer from allowed check | public DNS; repo search | MANUAL_CONFIRMATION_REQUIRED | DO NOT TOUCH unless found in provider dashboard and explicitly scoped. |
 
-### Manual Confirmation Required
+### Dashboard Confirmation And Remaining Manual Items
 
-- Actual DNS provider dashboard and account owner.
-- Full current zone export.
-- Current TTLs as shown by the provider dashboard, because resolver TTLs can vary.
-- Cloudflare proxy orange-cloud state if Cloudflare is the DNS provider.
-- Whether Cloudflare page rules, redirects, workers, cache rules, SSL/TLS mode, or DNSSEC settings affect `mochirii.com`.
-- Exact Vercel-provided DNS records after adding `mochirii.com` and any `www` domain in Vercel.
-- Whether `www` should redirect to apex or serve app traffic.
-- Email provider requirements, including whether additional Proton DKIM selectors exist in the dashboard but were not returned by the allowed public checks.
+Confirmed from the Cloudflare DNS dashboard:
+
+- DNS provider dashboard is Cloudflare.
+- Apex web records are four `mochirii.com` A records, orange-cloud Proxied, with Auto TTL; IP values remain redacted.
+- `www` is a CNAME record, orange-cloud Proxied, with Auto TTL; target remains redacted.
+- ProtonMail DKIM CNAME records `protonmail._domainkey`, `protonmail2._domainkey`, and `protonmail3._domainkey` must be preserved.
+- Apex MX records, apex TXT records, and `_dmarc` TXT records must be preserved.
+- Mail, security, and verification records are DNS only.
+
+Manual confirmation still required:
+
+- Full exact dashboard record content values remain redacted in the provided screenshot and must be captured from Cloudflare before any approved DNS change.
+- Exact Vercel-provided DNS records must come from Vercel Project -> Settings -> Domains after the custom domains are added.
+- Cloudflare rules, redirects, workers, cache rules, SSL/TLS mode, and DNSSEC settings still need confirmation before cutover.
+- Whether `www` should redirect to apex or serve app traffic remains a cutover decision.
 - Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
 
 ## DNS Provider Inventory Template
