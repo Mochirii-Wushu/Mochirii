@@ -441,6 +441,25 @@ Manual confirmation still required:
 - Whether `www` should redirect to apex or serve app traffic remains a cutover decision.
 - Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
 
+### Cloudflare Managed Transforms Recommendations
+
+Source: user-provided Cloudflare Rules -> Settings -> Managed Transforms dashboard screenshot.
+Confidence: `CONFIRMED_CLOUDFLARE_DASHBOARD`.
+
+Managed Transforms apply zone-wide, so keep recommendations conservative before DNS cutover. Do not introduce broad request-header changes or a zone-wide security-header bundle during readiness work.
+
+| Managed Transform | Recommendation | Notes |
+| --- | --- | --- |
+| Remove X-Powered-By headers | ON | Low-risk response-header cleanup that reduces unnecessary technology disclosure. |
+| Add TLS client auth headers | OFF | Do not add client-certificate request headers before cutover. |
+| Add visitor location headers | OFF | Avoid adding location-derived request headers before app, auth, and privacy behavior are reviewed. |
+| Remove visitor IP headers | OFF | Do not alter visitor IP signal before logging, moderation, Supabase, and Vercel behavior are verified. |
+| Add True-Client-IP header | OFF | Do not add broad client-IP forwarding headers before there is a tested origin-side need. |
+| Add leaked credentials checks header | OFF | Keep request-header behavior unchanged during DNS readiness. |
+| Add security headers | OFF for now | Revisit in a dedicated, tested Next/Vercel security-header PR instead of enabling zone-wide during cutover readiness. |
+
+Stronger security headers should be handled later through a tested Next/Vercel security-header PR with route, auth, gallery, browser, and production smoke coverage. Do not enable Cloudflare Managed Transforms as a shortcut for that work before cutover.
+
 ## DNS Provider Inventory Template
 
 Fill this in before any DNS change:
