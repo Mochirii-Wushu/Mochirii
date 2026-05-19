@@ -3236,19 +3236,25 @@ body[data-page="gallery"] .gallery-thumb:focus-visible img{
 }
 
 .lightbox-card{
-  max-width:min(92vw, 1160px);
-  max-height:86vh;
+  box-sizing:border-box;
+  width:min(100%, 1160px);
+  max-width:100%;
+  max-height:calc(100vh - 48px);
   margin:0;
   padding:14px;
   border-radius:22px;
   border:1px solid var(--line);
   background:rgba(10,12,14,.88);
   box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  overflow:hidden;
 }
 
 body[data-page="gallery"] .lightbox-card{
-  box-sizing:border-box;
-  width:min(92vw, 1160px);
+  width:min(100%, 1160px);
+  max-width:100%;
   border:1px solid transparent;
   background:
     linear-gradient(rgba(6,9,14,.92), rgba(6,9,14,.92)) padding-box,
@@ -3269,12 +3275,18 @@ body[data-page="gallery"] .lightbox-backdrop{
 }
 
 .lightbox-img{
-  max-height:calc(86vh - 88px);
+  width:auto;
+  max-width:100%;
+  max-height:min(82vh, calc(100vh - 132px));
   object-fit:contain;
   border-radius:16px;
+  flex:0 1 auto;
+  min-height:0;
 }
 
 .lightbox-caption{
+  flex:0 0 auto;
+  max-width:100%;
   margin-top:10px;
   color:var(--ink-1);
   line-height:1.45;
@@ -4062,7 +4074,10 @@ body[data-page="gallery-submit"] .muted{
 #modalRoot{
   position:fixed;
   inset:0;
-  z-index:9999;
+  z-index:20000;
+  pointer-events:auto;
+  isolation:isolate;
+  overscroll-behavior:contain;
 }
 
 /* Backdrops: must be clickable and above the page */
@@ -4084,6 +4099,9 @@ body[data-page="gallery-submit"] .muted{
   z-index:2;
   display:grid;
   place-items:center;
+  box-sizing:border-box;
+  padding:clamp(12px, 4vw, 24px);
+  overflow:hidden;
   pointer-events:none; /* key: allow clicks to pass through to backdrop */
 }
 

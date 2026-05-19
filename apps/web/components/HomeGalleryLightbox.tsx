@@ -8,6 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
+import { useBodyPortalRoot, useBodyScrollLock } from "@/components/useLightboxOverlay";
 
 export type GallerySpotlightItem = {
   key: string;
@@ -41,12 +43,15 @@ export function HomeGalleryLightbox({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
+  const portalRoot = useBodyPortalRoot();
   const openItem = openIndex === null ? null : items[openIndex] || null;
 
   const modalCaption = useMemo(() => {
     if (!openItem) return "";
     return openItem.caption || openItem.alt;
   }, [openItem]);
+
+  useBodyScrollLock(Boolean(openItem));
 
   const closeModal = useCallback(() => {
     setOpenIndex(null);
@@ -59,14 +64,6 @@ export function HomeGalleryLightbox({
   useEffect(() => {
     if (!openItem) return undefined;
 
-    const previousOverflow = document.body.style.overflow;
-    const previousPosition = document.body.style.position;
-    const previousTop = document.body.style.top;
-    const scrollY = window.scrollY || 0;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
     window.setTimeout(() => closeRef.current?.focus({ preventScroll: true }), 0);
 
     const closeOnEscape = (event: globalThis.KeyboardEvent) => {
@@ -77,10 +74,6 @@ export function HomeGalleryLightbox({
 
     return () => {
       window.removeEventListener("keydown", closeOnEscape);
-      document.body.style.overflow = previousOverflow;
-      document.body.style.position = previousPosition;
-      document.body.style.top = previousTop;
-      window.scrollTo(0, scrollY);
     };
   }, [closeModal, openItem]);
 
@@ -111,6 +104,55 @@ export function HomeGalleryLightbox({
     }
   };
 
+  const lightbox = (
+    <div
+      id="modalRoot"
+      ref={modalRef}
+      className={openItem ? "lightbox" : "lightbox hidden"}
+      aria-hidden={!openItem}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Gallery image viewer"
+      tabIndex={-1}
+      onKeyDown={trapTab}
+    >
+      <div
+        id="modalBackdrop"
+        className="lightbox-backdrop"
+        aria-hidden="true"
+        onClick={closeModal}
+      />
+
+      <div className="lightbox-shell" role="document">
+        <button
+          id="modalClose"
+          ref={closeRef}
+          className="lightbox-close"
+          type="button"
+          aria-label="Close viewer"
+          onClick={closeModal}
+        >
+          ✕
+        </button>
+
+        <figure className="lightbox-card">
+          {openItem ? (
+            <img
+              id="modalImage"
+              src={openItem.full}
+              alt={openItem.alt}
+              className="lightbox-img"
+              decoding="async"
+            />
+          ) : null}
+          <figcaption id="modalCaption" className="lightbox-caption">
+            {modalCaption}
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div id="galleryGrid" className="home-gallery" aria-label="Gallery thumbnails">
@@ -136,52 +178,7 @@ export function HomeGalleryLightbox({
         ))}
       </div>
 
-      <div
-        id="modalRoot"
-        ref={modalRef}
-        className={openItem ? "lightbox" : "lightbox hidden"}
-        aria-hidden={!openItem}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Gallery image viewer"
-        tabIndex={-1}
-        onKeyDown={trapTab}
-      >
-        <div
-          id="modalBackdrop"
-          className="lightbox-backdrop"
-          aria-hidden="true"
-          onClick={closeModal}
-        />
-
-        <div className="lightbox-shell" role="document">
-          <button
-            id="modalClose"
-            ref={closeRef}
-            className="lightbox-close"
-            type="button"
-            aria-label="Close viewer"
-            onClick={closeModal}
-          >
-            ✕
-          </button>
-
-          <figure className="lightbox-card">
-            {openItem ? (
-              <img
-                id="modalImage"
-                src={openItem.full}
-                alt={openItem.alt}
-                className="lightbox-img"
-                decoding="async"
-              />
-            ) : null}
-            <figcaption id="modalCaption" className="lightbox-caption">
-              {modalCaption}
-            </figcaption>
-          </figure>
-        </div>
-      </div>
+      {portalRoot ? createPortal(lightbox, portalRoot) : null}
     </>
   );
 }

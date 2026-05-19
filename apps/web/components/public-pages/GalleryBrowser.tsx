@@ -8,6 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
+import { useBodyPortalRoot, useBodyScrollLock } from "@/components/useLightboxOverlay";
 
 type Category = {
   slug?: string;
@@ -211,6 +213,7 @@ export function GalleryBrowser({
   const modalRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
+  const portalRoot = useBodyPortalRoot();
 
   const usableItems = useMemo(
     () =>
@@ -296,6 +299,8 @@ export function GalleryBrowser({
     }, 0);
   }, []);
 
+  useBodyScrollLock(Boolean(openItem));
+
   useEffect(() => {
     const readState = () => {
       const params = new URLSearchParams(window.location.search);
@@ -315,14 +320,6 @@ export function GalleryBrowser({
   useEffect(() => {
     if (!openItem) return undefined;
 
-    const previousOverflow = document.body.style.overflow;
-    const previousPosition = document.body.style.position;
-    const previousTop = document.body.style.top;
-    const scrollY = window.scrollY || 0;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
     window.setTimeout(() => closeRef.current?.focus({ preventScroll: true }), 0);
 
     const closeOnEscape = (event: globalThis.KeyboardEvent) => {
@@ -333,10 +330,6 @@ export function GalleryBrowser({
 
     return () => {
       window.removeEventListener("keydown", closeOnEscape);
-      document.body.style.overflow = previousOverflow;
-      document.body.style.position = previousPosition;
-      document.body.style.top = previousTop;
-      window.scrollTo(0, scrollY);
     };
   }, [closeModal, openItem]);
 
@@ -401,6 +394,48 @@ export function GalleryBrowser({
       setShareStatus("Copy failed");
     }
   };
+
+  const lightbox = (
+    <div
+      id="lightbox"
+      ref={modalRef}
+      className={openItem ? "lightbox" : "lightbox hidden"}
+      aria-hidden={!openItem}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image viewer"
+      onKeyDown={trapTab}
+    >
+      <div id="lightboxBackdrop" className="lightbox-backdrop" data-close aria-hidden="true" onClick={closeModal} />
+      <div className="lightbox-shell" role="document">
+        <button
+          id="lightboxClose"
+          ref={closeRef}
+          className="lightbox-close"
+          type="button"
+          data-close
+          aria-label="Close viewer"
+          onClick={closeModal}
+        >
+          ✕
+        </button>
+        <figure className="lightbox-card">
+          {openItem ? (
+            <img
+              id="lightboxImg"
+              src={openItem.full}
+              alt={openItem.alt}
+              className="lightbox-img"
+              decoding="async"
+            />
+          ) : null}
+          <figcaption id="lightboxCaption" className="lightbox-caption">
+            {openItem?.caption || openItem?.alt || ""}
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -467,45 +502,7 @@ export function GalleryBrowser({
         ))}
       </div>
 
-      <div
-        id="lightbox"
-        ref={modalRef}
-        className={openItem ? "lightbox" : "lightbox hidden"}
-        aria-hidden={!openItem}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Image viewer"
-        onKeyDown={trapTab}
-      >
-        <div id="lightboxBackdrop" className="lightbox-backdrop" data-close aria-hidden="true" onClick={closeModal} />
-        <div className="lightbox-shell" role="document">
-          <button
-            id="lightboxClose"
-            ref={closeRef}
-            className="lightbox-close"
-            type="button"
-            data-close
-            aria-label="Close viewer"
-            onClick={closeModal}
-          >
-            ✕
-          </button>
-          <figure className="lightbox-card">
-            {openItem ? (
-              <img
-                id="lightboxImg"
-                src={openItem.full}
-                alt={openItem.alt}
-                className="lightbox-img"
-                decoding="async"
-              />
-            ) : null}
-            <figcaption id="lightboxCaption" className="lightbox-caption">
-              {openItem?.caption || openItem?.alt || ""}
-            </figcaption>
-          </figure>
-        </div>
-      </div>
+      {portalRoot ? createPortal(lightbox, portalRoot) : null}
     </>
   );
 }
