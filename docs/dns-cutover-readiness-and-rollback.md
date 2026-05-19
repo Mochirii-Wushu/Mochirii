@@ -305,6 +305,7 @@ GitHub Pages direct-record reference set used for comparison:
 | Authoritative nameservers | `igor.ns.cloudflare.com.`, `naomi.ns.cloudflare.com.` | `dig NS`; `whois`; RDAP | CONFIRMED_PUBLIC_DNS | Current NS set is Cloudflare-branded. |
 | DNS provider | Cloudflare DNS | user-provided Cloudflare dashboard confirmation; authoritative nameservers | CONFIRMED_CLOUDFLARE_DASHBOARD | Dashboard confirmation identifies Cloudflare as the DNS provider. |
 | Cloudflare proxy classification | Apex A records and `www` CNAME are orange-cloud proxied | user-provided Cloudflare dashboard confirmation; Cloudflare HTTP headers | CONFIRMED_CLOUDFLARE_DASHBOARD | Mail, security, and verification records are DNS only. |
+| Cloudflare SSL/TLS mode | Full | user-provided Cloudflare dashboard screenshot | CONFIRMED_CLOUDFLARE_DASHBOARD | Full encrypts Cloudflare-to-origin traffic but does not validate the origin certificate. After the Vercel certificate is active and verified, consider Full (strict). |
 | Apex dashboard web records | four `mochirii.com` A records, Proxied, TTL Auto; IP values redacted | user-provided Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | Preserve until an approved cutover uses exact Vercel-provided records. |
 | `www` dashboard web record | `www` CNAME, Proxied, TTL Auto; target redacted | user-provided Cloudflare dashboard confirmation | CONFIRMED_CLOUDFLARE_DASHBOARD | Preserve until an approved cutover defines final `www` behavior. |
 | Apex web origin | GitHub Pages behind Cloudflare likely | GitHub Pages API/CNAME; HTTP `x-github-request-id`, Fastly headers, and Cloudflare headers | INFERRED | Direct DNS answers are Cloudflare proxy IPs, not GitHub Pages IPs. |
@@ -426,6 +427,8 @@ Confirmed from the Cloudflare DNS dashboard:
 - DNS provider dashboard is Cloudflare.
 - Apex web records are four `mochirii.com` A records, orange-cloud Proxied, with Auto TTL; IP values remain redacted.
 - `www` is a CNAME record, orange-cloud Proxied, with Auto TTL; target remains redacted.
+- SSL/TLS Current encryption mode is Full. Full encrypts Cloudflare-to-origin traffic but does not validate the origin certificate.
+- After cutover, consider Full (strict) only after the Vercel certificate is active and verified.
 - ProtonMail DKIM CNAME records `protonmail._domainkey`, `protonmail2._domainkey`, and `protonmail3._domainkey` must be preserved.
 - Apex MX records, apex TXT records, and `_dmarc` TXT records must be preserved.
 - Mail, security, and verification records are DNS only.
@@ -434,7 +437,7 @@ Manual confirmation still required:
 
 - Full exact dashboard record content values remain redacted in the provided screenshot and must be captured from Cloudflare before any approved DNS change.
 - Exact Vercel-provided DNS records must come from Vercel Project -> Settings -> Domains after the custom domains are added.
-- Cloudflare rules, redirects, workers, cache rules, SSL/TLS mode, and DNSSEC settings still need confirmation before cutover.
+- Cloudflare rules, redirects, workers, cache rules, and DNSSEC settings still need confirmation before cutover.
 - Whether `www` should redirect to apex or serve app traffic remains a cutover decision.
 - Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
 
