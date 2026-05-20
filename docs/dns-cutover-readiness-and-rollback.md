@@ -301,7 +301,7 @@ GitHub Pages direct-record reference set used for comparison:
 | --- | --- | --- | --- | --- |
 | Registrar | Cloudflare, Inc.; IANA ID `1910` | `whois`; RDAP | CONFIRMED_PUBLIC_DNS | Public registration data confirms the registrar. |
 | Registration status | `client transfer prohibited` | `whois`; RDAP | CONFIRMED_PUBLIC_DNS | No dashboard access used. |
-| DNSSEC | signed delegation | `whois`; RDAP `secureDNS.delegationSigned=true` | CONFIRMED_PUBLIC_DNS | Do not alter DNSSEC during cutover without explicit approval. |
+| DNSSEC | enabled; `mochirii.com` protected | user-provided Cloudflare DNS Settings screenshot; `whois`; RDAP `secureDNS.delegationSigned=true` | CONFIRMED_CLOUDFLARE_DASHBOARD | Keep enabled. Do not alter DNSSEC during cutover without explicit approval. |
 | Authoritative nameservers | `igor.ns.cloudflare.com.`, `naomi.ns.cloudflare.com.` | `dig NS`; `whois`; RDAP | CONFIRMED_PUBLIC_DNS | Current NS set is Cloudflare-branded. |
 | DNS provider | Cloudflare DNS | user-provided Cloudflare dashboard confirmation; authoritative nameservers | CONFIRMED_CLOUDFLARE_DASHBOARD | Dashboard confirmation identifies Cloudflare as the DNS provider. |
 | Cloudflare proxy classification | Apex A records and `www` CNAME are orange-cloud proxied | user-provided Cloudflare dashboard confirmation; Cloudflare HTTP headers | CONFIRMED_CLOUDFLARE_DASHBOARD | Mail, security, and verification records are DNS only. |
@@ -437,9 +437,24 @@ Manual confirmation still required:
 
 - Full exact dashboard record content values remain redacted in the provided screenshot and must be captured from Cloudflare before any approved DNS change.
 - Exact Vercel-provided DNS records must come from Vercel Project -> Settings -> Domains after the custom domains are added.
-- Cloudflare DNSSEC settings still need confirmation before cutover.
 - Whether `www` should redirect to apex or serve app traffic remains a cutover decision.
 - Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
+
+### Cloudflare DNS Settings Confirmation
+
+Source: user-provided Cloudflare DNS Settings screenshot.
+Confidence: `CONFIRMED_CLOUDFLARE_DASHBOARD`.
+
+Cloudflare remains the authoritative DNS provider. Vercel is only the future web hosting target for the approved app domains; it should not replace Cloudflare as the DNS provider during this cutover plan.
+
+| DNS Setting | Current state | Cutover guidance |
+| --- | --- | --- |
+| DNSSEC | Enabled; `mochirii.com` is protected | Keep enabled. Do not disable or rotate DNSSEC during website cutover. |
+| Multi-signer DNSSEC | Off | Keep off unless a future multi-signer migration is explicitly planned. |
+| Multi-provider DNS | Off | Keep off. This cutover does not introduce another authoritative DNS provider. |
+| Email Security | Not configured | Do not configure during website cutover. ProtonMail email records must be preserved, and Cloudflare Email Security is out of scope. |
+
+Preserve ProtonMail MX, SPF/TXT, DKIM CNAME, verification TXT, and `_dmarc` records exactly. Website hosting changes should only touch the approved apex/`www` web records that Vercel requires during a future cutover window.
 
 ### Cloudflare Active Rules Confirmation
 
