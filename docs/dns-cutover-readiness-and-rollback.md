@@ -287,6 +287,7 @@ Confidence labels:
 - `CONFIRMED_REPO`: observed from tracked repository files.
 - `CONFIRMED_GITHUB_API`: observed from GitHub API or GitHub CLI API output.
 - `CONFIRMED_CLOUDFLARE_DASHBOARD`: observed from user-provided Cloudflare dashboard confirmation with sensitive values redacted.
+- `CONFIRMED_VERCEL_DASHBOARD`: observed from user-provided Vercel Domains DNS instructions.
 - `INFERRED`: reasoned from multiple public observations, but not directly proven by a dashboard.
 - `MANUAL_CONFIRMATION_REQUIRED`: not provable from the allowed public/repo sources.
 
@@ -373,9 +374,8 @@ GitHub Pages direct-record reference set used for comparison:
 
 | Host | Type | Current state | Future action | Final value | Source | Confidence | Cutover action |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `mochirii.com` | A/AAAA or Vercel-required apex record | Dashboard shows four proxied A records with Auto TTL; IP values redacted | Replace or adjust only after Vercel domain setup is approved | Use exact value shown in Vercel Project -> Settings -> Domains | Cloudflare dashboard confirmation; public DNS; Vercel checklist | CONFIRMED_CLOUDFLARE_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
-| `mochirii.com` | CNAME/ALIAS/ANAME | Dashboard-confirmed current apex web records are A records; no public CNAME answer | Follow Vercel dashboard instructions if it requires apex flattening/ALIAS/ANAME | Use exact value shown in Vercel Project -> Settings -> Domains | Cloudflare dashboard confirmation; public DNS; Vercel checklist | CONFIRMED_CLOUDFLARE_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
-| `www.mochirii.com` | CNAME | Dashboard shows proxied `www` CNAME with Auto TTL; target redacted | Configure according to chosen `www` behavior and Vercel dashboard instructions | Use exact value shown in Vercel Project -> Settings -> Domains | Cloudflare dashboard confirmation; public DNS; HTTP behavior; Vercel checklist | CONFIRMED_CLOUDFLARE_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
+| `mochirii.com` / `@` | CNAME | Dashboard shows four proxied A records with Auto TTL; IP values redacted | Replace current apex web records only during an approved cutover | `c4b58a30d23b9df3.vercel-dns-017.com`; Proxy disabled / DNS only | user-provided Vercel Domains DNS instructions; Cloudflare dashboard confirmation | CONFIRMED_VERCEL_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
+| `www.mochirii.com` / `www` | CNAME | Dashboard shows proxied `www` CNAME with Auto TTL; current target redacted | Replace or update `www` only during an approved cutover | `c4b58a30d23b9df3.vercel-dns-017.com`; Proxy disabled / DNS only | user-provided Vercel Domains DNS instructions; Cloudflare dashboard confirmation | CONFIRMED_VERCEL_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
 | `mochirii.com` | MX | ProtonMail MX records | Leave unchanged | `10 mail.protonmail.ch.`; `20 mailsec.protonmail.ch.` | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `mochirii.com` | TXT | SPF and verification TXT records | Leave unchanged | Existing public TXT values | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `_dmarc.mochirii.com` | TXT | DMARC quarantine policy | Leave unchanged | Existing DMARC TXT value | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
@@ -400,13 +400,26 @@ GitHub Pages direct-record reference set used for comparison:
 | `mochirii.com` | CAA | no public answer | n/a | Certificate authority policy | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH unless certificate policy is separately approved |
 | `CNAME` repository file | file | `mochirii.com` | n/a | GitHub Pages custom-domain rollback reference | repo | CONFIRMED_REPO | DO NOT TOUCH until after stabilization |
 
+### Vercel-Provided DNS Records For Future Cutover
+
+Source: user-provided Vercel Domains DNS instructions.
+Confidence: `CONFIRMED_VERCEL_DASHBOARD`.
+
+These records are documented for a future approved cutover only. They have not been applied in Cloudflare, and DNS cutover remains deferred.
+
+| Host / Name | Type | Value | Proxy setting | Cutover action |
+| --- | --- | --- | --- | --- |
+| `mochirii.com` / `@` | CNAME | `c4b58a30d23b9df3.vercel-dns-017.com` | Disabled / DNS only | Replace current apex web records only during an approved cutover. |
+| `www.mochirii.com` / `www` | CNAME | `c4b58a30d23b9df3.vercel-dns-017.com` | Disabled / DNS only | Replace or update current `www` web record only during an approved cutover. |
+
+Cloudflare remains authoritative DNS. Vercel is only the web hosting target for the approved app domains.
+
 ### Records Likely To Change During Future Cutover
 
-- Apex `mochirii.com` web record should change according to Vercel Project -> Settings -> Domains.
-- `www.mochirii.com` should change according to Vercel Project -> Settings -> Domains and the approved `www` behavior.
-- Use exact Vercel-provided DNS records at cutover time.
+- Apex `mochirii.com` web record should change to the Vercel-provided DNS-only CNAME above during an approved cutover.
+- `www.mochirii.com` should change to the Vercel-provided DNS-only CNAME above during an approved cutover.
 - Do not touch MX, SPF, DKIM, DMARC, CAA, verification TXT, email, or unrelated records.
-- Do not invent final Vercel DNS targets in this repository.
+- Do not change Cloudflare DNS before the explicit cutover window.
 
 ### Unrelated Subdomains And Do-Not-Touch List
 
@@ -436,7 +449,6 @@ Confirmed from the Cloudflare DNS dashboard:
 Manual confirmation still required:
 
 - Full exact dashboard record content values remain redacted in the provided screenshot and must be captured from Cloudflare before any approved DNS change.
-- Exact Vercel-provided DNS records must come from Vercel Project -> Settings -> Domains after the custom domains are added.
 - Whether `www` should redirect to apex or serve app traffic remains a cutover decision.
 - Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
 
