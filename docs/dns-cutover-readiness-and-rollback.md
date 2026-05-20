@@ -437,9 +437,26 @@ Manual confirmation still required:
 
 - Full exact dashboard record content values remain redacted in the provided screenshot and must be captured from Cloudflare before any approved DNS change.
 - Exact Vercel-provided DNS records must come from Vercel Project -> Settings -> Domains after the custom domains are added.
-- Cloudflare rules, redirects, workers, cache rules, and DNSSEC settings still need confirmation before cutover.
+- Cloudflare DNSSEC settings still need confirmation before cutover.
 - Whether `www` should redirect to apex or serve app traffic remains a cutover decision.
 - Whether any unpublished/private/unreferenced subdomains exist and must not be touched.
+
+### Cloudflare Active Rules Confirmation
+
+Source: user-provided Cloudflare dashboard review.
+Confidence: `CONFIRMED_CLOUDFLARE_DASHBOARD`.
+
+The reviewed Cloudflare rules pages show template/create screens or no visible active entries. DNS cutover remains deferred, and no Cloudflare rules should be created during cutover unless a specific redirect, cache, or origin issue is found. Prefer Vercel domain settings and app-level redirects first.
+
+| Cloudflare Area | Current visible state | Cutover guidance |
+| --- | --- | --- |
+| Redirect Rules | No active rules visible; templates/create screen only | Do not create redirect rules unless Vercel/app redirects fail a specific smoke check. |
+| Page Rules | No active rules visible | Do not add legacy Page Rules during readiness work. |
+| Cache Rules | No active rules visible; templates/create screen only | Do not add cache rules before production behavior requires a tested exception. |
+| Configuration Rules | No active rules visible | Do not create configuration rules during cutover readiness. |
+| Transform Rules | No active custom rules visible; Managed Transforms documented separately | Keep custom transforms off unless a narrow tested need appears. |
+| Origin Rules | No active rules visible | Prefer Vercel domain/origin setup before adding Cloudflare origin rules. |
+| Workers Routes | No active routes found for `mochirii.com`, `www.mochirii.com`, or `*.mochirii.com` | Do not add Workers routes during DNS cutover readiness. |
 
 ### Cloudflare Managed Transforms Recommendations
 
