@@ -100,6 +100,55 @@ Warnings to keep in view:
 - Hosted Vercel build logs may show an `outputFileTracingRoot` / `turbopack.root` warning. The current production deployment still builds successfully and is Ready.
 - Vercel Development env is intentionally not a cutover gate. Production and Preview envs are the relevant deployed environments.
 
+### Step 1 Baseline Lock
+
+Latest implementation-plan baseline lock: `2026-05-24`.
+
+Local repository state:
+
+- Branch: `dns-cutover-readiness-and-rollback-plan`.
+- PR: #181, open draft, base `main`, head `dns-cutover-readiness-and-rollback-plan`, merge state `CLEAN`.
+- Branch comparison at the start of this pass: `0` commits behind `main`, `9` commits ahead.
+- Worktree remained clean after validation and generated Vercel output cleanup, before this documentation update.
+
+Validation commands completed:
+
+- `npm run check` passed. Known warning only: `assets/audio/mochiriiiiii.mp3` is over the local asset-size warning threshold.
+- `git diff --check` passed.
+- `npm run check:production` passed against the current custom-domain GitHub Pages surface.
+- `cd apps/web && npm run lint` passed after running `npm run clean` to remove generated `.vercel/output` from a previous local Vercel build.
+- `cd apps/web && npm run build` passed and prerendered all current App Router routes.
+- `CI=1 vercel build --prod --cwd apps/web` passed with `status: ok` and target `production`.
+- `npm run smoke:vercel-production` passed against `https://mochirii.vercel.app`, including clean routes, legacy `.html` redirects, and signed-out Phase 3 route content checks.
+
+Read-only provider and public-network checks completed:
+
+- Vercel CLI account: `xartaiusx`.
+- Vercel project read: `mochirii/web`.
+- Vercel Production env names observed as encrypted values: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`.
+- Vercel Preview env names observed as encrypted values: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`.
+- Extra Vercel env name observed in both Production and Preview: `SUPABASE_PUBLISHABLE_KEY`. It is not a `NEXT_PUBLIC_` browser variable and should be reviewed later before cleanup, but it is not a current cutover blocker.
+- Supabase CLI version observed locally: `2.101.0`.
+- Public DNS still returns Cloudflare nameservers `igor.ns.cloudflare.com` and `naomi.ns.cloudflare.com`.
+- Public apex and `www` A answers still return Cloudflare IPs `104.21.70.47` and `172.67.219.251`.
+- `https://mochirii.com` still returns Cloudflare plus GitHub Pages/Fastly headers, so the custom domain has not cut over to Vercel.
+- `https://www.mochirii.com` still redirects to `https://mochirii.com/`.
+- `https://mochirii.vercel.app` still returns `server: Vercel` and serves the Vercel app.
+
+No DNS, Cloudflare, Vercel dashboard, Supabase dashboard, Discord Developer Portal, GitHub Pages, Supabase database, Supabase Edge Function, or deployment mutation was performed during this baseline lock.
+
+## Source-Aligned Operating Rules
+
+These rules are based on the official provider references checked during the baseline pass:
+
+- Vercel custom-domain setup should use the exact records Vercel shows for the project/domain and, with an external DNS provider such as Cloudflare, those records must be added in that external provider rather than through Vercel DNS. Source: <https://vercel.com/docs/domains/set-up-custom-domain>
+- Vercel does not recommend placing Cloudflare or another reverse proxy in front of a Vercel project because it can reduce Vercel traffic visibility, security signal quality, performance, and cache reliability. Keep the planned Vercel target DNS-only unless the user explicitly approves a tested reverse-proxy exception. Source: <https://vercel.com/kb/guide/cloudflare-with-vercel>
+- Cloudflare proxied `A`, `AAAA`, and `CNAME` records return Cloudflare anycast IPs publicly; this is why current public DNS answers do not reveal the GitHub Pages origin records while Cloudflare proxying remains active. Source: <https://developers.cloudflare.com/dns/proxy-status/>
+- Cloudflare `MX` and `TXT` records are always DNS-only. Do not touch ProtonMail, DKIM, DMARC, SPF, or verification records during a website-hosting cutover. Source: <https://developers.cloudflare.com/dns/proxy-status/>
+- Supabase Auth redirect URLs must match the `redirectTo` URLs used by the app. Use exact production custom-domain redirect paths for the final production state, and reserve wildcards for local and preview deployments. Source: <https://supabase.com/docs/guides/auth/redirect-urls>
+- Supabase browser code may use publishable keys only with RLS and explicit grants. Secret keys, service-role keys, Discord bot tokens, and OAuth client secrets stay in Supabase Edge Functions or other server-only runtimes. Sources: <https://supabase.com/docs/guides/getting-started/api-keys>, <https://supabase.com/docs/guides/functions/secrets>
+- New Supabase tables exposed through the Data API should keep explicit `GRANT` statements, RLS, and reviewed policies together in migrations because Supabase is moving away from automatic public-schema Data API exposure. Source: <https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically>
+
 ## Readiness Checklist
 
 Before cutover approval, confirm:
