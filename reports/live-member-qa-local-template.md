@@ -83,7 +83,7 @@ Strict readiness checks may fail locally when:
 - required variable names are missing;
 - `QA_ALLOW_LIVE_MUTATION` is not explicitly reviewed before D03;
 - the test image path is missing before an upload branch;
-- local labels look like private identifiers or the file contains token-like secret values;
+- local labels look like private identifiers or the file contains raw private Storage paths or token-like secret values;
 - any credential file is tracked by Git.
 
 Normal repository validation must not require live credentials.

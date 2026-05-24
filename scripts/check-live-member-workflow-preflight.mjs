@@ -40,7 +40,11 @@ const secretPatterns = [
   { label: "Discord webhook URL", pattern: /https:\/\/discord(?:app)?\.com\/api\/webhooks\/[^\s<>)]+/i },
 ];
 
-const privateIdentifierPatterns = [{ label: "email-like identifier", pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i }];
+const privateIdentifierPatterns = [
+  { label: "email-like identifier", pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i },
+  { label: "UUID-like private identifier", pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i },
+  { label: "private Storage object path", pattern: /\bmember-gallery\/[^\s<>)]+/i },
+];
 const allowedUploadExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
 const forbiddenTrackedPatterns = [
