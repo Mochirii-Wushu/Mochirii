@@ -207,6 +207,40 @@ Cloudflare and Discord manual confirmation still required:
 - Confirm DNSSEC, SSL/TLS mode, proxied/DNS-only status, active rules, Managed Transforms, and any unpublished subdomains in the Cloudflare dashboard before changing web records.
 - Confirm the Discord Developer Portal OAuth redirect remains the Supabase callback endpoint and not a Vercel or custom-domain URL.
 
+### Step 4 Member Workflow Preflight Pass
+
+Latest non-mutating member workflow preflight pass: `2026-05-24`.
+
+This pass intentionally avoided real OAuth, real member upload, moderation mutations, dashboard settings, database writes, and DNS changes.
+
+Commands completed:
+
+- `npm run check:live-member-workflow-preflight` passed in normal mode.
+- `npm run smoke:supabase-edge-functions` passed.
+- `npm run smoke:supabase-auth-boundary` passed against a temporary local static server at `http://127.0.0.1:8765`.
+- `npm run smoke:gallery-approved-feed` passed against a temporary local static server at `http://127.0.0.1:8765`.
+- `npm run smoke:vercel-production` passed against `https://mochirii.vercel.app`.
+
+Verified by this pass:
+
+- `.env.live-member-qa` is ignored by Git.
+- No live member QA credential files are tracked.
+- `reports/live-member-qa-local-template.md` documents all required local QA variable names.
+- `QA_ALLOW_LIVE_MUTATION=false` remains the committed template default.
+- `.env.live-member-qa` is not present locally, so real live member workflow QA is not configured in this checkout.
+- Protected Supabase Edge Functions reject missing, malformed, or publishable-key bearer credentials with fail-closed 401/403 behavior.
+- Public `list-approved-gallery-submissions` still returns the expected public contract and does not expose private storage/audit fields in the smoke response.
+- Signed-out root static auth/member pages do not make protected data, function, or storage calls in the mocked auth-boundary smoke.
+- Approved-feed gallery UI renders the member-submissions count, signed image URL, empty/failure states, and fallback behavior in the mocked browser smoke.
+- Vercel production still returns HTTP 200 for all clean public and Phase 3 routes, redirects legacy `.html` routes to clean routes, and renders signed-out Phase 3 content for `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
+
+Still manual before cutover:
+
+- Real Discord OAuth must be tested with an approved test account.
+- At least one verified active-member upload must be tested or explicitly deferred with a rollback owner.
+- At least one moderator queue, approve/reject, audit, signed URL, and cleanup pass must be tested or explicitly deferred with a rollback owner.
+- Any live-mutating QA must require explicit human approval and a local ignored `.env.live-member-qa` with `QA_ALLOW_LIVE_MUTATION=true`; the committed default remains false.
+
 ## Source-Aligned Operating Rules
 
 These rules are based on the official provider references checked during the baseline pass:
