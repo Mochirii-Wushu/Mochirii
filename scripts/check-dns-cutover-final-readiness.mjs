@@ -21,7 +21,7 @@ const automatedChecks = [
   { label: "standard validation", command: npmCommand, args: ["run", "check"] },
   { label: "workspace whitespace check", command: "git", args: ["diff", "--check"] },
   { label: "production route smoke", command: npmCommand, args: ["run", "check:production"] },
-  { label: "Vercel PR preview readiness", command: npmCommand, args: ["run", "check:vercel-pr-preview"] },
+  { label: "DNS cutover PR readiness", command: npmCommand, args: ["run", "check:dns-cutover-pr-readiness"] },
   { label: "Supabase Edge Function smoke", command: npmCommand, args: ["run", "smoke:supabase-edge-functions"] },
   {
     label: "signed-out Supabase auth boundary smoke",

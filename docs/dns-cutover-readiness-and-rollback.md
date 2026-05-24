@@ -132,6 +132,7 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 Latest PR #181 readiness verification protocol, refreshed `2026-05-24` after the live-member cleanup-note preparation helper:
 
 - PR #181 remains a draft; do not convert it out of draft, merge it, or treat it as cutover approval without explicit user approval.
+- For a single read-only check of the current PR head, run `npm run check:dns-cutover-pr-readiness`.
 - For the current branch head and comparison, run `git rev-parse HEAD` and `git rev-list --left-right --count origin/main...HEAD`.
 - For the current GitHub merge state and status rollup, run `gh pr view 181 --json mergeStateStatus,statusCheckRollup,headRefOid`.
 - For the current Vercel PR preview deployment, run `npm run check:vercel-pr-preview`.
@@ -843,6 +844,7 @@ It verifies:
 - `www.mochirii.com` still redirects to the apex custom domain before cutover;
 - `npm run smoke:vercel-production` still passes against `https://mochirii.vercel.app`;
 - `npm run check:dns-cutover-workstation` passes on the operator machine before same-window final readiness;
+- `npm run check:dns-cutover-pr-readiness` confirms the local head matches draft PR #181, the PR merge state is clean, required GitHub/Vercel checks pass, and the matching preview deployment is Ready;
 - `npm run check:live-member-workflow-preflight` still passes in normal, non-mutating mode.
 - `npm run check` still covers Supabase public config, Discord gallery ingest guardrails, Deno Edge Function type checks, and cutover validator self-tests.
 
@@ -859,6 +861,14 @@ Passing this helper is not cutover approval. It only proves the repeatable read-
 Use this helper before converting PR #181 out of draft or treating GitHub's combined PR state as healthy:
 
 ```sh
+npm run check:dns-cutover-pr-readiness
+```
+
+It is read-only. It verifies the local checkout matches draft PR #181, the base/head branches are expected, the merge state is `CLEAN`, GitHub `validate`, Vercel, and Vercel Preview Comments pass, Supabase Preview is either skipped or passing if present, and the matching Vercel preview deployment is `READY`. It does not create deployments, update aliases, edit Vercel domains, touch DNS, read environment values, or change provider settings.
+
+For a focused Vercel deployment diagnostic, use:
+
+```sh
 npm run check:vercel-pr-preview
 ```
 
@@ -872,7 +882,7 @@ Use this helper during the approved same-window review, after D02/D03 live-membe
 npm run check:dns-cutover-final-readiness -- --live-member-packet=/path/to/private/completed-live-member-result.md --approval-packet=/path/to/private/completed-packet.md
 ```
 
-It is read-only. It does not change DNS, provider dashboards, Vercel aliases, deployments, Supabase data, Edge Functions, uploads, moderation rows, Discord settings, GitHub Pages, or local credential files. It starts with the workstation preflight, starts a temporary local static server for browser smokes unless `SMOKE_BASE_URL` is already supplied, aggregates the automated same-window checks, validates the private live-member result packet, validates the private DNS approval packet, and fails closed until both packet paths are supplied. For a fast local diagnostic of the private-packet gate only, use:
+It is read-only. It does not change DNS, provider dashboards, Vercel aliases, deployments, Supabase data, Edge Functions, uploads, moderation rows, Discord settings, GitHub Pages, or local credential files. It starts with the workstation preflight, verifies draft PR #181 readiness for the current local head, starts a temporary local static server for browser smokes unless `SMOKE_BASE_URL` is already supplied, aggregates the automated same-window checks, validates the private live-member result packet, validates the private DNS approval packet, and fails closed until both packet paths are supplied. For a fast local diagnostic of the private-packet gate only, use:
 
 ```sh
 npm run check:dns-cutover-final-readiness -- --skip-automated-checks

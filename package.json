@@ -11,6 +11,7 @@
     "check:discord-gallery-ingest": "node scripts/check-discord-gallery-ingest.mjs",
     "check:dns-cutover-approval-packet": "node scripts/check-dns-cutover-approval-packet.mjs",
     "check:dns-cutover-final-readiness": "node scripts/check-dns-cutover-final-readiness.mjs",
+    "check:dns-cutover-pr-readiness": "node scripts/check-dns-cutover-pr-readiness.mjs",
     "check:dns-cutover-rehearsal": "node scripts/check-dns-cutover-rehearsal.mjs",
     "check:dns-cutover-workstation": "node scripts/check-dns-cutover-workstation.mjs",
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",

@@ -52,6 +52,7 @@ npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed
 npm run check
 git diff --check
 npm run check:production
+npm run check:dns-cutover-pr-readiness
 npm run smoke:vercel-production
 npm run smoke:supabase-edge-functions
 npm run smoke:supabase-auth-boundary
@@ -67,7 +68,9 @@ The live-member result-packet check validates the private D02/D03 handoff before
 
 The private packet preparation helper creates draft packet files outside the repository. It does not create completed evidence, does not authorize cutover, and does not print absolute paths.
 
-The final-readiness helper is a read-only aggregator for the same-window commands and the two private packet validators. It fails closed when either private packet path is missing or invalid. Passing it still does not perform or authorize DNS changes by itself.
+The PR-readiness helper is read-only. It verifies the local checkout matches draft PR #181, the merge state is clean, required GitHub/Vercel checks pass, and the matching Vercel preview deployment is Ready.
+
+The final-readiness helper is a read-only aggregator for the same-window commands and the two private packet validators. It includes the PR-readiness helper, fails closed when either private packet path is missing or invalid, and still does not perform or authorize DNS changes by itself.
 
 ## Public State Evidence
 
