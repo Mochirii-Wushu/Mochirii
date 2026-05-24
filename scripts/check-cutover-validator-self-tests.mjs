@@ -123,6 +123,72 @@ Cleanup public status: deferred by owner
 Ready for approval packet: yes
 `;
 
+const validCompletedD03ResultPacket = validResultPacket
+  .replace(
+    `D03 live upload/moderation smoke: deferred
+D03 deferral reason: approved owner deferral
+D03 deferral explicitly approved: confirmed
+If deferred, rollback owner: private owner`,
+    `D03 live upload/moderation smoke: passed
+D03 mutation approval preflight passed: passed
+One disposable upload only: yes
+Pending item not public before moderation: confirmed
+Moderator action completed: confirmed
+Audit or moderation history checked: confirmed
+Public gallery result verified: confirmed`,
+  )
+  .replace(
+    `Cleanup status: deferred by owner
+Cleanup owner: private owner`,
+    "Cleanup status: complete",
+  )
+  .replace("Safe public D03 status: deferred", "Safe public D03 status: passed")
+  .replace("Cleanup public status: deferred by owner", "Cleanup public status: complete");
+
+const noGoApprovalPacket = `# DNS Cutover Approval Packet
+
+## Packet Metadata
+Decision: NO-GO
+No-go reason: D02 did not pass
+Next owner: private owner
+Current public surface remains: confirmed
+
+## Required Same-Window Commands
+
+## Public State Evidence
+
+## Vercel Dashboard Evidence
+
+## Cloudflare Dashboard Evidence
+
+## Supabase Evidence
+
+## Discord Evidence
+
+## GitHub Pages Rollback Evidence
+
+## Go / No-Go Decision
+`;
+
+const noGoResultPacket = `# Live Member Workflow Result Packet
+
+## Packet Metadata
+Result: NO-GO
+No-go reason: D02 did not pass
+Next owner: private owner
+Current public surface remains: confirmed
+
+## D02 Evidence
+
+## D03 Evidence
+
+## Cleanup Evidence
+
+## Final Validation
+
+## Public Result Summary
+`;
+
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
@@ -176,6 +242,15 @@ try {
   const resultFile = writePacket("valid-live-member-result.md", validResultPacket);
   assertPass("valid live-member result packet", runNode(resultChecker, [`--packet=${resultFile}`]));
 
+  const completedD03ResultFile = writePacket("valid-live-member-result-completed-d03.md", validCompletedD03ResultPacket);
+  assertPass("valid live-member result packet with completed D03", runNode(resultChecker, [`--packet=${completedD03ResultFile}`]));
+
+  const noGoApprovalFile = writePacket("no-go-approval.md", noGoApprovalPacket);
+  assertPass("valid NO-GO approval packet", runNode(approvalChecker, [`--packet=${noGoApprovalFile}`]));
+
+  const noGoResultFile = writePacket("no-go-live-member-result.md", noGoResultPacket);
+  assertPass("valid NO-GO live-member result packet", runNode(resultChecker, [`--packet=${noGoResultFile}`]));
+
   const missingApprovalPath = path.join(tempDir, "missing-approval-packet-should-not-print.md");
   const missingApprovalOutput = assertFail(
     "missing approval packet",
@@ -200,6 +275,26 @@ try {
     "approval packet missing live-member handoff",
     runNode(approvalChecker, [`--packet=${missingHandoffFile}`]),
     "Live-member result packet validated",
+  );
+
+  const invalidNoGoApprovalFile = writePacket(
+    "invalid-no-go-approval.md",
+    noGoApprovalPacket.replace("No-go reason: D02 did not pass\n", ""),
+  );
+  assertFail(
+    "NO-GO approval packet missing reason",
+    runNode(approvalChecker, [`--packet=${invalidNoGoApprovalFile}`]),
+    "No-go reason",
+  );
+
+  const invalidNoGoResultFile = writePacket(
+    "invalid-no-go-live-member-result.md",
+    noGoResultPacket.replace("Current public surface remains: confirmed\n", ""),
+  );
+  assertFail(
+    "NO-GO live-member result packet missing public-surface state",
+    runNode(resultChecker, [`--packet=${invalidNoGoResultFile}`]),
+    "Current public surface remains",
   );
 
   [
