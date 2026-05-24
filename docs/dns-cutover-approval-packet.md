@@ -44,6 +44,7 @@ Run these before the approval decision:
 
 ```sh
 npm run check:dns-cutover-rehearsal
+npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 npm run check
 git diff --check
@@ -57,6 +58,8 @@ npm run smoke:gallery-approved-feed
 If the same-window check runs on a machine without browser smoke support, record why and name the machine or CI check that supplied equivalent evidence.
 
 The approval-packet check reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Decision: GO` lacks required evidence, if D02 is not passed, if D03 is neither passed nor deferred with a rollback owner, or if obvious secret/signed-URL values appear.
+
+The live-member result-packet check validates the private D02/D03 handoff before this final cutover packet records it as ready.
 
 ## Public State Evidence
 
@@ -146,6 +149,7 @@ D02 live OAuth/account smoke: passed / failed
 D03 live upload/moderation smoke: passed / deferred
 If deferred, rollback owner:
 If D03 ran, cleanup status: complete / deferred by owner
+Live-member result packet validated:
 ```
 
 Stop if D02 fails, if D03 is neither passed nor explicitly deferred with a rollback owner, if any service-role or secret key appears in browser/public output, or if signed URLs/private Storage paths are exposed outside the private operator note.
@@ -196,6 +200,7 @@ Supabase Auth redirect plan confirmed:
 Discord callback confirmed:
 D02 passed:
 D03 passed or explicitly deferred with rollback owner:
+Live-member result packet validated:
 Rollback owner and communication path confirmed:
 No secrets, tokens, private Storage paths, signed URLs, or private account identifiers exposed:
 ```

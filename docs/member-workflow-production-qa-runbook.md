@@ -238,6 +238,18 @@ Known accepted warning:
 
 - `assets/audio/mochiriiiiii.mp3` is intentionally above the large-asset threshold.
 
+## Result Packet
+
+After D02 or D03, prepare the sanitized private result packet from [`docs/live-member-workflow-result-packet.md`](./live-member-workflow-result-packet.md).
+
+Validate the completed packet before copying its safe status into the DNS cutover approval packet:
+
+```sh
+npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+```
+
+This helper prints only field labels and pass/fail state. It does not authorize cutover, D03 mutation, cleanup deferral, or provider changes by itself.
+
 ## Cutover Gate
 
 DNS cutover may not proceed from this runbook alone.
@@ -246,6 +258,7 @@ Before cutover:
 
 - D02 must pass.
 - D03 must pass, or upload/moderation QA must be explicitly deferred with a named rollback owner.
+- The live-member workflow result packet must be validated.
 - Vercel custom-domain dashboard settings must be confirmed.
 - Cloudflare records must be captured and approved for the exact change.
 - Supabase Auth URL settings must be confirmed for the final custom-domain plan.

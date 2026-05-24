@@ -777,10 +777,11 @@ The packet is a template for a private operator note. Do not commit a completed 
 Validate the completed private packet before any `GO` decision:
 
 ```sh
+npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 ```
 
-This helper prints only field labels and pass/fail state. It does not authorize cutover by itself.
+These helpers print only field labels and pass/fail state. They do not authorize cutover by themselves.
 
 The approval decision must remain `NO-GO` until:
 
@@ -791,6 +792,7 @@ The approval decision must remain `NO-GO` until:
 - Discord callback remains the Supabase callback;
 - D02 live OAuth/account QA passes;
 - D03 live upload/moderation QA passes or is explicitly deferred with a named rollback owner;
+- the live-member result packet validates the private D02/D03 handoff;
 - rollback owner and communication path are named.
 
 ## GitHub Pages Rollback Readiness

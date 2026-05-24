@@ -38,6 +38,17 @@ const requiredDocs = new Map([
       "QA_ALLOW_LIVE_MUTATION=false",
       "D02: Live OAuth And Account Smoke",
       "D03: Live Upload And Moderation Smoke",
+      "npm run check:live-member-workflow-result-packet",
+    ],
+  ],
+  [
+    "docs/live-member-workflow-result-packet.md",
+    [
+      "It does not authorize DNS changes",
+      "Result: READY / NO-GO",
+      "D02 live OAuth/account smoke",
+      "D03 live upload/moderation smoke",
+      "npm run check:live-member-workflow-result-packet",
     ],
   ],
   [
@@ -48,6 +59,7 @@ const requiredDocs = new Map([
       "Decision: GO / NO-GO",
       "Same-window rehearsal and validation passed",
       "npm run check:dns-cutover-approval-packet",
+      "npm run check:live-member-workflow-result-packet",
     ],
   ],
 ]);
