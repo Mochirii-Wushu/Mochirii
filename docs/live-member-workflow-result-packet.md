@@ -9,6 +9,12 @@ The DNS rehearsal helper fails if tracked filenames look like completed live-mem
 Validate the completed result packet before copying its safe status into the DNS cutover approval packet:
 
 ```sh
+DNS_CUTOVER_PRIVATE_PACKET_DIR=/absolute/private/directory npm --silent run prepare:dns-cutover-private-packets
+```
+
+The preparation helper creates a private draft copy outside the repository. It does not create completed evidence, does not authorize D02, D03, or cutover, and does not print absolute paths.
+
+```sh
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 ```
 

@@ -43,6 +43,7 @@ Decision: GO / NO-GO
 Run these before the approval decision:
 
 ```sh
+DNS_CUTOVER_PRIVATE_PACKET_DIR=/absolute/private/directory npm --silent run prepare:dns-cutover-private-packets
 npm run check:dns-cutover-workstation
 npm run check:dns-cutover-rehearsal
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
@@ -63,6 +64,8 @@ If the same-window check runs on a machine without browser smoke support, record
 The approval-packet check reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Decision: GO` lacks required evidence, if D02 is not passed, if D03 is neither passed nor deferred with a rollback owner, or if obvious private identifiers, private Storage paths, secret values, or signed-URL values appear.
 
 The live-member result-packet check validates the private D02/D03 handoff before this final cutover packet records it as ready.
+
+The private packet preparation helper creates draft packet files outside the repository. It does not create completed evidence, does not authorize cutover, and does not print absolute paths.
 
 The final-readiness helper is a read-only aggregator for the same-window commands and the two private packet validators. It fails closed when either private packet path is missing or invalid. Passing it still does not perform or authorize DNS changes by itself.
 

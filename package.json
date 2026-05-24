@@ -24,6 +24,7 @@
     "check:supabase-edge-types": "node scripts/check-supabase-edge-types.mjs",
     "check:vercel-pr-preview": "node scripts/check-vercel-pr-preview.mjs",
     "check:production": "node scripts/check-production.mjs",
+    "prepare:dns-cutover-private-packets": "node scripts/prepare-dns-cutover-private-packets.mjs",
     "smoke:dns-cutover-post": "node scripts/smoke-dns-cutover-post.mjs",
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",
     "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs",

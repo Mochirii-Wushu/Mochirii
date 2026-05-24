@@ -38,6 +38,14 @@ npm run check:dns-cutover-workstation
 
 This helper is read-only. It checks local command availability, Deno, Python or supplied `SMOKE_BASE_URL`, Playwright browser launch support, and GitHub/Vercel CLI authentication without printing account names, tokens, env values, or private packet values.
 
+To prepare local draft packet files for the private operator handoff, use:
+
+```sh
+DNS_CUTOVER_PRIVATE_PACKET_DIR=/absolute/private/directory npm --silent run prepare:dns-cutover-private-packets
+```
+
+The preparation helper refuses repository-local output, creates only draft packet files, does not print absolute paths, and refuses to overwrite existing drafts unless `--force` is supplied. Use `npm --silent` or run the Node script directly when terminal transcript redaction matters, because plain `npm run ... -- --out=/path` can echo command arguments before the helper runs. Draft packet files are not evidence and do not authorize cutover.
+
 ## Non-Goals
 
 - Do not add, remove, or edit DNS records.
@@ -790,6 +798,7 @@ It verifies:
 - DNS and member workflow runbooks still include the required safety gates;
 - completed/private cutover packet, live-member result packet, D02/D03 evidence, dashboard evidence, cleanup note, and screenshot artifacts are not tracked;
 - Next/Vercel legacy `.html` redirects remain configured;
+- private draft packet preparation remains documented via `prepare:dns-cutover-private-packets`;
 - readiness validator self-tests still reject private values without printing them;
 - Cloudflare nameservers still answer publicly for `mochirii.com`;
 - ProtonMail MX, SPF/TXT, DKIM, DMARC, and verification TXT records still resolve publicly;
