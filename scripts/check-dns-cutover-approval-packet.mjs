@@ -24,12 +24,16 @@ const requiredHeadings = [
   "## Go / No-Go Decision",
 ];
 
-const secretPatterns = [
+const privateValuePatterns = [
+  { label: "email-like identifier", pattern: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i },
+  { label: "UUID-like private identifier", pattern: /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i },
   { label: "Supabase secret key", pattern: /\bsb_secret_[A-Za-z0-9_-]{12,}\b/ },
   { label: "JWT-like token", pattern: /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/ },
   { label: "database URL", pattern: /\bpostgres(?:ql)?:\/\/[^\s<>)]+/i },
   { label: "Discord token", pattern: /\b[MN][A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{20,}\b/ },
+  { label: "Discord webhook URL", pattern: /https:\/\/discord(?:app)?\.com\/api\/webhooks\/[^\s<>)]+/i },
   { label: "signed Storage URL", pattern: /https?:\/\/[^\s<>)]+\/storage\/v1\/object\/sign\/[^\s<>)]+/i },
+  { label: "private Storage object path", pattern: /\bmember-gallery\/[^\s<>)]+/i },
   { label: "access token assignment", pattern: /\b(?:access|refresh|bearer|service[_-]?role)[_-]?token\s*[:=]\s*\S{8,}/i },
   { label: "client secret assignment", pattern: /\bclient[_-]?secret\s*[:=]\s*\S{8,}/i },
 ];
@@ -102,18 +106,18 @@ function validatePacketLocation(packetPath) {
   return absolute;
 }
 
-function validateNoSecrets(text) {
+function validateNoPrivateValues(text) {
   const failures = [];
 
   text.split(/\r?\n/).forEach((line, index) => {
-    for (const { label, pattern } of secretPatterns) {
+    for (const { label, pattern } of privateValuePatterns) {
       pattern.lastIndex = 0;
       if (pattern.test(line)) failures.push(`line ${index + 1}: ${label}`);
     }
   });
 
   if (failures.length) {
-    fail(`Private packet appears to contain secret or signed private values:\n- ${failures.join("\n- ")}`);
+    fail(`Private packet appears to contain private or secret values:\n- ${failures.join("\n- ")}`);
   }
 }
 
@@ -206,7 +210,7 @@ try {
   const packetPath = validatePacketLocation(packetPathArg);
   const text = readFileSync(packetPath, "utf8");
 
-  validateNoSecrets(text);
+  validateNoPrivateValues(text);
   validateStructure(text);
   const fields = parseFields(text);
   const decision = validateDecision(fields);
