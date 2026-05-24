@@ -129,7 +129,18 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 
 ## Production Verification Snapshot
 
-Latest post-PR-184 / PR #181 merge-refresh verification:
+Latest PR #181 readiness verification refresh: `2026-05-24`, after the live-member cleanup-note preparation helper.
+
+- PR #181 remains a draft; do not convert it out of draft, merge it, or treat it as cutover approval without explicit user approval.
+- Current branch head: `a6ab612861a5d5d4bfaed07873848094b8403e99`.
+- Current branch comparison: `0` commits behind `main`, `40` commits ahead.
+- Current GitHub merge state: `CLEAN`.
+- Current PR checks: GitHub `validate` passes, Vercel passes, Vercel Preview Comments passes, and Supabase Preview is skipped.
+- Current Vercel PR preview deployment from `npm run check:vercel-pr-preview`: `mochirii-29zfi1u1t-mochirii.vercel.app`, state `READY`, target `preview`.
+- Local Deno is installed at `/home/artaius/.deno/bin/deno`; `DENO_BIN=/home/artaius/.deno/bin/deno npm run check:supabase-edge-types` passed for the current checkout.
+- `npm run check:dns-cutover-final-readiness -- --skip-automated-checks` still fails closed because private D02/D03 and final approval packet paths are not supplied. This is expected until the approved-window private packet work is complete.
+
+Post-PR-184 / PR #181 merge-refresh baseline retained for history:
 
 - Vercel production URL: `https://mochirii.vercel.app`
 - Current main commit: `ce127ae9600d69d60948c043be4f3c8aab5252e4`
@@ -167,7 +178,7 @@ Local repository state:
 - Branch: `dns-cutover-readiness-and-rollback-plan`.
 - PR: #181, open draft, base `main`, head `dns-cutover-readiness-and-rollback-plan`.
 - Branch comparison at the post-PR-184 merge-refresh commit: `0` commits behind `main`, `29` commits ahead; later doc-only status commits can increase the ahead count.
-- GitHub PR merge state observed after the merge refresh: `UNSTABLE`, caused by the standalone Vercel commit status remaining pending while GitHub Actions `validate` and Vercel Preview Comments pass.
+- GitHub PR merge state observed at the post-PR-184 merge refresh: `UNSTABLE`, caused by the standalone Vercel commit status remaining pending while GitHub Actions `validate` and Vercel Preview Comments passed. Later PR-head status must be checked with the current readiness refresh above.
 - Worktree remained clean after validation and generated Vercel output cleanup, before the later post-PR-184 documentation refreshes.
 
 Validation commands completed:
