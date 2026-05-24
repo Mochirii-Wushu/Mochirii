@@ -66,6 +66,14 @@ If live testing is approved, create `.env.live-member-qa` locally. This file is 
 
 Use labels only. Keep real credentials in the operator's password manager.
 
+To create a local placeholder file without printing values:
+
+```sh
+npm --silent run prepare:live-member-qa-local
+```
+
+This preparation helper verifies `.env.live-member-qa` is ignored, refuses tracked state, keeps `QA_ALLOW_LIVE_MUTATION=false`, writes safe placeholder labels only, and refuses to overwrite an existing local QA file unless `--force` is supplied. It does not authorize D02, D03, upload, moderation, cleanup, or cutover.
+
 ```sh
 QA_TEST_MEMBER_EMAIL_OR_LABEL=
 QA_TEST_UNVERIFIED_DISCORD_LABEL=

@@ -28,6 +28,14 @@ That file is ignored by `.gitignore` through the existing `.env.*` rule:
 
 Operators may create `.env.live-member-qa` locally with placeholder-style labels only. Do not store passwords, tokens, cookies, access tokens, refresh tokens, Discord client secrets, Discord bot tokens, service-role keys, database URLs, signed URLs, private Storage paths, or real member identifiers.
 
+Preferred preparation command:
+
+```sh
+npm --silent run prepare:live-member-qa-local
+```
+
+The helper verifies the local file is ignored, writes safe placeholder labels only, keeps `QA_ALLOW_LIVE_MUTATION=false`, and refuses to overwrite existing local QA values unless `--force` is supplied.
+
 ```sh
 # Local-only live member workflow QA readiness values.
 # Keep this file ignored. Never commit it.
