@@ -737,6 +737,36 @@ Future DNS action checklist:
 
 Use the exact records Vercel shows in Project -> Settings -> Domains.
 
+## Cutover Rehearsal Gate
+
+Run this before requesting an approved DNS cutover window:
+
+```sh
+npm run check:dns-cutover-rehearsal
+```
+
+This helper is read-only. It does not change DNS, Vercel, Cloudflare, Supabase, Discord, GitHub Pages, deployments, aliases, databases, Edge Functions, uploads, moderation rows, or local credential files.
+
+It verifies:
+
+- rollback files and `CNAME` still exist;
+- DNS and member workflow runbooks still include the required safety gates;
+- Next/Vercel legacy `.html` redirects remain configured;
+- Cloudflare nameservers still answer publicly for `mochirii.com`;
+- ProtonMail MX, SPF/TXT, DKIM, DMARC, and verification TXT records still resolve publicly;
+- the current custom domain still matches the pre-cutover Cloudflare/GitHub Pages surface;
+- `www.mochirii.com` still redirects to the apex custom domain before cutover;
+- `npm run smoke:vercel-production` still passes against `https://mochirii.vercel.app`;
+- `npm run check:live-member-workflow-preflight` still passes in normal, non-mutating mode.
+
+If only the local/file/DNS portion is needed while investigating a smoke failure, use:
+
+```sh
+npm run check:dns-cutover-rehearsal -- --skip-child-checks
+```
+
+Passing this helper is not cutover approval. It only proves the repeatable read-only rehearsal checks that can run from the repository and public network.
+
 ## GitHub Pages Rollback Readiness
 
 Rollback assumptions:
