@@ -83,10 +83,10 @@ Latest post-PR-184 / PR #181 merge-refresh verification:
 - Current main commit: `ce127ae9600d69d60948c043be4f3c8aab5252e4`
 - Merge-refresh commit: `33c88f4fff657828aa0e79ce70296a7aa16918e9`.
 - GitHub Actions `validate` is passing on PR #181 after the post-PR-184 merge refresh.
-- PR #181 remains a draft; GitHub reports the combined merge state as `UNSTABLE` only because the standalone Vercel commit status is still pending.
+- PR #181 remains a draft; use `npm run check:vercel-pr-preview` plus `gh pr view 181 --json mergeStateStatus,statusCheckRollup` for current PR preview and combined-state evidence.
 - PR #184 Discord gallery ingest foundation has merged to `main`.
 - PR #184 GitHub `validate`, Supabase Preview, GitHub build/deploy/report checks, and Vercel Preview Comments passed.
-- The standalone Vercel commit status can remain pending even after GitHub/Vercel preview deployment checks pass; do not treat that stale pending status as cutover approval or as proof that production is unhealthy.
+- The standalone Vercel commit status can remain pending while Vercel queues a preview deployment; do not treat that temporary pending state as cutover approval or as proof that production is unhealthy.
 - PR #183 shared lightbox overlay and scroll-lock fix is included in production.
 - PR #184 Supabase migrations and Edge Function deployments are live in the linked Supabase project.
 - Homepage Screenshot Spotlight full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
