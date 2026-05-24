@@ -900,6 +900,16 @@ npm run smoke:vercel-production
 BASE_URL=https://mochirii.com npm run smoke:vercel-production
 ```
 
+Post-cutover custom-domain helper:
+
+```sh
+npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
+```
+
+Use `--www-mode=serve` if `www.mochirii.com` is approved to serve the app directly, or `--www-mode=skip` if `www` is intentionally out of scope for the cutover window.
+
+This helper is read-only. It expects the custom domain to expose Vercel response headers, rejects accidental Cloudflare reverse-proxy behavior unless `--allow-cloudflare-proxy` is explicitly supplied for a tested exception, runs the clean-route and legacy-redirect matrix against the custom domain, and verifies the approved `www` behavior.
+
 ## Decision Gates Requiring User Approval
 
 - Approving a cutover window.

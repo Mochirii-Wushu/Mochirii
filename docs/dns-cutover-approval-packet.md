@@ -212,6 +212,14 @@ Live-member QA status:
 Cleanup status:
 ```
 
+After the approved DNS change and Vercel verification, run:
+
+```sh
+npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
+```
+
+Use the approved `www` decision from the packet: `redirect`, `serve`, or `skip`.
+
 For `NO-GO`, record:
 
 ```text
