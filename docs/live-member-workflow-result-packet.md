@@ -4,6 +4,8 @@ This template gives operators a sanitized private handoff after D02 or D03 live-
 
 Keep completed packets in a private operator location. Do not commit completed packets unless every private value is removed. The private cleanup note may contain submission IDs and Storage paths, but this result packet must not.
 
+The DNS rehearsal helper fails if tracked filenames look like completed live-member result packets, private D02/D03 evidence bundles, screenshots, cleanup notes, or operator artifacts. That guard is only a backstop; operators should keep completed packets and private evidence outside the repo from the start.
+
 Validate the completed result packet before copying its safe status into the DNS cutover approval packet:
 
 ```sh

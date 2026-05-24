@@ -751,7 +751,7 @@ It verifies:
 
 - rollback files and `CNAME` still exist;
 - DNS and member workflow runbooks still include the required safety gates;
-- completed/private cutover packet, dashboard evidence, and screenshot artifacts are not tracked;
+- completed/private cutover packet, live-member result packet, D02/D03 evidence, dashboard evidence, cleanup note, and screenshot artifacts are not tracked;
 - Next/Vercel legacy `.html` redirects remain configured;
 - Cloudflare nameservers still answer publicly for `mochirii.com`;
 - ProtonMail MX, SPF/TXT, DKIM, DMARC, and verification TXT records still resolve publicly;

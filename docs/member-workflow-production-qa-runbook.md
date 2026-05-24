@@ -250,6 +250,8 @@ npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/co
 
 This helper prints only field labels and pass/fail state. It does not authorize cutover, D03 mutation, cleanup deferral, or provider changes by itself.
 
+The DNS rehearsal helper also fails if tracked filenames look like completed live-member result packets, private D02/D03 evidence bundles, screenshots, cleanup notes, or operator artifacts.
+
 ## Cutover Gate
 
 DNS cutover may not proceed from this runbook alone.

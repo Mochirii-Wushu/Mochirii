@@ -67,12 +67,15 @@ const requiredDocs = new Map([
 const allowedCutoverFiles = new Set([
   "docs/dns-cutover-approval-packet.md",
   "docs/dns-cutover-readiness-and-rollback.md",
+  "docs/live-member-workflow-result-packet.md",
   "scripts/check-dns-cutover-rehearsal.mjs",
 ]);
 
 const privateCutoverArtifactPatterns = [
   /(?:^|\/)(?:private|operator|evidence|screenshots?)\/.*(?:cutover|dns|cloudflare|vercel|supabase|discord)/i,
+  /(?:^|\/)(?:private|operator|evidence|screenshots?)\/.*(?:live-member|member-workflow|d02|d03|qa)/i,
   /(?:dns-cutover|cutover-approval|go-no-go).*(?:completed|filled|private|operator|evidence|screenshot|dashboard)/i,
+  /(?:live-member|member-workflow|d02|d03).*(?:completed|filled|private|operator|evidence|screenshot|dashboard|cleanup|result).*\.(?:md|txt|png|jpe?g|webp|gif|pdf|json)$/i,
   /(?:cloudflare|vercel|supabase|discord|dashboard).*(?:cutover|approval).*\.(?:png|jpe?g|webp|gif|pdf)$/i,
 ];
 
