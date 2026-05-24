@@ -10,6 +10,7 @@
     "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",
     "check:discord-gallery-ingest": "node scripts/check-discord-gallery-ingest.mjs",
     "check:dns-cutover-approval-packet": "node scripts/check-dns-cutover-approval-packet.mjs",
+    "check:dns-cutover-final-readiness": "node scripts/check-dns-cutover-final-readiness.mjs",
     "check:dns-cutover-rehearsal": "node scripts/check-dns-cutover-rehearsal.mjs",
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",
     "check:js": "node scripts/check-js.mjs",

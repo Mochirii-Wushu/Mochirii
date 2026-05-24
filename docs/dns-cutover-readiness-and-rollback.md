@@ -797,6 +797,22 @@ npm run check:vercel-pr-preview
 
 It is read-only. It does not create deployments, update aliases, edit Vercel domains, touch DNS, or read environment values. It reports only the PR number, branch, short commit, GitHub Vercel status, Vercel deployment URL, deployment state, target, and branch alias. It fails closed when the latest PR head is still queued/pending even if production at `https://mochirii.vercel.app` remains Ready.
 
+### Final Readiness Gate
+
+Use this helper during the approved same-window review, after D02/D03 live-member QA has a private result packet and the final approval packet has been completed:
+
+```sh
+npm run check:dns-cutover-final-readiness -- --live-member-packet=/path/to/private/completed-live-member-result.md --approval-packet=/path/to/private/completed-packet.md
+```
+
+It is read-only. It does not change DNS, provider dashboards, Vercel aliases, deployments, Supabase data, Edge Functions, uploads, moderation rows, Discord settings, GitHub Pages, or local credential files. It starts a temporary local static server for browser smokes unless `SMOKE_BASE_URL` is already supplied. It aggregates the automated same-window checks, validates the private live-member result packet, validates the private DNS approval packet, and fails closed until both packet paths are supplied. For a fast local diagnostic of the private-packet gate only, use:
+
+```sh
+npm run check:dns-cutover-final-readiness -- --skip-automated-checks
+```
+
+Passing this helper proves only that the repository-accessible checks and private packet validators passed on the current machine. It is not a substitute for the human cutover approval decision.
+
 ## Approval Packet
 
 Before any approved cutover window, prepare the operator packet from [`docs/dns-cutover-approval-packet.md`](./dns-cutover-approval-packet.md).

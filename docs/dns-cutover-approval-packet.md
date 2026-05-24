@@ -54,6 +54,7 @@ npm run smoke:vercel-production
 npm run smoke:supabase-edge-functions
 npm run smoke:supabase-auth-boundary
 npm run smoke:gallery-approved-feed
+npm run check:dns-cutover-final-readiness -- --live-member-packet=/path/to/private/completed-live-member-result.md --approval-packet=/path/to/private/completed-packet.md
 ```
 
 If the same-window check runs on a machine without browser smoke support, record why and name the machine or CI check that supplied equivalent evidence.
@@ -61,6 +62,8 @@ If the same-window check runs on a machine without browser smoke support, record
 The approval-packet check reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Decision: GO` lacks required evidence, if D02 is not passed, if D03 is neither passed nor deferred with a rollback owner, or if obvious private identifiers, private Storage paths, secret values, or signed-URL values appear.
 
 The live-member result-packet check validates the private D02/D03 handoff before this final cutover packet records it as ready.
+
+The final-readiness helper is a read-only aggregator for the same-window commands and the two private packet validators. It fails closed when either private packet path is missing or invalid. Passing it still does not perform or authorize DNS changes by itself.
 
 ## Public State Evidence
 

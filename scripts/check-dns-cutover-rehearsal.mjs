@@ -29,6 +29,7 @@ const requiredDocs = new Map([
       "Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard",
       "GitHub Pages remains the current rollback surface",
       "Member workflow production QA has followed",
+      "npm run check:dns-cutover-final-readiness",
     ],
   ],
   [
@@ -62,6 +63,7 @@ const requiredDocs = new Map([
       "Same-window rehearsal and validation passed",
       "npm run check:dns-cutover-approval-packet",
       "npm run check:live-member-workflow-result-packet",
+      "npm run check:dns-cutover-final-readiness",
       "npm run check:cutover-validators",
     ],
   ],
