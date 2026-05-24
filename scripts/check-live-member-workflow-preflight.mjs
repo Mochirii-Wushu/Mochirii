@@ -9,6 +9,7 @@ const strictMode = process.argv.includes("--strict") || process.env.QA_LIVE_MEMB
 const requireMutationApproval =
   process.argv.includes("--require-mutation-approval") ||
   process.env.QA_LIVE_MEMBER_REQUIRE_MUTATION_APPROVAL === "1";
+const selfTestMode = process.argv.includes("--self-test");
 const maxUploadBytes = 50 * 1024 * 1024;
 
 const requiredVars = [
@@ -128,7 +129,7 @@ function isInsideRepo(absolutePath) {
   return Boolean(relative && !relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
-function checkLocalFileForSecrets(text) {
+function scanLocalFileForPrivateValues(text) {
   const secretMatches = [];
   const privateMatches = [];
 
@@ -144,6 +145,12 @@ function checkLocalFileForSecrets(text) {
     }
   });
 
+  return { secretMatches, privateMatches };
+}
+
+function checkLocalFileForSecrets(text) {
+  const { secretMatches, privateMatches } = scanLocalFileForPrivateValues(text);
+
   if (secretMatches.length) {
     addFailure(`Local ${localEnvFile} appears to contain secret values: ${secretMatches.join("; ")}.`);
   }
@@ -151,6 +158,37 @@ function checkLocalFileForSecrets(text) {
   if (privateMatches.length) {
     addStrictIssue(`Local ${localEnvFile} appears to contain private identifiers: ${privateMatches.join("; ")}.`);
   }
+}
+
+function assertSelfTest(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+function runSelfTest() {
+  const supabaseSecretSample = ["sb", "secret"].join("_") + "_fakeSecretValueForSelfTest";
+  const discordWebhookSample = `https://${["discord", "com"].join(".")}/api/${"webhooks"}/111111111111111111/fakeWebhookSecretValue`;
+  const cases = [
+    ["email-like identifier", "QA_TEST_MEMBER_EMAIL_OR_LABEL=operator@example.com"],
+    ["UUID-like private identifier", "QA_PRIVATE_NOTE=123e4567-e89b-12d3-a456-426614174000"],
+    ["private Storage object path", "QA_PRIVATE_NOTE=member-gallery/private/proof.webp"],
+    ["Supabase secret key", `QA_PRIVATE_NOTE=${supabaseSecretSample}`],
+    ["Discord webhook URL", `QA_PRIVATE_NOTE=${discordWebhookSample}`],
+  ];
+
+  for (const [label, line] of cases) {
+    const { secretMatches, privateMatches } = scanLocalFileForPrivateValues(`${line}\n`);
+    const matches = [...secretMatches, ...privateMatches];
+    assertSelfTest(matches.some((match) => match.includes(label)), `${label} was not detected.`);
+    assertSelfTest(!matches.some((match) => match.includes(line.split("=").slice(1).join("="))), `${label} leaked a value.`);
+  }
+
+  const safe = scanLocalFileForPrivateValues(
+    "QA_TEST_MEMBER_EMAIL_OR_LABEL=qa-member\nQA_TEST_UNVERIFIED_DISCORD_LABEL=qa-unverified\n",
+  );
+  assertSelfTest(safe.secretMatches.length === 0, "Safe labels matched secret patterns.");
+  assertSelfTest(safe.privateMatches.length === 0, "Safe labels matched private identifier patterns.");
+
+  console.log("Live member workflow preflight self-test OK (values redacted).");
 }
 
 function checkLabelValues(values) {
@@ -321,6 +359,17 @@ function checkLocalReadiness() {
   checkMarkerValues(values);
   checkMutationFlag(values);
   checkImagePath(values);
+}
+
+if (selfTestMode) {
+  try {
+    runSelfTest();
+  } catch (error) {
+    console.error(`Live member workflow preflight self-test failed: ${error?.message || error}`);
+    process.exit(1);
+  }
+
+  process.exit(0);
 }
 
 checkIgnoredLocalFile();

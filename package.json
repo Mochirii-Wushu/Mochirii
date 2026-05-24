@@ -7,6 +7,7 @@
     "check": "node scripts/check-all.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "check:content": "node scripts/check-content-guardrails.mjs",
+    "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",
     "check:dns-cutover-approval-packet": "node scripts/check-dns-cutover-approval-packet.mjs",
     "check:dns-cutover-rehearsal": "node scripts/check-dns-cutover-rehearsal.mjs",
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",

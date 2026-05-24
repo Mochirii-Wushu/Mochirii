@@ -226,6 +226,7 @@ npm run smoke:supabase-edge-functions
 npm run smoke:supabase-auth-boundary
 npm run smoke:gallery-approved-feed
 npm run check:live-member-workflow-preflight
+npm run check:cutover-validators
 ```
 
 If Gallery behavior changed or cleanup touched public feed behavior, also run:

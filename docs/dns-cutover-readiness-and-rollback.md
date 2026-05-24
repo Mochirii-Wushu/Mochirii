@@ -753,6 +753,7 @@ It verifies:
 - DNS and member workflow runbooks still include the required safety gates;
 - completed/private cutover packet, live-member result packet, D02/D03 evidence, dashboard evidence, cleanup note, and screenshot artifacts are not tracked;
 - Next/Vercel legacy `.html` redirects remain configured;
+- readiness validator self-tests still reject private values without printing them;
 - Cloudflare nameservers still answer publicly for `mochirii.com`;
 - ProtonMail MX, SPF/TXT, DKIM, DMARC, and verification TXT records still resolve publicly;
 - the current custom domain still matches the pre-cutover Cloudflare/GitHub Pages surface;
@@ -778,6 +779,7 @@ Validate the completed private packet before any `GO` decision:
 
 ```sh
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm run check:cutover-validators
 npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 ```
 

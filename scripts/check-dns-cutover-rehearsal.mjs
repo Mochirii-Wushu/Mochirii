@@ -39,6 +39,7 @@ const requiredDocs = new Map([
       "D02: Live OAuth And Account Smoke",
       "D03: Live Upload And Moderation Smoke",
       "npm run check:live-member-workflow-result-packet",
+      "npm run check:cutover-validators",
     ],
   ],
   [
@@ -49,6 +50,7 @@ const requiredDocs = new Map([
       "D02 live OAuth/account smoke",
       "D03 live upload/moderation smoke",
       "npm run check:live-member-workflow-result-packet",
+      "npm run check:cutover-validators",
     ],
   ],
   [
@@ -60,6 +62,7 @@ const requiredDocs = new Map([
       "Same-window rehearsal and validation passed",
       "npm run check:dns-cutover-approval-packet",
       "npm run check:live-member-workflow-result-packet",
+      "npm run check:cutover-validators",
     ],
   ],
 ]);
@@ -264,6 +267,7 @@ async function checkChildCommands() {
   }
 
   const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+  await runCommand("cutover validator self-tests passed", npmCommand, ["run", "check:cutover-validators"]);
   await runCommand("Vercel production smoke passed", npmCommand, ["run", "smoke:vercel-production"]);
   await runCommand("live member workflow preflight passed", npmCommand, ["run", "check:live-member-workflow-preflight"]);
 }

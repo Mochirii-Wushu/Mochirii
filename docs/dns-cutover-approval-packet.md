@@ -45,6 +45,7 @@ Run these before the approval decision:
 ```sh
 npm run check:dns-cutover-rehearsal
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm run check:cutover-validators
 npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 npm run check
 git diff --check
