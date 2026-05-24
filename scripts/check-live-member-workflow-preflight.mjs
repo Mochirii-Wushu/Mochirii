@@ -38,6 +38,9 @@ const secretPatterns = [
   { label: "signed Storage URL", pattern: /https?:\/\/[^\s<>)]+\/storage\/v1\/object\/sign\/[^\s<>)]+/i },
   { label: "access token assignment", pattern: /\b(?:access|refresh|bearer|service[_-]?role)[_-]?token\s*[:=]\s*\S{8,}/i },
   { label: "client secret assignment", pattern: /\bclient[_-]?secret\s*[:=]\s*\S{8,}/i },
+  { label: "API credential assignment", pattern: /\b(?:api[_-]?key|api[_-]?token|cloudflare[_-]?token|vercel[_-]?token|github[_-]?token|pat)\s*[:=]\s*\S{8,}/i },
+  { label: "password assignment", pattern: /\bpassword\s*[:=]\s*\S{8,}/i },
+  { label: "session cookie assignment", pattern: /\b(?:cookie|session[_-]?cookie)\s*[:=]\s*\S{20,}/i },
   { label: "Discord webhook URL", pattern: /https:\/\/discord(?:app)?\.com\/api\/webhooks\/[^\s<>)]+/i },
 ];
 
@@ -173,6 +176,9 @@ function runSelfTest() {
     ["private Storage object path", "QA_PRIVATE_NOTE=member-gallery/private/proof.webp"],
     ["Supabase secret key", `QA_PRIVATE_NOTE=${supabaseSecretSample}`],
     ["Discord webhook URL", `QA_PRIVATE_NOTE=${discordWebhookSample}`],
+    ["API credential assignment", "QA_PRIVATE_NOTE=cloudflare_token=cf_test_secret_value"],
+    ["password assignment", "QA_PRIVATE_NOTE=password=local-test-password"],
+    ["session cookie assignment", "QA_PRIVATE_NOTE=session_cookie=local-test-cookie-value"],
   ];
 
   for (const [label, line] of cases) {

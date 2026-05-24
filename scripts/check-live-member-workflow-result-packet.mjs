@@ -33,6 +33,9 @@ const privateValuePatterns = [
   { label: "private Storage object path", pattern: /\bmember-gallery\/[^\s<>)]+/i },
   { label: "access token assignment", pattern: /\b(?:access|refresh|bearer|service[_-]?role)[_-]?token\s*[:=]\s*\S{8,}/i },
   { label: "client secret assignment", pattern: /\bclient[_-]?secret\s*[:=]\s*\S{8,}/i },
+  { label: "API credential assignment", pattern: /\b(?:api[_-]?key|api[_-]?token|cloudflare[_-]?token|vercel[_-]?token|github[_-]?token|pat)\s*[:=]\s*\S{8,}/i },
+  { label: "password assignment", pattern: /\bpassword\s*[:=]\s*\S{8,}/i },
+  { label: "session cookie assignment", pattern: /\b(?:cookie|session[_-]?cookie)\s*[:=]\s*\S{20,}/i },
 ];
 
 const truthyPattern = /^(?:yes|y|true|pass|passed|complete|completed|confirmed|captured|ready|present|ok|healthy)$/i;

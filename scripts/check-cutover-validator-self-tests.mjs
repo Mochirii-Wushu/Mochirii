@@ -321,11 +321,32 @@ try {
       discordWebhookSample,
     ],
     [
+      "approval packet API credential assignment",
+      approvalChecker,
+      validApprovalPacket,
+      "API credential assignment",
+      "cloudflare_token=cf_test_secret_value",
+    ],
+    [
+      "approval packet session cookie assignment",
+      approvalChecker,
+      validApprovalPacket,
+      "session cookie assignment",
+      "session_cookie=local-test-cookie-value",
+    ],
+    [
       "live-member result packet Supabase secret key",
       resultChecker,
       validResultPacket,
       "Supabase secret key",
       supabaseSecretSample,
+    ],
+    [
+      "live-member result packet password assignment",
+      resultChecker,
+      validResultPacket,
+      "password assignment",
+      "password=local-test-password",
     ],
     [
       "live-member result packet private Storage object path",

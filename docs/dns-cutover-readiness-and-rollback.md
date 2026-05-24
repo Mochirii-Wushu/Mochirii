@@ -18,6 +18,18 @@ Do not cut over `mochirii.com` DNS until the user explicitly approves the cutove
 - Supabase-first architecture is preserved: Supabase remains authoritative for Auth, Postgres/RLS, Storage, Edge Functions, Discord verification, gallery moderation, signed preview URLs, and audit records.
 - Vercel/Next owns routing, React UI, rendering, redirects, and browser-safe Supabase integration.
 
+## Operator Workstation Prerequisites
+
+Use a workstation that can run the same-window checks without exposing private values:
+
+- Node.js/npm and Git for the repository validation scripts.
+- Deno for `npm run check:supabase-edge-types`, which is included in `npm run check`.
+- Python 3 or a supplied `SMOKE_BASE_URL` for local browser smokes that need a static server.
+- Browser smoke support for Playwright-based checks.
+- GitHub/Vercel CLI authentication for read-only PR preview and production readiness checks when those commands are part of the review window.
+
+The Deno checker resolves `DENO_BIN`, then `~/.deno/bin/deno`, then `deno` on `PATH`. Confirm the binary with `deno --version` or by setting `DENO_BIN` to the installed binary path before the same-window run. Do not print or commit local credential values while preparing the workstation.
+
 ## Non-Goals
 
 - Do not add, remove, or edit DNS records.
