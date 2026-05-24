@@ -40,6 +40,15 @@ const requiredDocs = new Map([
       "D03: Live Upload And Moderation Smoke",
     ],
   ],
+  [
+    "docs/dns-cutover-approval-packet.md",
+    [
+      "Do not treat this template as approval",
+      "Completed packets may include dashboard screenshots",
+      "Decision: GO / NO-GO",
+      "Same-window rehearsal and validation passed",
+    ],
+  ],
 ]);
 
 const expectedLegacyRedirects = new Map([

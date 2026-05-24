@@ -287,7 +287,7 @@ DNS cutover should wait until:
 - Rollback plan is accepted.
 - The user explicitly approves cutover.
 
-See `docs/dns-cutover-readiness-and-rollback.md` for the custom-domain cutover checklist, manual dashboard tasks, DNS inventory template, and rollback plan. Do not cut over DNS from this document alone.
+See `docs/dns-cutover-readiness-and-rollback.md` for the custom-domain cutover checklist, manual dashboard tasks, DNS inventory template, approval packet, and rollback plan. Do not cut over DNS from this document alone.
 
 ## 22. Decision Points Requiring User Approval
 

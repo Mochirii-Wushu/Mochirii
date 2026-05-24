@@ -767,6 +767,23 @@ npm run check:dns-cutover-rehearsal -- --skip-child-checks
 
 Passing this helper is not cutover approval. It only proves the repeatable read-only rehearsal checks that can run from the repository and public network.
 
+## Approval Packet
+
+Before any approved cutover window, prepare the operator packet from [`docs/dns-cutover-approval-packet.md`](./dns-cutover-approval-packet.md).
+
+The packet is a template for a private operator note. Do not commit a completed packet if it contains dashboard screenshots, exact pre-change DNS record values, operator contacts, account labels, submission IDs, private Storage paths, signed URLs, tokens, cookies, or any other private operational detail.
+
+The approval decision must remain `NO-GO` until:
+
+- same-window rehearsal and validation pass;
+- Vercel project ownership and exact DNS instructions are confirmed;
+- Cloudflare pre-change and rollback DNS values are captured privately;
+- Supabase Auth Site URL and Redirect URL plan is confirmed;
+- Discord callback remains the Supabase callback;
+- D02 live OAuth/account QA passes;
+- D03 live upload/moderation QA passes or is explicitly deferred with a named rollback owner;
+- rollback owner and communication path are named.
+
 ## GitHub Pages Rollback Readiness
 
 Rollback assumptions:
