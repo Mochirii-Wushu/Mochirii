@@ -36,6 +36,14 @@ npm --silent run prepare:live-member-qa-local
 
 The helper verifies the local file is ignored, writes safe placeholder labels only, keeps `QA_ALLOW_LIVE_MUTATION=false`, and refuses to overwrite existing local QA values unless `--force` is supplied.
 
+Optional disposable image preparation command:
+
+```sh
+QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run prepare:live-member-qa-image
+```
+
+The image helper writes a deterministic PNG outside the repo and does not print the absolute path. It does not update `.env.live-member-qa`; set `QA_TEST_IMAGE_PATH_LOCAL` privately after reviewing the local file.
+
 ```sh
 # Local-only live member workflow QA readiness values.
 # Keep this file ignored. Never commit it.

@@ -54,6 +54,14 @@ npm --silent run prepare:live-member-qa-local
 
 This helper verifies `.env.live-member-qa` is ignored, refuses tracked state, writes safe labels with mutation disabled, and refuses to overwrite existing local QA values unless `--force` is supplied. It does not authorize live OAuth, upload, moderation, cleanup, or cutover.
 
+To prepare a small repo-external disposable PNG for D03, use:
+
+```sh
+QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run prepare:live-member-qa-image
+```
+
+This helper refuses repository-local output, writes only a deterministic PNG, does not print the absolute path, and refuses overwrite unless `--force` is supplied. It does not update `.env.live-member-qa` or authorize upload/moderation by itself.
+
 ## Non-Goals
 
 - Do not add, remove, or edit DNS records.
@@ -806,6 +814,7 @@ It verifies:
 - DNS and member workflow runbooks still include the required safety gates;
 - completed/private cutover packet, live-member result packet, D02/D03 evidence, dashboard evidence, cleanup note, and screenshot artifacts are not tracked;
 - Next/Vercel legacy `.html` redirects remain configured;
+- live-member QA disposable image preparation remains documented via `prepare:live-member-qa-image`;
 - live-member QA local preparation remains documented via `prepare:live-member-qa-local`;
 - private draft packet preparation remains documented via `prepare:dns-cutover-private-packets`;
 - readiness validator self-tests still reject private values without printing them;

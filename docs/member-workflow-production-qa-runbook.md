@@ -74,6 +74,14 @@ npm --silent run prepare:live-member-qa-local
 
 This preparation helper verifies `.env.live-member-qa` is ignored, refuses tracked state, keeps `QA_ALLOW_LIVE_MUTATION=false`, writes safe placeholder labels only, and refuses to overwrite an existing local QA file unless `--force` is supplied. It does not authorize D02, D03, upload, moderation, cleanup, or cutover.
 
+To prepare a small disposable PNG outside the repository for D03, use:
+
+```sh
+QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run prepare:live-member-qa-image
+```
+
+This image helper refuses repository-local output, writes only a deterministic disposable PNG, refuses overwrite unless `--force` is supplied, and does not print the absolute path. It does not update `.env.live-member-qa` or authorize upload/moderation by itself.
+
 ```sh
 QA_TEST_MEMBER_EMAIL_OR_LABEL=
 QA_TEST_UNVERIFIED_DISCORD_LABEL=
@@ -151,6 +159,7 @@ Preconditions:
 
 - `QA_ALLOW_LIVE_MUTATION=true` is set in the local ignored QA file.
 - A disposable image exists outside the repo, is JPEG/PNG/WebP, and is under 50 MB.
+- `prepare:live-member-qa-image` may be used to create a repo-external disposable PNG before setting `QA_TEST_IMAGE_PATH_LOCAL`.
 - `QA_TEST_IMAGE_PATH_LOCAL` is an absolute path to that repo-external image.
 - The title and caption use the local QA marker.
 - A private cleanup note exists before upload.

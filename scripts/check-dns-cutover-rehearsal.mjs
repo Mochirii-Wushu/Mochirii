@@ -30,6 +30,7 @@ const requiredDocs = new Map([
       "GitHub Pages remains the current rollback surface",
       "Member workflow production QA has followed",
       "prepare:live-member-qa-local",
+      "prepare:live-member-qa-image",
       "prepare:dns-cutover-private-packets",
       "npm run check:dns-cutover-workstation",
       "npm run check:dns-cutover-final-readiness",
@@ -43,6 +44,7 @@ const requiredDocs = new Map([
       "D02: Live OAuth And Account Smoke",
       "D03: Live Upload And Moderation Smoke",
       "prepare:live-member-qa-local",
+      "prepare:live-member-qa-image",
       "npm run check:live-member-workflow-result-packet",
       "npm run check:cutover-validators",
     ],
@@ -82,6 +84,7 @@ const allowedCutoverFiles = new Set([
   "docs/live-member-workflow-result-packet.md",
   "scripts/check-dns-cutover-rehearsal.mjs",
   "scripts/prepare-dns-cutover-private-packets.mjs",
+  "scripts/prepare-live-member-qa-image.mjs",
   "scripts/prepare-live-member-qa-local.mjs",
 ]);
 
