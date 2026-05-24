@@ -50,7 +50,7 @@ Optional D03 cleanup-note preparation command:
 LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm --silent run prepare:live-member-cleanup-note
 ```
 
-The cleanup-note helper writes a private Markdown draft outside the repo and does not print the absolute path. Use it before D03 upload to keep submission IDs, Storage paths, cleanup ownership, and status-only public summaries out of committed reports.
+The cleanup-note helper writes a private Markdown draft from [`docs/live-member-cleanup-note.md`](../docs/live-member-cleanup-note.md) outside the repo and does not print the absolute path. Use it before D03 upload to keep submission IDs, Storage paths, cleanup ownership, and status-only public summaries out of committed reports.
 
 ```sh
 # Local-only live member workflow QA readiness values.

@@ -29,6 +29,7 @@ const requiredDocs = new Map([
       "Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard",
       "GitHub Pages remains the current rollback surface",
       "Member workflow production QA has followed",
+      "docs/live-member-cleanup-note.md",
       "prepare:live-member-qa-local",
       "prepare:live-member-qa-image",
       "prepare:live-member-cleanup-note",
@@ -36,6 +37,16 @@ const requiredDocs = new Map([
       "npm run check:dns-cutover-workstation",
       "npm run check:dns-cutover-pr-readiness",
       "npm run check:dns-cutover-final-readiness",
+    ],
+  ],
+  [
+    "docs/live-member-cleanup-note.md",
+    [
+      "Live Member D03 Cleanup Note Template",
+      "does not authorize DNS cutover",
+      "Submission ID",
+      "Storage object path",
+      "Only copy status-level text",
     ],
   ],
   [
@@ -87,6 +98,7 @@ const requiredDocs = new Map([
 const allowedCutoverFiles = new Set([
   "docs/dns-cutover-approval-packet.md",
   "docs/dns-cutover-readiness-and-rollback.md",
+  "docs/live-member-cleanup-note.md",
   "docs/live-member-workflow-result-packet.md",
   "scripts/check-dns-cutover-final-readiness.mjs",
   "scripts/check-dns-cutover-pr-readiness.mjs",

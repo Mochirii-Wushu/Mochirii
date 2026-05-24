@@ -22,6 +22,8 @@ LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm 
 
 The cleanup-note helper refuses repository-local output, writes only a Markdown draft, does not print absolute paths, and does not authorize upload, moderation, cleanup deferral, or cutover. Keep submission IDs, Storage paths, and any signed-URL handling details in that private note; copy only status-level cleanup text into this result packet.
 
+Review the cleanup-note fields in [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md) before completing a private copy.
+
 ```sh
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 ```

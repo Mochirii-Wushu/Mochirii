@@ -90,6 +90,8 @@ LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm 
 
 This cleanup-note helper refuses repository-local output, writes only a Markdown draft, refuses overwrite unless `--force` is supplied, and does not print the absolute path. It is private operator working state for submission IDs, Storage paths, cleanup ownership, and status-only public summaries; it does not authorize upload, moderation, cleanup deferral, or cutover.
 
+The cleanup-note field template lives at [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md). Review the template publicly, but keep the completed note private and outside the repository.
+
 ```sh
 QA_TEST_MEMBER_EMAIL_OR_LABEL=
 QA_TEST_UNVERIFIED_DISCORD_LABEL=

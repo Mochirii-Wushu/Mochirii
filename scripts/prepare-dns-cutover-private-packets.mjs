@@ -25,6 +25,7 @@ This local folder is private operator working state. It is not approval, does no
 Use these draft files only as private handoff templates:
 
 - \`draft-live-member-workflow-result-packet.md\`
+- \`draft-live-member-cleanup-note.md\`
 - \`draft-dns-cutover-approval-packet.md\`
 
 Keep real dashboard values, private account labels, rollback contacts, screenshots, submission IDs, Storage paths, signed URLs, cookies, tokens, and credentials out of public docs, PRs, issues, and chat.
@@ -32,13 +33,15 @@ Keep real dashboard values, private account labels, rollback contacts, screensho
 Recommended order:
 
 1. Run \`npm run check:dns-cutover-workstation\`.
-2. Complete D02 live OAuth/account QA.
-3. Complete D03 upload/moderation QA only after explicit approval, or defer it with a rollback owner.
-4. Fill the live-member result packet.
-5. Validate it with \`npm run check:live-member-workflow-result-packet -- --packet=/absolute/private/path/draft-live-member-workflow-result-packet.md\`.
-6. Fill the DNS cutover approval packet.
-7. Validate it with \`npm run check:dns-cutover-approval-packet -- --packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
-8. Run \`npm run check:dns-cutover-final-readiness -- --live-member-packet=/absolute/private/path/draft-live-member-workflow-result-packet.md --approval-packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
+2. Run \`npm run check:dns-cutover-pr-readiness\`.
+3. Complete D02 live OAuth/account QA.
+4. If D03 is approved, fill the cleanup note before upload; otherwise record the D03 deferral owner.
+5. Complete D03 upload/moderation QA only after explicit approval, or defer it with a rollback owner.
+6. Fill the live-member result packet.
+7. Validate it with \`npm run check:live-member-workflow-result-packet -- --packet=/absolute/private/path/draft-live-member-workflow-result-packet.md\`.
+8. Fill the DNS cutover approval packet.
+9. Validate it with \`npm run check:dns-cutover-approval-packet -- --packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
+10. Run \`npm run check:dns-cutover-final-readiness -- --live-member-packet=/absolute/private/path/draft-live-member-workflow-result-packet.md --approval-packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
 
 Passing local validators still does not perform or authorize cutover. A human GO decision is required before any provider dashboard or DNS change.
 `,
@@ -46,6 +49,10 @@ Passing local validators still does not perform or authorize cutover. A human GO
   {
     name: "draft-live-member-workflow-result-packet.md",
     source: "docs/live-member-workflow-result-packet.md",
+  },
+  {
+    name: "draft-live-member-cleanup-note.md",
+    source: "docs/live-member-cleanup-note.md",
   },
   {
     name: "draft-dns-cutover-approval-packet.md",

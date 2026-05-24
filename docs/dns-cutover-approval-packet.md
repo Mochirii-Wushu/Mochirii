@@ -163,7 +163,7 @@ If D03 ran, cleanup status: complete / deferred by owner
 Live-member result packet validated:
 ```
 
-Use `prepare:live-member-cleanup-note` before any D03 upload to create a repo-external private cleanup-note draft for submission IDs, Storage paths, cleanup ownership, and status-only public summaries. Do not copy private note values into this packet.
+Use `prepare:live-member-cleanup-note` before any D03 upload to create a repo-external private cleanup-note draft from [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md) for submission IDs, Storage paths, cleanup ownership, and status-only public summaries. Do not copy private note values into this packet.
 
 Stop if D02 fails, if D03 is neither passed nor explicitly deferred with a rollback owner, if any service-role or secret key appears in browser/public output, or if signed URLs/private Storage paths are exposed outside the private operator note.
 
