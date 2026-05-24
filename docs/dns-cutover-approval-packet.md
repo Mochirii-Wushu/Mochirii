@@ -46,9 +46,10 @@ Run these before the approval decision:
 DNS_CUTOVER_PRIVATE_PACKET_DIR=/absolute/private/directory npm --silent run prepare:dns-cutover-private-packets
 npm run check:dns-cutover-workstation
 npm run check:dns-cutover-rehearsal
-npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm --silent run check:live-member-cleanup-note -- --note=/path/to/private/completed-cleanup-note.md
+npm --silent run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 npm run check:cutover-validators
-npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
+npm --silent run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 npm run check
 git diff --check
 npm run check:production
@@ -57,12 +58,14 @@ npm run smoke:vercel-production
 npm run smoke:supabase-edge-functions
 npm run smoke:supabase-auth-boundary
 npm run smoke:gallery-approved-feed
-npm run check:dns-cutover-final-readiness -- --live-member-packet=/path/to/private/completed-live-member-result.md --approval-packet=/path/to/private/completed-packet.md
+LIVE_MEMBER_WORKFLOW_RESULT_PACKET=/path/to/private/completed-live-member-result.md DNS_CUTOVER_APPROVAL_PACKET=/path/to/private/completed-packet.md npm --silent run check:dns-cutover-final-readiness
 ```
 
 If the same-window check runs on a machine without browser smoke support, record why and name the machine or CI check that supplied equivalent evidence.
 
 The approval-packet check reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Decision: GO` lacks required evidence, if D02 is not passed, if D03 is neither passed nor deferred with a rollback owner, or if obvious private identifiers, private Storage paths, secret values, or signed-URL values appear.
+
+The live-member cleanup-note check validates the private D03 artifact and cleanup handoff before the result packet copies only status-level cleanup text.
 
 The live-member result-packet check validates the private D02/D03 handoff before this final cutover packet records it as ready.
 

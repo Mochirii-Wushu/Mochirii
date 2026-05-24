@@ -72,6 +72,14 @@ This helper refuses repository-local output, writes only a Markdown cleanup-note
 
 The cleanup-note template is tracked at [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md) so operators can review the fields before generating a private copy. Completed cleanup notes must remain outside the repository unless every private value is removed.
 
+Validate the completed private cleanup note without printing values:
+
+```sh
+npm --silent run check:live-member-cleanup-note -- --note=/absolute/private/live-member-cleanup-note.md
+```
+
+This helper validates the private completed note's required sections, completion state, cleanup status, and no-secret guardrails. It permits expected private D03 artifact identifiers such as submission IDs and Storage object paths because those belong only in the private note.
+
 ## Non-Goals
 
 - Do not add, remove, or edit DNS records.
@@ -838,6 +846,7 @@ It verifies:
 - live-member QA disposable image preparation remains documented via `prepare:live-member-qa-image`;
 - live-member QA local preparation remains documented via `prepare:live-member-qa-local`;
 - private D03 cleanup-note preparation remains documented via `prepare:live-member-cleanup-note`;
+- private D03 cleanup-note validation remains documented via `npm run check:live-member-cleanup-note`;
 - private draft packet preparation remains documented via `prepare:dns-cutover-private-packets`;
 - readiness validator self-tests still reject private values without printing them;
 - Cloudflare nameservers still answer publicly for `mochirii.com`;
@@ -881,7 +890,7 @@ It is read-only. It does not create deployments, update aliases, edit Vercel dom
 Use this helper during the approved same-window review, after D02/D03 live-member QA has a private result packet and the final approval packet has been completed:
 
 ```sh
-npm run check:dns-cutover-final-readiness -- --live-member-packet=/path/to/private/completed-live-member-result.md --approval-packet=/path/to/private/completed-packet.md
+LIVE_MEMBER_WORKFLOW_RESULT_PACKET=/path/to/private/completed-live-member-result.md DNS_CUTOVER_APPROVAL_PACKET=/path/to/private/completed-packet.md npm --silent run check:dns-cutover-final-readiness
 ```
 
 It is read-only. It does not change DNS, provider dashboards, Vercel aliases, deployments, Supabase data, Edge Functions, uploads, moderation rows, Discord settings, GitHub Pages, or local credential files. It starts with the workstation preflight, verifies draft PR #181 readiness for the current local head, starts a temporary local static server for browser smokes unless `SMOKE_BASE_URL` is already supplied, aggregates the automated same-window checks, validates the private live-member result packet, validates the private DNS approval packet, and fails closed until both packet paths are supplied. For a fast local diagnostic of the private-packet gate only, use:
@@ -901,9 +910,10 @@ The packet is a template for a private operator note. Do not commit a completed 
 Validate the completed private packet before any `GO` decision:
 
 ```sh
-npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm --silent run check:live-member-cleanup-note -- --note=/path/to/private/completed-cleanup-note.md
+npm --silent run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 npm run check:cutover-validators
-npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
+npm --silent run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 ```
 
 These helpers print only field labels and pass/fail state. They do not authorize cutover by themselves.

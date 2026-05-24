@@ -52,6 +52,12 @@ LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm 
 
 The cleanup-note helper writes a private Markdown draft from [`docs/live-member-cleanup-note.md`](../docs/live-member-cleanup-note.md) outside the repo and does not print the absolute path. Use it before D03 upload to keep submission IDs, Storage paths, cleanup ownership, and status-only public summaries out of committed reports.
 
+Completed cleanup notes can be checked without printing their values:
+
+```sh
+npm --silent run check:live-member-cleanup-note -- --note=/absolute/private/live-member-cleanup-note.md
+```
+
 ```sh
 # Local-only live member workflow QA readiness values.
 # Keep this file ignored. Never commit it.

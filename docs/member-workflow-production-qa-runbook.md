@@ -92,6 +92,14 @@ This cleanup-note helper refuses repository-local output, writes only a Markdown
 
 The cleanup-note field template lives at [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md). Review the template publicly, but keep the completed note private and outside the repository.
 
+To validate a completed private cleanup note without printing its submission IDs, Storage paths, or other values:
+
+```sh
+npm --silent run check:live-member-cleanup-note -- --note=/absolute/private/live-member-cleanup-note.md
+```
+
+This validator permits the expected private D03 artifact identifiers that belong only in the cleanup note, but it rejects obvious secrets, token assignments, database URLs, Discord webhooks, and signed Storage URLs.
+
 ```sh
 QA_TEST_MEMBER_EMAIL_OR_LABEL=
 QA_TEST_UNVERIFIED_DISCORD_LABEL=
@@ -273,7 +281,8 @@ After D02 or D03, prepare the sanitized private result packet from [`docs/live-m
 Validate the completed packet before copying its safe status into the DNS cutover approval packet:
 
 ```sh
-npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm --silent run check:live-member-cleanup-note -- --note=/path/to/private/completed-cleanup-note.md
+npm --silent run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 ```
 
 This helper prints only field labels and pass/fail state. It does not authorize cutover, D03 mutation, cleanup deferral, or provider changes by itself.

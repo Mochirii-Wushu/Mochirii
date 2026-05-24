@@ -38,10 +38,11 @@ Recommended order:
 4. If D03 is approved, fill the cleanup note before upload; otherwise record the D03 deferral owner.
 5. Complete D03 upload/moderation QA only after explicit approval, or defer it with a rollback owner.
 6. Fill the live-member result packet.
-7. Validate it with \`npm run check:live-member-workflow-result-packet -- --packet=/absolute/private/path/draft-live-member-workflow-result-packet.md\`.
+7. Validate the cleanup note with \`npm --silent run check:live-member-cleanup-note -- --note=/absolute/private/path/draft-live-member-cleanup-note.md\`.
 8. Fill the DNS cutover approval packet.
-9. Validate it with \`npm run check:dns-cutover-approval-packet -- --packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
-10. Run \`npm run check:dns-cutover-final-readiness -- --live-member-packet=/absolute/private/path/draft-live-member-workflow-result-packet.md --approval-packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
+9. Validate the live-member result packet with \`npm --silent run check:live-member-workflow-result-packet -- --packet=/absolute/private/path/draft-live-member-workflow-result-packet.md\`.
+10. Validate the DNS approval packet with \`npm --silent run check:dns-cutover-approval-packet -- --packet=/absolute/private/path/draft-dns-cutover-approval-packet.md\`.
+11. Run \`LIVE_MEMBER_WORKFLOW_RESULT_PACKET=/absolute/private/path/draft-live-member-workflow-result-packet.md DNS_CUTOVER_APPROVAL_PACKET=/absolute/private/path/draft-dns-cutover-approval-packet.md npm --silent run check:dns-cutover-final-readiness\`.
 
 Passing local validators still does not perform or authorize cutover. A human GO decision is required before any provider dashboard or DNS change.
 `,

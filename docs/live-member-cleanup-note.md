@@ -4,6 +4,14 @@ This template gives operators a private working note for D03 live upload/moderat
 
 Keep completed cleanup notes outside the repository. Do not paste raw values from a completed note into PRs, public reports, issues, chat, the live-member result packet, or the DNS approval packet.
 
+Validate a completed private copy without printing values:
+
+```sh
+npm --silent run check:live-member-cleanup-note -- --note=/absolute/private/live-member-cleanup-note.md
+```
+
+The checker permits the submission ID and Storage object path that belong in this private note, but rejects obvious secrets, token assignments, database URLs, Discord webhooks, and signed Storage URLs.
+
 ## Metadata
 
 ```text

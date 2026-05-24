@@ -45,8 +45,8 @@ const privatePacketChecks = [
     label: "live-member workflow result packet",
     envName: "LIVE_MEMBER_WORKFLOW_RESULT_PACKET",
     value: liveMemberPacket,
-    command: npmCommand,
-    args: ["run", "check:live-member-workflow-result-packet", "--", `--packet=${liveMemberPacket}`],
+    command: process.execPath,
+    args: ["scripts/check-live-member-workflow-result-packet.mjs", `--packet=${liveMemberPacket}`],
     missing:
       "D02/D03 live-member QA has not been proven to this checkout. Provide a private completed result packet path with --live-member-packet=... or LIVE_MEMBER_WORKFLOW_RESULT_PACKET.",
   },
@@ -54,8 +54,8 @@ const privatePacketChecks = [
     label: "DNS cutover approval packet",
     envName: "DNS_CUTOVER_APPROVAL_PACKET",
     value: approvalPacket,
-    command: npmCommand,
-    args: ["run", "check:dns-cutover-approval-packet", "--", `--packet=${approvalPacket}`],
+    command: process.execPath,
+    args: ["scripts/check-dns-cutover-approval-packet.mjs", `--packet=${approvalPacket}`],
     missing:
       "Final GO/NO-GO approval has not been proven to this checkout. Provide a private completed approval packet path with --approval-packet=... or DNS_CUTOVER_APPROVAL_PACKET.",
   },

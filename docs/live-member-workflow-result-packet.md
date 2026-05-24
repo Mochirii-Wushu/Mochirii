@@ -25,10 +25,13 @@ The cleanup-note helper refuses repository-local output, writes only a Markdown 
 Review the cleanup-note fields in [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md) before completing a private copy.
 
 ```sh
-npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm --silent run check:live-member-cleanup-note -- --note=/path/to/private/completed-cleanup-note.md
+npm --silent run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 ```
 
-The checker reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Result: READY` lacks D02/D03 evidence, if D02 is not passed, if D03 is neither passed nor explicitly deferred with a rollback owner, or if obvious secret/private identifier values appear.
+The cleanup-note checker reads a private local file, permits expected private D03 artifact identifiers, and prints only pass/fail labels. It fails if the note is tracked, if an in-repo note path is not ignored by Git, if completed fields are missing, or if obvious secret values appear.
+
+The result-packet checker reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Result: READY` lacks D02/D03 evidence, if D02 is not passed, if D03 is neither passed nor explicitly deferred with a rollback owner, or if obvious secret/private identifier values appear.
 
 ## Source Rules
 
