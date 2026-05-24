@@ -52,12 +52,12 @@ Suggested local values:
 - `QA_TEST_UNVERIFIED_DISCORD_LABEL`: a non-sensitive label for the signed-in account without required roles.
 - `QA_TEST_VERIFIED_MEMBER_LABEL`: a non-sensitive label for the verified active member account.
 - `QA_TEST_MODERATOR_LABEL`: a non-sensitive label for the moderator/leader account.
-- `QA_TEST_IMAGE_PATH_LOCAL`: an absolute or repo-external local path to the disposable test image.
+- `QA_TEST_IMAGE_PATH_LOCAL`: an absolute repo-external local path to the disposable test image.
 - `QA_TEST_TITLE_PREFIX`: should remain `Mochirii QA Test` unless the runbook changes.
 - `QA_TEST_CAPTION_MARKER`: should clearly mark disposable QA data.
 - `QA_ALLOW_LIVE_MUTATION`: keep `false` until a D03 branch receives explicit human approval.
 
-Do not put the disposable image inside the repo unless a future branch explicitly approves a small evidence asset. Prefer a local path outside the repository.
+Do not put the disposable image inside the repo unless a future branch explicitly approves a small evidence asset. Prefer a local path outside the repository. Strict preflight rejects repo-local, missing, empty, oversized, or unsupported test image paths without printing the path value.
 
 ## 4. What Must Never Be Committed
 
@@ -83,6 +83,7 @@ Strict readiness checks may fail locally when:
 - required variable names are missing;
 - `QA_ALLOW_LIVE_MUTATION` is not explicitly reviewed before D03;
 - the test image path is missing before an upload branch;
+- local labels look like private identifiers or the file contains token-like secret values;
 - any credential file is tracked by Git.
 
 Normal repository validation must not require live credentials.
