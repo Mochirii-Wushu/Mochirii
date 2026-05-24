@@ -774,6 +774,14 @@ Before any approved cutover window, prepare the operator packet from [`docs/dns-
 
 The packet is a template for a private operator note. Do not commit a completed packet if it contains dashboard screenshots, exact pre-change DNS record values, operator contacts, account labels, submission IDs, private Storage paths, signed URLs, tokens, cookies, or any other private operational detail.
 
+Validate the completed private packet before any `GO` decision:
+
+```sh
+npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
+```
+
+This helper prints only field labels and pass/fail state. It does not authorize cutover by itself.
+
 The approval decision must remain `NO-GO` until:
 
 - same-window rehearsal and validation pass;

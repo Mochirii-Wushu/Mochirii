@@ -47,6 +47,7 @@ const requiredDocs = new Map([
       "Completed packets may include dashboard screenshots",
       "Decision: GO / NO-GO",
       "Same-window rehearsal and validation passed",
+      "npm run check:dns-cutover-approval-packet",
     ],
   ],
 ]);

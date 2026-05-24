@@ -44,6 +44,7 @@ Run these before the approval decision:
 
 ```sh
 npm run check:dns-cutover-rehearsal
+npm run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
 npm run check
 git diff --check
 npm run check:production
@@ -54,6 +55,8 @@ npm run smoke:gallery-approved-feed
 ```
 
 If the same-window check runs on a machine without browser smoke support, record why and name the machine or CI check that supplied equivalent evidence.
+
+The approval-packet check reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Decision: GO` lacks required evidence, if D02 is not passed, if D03 is neither passed nor deferred with a rollback owner, or if obvious secret/signed-URL values appear.
 
 ## Public State Evidence
 
