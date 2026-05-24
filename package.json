@@ -20,6 +20,7 @@
     "check:refs": "node scripts/check-refs.mjs",
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
     "check:supabase-edge-types": "node scripts/check-supabase-edge-types.mjs",
+    "check:vercel-pr-preview": "node scripts/check-vercel-pr-preview.mjs",
     "check:production": "node scripts/check-production.mjs",
     "smoke:dns-cutover-post": "node scripts/smoke-dns-cutover-post.mjs",
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",

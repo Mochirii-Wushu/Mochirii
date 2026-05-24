@@ -96,6 +96,7 @@ Latest post-PR-184 / PR #181 merge-refresh verification:
 - Public routes, legacy redirects, and Phase 3 member workflow routes remain production-ready on `https://mochirii.vercel.app`.
 - Supabase Edge Function contract smoke passes, including fail-closed checks for `submit-discord-gallery-image` without the ingest secret.
 - Deno-backed Edge Function type validation is now part of `npm run check`.
+- `npm run check:vercel-pr-preview` is available as a read-only PR preview gate; it compares the current PR head against GitHub's Vercel status and Vercel's deployment list for the same commit.
 - No empty image `src` warnings were observed on `/`, `/gallery`, or `/spotlight`.
 - DNS cutover remains deferred.
 
@@ -170,6 +171,7 @@ Read-only Vercel findings:
 - `vercel inspect https://mochirii.vercel.app` confirms deployment `dpl_12d12HX9a9xpTRZXtbkbXraTm6Uj`, project/name `mochirii`, target `production`, status `Ready`.
 - On a checkout without a global `vercel` binary, `npm exec -- vercel inspect https://mochirii.vercel.app` provides the same read-only production deployment confirmation.
 - The PR #181 standalone Vercel status target is a dashboard URL, not an inspectable deployment URL; use `gh pr view 181 --json headRefOid,statusCheckRollup` and `gh api repos/Mochirii-Wushu/Mochirii/commits/<head-sha>/status` for current status evidence.
+- `npm run check:vercel-pr-preview` fails closed if the current PR head's GitHub Vercel status is not `success` or if Vercel lists the matching preview deployment as anything other than `READY`.
 - Root-level Vercel env read for `mochirii/mochirii` shows encrypted Production/Preview env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 - Initial `apps/web` Vercel env read showed `mochirii/web`, encrypted Production env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and extra `SUPABASE_PUBLISHABLE_KEY`.
 - After `vercel pull --yes --environment=production --cwd .`, `apps/web` Vercel env reads resolve to `mochirii/mochirii`, and the production project settings report Root Directory `apps/web`.
@@ -784,6 +786,16 @@ npm run check:dns-cutover-rehearsal -- --skip-child-checks
 ```
 
 Passing this helper is not cutover approval. It only proves the repeatable read-only rehearsal checks that can run from the repository and public network.
+
+### Vercel PR Preview Gate
+
+Use this helper before converting PR #181 out of draft or treating GitHub's combined PR state as healthy:
+
+```sh
+npm run check:vercel-pr-preview
+```
+
+It is read-only. It does not create deployments, update aliases, edit Vercel domains, touch DNS, or read environment values. It reports only the PR number, branch, short commit, GitHub Vercel status, Vercel deployment URL, deployment state, target, and branch alias. It fails closed when the latest PR head is still queued/pending even if production at `https://mochirii.vercel.app` remains Ready.
 
 ## Approval Packet
 
