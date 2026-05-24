@@ -240,6 +240,7 @@ Still manual before cutover:
 - At least one verified active-member upload must be tested or explicitly deferred with a rollback owner.
 - At least one moderator queue, approve/reject, audit, signed URL, and cleanup pass must be tested or explicitly deferred with a rollback owner.
 - Any live-mutating QA must require explicit human approval and a local ignored `.env.live-member-qa` with `QA_ALLOW_LIVE_MUTATION=true`; the committed default remains false.
+- Use the member workflow production QA runbook before running live-account checks: [`docs/member-workflow-production-qa-runbook.md`](./member-workflow-production-qa-runbook.md).
 
 ## Source-Aligned Operating Rules
 
@@ -274,6 +275,7 @@ Before cutover approval, confirm:
 - Supabase Auth redirect URLs include the future custom domains.
 - Discord OAuth callback remains pointed at Supabase Auth.
 - Vercel custom-domain readiness has been checked by an operator in the dashboard.
+- Member workflow production QA has followed [`docs/member-workflow-production-qa-runbook.md`](./member-workflow-production-qa-runbook.md), or remaining live-mutating checks are explicitly deferred with a rollback owner.
 - DNS inventory has been captured before any record changes.
 - Rollback owner and rollback communication path are confirmed.
 

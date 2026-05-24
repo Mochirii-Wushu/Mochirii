@@ -280,6 +280,7 @@ DNS cutover should wait until:
 
 - Public pages pass visual review on production Vercel.
 - Phase 3 auth/member workflows pass Vercel preview and production review.
+- Live-account QA follows [`docs/member-workflow-production-qa-runbook.md`](member-workflow-production-qa-runbook.md), or remaining live-mutating checks are explicitly deferred with a rollback owner.
 - Supabase redirect URLs include final domain URLs.
 - Discord OAuth callback remains valid.
 - Storage upload/moderation smoke tests pass.
