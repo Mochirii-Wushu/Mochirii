@@ -129,14 +129,13 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 
 ## Production Verification Snapshot
 
-Latest PR #181 readiness verification refresh: `2026-05-24`, after the live-member cleanup-note preparation helper.
+Latest PR #181 readiness verification protocol, refreshed `2026-05-24` after the live-member cleanup-note preparation helper:
 
 - PR #181 remains a draft; do not convert it out of draft, merge it, or treat it as cutover approval without explicit user approval.
-- Current branch head: `a6ab612861a5d5d4bfaed07873848094b8403e99`.
-- Current branch comparison: `0` commits behind `main`, `40` commits ahead.
-- Current GitHub merge state: `CLEAN`.
-- Current PR checks: GitHub `validate` passes, Vercel passes, Vercel Preview Comments passes, and Supabase Preview is skipped.
-- Current Vercel PR preview deployment from `npm run check:vercel-pr-preview`: `mochirii-29zfi1u1t-mochirii.vercel.app`, state `READY`, target `preview`.
+- For the current branch head and comparison, run `git rev-parse HEAD` and `git rev-list --left-right --count origin/main...HEAD`.
+- For the current GitHub merge state and status rollup, run `gh pr view 181 --json mergeStateStatus,statusCheckRollup,headRefOid`.
+- For the current Vercel PR preview deployment, run `npm run check:vercel-pr-preview`.
+- After each pushed readiness-only commit, wait for GitHub `validate`, Vercel, and Vercel Preview Comments to pass before treating the PR head as clean. Supabase Preview may remain skipped.
 - Local Deno is installed at `/home/artaius/.deno/bin/deno`; `DENO_BIN=/home/artaius/.deno/bin/deno npm run check:supabase-edge-types` passed for the current checkout.
 - `npm run check:dns-cutover-final-readiness -- --skip-automated-checks` still fails closed because private D02/D03 and final approval packet paths are not supplied. This is expected until the approved-window private packet work is complete.
 
