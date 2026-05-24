@@ -82,6 +82,14 @@ QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run
 
 This image helper refuses repository-local output, writes only a deterministic disposable PNG, refuses overwrite unless `--force` is supplied, and does not print the absolute path. It does not update `.env.live-member-qa` or authorize upload/moderation by itself.
 
+To prepare a private cleanup-note draft before any D03 upload, use:
+
+```sh
+LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm --silent run prepare:live-member-cleanup-note
+```
+
+This cleanup-note helper refuses repository-local output, writes only a Markdown draft, refuses overwrite unless `--force` is supplied, and does not print the absolute path. It is private operator working state for submission IDs, Storage paths, cleanup ownership, and status-only public summaries; it does not authorize upload, moderation, cleanup deferral, or cutover.
+
 ```sh
 QA_TEST_MEMBER_EMAIL_OR_LABEL=
 QA_TEST_UNVERIFIED_DISCORD_LABEL=
@@ -162,7 +170,7 @@ Preconditions:
 - `prepare:live-member-qa-image` may be used to create a repo-external disposable PNG before setting `QA_TEST_IMAGE_PATH_LOCAL`.
 - `QA_TEST_IMAGE_PATH_LOCAL` is an absolute path to that repo-external image.
 - The title and caption use the local QA marker.
-- A private cleanup note exists before upload.
+- A private cleanup note exists before upload; `prepare:live-member-cleanup-note` may be used to create the repo-external draft.
 - The moderator knows the exact marker and expected submission timing.
 - Human approval covers one upload and one agreed moderation decision.
 

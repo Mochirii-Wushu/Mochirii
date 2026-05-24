@@ -62,6 +62,14 @@ QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run
 
 This helper refuses repository-local output, writes only a deterministic PNG, does not print the absolute path, and refuses overwrite unless `--force` is supplied. It does not update `.env.live-member-qa` or authorize upload/moderation by itself.
 
+To prepare a private D03 cleanup-note draft before any upload, use:
+
+```sh
+LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm --silent run prepare:live-member-cleanup-note
+```
+
+This helper refuses repository-local output, writes only a Markdown cleanup-note draft, does not print the absolute path, and refuses overwrite unless `--force` is supplied. The note is private operator working state for submission IDs, Storage paths, cleanup ownership, and status-only public summaries; it does not authorize upload, moderation, cleanup deferral, or cutover.
+
 ## Non-Goals
 
 - Do not add, remove, or edit DNS records.
@@ -816,6 +824,7 @@ It verifies:
 - Next/Vercel legacy `.html` redirects remain configured;
 - live-member QA disposable image preparation remains documented via `prepare:live-member-qa-image`;
 - live-member QA local preparation remains documented via `prepare:live-member-qa-local`;
+- private D03 cleanup-note preparation remains documented via `prepare:live-member-cleanup-note`;
 - private draft packet preparation remains documented via `prepare:dns-cutover-private-packets`;
 - readiness validator self-tests still reject private values without printing them;
 - Cloudflare nameservers still answer publicly for `mochirii.com`;

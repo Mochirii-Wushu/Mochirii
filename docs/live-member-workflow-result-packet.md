@@ -14,6 +14,14 @@ DNS_CUTOVER_PRIVATE_PACKET_DIR=/absolute/private/directory npm --silent run prep
 
 The preparation helper creates a private draft copy outside the repository. It does not create completed evidence, does not authorize D02, D03, or cutover, and does not print absolute paths.
 
+For D03 cleanup identifiers, prepare a separate private cleanup-note draft before upload:
+
+```sh
+LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm --silent run prepare:live-member-cleanup-note
+```
+
+The cleanup-note helper refuses repository-local output, writes only a Markdown draft, does not print absolute paths, and does not authorize upload, moderation, cleanup deferral, or cutover. Keep submission IDs, Storage paths, and any signed-URL handling details in that private note; copy only status-level cleanup text into this result packet.
+
 ```sh
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 ```

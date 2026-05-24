@@ -44,6 +44,14 @@ QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run
 
 The image helper writes a deterministic PNG outside the repo and does not print the absolute path. It does not update `.env.live-member-qa`; set `QA_TEST_IMAGE_PATH_LOCAL` privately after reviewing the local file.
 
+Optional D03 cleanup-note preparation command:
+
+```sh
+LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm --silent run prepare:live-member-cleanup-note
+```
+
+The cleanup-note helper writes a private Markdown draft outside the repo and does not print the absolute path. Use it before D03 upload to keep submission IDs, Storage paths, cleanup ownership, and status-only public summaries out of committed reports.
+
 ```sh
 # Local-only live member workflow QA readiness values.
 # Keep this file ignored. Never commit it.
