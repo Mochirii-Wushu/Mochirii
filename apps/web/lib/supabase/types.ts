@@ -78,6 +78,12 @@ export type GallerySubmission = {
   reviewed_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  submission_source?: string | null;
+  discord_guild_id?: string | null;
+  discord_channel_id?: string | null;
+  discord_message_id?: string | null;
+  discord_attachment_id?: string | null;
+  discord_user_id?: string | null;
 };
 
 export type GallerySubmissionMetadata = {
@@ -114,6 +120,14 @@ export type GalleryModerationEvent = {
 export type GalleryReviewSubmission = {
   id?: string | null;
   status?: string | null;
+  source?: string | null;
+  discord?: {
+    guildId?: string | null;
+    channelId?: string | null;
+    messageId?: string | null;
+    attachmentId?: string | null;
+    userId?: string | null;
+  } | null;
   uploader?: {
     displayName?: string | null;
     discordUsername?: string | null;

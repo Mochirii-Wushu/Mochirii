@@ -187,7 +187,6 @@ These require explicit later branches and review:
 - scheduled event sync
 - webhook notifications
 - forum index
-- slash commands
 - role assignment automation
 
 ## Required Edge Function Secrets
@@ -201,6 +200,8 @@ DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 DISCORD_MODERATOR_ROLE_NAMES=Moderator
 DISCORD_BOT_TOKEN=<set manually, never commit>
+DISCORD_GALLERY_CHANNEL_ID=<set after creating gallery-submissions>
+DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
 DISCORD_WEBHOOK_GALLERY_APPROVED=<set manually, never commit>
 DISCORD_WEBHOOK_MOD_LOG=<set manually, never commit>
 DISCORD_EVENTS_CHANNEL_ID=<set per environment>
@@ -217,6 +218,7 @@ supabase functions serve verify-discord-member --env-file supabase/functions/.en
 supabase functions serve list-gallery-review-queue --env-file supabase/functions/.env.local
 supabase functions serve moderate-gallery-submission --env-file supabase/functions/.env.local
 supabase functions serve list-approved-gallery-submissions --env-file supabase/functions/.env.local
+supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local
 ```
 
 Production secret examples:
@@ -228,6 +230,8 @@ supabase secrets set DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 supabase secrets set DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 supabase secrets set DISCORD_MODERATOR_ROLE_NAMES=Moderator
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
+supabase secrets set DISCORD_GALLERY_CHANNEL_ID=<set after creating gallery-submissions>
+supabase secrets set DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
 ```
 
 `supabase secrets set ...` writes remote project secrets. Run it only from a trusted shell and never paste tokens into tracked files.
@@ -267,6 +271,7 @@ supabase functions deploy verify-discord-member
 supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
+supabase functions deploy submit-discord-gallery-image
 ```
 
 Recommended production sequence after dashboard setup and secrets are complete:
@@ -280,6 +285,7 @@ supabase functions deploy verify-discord-member
 supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
+supabase functions deploy submit-discord-gallery-image
 ```
 
 If the linked project requires a database password in the shell, set it locally without committing it. Fish shell example:
@@ -335,6 +341,8 @@ The website does not assign Discord roles in this phase.
 - private Storage bucket/path
 - original filename, MIME type, and size
 - optional title/caption/category
+- upload source (`website` or `discord`)
+- Discord guild/channel/message/attachment/user IDs for Discord submissions
 - moderation status
 - review fields for moderator approval or decline actions
 
@@ -390,6 +398,7 @@ No public read access is granted.
 - authenticated users can insert only their own submissions when their profile is active, has required Discord roles, and has recent verification.
 - authenticated users can update only title, caption, and category on their own pending submissions.
 - browser users cannot approve, reject, archive, review, or delete submissions in this phase.
+- browser users cannot set Discord source metadata.
 - service_role can manage rows from trusted backend/admin workflows.
 
 `gallery_moderation_events`:
@@ -419,17 +428,19 @@ Both functions require a signed-in Supabase user JWT and then verify Discord ser
 
 `moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission. It updates `gallery_submissions.status`, `reviewed_by`, `reviewed_at`, and `rejection_reason`, then records a `gallery_moderation_events` row. Approved submissions become eligible for the approved public Gallery feed; they are not written into `data/gallery.json`.
 
-The website Leader Dashboard uses those functions to show queue tabs, submission details, signed private previews, rejection reasons, and compact moderation history. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
+The website Leader Dashboard uses those functions to show queue tabs, submission details, signed private previews, source metadata, rejection reasons, and compact moderation history. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
 
 For the human moderator workflow, see `docs/member-gallery-moderation-runbook.md`.
 
-When this moderation-polish branch is released, deploy only the changed moderator queue function after review:
+Discord `/submit image:` uploads use a separate Edge Function:
 
 ```sh
-supabase functions deploy list-gallery-review-queue
+submit-discord-gallery-image
 ```
 
-No database migration is required for this polish pass.
+That function has `verify_jwt = false` because it is called by the trusted Reaper bot rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The bot checks live Discord roles before calling it; the Edge Function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
+
+Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved.
 
 ## Approved Public Gallery Feed
 
@@ -437,7 +448,7 @@ Approved member submissions appear on `gallery.html` through the public Edge Fun
 
 - `list-approved-gallery-submissions`
 
-This is the only Gallery Edge Function with `verify_jwt = false`. It is publicly callable because the public Gallery page needs to load without sign-in, but it uses server-side credentials only inside the Edge runtime and queries only `gallery_submissions` rows where `status = 'approved'`.
+This Gallery Edge Function also has `verify_jwt = false`. It is publicly callable because the public Gallery page needs to load without sign-in, but it uses server-side credentials only inside the Edge runtime and queries only `gallery_submissions` rows where `status = 'approved'`.
 
 The function returns public-safe fields, safe uploader display names, and short-lived signed URLs for private `member-gallery` objects. The Storage bucket remains private; no public bucket or anonymous Storage read policy is added.
 
@@ -481,9 +492,7 @@ npm run check:production
 For Edge Function loading checks without deployment:
 
 ```sh
-deno check --import-map=supabase/functions/list-gallery-review-queue/deno.json supabase/functions/list-gallery-review-queue/index.ts
-deno check --import-map=supabase/functions/moderate-gallery-submission/deno.json supabase/functions/moderate-gallery-submission/index.ts
-deno check --import-map=supabase/functions/list-approved-gallery-submissions/deno.json supabase/functions/list-approved-gallery-submissions/index.ts
+npm run check:supabase-edge-types
 ```
 
 ## Manual Discord Role-Granting Flow

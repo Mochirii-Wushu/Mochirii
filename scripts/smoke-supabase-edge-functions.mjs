@@ -22,6 +22,22 @@ const protectedFunctions = [
   },
 ];
 
+const secretProtectedFunctions = [
+  {
+    name: "submit-discord-gallery-image",
+    body: {
+      guildId: "1078630751077142608",
+      channelId: "1078630751077142608",
+      messageId: "1078630751077142608",
+      attachmentId: "1078630751077142608",
+      discordUserId: "1078630751077142608",
+      attachmentUrl: "https://cdn.discordapp.com/attachments/1078630751077142608/1078630751077142608/example.png",
+      mimeType: "image/png",
+      sizeBytes: 1,
+    },
+  },
+];
+
 function readSupabasePublicConfig() {
   const text = readFileSync(path.join(root, "supabase.js"), "utf8");
   const url = text.match(/SUPABASE_URL\s*=\s*"([^"]+)"/)?.[1] || "";
@@ -116,6 +132,30 @@ async function checkProtectedRejects(config, target, label, authorization) {
   );
 }
 
+async function checkSecretProtectedRejects(config, target, label, extraHeaders = {}) {
+  const result = await fetchContract(functionUrl(config, target.name), {
+    method: "POST",
+    headers: headers(config, extraHeaders),
+    body: JSON.stringify(target.body),
+  });
+
+  assert(
+    result.status === 401 || result.status === 403 || result.status === 500,
+    `${target.name} ${label} expected fail-closed 401/403/500 response, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
+  );
+
+  assert(result.ok === false, `${target.name} ${label} unexpectedly succeeded.`);
+}
+
+async function checkMethodNotAllowed(config, name) {
+  const result = await fetchContract(functionUrl(config, name), {
+    method: "DELETE",
+    headers: headers(config),
+  });
+
+  assert(result.status === 405, `${name} DELETE expected 405 Method not allowed, got ${result.status}.`);
+}
+
 function validateApprovedFeedBody(body) {
   assert(body && typeof body === "object", "approved feed response was not JSON.");
   assert(body.ok === true, `approved feed response ok flag was not true: ${summarizeBody(body)}`);
@@ -173,6 +213,18 @@ try {
     await checkProtectedRejects(config, target, "without JWT", "");
     await checkProtectedRejects(config, target, "with malformed JWT", "Bearer malformed.jwt.token");
     await checkProtectedRejects(config, target, "with publishable key as bearer", `Bearer ${config.publishableKey}`);
+  }
+
+  for (const target of secretProtectedFunctions) {
+    await checkOptions(config, target.name);
+    await checkMethodNotAllowed(config, target.name);
+    await checkSecretProtectedRejects(config, target, "without ingest secret");
+    await checkSecretProtectedRejects(config, target, "with publishable key as bearer", {
+      Authorization: `Bearer ${config.publishableKey}`,
+    });
+    await checkSecretProtectedRejects(config, target, "with invalid ingest header", {
+      "x-mochirii-reaper-secret": "invalid-ingest-secret",
+    });
   }
 
   await checkApprovedFeed(config);

@@ -77,20 +77,22 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 
 ## Production Verification Snapshot
 
-Latest post-PR-183 production verification:
+Latest post-PR-184 / PR #181 merge-refresh verification:
 
 - Vercel production URL: `https://mochirii.vercel.app`
-- Deployment ID: `dpl_12d12HX9a9xpTRZXtbkbXraTm6Uj`
-- Target: `production`
-- Commit: `a33ac30fbe303c9e865c94b81887e7100c706333`
-- Status: `Ready`
-- Build result: success
+- Current main commit: `ce127ae9600d69d60948c043be4f3c8aab5252e4`
+- PR #184 Discord gallery ingest foundation has merged to `main`.
+- PR #184 GitHub `validate`, Supabase Preview, GitHub build/deploy/report checks, and Vercel Preview Comments passed.
+- The standalone Vercel commit status can remain pending even after GitHub/Vercel preview deployment checks pass; do not treat that stale pending status as cutover approval.
 - PR #183 shared lightbox overlay and scroll-lock fix is included in production.
+- PR #184 Supabase migrations and Edge Function deployments are live in the linked Supabase project.
 - Homepage Screenshot Spotlight full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
 - Gallery full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
 - Homepage Screenshot Spotlight randomization remains working: four thumbnails render, hard refresh changes the selected set/order, selection stays stable in-session, and thumbnails open matching full images.
 - Gallery sorting/random behavior remains working: newest starts `shot-73`, `shot-72`, `shot-71`; oldest starts `shot-01`, `shot-02`, `shot-03`; random changes after hard refresh and stays stable in-session.
 - Public routes, legacy redirects, and Phase 3 member workflow routes remain production-ready on `https://mochirii.vercel.app`.
+- Supabase Edge Function contract smoke passes, including fail-closed checks for `submit-discord-gallery-image` without the ingest secret.
+- Deno-backed Edge Function type validation is now part of `npm run check`.
 - No empty image `src` warnings were observed on `/`, `/gallery`, or `/spotlight`.
 - DNS cutover remains deferred.
 
@@ -182,10 +184,13 @@ Read-only Supabase findings:
 - Supabase project: `Mōchirīī`, ref `deyvmtncimmcinldjyqe`, region `us-west-2`, status `ACTIVE_HEALTHY`.
 - Database engine: Postgres `17`, version `17.6.1.111`, release channel `ga`.
 - Deployed Edge Functions are active:
-  - `verify-discord-member`, `verify_jwt: true`, version `42`.
-  - `list-gallery-review-queue`, `verify_jwt: true`, version `41`.
-  - `moderate-gallery-submission`, `verify_jwt: true`, version `40`.
-  - `list-approved-gallery-submissions`, `verify_jwt: false`, version `41`.
+  - `verify-discord-member`, `verify_jwt: true`, version `44`.
+  - `list-gallery-review-queue`, `verify_jwt: true`, version `44`.
+  - `moderate-gallery-submission`, `verify_jwt: true`, version `42`.
+  - `list-approved-gallery-submissions`, `verify_jwt: false`, version `43`.
+  - `submit-discord-gallery-image`, `verify_jwt: false`, version `2`.
+- Supabase migration list shows `20260524114802_add_discord_gallery_submission_source.sql` and `20260524115932_revoke_public_rls_auto_enable_execute.sql` applied to the linked project.
+- Linked Supabase advisors no longer report public `SECURITY DEFINER` execute warnings for `public.rls_auto_enable()`; the remaining linked warning is Auth leaked-password protection disabled.
 - Supabase secret names are present for Discord integration and Supabase runtime access. Raw secret values must not be recorded in this repository, and secret/service-role material must stay in Edge Functions or other server-only runtimes.
 - Supabase changelog scan surfaced current breaking-change items around Data API exposure and self-hosted/database topics; no cutover setting was changed.
 
@@ -216,6 +221,8 @@ This pass intentionally avoided real OAuth, real member upload, moderation mutat
 Commands completed:
 
 - `npm run check:live-member-workflow-preflight` passed in normal mode.
+- `npm run check:discord-gallery-ingest` passed.
+- `npm run check:supabase-edge-types` passed with Deno.
 - `npm run smoke:supabase-edge-functions` passed.
 - `npm run smoke:supabase-auth-boundary` passed against a temporary local static server at `http://127.0.0.1:8765`.
 - `npm run smoke:gallery-approved-feed` passed against a temporary local static server at `http://127.0.0.1:8765`.
@@ -230,6 +237,8 @@ Verified by this pass:
 - `.env.live-member-qa` is not present locally, so real live member workflow QA is not configured in this checkout.
 - Protected Supabase Edge Functions reject missing, malformed, or publishable-key bearer credentials with fail-closed 401/403 behavior.
 - Public `list-approved-gallery-submissions` still returns the expected public contract and does not expose private storage/audit fields in the smoke response.
+- Public/secret-gated `submit-discord-gallery-image` is active but fails closed without the bot ingest secret, fails closed with the publishable key as bearer, and rejects invalid ingest headers in smoke checks.
+- Deno type checks cover all Supabase Edge Function entrypoints and import maps.
 - Signed-out root static auth/member pages do not make protected data, function, or storage calls in the mocked auth-boundary smoke.
 - Approved-feed gallery UI renders the member-submissions count, signed image URL, empty/failure states, and fallback behavior in the mocked browser smoke.
 - Vercel production still returns HTTP 200 for all clean public and Phase 3 routes, redirects legacy `.html` routes to clean routes, and renders signed-out Phase 3 content for `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
@@ -760,6 +769,7 @@ It verifies:
 - `www.mochirii.com` still redirects to the apex custom domain before cutover;
 - `npm run smoke:vercel-production` still passes against `https://mochirii.vercel.app`;
 - `npm run check:live-member-workflow-preflight` still passes in normal, non-mutating mode.
+- `npm run check` still covers Supabase public config, Discord gallery ingest guardrails, Deno Edge Function type checks, and cutover validator self-tests.
 
 If only the local/file/DNS portion is needed while investigating a smoke failure, use:
 

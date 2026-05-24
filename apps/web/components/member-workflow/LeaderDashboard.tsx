@@ -79,6 +79,7 @@ function SubmissionCard({
   const status = normalizeStatus(item.status || activeStatus);
   const title = text(item.title || item.originalFilename, "Untitled image");
   const events = Array.isArray(item.moderationEvents) ? item.moderationEvents : [];
+  const sourceLabel = text(item.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
 
   return (
     <article className={`review-item review-item--${status}`} data-submission-id={item.id || ""}>
@@ -104,6 +105,7 @@ function SubmissionCard({
         <dl className="review-meta">
           {[
             ["Status", item.status || activeStatus],
+            ["Source", sourceLabel],
             ["Category", item.category || "Uncategorized"],
             ["Type", item.mimeType || "Unknown"],
             ["Size", formatBytes(item.sizeBytes)],
@@ -119,6 +121,7 @@ function SubmissionCard({
         <details className="review-storage">
           <summary>Storage reference</summary>
           <code>{item.storagePath || "Not available"}</code>
+          {item.discord?.messageId ? <code>Discord message: {item.discord.messageId}</code> : null}
         </details>
         <section className="review-history" aria-label="Moderation history">
           <h4>Moderation History</h4>

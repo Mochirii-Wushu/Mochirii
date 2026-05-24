@@ -150,8 +150,10 @@
   }
 
   function renderMeta(item) {
+    const sourceLabel = U.text(item.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
     const rows = [
       ["Status", item.status || activeStatus],
+      ["Source", sourceLabel],
       ["Category", item.category || "Uncategorized"],
       ["Type", item.mimeType || "Unknown"],
       ["Size", formatBytes(item.sizeBytes)],
@@ -241,6 +243,7 @@
           <details class="review-storage">
             <summary>Storage reference</summary>
             <code>${U.escapeHtml(item.storagePath || "Not available")}</code>
+            ${item.discord?.messageId ? `<code>Discord message: ${U.escapeHtml(item.discord.messageId)}</code>` : ""}
           </details>
           ${renderHistory(item)}
           ${status === "pending" ? renderPendingActions() : ""}
