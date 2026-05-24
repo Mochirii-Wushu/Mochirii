@@ -10,8 +10,8 @@ Do not cut over `mochirii.com` DNS until the user explicitly approves the cutove
 
 - Root GitHub Pages static site files still exist and must remain available for rollback.
 - The Next.js app lives under `apps/web`.
-- Vercel project: `mochirii/web`.
-- Vercel Root Directory: `apps/web`.
+- Vercel app project to reconcile before cutover: production aliases currently point at `mochirii/mochirii`, while the local `apps/web` CLI link points at `mochirii/web`.
+- Vercel Root Directory: `apps/web` on the production-serving `mochirii/mochirii` project; `mochirii/web` currently reports root directory `.` and must not be treated as the production alias owner without dashboard reconciliation.
 - Vercel production review URL: `https://mochirii.vercel.app`.
 - Current custom-domain production surface remains the GitHub Pages site until DNS is explicitly changed.
 - DNS cutover for `mochirii.com` remains deferred.
@@ -137,6 +137,70 @@ Read-only provider and public-network checks completed:
 
 No DNS, Cloudflare, Vercel dashboard, Supabase dashboard, Discord Developer Portal, GitHub Pages, Supabase database, Supabase Edge Function, or deployment mutation was performed during this baseline lock.
 
+### Step 3 Operator Inventory Pass
+
+Latest read-only operator inventory pass: `2026-05-24`.
+
+This pass intentionally stopped at read-only CLI/API/public checks. It did not change DNS, Cloudflare, Vercel, Supabase, Discord, GitHub Pages, Supabase database state, Supabase Edge Functions, or deployment aliases.
+
+Source alignment used for this pass:
+
+- Vercel says external-DNS domains should be inspected in Vercel, then configured in the external DNS provider with the exact records Vercel shows.
+- Vercel warns against placing Cloudflare as a reverse proxy in front of Vercel unless that exception is explicitly tested and accepted.
+- Cloudflare proxy status explains why orange-clouded `A`, `AAAA`, and `CNAME` records expose Cloudflare anycast IPs publicly rather than origin records.
+- Supabase Auth redirect docs recommend exact production redirect URLs, using broad wildcards mainly for local and preview URLs.
+- Supabase Edge Function secret docs keep secret/service-role material server-only; browser code must not receive secret keys.
+
+Read-only Vercel findings:
+
+- `vercel domains ls` shows `mochirii.com` under team `mochirii`, with a third-party registrar and third-party nameservers.
+- `vercel domains inspect mochirii.com` shows current nameservers `igor.ns.cloudflare.com` and `naomi.ns.cloudflare.com`, not Vercel nameservers, and reports the domain as not configured properly for Vercel yet.
+- `vercel domains inspect mochirii.com` currently recommends `A mochirii.com 76.76.21.21` if the domain stays on an external DNS provider.
+- `vercel domains inspect www.mochirii.com` resolves to the same domain ownership record and currently recommends `A www.mochirii.com 76.76.21.21`.
+- `vercel project inspect mochirii` shows project `mochirii/mochirii`, Root Directory `apps/web`, Framework Next.js, Node.js `24.x`.
+- `vercel project inspect web` shows project `mochirii/web`, Root Directory `.`, Framework Next.js, Node.js `24.x`.
+- `vercel alias list` shows `mochirii.com`, `www.mochirii.com`, `mochirii.vercel.app`, `mochirii-mochirii.vercel.app`, and `mochirii-git-main-mochirii.vercel.app` aliasing the same production deployment source `mochirii-k3kmghcpi-mochirii.vercel.app`.
+- `vercel inspect https://mochirii.vercel.app` confirms deployment `dpl_12d12HX9a9xpTRZXtbkbXraTm6Uj`, project/name `mochirii`, target `production`, status `Ready`.
+- Root-level Vercel env read for `mochirii/mochirii` shows encrypted Production/Preview env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
+- `apps/web` Vercel env read for `mochirii/web` shows encrypted Production env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and extra `SUPABASE_PUBLISHABLE_KEY`.
+
+Vercel manual reconciliation now required before DNS cutover:
+
+- Confirm in the Vercel dashboard which project is intended to own production custom domains: `mochirii/mochirii` or `mochirii/web`.
+- Confirm the production-serving project has Root Directory `apps/web`, Production Branch `main`, Framework Next.js, Node.js `24.x`, and the required Production/Preview env names.
+- Resolve the mismatch between prior dashboard-confirmed project-specific CNAME targets and the current Vercel CLI domain-inspect `A 76.76.21.21` recommendation.
+- Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard at the approved cutover window.
+
+Read-only Supabase findings:
+
+- Supabase project: `Mōchirīī`, ref `deyvmtncimmcinldjyqe`, region `us-west-2`, status `ACTIVE_HEALTHY`.
+- Database engine: Postgres `17`, version `17.6.1.111`, release channel `ga`.
+- Deployed Edge Functions are active:
+  - `verify-discord-member`, `verify_jwt: true`, version `42`.
+  - `list-gallery-review-queue`, `verify_jwt: true`, version `41`.
+  - `moderate-gallery-submission`, `verify_jwt: true`, version `40`.
+  - `list-approved-gallery-submissions`, `verify_jwt: false`, version `41`.
+- Supabase secret names are present for Discord integration and Supabase runtime access. Raw secret values must not be recorded in this repository, and secret/service-role material must stay in Edge Functions or other server-only runtimes.
+- Supabase changelog scan surfaced current breaking-change items around Data API exposure and self-hosted/database topics; no cutover setting was changed.
+
+Supabase manual confirmation still required before DNS cutover:
+
+- Auth -> URL Configuration Site URL and Redirect URLs must be checked in the dashboard against the final custom-domain plan.
+- Exact production redirect URLs should be present for the final production state; Vercel preview and localhost wildcards should stay available through the transition.
+- Discord provider configuration must continue using the Supabase callback endpoint.
+- Edge Function secrets should be verified in the dashboard by name and freshness only; do not copy values into docs, PRs, issues, or chat.
+
+Read-only GitHub Pages findings:
+
+- GitHub Pages API reports status `built`, custom domain `mochirii.com`, source branch `main`, source path `/`, public `true`, and HTTPS enforced `false`.
+- GitHub Pages remains the current rollback surface; root static files and the tracked `CNAME` file must remain untouched until post-cutover stabilization is complete.
+
+Cloudflare and Discord manual confirmation still required:
+
+- Cloudflare remains the current public authoritative DNS provider from nameserver and header evidence, but the exact live dashboard record values must be re-captured before cutover.
+- Confirm DNSSEC, SSL/TLS mode, proxied/DNS-only status, active rules, Managed Transforms, and any unpublished subdomains in the Cloudflare dashboard before changing web records.
+- Confirm the Discord Developer Portal OAuth redirect remains the Supabase callback endpoint and not a Vercel or custom-domain URL.
+
 ## Source-Aligned Operating Rules
 
 These rules are based on the official provider references checked during the baseline pass:
@@ -179,10 +243,13 @@ Do not change Vercel settings while using this document unless the user has expl
 
 Manual Vercel Dashboard path:
 
-- Project: `mochirii/web`
-- Verify Root Directory: `apps/web`
+- Candidate production project: `mochirii/mochirii`
+- Candidate local-linked project: `mochirii/web`
+- Verify which project owns production aliases and custom domains before cutover.
+- Verify Root Directory is `apps/web` on the production-serving project.
 - Verify Production Branch: `main`
 - Verify Framework: Next.js
+- Verify Node.js Version: `24.x`
 - Verify Production env names are present:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
@@ -197,6 +264,12 @@ Domains to add later only after explicit cutover approval:
 - `mochirii.com`
 - `www.mochirii.com`, if desired
 
+Current project/domain inventory note:
+
+- `mochirii.com`, `www.mochirii.com`, and `mochirii.vercel.app` currently alias a Ready production deployment under project `mochirii/mochirii`.
+- The local `apps/web/.vercel/project.json` link points at `mochirii/web`.
+- Treat this as a cutover blocker until an operator confirms the intended Vercel project and normalizes documentation/dashboard state.
+
 Expected Vercel custom-domain flow:
 
 1. Add `mochirii.com` in Project -> Settings -> Domains.
@@ -207,7 +280,7 @@ Expected Vercel custom-domain flow:
 6. Confirm Vercel marks each domain valid/ready.
 7. Keep `https://mochirii.vercel.app` available as a fallback and debugging URL.
 
-Do not hardcode expected DNS records in this repository. Use the exact records Vercel shows in Project -> Settings -> Domains.
+Do not hardcode new expected DNS records in this repository. Use the exact records Vercel shows in Project -> Settings -> Domains for the production-serving project, and re-check them during the approved cutover window.
 
 ## Supabase Checklist
 
@@ -421,6 +494,8 @@ GitHub Pages direct-record reference set used for comparison:
 
 ### Future Cutover Action Table
 
+The Vercel targets below came from prior dashboard-confirmed DNS instructions. The `2026-05-24` CLI inventory also surfaced a generic `A 76.76.21.21` recommendation from `vercel domains inspect`. Re-confirm the exact final records in the production-serving Vercel project's Domains dashboard during the approved cutover window before changing Cloudflare.
+
 | Host | Type | Current state | Future action | Final value | Source | Confidence | Cutover action |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `mochirii.com` / `@` | CNAME | Dashboard shows four proxied A records with Auto TTL; IP values redacted | Replace current apex web records only during an approved cutover | `c4b58a30d23b9df3.vercel-dns-017.com`; Proxy disabled / DNS only | user-provided Vercel Domains DNS instructions; Cloudflare dashboard confirmation | CONFIRMED_VERCEL_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
@@ -454,7 +529,7 @@ GitHub Pages direct-record reference set used for comparison:
 Source: user-provided Vercel Domains DNS instructions.
 Confidence: `CONFIRMED_VERCEL_DASHBOARD`.
 
-These records are documented for a future approved cutover only. They have not been applied in Cloudflare, and DNS cutover remains deferred.
+These records are documented for a future approved cutover only. They have not been applied in Cloudflare, and DNS cutover remains deferred. Re-confirm them in the production-serving Vercel project immediately before cutover because the `2026-05-24` CLI inventory also reported an `A 76.76.21.21` recommendation from `vercel domains inspect`.
 
 | Host / Name | Type | Value | Proxy setting | Cutover action |
 | --- | --- | --- | --- | --- |
