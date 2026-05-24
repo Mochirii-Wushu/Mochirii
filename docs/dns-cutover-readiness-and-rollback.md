@@ -30,6 +30,14 @@ Use a workstation that can run the same-window checks without exposing private v
 
 The Deno checker resolves `DENO_BIN`, then `~/.deno/bin/deno`, then `deno` on `PATH`. Confirm the binary with `deno --version` or by setting `DENO_BIN` to the installed binary path before the same-window run. Do not print or commit local credential values while preparing the workstation.
 
+Before the same-window final readiness run, verify the workstation with:
+
+```sh
+npm run check:dns-cutover-workstation
+```
+
+This helper is read-only. It checks local command availability, Deno, Python or supplied `SMOKE_BASE_URL`, Playwright browser launch support, and GitHub/Vercel CLI authentication without printing account names, tokens, env values, or private packet values.
+
 ## Non-Goals
 
 - Do not add, remove, or edit DNS records.
@@ -788,6 +796,7 @@ It verifies:
 - the current custom domain still matches the pre-cutover Cloudflare/GitHub Pages surface;
 - `www.mochirii.com` still redirects to the apex custom domain before cutover;
 - `npm run smoke:vercel-production` still passes against `https://mochirii.vercel.app`;
+- `npm run check:dns-cutover-workstation` passes on the operator machine before same-window final readiness;
 - `npm run check:live-member-workflow-preflight` still passes in normal, non-mutating mode.
 - `npm run check` still covers Supabase public config, Discord gallery ingest guardrails, Deno Edge Function type checks, and cutover validator self-tests.
 
@@ -817,7 +826,7 @@ Use this helper during the approved same-window review, after D02/D03 live-membe
 npm run check:dns-cutover-final-readiness -- --live-member-packet=/path/to/private/completed-live-member-result.md --approval-packet=/path/to/private/completed-packet.md
 ```
 
-It is read-only. It does not change DNS, provider dashboards, Vercel aliases, deployments, Supabase data, Edge Functions, uploads, moderation rows, Discord settings, GitHub Pages, or local credential files. It starts a temporary local static server for browser smokes unless `SMOKE_BASE_URL` is already supplied. It aggregates the automated same-window checks, validates the private live-member result packet, validates the private DNS approval packet, and fails closed until both packet paths are supplied. For a fast local diagnostic of the private-packet gate only, use:
+It is read-only. It does not change DNS, provider dashboards, Vercel aliases, deployments, Supabase data, Edge Functions, uploads, moderation rows, Discord settings, GitHub Pages, or local credential files. It starts with the workstation preflight, starts a temporary local static server for browser smokes unless `SMOKE_BASE_URL` is already supplied, aggregates the automated same-window checks, validates the private live-member result packet, validates the private DNS approval packet, and fails closed until both packet paths are supplied. For a fast local diagnostic of the private-packet gate only, use:
 
 ```sh
 npm run check:dns-cutover-final-readiness -- --skip-automated-checks

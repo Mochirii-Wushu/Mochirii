@@ -43,6 +43,7 @@ Decision: GO / NO-GO
 Run these before the approval decision:
 
 ```sh
+npm run check:dns-cutover-workstation
 npm run check:dns-cutover-rehearsal
 npm run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
 npm run check:cutover-validators

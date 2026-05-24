@@ -17,6 +17,7 @@ const approvalPacket =
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 const automatedChecks = [
+  { label: "operator workstation preflight", command: npmCommand, args: ["run", "check:dns-cutover-workstation"] },
   { label: "standard validation", command: npmCommand, args: ["run", "check"] },
   { label: "workspace whitespace check", command: "git", args: ["diff", "--check"] },
   { label: "production route smoke", command: npmCommand, args: ["run", "check:production"] },
