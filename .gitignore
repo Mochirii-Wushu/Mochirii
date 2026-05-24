@@ -1,6 +1,7 @@
 reports/lighthouse/
 .lighthouseci/
 *.lhr.json
+node_modules/
 
 # Local environment values; .env.example stays commit-safe.
 .env

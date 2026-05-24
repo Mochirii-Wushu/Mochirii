@@ -1,5 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -34,7 +34,7 @@ function jsonResponse(body: JsonRecord, status = 200): Response {
   });
 }
 
-function parseCsv(value: string | null): string[] {
+function parseCsv(value: string | null | undefined): string[] {
   return String(value || "")
     .split(",")
     .map((item) => item.trim())
@@ -133,7 +133,7 @@ function verificationBody(input: VerificationResponse): VerificationResponse {
 }
 
 async function updateProfile(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: SupabaseClient,
   userId: string,
   payload: JsonRecord,
 ): Promise<JsonRecord | null> {

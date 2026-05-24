@@ -492,10 +492,7 @@ npm run check:production
 For Edge Function loading checks without deployment:
 
 ```sh
-deno check --import-map=supabase/functions/list-gallery-review-queue/deno.json supabase/functions/list-gallery-review-queue/index.ts
-deno check --import-map=supabase/functions/moderate-gallery-submission/deno.json supabase/functions/moderate-gallery-submission/index.ts
-deno check --import-map=supabase/functions/list-approved-gallery-submissions/deno.json supabase/functions/list-approved-gallery-submissions/index.ts
-deno check --import-map=supabase/functions/submit-discord-gallery-image/deno.json supabase/functions/submit-discord-gallery-image/index.ts
+npm run check:supabase-edge-types
 ```
 
 ## Manual Discord Role-Granting Flow

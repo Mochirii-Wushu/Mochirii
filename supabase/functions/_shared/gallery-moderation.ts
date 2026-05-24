@@ -52,7 +52,7 @@ export function safeString(value: unknown, maxLength: number): string | null {
   return text.slice(0, maxLength);
 }
 
-export function parseCsv(value: string | null): string[] {
+export function parseCsv(value: string | null | undefined): string[] {
   return String(value || "")
     .split(",")
     .map((item) => item.trim())
