@@ -6,6 +6,8 @@ Do not treat this template as approval. A completed packet must be reviewed duri
 
 Completed packets may include dashboard screenshots, exact DNS record values, operator names, account labels, rollback contacts, or private cleanup notes. Keep completed packets in a private operator location, not in this repository, unless every sensitive value has been redacted.
 
+The rehearsal helper fails if tracked filenames look like completed cutover packets, private evidence bundles, dashboard screenshots, or cutover-specific operator artifacts. That guard is only a backstop; operators should keep completed packets outside the repo from the start.
+
 ## Source Rules
 
 - Vercel custom-domain records must come from the production-serving Vercel project's Domains dashboard or same-window `vercel domains inspect` output for the exact host.

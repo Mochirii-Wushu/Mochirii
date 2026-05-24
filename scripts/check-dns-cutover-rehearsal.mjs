@@ -1,6 +1,6 @@
 import { access, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { Resolver } from "node:dns/promises";
 
 const CURRENT_CUSTOM_DOMAIN = "https://mochirii.com";
@@ -51,6 +51,18 @@ const requiredDocs = new Map([
   ],
 ]);
 
+const allowedCutoverFiles = new Set([
+  "docs/dns-cutover-approval-packet.md",
+  "docs/dns-cutover-readiness-and-rollback.md",
+  "scripts/check-dns-cutover-rehearsal.mjs",
+]);
+
+const privateCutoverArtifactPatterns = [
+  /(?:^|\/)(?:private|operator|evidence|screenshots?)\/.*(?:cutover|dns|cloudflare|vercel|supabase|discord)/i,
+  /(?:dns-cutover|cutover-approval|go-no-go).*(?:completed|filled|private|operator|evidence|screenshot|dashboard)/i,
+  /(?:cloudflare|vercel|supabase|discord|dashboard).*(?:cutover|approval).*\.(?:png|jpe?g|webp|gif|pdf)$/i,
+];
+
 const expectedLegacyRedirects = new Map([
   ["/index.html", "/"],
   ["/join.html", "/join"],
@@ -87,6 +99,11 @@ function ok(message) {
   console.log(`OK ${message}`);
 }
 
+function listTrackedFiles() {
+  const output = execFileSync("git", ["ls-files"], { encoding: "utf8" }).trim();
+  return output ? output.split(/\r?\n/).filter(Boolean) : [];
+}
+
 async function fileExists(path) {
   await access(path, constants.F_OK);
 }
@@ -112,7 +129,18 @@ async function checkFiles() {
     assert(nextConfig.includes(`"${destination}"`), `apps/web/next.config.ts is missing redirect destination ${destination}.`);
   }
 
-  ok("rollback files, runbooks, CNAME, and legacy redirect config are present");
+  const trackedPrivateArtifacts = listTrackedFiles().filter(
+    (file) =>
+      !allowedCutoverFiles.has(file) &&
+      privateCutoverArtifactPatterns.some((pattern) => pattern.test(file)),
+  );
+
+  assert(
+    trackedPrivateArtifacts.length === 0,
+    `private cutover artifacts must not be tracked: ${trackedPrivateArtifacts.join(", ")}`,
+  );
+
+  ok("rollback files, runbooks, CNAME, legacy redirect config, and private-artifact guards are present");
 }
 
 function makeResolver(label, servers) {
