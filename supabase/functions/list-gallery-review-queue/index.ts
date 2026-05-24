@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
 
   let submissionQuery = access.adminClient
     .from("gallery_submissions")
-    .select("id,user_id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at")
+    .select("id,user_id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at,submission_source,discord_guild_id,discord_channel_id,discord_message_id,discord_attachment_id,discord_user_id")
     .eq("status", requestedStatus)
     .limit(QUEUE_LIMIT);
 
@@ -280,6 +280,14 @@ Deno.serve(async (req: Request) => {
     queue.push({
       id: submissionId,
       status: safeString(submission.status, 20) || requestedStatus,
+      source: safeString(submission.submission_source, 40) || "website",
+      discord: {
+        guildId: safeString(submission.discord_guild_id, 40),
+        channelId: safeString(submission.discord_channel_id, 40),
+        messageId: safeString(submission.discord_message_id, 40),
+        attachmentId: safeString(submission.discord_attachment_id, 40),
+        userId: safeString(submission.discord_user_id, 40),
+      },
       uploader: {
         displayName: displayName(profile),
         discordUsername: safeString(profile.discord_username, 80),

@@ -28,3 +28,9 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/list-approved-gallery-submissions/deno.json"
 entrypoint = "./functions/list-approved-gallery-submissions/index.ts"
+
+[functions.submit-discord-gallery-image]
+enabled = true
+verify_jwt = false
+import_map = "./functions/submit-discord-gallery-image/deno.json"
+entrypoint = "./functions/submit-discord-gallery-image/index.ts"
