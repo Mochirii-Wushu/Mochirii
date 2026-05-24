@@ -85,7 +85,7 @@ function requireTruthy(fields, label) {
 }
 
 function validatePacketLocation(packetPath) {
-  if (!existsSync(packetPath)) fail(`Approval packet does not exist: ${packetPath}`);
+  if (!existsSync(packetPath)) fail("Approval packet path does not exist.");
 
   const absolute = realpathSync(packetPath);
   const relative = path.relative(root, absolute).split(path.sep).join("/");
