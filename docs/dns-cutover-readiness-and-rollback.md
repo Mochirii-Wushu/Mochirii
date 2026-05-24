@@ -81,9 +81,12 @@ Latest post-PR-184 / PR #181 merge-refresh verification:
 
 - Vercel production URL: `https://mochirii.vercel.app`
 - Current main commit: `ce127ae9600d69d60948c043be4f3c8aab5252e4`
+- Current PR #181 head after merge refresh: `33c88f4fff657828aa0e79ce70296a7aa16918e9`.
+- GitHub Actions `validate` is passing on PR #181 after the post-PR-184 merge refresh.
+- PR #181 remains a draft; GitHub reports the combined merge state as `UNSTABLE` only because the standalone Vercel commit status is still pending.
 - PR #184 Discord gallery ingest foundation has merged to `main`.
 - PR #184 GitHub `validate`, Supabase Preview, GitHub build/deploy/report checks, and Vercel Preview Comments passed.
-- The standalone Vercel commit status can remain pending even after GitHub/Vercel preview deployment checks pass; do not treat that stale pending status as cutover approval.
+- The standalone Vercel commit status can remain pending even after GitHub/Vercel preview deployment checks pass; do not treat that stale pending status as cutover approval or as proof that production is unhealthy.
 - PR #183 shared lightbox overlay and scroll-lock fix is included in production.
 - PR #184 Supabase migrations and Edge Function deployments are live in the linked Supabase project.
 - Homepage Screenshot Spotlight full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
@@ -109,9 +112,10 @@ Latest implementation-plan baseline lock: `2026-05-24`.
 Local repository state:
 
 - Branch: `dns-cutover-readiness-and-rollback-plan`.
-- PR: #181, open draft, base `main`, head `dns-cutover-readiness-and-rollback-plan`, merge state `CLEAN`.
-- Branch comparison at the start of this pass: `0` commits behind `main`, `9` commits ahead.
-- Worktree remained clean after validation and generated Vercel output cleanup, before this documentation update.
+- PR: #181, open draft, base `main`, head `dns-cutover-readiness-and-rollback-plan`.
+- Branch comparison after the post-PR-184 merge refresh: `0` commits behind `main`, `29` commits ahead.
+- Current GitHub PR merge state: `UNSTABLE`, caused by the standalone Vercel commit status remaining pending while GitHub Actions `validate` and Vercel Preview Comments pass.
+- Worktree remained clean after validation and generated Vercel output cleanup, before the later post-PR-184 documentation refreshes.
 
 Validation commands completed:
 
@@ -164,6 +168,8 @@ Read-only Vercel findings:
 - Root `.vercel/repo.json` maps Vercel project `mochirii` to directory `apps/web`.
 - `vercel alias list` shows `mochirii.com`, `www.mochirii.com`, `mochirii.vercel.app`, `mochirii-mochirii.vercel.app`, and `mochirii-git-main-mochirii.vercel.app` aliasing the same production deployment source `mochirii-k3kmghcpi-mochirii.vercel.app`.
 - `vercel inspect https://mochirii.vercel.app` confirms deployment `dpl_12d12HX9a9xpTRZXtbkbXraTm6Uj`, project/name `mochirii`, target `production`, status `Ready`.
+- On a checkout without a global `vercel` binary, `npm exec -- vercel inspect https://mochirii.vercel.app` provides the same read-only production deployment confirmation.
+- The PR #181 standalone Vercel status target is a dashboard URL, not an inspectable deployment URL; `gh api repos/Mochirii-Wushu/Mochirii/commits/33c88f4fff657828aa0e79ce70296a7aa16918e9/status` shows the pending status was created once with no later update.
 - Root-level Vercel env read for `mochirii/mochirii` shows encrypted Production/Preview env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 - Initial `apps/web` Vercel env read showed `mochirii/web`, encrypted Production env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and extra `SUPABASE_PUBLISHABLE_KEY`.
 - After `vercel pull --yes --environment=production --cwd .`, `apps/web` Vercel env reads resolve to `mochirii/mochirii`, and the production project settings report Root Directory `apps/web`.
