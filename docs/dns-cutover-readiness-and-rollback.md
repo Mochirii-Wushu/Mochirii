@@ -10,8 +10,8 @@ Do not cut over `mochirii.com` DNS until the user explicitly approves the cutove
 
 - Root GitHub Pages static site files still exist and must remain available for rollback.
 - The Next.js app lives under `apps/web`.
-- Vercel app project to reconcile before cutover: production aliases currently point at `mochirii/mochirii`, while the local `apps/web` CLI link points at `mochirii/web`.
-- Vercel Root Directory: `apps/web` on the production-serving `mochirii/mochirii` project; `mochirii/web` currently reports root directory `.` and must not be treated as the production alias owner without dashboard reconciliation.
+- Vercel app project to confirm before cutover: read-only CLI evidence points at `mochirii/mochirii` as the production-serving project.
+- Vercel Root Directory: `apps/web` on the production-serving `mochirii/mochirii` project.
 - Vercel production review URL: `https://mochirii.vercel.app`.
 - Current custom-domain production surface remains the GitHub Pages site until DNS is explicitly changed.
 - DNS cutover for `mochirii.com` remains deferred.
@@ -159,15 +159,21 @@ Read-only Vercel findings:
 - `vercel domains inspect www.mochirii.com` resolves to the same domain ownership record and currently recommends `A www.mochirii.com 76.76.21.21`.
 - `vercel project inspect mochirii` shows project `mochirii/mochirii`, Root Directory `apps/web`, Framework Next.js, Node.js `24.x`.
 - `vercel project inspect web` shows project `mochirii/web`, Root Directory `.`, Framework Next.js, Node.js `24.x`.
+- Root `.vercel/repo.json` maps Vercel project `mochirii` to directory `apps/web`.
 - `vercel alias list` shows `mochirii.com`, `www.mochirii.com`, `mochirii.vercel.app`, `mochirii-mochirii.vercel.app`, and `mochirii-git-main-mochirii.vercel.app` aliasing the same production deployment source `mochirii-k3kmghcpi-mochirii.vercel.app`.
 - `vercel inspect https://mochirii.vercel.app` confirms deployment `dpl_12d12HX9a9xpTRZXtbkbXraTm6Uj`, project/name `mochirii`, target `production`, status `Ready`.
 - Root-level Vercel env read for `mochirii/mochirii` shows encrypted Production/Preview env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
-- `apps/web` Vercel env read for `mochirii/web` shows encrypted Production env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and extra `SUPABASE_PUBLISHABLE_KEY`.
+- Initial `apps/web` Vercel env read showed `mochirii/web`, encrypted Production env names `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and extra `SUPABASE_PUBLISHABLE_KEY`.
+- After `vercel pull --yes --environment=production --cwd .`, `apps/web` Vercel env reads resolve to `mochirii/mochirii`, and the production project settings report Root Directory `apps/web`.
+- `CI=1 vercel build --prod --cwd .` passed after pulling project settings, using the production-serving `mochirii/mochirii` configuration and producing `status: ok`, target `production`.
+- The successful local Vercel build still emitted the known Next.js `outputFileTracingRoot` / `turbopack.root` warning; this remains non-blocking while builds and production smoke checks pass.
+- `vercel certs ls` reports no certificates found under team `mochirii` while custom-domain DNS is not yet configured for Vercel.
 
 Vercel manual reconciliation now required before DNS cutover:
 
-- Confirm in the Vercel dashboard which project is intended to own production custom domains: `mochirii/mochirii` or `mochirii/web`.
+- Confirm in the Vercel dashboard that `mochirii/mochirii` is the intended project to own production custom domains.
 - Confirm the production-serving project has Root Directory `apps/web`, Production Branch `main`, Framework Next.js, Node.js `24.x`, and the required Production/Preview env names.
+- Treat stale or alternate local Vercel links, including the previously observed `mochirii/web` link, as non-authoritative until refreshed with `vercel pull`.
 - Resolve the mismatch between prior dashboard-confirmed project-specific CNAME targets and the current Vercel CLI domain-inspect `A 76.76.21.21` recommendation.
 - Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard at the approved cutover window.
 
@@ -243,9 +249,9 @@ Do not change Vercel settings while using this document unless the user has expl
 
 Manual Vercel Dashboard path:
 
-- Candidate production project: `mochirii/mochirii`
-- Candidate local-linked project: `mochirii/web`
-- Verify which project owns production aliases and custom domains before cutover.
+- Production-serving project from read-only CLI evidence: `mochirii/mochirii`
+- Previously observed stale/alternate local-linked project: `mochirii/web`
+- Verify `mochirii/mochirii` owns production aliases and custom domains before cutover.
 - Verify Root Directory is `apps/web` on the production-serving project.
 - Verify Production Branch: `main`
 - Verify Framework: Next.js
@@ -267,8 +273,9 @@ Domains to add later only after explicit cutover approval:
 Current project/domain inventory note:
 
 - `mochirii.com`, `www.mochirii.com`, and `mochirii.vercel.app` currently alias a Ready production deployment under project `mochirii/mochirii`.
-- The local `apps/web/.vercel/project.json` link points at `mochirii/web`.
-- Treat this as a cutover blocker until an operator confirms the intended Vercel project and normalizes documentation/dashboard state.
+- Root `.vercel/repo.json` maps project `mochirii` to `apps/web`.
+- A stale/alternate app-level local link to `mochirii/web` was observed before `vercel pull`; do not use that stale local link as the source of truth for cutover.
+- Treat project ownership as dashboard-confirmation-required, with current read-only evidence favoring `mochirii/mochirii`.
 
 Expected Vercel custom-domain flow:
 
