@@ -224,9 +224,9 @@ async function checkPublicDns() {
   ];
 
   for (const { label, resolver } of resolvers) {
-    const ns = (await resolver.resolveNs("mochirii.com")).map(normalizeDnsName);
-    assert(ns.includes("igor.ns.cloudflare.com"), `${label} NS lookup is missing igor.ns.cloudflare.com.`);
-    assert(ns.includes("naomi.ns.cloudflare.com"), `${label} NS lookup is missing naomi.ns.cloudflare.com.`);
+    const ns = new Set((await resolver.resolveNs("mochirii.com")).map(normalizeDnsName));
+    assert(ns.has("igor.ns.cloudflare.com"), `${label} NS lookup is missing igor.ns.cloudflare.com.`);
+    assert(ns.has("naomi.ns.cloudflare.com"), `${label} NS lookup is missing naomi.ns.cloudflare.com.`);
   }
 
   const mxResolver = resolvers[0].resolver;

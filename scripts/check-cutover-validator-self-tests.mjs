@@ -217,7 +217,6 @@ const validDeferredCleanupNote = validCleanupNote
   .replace("Cleanup action performed: removed disposable test artifact", "Cleanup action performed: deferred cleanup by owner")
   .replace("Storage object removed or retained safely: removed", "Storage object removed or retained safely: retained private")
   .replace("Database row removed, rejected, or retained safely: removed", "Database row removed, rejected, or retained safely: rejected")
-  .replace("Approved-feed visibility after cleanup: absent", "Approved-feed visibility after cleanup: absent")
   .replace("Cleanup deferral owner:", "Cleanup deferral owner: private owner")
   .replace("Cleanup deferral reason:", "Cleanup deferral reason: deletion requires approved operator window")
   .replace("Cleanup follow-up date:", "Cleanup follow-up date: 2026-05-25")
