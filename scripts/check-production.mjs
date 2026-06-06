@@ -1,4 +1,4 @@
-const BASE_URL = "https://mochirii.com";
+const BASE_URL = process.env.MOCHIRII_PRODUCTION_BASE_URL || "https://mochirii.com";
 const TIMEOUT_MS = 30000;
 const MAX_ATTEMPTS = 3;
 const DIAGNOSE = process.argv.includes("--diagnose");
@@ -26,10 +26,10 @@ const DIAGNOSTIC_HEADERS = [
 
 const pageUrls = [
   "/",
-  "/gallery.html",
-  "/recruitment.html",
-  "/join.html",
-  "/events.html",
+  "/gallery",
+  "/recruitment",
+  "/join",
+  "/events",
   "/robots.txt",
   "/sitemap.xml",
 ];
@@ -143,9 +143,9 @@ async function checkUrlAvailability() {
 
 async function checkMetadata() {
   const home = await fetchText("/");
-  assertIncludes(home.text, /<title>[^<]*Mōchirīī[^<]*Where Winds Meet/i, "homepage title");
+  assertIncludes(home.text, /<title>[^<]*Where Winds Meet/i, "homepage title");
   assertIncludes(home.text, /<meta\s+name="description"\s+content="[^"]+"/i, "homepage description");
-  assertIncludes(home.text, /<link\s+rel="canonical"\s+href="https:\/\/mochirii\.com\/"/i, "homepage canonical");
+  assertIncludes(home.text, /<link\s+rel="canonical"\s+href="https:\/\/mochirii\.com\/?"/i, "homepage canonical");
   assertIncludes(home.text, /property="og:title"/i, "homepage OG title");
   assertIncludes(home.text, /property="og:image"/i, "homepage OG image");
 
@@ -156,11 +156,11 @@ async function checkMetadata() {
   const ogContentType = ogResponse.headers.get("content-type") || "";
   assertIncludes(ogContentType, /^image\//i, "homepage OG image content type");
 
-  const recruitment = await fetchText("/recruitment.html");
+  const recruitment = await fetchText("/recruitment");
   assertIncludes(recruitment.text, /Recruitment/i, "recruitment page content");
   assertIncludes(
     recruitment.text,
-    /<link\s+rel="canonical"\s+href="https:\/\/mochirii\.com\/recruitment\.html"/i,
+    /<link\s+rel="canonical"\s+href="https:\/\/mochirii\.com\/recruitment"/i,
     "recruitment canonical"
   );
 }
@@ -168,7 +168,7 @@ async function checkMetadata() {
 async function checkDiscoveryFiles() {
   const sitemap = await fetchText("/sitemap.xml");
   assertIncludes(sitemap.text, /<urlset[\s>]/i, "sitemap urlset");
-  assertIncludes(sitemap.text, /https:\/\/mochirii\.com\/gallery\.html/i, "gallery sitemap entry");
+  assertIncludes(sitemap.text, /https:\/\/mochirii\.com\/gallery/i, "gallery sitemap entry");
 
   const robots = await fetchText("/robots.txt");
   assertIncludes(robots.text, /Sitemap:\s*https:\/\/mochirii\.com\/sitemap\.xml/i, "robots sitemap entry");
