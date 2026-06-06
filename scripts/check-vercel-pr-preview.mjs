@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 const args = process.argv.slice(2);
 const DEFAULT_PR = "181";
 const DEFAULT_PROJECT = "mochirii";
+const DEFAULT_VERCEL_CONTEXT = "Vercel – mochirii";
 
 function argValue(name, fallback = "") {
   const match = args.find((value) => value.startsWith(`${name}=`));
@@ -22,7 +23,13 @@ function shortSha(sha) {
 }
 
 function findVercelRollup(statusCheckRollup = []) {
-  return statusCheckRollup.find((entry) => entry.context === "Vercel" || entry.name === "Vercel");
+  return statusCheckRollup.find(
+    (entry) =>
+      entry.context === vercelContext ||
+      entry.name === vercelContext ||
+      entry.context === "Vercel" ||
+      entry.name === "Vercel",
+  );
 }
 
 function normalizeGithubVercelStatus(entry) {
@@ -77,6 +84,7 @@ function fail(message) {
 
 const pr = argValue("--pr", process.env.VERCEL_PR_PREVIEW_PR || DEFAULT_PR);
 const project = argValue("--project", process.env.VERCEL_PR_PREVIEW_PROJECT || DEFAULT_PROJECT);
+const vercelContext = argValue("--context", process.env.VERCEL_PR_PREVIEW_CONTEXT || DEFAULT_VERCEL_CONTEXT);
 
 try {
   const prData = runJson("gh", [
@@ -95,13 +103,16 @@ try {
     "api",
     `repos/Mochirii-Wushu/Mochirii/commits/${sha}/status`,
   ]);
-  const latestVercelStatus = (commitStatus.statuses || []).find((status) => status.context === "Vercel");
+  const latestVercelStatus =
+    (commitStatus.statuses || []).find((status) => status.context === vercelContext) ||
+    (commitStatus.statuses || []).find((status) => status.context === "Vercel");
   const deploymentSummary = deploymentSafeSummary(latestDeploymentForSha(project, sha));
 
   console.log("Vercel PR preview readiness:");
   console.log(`- PR: #${prData.number}`);
   console.log(`- Branch: ${prData.headRefName}`);
   console.log(`- Head: ${shortSha(sha)}`);
+  console.log(`- Expected Vercel context: ${vercelContext}`);
   console.log(`- GitHub Vercel rollup: ${rollupStatus.state}`);
   if (latestVercelStatus) {
     console.log(`- GitHub Vercel commit status: ${latestVercelStatus.state}`);

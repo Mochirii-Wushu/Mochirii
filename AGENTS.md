@@ -1,10 +1,11 @@
 # Repository Guidance
 
-- This is a static HTML/CSS/vanilla JavaScript guild website. Do not add frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
+- This repository has two deployable surfaces during migration: the root static HTML/CSS/vanilla JavaScript GitHub Pages site is current production, and `apps/web` is the Vercel-ready Next.js app. Do not add additional frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
+- Root `assets/` and `data/` remain canonical until DNS cutover. Mirror them to `apps/web/public/` with `npm run sync:next-public` and verify with `npm run check:next-public-sync`.
 - Use one scoped branch per task. Do not edit `main` directly, and avoid broad refactors during content or feature work.
 - Preserve the current Mōchirīī wuxia/glass visual identity while improving clarity, speed, and accessibility.
 - Do not delete or rewrite asset directories unless usage is verified and the change is intentionally scoped.
-- Run validation before completing work: `npm run check`, `git diff --check`, and task-specific smoke checks. Use `npm run check:production` when production behavior matters and `npm run smoke:gallery` when gallery behavior might regress.
+- Run validation before completing work: `npm run check`, `git diff --check`, and task-specific smoke checks. For `apps/web` changes, also run `cd apps/web && npm run lint && npm run build`. Use `npm run check:production` when production behavior matters and `npm run smoke:gallery` when gallery behavior might regress.
 - Consult `docs/content-guide.md` before content, JSON, date, gallery, or asset edits.
 - Preserve protected copy exactly: `data/recruitment.json` `content.paragraphs`, `data/recruitment.json` `content.conclusion`, and `data/home.json` `seal.verse`.
 - Keep Mōchirīī copy clear, xianxia-inspired, noun/verb led, lightly rhythmic, and human. Use Cupcake warmth sparingly, keep functional labels plain, and avoid generic AI-like phrasing, adjective padding, forced rhyme, copied poem/article phrasing, or named-author imitation.

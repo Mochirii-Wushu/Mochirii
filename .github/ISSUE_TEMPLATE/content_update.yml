@@ -1,0 +1,31 @@
+name: Content update
+description: Request a safe guild content, data, or asset update.
+title: "[Content]: "
+labels:
+  - content
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: Requested change
+      description: What content should change?
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page or data file
+      description: Include a route, page name, or JSON file if known.
+  - type: textarea
+    id: source
+    attributes:
+      label: Source of truth
+      description: Link or describe the guild-approved source for this update.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety checks
+      options:
+        - label: This does not include private member data.
+        - label: This does not require entering or exposing secrets.
+        - label: This should preserve protected copy unless explicitly approved.

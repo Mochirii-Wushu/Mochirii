@@ -99,8 +99,13 @@ try {
 
   const statuses = Array.isArray(prData.statusCheckRollup) ? prData.statusCheckRollup : [];
   const validateState = requireStatus(statuses, "validate", ["SUCCESS"]);
-  const vercelState = requireStatus(statuses, "Vercel", ["SUCCESS"]);
-  const vercelCommentState = requireStatus(statuses, "Vercel Preview Comments", ["SUCCESS"]);
+  const validateNextState = requireStatus(statuses, "validate-next", ["SUCCESS"]);
+  const intendedVercel = findStatus(statuses, "Vercel – mochirii") || findStatus(statuses, "Vercel");
+  const intendedVercelState = intendedVercel ? statusState(intendedVercel) : "MISSING";
+  const duplicateWebVercel = findStatus(statuses, "Vercel – web");
+  const duplicateWebVercelState = duplicateWebVercel ? statusState(duplicateWebVercel) : "MISSING";
+  const vercelComment = findStatus(statuses, "Vercel Preview Comments");
+  const vercelCommentState = vercelComment ? statusState(vercelComment) : "MISSING";
   const supabasePreview = findStatus(statuses, "Supabase Preview");
   const supabasePreviewState = supabasePreview ? statusState(supabasePreview) : "MISSING";
 
@@ -113,6 +118,12 @@ try {
   if (!prData.isDraft) fail(`PR #${pr} is not draft. Keep the DNS cutover PR draft until explicit approval.`);
   if (prData.mergeStateStatus !== "CLEAN") {
     fail(`PR #${pr} merge state is ${prData.mergeStateStatus}; expected CLEAN.`);
+  }
+  if (intendedVercel && intendedVercelState !== "SUCCESS") {
+    fail(`PR #${pr} intended Vercel status is ${intendedVercelState}; expected SUCCESS when present.`);
+  }
+  if (vercelComment && vercelCommentState !== "SUCCESS") {
+    fail(`PR #${pr} Vercel Preview Comments status is ${vercelCommentState}; expected SUCCESS when present.`);
   }
   if (supabasePreview && !["SKIPPED", "SUCCESS"].includes(supabasePreviewState)) {
     fail(`PR #${pr} Supabase Preview status is ${supabasePreviewState}; expected SKIPPED or SUCCESS.`);
@@ -128,7 +139,9 @@ try {
   console.log(`- Branch comparison: ${behind} behind / ${ahead} ahead vs ${remoteBase}`);
   console.log(`- Merge state: ${prData.mergeStateStatus}`);
   console.log(`- GitHub validate: ${validateState}`);
-  console.log(`- Vercel: ${vercelState}`);
+  console.log(`- GitHub validate-next: ${validateNextState}`);
+  console.log(`- Intended Vercel: ${intendedVercelState}`);
+  console.log(`- Duplicate Vercel web: ${duplicateWebVercelState} (ignored; clean up dashboard before relying on Vercel status)`);
   console.log(`- Vercel Preview Comments: ${vercelCommentState}`);
   console.log(`- Supabase Preview: ${supabasePreviewState}`);
 

@@ -1,10 +1,12 @@
 # DNS Cutover Readiness and Rollback Plan
 
-## Do Not Cut Over Yet
+## Same-Window Cutover Gate
 
 This document prepares for a future custom-domain cutover from the current GitHub Pages production site to the validated Vercel/Next.js production site. It is a checklist and rollback plan only.
 
-Do not cut over `mochirii.com` DNS until the user explicitly approves the cutover window and the manual dashboard/provider steps are completed by an operator.
+Do not cut over `mochirii.com` DNS until the current same-window checks pass, Vercel Domains shows the exact required records for `mochirii/mochirii`, Cloudflare rollback records are captured, and an operator is ready to verify or roll back immediately.
+
+The current production/preview split and Vercel dashboard checklist are tracked in [`deployment.md`](./deployment.md). Treat that file as the short deployment source of truth and this file as the detailed runbook.
 
 ## Current State
 
@@ -15,6 +17,8 @@ Do not cut over `mochirii.com` DNS until the user explicitly approves the cutove
 - Vercel production review URL: `https://mochirii.vercel.app`.
 - Current custom-domain production surface remains the GitHub Pages site until DNS is explicitly changed.
 - DNS cutover for `mochirii.com` remains deferred.
+- Current `main` includes required GitHub checks `validate` and `validate-next`; both must pass before cutover-sensitive changes merge.
+- The intended Vercel project/status context is `Vercel – mochirii`. The duplicate project/status context `Vercel – web` is a dashboard cleanup item and must not be used as production readiness evidence.
 - Supabase-first architecture is preserved: Supabase remains authoritative for Auth, Postgres/RLS, Storage, Edge Functions, Discord verification, gallery moderation, signed preview URLs, and audit records.
 - Vercel/Next owns routing, React UI, rendering, redirects, and browser-safe Supabase integration.
 
@@ -139,23 +143,25 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 
 ## Production Verification Snapshot
 
-Latest PR #181 readiness verification protocol, refreshed `2026-05-24` after the live-member cleanup-note preparation helper:
+Latest PR #181 readiness verification protocol, refreshed `2026-06-06` after the repository organization hardening merge:
 
 - PR #181 remains a draft; do not convert it out of draft, merge it, or treat it as cutover approval without explicit user approval.
 - For a single read-only check of the current PR head, run `npm run check:dns-cutover-pr-readiness`.
 - For the current branch head and comparison, run `git rev-parse HEAD` and `git rev-list --left-right --count origin/main...HEAD`.
 - For the current GitHub merge state and status rollup, run `gh pr view 181 --json mergeStateStatus,statusCheckRollup,headRefOid`.
 - For the current Vercel PR preview deployment, run `npm run check:vercel-pr-preview`.
-- After each pushed readiness-only commit, wait for GitHub `validate`, Vercel, and Vercel Preview Comments to pass before treating the PR head as clean. Supabase Preview may remain skipped.
-- Local Deno is installed at `/home/artaius/.deno/bin/deno`; `DENO_BIN=/home/artaius/.deno/bin/deno npm run check:supabase-edge-types` passed for the current checkout.
+- After each pushed readiness-only commit, wait for GitHub `validate` and `validate-next` to pass before treating the PR head as merge-ready.
+- Use `Vercel – mochirii` as the intended Vercel deployment signal. Ignore the known duplicate `Vercel – web` failure for PR readiness while separately cleaning up that dashboard connection before relying on Vercel commit status.
+- Vercel Preview Comments may pass independently of deployment status; treat it as useful PR annotation evidence, not as production readiness by itself.
+- Supabase Preview may remain skipped.
+- Use the current workstation's Deno path or `DENO_BIN`; do not rely on older machine-specific paths from May snapshots.
 - `npm run check:dns-cutover-final-readiness -- --skip-automated-checks` still fails closed because private D02/D03 and final approval packet paths are not supplied. This is expected until the approved-window private packet work is complete.
 
-Post-PR-184 / PR #181 merge-refresh baseline retained for history:
+Current `main` baseline retained for the cutover window:
 
 - Vercel production URL: `https://mochirii.vercel.app`
-- Current main commit: `ce127ae9600d69d60948c043be4f3c8aab5252e4`
-- Merge-refresh commit: `33c88f4fff657828aa0e79ce70296a7aa16918e9`.
-- GitHub Actions `validate` is passing on PR #181 after the post-PR-184 merge refresh.
+- Current main commit before refreshing this PR: `d841e377811acb4e4ef5a7f079e04bf630d4929b`.
+- GitHub Actions `validate` and `validate-next` pass on current `main`.
 - PR #181 remains a draft; use `npm run check:vercel-pr-preview` plus `gh pr view 181 --json mergeStateStatus,statusCheckRollup` for current PR preview and combined-state evidence.
 - PR #184 Discord gallery ingest foundation has merged to `main`.
 - PR #184 GitHub `validate`, Supabase Preview, GitHub build/deploy/report checks, and Vercel Preview Comments passed.
@@ -235,8 +241,8 @@ Read-only Vercel findings:
 
 - `vercel domains ls` shows `mochirii.com` under team `mochirii`, with a third-party registrar and third-party nameservers.
 - `vercel domains inspect mochirii.com` shows current nameservers `igor.ns.cloudflare.com` and `naomi.ns.cloudflare.com`, not Vercel nameservers, and reports the domain as not configured properly for Vercel yet.
-- `vercel domains inspect mochirii.com` currently recommends `A mochirii.com 76.76.21.21` if the domain stays on an external DNS provider.
-- `vercel domains inspect www.mochirii.com` resolves to the same domain ownership record and currently recommends `A www.mochirii.com 76.76.21.21`.
+- Vercel's public documentation says external-DNS cutovers should add the custom domain to the project, inspect the domain, then copy the exact records Vercel shows into the external DNS provider.
+- Vercel's general-purpose external DNS pattern is an apex `A` record, commonly `76.76.21.21`, plus a subdomain `CNAME` to the Vercel-provided target. Use the dashboard-provided values from the production-serving `mochirii/mochirii` project during the cutover window, not older notes.
 - `vercel project inspect mochirii` shows project `mochirii/mochirii`, Root Directory `apps/web`, Framework Next.js, Node.js `24.x`.
 - `vercel project inspect web` shows project `mochirii/web`, Root Directory `.`, Framework Next.js, Node.js `24.x`.
 - Root `.vercel/repo.json` maps Vercel project `mochirii` to directory `apps/web`.
@@ -257,7 +263,7 @@ Vercel manual reconciliation now required before DNS cutover:
 - Confirm in the Vercel dashboard that `mochirii/mochirii` is the intended project to own production custom domains.
 - Confirm the production-serving project has Root Directory `apps/web`, Production Branch `main`, Framework Next.js, Node.js `24.x`, and the required Production/Preview env names.
 - Treat stale or alternate local Vercel links, including the previously observed `mochirii/web` link, as non-authoritative until refreshed with `vercel pull`.
-- Resolve the mismatch between prior dashboard-confirmed project-specific CNAME targets and the current Vercel CLI domain-inspect `A 76.76.21.21` recommendation.
+- Resolve any mismatch between prior dashboard-confirmed project-specific CNAME targets and the current Vercel Domains recommendation by using the current production-serving `mochirii/mochirii` dashboard values only.
 - Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard at the approved cutover window.
 
 Read-only Supabase findings:
@@ -625,14 +631,14 @@ GitHub Pages direct-record reference set used for comparison:
 | Tracked CNAME | `mochirii.com` | `CNAME`; `git ls-files` | CONFIRMED_REPO | Do not remove during cutover readiness work. |
 | Default Pages domain | likely `mochirii-wushu.github.io/Mochirii/` before custom domain | repository owner/name convention | INFERRED | Not directly returned by the GitHub API output used here; use GitHub Pages dashboard/API if this matters for rollback. |
 
-### Future Cutover Action Table
+### Cutover Action Table
 
-The Vercel targets below came from prior dashboard-confirmed DNS instructions. The `2026-05-24` CLI inventory also surfaced a generic `A 76.76.21.21` recommendation from `vercel domains inspect`. Re-confirm the exact final records in the production-serving Vercel project's Domains dashboard during the approved cutover window before changing Cloudflare.
+Use the exact final records shown in the production-serving Vercel project's Domains dashboard during the cutover window. Older dashboard snapshots and older CLI output are inventory history, not final authority.
 
 | Host | Type | Current state | Future action | Final value | Source | Confidence | Cutover action |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `mochirii.com` / `@` | CNAME | Dashboard shows four proxied A records with Auto TTL; IP values redacted | Replace current apex web records only during an approved cutover | `c4b58a30d23b9df3.vercel-dns-017.com`; Proxy disabled / DNS only | user-provided Vercel Domains DNS instructions; Cloudflare dashboard confirmation | CONFIRMED_VERCEL_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
-| `www.mochirii.com` / `www` | CNAME | Dashboard shows proxied `www` CNAME with Auto TTL; current target redacted | Replace or update `www` only during an approved cutover | `c4b58a30d23b9df3.vercel-dns-017.com`; Proxy disabled / DNS only | user-provided Vercel Domains DNS instructions; Cloudflare dashboard confirmation | CONFIRMED_VERCEL_DASHBOARD | CHANGE ONLY DURING APPROVED CUTOVER |
+| `mochirii.com` / `@` | A or dashboard-specified apex record | Public DNS currently returns Cloudflare A/AAAA answers | Replace current apex web records only during the approved cutover | Exact Vercel Domains value for `mochirii/mochirii`; commonly apex `A 76.76.21.21`; Proxy disabled / DNS only | current Vercel Domains dashboard during cutover | SAME_WINDOW_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
+| `www.mochirii.com` / `www` | CNAME or dashboard-specified subdomain record | Public DNS currently returns Cloudflare A/AAAA answers through proxying/flattening | Replace or update `www` only during the approved cutover | Exact Vercel Domains value for `mochirii/mochirii`; commonly Vercel-provided CNAME; Proxy disabled / DNS only | current Vercel Domains dashboard during cutover | SAME_WINDOW_REQUIRED | CHANGE ONLY DURING APPROVED CUTOVER |
 | `mochirii.com` | MX | ProtonMail MX records | Leave unchanged | `10 mail.protonmail.ch.`; `20 mailsec.protonmail.ch.` | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `mochirii.com` | TXT | SPF and verification TXT records | Leave unchanged | Existing public TXT values | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
 | `_dmarc.mochirii.com` | TXT | DMARC quarantine policy | Leave unchanged | Existing DMARC TXT value | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH |
@@ -657,24 +663,24 @@ The Vercel targets below came from prior dashboard-confirmed DNS instructions. T
 | `mochirii.com` | CAA | no public answer | n/a | Certificate authority policy | public DNS | CONFIRMED_PUBLIC_DNS | DO NOT TOUCH unless certificate policy is separately approved |
 | `CNAME` repository file | file | `mochirii.com` | n/a | GitHub Pages custom-domain rollback reference | repo | CONFIRMED_REPO | DO NOT TOUCH until after stabilization |
 
-### Vercel-Provided DNS Records For Future Cutover
+### Vercel-Provided DNS Records For Cutover
 
-Source: user-provided Vercel Domains DNS instructions.
-Confidence: `CONFIRMED_VERCEL_DASHBOARD`.
+Source: current production-serving Vercel Domains dashboard during the cutover window.
+Confidence: `SAME_WINDOW_REQUIRED`.
 
-These records are documented for a future approved cutover only. They have not been applied in Cloudflare, and DNS cutover remains deferred. Re-confirm them in the production-serving Vercel project immediately before cutover because the `2026-05-24` CLI inventory also reported an `A 76.76.21.21` recommendation from `vercel domains inspect`.
+Do not use older hard-coded Vercel CNAME targets as final authority. Add `mochirii.com` and `www.mochirii.com` to `mochirii/mochirii`, inspect the current required DNS records in Vercel, then copy those exact values into Cloudflare as DNS-only records.
 
 | Host / Name | Type | Value | Proxy setting | Cutover action |
 | --- | --- | --- | --- | --- |
-| `mochirii.com` / `@` | CNAME | `c4b58a30d23b9df3.vercel-dns-017.com` | Disabled / DNS only | Replace current apex web records only during an approved cutover. |
-| `www.mochirii.com` / `www` | CNAME | `c4b58a30d23b9df3.vercel-dns-017.com` | Disabled / DNS only | Replace or update current `www` web record only during an approved cutover. |
+| `mochirii.com` / `@` | Vercel-provided apex record | Same-window Vercel Domains value | Disabled / DNS only | Replace current apex web records only during the approved cutover. |
+| `www.mochirii.com` / `www` | Vercel-provided subdomain record | Same-window Vercel Domains value | Disabled / DNS only | Replace or update current `www` web record only during the approved cutover. |
 
 Cloudflare remains authoritative DNS. Vercel is only the web hosting target for the approved app domains.
 
 ### Records Likely To Change During Future Cutover
 
-- Apex `mochirii.com` web record should change to the Vercel-provided DNS-only CNAME above during an approved cutover.
-- `www.mochirii.com` should change to the Vercel-provided DNS-only CNAME above during an approved cutover.
+- Apex `mochirii.com` web records should change to the Vercel-provided DNS-only apex record during the approved cutover.
+- `www.mochirii.com` should change to the Vercel-provided DNS-only subdomain record during the approved cutover.
 - Do not touch MX, SPF, DKIM, DMARC, CAA, verification TXT, email, or unrelated records.
 - Do not change Cloudflare DNS before the explicit cutover window.
 
@@ -875,7 +881,7 @@ Use this helper before converting PR #181 out of draft or treating GitHub's comb
 npm run check:dns-cutover-pr-readiness
 ```
 
-It is read-only. It verifies the local checkout matches draft PR #181, the base/head branches are expected, the merge state is `CLEAN`, GitHub `validate`, Vercel, and Vercel Preview Comments pass, Supabase Preview is either skipped or passing if present, and the matching Vercel preview deployment is `READY`. It does not create deployments, update aliases, edit Vercel domains, touch DNS, read environment values, or change provider settings.
+It is read-only. It verifies the local checkout matches draft PR #181, the base/head branches are expected, the merge state is `CLEAN`, GitHub `validate` and `validate-next` pass, the intended `Vercel – mochirii` signal is successful when present, duplicate `Vercel – web` is ignored for PR readiness, Supabase Preview is either skipped or passing if present, and the matching Vercel preview deployment is `READY` when the Vercel preview check is not skipped. It does not create deployments, update aliases, edit Vercel domains, touch DNS, read environment values, or change provider settings.
 
 For a focused Vercel deployment diagnostic, use:
 

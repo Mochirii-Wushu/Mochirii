@@ -25,7 +25,7 @@ const requiredDocs = new Map([
   [
     "docs/dns-cutover-readiness-and-rollback.md",
     [
-      "Do not cut over `mochirii.com` DNS until the user explicitly approves",
+      "Do not cut over `mochirii.com` DNS until the current same-window checks pass",
       "Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard",
       "GitHub Pages remains the current rollback surface",
       "Member workflow production QA has followed",

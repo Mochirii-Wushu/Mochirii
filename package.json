@@ -20,6 +20,7 @@
     "check:live-member-cleanup-note": "node scripts/check-live-member-cleanup-note.mjs",
     "check:live-member-workflow-preflight": "node scripts/check-live-member-workflow-preflight.mjs",
     "check:live-member-workflow-result-packet": "node scripts/check-live-member-workflow-result-packet.mjs",
+    "check:next-public-sync": "node scripts/check-next-public-sync.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
@@ -35,6 +36,7 @@
     "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs",
     "smoke:vercel-production": "node scripts/smoke-vercel-production.mjs",
     "smoke:supabase-auth-boundary": "node scripts/smoke-supabase-auth-boundary.mjs",
-    "smoke:supabase-edge-functions": "node scripts/smoke-supabase-edge-functions.mjs"
+    "smoke:supabase-edge-functions": "node scripts/smoke-supabase-edge-functions.mjs",
+    "sync:next-public": "node scripts/sync-next-public.mjs"
   }
 }
