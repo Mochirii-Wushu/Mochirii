@@ -11,6 +11,7 @@ const checks = [
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
+  ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
 ];
 
 let failed = false;

@@ -2,6 +2,8 @@
 
 This app is the Vercel-ready Next.js surface for Mochirii. The existing root GitHub Pages static site remains intact, and DNS cutover is still deferred.
 
+For the current production/preview split, Vercel dashboard checklist, and DNS cutover guardrails, see [`../../docs/deployment.md`](../../docs/deployment.md).
+
 ## Local Development
 
 ```sh
@@ -54,6 +56,17 @@ vercel build --prod --cwd apps/web
 Root-level `vercel link --repo` was tested as a reversible monorepo-link cleanup path, but it prompts for confirmation before linking the repository to Vercel projects. Do not answer that prompt or relink the project without an operator present. Dashboard Root Directory remains the authoritative production/preview setting.
 
 Do not commit `.vercel/`.
+
+## Public Assets And Data
+
+Until DNS cutover, root `assets/` and `data/` are canonical. The Next app reads copied files from `public/assets/` and `public/data/`.
+
+From the repository root, mirror and verify the copies with:
+
+```sh
+npm run sync:next-public
+npm run check:next-public-sync
+```
 
 ## Supabase Environment Variables
 
