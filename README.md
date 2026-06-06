@@ -8,6 +8,15 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 
 ---
 
+## Deployment Status
+
+- `https://mochirii.com` is the current production domain and is served from the root static GitHub Pages site.
+- `https://mochirii.vercel.app` is the Vercel-hosted Next.js app in `apps/web`.
+- DNS cutover to Vercel is deferred until the readiness and rollback checklist is approved.
+- See [`docs/deployment.md`](docs/deployment.md) for the authoritative deployment, Vercel dashboard, and public asset/data sync rules.
+
+---
+
 ## Goals
 
 - Provide a calm, welcoming entry point for new members
@@ -237,6 +246,8 @@ For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/road
 - Open files directly in browser or via static server
 - Use `git pull --rebase` (recommended) to keep history clean
 - GitHub Pages deploys automatically from `main`
+- Next/Vercel validation runs from `apps/web` for the migration app.
+- Keep root `assets/` and `data/` canonical until cutover; use `npm run sync:next-public` to mirror them into `apps/web/public/`.
 - Optional Lighthouse audits can be run manually from GitHub Actions using **Manual Lighthouse audit**; they are not required PR gates.
 
 ---
@@ -246,6 +257,8 @@ For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/road
 This site is purpose-built for the Mōchirīī guild.
 
 Content, branding, and structure are not intended for redistribution without permission.
+
+This repository is public but not open source. See [`COPYRIGHT.md`](COPYRIGHT.md) and [`NOTICE.md`](NOTICE.md).
 
 ---
 
