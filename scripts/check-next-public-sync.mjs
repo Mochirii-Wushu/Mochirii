@@ -63,4 +63,3 @@ if (failed) {
 }
 
 console.log("Next public asset/data copies are in sync.");
-

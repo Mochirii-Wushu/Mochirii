@@ -200,6 +200,23 @@ async function assertNoErrors(errors, label) {
   if (errors.length) fail(`${label} browser errors: ${errors.join(" | ")}`);
 }
 
+async function waitForLightboxOpen(page) {
+  await page.waitForFunction(() => {
+    const root = document.querySelector("#lightbox");
+    const img = document.querySelector("#lightboxImg");
+    const rect = root?.getBoundingClientRect();
+
+    return Boolean(
+      root &&
+        img?.getAttribute("src") &&
+        !root.classList.contains("hidden") &&
+        root.getAttribute("aria-hidden") === "false" &&
+        rect?.width &&
+        rect?.height,
+    );
+  });
+}
+
 const browser = await chromium.launch({ headless: true });
 
 try {
@@ -234,7 +251,7 @@ try {
     assert(state.filters.find((filter) => filter.slug === "portraits")?.pressed === "true", "Portraits filter was not active.");
 
     await page.click("#galleryGrid .gallery-thumb");
-    await page.waitForSelector("#lightbox:not(.hidden) #lightboxImg[src]");
+    await waitForLightboxOpen(page);
     const lightbox = await page.evaluate(() => ({
       src: document.querySelector("#lightboxImg")?.getAttribute("src") || "",
       focusId: document.activeElement?.id || "",
@@ -271,7 +288,7 @@ try {
     assert(!state.bodyText.includes("Rejected Should Not Render"), "Rejected mock submission leaked into public Gallery text.");
 
     await page.click("#galleryGrid .gallery-thumb");
-    await page.waitForSelector("#lightbox:not(.hidden) #lightboxImg[src]");
+    await waitForLightboxOpen(page);
     const lightbox = await page.evaluate(() => ({
       src: document.querySelector("#lightboxImg")?.getAttribute("src") || "",
       caption: document.querySelector("#lightboxCaption")?.textContent?.trim() || "",

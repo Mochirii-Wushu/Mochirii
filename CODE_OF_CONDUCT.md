@@ -22,4 +22,3 @@ Unacceptable behavior:
 ## Enforcement
 
 Maintainers may edit, hide, close, or remove contributions that violate this code. Repeated or serious violations may result in loss of repository access or guild-facing collaboration privileges.
-

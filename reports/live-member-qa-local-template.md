@@ -28,6 +28,36 @@ That file is ignored by `.gitignore` through the existing `.env.*` rule:
 
 Operators may create `.env.live-member-qa` locally with placeholder-style labels only. Do not store passwords, tokens, cookies, access tokens, refresh tokens, Discord client secrets, Discord bot tokens, service-role keys, database URLs, signed URLs, private Storage paths, or real member identifiers.
 
+Preferred preparation command:
+
+```sh
+npm --silent run prepare:live-member-qa-local
+```
+
+The helper verifies the local file is ignored, writes safe placeholder labels only, keeps `QA_ALLOW_LIVE_MUTATION=false`, and refuses to overwrite existing local QA values unless `--force` is supplied.
+
+Optional disposable image preparation command:
+
+```sh
+QA_TEST_IMAGE_PATH_LOCAL=/absolute/private/mochirii-qa-test.png npm --silent run prepare:live-member-qa-image
+```
+
+The image helper writes a deterministic PNG outside the repo and does not print the absolute path. It does not update `.env.live-member-qa`; set `QA_TEST_IMAGE_PATH_LOCAL` privately after reviewing the local file.
+
+Optional D03 cleanup-note preparation command:
+
+```sh
+LIVE_MEMBER_CLEANUP_NOTE_PATH=/absolute/private/live-member-cleanup-note.md npm --silent run prepare:live-member-cleanup-note
+```
+
+The cleanup-note helper writes a private Markdown draft from [`docs/live-member-cleanup-note.md`](../docs/live-member-cleanup-note.md) outside the repo and does not print the absolute path. Use it before D03 upload to keep submission IDs, Storage paths, cleanup ownership, and status-only public summaries out of committed reports.
+
+Completed cleanup notes can be checked without printing their values:
+
+```sh
+npm --silent run check:live-member-cleanup-note -- --note=/absolute/private/live-member-cleanup-note.md
+```
+
 ```sh
 # Local-only live member workflow QA readiness values.
 # Keep this file ignored. Never commit it.
@@ -52,12 +82,12 @@ Suggested local values:
 - `QA_TEST_UNVERIFIED_DISCORD_LABEL`: a non-sensitive label for the signed-in account without required roles.
 - `QA_TEST_VERIFIED_MEMBER_LABEL`: a non-sensitive label for the verified active member account.
 - `QA_TEST_MODERATOR_LABEL`: a non-sensitive label for the moderator/leader account.
-- `QA_TEST_IMAGE_PATH_LOCAL`: an absolute or repo-external local path to the disposable test image.
+- `QA_TEST_IMAGE_PATH_LOCAL`: an absolute repo-external local path to the disposable test image.
 - `QA_TEST_TITLE_PREFIX`: should remain `Mochirii QA Test` unless the runbook changes.
 - `QA_TEST_CAPTION_MARKER`: should clearly mark disposable QA data.
 - `QA_ALLOW_LIVE_MUTATION`: keep `false` until a D03 branch receives explicit human approval.
 
-Do not put the disposable image inside the repo unless a future branch explicitly approves a small evidence asset. Prefer a local path outside the repository.
+Do not put the disposable image inside the repo unless a future branch explicitly approves a small evidence asset. Prefer a local path outside the repository. Strict preflight rejects repo-local, missing, empty, oversized, or unsupported test image paths without printing the path value.
 
 ## 4. What Must Never Be Committed
 
@@ -83,6 +113,7 @@ Strict readiness checks may fail locally when:
 - required variable names are missing;
 - `QA_ALLOW_LIVE_MUTATION` is not explicitly reviewed before D03;
 - the test image path is missing before an upload branch;
+- local labels look like private identifiers or the file contains raw private Storage paths or token-like secret values;
 - any credential file is tracked by Git.
 
 Normal repository validation must not require live credentials.

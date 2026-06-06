@@ -70,4 +70,3 @@ The check is included in `npm run check` so drift is caught in CI.
 - Keep the root GitHub Pages site deployable until Vercel production is verified.
 - Keep legacy `.html` redirects in `apps/web/next.config.ts` so existing URLs continue to work after cutover.
 - After cutover, run production smoke checks against both `/path` and legacy `/path.html` route shapes.
-

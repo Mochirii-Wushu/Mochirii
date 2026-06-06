@@ -1,6 +1,6 @@
 ## Summary
 
-- 
+-
 
 ## Changed Surfaces
 
@@ -20,4 +20,3 @@
 ## Deployment Notes
 
 State whether this affects GitHub Pages, Vercel previews, DNS, environment variables, or Supabase settings.
-

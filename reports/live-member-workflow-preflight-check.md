@@ -46,7 +46,11 @@ The preflight verifies:
 - all required variable names are documented;
 - `QA_ALLOW_LIVE_MUTATION=false` is the committed template default;
 - normal mode does not fail merely because live credentials are missing;
-- strict mode can fail when the local ignored readiness file is missing, incomplete, or not explicitly prepared.
+- strict mode can fail when the local ignored readiness file is missing, incomplete, or not explicitly prepared;
+- local QA values do not contain obvious token/secret values;
+- strict D02 mode keeps `QA_ALLOW_LIVE_MUTATION=false`;
+- mutation-approval mode requires `--strict` and `QA_ALLOW_LIVE_MUTATION=true`;
+- strict mode requires safe non-private labels and an absolute repo-external JPEG/PNG/WebP test image under 50 MB.
 
 Required local variable names:
 
@@ -77,7 +81,7 @@ The script does not:
 
 The script never prints local environment values. It reports only whether required keys are present, empty, missing, ignored, or tracked.
 
-If a local `.env.live-member-qa` exists, strict-mode failures name only the missing or empty key names. Values stay local and unprinted.
+If a local `.env.live-member-qa` exists, strict-mode failures name only key names, line numbers, or value classes such as secret token, email-like identifier, or unsupported image type. Values and paths stay local and unprinted.
 
 ## 5. Check Wiring
 

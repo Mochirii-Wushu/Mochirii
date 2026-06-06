@@ -22,4 +22,3 @@ Security-sensitive areas include:
 - Member-only upload, account, and leader dashboard flows
 
 Do not include real secrets, tokens, private member data, or exploit payloads beyond what is necessary to explain the issue.
-

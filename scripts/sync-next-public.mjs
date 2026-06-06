@@ -20,4 +20,3 @@ for (const [sourceRel, targetRel] of pairs) {
   cpSync(source, target, { recursive: true, force: true });
   console.log(`Synced ${sourceRel} -> ${targetRel}`);
 }
-

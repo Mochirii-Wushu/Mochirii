@@ -37,4 +37,3 @@ npm run check:production
 ## Pull Requests
 
 Include the purpose, changed surfaces, validation run, and any deployment or DNS impact. If a change touches protected copy, Supabase behavior, auth/member workflows, or production routing, call that out clearly.
-

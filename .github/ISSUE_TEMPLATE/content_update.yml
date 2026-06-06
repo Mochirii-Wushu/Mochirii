@@ -29,4 +29,3 @@ body:
         - label: This does not include private member data.
         - label: This does not require entering or exposing secrets.
         - label: This should preserve protected copy unless explicitly approved.
-
