@@ -11,6 +11,7 @@ const checks = [
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
+  ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
