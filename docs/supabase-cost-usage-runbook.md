@@ -29,11 +29,11 @@ Supabase usage comes from the member workflows:
 - Auth: Discord OAuth sign-ins and active member sessions.
 - Database: `member_profiles`, `gallery_submissions`, `gallery_moderation_events`, `discord_resources`, and `discord_sync_log`.
 - Storage: private `member-gallery` image objects for pending, approved, rejected, and archived submissions.
-- Edge Functions: `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, and `list-approved-gallery-submissions`.
+- Edge Functions: `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-approved-gallery-submissions`, `submit-discord-gallery-image`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission`.
 - Egress: Auth/API responses, Edge Function responses, and Storage signed URL image delivery.
 - Logs: function logs, moderation troubleshooting, and dashboard observability.
 
-Expected normal use is small, human-paced, and tied to guild activity. Runaway use usually looks like sudden public approved-feed traffic, repeated verification attempts, automated upload attempts, unexpected Storage growth, or repeated function errors.
+Expected normal use is small, human-paced, and tied to guild activity. Runaway use usually looks like sudden public approved-feed traffic, repeated verification attempts, automated upload attempts, Instagram queue retries, unexpected Storage growth, or repeated function errors.
 
 ## Current Member Gallery Policy
 
@@ -99,6 +99,7 @@ Watch:
 - Storage grows faster than known member upload activity.
 - Many files sit in pending or rejected states for more than a review cycle.
 - `list-approved-gallery-submissions` invocations jump after public sharing.
+- `publish-instagram-gallery-submission` retries repeat after a Meta or credential failure.
 - `verify-discord-member` calls spike without a matching guild event.
 - Function `429`, `5xx`, or signed URL errors repeat.
 - Egress rises without a matching public traffic explanation.

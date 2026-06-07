@@ -62,6 +62,7 @@
       title: data.get("title") || "",
       caption: data.get("caption") || "",
       category: data.get("category") || "",
+      instagramOptIn: data.get("instagramOptIn") === "true",
     };
   }
 
@@ -80,6 +81,7 @@
     const title = U.escapeHtml(item.title || item.original_filename || "Untitled image");
     const caption = item.caption ? `<p>${U.escapeHtml(item.caption)}</p>` : "";
     const category = item.category ? `<span>${U.escapeHtml(item.category)}</span>` : "";
+    const instagramLabel = item.instagram_opt_in === true ? "Instagram opt-in" : "Site Gallery only";
 
     return `
       <article class="submission-item">
@@ -91,6 +93,7 @@
         <div class="submission-meta">
           <span>${U.escapeHtml(created)}</span>
           ${category}
+          <span>${U.escapeHtml(instagramLabel)}</span>
         </div>
       </article>
     `;
@@ -183,7 +186,7 @@
     }
 
     const successMessage =
-      "Image submitted for moderation. It will not appear in the public Gallery until a later approval workflow exists.";
+      "Image submitted for moderation. It will not appear in the public Gallery until Moderator approval.";
     form.reset();
     await checkAccess();
     await loadSubmissions();

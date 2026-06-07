@@ -149,6 +149,9 @@ The current static implementation uses:
   - `list-approved-gallery-submissions`
   - `list-gallery-review-queue`
   - `moderate-gallery-submission`
+  - `submit-discord-gallery-image`
+  - `list-instagram-publish-queue`
+  - `publish-instagram-gallery-submission`
 
 The Next app does not yet migrate these auth/member/upload/moderation behaviors.
 

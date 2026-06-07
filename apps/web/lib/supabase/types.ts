@@ -84,12 +84,17 @@ export type GallerySubmission = {
   discord_message_id?: string | null;
   discord_attachment_id?: string | null;
   discord_user_id?: string | null;
+  instagram_opt_in?: boolean | null;
+  instagram_opt_in_at?: string | null;
+  instagram_opt_in_source?: string | null;
+  instagram_opt_in_copy_version?: string | null;
 };
 
 export type GallerySubmissionMetadata = {
   title?: string | null;
   caption?: string | null;
   category?: string | null;
+  instagramOptIn?: boolean | null;
 };
 
 export type VerificationResponse = {
@@ -149,11 +154,56 @@ export type GalleryReviewSubmission = {
   storagePath?: string | null;
   signedPreviewUrl?: string | null;
   previewError?: string | null;
+  instagramOptIn?: boolean | null;
+  instagramOptInAt?: string | null;
+  instagramOptInSource?: string | null;
+  instagramOptInCopyVersion?: string | null;
   moderationEvents?: GalleryModerationEvent[];
 };
 
 export type GalleryReviewQueue = {
   submissions: GalleryReviewSubmission[];
+  count?: number;
+  status?: string;
+  signedUrlSeconds?: number;
+  summary?: Record<string, number | string | undefined>;
+};
+
+export type InstagramPublishJobStatus = "queued" | "ineligible" | "publishing" | "published" | "failed" | "canceled";
+
+export type InstagramPublishEvent = {
+  id?: string | null;
+  action?: string | null;
+  createdAt?: string | null;
+  actor?: {
+    displayName?: string | null;
+    discordUsername?: string | null;
+    discordGlobalName?: string | null;
+    discordUserId?: string | null;
+  } | null;
+};
+
+export type InstagramPublishJob = {
+  id?: string | null;
+  status?: InstagramPublishJobStatus | string | null;
+  eligibilityReason?: string | null;
+  caption?: string | null;
+  altText?: string | null;
+  instagramMediaId?: string | null;
+  instagramPermalink?: string | null;
+  lastError?: string | null;
+  attemptCount?: number | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  publishedAt?: string | null;
+  signedPreviewUrl?: string | null;
+  previewError?: string | null;
+  submission?: GalleryReviewSubmission | null;
+  events?: InstagramPublishEvent[];
+};
+
+export type InstagramPublishQueue = {
+  jobs: InstagramPublishJob[];
   count?: number;
   status?: string;
   signedUrlSeconds?: number;

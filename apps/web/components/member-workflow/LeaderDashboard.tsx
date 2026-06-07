@@ -3,8 +3,21 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { requireAuth, onAuthStateChange } from "@/lib/supabase/auth";
-import { checkLeaderGalleryModerationAccess, listGalleryReviewQueue, moderateGallerySubmission } from "@/lib/supabase/moderation";
-import { text, type GalleryReviewQueue, type GalleryReviewSubmission, type ModerationStatus } from "@/lib/supabase/types";
+import {
+  checkLeaderGalleryModerationAccess,
+  listGalleryReviewQueue,
+  listInstagramPublishQueue,
+  moderateGallerySubmission,
+  publishInstagramGallerySubmission,
+} from "@/lib/supabase/moderation";
+import {
+  text,
+  type GalleryReviewQueue,
+  type GalleryReviewSubmission,
+  type InstagramPublishJob,
+  type InstagramPublishQueue,
+  type ModerationStatus,
+} from "@/lib/supabase/types";
 import { formatBytes, formatDate } from "./format";
 
 const statuses: Array<{ id: ModerationStatus; label: string; empty: string }> = [
@@ -12,6 +25,14 @@ const statuses: Array<{ id: ModerationStatus; label: string; empty: string }> = 
   { id: "approved", label: "Approved", empty: "No approved gallery submissions." },
   { id: "rejected", label: "Rejected", empty: "No rejected gallery submissions." },
   { id: "archived", label: "Archived", empty: "No archived gallery submissions." },
+];
+
+const instagramStatuses: Array<{ id: string; label: string; empty: string }> = [
+  { id: "queued", label: "Queued", empty: "No Instagram-ready images." },
+  { id: "ineligible", label: "Ineligible", empty: "No ineligible Instagram jobs." },
+  { id: "failed", label: "Failed", empty: "No failed Instagram jobs." },
+  { id: "published", label: "Published", empty: "No published Instagram posts." },
+  { id: "all", label: "All", empty: "No Instagram publishing jobs." },
 ];
 
 function normalizeStatus(value: unknown): ModerationStatus {
@@ -23,6 +44,10 @@ function statusConfig(status: ModerationStatus) {
   return statuses.find((entry) => entry.id === status) || statuses[0];
 }
 
+function instagramStatusConfig(status: string) {
+  return instagramStatuses.find((entry) => entry.id === status) || instagramStatuses[0];
+}
+
 function uploaderName(item: GalleryReviewSubmission) {
   const uploader = item.uploader || {};
   return uploader.discordGlobalName || uploader.displayName || uploader.discordUsername || "Mochirii Member";
@@ -32,6 +57,10 @@ function discordDetail(item: GalleryReviewSubmission) {
   const uploader = item.uploader || {};
   if (uploader.discordGlobalName && uploader.discordUsername) return `${uploader.discordGlobalName} · ${uploader.discordUsername}`;
   return uploader.discordUsername || uploader.discordUserId || "Discord identity on file";
+}
+
+function instagramConsentLabel(item: GalleryReviewSubmission) {
+  return item.instagramOptIn ? "Instagram opt-in" : "Site Gallery only";
 }
 
 function moderatorName(event: NonNullable<GalleryReviewSubmission["moderationEvents"]>[number]) {
@@ -111,6 +140,7 @@ function SubmissionCard({
             ["Size", formatBytes(item.sizeBytes)],
             ["Submitted", formatDate(item.createdAt, "Not set")],
             ["Reviewed", item.reviewedAt ? formatDate(item.reviewedAt, "Not reviewed") : "Not reviewed"],
+            ["Instagram", instagramConsentLabel(item)],
           ].map(([label, value]) => (
             <div key={label}>
               <dt>{label}</dt>
@@ -166,6 +196,106 @@ function SubmissionCard({
   );
 }
 
+function InstagramJobCard({
+  job,
+  busy,
+  caption,
+  altText,
+  onCaptionChange,
+  onAltTextChange,
+  onPublish,
+}: {
+  job: InstagramPublishJob;
+  busy: boolean;
+  caption: string;
+  altText: string;
+  onCaptionChange: (value: string) => void;
+  onAltTextChange: (value: string) => void;
+  onPublish: (job: InstagramPublishJob) => void;
+}) {
+  const submission = job.submission || {};
+  const title = text(submission.title || submission.originalFilename, "Untitled image");
+  const sourceLabel = text(submission.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
+  const status = text(job.status, "queued").toLowerCase();
+  const canPublish = status === "queued" || status === "failed";
+  const permalink = text(job.instagramPermalink);
+
+  return (
+    <article className={`review-item review-item--${status}`} data-instagram-job-id={job.id || ""}>
+      <div className="review-preview">
+        {job.signedPreviewUrl ? (
+          <img src={job.signedPreviewUrl} alt={`${title} Instagram preview`} loading="lazy" decoding="async" />
+        ) : (
+          <div className="review-preview__empty">
+            <span>Preview unavailable</span>
+          </div>
+        )}
+      </div>
+      <div className="review-details">
+        <div className="review-details__head">
+          <div>
+            <h3>{title}</h3>
+            <p className="muted">{submission.uploader?.displayName || "Mochirii Member"} - {sourceLabel}</p>
+          </div>
+          <span className={`submission-status submission-status--${status}`}>{status}</span>
+        </div>
+        {job.eligibilityReason ? <p className="review-decision">Eligibility: {job.eligibilityReason}</p> : null}
+        {job.lastError ? <p className="review-decision">Last error: {job.lastError}</p> : null}
+        {permalink ? (
+          <p>
+            <a href={permalink} target="_blank" rel="noopener noreferrer">Open Instagram post</a>
+          </p>
+        ) : null}
+        <dl className="review-meta">
+          {[
+            ["Consent", submission.instagramOptIn ? "Instagram opt-in" : "No opt-in"],
+            ["Type", submission.mimeType || "Unknown"],
+            ["Size", formatBytes(submission.sizeBytes)],
+            ["Attempts", String(job.attemptCount || 0)],
+            ["Queued", formatDate(job.createdAt, "Not set")],
+            ["Published", job.publishedAt ? formatDate(job.publishedAt, "Not published") : "Not published"],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <label className="form-field">
+          <span>Instagram caption</span>
+          <textarea
+            maxLength={2200}
+            rows={4}
+            value={caption}
+            disabled={busy || !canPublish}
+            onChange={(event) => onCaptionChange(event.target.value.slice(0, 2200))}
+          />
+        </label>
+        <label className="form-field">
+          <span>Instagram alt text</span>
+          <textarea
+            maxLength={1000}
+            rows={3}
+            value={altText}
+            disabled={busy || !canPublish}
+            onChange={(event) => onAltTextChange(event.target.value.slice(0, 1000))}
+          />
+        </label>
+        <div className="auth-actions">
+          <button
+            className="hero-cta hero-cta--primary"
+            type="button"
+            disabled={busy || !canPublish}
+            onClick={() => onPublish(job)}
+          >
+            Publish to Instagram
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function LeaderDashboard() {
   const [busy, setBusy] = useState(true);
   const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
@@ -175,6 +305,13 @@ export function LeaderDashboard() {
   const [reviewError, setReviewError] = useState("");
   const [accessDeniedMessage, setAccessDeniedMessage] = useState("Gallery moderation requires Discord membership, completed onboarding, and the Moderator role.");
   const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [instagramActiveStatus, setInstagramActiveStatus] = useState("queued");
+  const [instagramQueue, setInstagramQueue] = useState<InstagramPublishQueue | null>(null);
+  const [instagramBusy, setInstagramBusy] = useState(false);
+  const [instagramStatus, setInstagramStatus] = useState("Instagram queue has not loaded yet.");
+  const [instagramError, setInstagramError] = useState("");
+  const [instagramCaptions, setInstagramCaptions] = useState<Record<string, string>>({});
+  const [instagramAltTexts, setInstagramAltTexts] = useState<Record<string, string>>({});
 
   const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
     const nextStatus = normalizeStatus(status);
@@ -204,6 +341,34 @@ export function LeaderDashboard() {
     setBusy(false);
   }, [activeStatus]);
 
+  const loadInstagramQueue = useCallback(async ({ status = instagramActiveStatus, successMessage = "" }: { status?: string; successMessage?: string } = {}) => {
+    const nextStatus = instagramStatusConfig(status).id;
+    const config = instagramStatusConfig(nextStatus);
+    setInstagramActiveStatus(nextStatus);
+    setInstagramBusy(true);
+    setInstagramError("");
+    setInstagramStatus(`Loading ${config.label.toLowerCase()} Instagram jobs.`);
+
+    const result = await listInstagramPublishQueue({ status: nextStatus });
+    if (!result.ok) {
+      setInstagramQueue(null);
+      setInstagramError(result.message || "Instagram publishing queue could not be loaded.");
+      setInstagramStatus("");
+      setInstagramBusy(false);
+      return;
+    }
+
+    const data = result.data || { jobs: [] };
+    setInstagramQueue(data);
+    setInstagramStatus(
+      successMessage ||
+        (data.jobs?.length
+          ? `${data.jobs.length} ${config.label.toLowerCase()} Instagram job${data.jobs.length === 1 ? "" : "s"} shown.`
+          : config.empty),
+    );
+    setInstagramBusy(false);
+  }, [instagramActiveStatus]);
+
   const checkAccess = useCallback(async () => {
     setBusy(true);
     setReviewError("");
@@ -225,7 +390,8 @@ export function LeaderDashboard() {
 
     setPanel("review");
     await loadQueue({ status: activeStatus });
-  }, [activeStatus, loadQueue]);
+    await loadInstagramQueue({ status: instagramActiveStatus });
+  }, [activeStatus, instagramActiveStatus, loadInstagramQueue, loadQueue]);
 
   useEffect(() => {
     void Promise.resolve().then(() => checkAccess());
@@ -261,6 +427,44 @@ export function LeaderDashboard() {
       status: activeStatus,
       successMessage: result.message || "Submission moderated.",
     });
+    if (action === "approved") {
+      await loadInstagramQueue({ status: instagramActiveStatus });
+    }
+  }
+
+  async function publishInstagram(job: InstagramPublishJob) {
+    const jobId = text(job.id);
+    const caption = instagramCaptions[jobId] ?? text(job.caption, "Shared from the Mōchirīī guild gallery.");
+    const altText = instagramAltTexts[jobId] ?? text(job.altText);
+    const confirmed =
+      typeof window !== "undefined" &&
+      window.confirm("Publish this approved member image to the official Mōchirīī Instagram account?");
+
+    if (!confirmed) return;
+
+    setInstagramBusy(true);
+    setInstagramError("");
+    setInstagramStatus("Publishing image to Instagram.");
+
+    const result = await publishInstagramGallerySubmission({
+      jobId,
+      caption,
+      altText,
+      confirmPublish: true,
+    });
+
+    if (!result.ok) {
+      setInstagramError(result.message || "Instagram publishing failed.");
+      setInstagramStatus("");
+      setInstagramBusy(false);
+      await loadInstagramQueue({ status: instagramActiveStatus });
+      return;
+    }
+
+    await loadInstagramQueue({
+      status: instagramActiveStatus,
+      successMessage: result.message || "Image published to Instagram.",
+    });
   }
 
   if (panel === "signed-out") {
@@ -292,8 +496,11 @@ export function LeaderDashboard() {
 
   const submissions = Array.isArray(queue?.submissions) ? queue.submissions : [];
   const config = statusConfig(activeStatus);
+  const instagramJobs = Array.isArray(instagramQueue?.jobs) ? instagramQueue.jobs : [];
+  const instagramConfig = instagramStatusConfig(instagramActiveStatus);
 
   return (
+    <>
     <section className="glass-card glass-card--primary glass-pad auth-panel" id="reviewPanel">
       <div className="auth-panel__head">
         <div>
@@ -345,5 +552,56 @@ export function LeaderDashboard() {
         )}
       </div>
     </section>
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="instagramQueuePanel">
+      <div className="auth-panel__head">
+        <div>
+          <p className="kicker">Instagram Queue</p>
+          <h2 className="section-title">Approved Social Publishing</h2>
+        </div>
+        <button className="hero-cta" type="button" onClick={() => loadInstagramQueue({ status: instagramActiveStatus })} disabled={instagramBusy}>Refresh</button>
+      </div>
+
+      <div className="queue-tabs" role="group" aria-label="Instagram publishing queues">
+        {instagramStatuses.map((status) => (
+          <button
+            className="queue-tab"
+            type="button"
+            data-status={status.id}
+            aria-pressed={status.id === instagramActiveStatus}
+            disabled={instagramBusy}
+            key={status.id}
+            onClick={() => loadInstagramQueue({ status: status.id })}
+          >
+            {status.label} - {Number(instagramQueue?.summary?.[status.id === "all" ? "total" : status.id] || 0)}
+          </button>
+        ))}
+      </div>
+
+      <p className="auth-status muted" role="status" aria-live="polite">{instagramStatus}</p>
+      <p className="auth-error" role="alert" hidden={!instagramError}>{instagramError}</p>
+
+      <div className="review-list" aria-live="polite">
+        {instagramJobs.length ? (
+          instagramJobs.map((job) => {
+            const id = text(job.id, "unknown");
+            return (
+              <InstagramJobCard
+                job={job}
+                busy={instagramBusy}
+                caption={instagramCaptions[id] ?? text(job.caption, "Shared from the Mōchirīī guild gallery.")}
+                altText={instagramAltTexts[id] ?? text(job.altText)}
+                key={id}
+                onCaptionChange={(value) => setInstagramCaptions((current) => ({ ...current, [id]: value }))}
+                onAltTextChange={(value) => setInstagramAltTexts((current) => ({ ...current, [id]: value }))}
+                onPublish={publishInstagram}
+              />
+            );
+          })
+        ) : (
+          <p className="muted">{instagramConfig.empty}</p>
+        )}
+      </div>
+    </section>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import {
   CORS_HEADERS,
+  type JsonRecord,
   jsonResponse,
   readRequiredJsonBody,
   requireModeratorAccess,
@@ -9,6 +10,19 @@ import {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const VALID_ACTIONS = new Set(["approved", "rejected"]);
+const INSTAGRAM_SUPPORTED_MIME_TYPES = new Set(["image/jpeg"]);
+
+function buildInstagramCaption(submission: JsonRecord): string {
+  const title = safeString(submission.title, 80);
+  const caption = safeString(submission.caption, 300);
+  const parts = [title, caption, "Shared from the Mōchirīī guild gallery."].filter(Boolean);
+  return parts.join("\n\n").slice(0, 2200);
+}
+
+function buildInstagramAltText(submission: JsonRecord): string {
+  const title = safeString(submission.title, 80) || "Member gallery image";
+  return `Mōchirīī guild gallery submission: ${title}`.slice(0, 1000);
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -64,7 +78,7 @@ Deno.serve(async (req: Request) => {
     })
     .eq("id", submissionId)
     .eq("status", "pending")
-    .select("id,status,reviewed_by,reviewed_at,rejection_reason")
+    .select("id,status,reviewed_by,reviewed_at,rejection_reason,title,caption,mime_type,instagram_opt_in")
     .maybeSingle();
 
   if (updateError) {
@@ -120,12 +134,83 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  let instagramJob: JsonRecord | null = null;
+  if (action === "approved" && updatedSubmission.instagram_opt_in === true) {
+    const mimeType = safeString(updatedSubmission.mime_type, 80);
+    const isEligible = Boolean(mimeType && INSTAGRAM_SUPPORTED_MIME_TYPES.has(mimeType));
+    const instagramStatus = isEligible ? "queued" : "ineligible";
+    const eligibilityReason = isEligible ? null : "Instagram v1 publishing supports JPEG images only.";
+
+    const { data: jobData, error: jobError } = await access.adminClient
+      .from("gallery_instagram_publish_jobs")
+      .insert({
+        submission_id: submissionId,
+        status: instagramStatus,
+        eligibility_reason: eligibilityReason,
+        caption: buildInstagramCaption(updatedSubmission as JsonRecord),
+        alt_text: buildInstagramAltText(updatedSubmission as JsonRecord),
+        queued_by: access.userId,
+      })
+      .select("id,status,eligibility_reason,created_at")
+      .maybeSingle();
+
+    if (jobError || !jobData) {
+      console.error("moderate-gallery-submission instagram job insert failed", {
+        code: jobError?.code,
+        message: jobError?.message || "Missing inserted Instagram job",
+        submissionId,
+      });
+
+      return jsonResponse(
+        {
+          ok: false,
+          error: "instagram_job_failed",
+          message: "The submission was approved, but the Instagram publishing job could not be queued.",
+        },
+        500,
+      );
+    }
+
+    instagramJob = jobData as JsonRecord;
+
+    const { error: instagramEventError } = await access.adminClient
+      .from("gallery_instagram_publish_events")
+      .insert({
+        job_id: safeString(instagramJob.id, 80),
+        submission_id: submissionId,
+        actor_id: access.userId,
+        action: instagramStatus,
+        details: {
+          reason: eligibilityReason,
+          mime_type: mimeType,
+        },
+      });
+
+    if (instagramEventError) {
+      console.error("moderate-gallery-submission instagram event insert failed", {
+        code: instagramEventError.code,
+        message: instagramEventError.message,
+        submissionId,
+      });
+
+      return jsonResponse(
+        {
+          ok: false,
+          error: "instagram_event_failed",
+          message: "The submission was approved, but the Instagram publishing audit event could not be recorded.",
+        },
+        500,
+      );
+    }
+  }
+
   return jsonResponse({
     ok: true,
     data: {
       submission: updatedSubmission,
       action,
       reviewedAt,
+      instagramJob,
     },
     message: action === "approved" ? "Submission approved for a future publishing step." : "Submission declined.",
   });

@@ -14,6 +14,7 @@ Moderation does not:
 
 - edit `data/gallery.json`
 - publish static Gallery images
+- automatically publish images to Instagram
 - make the `member-gallery` Storage bucket public
 - assign Discord roles
 - bypass Supabase RLS or Storage policies
@@ -21,6 +22,8 @@ Moderation does not:
 - require Edge Function deployment during normal review
 
 Approved submissions are served to the public Gallery by the approved-feed Edge Function as short-lived signed URLs. Pending, rejected, and archived submissions stay out of the public Gallery.
+
+If a member opted in to Instagram sharing, approving the website Gallery submission creates an Instagram Queue job. It does not publish to Instagram. A moderator must review that separate queue and use a final confirmation before any external public post is sent.
 
 ## 2. Access Requirements
 
@@ -60,6 +63,7 @@ Each submission may show:
 - file size
 - submitted date
 - reviewed date
+- Instagram opt-in state
 - Storage reference
 - moderation history
 
@@ -75,6 +79,7 @@ Before approving a submission, check:
 - the caption does not contain private information, harassment, slurs, spam, or unrelated promotion
 - the category is reasonable for Gallery browsing
 - the image does not reveal sensitive account, server, or personal information
+- any Instagram opt-in is intentional and shown on the submission
 
 If the preview is unavailable, do not approve by title alone. Refresh the queue once. If it remains unavailable, leave it pending and escalate.
 
@@ -88,11 +93,41 @@ After approval:
 - review metadata is recorded
 - a moderation event is recorded
 - the approved public Gallery feed may include the item
+- an opted-in image may create an Instagram Queue job for later review
 - no static Gallery JSON is edited
+- no automatic Instagram publishing happens
 
 If an approved item needs later removal from the public feed, do not edit `data/gallery.json`. Use the moderation/admin path for changing the submission status, or escalate if that path is unavailable.
 
-## 6. Declining A Submission
+## 6. Instagram Queue
+
+The Instagram Queue is a moderator-only second step for approved images where the member explicitly opted in. It is separate from website Gallery approval.
+
+The queue may show:
+
+- preview image from signed preview URLs
+- title
+- caption/subtitle
+- uploader and submission source
+- consent state
+- eligibility
+- job state
+- last error
+- Instagram permalink after publish
+
+JPEG images are eligible for the v1 single-image feed workflow. PNG and WebP submissions are marked ineligible instead of being converted or posted.
+
+Before publishing:
+
+- review the image and consent state
+- review or edit the Instagram caption
+- review or edit the alt text
+- confirm that the post is appropriate for the official account
+- use the browser final confirmation
+
+Do not publish test images, live images, or retry failed jobs unless the owner has approved the live Instagram action. Do not paste signed preview URLs into Discord, GitHub, public docs, screenshots, or Meta setup notes.
+
+## 7. Declining A Submission
 
 Decline requires a reason.
 
@@ -113,7 +148,7 @@ Avoid:
 
 Rejected submissions remain private and should not appear in the public Gallery.
 
-## 7. Moderation History And Audit Trail
+## 8. Moderation History And Audit Trail
 
 Moderation actions are expected to update:
 
@@ -123,9 +158,14 @@ Moderation actions are expected to update:
 - `gallery_submissions.rejection_reason` when declined
 - `gallery_moderation_events`
 
+Instagram publishing actions are expected to update:
+
+- `gallery_instagram_publish_jobs`
+- `gallery_instagram_publish_events`
+
 The audit trail is for operational accountability. Do not manually edit audit rows from the browser. Direct database repair should be handled only in a separate approved admin task.
 
-## 8. Common States And Responses
+## 9. Common States And Responses
 
 | State | What it means | Response |
 | --- | --- | --- |
@@ -136,8 +176,10 @@ The audit trail is for operational accountability. Do not manually edit audit ro
 | Decline reason required | Decline was clicked without enough reason text. | Add a short reason and try again. |
 | Function request failed | Edge Function returned an error or network failed. | Refresh once, avoid repeated clicking, then escalate with time and visible message. |
 | Counts look stale | Another moderator may have acted or the queue changed. | Refresh Queue. |
+| Instagram job ineligible | Opted-in image cannot be posted by the v1 workflow. | Leave it unposted unless a later approved conversion workflow exists. |
+| Instagram publish failed | Meta or Supabase rejected the publish attempt. | Do not repeatedly click. Record the visible message and escalate. |
 
-## 9. Escalation Checklist
+## 10. Escalation Checklist
 
 When escalating, include:
 
@@ -158,8 +200,9 @@ Do not include:
 - signed preview URLs
 - private Storage URLs
 - screenshots showing private Storage references unless the recipient is an approved admin channel
+- Instagram access tokens, account IDs with secret context, or Meta access-token URLs
 
-## 10. Safe Operations Boundary
+## 11. Safe Operations Boundary
 
 Normal moderation should only use the website dashboard.
 
@@ -173,9 +216,9 @@ supabase secrets set
 
 Those are deployment/admin operations and require a separate approved branch or explicit operator instruction.
 
-If a fix appears to require database mutation, Edge Function deployment, a secret change, or direct Storage repair, stop moderation and open a scoped admin task.
+If a fix appears to require database mutation, Edge Function deployment, a secret change, direct Storage repair, Reaper slash-command registration, or a live Instagram post, stop moderation and open a scoped admin task.
 
-## 11. Local QA Checklist
+## 12. Local QA Checklist
 
 For a local dashboard smoke, use mocked states unless approved live credentials are available:
 
@@ -183,6 +226,8 @@ For a local dashboard smoke, use mocked states unless approved live credentials 
 - access denied
 - moderator with pending queue
 - approve success
+- opted-in approval creates Instagram Queue item
+- Instagram Queue requires final confirmation
 - decline reason required
 - decline success
 - function failure
@@ -203,7 +248,7 @@ npm run smoke:gallery
 
 The known large MP3 asset warning is expected unless the audio asset policy changes in a separate branch.
 
-## 12. Related Files
+## 13. Related Files
 
 - `account.html`
 - `leader-dashboard.html`
@@ -212,6 +257,8 @@ The known large MP3 asset warning is expected unless the audio asset policy chan
 - `gallery-submit.js`
 - `gallery.js`
 - `supabase.js`
+- `supabase/functions/list-instagram-publish-queue`
+- `supabase/functions/publish-instagram-gallery-submission`
 - `supabase/README.md`
 - `reports/member-gallery-end-to-end-review.md`
 - `reports/account-member-dashboard-review.md`

@@ -15,11 +15,11 @@ The root GitHub Pages files stay intact as rollback/reference material while the
 
 ## Supabase-First Architecture Rule
 
-Supabase remains the authority for Auth, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation, and audit records. Vercel/Next owns routing, React UI, rendering, redirects, and thin browser-safe integration with Supabase.
+Supabase remains the authority for Auth, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation, Instagram publishing, and audit records. Vercel/Next owns routing, React UI, rendering, redirects, and thin browser-safe integration with Supabase.
 
-Existing Supabase Edge Functions should continue to be invoked from the Next app. Do not recreate `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, or `list-approved-gallery-submissions` as Vercel route handlers in this phase.
+Existing Supabase Edge Functions should continue to be invoked from the Next app. Do not recreate `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-approved-gallery-submissions`, `list-instagram-publish-queue`, or `publish-instagram-gallery-submission` as Vercel route handlers in this phase.
 
-Do not add Vercel service-role or Discord bot secrets unless a later approved change explicitly requires them. Browser-safe Supabase calls may use `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; service-role keys, secret keys, Discord bot tokens, and OAuth client secrets must stay in Supabase Edge Functions or explicitly server-only code.
+Do not add Vercel service-role, Discord bot, or Instagram publishing secrets unless a later approved change explicitly requires them. Browser-safe Supabase calls may use `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; service-role keys, secret keys, Discord bot tokens, Instagram access tokens, and OAuth client secrets must stay in Supabase Edge Functions or explicitly server-only code.
 
 RLS and Storage policies remain central and must not be bypassed by client code. The custom domain now serves the Vercel/Next app; future provider, DNS, Supabase, or Discord setting changes still require explicit approval.
 
@@ -96,8 +96,10 @@ Current Storage bucket:
 - `list-approved-gallery-submissions`
 - `list-gallery-review-queue`
 - `moderate-gallery-submission`
+- `list-instagram-publish-queue`
+- `publish-instagram-gallery-submission`
 
-`verify-discord-member`, `list-gallery-review-queue`, and `moderate-gallery-submission` require a valid user JWT. `list-approved-gallery-submissions` is currently configured without JWT verification for public approved-gallery reads.
+`verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission` require a valid user JWT. `list-approved-gallery-submissions` is currently configured without JWT verification for public approved-gallery reads.
 
 ## 8. Current Discord OAuth and Member Verification Flow
 
@@ -132,8 +134,14 @@ Existing Supabase Edge Function secret or non-browser names are not required in 
 - `DISCORD_MODERATOR_ROLE_IDS`
 - `DISCORD_MODERATOR_ROLE_NAMES`
 - `DISCORD_BOT_TOKEN`
+- `DISCORD_GALLERY_CHANNEL_ID`
+- `DISCORD_GALLERY_INGEST_SECRET`
+- `INSTAGRAM_ACCOUNT_ID`
+- `INSTAGRAM_ACCESS_TOKEN`
+- `INSTAGRAM_API_VERSION`
+- `INSTAGRAM_API_BASE_URL`
 
-Only public publishable keys may be exposed to browser code. Service-role, secret, and Discord bot values must stay server-side only.
+Only public publishable keys may be exposed to browser code. Service-role, secret, Discord bot, and Instagram publishing values must stay server-side only.
 
 ## 10. Supabase Redirect URL Checklist
 
@@ -173,7 +181,7 @@ The initial Next implementation uses:
 - Client components only for browser auth state, form interactions, file selection, modal state, and upload progress.
 - Shared `apps/web/lib/supabase` helpers for browser-safe Supabase client creation.
 - Existing Supabase Edge Functions for privileged Discord/member/moderation actions.
-- No Next route handlers for `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, or `moderate-gallery-submission`.
+- No Next route handlers for `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, or `publish-instagram-gallery-submission`.
 - No Supabase SSR cookie middleware in this phase; server-side auth can be evaluated later only if a real route need appears.
 
 Do not import server-only credentials into Client Components.
@@ -194,6 +202,8 @@ Do not import server-only credentials into Client Components.
 - Moderator-role checks through existing moderation Edge Function helpers.
 - Moderation queue reads through `list-gallery-review-queue`.
 - Submission approval/rejection writes through `moderate-gallery-submission`.
+- Instagram publishing queue reads through `list-instagram-publish-queue`.
+- Moderator-confirmed Instagram posts through `publish-instagram-gallery-submission`.
 - Approved submission feed reads through `list-approved-gallery-submissions`.
 - Signed preview URL creation.
 - Gallery moderation audit records.

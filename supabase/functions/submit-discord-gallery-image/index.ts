@@ -17,6 +17,7 @@ const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const DISCORD_CDN_HOSTS = new Set(["cdn.discordapp.com", "media.discordapp.net", "media.discordapp.com"]);
 const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
+const INSTAGRAM_OPT_IN_COPY_VERSION = "2026-06-discord-submit-v1";
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -47,6 +48,10 @@ function parseCsv(value: string | null | undefined): string[] {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function booleanTrue(value: unknown): boolean {
+  return value === true;
 }
 
 function getServiceRoleKey(): string {
@@ -263,6 +268,7 @@ Deno.serve(async (req: Request) => {
   const declaredSize = Number(body.sizeBytes || 0);
   const title = safeString(body.title, 80);
   const caption = safeString(body.caption, 300);
+  const instagramOptIn = booleanTrue(body.instagramOptIn);
 
   if (
     guildId !== EXPECTED_DISCORD_GUILD_ID ||
@@ -511,6 +517,10 @@ Deno.serve(async (req: Request) => {
       discord_message_id: messageId,
       discord_attachment_id: attachmentId,
       discord_user_id: discordUserId,
+      instagram_opt_in: instagramOptIn,
+      instagram_opt_in_at: instagramOptIn ? new Date().toISOString() : null,
+      instagram_opt_in_source: instagramOptIn ? "discord_slash_command" : null,
+      instagram_opt_in_copy_version: instagramOptIn ? INSTAGRAM_OPT_IN_COPY_VERSION : null,
     })
     .select("id,status,created_at")
     .maybeSingle();

@@ -7,6 +7,7 @@ const checks = [
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],
   ["check:discord-gallery-ingest", ["node", "scripts/check-discord-gallery-ingest.mjs"]],
+  ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],

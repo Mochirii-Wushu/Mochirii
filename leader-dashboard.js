@@ -14,10 +14,20 @@
     { id: "archived", label: "Archived", empty: "No archived gallery submissions." },
   ];
   const STATUS_IDS = new Set(STATUSES.map((status) => status.id));
+  const INSTAGRAM_STATUSES = [
+    { id: "queued", label: "Queued", empty: "No Instagram-ready images." },
+    { id: "ineligible", label: "Ineligible", empty: "No ineligible Instagram jobs." },
+    { id: "failed", label: "Failed", empty: "No failed Instagram jobs." },
+    { id: "published", label: "Published", empty: "No published Instagram posts." },
+    { id: "all", label: "All", empty: "No Instagram publishing jobs." },
+  ];
+  const INSTAGRAM_STATUS_IDS = new Set(INSTAGRAM_STATUSES.map((status) => status.id));
 
   let accessReady = false;
   let activeStatus = "pending";
+  let activeInstagramStatus = "queued";
   let latestSummary = null;
+  let latestInstagramSummary = null;
 
   function setText(selector, value) {
     const el = $(selector);
@@ -39,12 +49,25 @@
     $("#reviewList")?.querySelectorAll("button, textarea").forEach((el) => {
       el.disabled = busy;
     });
+    $("#refreshInstagramQueue")?.toggleAttribute("disabled", busy);
+    $("#instagramQueueTabs")?.querySelectorAll("button").forEach((el) => {
+      el.disabled = busy;
+    });
+    $("#instagramList")?.querySelectorAll("button, textarea").forEach((el) => {
+      el.disabled = busy;
+    });
   }
 
   function showPanel(panelId) {
-    ["#signedOutPanel", "#accessDeniedPanel", "#reviewPanel"].forEach((selector) => {
+    const reviewMode = panelId === "#reviewPanel";
+    ["#signedOutPanel", "#accessDeniedPanel", "#reviewPanel", "#instagramQueuePanel"].forEach((selector) => {
       const el = $(selector);
-      if (el) el.hidden = selector !== panelId;
+      if (!el) return;
+      if (reviewMode) {
+        el.hidden = selector === "#signedOutPanel" || selector === "#accessDeniedPanel";
+      } else {
+        el.hidden = selector !== panelId;
+      }
     });
   }
 
@@ -55,6 +78,15 @@
 
   function statusConfig(status) {
     return STATUSES.find((entry) => entry.id === status) || STATUSES[0];
+  }
+
+  function normalizeInstagramStatus(value) {
+    const status = U.text(value, "").toLowerCase();
+    return INSTAGRAM_STATUS_IDS.has(status) ? status : "queued";
+  }
+
+  function instagramStatusConfig(status) {
+    return INSTAGRAM_STATUSES.find((entry) => entry.id === status) || INSTAGRAM_STATUSES[0];
   }
 
   function formatDate(value) {
@@ -116,6 +148,16 @@
     });
   }
 
+  function renderInstagramQueueTabs(summary) {
+    $("#instagramQueueTabs")?.querySelectorAll("[data-instagram-status]").forEach((button) => {
+      const status = normalizeInstagramStatus(button.dataset.instagramStatus);
+      const config = instagramStatusConfig(status);
+      const count = Number(summary?.[status === "all" ? "total" : status] || 0);
+      button.setAttribute("aria-pressed", status === activeInstagramStatus ? "true" : "false");
+      button.textContent = `${config.label} - ${count}`;
+    });
+  }
+
   function renderSummary(summary, shown) {
     const panel = $("#queueSummary");
     if (!panel) return;
@@ -159,6 +201,7 @@
       ["Size", formatBytes(item.sizeBytes)],
       ["Submitted", formatDate(item.createdAt)],
       ["Reviewed", item.reviewedAt ? formatDate(item.reviewedAt) : "Not reviewed"],
+      ["Instagram", item.instagramOptIn ? "Instagram opt-in" : "Site Gallery only"],
     ];
 
     return `
@@ -252,6 +295,61 @@
     `;
   }
 
+  function renderInstagramJob(job) {
+    const submission = job.submission || {};
+    const title = submission.title || submission.originalFilename || "Untitled image";
+    const status = U.text(job.status, "queued").toLowerCase();
+    const sourceLabel = U.text(submission.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
+    const canPublish = status === "queued" || status === "failed";
+    const permalink = U.text(job.instagramPermalink, "");
+
+    return `
+      <article class="review-item review-item--${U.escapeHtml(status)}" data-instagram-job-id="${U.escapeHtml(job.id || "")}">
+        <div class="review-preview">
+          ${renderPreview(job, `${title} Instagram`)}
+        </div>
+        <div class="review-details">
+          <div class="review-details__head">
+            <div>
+              <h3>${U.escapeHtml(title)}</h3>
+              <p class="muted">${U.escapeHtml(submission.uploader?.displayName || "Mochirii Member")} - ${U.escapeHtml(sourceLabel)}</p>
+            </div>
+            <span class="submission-status submission-status--${U.escapeHtml(status)}">${U.escapeHtml(status)}</span>
+          </div>
+          ${job.eligibilityReason ? `<p class="review-decision">Eligibility: ${U.escapeHtml(job.eligibilityReason)}</p>` : ""}
+          ${job.lastError ? `<p class="review-decision">Last error: ${U.escapeHtml(job.lastError)}</p>` : ""}
+          ${permalink ? `<p><a href="${U.escapeHtml(permalink)}" target="_blank" rel="noopener noreferrer">Open Instagram post</a></p>` : ""}
+          <dl class="review-meta">
+            ${[
+              ["Consent", submission.instagramOptIn ? "Instagram opt-in" : "No opt-in"],
+              ["Type", submission.mimeType || "Unknown"],
+              ["Size", formatBytes(submission.sizeBytes)],
+              ["Attempts", String(job.attemptCount || 0)],
+              ["Queued", formatDate(job.createdAt)],
+              ["Published", job.publishedAt ? formatDate(job.publishedAt) : "Not published"],
+            ].map(([label, value]) => `
+              <div>
+                <dt>${U.escapeHtml(label)}</dt>
+                <dd>${U.escapeHtml(value)}</dd>
+              </div>
+            `).join("")}
+          </dl>
+          <label class="form-field review-reason">
+            <span>Instagram caption</span>
+            <textarea data-instagram-caption maxlength="2200" rows="4" ${canPublish ? "" : "disabled"}>${U.escapeHtml(job.caption || "")}</textarea>
+          </label>
+          <label class="form-field review-reason">
+            <span>Instagram alt text</span>
+            <textarea data-instagram-alt-text maxlength="1000" rows="3" ${canPublish ? "" : "disabled"}>${U.escapeHtml(job.altText || "")}</textarea>
+          </label>
+          <div class="auth-actions">
+            <button class="hero-cta hero-cta--primary" type="button" data-instagram-action="publish" ${canPublish ? "" : "disabled"}>Publish to Instagram</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
   async function loadQueue({ status = activeStatus, successMessage = "" } = {}) {
     if (!accessReady) return;
 
@@ -295,6 +393,48 @@
     setBusy(false);
   }
 
+  async function loadInstagramQueue({ status = activeInstagramStatus, successMessage = "" } = {}) {
+    if (!accessReady) return;
+
+    activeInstagramStatus = normalizeInstagramStatus(status);
+    const config = instagramStatusConfig(activeInstagramStatus);
+
+    setBusy(true);
+    setError("#instagramError", "");
+    setText("#instagramStatus", `Loading ${config.label.toLowerCase()} Instagram jobs.`);
+
+    const list = $("#instagramList");
+    if (list) list.innerHTML = "";
+
+    const result = await S.listInstagramPublishQueue({ status: activeInstagramStatus });
+    if (!result.ok) {
+      setError("#instagramError", result.message || "Instagram publishing queue could not be loaded.");
+      setText("#instagramStatus", "");
+      setBusy(false);
+      return;
+    }
+
+    const data = result.data || {};
+    const jobs = Array.isArray(data.jobs) ? data.jobs : [];
+    latestInstagramSummary = data.summary || latestInstagramSummary || {};
+
+    renderInstagramQueueTabs(latestInstagramSummary);
+
+    if (!jobs.length) {
+      if (list) list.innerHTML = `<p class="muted">${U.escapeHtml(config.empty)}</p>`;
+      setText("#instagramStatus", successMessage || config.empty);
+      setBusy(false);
+      return;
+    }
+
+    if (list) list.innerHTML = jobs.map(renderInstagramJob).join("");
+    setText(
+      "#instagramStatus",
+      successMessage || `${jobs.length} ${config.label.toLowerCase()} Instagram job${jobs.length === 1 ? "" : "s"} shown.`,
+    );
+    setBusy(false);
+  }
+
   async function checkAccess() {
     setBusy(true);
     setError("#reviewError", "");
@@ -320,6 +460,7 @@
     accessReady = true;
     showPanel("#reviewPanel");
     await loadQueue({ status: activeStatus });
+    await loadInstagramQueue({ status: activeInstagramStatus });
   }
 
   async function moderate(event) {
@@ -355,6 +496,9 @@
       status: activeStatus,
       successMessage: result.message || "Submission moderated.",
     });
+    if (action === "approved") {
+      await loadInstagramQueue({ status: activeInstagramStatus });
+    }
   }
 
   function selectQueueStatus(event) {
@@ -364,11 +508,60 @@
     loadQueue({ status: button.dataset.status });
   }
 
+  function selectInstagramStatus(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest("[data-instagram-status]");
+    if (!button || !accessReady) return;
+    loadInstagramQueue({ status: button.dataset.instagramStatus });
+  }
+
+  async function publishInstagram(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest("[data-instagram-action='publish']");
+    if (!button || !accessReady) return;
+
+    const card = button.closest("[data-instagram-job-id]");
+    const jobId = card?.dataset?.instagramJobId || "";
+    const caption = card?.querySelector("[data-instagram-caption]")?.value?.trim() || "";
+    const altText = card?.querySelector("[data-instagram-alt-text]")?.value?.trim() || "";
+
+    const confirmed = window.confirm("Publish this approved member image to the official Mōchirīī Instagram account?");
+    if (!confirmed) return;
+
+    setBusy(true);
+    setError("#instagramError", "");
+    setText("#instagramStatus", "Publishing image to Instagram.");
+
+    const result = await S.publishInstagramGallerySubmission({
+      jobId,
+      caption,
+      altText,
+      confirmPublish: true,
+    });
+
+    if (!result.ok) {
+      setError("#instagramError", result.message || "Instagram publishing failed.");
+      setText("#instagramStatus", "");
+      setBusy(false);
+      await loadInstagramQueue({ status: activeInstagramStatus });
+      return;
+    }
+
+    await loadInstagramQueue({
+      status: activeInstagramStatus,
+      successMessage: result.message || "Image published to Instagram.",
+    });
+  }
+
   function boot() {
     $("#refreshQueue")?.addEventListener("click", () => loadQueue({ status: activeStatus }));
+    $("#refreshInstagramQueue")?.addEventListener("click", () => loadInstagramQueue({ status: activeInstagramStatus }));
     $("#queueTabs")?.addEventListener("click", selectQueueStatus);
+    $("#instagramQueueTabs")?.addEventListener("click", selectInstagramStatus);
     $("#reviewList")?.addEventListener("click", moderate);
+    $("#instagramList")?.addEventListener("click", publishInstagram);
     renderQueueTabs(latestSummary);
+    renderInstagramQueueTabs(latestInstagramSummary);
     S.onAuthStateChange(() => {
       checkAccess();
     });

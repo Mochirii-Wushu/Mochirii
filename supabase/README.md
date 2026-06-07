@@ -50,6 +50,8 @@ It also exposes Auth/profile/gallery helpers:
 - `checkLeaderGalleryModerationAccess()`
 - `listGalleryReviewQueue()`
 - `moderateGallerySubmission(submissionId, action, reason)`
+- `listInstagramPublishQueue()`
+- `publishInstagramGallerySubmission(options)`
 - `listApprovedGallerySubmissions()`
 
 Script order on pages with Auth or upload behavior is:
@@ -200,8 +202,12 @@ DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 DISCORD_MODERATOR_ROLE_NAMES=Moderator
 DISCORD_BOT_TOKEN=<set manually, never commit>
-DISCORD_GALLERY_CHANNEL_ID=<set after creating gallery-submissions>
+DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
+INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
+INSTAGRAM_API_VERSION=<set manually, never commit>
+INSTAGRAM_API_BASE_URL=<optional Meta-compatible test base URL>
 DISCORD_WEBHOOK_GALLERY_APPROVED=<set manually, never commit>
 DISCORD_WEBHOOK_MOD_LOG=<set manually, never commit>
 DISCORD_EVENTS_CHANNEL_ID=<set per environment>
@@ -219,6 +225,8 @@ supabase functions serve list-gallery-review-queue --env-file supabase/functions
 supabase functions serve moderate-gallery-submission --env-file supabase/functions/.env.local
 supabase functions serve list-approved-gallery-submissions --env-file supabase/functions/.env.local
 supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local
+supabase functions serve list-instagram-publish-queue --env-file supabase/functions/.env.local
+supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
 ```
 
 Production secret examples:
@@ -230,11 +238,16 @@ supabase secrets set DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 supabase secrets set DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 supabase secrets set DISCORD_MODERATOR_ROLE_NAMES=Moderator
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
-supabase secrets set DISCORD_GALLERY_CHANNEL_ID=<set after creating gallery-submissions>
+supabase secrets set DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 supabase secrets set DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+supabase secrets set INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
+supabase secrets set INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
+supabase secrets set INSTAGRAM_API_VERSION=<set manually, never commit>
 ```
 
 `supabase secrets set ...` writes remote project secrets. Run it only from a trusted shell and never paste tokens into tracked files.
+
+Instagram credentials live only in Supabase secrets. Do not place Instagram access tokens, account IDs, API base URLs, or API versions in Vercel, browser code, GitHub Actions logs, issue comments, PR text, or public docs with real values.
 
 Verify remote secrets without printing secret values:
 
@@ -272,6 +285,8 @@ supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
+supabase functions deploy list-instagram-publish-queue
+supabase functions deploy publish-instagram-gallery-submission
 ```
 
 Recommended production sequence after dashboard setup and secrets are complete:
@@ -286,6 +301,8 @@ supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
+supabase functions deploy list-instagram-publish-queue
+supabase functions deploy publish-instagram-gallery-submission
 ```
 
 If the linked project requires a database password in the shell, set it locally without committing it. Fish shell example:
@@ -343,6 +360,7 @@ The website does not assign Discord roles in this phase.
 - optional title/caption/category
 - upload source (`website` or `discord`)
 - Discord guild/channel/message/attachment/user IDs for Discord submissions
+- Instagram opt-in boolean, timestamp, source, and copy version
 - moderation status
 - review fields for moderator approval or decline actions
 
@@ -357,6 +375,17 @@ Uploads stay `pending` and do not appear in the public Gallery in this phase.
 - event creation time
 
 Browser clients do not receive direct insert, update, or delete privileges for moderation events. Trusted Edge Functions write these rows with service-role credentials after Discord Moderator verification.
+
+`gallery_instagram_publish_jobs` stores the second-stage Instagram publishing queue:
+
+- submission id
+- job status: `queued`, `ineligible`, `publishing`, `published`, `failed`, or `canceled`
+- eligibility reason for unsupported v1 media
+- moderator-editable Instagram caption and alt text
+- Meta container/media/permalink IDs after a publish attempt
+- attempt count, last error, queued/published actors, and timestamps
+
+`gallery_instagram_publish_events` stores service-role audit events for Instagram publishing jobs. Browser clients receive no direct table privileges for either Instagram publishing table.
 
 ## Storage Bucket Plan
 
@@ -407,6 +436,12 @@ No public read access is granted.
 - anon and authenticated browser clients receive no direct table privileges.
 - service_role can manage rows from trusted Edge Functions.
 
+`gallery_instagram_publish_jobs` and `gallery_instagram_publish_events`:
+
+- RLS is enabled.
+- anon and authenticated browser clients receive no direct table privileges.
+- service_role can manage rows from trusted Edge Functions after moderator verification.
+
 Storage `member-gallery`:
 
 - authenticated active verified members can upload only into their own first path segment.
@@ -441,6 +476,36 @@ submit-discord-gallery-image
 That function has `verify_jwt = false` because it is called by the trusted Reaper bot rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The bot checks live Discord roles before calling it; the Edge Function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
 
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved.
+
+Reaper's gallery slash command must include the optional Discord boolean option:
+
+```text
+/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>
+```
+
+`share_to_instagram` defaults to `false`. Reaper maps `subtitle` to the existing website `caption` field and sends `instagramOptIn` in the `submit-discord-gallery-image` JSON payload. The user-facing Discord copy should say whether Instagram sharing was enabled. Duplicate Discord message/attachment submissions stay idempotent and do not mutate existing stored consent.
+
+There is no automatic Instagram publishing. Website gallery approval creates an Instagram publishing job only when the submission has explicit opt-in consent. Moderators then review the separate Instagram Queue before any external post is sent.
+
+## Instagram Publishing Queue
+
+Instagram publishing uses two moderator-only Edge Functions:
+
+- `list-instagram-publish-queue`
+- `publish-instagram-gallery-submission`
+
+Both require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private; the publishing function creates a short-lived signed URL only when sending the image URL to Meta.
+
+Approval behavior:
+
+- Non-opted-in approved images do not create an Instagram job.
+- Opted-in JPEG images create a `queued` Instagram job.
+- Opted-in PNG or WebP images create an `ineligible` job with a clear reason.
+- Existing submissions are not retroactively opted in.
+
+The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish. Moderators can edit caption and alt text before publishing. The browser must show a final confirmation before calling `publish-instagram-gallery-submission` because publishing is an external public side effect.
+
+V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Any live Meta setup, Supabase secret change, Edge Function deployment, slash-command registration, or real Instagram post requires explicit owner approval.
 
 ## Approved Public Gallery Feed
 
