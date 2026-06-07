@@ -6,6 +6,22 @@ Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
 
 Do not paste secrets, access tokens, signed Storage URLs, private payloads, or dashboard screenshots with sensitive values into GitHub, Discord, public docs, or reports. No real Instagram post may be created without explicit action-time owner approval.
 
+## Deployment Status - 2026-06-07
+
+Completed:
+
+- PR #198 merged to `main`.
+- Vercel production deployed the Next app changes.
+- Supabase production migration `add_instagram_gallery_publishing` is applied.
+- Supabase production has active `list-instagram-publish-queue` and `publish-instagram-gallery-submission` functions with JWT verification enabled.
+
+Still pending:
+
+- Set real Instagram production secrets in Supabase.
+- Update and register Reaper's slash command outside this repository.
+- Run a non-live Reaper dry-run payload.
+- Publish one live Instagram test post only after explicit action-time owner approval.
+
 ## Public Interface
 
 Website uploads add an optional Instagram consent checkbox:
@@ -32,14 +48,14 @@ Reaper's Gallery command must match this interface:
 
 ## Preconditions
 
-Complete these checks before any production mutation:
+Complete these checks before any production mutation or future redeployment:
 
-1. PR #198 is approved for deployment and merged to `main`.
-2. GitHub checks are green: `validate`, `validate-next`, CodeQL, Vercel, and Supabase Preview.
+1. The scoped code PR is approved for deployment and merged to `main`. For the first release, this was PR #198.
+2. GitHub checks are green: `validate`, `validate-next`, CodeQL, Vercel, and Supabase Preview when present.
 3. Vercel production for `mochirii/mochirii` is Ready after the merge.
 4. Supabase project is confirmed as `deyvmtncimmcinldjyqe`.
 5. The official Instagram account is a Professional account controlled by Mōchirīī.
-6. Reaper's code is ready outside this repository, but not registered live until the owner approves that step.
+6. Reaper's code repository or runtime is available outside this repository before slash-command changes begin.
 7. The Discord submission channel remains `1508077313965817856`.
 
 ## Deployment Sequence
@@ -59,9 +75,9 @@ supabase secrets list --project-ref deyvmtncimmcinldjyqe
 
 Record only secret names and presence. Do not record secret values.
 
-### 2. Merge PR #198
+### 2. Merge The Scoped Code PR
 
-After owner approval for the deployment window, mark PR #198 ready if it is still draft, confirm checks are current, then merge through GitHub.
+For the first release, PR #198 was merged on 2026-06-07. For future redeployments, merge only the current scoped PR after owner approval for the deployment window and current green checks.
 
 After merge, wait for the Vercel production deployment from `main` to be Ready and verify:
 

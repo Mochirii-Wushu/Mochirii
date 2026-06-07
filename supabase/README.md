@@ -54,7 +54,7 @@ It also exposes Auth/profile/gallery helpers:
 - `publishInstagramGallerySubmission(options)`
 - `listApprovedGallerySubmissions()`
 
-Instagram deployment and Reaper rollout steps are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
+Instagram production migration and Edge Functions are deployed. Reaper rollout, Instagram secret setup, dry-run payloads, and any live Instagram post are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
 
 Script order on pages with Auth or upload behavior is:
 
@@ -507,7 +507,7 @@ Approval behavior:
 
 The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish. Moderators can edit caption and alt text before publishing. The browser must show a final confirmation before calling `publish-instagram-gallery-submission` because publishing is an external public side effect.
 
-V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Any live Meta setup, Supabase secret change, Edge Function deployment, slash-command registration, or real Instagram post requires explicit owner approval.
+V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Any future live Meta setup, Supabase secret change, Edge Function redeployment, slash-command registration, or real Instagram post requires explicit owner approval.
 
 ## Approved Public Gallery Feed
 
