@@ -1,7 +1,7 @@
 # Repository Guidance
 
-- This repository has two deployable surfaces during migration: the root static HTML/CSS/vanilla JavaScript GitHub Pages site is current production, and `apps/web` is the Vercel-ready Next.js app. Do not add additional frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
-- Root `assets/` and `data/` remain canonical until DNS cutover. Mirror them to `apps/web/public/` with `npm run sync:next-public` and verify with `npm run check:next-public-sync`.
+- This repository has two deployable surfaces after cutover: `apps/web` is the live Vercel/Next.js production app for `https://mochirii.com`, and the root static HTML/CSS/vanilla JavaScript GitHub Pages files remain rollback/reference material. Do not add additional frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
+- Root `assets/` and `data/` remain the editable content source for now while the rollback surface is retained. Mirror them to `apps/web/public/` with `npm run sync:next-public` and verify with `npm run check:next-public-sync`.
 - Use one scoped branch per task. Do not edit `main` directly, and avoid broad refactors during content or feature work.
 - Preserve the current Mōchirīī wuxia/glass visual identity while improving clarity, speed, and accessibility.
 - Do not delete or rewrite asset directories unless usage is verified and the change is intentionally scoped.

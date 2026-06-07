@@ -2,7 +2,7 @@
 
 ## 1. Phase 3 Scope
 
-Phase 3 migrates the deferred auth/member workflows from the root static site into the existing Next.js App Router app under `apps/web`.
+Phase 3 migrated the deferred auth/member workflows from the root static site into the existing Next.js App Router app under `apps/web`.
 
 Route migration order:
 
@@ -11,7 +11,7 @@ Route migration order:
 3. `/gallery-submit`
 4. `/leader-dashboard`
 
-The root GitHub Pages files should stay intact until the Next implementation is validated in Vercel preview and production review.
+The root GitHub Pages files stay intact as rollback/reference material while the Vercel/Next production surface stabilizes.
 
 ## Supabase-First Architecture Rule
 
@@ -21,11 +21,11 @@ Existing Supabase Edge Functions should continue to be invoked from the Next app
 
 Do not add Vercel service-role or Discord bot secrets unless a later approved change explicitly requires them. Browser-safe Supabase calls may use `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; service-role keys, secret keys, Discord bot tokens, and OAuth client secrets must stay in Supabase Edge Functions or explicitly server-only code.
 
-RLS and Storage policies remain central and must not be bypassed by client code. DNS cutover remains deferred until Phase 3 is validated and explicitly approved.
+RLS and Storage policies remain central and must not be bypassed by client code. The custom domain now serves the Vercel/Next app; future provider, DNS, Supabase, or Discord setting changes still require explicit approval.
 
 ## Phase 3 Implementation Status
 
-This branch migrates the deferred member workflow routes into `apps/web` while leaving the root GitHub Pages files intact:
+The member workflow routes now exist in `apps/web` while the root GitHub Pages files remain as rollback/reference material:
 
 - `/auth`
 - `/account`
@@ -34,11 +34,11 @@ This branch migrates the deferred member workflow routes into `apps/web` while l
 
 The Next implementation adds browser-safe helpers under `apps/web/lib/supabase/` and member workflow components under `apps/web/components/member-workflow/`. The helpers keep the existing static-site behavior close to `supabase.js`: Supabase Auth runs in the browser with the publishable key, user-owned profile and submission reads remain subject to RLS, uploads go through the private `member-gallery` bucket, and privileged verification/moderation still invokes existing Supabase Edge Functions.
 
-No Supabase migrations, Supabase Edge Functions, dashboard settings, Discord settings, DNS settings, Vercel settings, or root GitHub Pages auth/member/upload/moderation files are changed in this phase.
+No Supabase migrations, Supabase Edge Functions, dashboard settings, Discord settings, DNS settings, Vercel settings, or root GitHub Pages auth/member/upload/moderation files should be changed by ordinary docs/content work.
 
 ## 2. Non-Goals
 
-- Do not cut over `mochirii.com` DNS.
+- Do not change `mochirii.com` DNS or provider settings without explicit approval.
 - Do not remove root GitHub Pages auth/member files.
 - Do not manually deploy from local CLI.
 - Do not expose service-role, secret, Discord bot, or OAuth client secret values to the browser.
@@ -137,12 +137,12 @@ Only public publishable keys may be exposed to browser code. Service-role, secre
 
 ## 10. Supabase Redirect URL Checklist
 
-Before Phase 3 preview testing, manually confirm Supabase Auth URL Configuration allows:
+For authenticated testing, manually confirm Supabase Auth URL Configuration allows:
 
 - `http://localhost:3000/**`
+- `https://mochirii.com/**`
 - `https://mochirii.vercel.app/**`
 - Vercel preview URL pattern for the project/team.
-- Future `https://mochirii.com/**` only after DNS cutover is approved.
 
 Confirm these route targets are accepted:
 
@@ -151,7 +151,7 @@ Confirm these route targets are accepted:
 - `/gallery-submit`
 - `/leader-dashboard`
 
-Keep legacy root static callback URLs allowed until the static auth pages are retired:
+Keep legacy root static callback URLs allowed until rollback risk is retired:
 
 - Existing GitHub Pages/static account callback URL.
 - Existing production static account callback URL, if currently configured.
@@ -268,15 +268,15 @@ Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`,
 ## 20. Rollback Plan
 
 - Keep root static auth/member files untouched.
-- Keep DNS on the current approved surface until explicit cutover.
+- Keep DNS on the current approved Vercel/Next surface unless explicit rollback/provider approval exists.
 - Revert the Phase 3 PR if Vercel preview reveals auth/session regressions.
 - Leave Supabase Edge Functions and migrations unchanged unless a separate approved backend migration is needed.
 - Keep legacy redirect URLs allowed until rollback risk is gone.
 - If needed, temporarily remove the `.html` redirects for Phase 3 routes in a follow-up PR so the root static pages can keep serving those workflows while Next is repaired.
 
-## 21. DNS Cutover Prerequisites
+## 21. Post-Cutover Stabilization Prerequisites
 
-DNS cutover should wait until:
+The custom domain is already on Vercel/Next. Stabilization should continue until:
 
 - Public pages pass visual review on production Vercel.
 - Phase 3 auth/member workflows pass Vercel preview and production review.
@@ -285,9 +285,9 @@ DNS cutover should wait until:
 - Discord OAuth callback remains valid.
 - Storage upload/moderation smoke tests pass.
 - Rollback plan is accepted.
-- The user explicitly approves cutover.
+- The user explicitly approves retiring rollback artifacts.
 
-See `docs/dns-cutover-readiness-and-rollback.md` for the custom-domain cutover checklist, manual dashboard tasks, DNS inventory template, approval packet, and rollback plan. Do not cut over DNS from this document alone.
+See `docs/dns-cutover-readiness-and-rollback.md` for the post-cutover rollback and provider-change checklist. Do not change DNS or provider settings from this document alone.
 
 ## 22. Decision Points Requiring User Approval
 
@@ -298,7 +298,7 @@ See `docs/dns-cutover-readiness-and-rollback.md` for the custom-domain cutover c
 - Whether moderation roles should remain Discord-only or be mirrored into a trusted app table.
 - Whether to change file size/type policy.
 - Whether to add CAPTCHA, rate limits, or abuse controls beyond current Supabase/Discord checks.
-- Whether and when to cut over `mochirii.com` DNS.
+- Whether and when to retire GitHub Pages/root static rollback artifacts.
 
 ## Primary References
 

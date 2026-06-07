@@ -1,8 +1,8 @@
 # Mochirii Next.js App
 
-This app is the Vercel-ready Next.js surface for Mochirii. The existing root GitHub Pages static site remains intact, and DNS cutover is still deferred.
+This app is the live Vercel/Next.js production surface for Mochirii at `https://mochirii.com`. The existing root GitHub Pages static site remains intact as rollback/reference material.
 
-For the current production/preview split, Vercel dashboard checklist, and DNS cutover guardrails, see [`../../docs/deployment.md`](../../docs/deployment.md).
+For the current production, fallback, Vercel dashboard checklist, and rollback guardrails, see [`../../docs/deployment.md`](../../docs/deployment.md).
 
 ## Local Development
 
@@ -59,7 +59,7 @@ Do not commit `.vercel/`.
 
 ## Public Assets And Data
 
-Until DNS cutover, root `assets/` and `data/` are canonical. The Next app reads copied files from `public/assets/` and `public/data/`.
+While the root static rollback surface remains available, root `assets/` and `data/` are the editable content source. The Next app reads copied files from `public/assets/` and `public/data/`.
 
 From the repository root, mirror and verify the copies with:
 
@@ -147,8 +147,8 @@ vercel build --prod --cwd apps/web
 - Browser-safe Supabase helpers added under `lib/supabase/` for Auth session state, Discord OAuth, profile reads/updates, member upload submission, approved feed reads, and moderation Edge Function invocations.
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
-- Root GitHub Pages auth/member/upload/moderation files remain untouched.
-- Supabase migrations, Supabase Edge Functions, Vercel settings, Discord settings, dashboard settings, DNS, and production cutover remain unchanged.
+- Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
+- Supabase migrations, Supabase Edge Functions, Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged.
 
 What stays in Supabase:
 
@@ -163,9 +163,9 @@ Manual Supabase redirect URL checklist before authenticated preview testing:
 
 ```text
 http://localhost:3000/**
+https://mochirii.com/**
 https://mochirii.vercel.app/**
 Vercel preview URL pattern for the project/team
-future https://mochirii.com/** only after DNS cutover approval
 ```
 
 Route targets to verify:
@@ -201,7 +201,7 @@ cd ../..
 vercel build --prod --cwd apps/web
 ```
 
-Rollback plan: revert the Phase 3 PR if preview testing finds auth/session regressions. The root static auth/member files remain in place, and DNS cutover remains deferred.
+Rollback plan: keep the root static auth/member files in place while the post-cutover stabilization window remains open. Any DNS, provider, or GitHub Pages rollback requires explicit owner approval and same-window evidence.
 
 ## Accepted or Deferred Warnings
 
@@ -223,21 +223,33 @@ vercel pull --environment=preview --yes
 
 Report env names only as present or missing. Do not print values.
 
-## DNS Cutover
+## Live Domain And Fallback
 
-DNS cutover is deferred. Current Vercel production review URL is:
+The canonical production URL is:
+
+```text
+https://mochirii.com
+```
+
+`www` redirects to the apex:
+
+```text
+https://www.mochirii.com -> https://mochirii.com
+```
+
+The Vercel fallback/debug URL is:
 
 ```text
 https://mochirii.vercel.app
 ```
 
-Custom-domain cutover for `mochirii.com` requires explicit approval and a manual DNS/Vercel/Supabase checklist. See [`../../docs/dns-cutover-readiness-and-rollback.md`](../../docs/dns-cutover-readiness-and-rollback.md).
+Rollback/provider changes require explicit approval and a manual DNS/Vercel/Supabase checklist. See [`../../docs/dns-cutover-readiness-and-rollback.md`](../../docs/dns-cutover-readiness-and-rollback.md).
 
 ## Deferred
 
 - Server-side Supabase SSR/cookie behavior unless a route proves it needs server-side auth.
 - Backend/schema/RLS/Edge Function changes.
 - Vercel dashboard automation.
-- Production DNS and cutover.
+- Retiring GitHub Pages/root static rollback artifacts.
 
 See `docs/next-phase-3-auth-member-workflow.md` for the Phase 3 auth/member/gallery workflow migration plan.

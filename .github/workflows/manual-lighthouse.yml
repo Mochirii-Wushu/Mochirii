@@ -29,12 +29,12 @@ jobs:
             --output-path=reports/lighthouse/home \
             --chrome-flags="--headless --no-sandbox"
 
-          npx --yes lighthouse "https://mochirii.com/recruitment.html" \
+          npx --yes lighthouse "https://mochirii.com/recruitment" \
             --output=html --output=json \
             --output-path=reports/lighthouse/recruitment \
             --chrome-flags="--headless --no-sandbox"
 
-          npx --yes lighthouse "https://mochirii.com/gallery.html" \
+          npx --yes lighthouse "https://mochirii.com/gallery" \
             --output=html --output=json \
             --output-path=reports/lighthouse/gallery \
             --chrome-flags="--headless --no-sandbox"
