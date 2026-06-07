@@ -10,10 +10,11 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 
 ## Deployment Status
 
-- `https://mochirii.com` is the current production domain and is served from the root static GitHub Pages site.
-- `https://mochirii.vercel.app` is the Vercel-hosted Next.js app in `apps/web`.
-- DNS cutover to Vercel is deferred until the readiness and rollback checklist is approved.
-- See [`docs/deployment.md`](docs/deployment.md) for the authoritative deployment, Vercel dashboard, and public asset/data sync rules.
+- `https://mochirii.com` is the current production domain and is served by the Vercel-hosted Next.js app in `apps/web`.
+- `https://www.mochirii.com` redirects to `https://mochirii.com`.
+- `https://mochirii.vercel.app` remains a Vercel fallback/debug URL for the same app.
+- The root static GitHub Pages files and tracked `CNAME` remain rollback/reference material, not the current production surface.
+- See [`docs/deployment.md`](docs/deployment.md) for the authoritative deployment, Vercel dashboard, rollback, and public asset/data sync rules.
 
 ---
 
@@ -23,7 +24,7 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 - Keep expectations, culture, and coordination transparent
 - Allow non-technical contributors to update content safely via JSON
 - Avoid unnecessary frameworks, build steps, or tooling complexity
-- Remain deployable via GitHub Pages with zero backend dependencies
+- Keep the current Vercel/Next production app and root static rollback surface easy to validate
 
 ---
 
@@ -33,9 +34,11 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 - **CSS** — handcrafted styles in `styles.css`
 - **Vanilla JavaScript** — page-scoped renderers only
 - **JSON** — all page content and copy
-- **GitHub Pages** — static hosting
+- **Next.js / React** — production app under `apps/web`
+- **Vercel** — production hosting for `mochirii.com`
+- **GitHub Pages** — retained rollback/reference surface
 
-No frameworks. No bundlers. No transpilers.
+The root static site stays dependency-light. The production app builds from `apps/web`.
 
 ---
 
@@ -242,12 +245,12 @@ For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/road
 
 ## Development Notes
 
-- No build step required
-- Open files directly in browser or via static server
+- Root static files can still be opened directly in a browser or via static server for rollback/reference checks.
+- Production changes are validated through the Next app in `apps/web` and Vercel.
 - Use `git pull --rebase` (recommended) to keep history clean
-- GitHub Pages deploys automatically from `main`
-- Next/Vercel validation runs from `apps/web` for the migration app.
-- Keep root `assets/` and `data/` canonical until cutover; use `npm run sync:next-public` to mirror them into `apps/web/public/`.
+- Vercel deploys the production app from `main` with Root Directory `apps/web`.
+- GitHub Pages/root static files remain available as rollback/reference material until a later stabilization task retires them.
+- Keep root `assets/` and `data/` as the editable content source for now; use `npm run sync:next-public` to mirror them into `apps/web/public/`.
 - Optional Lighthouse audits can be run manually from GitHub Actions using **Manual Lighthouse audit**; they are not required PR gates.
 
 ---

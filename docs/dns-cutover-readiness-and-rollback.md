@@ -1,26 +1,30 @@
-# DNS Cutover Readiness and Rollback Plan
+# DNS Post-Cutover Stabilization and Rollback Plan
 
-## Same-Window Cutover Gate
+## Current Operating Status
 
-This document prepares for a future custom-domain cutover from the current GitHub Pages production site to the validated Vercel/Next.js production site. It is a checklist and rollback plan only.
+As of `2026-06-07`, `https://mochirii.com` is already serving the Vercel/Next.js app from `apps/web`. `https://www.mochirii.com` redirects to the apex domain. Root static GitHub Pages files and the tracked `CNAME` remain rollback/reference material, not the current production surface.
 
-Do not cut over `mochirii.com` DNS until the current same-window checks pass, Vercel Domains shows the exact required records for `mochirii/mochirii`, Cloudflare rollback records are captured, and an operator is ready to verify or roll back immediately.
+This document is now a post-cutover stabilization and rollback runbook. Older sections that mention a future DNS cutover or GitHub Pages as current production are historical pre-cutover evidence unless a section explicitly says it is current.
 
-The current production/preview split and Vercel dashboard checklist are tracked in [`deployment.md`](./deployment.md). Treat that file as the short deployment source of truth and this file as the detailed runbook.
+Do not change DNS, Cloudflare, Vercel custom domains, Supabase, Discord, GitHub Pages, GitHub repository settings, or live data from this document alone. Provider and dashboard mutations require explicit owner approval, same-window evidence capture, and a rollback operator.
+
+The current production/fallback split and Vercel dashboard checklist are tracked in [`deployment.md`](./deployment.md). Treat that file as the short deployment source of truth and this file as the detailed rollback/reference runbook.
 
 ## Current State
 
-- Root GitHub Pages static site files still exist and must remain available for rollback.
-- The Next.js app lives under `apps/web`.
-- Vercel app project to confirm before cutover: read-only CLI evidence points at `mochirii/mochirii` as the production-serving project.
-- Vercel Root Directory: `apps/web` on the production-serving `mochirii/mochirii` project.
-- Vercel production review URL: `https://mochirii.vercel.app`.
-- Current custom-domain production surface remains the GitHub Pages site until DNS is explicitly changed.
-- DNS cutover for `mochirii.com` remains deferred.
-- Current `main` includes required GitHub checks `validate` and `validate-next`; both must pass before cutover-sensitive changes merge.
-- The intended Vercel project/status context is `Vercel – mochirii`. The duplicate project/status context `Vercel – web` is a dashboard cleanup item and must not be used as production readiness evidence.
+- `https://mochirii.com` is the canonical production URL and serves the Vercel/Next.js app from `apps/web`.
+- `https://www.mochirii.com` redirects to `https://mochirii.com/`.
+- `https://mochirii.vercel.app` remains a fallback/debug hostname, not the primary production URL.
+- Observed public DNS for the live web records: apex `A 76.76.21.21`; `www` `CNAME c4b58a30d23b9df3.vercel-dns-017.com`.
+- Root GitHub Pages static site files and `CNAME` still exist and must remain available for rollback/reference until a later approved retirement task.
+- Current `main` includes required GitHub checks `validate` and `validate-next`; both must pass before production-sensitive changes merge.
+- The intended Vercel project/status context is `Vercel` for the `mochirii/mochirii` production project. Any duplicate `web` project/status context is a dashboard cleanup item and must not be used as production readiness evidence.
 - Supabase-first architecture is preserved: Supabase remains authoritative for Auth, Postgres/RLS, Storage, Edge Functions, Discord verification, gallery moderation, signed preview URLs, and audit records.
 - Vercel/Next owns routing, React UI, rendering, redirects, and browser-safe Supabase integration.
+
+## Historical Evidence Boundary
+
+Sections below this point include the original cutover-readiness packet, PR #181 snapshots, and pre-cutover provider observations. Keep them for rollback context and audit history, but re-verify every provider value before using it in an active incident or rollback window.
 
 ## Operator Workstation Prerequisites
 
@@ -86,12 +90,12 @@ This helper validates the private completed note's required sections, completion
 
 ## Non-Goals
 
-- Do not add, remove, or edit DNS records.
-- Do not add, remove, or edit Vercel custom domains.
-- Do not change Supabase dashboard settings.
-- Do not change Discord Developer Portal settings.
-- Do not change GitHub Pages settings.
-- Do not change Vercel dashboard settings.
+- Do not add, remove, or edit DNS records during a docs or stabilization pass.
+- Do not add, remove, or edit Vercel custom domains during a docs or stabilization pass.
+- Do not change Supabase dashboard settings during a docs or stabilization pass.
+- Do not change Discord Developer Portal settings during a docs or stabilization pass.
+- Do not change GitHub Pages settings during a docs or stabilization pass.
+- Do not change Vercel dashboard settings during a docs or stabilization pass.
 - Do not deploy manually from local CLI.
 - Do not delete root GitHub Pages files or legacy auth/member workflow files.
 - Do not optimize, replace, remove, or re-encode `assets/audio/mochiriiiiii.mp3`.
@@ -141,7 +145,7 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 - `/gallery-submit.html` -> `/gallery-submit`
 - `/leader-dashboard.html` -> `/leader-dashboard`
 
-## Production Verification Snapshot
+## Historical Production Verification Snapshot
 
 Latest PR #181 readiness verification protocol, refreshed `2026-06-06` after the repository organization hardening merge:
 
@@ -151,7 +155,7 @@ Latest PR #181 readiness verification protocol, refreshed `2026-06-06` after the
 - For the current GitHub merge state and status rollup, run `gh pr view 181 --json mergeStateStatus,statusCheckRollup,headRefOid`.
 - For the current Vercel PR preview deployment, run `npm run check:vercel-pr-preview`.
 - After each pushed readiness-only commit, wait for GitHub `validate` and `validate-next` to pass before treating the PR head as merge-ready.
-- Use `Vercel – mochirii` as the intended Vercel deployment signal. Ignore the known duplicate `Vercel – web` failure for PR readiness while separately cleaning up that dashboard connection before relying on Vercel commit status.
+- Use `Vercel - mochirii` as the intended Vercel deployment signal. Ignore the known duplicate `Vercel - web` failure for PR readiness while separately cleaning up that dashboard connection before relying on Vercel commit status.
 - Vercel Preview Comments may pass independently of deployment status; treat it as useful PR annotation evidence, not as production readiness by itself.
 - Supabase Preview may remain skipped.
 - Use the current workstation's Deno path or `DENO_BIN`; do not rely on older machine-specific paths from May snapshots.
@@ -172,12 +176,12 @@ Current `main` baseline retained for the cutover window:
 - Gallery full-image lightbox no longer shifts the page left, overlays the footer/header, restores scroll/focus, and keeps the image centered and viewport-contained.
 - Homepage Screenshot Spotlight randomization remains working: four thumbnails render, hard refresh changes the selected set/order, selection stays stable in-session, and thumbnails open matching full images.
 - Gallery sorting/random behavior remains working: newest starts `shot-73`, `shot-72`, `shot-71`; oldest starts `shot-01`, `shot-02`, `shot-03`; random changes after hard refresh and stays stable in-session.
-- Public routes, legacy redirects, and Phase 3 member workflow routes remain production-ready on `https://mochirii.vercel.app`.
+- Historical snapshot: public routes, legacy redirects, and Phase 3 member workflow routes were ready on `https://mochirii.vercel.app`, which is now a fallback/debug hostname.
 - Supabase Edge Function contract smoke passes, including fail-closed checks for `submit-discord-gallery-image` without the ingest secret.
 - Deno-backed Edge Function type validation is now part of `npm run check`.
 - `npm run check:vercel-pr-preview` is available as a read-only PR preview gate; it compares the current PR head against GitHub's Vercel status and Vercel's deployment list for the same commit.
 - No empty image `src` warnings were observed on `/`, `/gallery`, or `/spotlight`.
-- DNS cutover remains deferred.
+- Historical pre-cutover state: DNS cutover was deferred at the time of this snapshot.
 
 Warnings to keep in view:
 
@@ -201,7 +205,7 @@ Validation commands completed:
 
 - `npm run check` passed. Known warning only: `assets/audio/mochiriiiiii.mp3` is over the local asset-size warning threshold.
 - `git diff --check` passed.
-- `npm run check:production` passed against the current custom-domain GitHub Pages surface.
+- Historical snapshot: `npm run check:production` passed against the then-current custom-domain GitHub Pages surface.
 - `cd apps/web && npm run lint` passed after running `npm run clean` to remove generated `.vercel/output` from a previous local Vercel build.
 - `cd apps/web && npm run build` passed and prerendered all current App Router routes.
 - `CI=1 vercel build --prod --cwd apps/web` passed with `status: ok` and target `production`.
@@ -258,7 +262,7 @@ Read-only Vercel findings:
 - The successful local Vercel build still emitted the known Next.js `outputFileTracingRoot` / `turbopack.root` warning; this remains non-blocking while builds and production smoke checks pass.
 - `vercel certs ls` reports no certificates found under team `mochirii` while custom-domain DNS is not yet configured for Vercel.
 
-Vercel manual reconciliation now required before DNS cutover:
+Historical Vercel manual reconciliation required before the cutover:
 
 - Confirm in the Vercel dashboard that `mochirii/mochirii` is the intended project to own production custom domains.
 - Confirm the production-serving project has Root Directory `apps/web`, Production Branch `main`, Framework Next.js, Node.js `24.x`, and the required Production/Preview env names.
@@ -281,7 +285,7 @@ Read-only Supabase findings:
 - Supabase secret names are present for Discord integration and Supabase runtime access. Raw secret values must not be recorded in this repository, and secret/service-role material must stay in Edge Functions or other server-only runtimes.
 - Supabase changelog scan surfaced current breaking-change items around Data API exposure and self-hosted/database topics; no cutover setting was changed.
 
-Supabase manual confirmation still required before DNS cutover:
+Historical Supabase manual confirmation required before the cutover:
 
 - Auth -> URL Configuration Site URL and Redirect URLs must be checked in the dashboard against the final custom-domain plan.
 - Exact production redirect URLs should be present for the final production state; Vercel preview and localhost wildcards should stay available through the transition.
@@ -573,7 +577,7 @@ GitHub Pages direct-record reference set used for comparison:
 | Apex web origin | GitHub Pages behind Cloudflare likely | GitHub Pages API/CNAME; HTTP `x-github-request-id`, Fastly headers, and Cloudflare headers | INFERRED | Direct DNS answers are Cloudflare proxy IPs, not GitHub Pages IPs. |
 | GitHub Pages custom domain | `mochirii.com` | GitHub Pages API | CONFIRMED_GITHUB_API | API reports Pages `status: built`, `cname: mochirii.com`, source `main` `/`. |
 | Repository CNAME file | `CNAME` contains `mochirii.com` | tracked `CNAME` file | CONFIRMED_REPO | Keep root static files and CNAME available for rollback until stabilization. |
-| Repository homepage URL | `https://mochirii.vercel.app` | GitHub repo API | CONFIRMED_GITHUB_API | Repo metadata points to the Vercel production review URL. |
+| Repository homepage URL | `https://mochirii.vercel.app` | GitHub repo API | CONFIRMED_GITHUB_API | Historical repo metadata pointed to the Vercel review/fallback URL. Current production is `https://mochirii.com`. |
 | GitHub Pages A classification | no direct GitHub Pages A match; proxied / ambiguous | public DNS vs GitHub Pages reference A values | INFERRED | Current A records are Cloudflare IPs, so direct GitHub Pages A comparison is hidden by proxying. |
 | GitHub Pages AAAA classification | no direct GitHub Pages AAAA match; proxied / ambiguous | public DNS vs GitHub Pages reference AAAA values | INFERRED | Current AAAA records are Cloudflare IPs, so direct GitHub Pages AAAA comparison is hidden by proxying. |
 | `www` routing intent | `https://www.mochirii.com` redirects to `https://mochirii.com/` | `curl -I` | CONFIRMED_PUBLIC_DNS | Whether `www` should remain redirect-only or serve app traffic is a cutover decision. |
@@ -615,7 +619,7 @@ GitHub Pages direct-record reference set used for comparison:
 | URL | Status | Location | Server / headers | Source | Confidence | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `http://mochirii.com` | `301` | `https://mochirii.com/` | `server: cloudflare`, `cf-ray` | `curl -I` | CONFIRMED_PUBLIC_DNS | HTTP redirects to HTTPS apex. |
-| `https://mochirii.com` | `200` | n/a | `server: cloudflare`, `x-github-request-id`, Fastly cache headers | `curl -I` | CONFIRMED_PUBLIC_DNS | HTTPS apex serves current GitHub Pages site through Cloudflare. |
+| `https://mochirii.com` | `200` | n/a | `server: cloudflare`, `x-github-request-id`, Fastly cache headers | `curl -I` | CONFIRMED_PUBLIC_DNS | Historical snapshot: HTTPS apex served the GitHub Pages site through Cloudflare before Vercel cutover. |
 | `http://www.mochirii.com` | `301` | `https://www.mochirii.com/` | `server: cloudflare`, `cf-ray` | `curl -I` | CONFIRMED_PUBLIC_DNS | HTTP redirects to HTTPS `www`. |
 | `https://www.mochirii.com` | `301` | `https://mochirii.com/` | `server: cloudflare`, `x-github-request-id`, Fastly cache headers | `curl -I` | CONFIRMED_PUBLIC_DNS | `www` redirects to apex over HTTPS. |
 
@@ -729,14 +733,14 @@ Cloudflare remains the authoritative DNS provider. Vercel is only the future web
 | Multi-provider DNS | Off | Keep off. This cutover does not introduce another authoritative DNS provider. |
 | Email Security | Not configured | Do not configure during website cutover. ProtonMail email records must be preserved, and Cloudflare Email Security is out of scope. |
 
-Preserve ProtonMail MX, SPF/TXT, DKIM CNAME, verification TXT, and `_dmarc` records exactly. Website hosting changes should only touch the approved apex/`www` web records that Vercel requires during a future cutover window.
+Preserve ProtonMail MX, SPF/TXT, DKIM CNAME, verification TXT, and `_dmarc` records exactly. Website hosting changes should only touch approved apex/`www` web records during an owner-approved rollback or provider-change window.
 
 ### Cloudflare Active Rules Confirmation
 
 Source: user-provided Cloudflare dashboard review.
 Confidence: `CONFIRMED_CLOUDFLARE_DASHBOARD`.
 
-The reviewed Cloudflare rules pages show template/create screens or no visible active entries. DNS cutover remains deferred, and no Cloudflare rules should be created during cutover unless a specific redirect, cache, or origin issue is found. Prefer Vercel domain settings and app-level redirects first.
+Historical snapshot: the reviewed Cloudflare rules pages showed template/create screens or no visible active entries. Do not create Cloudflare rules during stabilization unless a specific redirect, cache, or origin issue is found and owner-approved. Prefer Vercel domain settings and app-level redirects first.
 
 | Cloudflare Area | Current visible state | Cutover guidance |
 | --- | --- | --- |
@@ -753,7 +757,7 @@ The reviewed Cloudflare rules pages show template/create screens or no visible a
 Source: user-provided Cloudflare Rules -> Settings -> Managed Transforms dashboard screenshot.
 Confidence: `CONFIRMED_CLOUDFLARE_DASHBOARD`.
 
-Managed Transforms apply zone-wide, so keep recommendations conservative before DNS cutover. Do not introduce broad request-header changes or a zone-wide security-header bundle during readiness work.
+Managed Transforms apply zone-wide, so keep recommendations conservative during any rollback or provider-change window. Do not introduce broad request-header changes or a zone-wide security-header bundle during stabilization work.
 
 | Managed Transform | Recommendation | Notes |
 | --- | --- | --- |
@@ -881,7 +885,7 @@ Use this helper before converting PR #181 out of draft or treating GitHub's comb
 npm run check:dns-cutover-pr-readiness
 ```
 
-It is read-only. It verifies the local checkout matches draft PR #181, the base/head branches are expected, the merge state is `CLEAN`, GitHub `validate` and `validate-next` pass, the intended `Vercel – mochirii` signal is successful when present, duplicate `Vercel – web` is ignored for PR readiness, Supabase Preview is either skipped or passing if present, and the matching Vercel preview deployment is `READY` when the Vercel preview check is not skipped. It does not create deployments, update aliases, edit Vercel domains, touch DNS, read environment values, or change provider settings.
+It is read-only. It verifies the local checkout matches draft PR #181, the base/head branches are expected, the merge state is `CLEAN`, GitHub `validate` and `validate-next` pass, the intended `Vercel - mochirii` signal is successful when present, duplicate `Vercel - web` is ignored for PR readiness, Supabase Preview is either skipped or passing if present, and the matching Vercel preview deployment is `READY` when the Vercel preview check is not skipped. It does not create deployments, update aliases, edit Vercel domains, touch DNS, read environment values, or change provider settings.
 
 For a focused Vercel deployment diagnostic, use:
 

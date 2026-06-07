@@ -1,17 +1,18 @@
 # Deployment Source of Truth
 
-This repository currently carries two deployable surfaces during the GitHub Pages to Vercel migration.
+This repository currently carries a live Vercel/Next production surface and a retained root static rollback/reference surface.
 
-## Current Production And Preview
+## Current Production
 
-- `https://mochirii.com` is the current production domain and is still served from the root static GitHub Pages site on `main`.
-- `https://mochirii.vercel.app` is the Vercel-hosted Next.js app under `apps/web`.
-- DNS cutover to Vercel is deferred until the DNS readiness and rollback plan is approved and executed.
-- Root `assets/` and `data/` remain canonical until cutover. The Next app uses copied files in `apps/web/public/assets/` and `apps/web/public/data/`.
+- `https://mochirii.com` is the canonical production domain and is served by the Vercel-hosted Next.js app under `apps/web`.
+- `https://www.mochirii.com` redirects to `https://mochirii.com`.
+- `https://mochirii.vercel.app` remains available as a Vercel fallback/debug URL for the same app.
+- Root static files, GitHub Pages, and the tracked `CNAME` file remain rollback/reference material until a later stabilization task explicitly retires them.
+- Root `assets/` and `data/` remain the editable content source for now. The Next app uses mirrored copies in `apps/web/public/assets/` and `apps/web/public/data/`.
 
 ## Vercel Dashboard Checklist
 
-Verify these settings in the `mochirii/mochirii` Vercel project before any production cutover:
+Verify these settings in the production-serving `mochirii/mochirii` Vercel project before deployment-sensitive work:
 
 - Root Directory: `apps/web`
 - Framework Preset: `Next.js`
@@ -19,6 +20,8 @@ Verify these settings in the `mochirii/mochirii` Vercel project before any produ
 - Build Command: Vercel default or `npm run build` from `apps/web`
 - Install Command: Vercel default or `npm ci` from `apps/web`
 - Output Directory: Vercel default for Next.js
+- Production domain: `mochirii.com`
+- `www` behavior: redirect to apex
 - Preview deployments: enabled for pull requests that need visual or auth review
 - Deployment protection: enabled for previews if member/auth workflow state should not be public
 - Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
@@ -48,9 +51,17 @@ cd ../..
 vercel build --prod --cwd apps/web
 ```
 
+Post-deploy production smoke:
+
+```sh
+npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
+```
+
+This verifies clean Vercel routes, legacy `.html` redirects, signed-out member route content, Vercel headers on the apex, and the `www` redirect.
+
 ## Public Copy Sync
 
-Until cutover, update canonical root files first:
+Until the retained root static rollback surface is retired, update canonical root files first:
 
 - Root assets: `assets/`
 - Root data: `data/`
@@ -62,11 +73,12 @@ npm run sync:next-public
 npm run check:next-public-sync
 ```
 
-The check is included in `npm run check` so drift is caught in CI.
+The sync check is included in `npm run check` so drift is caught in CI.
 
-## Cutover Guardrails
+## Rollback And Stabilization Guardrails
 
-- Do not point `mochirii.com` at Vercel until the DNS readiness and rollback plan is current.
-- Keep the root GitHub Pages site deployable until Vercel production is verified.
-- Keep legacy `.html` redirects in `apps/web/next.config.ts` so existing URLs continue to work after cutover.
-- After cutover, run production smoke checks against both `/path` and legacy `/path.html` route shapes.
+- Do not change DNS, Vercel domains, GitHub Pages settings, Cloudflare settings, Supabase settings, or Discord settings during ordinary docs/content/theme work.
+- Keep the root GitHub Pages files and tracked `CNAME` file available until a later stabilization task explicitly approves retirement.
+- Keep legacy `.html` redirects in `apps/web/next.config.ts` so existing URLs continue to work on Vercel.
+- Treat `mochirii.vercel.app` as a fallback/debug URL, not the canonical public URL.
+- For rollback or provider-side changes, follow `docs/dns-cutover-readiness-and-rollback.md` and capture same-window evidence before mutating dashboards.
