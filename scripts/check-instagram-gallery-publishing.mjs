@@ -7,7 +7,7 @@ const files = {
   packageJson: "package.json",
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
-  migration: "supabase/migrations/20260607094500_add_instagram_gallery_publishing.sql",
+  migration: "supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   moderation: "supabase/functions/moderate-gallery-submission/index.ts",
   listQueue: "supabase/functions/list-instagram-publish-queue/index.ts",
