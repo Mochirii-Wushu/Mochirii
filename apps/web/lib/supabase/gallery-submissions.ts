@@ -1,5 +1,11 @@
 import { invokeEdgeFunction, requireBrowserSupabaseClient } from "./client";
-import { ACCEPTED_IMAGE_TYPES, MAX_UPLOAD_BYTES, MEMBER_GALLERY_BUCKET, SUBMISSION_FIELDS } from "./config";
+import {
+  ACCEPTED_IMAGE_TYPES,
+  INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION,
+  MAX_UPLOAD_BYTES,
+  MEMBER_GALLERY_BUCKET,
+  SUBMISSION_FIELDS,
+} from "./config";
 import { requireAuth } from "./auth";
 import { requireActiveMember } from "./profile";
 import {
@@ -54,16 +60,16 @@ export function validateGalleryFile(file: File | null | undefined) {
 }
 
 export function cleanSubmissionMetadata(metadata: GallerySubmissionMetadata = {}) {
-  const clean: GallerySubmissionMetadata = {};
+  const clean: Record<string, string> = {};
 
   Object.entries(SUBMISSION_FIELDS).forEach(([key, max]) => {
     const value = String(metadata[key as keyof GallerySubmissionMetadata] ?? "").trim();
     if (!value) return;
     if (value.length > max) throw new Error(`${fieldLabel(key)} must be ${max} characters or fewer.`);
-    clean[key as keyof GallerySubmissionMetadata] = value;
+    clean[key] = value;
   });
 
-  return clean;
+  return clean as Pick<GallerySubmissionMetadata, keyof typeof SUBMISSION_FIELDS>;
 }
 
 export async function uploadMemberGalleryImage(file: File | null | undefined, metadata: GallerySubmissionMetadata = {}) {
@@ -96,6 +102,10 @@ export async function uploadMemberGalleryImage(file: File | null | undefined, me
       mime_type: validFile.type,
       size_bytes: validFile.size,
       ...cleanMetadata,
+      instagram_opt_in: metadata.instagramOptIn === true,
+      instagram_opt_in_at: metadata.instagramOptIn === true ? new Date().toISOString() : null,
+      instagram_opt_in_source: metadata.instagramOptIn === true ? "website_upload" : null,
+      instagram_opt_in_copy_version: metadata.instagramOptIn === true ? INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION : null,
     };
 
     const { data: submission, error: insertError } = await client
@@ -129,7 +139,7 @@ export async function listMyGallerySubmissions() {
 
     const { data, error, status, statusText } = await client
       .from("gallery_submissions")
-      .select("id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_at,created_at,updated_at")
+      .select("id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_at,created_at,updated_at,submission_source,instagram_opt_in,instagram_opt_in_at,instagram_opt_in_source,instagram_opt_in_copy_version")
       .eq("user_id", auth.data.user.id)
       .order("created_at", { ascending: false });
 

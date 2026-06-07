@@ -1,5 +1,11 @@
 import { invokeEdgeFunction } from "./client";
-import { failedResult, type GalleryReviewQueue, type ModerationStatus } from "./types";
+import {
+  failedResult,
+  type GalleryReviewQueue,
+  type InstagramPublishQueue,
+  type InstagramPublishJob,
+  type ModerationStatus,
+} from "./types";
 
 export async function checkLeaderGalleryModerationAccess() {
   return invokeEdgeFunction<{ hasAccess?: boolean; moderatorId?: string }>("list-gallery-review-queue", {
@@ -27,4 +33,35 @@ export async function moderateGallerySubmission(submissionId: string, action: st
     action: cleanAction,
     reason: String(reason || "").trim().slice(0, 500),
   });
+}
+
+export async function listInstagramPublishQueue(options: { status?: string } = {}) {
+  const status = String(options.status || "queued").trim().toLowerCase() || "queued";
+  return invokeEdgeFunction<InstagramPublishQueue>("list-instagram-publish-queue", { status });
+}
+
+export async function publishInstagramGallerySubmission({
+  jobId,
+  caption,
+  altText,
+  confirmPublish,
+}: {
+  jobId: string;
+  caption: string;
+  altText?: string;
+  confirmPublish: boolean;
+}) {
+  const cleanJobId = String(jobId || "").trim();
+  if (!cleanJobId) return failedResult("Choose an Instagram publishing job before publishing.");
+  if (!confirmPublish) return failedResult("Confirm Instagram publishing before posting.");
+
+  return invokeEdgeFunction<{ job?: InstagramPublishJob; instagramMediaId?: string; instagramPermalink?: string; publishedAt?: string }>(
+    "publish-instagram-gallery-submission",
+    {
+      job_id: cleanJobId,
+      caption: String(caption || "").trim().slice(0, 2200),
+      alt_text: String(altText || "").trim().slice(0, 1000),
+      confirmPublish,
+    },
+  );
 }

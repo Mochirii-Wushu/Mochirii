@@ -78,7 +78,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 NEXT_PUBLIC_SITE_URL
 ```
 
-Do not print or commit secret values. Do not add service-role keys, Discord bot tokens, OAuth client secrets, or other privileged credentials to browser code. Privileged verification, moderation, signed preview URLs, and audit behavior stay inside existing Supabase Edge Functions.
+Do not print or commit secret values. Do not add service-role keys, Discord bot tokens, Instagram access tokens, OAuth client secrets, or other privileged credentials to browser code. Privileged verification, moderation, Instagram publishing, signed preview URLs, and audit behavior stay inside Supabase Edge Functions.
 
 ## Migrated Routes
 
@@ -144,16 +144,24 @@ vercel build --prod --cwd apps/web
 ## Migrated in Phase 3
 
 - Deferred member workflow routes migrated into App Router pages: `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
-- Browser-safe Supabase helpers added under `lib/supabase/` for Auth session state, Discord OAuth, profile reads/updates, member upload submission, approved feed reads, and moderation Edge Function invocations.
+- Browser-safe Supabase helpers added under `lib/supabase/` for Auth session state, Discord OAuth, profile reads/updates, member upload submission, approved feed reads, moderation Edge Function invocations, and the moderator-controlled Instagram publishing queue.
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
 - Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
-- Supabase migrations, Supabase Edge Functions, Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged.
+- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram publishing branch adds Supabase migration and Edge Function code that must be deployed separately after owner approval.
 
 What stays in Supabase:
 
 - Identity, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation authority, signed preview URLs, and audit records.
-- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, and `moderate-gallery-submission`.
+- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission`.
+
+## Instagram Gallery Publishing
+
+Website uploads include an optional Instagram opt-in checkbox. Discord/Reaper submissions should send the matching `instagramOptIn` payload from the optional `share_to_instagram` command parameter.
+
+Approval for the public Gallery never posts to Instagram automatically. If an approved submission has explicit opt-in consent, Supabase creates an Instagram publishing job. The Leader Dashboard shows that separate Instagram Queue, allows moderator caption and alt-text review, and requires a final browser confirmation before calling the publish Edge Function.
+
+Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase secrets only. They do not belong in Vercel env vars or any `NEXT_PUBLIC_*` value.
 
 What Next/Vercel handles:
 

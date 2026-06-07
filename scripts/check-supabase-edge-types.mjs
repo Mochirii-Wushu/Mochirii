@@ -11,6 +11,8 @@ const functions = [
   "moderate-gallery-submission",
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
+  "list-instagram-publish-queue",
+  "publish-instagram-gallery-submission",
 ];
 
 function denoBinary() {

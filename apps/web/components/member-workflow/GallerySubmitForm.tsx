@@ -14,6 +14,8 @@ function SubmissionStatus({ status }: { status?: string | null }) {
 }
 
 function SubmissionItem({ item }: { item: GallerySubmission }) {
+  const instagramOptIn = item.instagram_opt_in === true;
+
   return (
     <article className="submission-item">
       <div className="submission-item__head">
@@ -24,6 +26,7 @@ function SubmissionItem({ item }: { item: GallerySubmission }) {
       <div className="submission-meta">
         <span>{formatDateShort(item.created_at, "Unknown date")}</span>
         {item.category ? <span>{item.category}</span> : null}
+        <span>{instagramOptIn ? "Instagram opt-in" : "Site Gallery only"}</span>
       </div>
     </article>
   );
@@ -38,6 +41,7 @@ export function GallerySubmitForm() {
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [instagramOptIn, setInstagramOptIn] = useState(false);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [submissionsError, setSubmissionsError] = useState("");
@@ -102,7 +106,7 @@ export function GallerySubmitForm() {
     setError("");
     setStatus("Submitting image for moderation.");
 
-    const result = await uploadMemberGalleryImage(file, { title, caption, category });
+    const result = await uploadMemberGalleryImage(file, { title, caption, category, instagramOptIn });
     if (!result.ok) {
       setError(result.message || "Upload failed.");
       setStatus("");
@@ -114,6 +118,7 @@ export function GallerySubmitForm() {
     setCaption("");
     setCategory("");
     setFile(null);
+    setInstagramOptIn(false);
     await checkAccess();
     await loadSubmissions();
     setStatus("Image submitted for moderation. It will not appear in the public Gallery until Moderator approval.");
@@ -210,6 +215,18 @@ export function GallerySubmitForm() {
                   <option value="scenery">Scenery</option>
                   <option value="companions">Companions</option>
                 </select>
+              </label>
+
+              <label className="form-check">
+                <input
+                  id="instagramOptIn"
+                  name="instagramOptIn"
+                  type="checkbox"
+                  checked={instagramOptIn}
+                  disabled={busy}
+                  onChange={(event) => setInstagramOptIn(event.target.checked)}
+                />
+                <span>Allow Mōchirīī to share this image on our official Instagram if approved.</span>
               </label>
 
               <div className="auth-actions">

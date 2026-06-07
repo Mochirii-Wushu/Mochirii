@@ -22,18 +22,18 @@ The 2026-05-14 changelog scan did not show a G13 blocker for member Gallery cost
 
 ## What Can Drive Usage
 
-Mochirii remains a static GitHub Pages site. Static page views, static Gallery images, CSS, JavaScript, and audio assets are served by the site host, not Supabase.
+Mochirii's live public site is served by the Vercel/Next.js app in `apps/web`; root static files remain rollback/reference material. Static page views, public static assets, CSS, JavaScript, and audio files are served by the site host, not Supabase.
 
 Supabase usage comes from the member workflows:
 
 - Auth: Discord OAuth sign-ins and active member sessions.
 - Database: `member_profiles`, `gallery_submissions`, `gallery_moderation_events`, `discord_resources`, and `discord_sync_log`.
 - Storage: private `member-gallery` image objects for pending, approved, rejected, and archived submissions.
-- Edge Functions: `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, and `list-approved-gallery-submissions`.
+- Edge Functions: `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-approved-gallery-submissions`, `submit-discord-gallery-image`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission`.
 - Egress: Auth/API responses, Edge Function responses, and Storage signed URL image delivery.
 - Logs: function logs, moderation troubleshooting, and dashboard observability.
 
-Expected normal use is small, human-paced, and tied to guild activity. Runaway use usually looks like sudden public approved-feed traffic, repeated verification attempts, automated upload attempts, unexpected Storage growth, or repeated function errors.
+Expected normal use is small, human-paced, and tied to guild activity. Runaway use usually looks like sudden public approved-feed traffic, repeated verification attempts, automated upload attempts, Instagram queue retries, unexpected Storage growth, or repeated function errors.
 
 ## Current Member Gallery Policy
 
@@ -99,6 +99,7 @@ Watch:
 - Storage grows faster than known member upload activity.
 - Many files sit in pending or rejected states for more than a review cycle.
 - `list-approved-gallery-submissions` invocations jump after public sharing.
+- `publish-instagram-gallery-submission` retries repeat after a Meta or credential failure.
 - `verify-discord-member` calls spike without a matching guild event.
 - Function `429`, `5xx`, or signed URL errors repeat.
 - Egress rises without a matching public traffic explanation.

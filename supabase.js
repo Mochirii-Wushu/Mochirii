@@ -11,6 +11,7 @@
   const DISCORD_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
   const DISCORD_REQUIRED_ROLE_NAMES = ["Mōchirīī - WWM", "✅Verified"];
   const MEMBER_GALLERY_BUCKET = "member-gallery";
+  const INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION = "2026-06-website-upload-v1";
   const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
   const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
   const ACCEPTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -519,6 +520,12 @@
       clean[key] = value;
     });
 
+    const instagramOptIn = metadata.instagramOptIn === true || metadata.instagramOptIn === "true" || metadata.share_to_instagram === true;
+    clean.instagram_opt_in = instagramOptIn;
+    clean.instagram_opt_in_at = instagramOptIn ? new Date().toISOString() : null;
+    clean.instagram_opt_in_source = instagramOptIn ? "website_upload" : null;
+    clean.instagram_opt_in_copy_version = instagramOptIn ? INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION : null;
+
     return clean;
   }
 
@@ -659,6 +666,22 @@
       submission_id: String(submissionId || "").trim(),
       action: cleanAction,
       reason: String(reason || "").trim(),
+    });
+  }
+
+  async function listInstagramPublishQueue(options = {}) {
+    const status = typeof options === "string" ? options : options.status;
+    return invokeEdgeFunction("list-instagram-publish-queue", {
+      status: String(status || "queued").trim().toLowerCase() || "queued",
+    });
+  }
+
+  async function publishInstagramGallerySubmission(options = {}) {
+    return invokeEdgeFunction("publish-instagram-gallery-submission", {
+      job_id: String(options.jobId || options.job_id || "").trim(),
+      caption: String(options.caption || "").trim(),
+      alt_text: String(options.altText || options.alt_text || "").trim(),
+      confirmPublish: options.confirmPublish === true,
     });
   }
 
@@ -877,7 +900,7 @@
 
       const { data, error, status, statusText } = await instance
         .from("gallery_submissions")
-        .select("id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_at,created_at,updated_at")
+        .select("id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_at,created_at,updated_at,submission_source,instagram_opt_in,instagram_opt_in_at,instagram_opt_in_source,instagram_opt_in_copy_version")
         .eq("user_id", auth.data.user.id)
         .order("created_at", { ascending: false });
 
@@ -918,6 +941,8 @@
     checkLeaderGalleryModerationAccess,
     listGalleryReviewQueue,
     moderateGallerySubmission,
+    listInstagramPublishQueue,
+    publishInstagramGallerySubmission,
     listApprovedGallerySubmissions,
     request,
     select,

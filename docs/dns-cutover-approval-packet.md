@@ -1,6 +1,6 @@
 # DNS Cutover Approval Packet Template
 
-This template defines the final human approval packet for the future `mochirii.com` cutover from the current GitHub Pages custom-domain surface to the Vercel/Next.js production site.
+This historical template defined the final human approval packet for the `mochirii.com` cutover from the GitHub Pages custom-domain surface to the Vercel/Next.js production site. As of 2026-06-07, `mochirii.com` is already serving the Vercel/Next.js app; keep this template only as rollback/reference material unless a future DNS migration explicitly reactivates it.
 
 Do not treat this template as approval. A completed packet must be reviewed during an approved window before any dashboard or DNS changes happen.
 

@@ -20,6 +20,19 @@ const protectedFunctions = [
       action: "approved",
     },
   },
+  {
+    name: "list-instagram-publish-queue",
+    body: { status: "queued" },
+  },
+  {
+    name: "publish-instagram-gallery-submission",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      caption: "Smoke test only.",
+      alt_text: "Smoke test placeholder.",
+      confirmPublish: true,
+    },
+  },
 ];
 
 const secretProtectedFunctions = [
@@ -34,6 +47,7 @@ const secretProtectedFunctions = [
       attachmentUrl: "https://cdn.discordapp.com/attachments/1078630751077142608/1078630751077142608/example.png",
       mimeType: "image/png",
       sizeBytes: 1,
+      instagramOptIn: false,
     },
   },
 ];

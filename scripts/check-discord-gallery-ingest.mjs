@@ -100,6 +100,10 @@ assertIncludes("import map", importMap, '"@supabase/supabase-js": "npm:@supabase
   "discord_message_id: messageId",
   "discord_attachment_id: attachmentId",
   "discord_user_id: discordUserId",
+  "instagramOptIn",
+  "INSTAGRAM_OPT_IN_COPY_VERSION",
+  "instagram_opt_in: instagramOptIn",
+  'instagram_opt_in_source: instagramOptIn ? "discord_slash_command" : null',
 ].forEach((snippet) => assertIncludes("submit-discord-gallery-image", functionSource, snippet));
 
 assertMatches(
@@ -173,8 +177,10 @@ assertNotMatches(
 );
 
 [
-  "DISCORD_GALLERY_CHANNEL_ID=<set after creating gallery-submissions>",
+  "DISCORD_GALLERY_CHANNEL_ID=1508077313965817856",
   "DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>",
+  "share_to_instagram",
+  "instagramOptIn",
   "supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local",
   "supabase functions deploy submit-discord-gallery-image",
   "browser users cannot set Discord source metadata.",
@@ -194,7 +200,7 @@ assertNotMatches(
 assertIncludes(
   "leader dashboard html",
   leaderDashboardHtml,
-  "./leader-dashboard.js?v=2026-05-discord-gallery-ingest",
+  "./leader-dashboard.js?v=2026-06-instagram-gallery",
 );
 
 if (failures.length) {

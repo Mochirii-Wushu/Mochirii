@@ -10,6 +10,7 @@ export const MEMBER_GALLERY_BUCKET = "member-gallery";
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 export const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+export const INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION = "2026-06-website-upload-v1";
 
 export const SAFE_PROFILE_FIELDS = {
   display_name: { max: 40, min: 2, required: true },

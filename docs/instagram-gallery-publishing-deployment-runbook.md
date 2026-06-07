@@ -1,0 +1,296 @@
+# Instagram Gallery Publishing Deployment Runbook
+
+This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images.
+
+Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
+
+Do not paste secrets, access tokens, signed Storage URLs, private payloads, or dashboard screenshots with sensitive values into GitHub, Discord, public docs, or reports. No real Instagram post may be created without explicit action-time owner approval.
+
+## Public Interface
+
+Website uploads add an optional Instagram consent checkbox:
+
+```text
+Allow Mōchirīī to share this image on our official Instagram if approved.
+```
+
+Reaper's Gallery command must match this interface:
+
+```text
+/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>
+```
+
+`share_to_instagram` is optional, defaults to `false`, and maps to the Supabase ingest payload field:
+
+```json
+{
+  "instagramOptIn": false
+}
+```
+
+`subtitle` continues to map to the website Gallery `caption` field. Approval for the public website Gallery does not publish to Instagram; it only creates an Instagram Queue item when the member opted in.
+
+## Preconditions
+
+Complete these checks before any production mutation:
+
+1. PR #198 is approved for deployment and merged to `main`.
+2. GitHub checks are green: `validate`, `validate-next`, CodeQL, Vercel, and Supabase Preview.
+3. Vercel production for `mochirii/mochirii` is Ready after the merge.
+4. Supabase project is confirmed as `deyvmtncimmcinldjyqe`.
+5. The official Instagram account is a Professional account controlled by Mōchirīī.
+6. Reaper's code is ready outside this repository, but not registered live until the owner approves that step.
+7. The Discord submission channel remains `1508077313965817856`.
+
+## Deployment Sequence
+
+### 1. Capture Baseline Evidence
+
+Run read-only checks:
+
+```sh
+git status --short --branch
+gh pr view 198 --json number,state,isDraft,mergeStateStatus,headRefName,baseRefName,url,statusCheckRollup
+gh pr checks 198
+supabase migration list --project-ref deyvmtncimmcinldjyqe
+supabase functions list --project-ref deyvmtncimmcinldjyqe
+supabase secrets list --project-ref deyvmtncimmcinldjyqe
+```
+
+Record only secret names and presence. Do not record secret values.
+
+### 2. Merge PR #198
+
+After owner approval for the deployment window, mark PR #198 ready if it is still draft, confirm checks are current, then merge through GitHub.
+
+After merge, wait for the Vercel production deployment from `main` to be Ready and verify:
+
+```sh
+curl -I -L https://mochirii.com/
+curl -I -L https://www.mochirii.com/
+```
+
+### 3. Apply Supabase Database Migration
+
+Apply the migration that adds Instagram consent fields, publish jobs, and publish events:
+
+```sh
+supabase db push --project-ref deyvmtncimmcinldjyqe
+```
+
+Confirm tables and columns exist without exposing row data:
+
+```sh
+supabase db diff --project-ref deyvmtncimmcinldjyqe
+```
+
+If the migration fails, stop. Do not manually edit rows or constraints during the deployment window.
+
+### 4. Deploy Edge Functions
+
+Deploy the new queue and publishing functions plus the updated Gallery workflow functions:
+
+```sh
+supabase functions deploy submit-discord-gallery-image --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy list-gallery-review-queue --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy moderate-gallery-submission --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy list-instagram-publish-queue --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy publish-instagram-gallery-submission --project-ref deyvmtncimmcinldjyqe
+```
+
+Verify deployed function names:
+
+```sh
+supabase functions list --project-ref deyvmtncimmcinldjyqe
+```
+
+### 5. Set Supabase Secrets
+
+Set secrets only inside Supabase. Do not put Instagram credentials in Vercel, browser code, GitHub variables, docs, PR comments, or logs.
+
+Required production secret names:
+
+```text
+INSTAGRAM_ACCOUNT_ID
+INSTAGRAM_ACCESS_TOKEN
+INSTAGRAM_API_VERSION
+DISCORD_GALLERY_CHANNEL_ID
+DISCORD_GALLERY_INGEST_SECRET
+```
+
+Optional test-only secret name:
+
+```text
+INSTAGRAM_API_BASE_URL
+```
+
+Use `INSTAGRAM_API_BASE_URL` only for a Meta-compatible mock during tests. Production should use Meta's real API base.
+
+After setting secrets, confirm only names are present:
+
+```sh
+supabase secrets list --project-ref deyvmtncimmcinldjyqe
+```
+
+### 6. Update Reaper Slash Command
+
+Register Reaper's command with the new optional boolean:
+
+```text
+share_to_instagram
+```
+
+Description:
+
+```text
+Allow Mōchirīī to share this image on our official Instagram if approved.
+```
+
+Reaper must:
+
+- reject submissions outside channel `1508077313965817856`
+- default `share_to_instagram` to `false`
+- send `instagramOptIn: true` only when the user explicitly selects true
+- preserve Discord message/attachment idempotency
+- show the member whether Instagram sharing was enabled for that submission
+
+## Dry-Run Payloads
+
+Use a dry-run or staging-safe test harness first. Do not call Meta's live publish endpoint during this phase.
+
+Default false:
+
+```json
+{
+  "guildId": "1078630751077142608",
+  "channelId": "1508077313965817856",
+  "messageId": "DRY_RUN_MESSAGE_FALSE",
+  "attachmentId": "DRY_RUN_ATTACHMENT_FALSE",
+  "userId": "DRY_RUN_USER",
+  "username": "dry-run-user",
+  "attachmentUrl": "https://example.invalid/dry-run.jpg",
+  "mimeType": "image/jpeg",
+  "size": 12345,
+  "filename": "dry-run.jpg",
+  "title": "Dry run upload",
+  "caption": "Consent omitted.",
+  "instagramOptIn": false
+}
+```
+
+Explicit true:
+
+```json
+{
+  "guildId": "1078630751077142608",
+  "channelId": "1508077313965817856",
+  "messageId": "DRY_RUN_MESSAGE_TRUE",
+  "attachmentId": "DRY_RUN_ATTACHMENT_TRUE",
+  "userId": "DRY_RUN_USER",
+  "username": "dry-run-user",
+  "attachmentUrl": "https://example.invalid/dry-run.jpg",
+  "mimeType": "image/jpeg",
+  "size": 12345,
+  "filename": "dry-run.jpg",
+  "title": "Dry run upload",
+  "caption": "Consent enabled.",
+  "instagramOptIn": true
+}
+```
+
+wrong channel fail-closed:
+
+```json
+{
+  "guildId": "1078630751077142608",
+  "channelId": "000000000000000000",
+  "messageId": "DRY_RUN_WRONG_CHANNEL",
+  "attachmentId": "DRY_RUN_WRONG_CHANNEL_ATTACHMENT",
+  "userId": "DRY_RUN_USER",
+  "username": "dry-run-user",
+  "attachmentUrl": "https://example.invalid/dry-run.jpg",
+  "mimeType": "image/jpeg",
+  "size": 12345,
+  "filename": "dry-run.jpg",
+  "title": "Wrong channel dry run",
+  "caption": "This must be rejected.",
+  "instagramOptIn": true
+}
+```
+
+## Verification Checklist
+
+Run repository checks after merge and before provider deployment where possible:
+
+```sh
+npm run check
+git diff --check
+cd apps/web && npm run lint && npm run build
+```
+
+Run feature checks:
+
+- missing Instagram secrets fail closed
+- invalid moderator JWT fails
+- non-moderator request fails
+- non-opted-in approval creates no Instagram job
+- opted-in JPEG approval creates a queued job
+- opted-in PNG/WebP approval creates an ineligible job
+- duplicate Discord message/attachment does not change stored consent
+- Meta API failure records a failed job/event without duplicate publishing
+- Leader Dashboard requires final confirmation before publishing
+
+Run browser checks:
+
+- website upload checkbox is visible, optional, and unselected by default
+- Leader Dashboard shows the Instagram Queue to moderators only
+- public Gallery behavior is unchanged
+- signed-out users cannot access protected member or moderation surfaces
+
+## Live Test Post
+
+Perform one live Instagram test post only after explicit owner approval in the deployment window.
+
+Before publishing, confirm:
+
+- the member image is approved for public website Gallery display
+- the submission has `instagram_opt_in = true`
+- the job is `queued`
+- image MIME type is `image/jpeg`
+- caption and alt text were reviewed by a moderator
+- the official Instagram account is selected
+
+After publishing, record:
+
+- job ID
+- submission ID
+- published timestamp
+- Instagram permalink
+- moderator who published
+- visible result on Instagram
+
+Do not include access tokens, signed URLs, or private Storage paths in the record.
+
+## Rollback And Stop Conditions
+
+Stop the deployment and do not continue if:
+
+- GitHub checks fail after merge
+- Vercel production is not Ready
+- Supabase migration fails
+- any Edge Function deploy fails
+- required secrets are missing
+- non-moderator access succeeds
+- Reaper sends `instagramOptIn: true` without explicit user selection
+- the queue can publish without final confirmation
+- Meta returns unexpected authorization or account ownership errors
+
+Rollback options:
+
+- Disable Reaper's `share_to_instagram` option or stop sending `instagramOptIn: true`.
+- Leave existing Instagram jobs in place; do not delete queue/event rows during incident response.
+- Rotate Instagram access token if a token exposure is suspected.
+- Revert the website UI in a scoped follow-up PR if the dashboard blocks normal moderation.
+- Restore the previous Supabase function versions only through an approved admin task.
+
+If an accidental live post occurs, remove it from Instagram manually in the official account, preserve the Supabase job/event audit trail, rotate credentials if needed, and write a private incident note without secrets.
