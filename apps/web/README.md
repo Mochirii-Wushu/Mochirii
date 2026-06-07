@@ -148,7 +148,7 @@ vercel build --prod --cwd apps/web
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
 - Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
-- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram publishing branch adds Supabase migration and Edge Function code that must be deployed separately after owner approval.
+- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram publishing migration and Supabase Edge Functions are deployed in production; Reaper command registration, Instagram production secrets, and any real Instagram post remain external owner-approved steps.
 
 What stays in Supabase:
 

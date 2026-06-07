@@ -1,5 +1,7 @@
 # Live Site Verification - 2026-06-07
 
+Later same-day implementation status is tracked in [`six-step-implementation-report-2026-06-07.md`](./six-step-implementation-report-2026-06-07.md).
+
 ## Summary
 
 `https://mochirii.com` is live on the Vercel/Next.js app from `apps/web`. `https://www.mochirii.com` redirects to the apex domain. Root static GitHub Pages files and the tracked `CNAME` remain rollback/reference material only.
@@ -78,6 +80,6 @@ In-app browser viewport smoke passed for `35` route/viewport combinations:
 ## Remaining Follow-Ups
 
 - Keep tracking the open Dependabot `postcss` alert as a separate dependency task.
-- Confirm any duplicate Vercel `web` project/status posting is cleaned up in the dashboard before using duplicate Vercel contexts as release evidence.
+- Duplicate Vercel `web` project/status noise was later verified as cleaned up; the canonical project is `mochirii/mochirii`.
 - Decide later, after stabilization, whether to retire GitHub Pages/root static rollback artifacts.
 - Reconfirm Supabase redirect allowlist and Discord OAuth callback settings in their dashboards before any future auth/provider mutation.
