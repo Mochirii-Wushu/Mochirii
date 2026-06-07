@@ -15,6 +15,7 @@ const files = {
   envExample: "supabase/functions/.env.example",
   supabaseReadme: "supabase/README.md",
   moderationRunbook: "docs/member-gallery-moderation-runbook.md",
+  deploymentRunbook: "docs/instagram-gallery-publishing-deployment-runbook.md",
   nextSubmit: "apps/web/components/member-workflow/GallerySubmitForm.tsx",
   nextDashboard: "apps/web/components/member-workflow/LeaderDashboard.tsx",
   nextHelpers: "apps/web/lib/supabase/moderation.ts",
@@ -76,6 +77,7 @@ const publish = read(files.publish);
 const envExample = read(files.envExample);
 const supabaseReadme = read(files.supabaseReadme);
 const moderationRunbook = read(files.moderationRunbook);
+const deploymentRunbook = read(files.deploymentRunbook);
 const nextSubmit = read(files.nextSubmit);
 const nextDashboard = read(files.nextDashboard);
 const nextHelpers = read(files.nextHelpers);
@@ -197,6 +199,21 @@ assertNotMatches(
   "signed preview URLs",
   "supabase secrets set",
 ].forEach((snippet) => assertIncludes("moderation runbook", moderationRunbook, snippet));
+
+[
+  "Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>",
+  "/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>",
+  "No real Instagram post may be created without explicit action-time owner approval.",
+  "DISCORD_GALLERY_CHANNEL_ID",
+  "INSTAGRAM_ACCOUNT_ID",
+  "INSTAGRAM_ACCESS_TOKEN",
+  "supabase functions deploy list-instagram-publish-queue",
+  "supabase functions deploy publish-instagram-gallery-submission",
+  "\"instagramOptIn\": true",
+  "wrong channel fail-closed",
+  "duplicate Discord message/attachment does not change stored consent",
+  "Rollback options",
+].forEach((snippet) => assertIncludes("Instagram deployment runbook", deploymentRunbook, snippet));
 
 [
   "instagramOptIn",

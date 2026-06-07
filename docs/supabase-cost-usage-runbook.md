@@ -22,7 +22,7 @@ The 2026-05-14 changelog scan did not show a G13 blocker for member Gallery cost
 
 ## What Can Drive Usage
 
-Mochirii remains a static GitHub Pages site. Static page views, static Gallery images, CSS, JavaScript, and audio assets are served by the site host, not Supabase.
+Mochirii's live public site is served by the Vercel/Next.js app in `apps/web`; root static files remain rollback/reference material. Static page views, public static assets, CSS, JavaScript, and audio files are served by the site host, not Supabase.
 
 Supabase usage comes from the member workflows:
 

@@ -4,7 +4,7 @@ Project ref: `deyvmtncimmcinldjyqe`
 
 Project URL: `https://deyvmtncimmcinldjyqe.supabase.co`
 
-This repository is a static GitHub Pages site. Keep Supabase integration browser-safe, dependency-free, and migration-based. Do not commit real secrets or `.env` files.
+This repository serves the live Vercel/Next.js production app from `apps/web`; the root static files remain rollback/reference material. Keep Supabase browser integration limited to public keys, keep privileged work in Edge Functions, and keep schema changes migration-based. Do not commit real secrets or `.env` files.
 
 ## Rules
 
@@ -53,6 +53,8 @@ It also exposes Auth/profile/gallery helpers:
 - `listInstagramPublishQueue()`
 - `publishInstagramGallerySubmission(options)`
 - `listApprovedGallerySubmissions()`
+
+Instagram deployment and Reaper rollout steps are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
 
 Script order on pages with Auth or upload behavior is:
 
