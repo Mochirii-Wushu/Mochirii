@@ -7,6 +7,7 @@ const files = {
   packageJson: "package.json",
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
+  migrationHistory: "supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql",
   migration: "supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   moderation: "supabase/functions/moderate-gallery-submission/index.ts",
@@ -70,6 +71,7 @@ function walkFiles(dir, results = []) {
 const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
+const migrationHistory = read(files.migrationHistory);
 const migration = read(files.migration);
 const discordIngest = read(files.discordIngest);
 const moderation = read(files.moderation);
@@ -102,6 +104,12 @@ assertIncludes("check-all", checkAll, "check:instagram-gallery-publishing");
   'entrypoint = "./functions/publish-instagram-gallery-submission/index.ts"',
   'entrypoint = "./functions/mark-instagram-gallery-submission-shared/index.ts"',
 ].forEach((snippet) => assertIncludes("supabase config", config, snippet));
+
+[
+  "Restores the original Supabase migration version",
+  "20260607125027_add_instagram_gallery_publishing.sql",
+  "select 1;",
+].forEach((snippet) => assertIncludes("migration history restore", migrationHistory, snippet));
 
 [
   "add column if not exists instagram_opt_in boolean not null default false",

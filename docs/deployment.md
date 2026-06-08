@@ -29,6 +29,12 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
+## Supabase Preview Migration History
+
+Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
+
+The Instagram publishing schema is maintained in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`. The no-op compatibility file `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` intentionally preserves the earlier remote-applied version so future Supabase Preview checks do not fail with `Remote migration versions not found in local migrations directory`.
+
 ## Validation
 
 Use this sequence for deployment-sensitive work:
