@@ -17,12 +17,24 @@ Remote migration versions not found in local migrations directory.
 
 Root cause: an earlier Instagram publishing migration version was represented in remote Supabase migration history, then the local migration was renamed to `20260607125027_add_instagram_gallery_publishing.sql`.
 
-Fix in this packet:
+Fix in PR #214:
 
 - Restored the remote-applied timestamp as `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql`.
 - Left the canonical Instagram publishing schema in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`.
 - Updated `scripts/check-instagram-gallery-publishing.mjs` so the compatibility migration remains guarded.
 - Updated `supabase/README.md` and `docs/deployment.md` with the migration-history rule.
+
+Follow-up evidence from the Supabase SQL editor showed one additional remote-only migration version:
+
+```text
+20260608093407 add_manual_instagram_share_status
+```
+
+Follow-up fix:
+
+- Restored that remote-applied timestamp as `supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql`.
+- Left the canonical manual sharing status schema in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`.
+- Updated the same guardrail script and source-of-truth docs.
 
 ## Current Open Development Packets
 

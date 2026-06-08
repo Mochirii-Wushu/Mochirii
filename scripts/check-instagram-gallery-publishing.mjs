@@ -9,6 +9,7 @@ const files = {
   config: "supabase/config.toml",
   migrationHistory: "supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql",
   migration: "supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql",
+  manualMigrationHistory: "supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   moderation: "supabase/functions/moderate-gallery-submission/index.ts",
   listQueue: "supabase/functions/list-instagram-publish-queue/index.ts",
@@ -73,6 +74,7 @@ const checkAll = read(files.checkAll);
 const config = read(files.config);
 const migrationHistory = read(files.migrationHistory);
 const migration = read(files.migration);
+const manualMigrationHistory = read(files.manualMigrationHistory);
 const discordIngest = read(files.discordIngest);
 const moderation = read(files.moderation);
 const listQueue = read(files.listQueue);
@@ -110,6 +112,12 @@ assertIncludes("check-all", checkAll, "check:instagram-gallery-publishing");
   "20260607125027_add_instagram_gallery_publishing.sql",
   "select 1;",
 ].forEach((snippet) => assertIncludes("migration history restore", migrationHistory, snippet));
+
+[
+  "Restores the original Supabase migration version",
+  "20260608173000_add_manual_instagram_share_status.sql",
+  "select 1;",
+].forEach((snippet) => assertIncludes("manual migration history restore", manualMigrationHistory, snippet));
 
 [
   "add column if not exists instagram_opt_in boolean not null default false",
