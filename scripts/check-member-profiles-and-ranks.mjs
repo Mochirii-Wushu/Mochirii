@@ -9,7 +9,13 @@ const files = {
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
   migration: "supabase/migrations/20260608210000_add_member_profiles_and_media.sql",
+  refinementMigration: "supabase/migrations/20260608233000_refine_member_profile_identity_media.sql",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
+  sharedMemberProfiles: "supabase/functions/_shared/member-profiles.ts",
+  verifyDiscordMember: "supabase/functions/verify-discord-member/index.ts",
+  appConfig: "apps/web/lib/supabase/config.ts",
+  profileTypes: "apps/web/lib/supabase/types.ts",
+  profileFormat: "apps/web/components/member-workflow/format.ts",
   accountPanel: "apps/web/components/member-workflow/AccountPanel.tsx",
   leaderDashboard: "apps/web/components/member-workflow/LeaderDashboard.tsx",
   memberProfilesClient: "apps/web/lib/supabase/member-profiles.ts",
@@ -43,7 +49,13 @@ const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
 const migration = read(files.migration);
+const refinementMigration = read(files.refinementMigration);
 const reaper = read(files.reaper);
+const sharedMemberProfiles = read(files.sharedMemberProfiles);
+const verifyDiscordMember = read(files.verifyDiscordMember);
+const appConfig = read(files.appConfig);
+const profileTypes = read(files.profileTypes);
+const profileFormat = read(files.profileFormat);
 const accountPanel = read(files.accountPanel);
 const leaderDashboard = read(files.leaderDashboard);
 const memberProfilesClient = read(files.memberProfilesClient);
@@ -77,6 +89,52 @@ assertIncludes("check-all", checkAll, "check:member-profiles-and-ranks");
 ].forEach((snippet) => assertIncludes("profile migration", migration, snippet));
 
 [
+  "member_profiles_bio_length",
+  "char_length(bio) <= 1000",
+  "revoke update (discord_handle, avatar_url)",
+  "display_name",
+  "profile_public_enabled",
+  "member_profile_media_size_check",
+  "size_bytes <= 52428800",
+  "file_size_limit",
+  "52428800",
+].forEach((snippet) => assertIncludes("profile refinement migration", refinementMigration, snippet));
+
+[
+  "MAX_PROFILE_AVATAR_BYTES = 50 * 1024 * 1024",
+  "MAX_PROFILE_BANNER_BYTES = 50 * 1024 * 1024",
+  "bio: { max: 1000 }",
+].forEach((snippet) => assertIncludes("app profile config", appConfig, snippet));
+
+assertMatches(
+  "app profile config",
+  appConfig,
+  /SAFE_PROFILE_FIELDS\s*=\s*\{[\s\S]*display_name[\s\S]*game_uid[\s\S]*region[\s\S]*timezone[\s\S]*bio[\s\S]*\}\s*as const;/,
+  "safe profile fields must stay limited to member-editable fields.",
+);
+
+assertMatches(
+  "app profile config",
+  appConfig,
+  /SAFE_PROFILE_FIELDS\s*=\s*\{(?:(?!discord_handle|avatar_url)[\s\S])*\}\s*as const;/,
+  "discord_handle and avatar_url must not be browser-editable safe profile fields.",
+);
+
+assertMatches(
+  "profile format",
+  profileFormat,
+  /editableProfileFields\s*=\s*\[[\s\S]*"display_name"[\s\S]*"game_uid"[\s\S]*"region"[\s\S]*"timezone"[\s\S]*"bio"[\s\S]*\]\s*as const;/,
+  "editable profile form fields must stay limited to member-editable fields.",
+);
+
+assertMatches(
+  "profile format",
+  profileFormat,
+  /editableProfileFields\s*=\s*\[(?:(?!"discord_handle"|"avatar_url")[\s\S])*\]\s*as const;/,
+  "discord_handle and avatar_url must not appear in editableProfileFields.",
+);
+
+[
   "const RANK_ROLES = [",
   "\"Guild Leader\"",
   "\"Rice Sprout\"",
@@ -102,7 +160,29 @@ assertMatches(
   "uploadProfileMedia",
   "profile_public_enabled",
   "View profile",
+  "discord_handle_readonly",
+  "readOnly",
+  "maxLength={1000}",
 ].forEach((snippet) => assertIncludes("account panel", accountPanel, snippet));
+
+[
+  "gameUid?: string | null",
+  "discordHandle?: string | null",
+  "region?: string | null",
+].forEach((snippet) => assertIncludes("profile types", profileTypes, snippet));
+
+[
+  "PROFILE_MEDIA_LIMITS",
+  "avatar: 50 * 1024 * 1024",
+  "banner: 50 * 1024 * 1024",
+  "recentVerification(profile.discord_verified_at)",
+  "discordHandle",
+  "gameUid",
+  "region",
+  "signedMediaUrl",
+].forEach((snippet) => assertIncludes("shared member profiles", sharedMemberProfiles, snippet));
+
+assertIncludes("verify discord member", verifyDiscordMember, "discord_handle: discordUsername || discordGlobalName");
 
 [
   "listProfileMediaQueue",

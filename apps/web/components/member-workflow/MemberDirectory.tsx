@@ -172,6 +172,7 @@ export function MemberProfileView({ slug }: { slug: string }) {
   }
 
   const displayName = text(profile.displayName, "Mōchirīī Member");
+  const title = memberTitle(profile);
   return (
     <ProfileDisplay
       page="memberProfile"
@@ -181,10 +182,17 @@ export function MemberProfileView({ slug }: { slug: string }) {
       kicker="Member Profile"
       name={displayName}
       timezone={profile.timezone}
-      guildTitle={memberTitle(profile)}
+      guildTitle={title}
       avatar={profile.avatarUrl || fallbackAvatar}
       avatarAlt={`${displayName} profile picture`}
       bio={profile.bio || "Profile details are coming soon."}
+      details={[
+        { label: "Title", value: title },
+        { label: "Discord handle", value: profile.discordHandle },
+        { label: "Game UID", value: profile.gameUid },
+        { label: "Region", value: profile.region },
+        { label: "Timezone", value: profile.timezone },
+      ]}
       centerHero={false}
     />
   );

@@ -16,7 +16,7 @@ Deno.serve(async (req: Request) => {
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await access.adminClient
     .from("member_profiles")
-    .select("id,profile_slug,display_name,timezone,bio,discord_roles,member_status,has_required_discord_roles,discord_verified_at,profile_public_enabled,profile_published_at,approved_avatar_media_id,approved_banner_media_id,updated_at")
+    .select("id,profile_slug,display_name,game_uid,discord_handle,discord_username,region,timezone,bio,discord_roles,member_status,has_required_discord_roles,discord_verified_at,profile_public_enabled,profile_published_at,approved_avatar_media_id,approved_banner_media_id,updated_at")
     .eq("profile_public_enabled", true)
     .eq("member_status", "active")
     .eq("has_required_discord_roles", true)

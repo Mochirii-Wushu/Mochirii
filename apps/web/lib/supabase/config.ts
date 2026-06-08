@@ -9,8 +9,8 @@ export const DISCORD_REQUIRED_ROLE_NAMES = ["Mōchirīī - WWM", "✅Verified"] 
 export const MEMBER_GALLERY_BUCKET = "member-gallery";
 export const MEMBER_PROFILE_MEDIA_BUCKET = "member-profile-media";
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-export const MAX_PROFILE_AVATAR_BYTES = 2 * 1024 * 1024;
-export const MAX_PROFILE_BANNER_BYTES = 5 * 1024 * 1024;
+export const MAX_PROFILE_AVATAR_BYTES = 50 * 1024 * 1024;
+export const MAX_PROFILE_BANNER_BYTES = 50 * 1024 * 1024;
 export const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION = "2026-06-website-upload-v1";
@@ -18,11 +18,9 @@ export const INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION = "2026-06-website-upload-v1"
 export const SAFE_PROFILE_FIELDS = {
   display_name: { max: 40, min: 2, required: true },
   game_uid: { max: 40 },
-  discord_handle: { max: 80 },
   region: { max: 80 },
   timezone: { max: 80 },
-  avatar_url: { max: 500 },
-  bio: { max: 500 },
+  bio: { max: 1000 },
 } as const;
 
 export const SUBMISSION_FIELDS = {

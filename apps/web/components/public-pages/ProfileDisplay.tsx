@@ -15,6 +15,7 @@ export type ProfileDisplayProps = {
   avatarAlt: string;
   bioTitle?: string;
   bio: unknown[] | unknown;
+  details?: { label: string; value?: string | null }[];
   centerHero?: boolean;
 };
 
@@ -33,9 +34,11 @@ export function ProfileDisplay({
   avatarAlt,
   bioTitle = "Bio",
   bio,
+  details = [],
   centerHero = true,
 }: ProfileDisplayProps) {
   const metaItems = [timezone, guildTitle].filter(Boolean);
+  const visibleDetails = details.filter((item) => text(item.value));
 
   return (
     <>
@@ -67,6 +70,16 @@ export function ProfileDisplay({
                     loading="lazy"
                     decoding="async"
                   />
+                  {visibleDetails.length ? (
+                    <dl className="profile-detail-list" aria-label={`${name} profile details`}>
+                      {visibleDetails.map((item) => (
+                        <div key={item.label}>
+                          <dt>{item.label}</dt>
+                          <dd>{text(item.value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : null}
                 </div>
               </aside>
               <section className="col-8">
