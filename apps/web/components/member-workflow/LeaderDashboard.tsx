@@ -7,6 +7,7 @@ import {
   checkLeaderGalleryModerationAccess,
   listGalleryReviewQueue,
   listInstagramPublishQueue,
+  markInstagramGallerySubmissionShared,
   moderateGallerySubmission,
   publishInstagramGallerySubmission,
 } from "@/lib/supabase/moderation";
@@ -32,6 +33,7 @@ const instagramStatuses: Array<{ id: string; label: string; empty: string }> = [
   { id: "ineligible", label: "Ineligible", empty: "No ineligible Instagram jobs." },
   { id: "failed", label: "Failed", empty: "No failed Instagram jobs." },
   { id: "published", label: "Published", empty: "No published Instagram posts." },
+  { id: "shared_manually", label: "Shared manually", empty: "No manually shared Instagram jobs." },
   { id: "all", label: "All", empty: "No Instagram publishing jobs." },
 ];
 
@@ -201,16 +203,30 @@ function InstagramJobCard({
   busy,
   caption,
   altText,
+  permalinkValue,
+  moderatorNote,
   onCaptionChange,
   onAltTextChange,
+  onPermalinkChange,
+  onModeratorNoteChange,
+  onCopyCaption,
+  onCopyAltText,
+  onMarkShared,
   onPublish,
 }: {
   job: InstagramPublishJob;
   busy: boolean;
   caption: string;
   altText: string;
+  permalinkValue: string;
+  moderatorNote: string;
   onCaptionChange: (value: string) => void;
   onAltTextChange: (value: string) => void;
+  onPermalinkChange: (value: string) => void;
+  onModeratorNoteChange: (value: string) => void;
+  onCopyCaption: () => void;
+  onCopyAltText: () => void;
+  onMarkShared: (job: InstagramPublishJob) => void;
   onPublish: (job: InstagramPublishJob) => void;
 }) {
   const submission = job.submission || {};
@@ -218,6 +234,7 @@ function InstagramJobCard({
   const sourceLabel = text(submission.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
   const status = text(job.status, "queued").toLowerCase();
   const canPublish = status === "queued" || status === "failed";
+  const canShareManually = status === "queued";
   const permalink = text(job.instagramPermalink);
 
   return (
@@ -249,11 +266,12 @@ function InstagramJobCard({
         <dl className="review-meta">
           {[
             ["Consent", submission.instagramOptIn ? "Instagram opt-in" : "No opt-in"],
+            ["Consent source", submission.instagramOptInSource || "Not set"],
             ["Type", submission.mimeType || "Unknown"],
             ["Size", formatBytes(submission.sizeBytes)],
             ["Attempts", String(job.attemptCount || 0)],
             ["Queued", formatDate(job.createdAt, "Not set")],
-            ["Published", job.publishedAt ? formatDate(job.publishedAt, "Not published") : "Not published"],
+            ["Completed", job.publishedAt ? formatDate(job.publishedAt, "Not completed") : "Not completed"],
           ].map(([label, value]) => (
             <div key={label}>
               <dt>{label}</dt>
@@ -281,14 +299,51 @@ function InstagramJobCard({
             onChange={(event) => onAltTextChange(event.target.value.slice(0, 1000))}
           />
         </label>
+        <label className="form-field">
+          <span>Instagram permalink after manual post</span>
+          <input
+            type="url"
+            maxLength={500}
+            value={permalinkValue}
+            disabled={busy || !canShareManually}
+            onChange={(event) => onPermalinkChange(event.target.value.slice(0, 500))}
+            placeholder="https://www.instagram.com/p/..."
+          />
+        </label>
+        <label className="form-field">
+          <span>Manual share note</span>
+          <textarea
+            maxLength={500}
+            rows={2}
+            value={moderatorNote}
+            disabled={busy || !canShareManually}
+            onChange={(event) => onModeratorNoteChange(event.target.value.slice(0, 500))}
+            placeholder="Optional moderator note."
+          />
+        </label>
         <div className="auth-actions">
+          {job.signedPreviewUrl ? (
+            <a className="hero-cta" href={job.signedPreviewUrl} download target="_blank" rel="noopener noreferrer">Download image</a>
+          ) : (
+            <button className="hero-cta" type="button" disabled>Download image</button>
+          )}
+          <button className="hero-cta" type="button" disabled={busy || !caption.trim()} onClick={onCopyCaption}>Copy caption</button>
+          <button className="hero-cta" type="button" disabled={busy || !altText.trim()} onClick={onCopyAltText}>Copy alt text</button>
           <button
             className="hero-cta hero-cta--primary"
             type="button"
-            disabled={busy || !canPublish}
+            disabled={busy || !canShareManually}
+            onClick={() => onMarkShared(job)}
+          >
+            Mark shared manually
+          </button>
+          <button
+            className="hero-cta"
+            type="button"
+            disabled
             onClick={() => onPublish(job)}
           >
-            Publish to Instagram
+            Meta API unavailable
           </button>
         </div>
       </div>
@@ -312,6 +367,8 @@ export function LeaderDashboard() {
   const [instagramError, setInstagramError] = useState("");
   const [instagramCaptions, setInstagramCaptions] = useState<Record<string, string>>({});
   const [instagramAltTexts, setInstagramAltTexts] = useState<Record<string, string>>({});
+  const [instagramPermalinks, setInstagramPermalinks] = useState<Record<string, string>>({});
+  const [instagramNotes, setInstagramNotes] = useState<Record<string, string>>({});
 
   const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
     const nextStatus = normalizeStatus(status);
@@ -349,7 +406,8 @@ export function LeaderDashboard() {
     setInstagramError("");
     setInstagramStatus(`Loading ${config.label.toLowerCase()} Instagram jobs.`);
 
-    const result = await listInstagramPublishQueue({ status: nextStatus });
+    const requestedStatus = nextStatus === "shared_manually" ? "all" : nextStatus;
+    const result = await listInstagramPublishQueue({ status: requestedStatus });
     if (!result.ok) {
       setInstagramQueue(null);
       setInstagramError(result.message || "Instagram publishing queue could not be loaded.");
@@ -358,7 +416,20 @@ export function LeaderDashboard() {
       return;
     }
 
-    const data = result.data || { jobs: [] };
+    const responseData = result.data || { jobs: [] };
+    const responseJobs = Array.isArray(responseData.jobs) ? responseData.jobs : [];
+    const jobs = nextStatus === "shared_manually"
+      ? responseJobs.filter((job) => text(job.status) === "shared_manually")
+      : responseJobs;
+    const data = {
+      ...responseData,
+      jobs,
+      count: jobs.length,
+      summary: {
+        ...(responseData.summary || {}),
+        ...(nextStatus === "shared_manually" ? { shared_manually: jobs.length } : {}),
+      },
+    };
     setInstagramQueue(data);
     setInstagramStatus(
       successMessage ||
@@ -464,6 +535,57 @@ export function LeaderDashboard() {
     await loadInstagramQueue({
       status: instagramActiveStatus,
       successMessage: result.message || "Image published to Instagram.",
+    });
+  }
+
+  async function copyInstagramText(value: string, label: string) {
+    const clean = value.trim();
+    if (!clean) {
+      setInstagramError(`${label} is empty.`);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(clean);
+      setInstagramError("");
+      setInstagramStatus(`${label} copied.`);
+    } catch {
+      setInstagramError(`${label} could not be copied by this browser.`);
+    }
+  }
+
+  async function markSharedManually(job: InstagramPublishJob) {
+    const jobId = text(job.id);
+    const instagramPermalink = instagramPermalinks[jobId] ?? text(job.instagramPermalink);
+    const moderatorNote = instagramNotes[jobId] ?? "";
+    const confirmed =
+      typeof window !== "undefined" &&
+      window.confirm("Mark this Instagram queue item as shared manually after posting from the official account?");
+
+    if (!confirmed) return;
+
+    setInstagramBusy(true);
+    setInstagramError("");
+    setInstagramStatus("Marking Instagram job as shared manually.");
+
+    const result = await markInstagramGallerySubmissionShared({
+      jobId,
+      instagramPermalink,
+      moderatorNote,
+      confirmManualShare: true,
+    });
+
+    if (!result.ok) {
+      setInstagramError(result.message || "Instagram job could not be marked shared manually.");
+      setInstagramStatus("");
+      setInstagramBusy(false);
+      await loadInstagramQueue({ status: instagramActiveStatus });
+      return;
+    }
+
+    await loadInstagramQueue({
+      status: instagramActiveStatus,
+      successMessage: result.message || "Instagram job marked as shared manually.",
     });
   }
 
@@ -590,9 +712,16 @@ export function LeaderDashboard() {
                 busy={instagramBusy}
                 caption={instagramCaptions[id] ?? text(job.caption, "Shared from the Mōchirīī guild gallery.")}
                 altText={instagramAltTexts[id] ?? text(job.altText)}
+                permalinkValue={instagramPermalinks[id] ?? text(job.instagramPermalink)}
+                moderatorNote={instagramNotes[id] ?? ""}
                 key={id}
                 onCaptionChange={(value) => setInstagramCaptions((current) => ({ ...current, [id]: value }))}
                 onAltTextChange={(value) => setInstagramAltTexts((current) => ({ ...current, [id]: value }))}
+                onPermalinkChange={(value) => setInstagramPermalinks((current) => ({ ...current, [id]: value }))}
+                onModeratorNoteChange={(value) => setInstagramNotes((current) => ({ ...current, [id]: value }))}
+                onCopyCaption={() => copyInstagramText(instagramCaptions[id] ?? text(job.caption, "Shared from the MÅchirÄ«Ä« guild gallery."), "Instagram caption")}
+                onCopyAltText={() => copyInstagramText(instagramAltTexts[id] ?? text(job.altText), "Instagram alt text")}
+                onMarkShared={markSharedManually}
                 onPublish={publishInstagram}
               />
             );

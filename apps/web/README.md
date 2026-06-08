@@ -172,18 +172,18 @@ vercel build --prod --cwd apps/web
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
 - Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
-- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram publishing migration and Supabase Edge Functions are deployed in production. The private Reaper source repo now exists at `Mochirii-Wushu/Reaper`; Reaper runtime secrets/command registration, Instagram production secrets, and any real Instagram post remain external owner-approved steps.
+- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram queue migration and Supabase Edge Functions are deployed in production. The private Reaper source repo now exists at `Mochirii-Wushu/Reaper`; direct Meta API secrets and any real Instagram API post remain external owner-approved steps. Current Instagram launch mode is moderator-controlled manual sharing from the Leader Dashboard.
 
 What stays in Supabase:
 
 - Identity, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation authority, signed preview URLs, and audit records.
-- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission`.
+- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, and `publish-instagram-gallery-submission`.
 
 ## Instagram Gallery Publishing
 
 Website uploads include an optional Instagram opt-in checkbox. Reaper's Discord submissions send the matching `instagramOptIn` payload from the optional `share_to_instagram` command parameter.
 
-Approval for the public Gallery never posts to Instagram automatically. If an approved submission has explicit opt-in consent, Supabase creates an Instagram publishing job. The Leader Dashboard shows that separate Instagram Queue, allows moderator caption and alt-text review, and requires a final browser confirmation before calling the publish Edge Function.
+Approval for the public Gallery never posts to Instagram automatically. If an approved submission has explicit opt-in consent, Supabase creates an Instagram publishing job. The Leader Dashboard shows that separate Instagram Queue, allows moderator caption and alt-text review, provides download/copy tools for manual posting, and requires a final browser confirmation before marking the job shared manually. The direct Meta API publish function remains a future path after Meta developer access is available.
 
 Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase secrets only. They do not belong in Vercel env vars or any `NEXT_PUBLIC_*` value.
 

@@ -14,6 +14,7 @@ const functions = [
   "reaper-discord-interactions",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
+  "mark-instagram-gallery-submission-shared",
 ];
 
 function denoBinary() {

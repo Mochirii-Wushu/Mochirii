@@ -19,6 +19,7 @@
     { id: "ineligible", label: "Ineligible", empty: "No ineligible Instagram jobs." },
     { id: "failed", label: "Failed", empty: "No failed Instagram jobs." },
     { id: "published", label: "Published", empty: "No published Instagram posts." },
+    { id: "shared_manually", label: "Shared manually", empty: "No manually shared Instagram jobs." },
     { id: "all", label: "All", empty: "No Instagram publishing jobs." },
   ];
   const INSTAGRAM_STATUS_IDS = new Set(INSTAGRAM_STATUSES.map((status) => status.id));
@@ -53,7 +54,7 @@
     $("#instagramQueueTabs")?.querySelectorAll("button").forEach((el) => {
       el.disabled = busy;
     });
-    $("#instagramList")?.querySelectorAll("button, textarea").forEach((el) => {
+    $("#instagramList")?.querySelectorAll("button, textarea, input").forEach((el) => {
       el.disabled = busy;
     });
   }
@@ -301,6 +302,7 @@
     const status = U.text(job.status, "queued").toLowerCase();
     const sourceLabel = U.text(submission.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
     const canPublish = status === "queued" || status === "failed";
+    const canShareManually = status === "queued";
     const permalink = U.text(job.instagramPermalink, "");
 
     return `
@@ -322,11 +324,12 @@
           <dl class="review-meta">
             ${[
               ["Consent", submission.instagramOptIn ? "Instagram opt-in" : "No opt-in"],
+              ["Consent source", submission.instagramOptInSource || "Not set"],
               ["Type", submission.mimeType || "Unknown"],
               ["Size", formatBytes(submission.sizeBytes)],
               ["Attempts", String(job.attemptCount || 0)],
               ["Queued", formatDate(job.createdAt)],
-              ["Published", job.publishedAt ? formatDate(job.publishedAt) : "Not published"],
+              ["Completed", job.publishedAt ? formatDate(job.publishedAt) : "Not completed"],
             ].map(([label, value]) => `
               <div>
                 <dt>${U.escapeHtml(label)}</dt>
@@ -342,8 +345,20 @@
             <span>Instagram alt text</span>
             <textarea data-instagram-alt-text maxlength="1000" rows="3" ${canPublish ? "" : "disabled"}>${U.escapeHtml(job.altText || "")}</textarea>
           </label>
+          <label class="form-field review-reason">
+            <span>Instagram permalink after manual post</span>
+            <input data-instagram-permalink type="url" maxlength="500" placeholder="https://www.instagram.com/p/..." value="${U.escapeHtml(permalink)}" ${canShareManually ? "" : "disabled"}>
+          </label>
+          <label class="form-field review-reason">
+            <span>Manual share note</span>
+            <textarea data-instagram-note maxlength="500" rows="2" placeholder="Optional moderator note." ${canShareManually ? "" : "disabled"}></textarea>
+          </label>
           <div class="auth-actions">
-            <button class="hero-cta hero-cta--primary" type="button" data-instagram-action="publish" ${canPublish ? "" : "disabled"}>Publish to Instagram</button>
+            ${job.signedPreviewUrl ? `<a class="hero-cta" href="${U.escapeHtml(job.signedPreviewUrl)}" download target="_blank" rel="noopener noreferrer">Download image</a>` : `<button class="hero-cta" type="button" disabled>Download image</button>`}
+            <button class="hero-cta" type="button" data-instagram-action="copy-caption" ${job.caption ? "" : "disabled"}>Copy caption</button>
+            <button class="hero-cta" type="button" data-instagram-action="copy-alt" ${job.altText ? "" : "disabled"}>Copy alt text</button>
+            <button class="hero-cta hero-cta--primary" type="button" data-instagram-action="mark-shared" ${canShareManually ? "" : "disabled"}>Mark shared manually</button>
+            <button class="hero-cta" type="button" data-instagram-action="publish" disabled>Meta API unavailable</button>
           </div>
         </div>
       </article>
@@ -406,7 +421,8 @@
     const list = $("#instagramList");
     if (list) list.innerHTML = "";
 
-    const result = await S.listInstagramPublishQueue({ status: activeInstagramStatus });
+    const requestedStatus = activeInstagramStatus === "shared_manually" ? "all" : activeInstagramStatus;
+    const result = await S.listInstagramPublishQueue({ status: requestedStatus });
     if (!result.ok) {
       setError("#instagramError", result.message || "Instagram publishing queue could not be loaded.");
       setText("#instagramStatus", "");
@@ -415,7 +431,15 @@
     }
 
     const data = result.data || {};
-    const jobs = Array.isArray(data.jobs) ? data.jobs : [];
+    const responseJobs = Array.isArray(data.jobs) ? data.jobs : [];
+    const jobs = activeInstagramStatus === "shared_manually"
+      ? responseJobs.filter((job) => U.text(job.status) === "shared_manually")
+      : responseJobs;
+    data.jobs = jobs;
+    data.count = jobs.length;
+    if (activeInstagramStatus === "shared_manually") {
+      data.summary = { ...(data.summary || {}), shared_manually: jobs.length };
+    }
     latestInstagramSummary = data.summary || latestInstagramSummary || {};
 
     renderInstagramQueueTabs(latestInstagramSummary);
@@ -553,13 +577,87 @@
     });
   }
 
+  async function copyInstagramText(value, label) {
+    const clean = U.text(value, "");
+    if (!clean) {
+      setError("#instagramError", `${label} is empty.`);
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(clean);
+      setError("#instagramError", "");
+      setText("#instagramStatus", `${label} copied.`);
+    } catch {
+      setError("#instagramError", `${label} could not be copied by this browser.`);
+    }
+  }
+
+  async function handleInstagramAction(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest("[data-instagram-action]");
+    if (!button || !accessReady) return;
+
+    const action = button.dataset.instagramAction;
+    if (action === "publish") {
+      await publishInstagram(event);
+      return;
+    }
+
+    const card = button.closest("[data-instagram-job-id]");
+    const jobId = card?.dataset?.instagramJobId || "";
+    const caption = card?.querySelector("[data-instagram-caption]")?.value?.trim() || "";
+    const altText = card?.querySelector("[data-instagram-alt-text]")?.value?.trim() || "";
+    const instagramPermalink = card?.querySelector("[data-instagram-permalink]")?.value?.trim() || "";
+    const moderatorNote = card?.querySelector("[data-instagram-note]")?.value?.trim() || "";
+
+    if (action === "copy-caption") {
+      await copyInstagramText(caption, "Instagram caption");
+      return;
+    }
+
+    if (action === "copy-alt") {
+      await copyInstagramText(altText, "Instagram alt text");
+      return;
+    }
+
+    if (action !== "mark-shared") return;
+
+    const confirmed = window.confirm("Mark this Instagram queue item as shared manually after posting from the official account?");
+    if (!confirmed) return;
+
+    setBusy(true);
+    setError("#instagramError", "");
+    setText("#instagramStatus", "Marking Instagram job as shared manually.");
+
+    const result = await S.markInstagramGallerySubmissionShared({
+      jobId,
+      instagramPermalink,
+      moderatorNote,
+      confirmManualShare: true,
+    });
+
+    if (!result.ok) {
+      setError("#instagramError", result.message || "Instagram job could not be marked shared manually.");
+      setText("#instagramStatus", "");
+      setBusy(false);
+      await loadInstagramQueue({ status: activeInstagramStatus });
+      return;
+    }
+
+    await loadInstagramQueue({
+      status: activeInstagramStatus,
+      successMessage: result.message || "Instagram job marked as shared manually.",
+    });
+  }
+
   function boot() {
     $("#refreshQueue")?.addEventListener("click", () => loadQueue({ status: activeStatus }));
     $("#refreshInstagramQueue")?.addEventListener("click", () => loadInstagramQueue({ status: activeInstagramStatus }));
     $("#queueTabs")?.addEventListener("click", selectQueueStatus);
     $("#instagramQueueTabs")?.addEventListener("click", selectInstagramStatus);
     $("#reviewList")?.addEventListener("click", moderate);
-    $("#instagramList")?.addEventListener("click", publishInstagram);
+    $("#instagramList")?.addEventListener("click", handleInstagramAction);
     renderQueueTabs(latestSummary);
     renderInstagramQueueTabs(latestInstagramSummary);
     S.onAuthStateChange(() => {

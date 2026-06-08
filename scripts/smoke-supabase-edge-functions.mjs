@@ -33,6 +33,15 @@ const protectedFunctions = [
       confirmPublish: true,
     },
   },
+  {
+    name: "mark-instagram-gallery-submission-shared",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      instagram_permalink: "",
+      moderator_note: "Smoke test only.",
+      confirmManualShare: true,
+    },
+  },
 ];
 
 const secretProtectedFunctions = [
