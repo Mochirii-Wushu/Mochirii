@@ -36,9 +36,9 @@ Follow-up fix:
 - Left the canonical manual sharing status schema in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`.
 - Updated the same guardrail script and source-of-truth docs.
 
-## Final Live Release State
+## Final Live Release State - Member Directory Baseline
 
-Current live `main` head:
+Previous live `main` head for the member-directory baseline:
 
 ```text
 2a9973d Add members-only profile directory
@@ -79,6 +79,59 @@ Owner-gated actions still require explicit action-time approval:
 
 - Running Discord `/sync-ranks mode:apply confirm:true`
 - Any real Instagram API publish action
+
+## Final Live Release State - PR #218
+
+Current live `main` head after the profile identity/media refinement:
+
+```text
+079940b Refine member profile identity and media
+```
+
+Merged in this follow-up release window:
+
+- PR #218: `Refine member profile identity and media`
+
+PR #218 changed the active member-profile surface so Discord handle is read-only and refreshed from Discord verification, profile bios allow up to 1,000 characters, avatar/banner profile media limits are documented and guarded at 50 MB per file, and profile titles continue to come from verified Discord rank-role mapping.
+
+Production checks passed on `079940b`:
+
+- `validate`
+- `validate-next`
+- CodeQL
+- Vercel production deployment
+- GitHub Pages rollback/reference deployment
+
+Live domain smoke passed after deployment:
+
+- `https://mochirii.com/` returns `200 OK` from Vercel.
+- `https://mochirii.com/account` returns `200 OK` from Vercel.
+- `https://mochirii.com/members` returns `200 OK` from Vercel.
+- `https://mochirii.com/members/test-profile` resolves through the dynamic profile route.
+- `https://www.mochirii.com/` redirects to `https://mochirii.com/`.
+
+Chrome live smoke confirmed:
+
+- `/account` renders the Discord handle field as read-only with the value sourced from the signed-in Discord account.
+- `/account` renders the Bio field with `maxlength="1000"`.
+- `/members` loads the members-only directory surface and currently reports no published profiles.
+- `/members/test-profile` resolves to the profile route and reports the profile is not published.
+
+Local and network validation after merge:
+
+- `git diff --check`
+- `scripts/check-all.mjs` with bundled Node on PATH
+- `scripts/check-production.mjs`
+- `scripts/smoke-supabase-edge-functions.mjs`
+- `apps/web` ESLint via bundled Node
+- `apps/web` Next production build via bundled Node
+
+Notes:
+
+- Running `scripts/check-all.mjs` without the bundled Node directory on PATH fails on this workstation because child `node` lookup is unavailable; rerunning with `C:\Users\xtyty\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin` prepended passes.
+- Supabase CLI `2.105.0` is installed, but this checkout is not locally linked, so direct `supabase migration list --linked` was not available from the shell. Production Supabase behavior was verified through the live Edge Function contract smoke and live browser behavior instead.
+- Stale PRs #178, #180, and #1 were closed after confirming they were superseded or obsolete.
+- Remote-tracking refs were pruned and stale local branches were removed. The only remaining local and remote branch is `main`.
 
 ## Verification Notes
 
