@@ -56,6 +56,8 @@ These compatibility files keep future Supabase Preview checks from failing with 
 
 ## Validation
 
+Local and CI validation use Node.js 22 with npm. On Windows, `node`, `npm`, `npx`, and `corepack` should resolve from the real Node install, typically `C:\Program Files\nodejs`, before WindowsApps/Codex app package paths. If the WindowsApps `node.exe` stub returns `Access is denied`, repair PATH/tooling before trusting local validation.
+
 Use this sequence for deployment-sensitive work:
 
 ```sh

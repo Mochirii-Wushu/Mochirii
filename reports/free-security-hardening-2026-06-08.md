@@ -27,7 +27,7 @@ This pass hardens the Vercel/Next production surface while keeping Cloudflare DN
   - `submit-discord-gallery-image`: protected by `DISCORD_GALLERY_INGEST_SECRET`.
   - `reaper-discord-interactions`: protected by Discord Ed25519 signature verification and timestamp freshness.
 - GitHub default CodeQL checks are active and passed on this branch.
-- GitHub Dependabot remains enabled. One open medium Dependabot alert for `postcss` remains tracked because this workstation lacks a clean npm binary for lockfile repair.
+- GitHub Dependabot remains enabled. One open medium Dependabot alert for `postcss` remains tracked separately. After this release, the workstation Node/npm blocker was resolved with Node.js 22.22.3 and npm 10.9.8.
 
 ## Dashboard Items To Verify
 
@@ -49,7 +49,7 @@ These require owner-approved provider-side checks and were not mutated in this r
 - `apps/web` ESLint through bundled Node: passed.
 - `apps/web` Next build through bundled Node: passed.
 - Local built Next header smoke on `127.0.0.1:3017`: returned `200` with `Content-Security-Policy-Report-Only`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and `X-Frame-Options`.
-- Workstation note: PATH-resolved `node`/Bun shims are unreliable here, so validation used the bundled Codex Node runtime.
+- Workstation note: this PR was validated with the bundled Codex Node runtime before release. After merge, Node.js 22.22.3 was installed with npm 10.9.8 and the same validation commands passed through normal `npm`.
 
 ## Remaining Notes
 

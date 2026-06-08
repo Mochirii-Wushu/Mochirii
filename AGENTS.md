@@ -6,6 +6,7 @@
 - Preserve the current Mōchirīī wuxia/glass visual identity while improving clarity, speed, and accessibility.
 - Do not delete or rewrite asset directories unless usage is verified and the change is intentionally scoped.
 - Run validation before completing work: `npm run check`, `git diff --check`, and task-specific smoke checks. For `apps/web` changes, also run `cd apps/web && npm run lint && npm run build`. Use `npm run check:production` when production behavior matters and `npm run smoke:gallery` when gallery behavior might regress.
+- Local JavaScript tooling should match CI: Node.js 22 with npm/package-lock. If `node` resolves to a WindowsApps/Codex MSIX path and fails with `Access is denied`, repair the workstation PATH/toolchain first instead of silently relying on bundled Node; `where.exe node` should show `C:\Program Files\nodejs\node.exe` before WindowsApps.
 - Consult `docs/content-guide.md` before content, JSON, date, gallery, or asset edits.
 - Preserve protected copy exactly: `data/recruitment.json` `content.paragraphs`, `data/recruitment.json` `content.conclusion`, and `data/home.json` `seal.verse`.
 - Keep Mōchirīī copy clear, xianxia-inspired, noun/verb led, lightly rhythmic, and human. Use Cupcake warmth sparingly, keep functional labels plain, and avoid generic AI-like phrasing, adjective padding, forced rhyme, copied poem/article phrasing, or named-author imitation.
