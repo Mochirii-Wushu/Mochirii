@@ -56,7 +56,7 @@ It also exposes Auth/profile/gallery helpers:
 
 Instagram production migration and Edge Functions are deployed. Reaper rollout, Instagram secret setup, dry-run payloads, and any live Instagram post are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
 
-Migration history note: keep `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` in place. The Instagram publishing schema now lives in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`, but Supabase Preview compares remote migration versions to local files and needs the original timestamp represented locally.
+Migration history note: keep `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` and `supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql` in place. The Instagram publishing schema now lives in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`, and the manual sharing status schema now lives in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`, but Supabase Preview compares remote migration versions to local files and needs the original timestamps represented locally.
 
 Production Reaper gallery submission handling is Supabase-hosted through Discord Interactions, not a persistent Discord Gateway process. The Discord Interactions Endpoint URL is:
 

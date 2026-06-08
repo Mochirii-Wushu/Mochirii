@@ -33,7 +33,11 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 
 Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
 
-The Instagram publishing schema is maintained in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`. The no-op compatibility file `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` intentionally preserves the earlier remote-applied version so future Supabase Preview checks do not fail with `Remote migration versions not found in local migrations directory`.
+The Instagram publishing schema is maintained in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`. The no-op compatibility file `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` intentionally preserves the earlier remote-applied version.
+
+The manual Instagram sharing status schema is maintained in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`. The no-op compatibility file `supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql` intentionally preserves the earlier remote-applied version.
+
+These compatibility files keep future Supabase Preview checks from failing with `Remote migration versions not found in local migrations directory`.
 
 ## Validation
 
