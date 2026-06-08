@@ -176,6 +176,14 @@ Image expectations:
 - Avoid large unoptimized assets.
 - Run asset and reference validation after asset or path edits.
 
+Next app shared hero presentation:
+
+- Shared `PageHero` routes use a stable `3 / 2` hero frame.
+- Hero images should render with `object-fit: contain`, no crop, no scrim, no tint, no CSS filter, and no card overlap.
+- The intro card belongs below the hero image with positive spacing so the image can be appreciated first.
+- Keep page-specific palette, border, and glass styling scoped by `body[data-page="..."]`; do not change text, alt text, image paths, or route data for visual-only passes.
+- Validate Home plus each shared `PageHero` route at `360px`, `390px`, `768px`, `1024px`, and `1440px` before release.
+
 ## 10. Cache Query Conventions
 
 Current cache-query behavior:
@@ -229,6 +237,7 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 - Focus returns correctly if supported.
 - Skip link appears and works.
 - Home hero renders.
+- Shared route heroes render full-frame without crop, tint, scrim, CSS filter, or intro-card overlap.
 - Home cards/doors render.
 - Seal poem renders unchanged.
 - Key links resolve.
