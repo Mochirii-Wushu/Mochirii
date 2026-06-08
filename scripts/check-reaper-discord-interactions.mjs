@@ -69,6 +69,7 @@ assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
   "x-signature-ed25519",
   "x-signature-timestamp",
   "DISCORD_PUBLIC_KEY",
+  "DISCORD_API_USER_AGENT",
   "nacl.sign.detached.verify",
   "INTERACTION_TYPE_PING",
   "INTERACTION_RESPONSE_PONG",

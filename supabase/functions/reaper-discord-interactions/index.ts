@@ -9,6 +9,7 @@ declare const EdgeRuntime: {
 };
 
 const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
+const DISCORD_API_USER_AGENT = "Mochirii-Reaper-RankSync/1.0 (https://mochirii.com)";
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
@@ -163,6 +164,7 @@ function discordApiHeaders(contentType = false): Headers {
   const headers = new Headers({
     Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN") || ""}`,
     Accept: "application/json",
+    "User-Agent": DISCORD_API_USER_AGENT,
   });
   if (contentType) headers.set("Content-Type", "application/json");
   return headers;
