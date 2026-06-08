@@ -24,6 +24,8 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - `www` behavior: redirect to apex
 - Preview deployments: enabled for pull requests that need visual or auth review
 - Deployment protection: enabled for previews if member/auth workflow state should not be public
+- Web Analytics: enabled for `mochirii/mochirii`
+- Speed Insights: enabled for `mochirii/mochirii`
 - Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
@@ -58,6 +60,16 @@ npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=red
 ```
 
 This verifies clean Vercel routes, legacy `.html` redirects, signed-out member route content, Vercel headers on the apex, and the `www` redirect.
+
+Post-deploy observability smoke:
+
+```js
+[
+  ...document.querySelectorAll("script[data-sdkn='@vercel/analytics/next'], script[data-sdkn='@vercel/speed-insights/next']"),
+].map((script) => ({ package: script.dataset.sdkn, version: script.dataset.sdkv, src: script.src }));
+```
+
+Run this in an inspected production browser page after hydration. It verifies that the deployed Next app loads the Vercel Web Analytics and Speed Insights scripts. Vercel may serve those scripts from project-specific unique paths instead of plain `/_vercel/...` URLs. Confirm dashboard events inside Vercel after production receives visits.
 
 ## Public Copy Sync
 

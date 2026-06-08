@@ -57,6 +57,24 @@ Root-level `vercel link --repo` was tested as a reversible monorepo-link cleanup
 
 Do not commit `.vercel/`.
 
+## Vercel Observability
+
+The app is wired for Vercel Web Analytics and Speed Insights from the root layout with the official Next.js packages:
+
+- `@vercel/analytics`
+- `@vercel/speed-insights`
+
+These integrations do not require app secrets or `NEXT_PUBLIC_*` values. Keep Web Analytics and Speed Insights enabled in the canonical `mochirii/mochirii` Vercel project dashboard, then verify the deployed browser page loads the Vercel observability scripts after hydration.
+
+```text
+script[data-sdkn="@vercel/analytics/next"]
+script[data-sdkn="@vercel/speed-insights/next"]
+```
+
+Vercel can serve those scripts from project-specific unique paths rather than the plain `/_vercel/...` endpoints.
+
+Analytics and Core Web Vitals data can take a few minutes, and enough real production visits, to appear in the Vercel dashboard.
+
 ## Public Assets And Data
 
 While the root static rollback surface remains available, root `assets/` and `data/` are the editable content source. The Next app reads copied files from `public/assets/` and `public/data/`.
