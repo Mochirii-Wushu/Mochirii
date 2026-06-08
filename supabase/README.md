@@ -521,6 +521,38 @@ The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/
 
 There is no automatic Instagram publishing. Website gallery approval creates an Instagram publishing job only when the submission has explicit opt-in consent. Moderators then review the separate Instagram Queue before any external post is sent.
 
+## Member Profiles And Vanity Rank Roles
+
+Member profiles are a members-only Supabase workflow, not a public directory. Active, recently verified Discord members can view `/members` and `/members/[slug]`; each member must opt in before their profile is listed.
+
+Profile media uses a separate private Storage bucket:
+
+```text
+member-profile-media
+```
+
+The browser uploads avatar/banner candidates to that bucket and then calls `submit-member-profile-media`. Pending, rejected, and archived media does not appear on profile pages. Approved media is returned only through short-lived signed URLs from Edge Functions.
+
+Member profile Edge Functions:
+
+- `list-member-profiles`
+- `get-member-profile`
+- `submit-member-profile-media`
+- `list-member-profile-media-queue`
+- `moderate-member-profile-media`
+
+`list-member-profiles` and `get-member-profile` require an active signed-in member. `list-member-profile-media-queue` and `moderate-member-profile-media` require the same server-side Moderator role verification as the gallery Leader Dashboard.
+
+The `reaper-discord-interactions` function also supports the moderator-only rank sync command:
+
+```text
+/sync-ranks mode:<preview|apply> confirm:<true|false>
+```
+
+Rank roles are display-only vanity roles. Reaper creates or adopts only the configured rank list with zero permissions, no hoist, no mentionable state, and no channel overwrites. Created/adopted role IDs are stored in `discord_resources` with metadata for member profile title mapping. Leaders still assign rank roles manually in Discord for v1.
+
+See [`../docs/member-profiles-and-rank-roles.md`](../docs/member-profiles-and-rank-roles.md) for the implementation boundaries and verification checklist.
+
 ## Instagram Publishing Queue
 
 Instagram publishing uses three moderator-only Edge Functions:

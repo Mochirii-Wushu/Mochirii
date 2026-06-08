@@ -11,6 +11,7 @@ import {
   moderateGallerySubmission,
   publishInstagramGallerySubmission,
 } from "@/lib/supabase/moderation";
+import { listProfileMediaQueue, moderateProfileMedia } from "@/lib/supabase/member-profiles";
 import {
   text,
   type GalleryReviewQueue,
@@ -18,6 +19,9 @@ import {
   type InstagramPublishJob,
   type InstagramPublishQueue,
   type ModerationStatus,
+  type ProfileMediaQueue,
+  type ProfileMediaQueueItem,
+  type ProfileMediaStatus,
 } from "@/lib/supabase/types";
 import { formatBytes, formatDate } from "./format";
 
@@ -37,6 +41,14 @@ const instagramStatuses: Array<{ id: string; label: string; empty: string }> = [
   { id: "all", label: "All", empty: "No Instagram publishing jobs." },
 ];
 
+const profileMediaStatuses: Array<{ id: ProfileMediaStatus | "all"; label: string; empty: string }> = [
+  { id: "pending", label: "Pending", empty: "No pending profile images." },
+  { id: "approved", label: "Approved", empty: "No approved profile images." },
+  { id: "rejected", label: "Rejected", empty: "No rejected profile images." },
+  { id: "archived", label: "Archived", empty: "No archived profile images." },
+  { id: "all", label: "All", empty: "No profile images in the queue." },
+];
+
 function normalizeStatus(value: unknown): ModerationStatus {
   const status = text(value, "pending").toLowerCase();
   return statuses.some((entry) => entry.id === status) ? (status as ModerationStatus) : "pending";
@@ -48,6 +60,10 @@ function statusConfig(status: ModerationStatus) {
 
 function instagramStatusConfig(status: string) {
   return instagramStatuses.find((entry) => entry.id === status) || instagramStatuses[0];
+}
+
+function profileMediaStatusConfig(status: string) {
+  return profileMediaStatuses.find((entry) => entry.id === status) || profileMediaStatuses[0];
 }
 
 function uploaderName(item: GalleryReviewSubmission) {
@@ -68,6 +84,10 @@ function instagramConsentLabel(item: GalleryReviewSubmission) {
 function moderatorName(event: NonNullable<GalleryReviewSubmission["moderationEvents"]>[number]) {
   const moderator = event.moderator || {};
   return moderator.discordGlobalName || moderator.displayName || moderator.discordUsername || "Moderator";
+}
+
+function profileMediaKindLabel(value: unknown) {
+  return text(value, "avatar").toLowerCase() === "banner" ? "Banner" : "Avatar";
 }
 
 function QueueSummary({ queue, shown }: { queue: GalleryReviewQueue | null; shown: number }) {
@@ -351,6 +371,87 @@ function InstagramJobCard({
   );
 }
 
+function ProfileMediaCard({
+  item,
+  busy,
+  reason,
+  onReasonChange,
+  onModerate,
+}: {
+  item: ProfileMediaQueueItem;
+  busy: boolean;
+  reason: string;
+  onReasonChange: (value: string) => void;
+  onModerate: (item: ProfileMediaQueueItem, action: "approved" | "rejected") => void;
+}) {
+  const status = text(item.status, "pending").toLowerCase();
+  const kind = profileMediaKindLabel(item.kind);
+  const uploader = item.uploader || {};
+  const title = `${kind} image`;
+
+  return (
+    <article className={`review-item review-item--${status}`} data-profile-media-id={item.id || ""}>
+      <div className="review-preview">
+        {item.signedPreviewUrl ? (
+          <img src={item.signedPreviewUrl} alt={`${title} preview`} loading="lazy" decoding="async" />
+        ) : (
+          <div className="review-preview__empty">
+            <span>Preview unavailable</span>
+          </div>
+        )}
+      </div>
+      <div className="review-details">
+        <div className="review-details__head">
+          <div>
+            <h3>{title}</h3>
+            <p className="muted">{uploader.displayName || uploader.discordGlobalName || uploader.discordUsername || "Mochirii Member"}</p>
+          </div>
+          <span className={`submission-status submission-status--${status}`}>{status}</span>
+        </div>
+        {status === "rejected" && item.rejectionReason ? <p className="review-decision">Reason: {item.rejectionReason}</p> : null}
+        <dl className="review-meta">
+          {[
+            ["Kind", kind],
+            ["Type", item.mimeType || "Unknown"],
+            ["Size", formatBytes(item.sizeBytes)],
+            ["Submitted", formatDate(item.createdAt, "Not set")],
+            ["Reviewed", item.reviewedAt ? formatDate(item.reviewedAt, "Not reviewed") : "Not reviewed"],
+            ["Filename", item.originalFilename || "Not set"],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <details className="review-storage">
+          <summary>Storage reference</summary>
+          <code>{item.storagePath || "Not available"}</code>
+        </details>
+        {status === "pending" ? (
+          <>
+            <label className="form-field review-reason">
+              <span>Decline reason</span>
+              <textarea
+                maxLength={500}
+                rows={3}
+                placeholder="Required when declining."
+                value={reason}
+                onChange={(event) => onReasonChange(event.target.value)}
+                disabled={busy}
+              />
+            </label>
+            <div className="auth-actions">
+              <button className="hero-cta hero-cta--primary" type="button" onClick={() => onModerate(item, "approved")} disabled={busy}>Approve</button>
+              <button className="hero-cta" type="button" onClick={() => onModerate(item, "rejected")} disabled={busy}>Decline</button>
+            </div>
+          </>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
 export function LeaderDashboard() {
   const [busy, setBusy] = useState(true);
   const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
@@ -369,6 +470,12 @@ export function LeaderDashboard() {
   const [instagramAltTexts, setInstagramAltTexts] = useState<Record<string, string>>({});
   const [instagramPermalinks, setInstagramPermalinks] = useState<Record<string, string>>({});
   const [instagramNotes, setInstagramNotes] = useState<Record<string, string>>({});
+  const [profileMediaActiveStatus, setProfileMediaActiveStatus] = useState<ProfileMediaStatus | "all">("pending");
+  const [profileMediaQueue, setProfileMediaQueue] = useState<ProfileMediaQueue | null>(null);
+  const [profileMediaBusy, setProfileMediaBusy] = useState(false);
+  const [profileMediaStatus, setProfileMediaStatus] = useState("Profile image queue has not loaded yet.");
+  const [profileMediaError, setProfileMediaError] = useState("");
+  const [profileMediaReasons, setProfileMediaReasons] = useState<Record<string, string>>({});
 
   const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
     const nextStatus = normalizeStatus(status);
@@ -440,6 +547,40 @@ export function LeaderDashboard() {
     setInstagramBusy(false);
   }, [instagramActiveStatus]);
 
+  const loadProfileMediaQueue = useCallback(async ({
+    status = profileMediaActiveStatus,
+    successMessage = "",
+  }: {
+    status?: ProfileMediaStatus | "all";
+    successMessage?: string;
+  } = {}) => {
+    const nextStatus = profileMediaStatusConfig(status).id;
+    const config = profileMediaStatusConfig(nextStatus);
+    setProfileMediaActiveStatus(nextStatus);
+    setProfileMediaBusy(true);
+    setProfileMediaError("");
+    setProfileMediaStatus(`Loading ${config.label.toLowerCase()} profile images.`);
+
+    const result = await listProfileMediaQueue(nextStatus);
+    if (!result.ok) {
+      setProfileMediaQueue(null);
+      setProfileMediaError(result.message || "Profile image queue could not be loaded.");
+      setProfileMediaStatus("");
+      setProfileMediaBusy(false);
+      return;
+    }
+
+    const data = result.data || { media: [] };
+    setProfileMediaQueue(data);
+    setProfileMediaStatus(
+      successMessage ||
+        (data.media?.length
+          ? `${data.media.length} ${config.label.toLowerCase()} profile image${data.media.length === 1 ? "" : "s"} shown.`
+          : config.empty),
+    );
+    setProfileMediaBusy(false);
+  }, [profileMediaActiveStatus]);
+
   const checkAccess = useCallback(async () => {
     setBusy(true);
     setReviewError("");
@@ -462,7 +603,8 @@ export function LeaderDashboard() {
     setPanel("review");
     await loadQueue({ status: activeStatus });
     await loadInstagramQueue({ status: instagramActiveStatus });
-  }, [activeStatus, instagramActiveStatus, loadInstagramQueue, loadQueue]);
+    await loadProfileMediaQueue({ status: profileMediaActiveStatus });
+  }, [activeStatus, instagramActiveStatus, loadInstagramQueue, loadProfileMediaQueue, loadQueue, profileMediaActiveStatus]);
 
   useEffect(() => {
     void Promise.resolve().then(() => checkAccess());
@@ -589,6 +731,32 @@ export function LeaderDashboard() {
     });
   }
 
+  async function moderateProfileImage(item: ProfileMediaQueueItem, action: "approved" | "rejected") {
+    const mediaId = text(item.id);
+    const reason = text(profileMediaReasons[mediaId]);
+
+    if (action === "rejected" && reason.length < 2) {
+      setProfileMediaError("Add a decline reason before rejecting this profile image.");
+      return;
+    }
+
+    setProfileMediaBusy(true);
+    setProfileMediaError("");
+    setProfileMediaStatus(action === "approved" ? "Approving profile image." : "Declining profile image.");
+    const result = await moderateProfileMedia(mediaId, action, reason);
+    if (!result.ok) {
+      setProfileMediaError(result.message || "Profile image could not be moderated.");
+      setProfileMediaStatus("");
+      setProfileMediaBusy(false);
+      return;
+    }
+
+    await loadProfileMediaQueue({
+      status: profileMediaActiveStatus,
+      successMessage: result.message || "Profile image moderated.",
+    });
+  }
+
   if (panel === "signed-out") {
     return (
       <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel">
@@ -620,6 +788,8 @@ export function LeaderDashboard() {
   const config = statusConfig(activeStatus);
   const instagramJobs = Array.isArray(instagramQueue?.jobs) ? instagramQueue.jobs : [];
   const instagramConfig = instagramStatusConfig(instagramActiveStatus);
+  const profileMediaItems = Array.isArray(profileMediaQueue?.media) ? profileMediaQueue.media : [];
+  const profileMediaConfig = profileMediaStatusConfig(profileMediaActiveStatus);
 
   return (
     <>
@@ -728,6 +898,54 @@ export function LeaderDashboard() {
           })
         ) : (
           <p className="muted">{instagramConfig.empty}</p>
+        )}
+      </div>
+    </section>
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="profileMediaQueuePanel">
+      <div className="auth-panel__head">
+        <div>
+          <p className="kicker">Profile Media</p>
+          <h2 className="section-title">Avatar And Banner Review</h2>
+        </div>
+        <button className="hero-cta" type="button" onClick={() => loadProfileMediaQueue({ status: profileMediaActiveStatus })} disabled={profileMediaBusy}>Refresh</button>
+      </div>
+
+      <div className="queue-tabs" role="group" aria-label="Profile media queues">
+        {profileMediaStatuses.map((status) => (
+          <button
+            className="queue-tab"
+            type="button"
+            data-status={status.id}
+            aria-pressed={status.id === profileMediaActiveStatus}
+            disabled={profileMediaBusy}
+            key={status.id}
+            onClick={() => loadProfileMediaQueue({ status: status.id })}
+          >
+            {status.label} - {Number(profileMediaQueue?.summary?.[status.id === "all" ? "total" : status.id] || 0)}
+          </button>
+        ))}
+      </div>
+
+      <p className="auth-status muted" role="status" aria-live="polite">{profileMediaStatus}</p>
+      <p className="auth-error" role="alert" hidden={!profileMediaError}>{profileMediaError}</p>
+
+      <div className="review-list" aria-live="polite">
+        {profileMediaItems.length ? (
+          profileMediaItems.map((item) => {
+            const id = text(item.id, "unknown");
+            return (
+              <ProfileMediaCard
+                item={item}
+                busy={profileMediaBusy}
+                reason={profileMediaReasons[id] || ""}
+                key={id}
+                onReasonChange={(value) => setProfileMediaReasons((current) => ({ ...current, [id]: value.slice(0, 500) }))}
+                onModerate={moderateProfileImage}
+              />
+            );
+          })
+        ) : (
+          <p className="muted">{profileMediaConfig.empty}</p>
         )}
       </div>
     </section>

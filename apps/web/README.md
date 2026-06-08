@@ -117,6 +117,8 @@ Current Next routes:
 - `/twills`
 - `/auth`
 - `/account`
+- `/members`
+- `/members/[slug]`
 - `/gallery-submit`
 - `/leader-dashboard`
 
@@ -187,6 +189,16 @@ Approval for the public Gallery never posts to Instagram automatically. If an ap
 
 Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase secrets only. They do not belong in Vercel env vars or any `NEXT_PUBLIC_*` value.
 
+## Member Profiles
+
+Member profiles build on the Phase 3 auth/member workflow. `/members` and `/members/[slug]` are members-only, `noindex` routes. They require a signed-in Supabase session plus active, recently verified Discord membership through Supabase Edge Functions.
+
+The Account page lets a member opt in to profile publication and submit avatar/banner images for review. The Leader Dashboard has a separate profile media moderation queue. Approved profile media is served through short-lived signed URLs from the private `member-profile-media` bucket; pending, rejected, and archived media never renders on profiles.
+
+The Twills route remains protected static profile content, but the visual profile layout is now shared through `components/public-pages/ProfileDisplay.tsx`.
+
+Discord guild titles come from vanity rank role IDs stored in `discord_resources` after Reaper `/sync-ranks` creates or adopts safe zero-permission roles. Vercel/Next never mutates Discord roles and never stores Discord bot tokens.
+
 What Next/Vercel handles:
 
 - Routing, React UI, metadata/noindex, legacy `.html` redirects, form state, client-side validation, file selection, and thin browser-safe Supabase integration.
@@ -205,6 +217,8 @@ Route targets to verify:
 ```text
 /auth
 /account
+/members
+/members/[slug]
 /gallery-submit
 /leader-dashboard
 ```
