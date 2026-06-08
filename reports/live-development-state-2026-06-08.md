@@ -36,23 +36,53 @@ Follow-up fix:
 - Left the canonical manual sharing status schema in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`.
 - Updated the same guardrail script and source-of-truth docs.
 
-## Current Open Development Packets
+## Final Live Release State
 
-These remain PR-gated until merged and deployed:
+Current live `main` head:
 
+```text
+2a9973d Add members-only profile directory
+```
+
+Merged in this release window:
+
+- PR #214: `Restore Supabase migration history`
+- PR #215: `Restore manual share migration history`
 - PR #211: `Record meenarii moderator verification state`
 - PR #212: `Add Reaper vanity rank role sync`
-- PR #213: `Add members-only profile directory`, stacked on PR #212
+- PR #216: `Add members-only profile directory`
+
+PR #213 was the earlier stacked member-profile PR. It was closed unmerged after PR #212 merged; the same profile work was rebased onto `main`, reopened as PR #216, and merged from there.
+
+Production checks passed on `2a9973d`:
+
+- `validate`
+- `validate-next`
+- CodeQL `Analyze (actions)`
+- CodeQL `Analyze (javascript-typescript)`
+- `Supabase Preview`
+- Vercel `build`
+- Vercel `deploy`
+
+Live domain smoke passed after deployment:
+
+- `https://mochirii.com` serves the Vercel/Next app.
+- `https://www.mochirii.com` redirects to `https://mochirii.com`.
+- Clean routes and legacy `.html` redirects passed `scripts/smoke-dns-cutover-post.mjs`.
+- `scripts/smoke-vercel-production.mjs` passed for the Vercel fallback URL.
+- `https://mochirii.com/members` returns `200 OK`.
+- `https://mochirii.com/members/test-profile` resolves through the dynamic profile route.
+
+No active Codex development PRs remain open from this release packet. Older draft PRs #178 and #180 are pre-existing Vercel observability drafts and were not part of this release; observability is already documented as live in `apps/web/README.md` and `reports/vercel-observability-verification-2026-06-08.md`.
 
 Owner-gated actions still require explicit action-time approval:
 
 - Running Discord `/sync-ranks mode:apply confirm:true`
-- Deploying new production Supabase migrations/functions for member profiles if not handled by the GitHub/Supabase integration
 - Any real Instagram API publish action
 
 ## Verification Notes
 
 - GitHub CLI is authenticated as `xartaiusx`.
 - Supabase CLI `2.105.0` is available at `C:\Users\xtyty\.bun\install\cache\@supabase\cli-windows-x64@2.105.0@@@1\bin\supabase.exe`, but local CLI auth is not configured in this shell.
-- Because the CLI has no local Supabase access token, remote migration history was inferred from Git history plus the Supabase Preview error and guarded through local files.
+- Because the CLI has no local Supabase access token, remote migration history was confirmed through the logged-in Supabase SQL Editor and guarded through local files.
 
