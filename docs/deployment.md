@@ -44,6 +44,8 @@ The Next app sets conservative response headers from `apps/web/next.config.ts`:
 
 Keep CSP in report-only mode until production browser checks confirm Discord widgets, Spotify embeds, Supabase signed URLs, and Vercel observability scripts are all clean. After that, promote CSP to enforcement in a separate scoped PR.
 
+The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
+
 ## Supabase Preview Migration History
 
 Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
