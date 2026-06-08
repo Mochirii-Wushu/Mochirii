@@ -104,6 +104,12 @@ Current Next routes:
 
 Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
+## Current Visual Shell Standard
+
+Shared `PageHero` routes should show their hero artwork as full-frame images in a stable `3 / 2` layout. The current standard is `object-fit: contain`, no crop, no tint/scrim/filter, and no intro-card overlap. Intro cards sit below the image with positive spacing while each page keeps its existing palette, glass styling, copy, image paths, metadata, and route behavior.
+
+Visual-only shell releases should verify Home and all shared routes at `360`, `390`, `768`, `1024`, and `1440` pixel widths before PR approval. Keep root `data/` and `apps/web/public/data/` synchronized when an approved root data correction is included.
+
 ## Migrated in Phase 1
 
 - Next.js TypeScript App Router scaffold under `apps/web`.
