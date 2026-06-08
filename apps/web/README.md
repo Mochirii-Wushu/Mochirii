@@ -57,6 +57,12 @@ Root-level `vercel link --repo` was tested as a reversible monorepo-link cleanup
 
 Do not commit `.vercel/`.
 
+## Security Headers
+
+`next.config.ts` owns app-level security headers for the Vercel surface. Keep Cloudflare DNS-only for Vercel web records; use Vercel's platform firewall/DDoS layer as the active edge protection.
+
+The current CSP is `Content-Security-Policy-Report-Only` so Discord widgets, Spotify embeds, Supabase signed URLs, and Vercel observability can be verified before enforcement. Do not promote it to `Content-Security-Policy` without a production browser pass on those surfaces.
+
 ## Vercel Observability
 
 The app is wired for Vercel Web Analytics and Speed Insights from the root layout with the official Next.js packages:

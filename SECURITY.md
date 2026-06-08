@@ -22,3 +22,11 @@ Security-sensitive areas include:
 - Member-only upload, account, and leader dashboard flows
 
 Do not include real secrets, tokens, private member data, or exploit payloads beyond what is necessary to explain the issue.
+
+## Current Hardening Baseline
+
+- `mochirii.com` is served from Vercel/Next; Cloudflare is DNS-only for the Vercel web records.
+- App-level security headers are defined in `apps/web/next.config.ts`.
+- CSP starts as `Content-Security-Policy-Report-Only` until Discord, Spotify, Supabase, and Vercel observability are verified clean in production.
+- Supabase service-role keys, Discord bot tokens, Instagram credentials, and OAuth client secrets must stay in Supabase secrets or other server-only provider storage, never browser code or docs.
+- Run `npm run check:security-hardening` before security-sensitive changes.

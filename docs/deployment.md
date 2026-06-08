@@ -29,6 +29,21 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
+## Security Hardening
+
+Production security is Vercel-first: `mochirii.com` stays on the canonical Vercel/Next project, and Cloudflare remains DNS-only for the Vercel web records. Do not orange-cloud the Vercel apex or `www` records unless a separate reverse-proxy test plan is approved.
+
+The Next app sets conservative response headers from `apps/web/next.config.ts`:
+
+- `Content-Security-Policy-Report-Only`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy`
+- `Cross-Origin-Opener-Policy`
+- `X-Frame-Options: DENY`
+
+Keep CSP in report-only mode until production browser checks confirm Discord widgets, Spotify embeds, Supabase signed URLs, and Vercel observability scripts are all clean. After that, promote CSP to enforcement in a separate scoped PR.
+
 ## Supabase Preview Migration History
 
 Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
