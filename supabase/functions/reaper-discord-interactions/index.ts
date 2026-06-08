@@ -1,4 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "@supabase/supabase-js";
 import nacl from "tweetnacl";
 
 type JsonRecord = Record<string, unknown>;
@@ -11,7 +12,10 @@ const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
+const EXPECTED_MODERATOR_ROLE_IDS = ["1078630751165222984"];
+const BASE_GUILD_ROLE_ID = "1468659807736299520";
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
 const EPHEMERAL_FLAG = 1 << 6;
 const INTERACTION_TYPE_PING = 1;
@@ -22,6 +26,19 @@ const INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5;
 const OPTION_TYPE_STRING = 3;
 const OPTION_TYPE_BOOLEAN = 5;
 const OPTION_TYPE_ATTACHMENT = 11;
+
+const RANK_ROLES = [
+  { name: "Guild Leader", tier: "senior", order: 1 },
+  { name: "Vice Leader", tier: "senior", order: 2 },
+  { name: "Hall Leader", tier: "senior", order: 3 },
+  { name: "Dharmapala", tier: "middle", order: 4 },
+  { name: "Lotus Warden", tier: "middle", order: 5 },
+  { name: "Petal Keeper", tier: "middle", order: 6 },
+  { name: "Mochi Blossom", tier: "members", order: 7 },
+  { name: "Young Bamboo", tier: "members", order: 8 },
+  { name: "Softwind", tier: "members", order: 9 },
+  { name: "Rice Sprout", tier: "members", order: 10 },
+];
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -78,6 +95,21 @@ function parseCsv(value: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
+function getServiceRoleKey(): string {
+  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (direct) return direct;
+
+  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
+  if (!secretKeys) return "";
+
+  try {
+    const parsed = JSON.parse(secretKeys);
+    return String(parsed.default || parsed.service_role || "");
+  } catch {
+    return "";
+  }
+}
+
 function snowflake(value: unknown): string | null {
   const id = safeString(value, 24);
   return id && /^\d{16,22}$/.test(id) ? id : null;
@@ -105,6 +137,213 @@ function expectedRoleConfigMatches(configuredRoleIds: string[]): boolean {
     configuredRoleIds.length === EXPECTED_REQUIRED_ROLE_IDS.length &&
     EXPECTED_REQUIRED_ROLE_IDS.every((roleId) => configuredRoleIds.includes(roleId))
   );
+}
+
+function expectedModeratorConfigMatches(configuredRoleIds: string[]): boolean {
+  return (
+    configuredRoleIds.length === EXPECTED_MODERATOR_ROLE_IDS.length &&
+    EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => configuredRoleIds.includes(roleId))
+  );
+}
+
+function hasPermission(permissionValue: unknown, permission: bigint): boolean {
+  try {
+    const value = BigInt(String(permissionValue || "0"));
+    return (value & permission) === permission;
+  } catch {
+    return false;
+  }
+}
+
+function roleNameKey(value: unknown): string {
+  return String(value || "").trim().toLowerCase();
+}
+
+function discordApiHeaders(contentType = false): Headers {
+  const headers = new Headers({
+    Authorization: `Bot ${Deno.env.get("DISCORD_BOT_TOKEN") || ""}`,
+    Accept: "application/json",
+  });
+  if (contentType) headers.set("Content-Type", "application/json");
+  return headers;
+}
+
+async function discordApi(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const response = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
+  const text = await response.text();
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+  return { ok: response.ok, status: response.status, data };
+}
+
+function hasChannelOverwrite(channels: JsonRecord[], roleId: string): boolean {
+  return channels.some((channel) =>
+    asArray(channel.permission_overwrites).some((overwrite) => {
+      const record = asRecord(overwrite);
+      if (safeString(record.id, 24) !== roleId) return false;
+      const allow = String(record.allow || "0");
+      const deny = String(record.deny || "0");
+      return allow !== "0" || deny !== "0";
+    })
+  );
+}
+
+function roleSafetyProblems(role: JsonRecord, channels: JsonRecord[]): string[] {
+  const problems: string[] = [];
+  const roleId = safeString(role.id, 24) || "";
+  if (String(role.permissions || "0") !== "0") problems.push("nonzero permissions");
+  if (role.hoist === true) problems.push("displayed separately");
+  if (role.mentionable === true) problems.push("mentionable");
+  if (hasChannelOverwrite(channels, roleId)) problems.push("channel overwrites");
+  return problems;
+}
+
+function rankSummaryLine(action: string, rankName: string, detail = ""): string {
+  return detail ? `${action}: ${rankName} (${detail})` : `${action}: ${rankName}`;
+}
+
+async function upsertDiscordResource(role: JsonRecord, rank: typeof RANK_ROLES[number]): Promise<void> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const serviceRoleKey = getServiceRoleKey();
+  const roleId = safeString(role.id, 24);
+
+  if (!supabaseUrl || !serviceRoleKey || !roleId) {
+    throw new Error("Supabase service credentials are not configured for rank registry updates.");
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { error } = await adminClient
+    .from("discord_resources")
+    .upsert(
+      {
+        kind: "role",
+        label: rank.name,
+        discord_id: roleId,
+        discord_parent_id: EXPECTED_DISCORD_GUILD_ID,
+        enabled: true,
+        description: `Vanity guild rank role for ${rank.name}.`,
+        metadata: {
+          managedBy: "reaper-rank-sync",
+          vanityOnly: true,
+          rankTier: rank.tier,
+          rankOrder: rank.order,
+          source: "data/ranks.json",
+          baseAccessRoleId: BASE_GUILD_ROLE_ID,
+        },
+      },
+      { onConflict: "kind,discord_id" },
+    );
+
+  if (error) {
+    console.error("reaper-discord-interactions rank registry upsert failed", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error("Rank role was created but could not be recorded in the website registry.");
+  }
+}
+
+async function processRankSync(
+  mode: string,
+  interactionToken: string,
+  applicationId: string,
+): Promise<void> {
+  const apply = mode === "apply";
+  const lines: string[] = [];
+
+  try {
+    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
+      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper rank sync is missing the Discord bot token.");
+      return;
+    }
+
+    const rolesResponse = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
+      headers: discordApiHeaders(),
+    });
+    const channelsResponse = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/channels`, {
+      headers: discordApiHeaders(),
+    });
+
+    if (!rolesResponse.ok || !channelsResponse.ok) {
+      await editOriginalInteractionResponse(
+        applicationId,
+        interactionToken,
+        "Reaper could not read guild roles and channels. Check bot role hierarchy and permissions.",
+      );
+      return;
+    }
+
+    const roles = asArray(rolesResponse.data).map(asRecord);
+    const channels = asArray(channelsResponse.data).map(asRecord);
+    const roleByName = new Map(roles.map((role) => [roleNameKey(role.name), role]));
+
+    for (const rank of RANK_ROLES) {
+      const existing = roleByName.get(roleNameKey(rank.name));
+      if (existing) {
+        const problems = roleSafetyProblems(existing, channels);
+        if (problems.length) {
+          lines.push(rankSummaryLine("Blocked", rank.name, problems.join(", ")));
+          continue;
+        }
+
+        lines.push(rankSummaryLine("Adopted", rank.name, `role ${safeString(existing.id, 24) || "unknown"}`));
+        if (apply) await upsertDiscordResource(existing, rank);
+        continue;
+      }
+
+      if (!apply) {
+        lines.push(rankSummaryLine("Would create", rank.name, "zero-permission vanity role"));
+        continue;
+      }
+
+      const createResponse = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
+        method: "POST",
+        headers: discordApiHeaders(true),
+        body: JSON.stringify({
+          name: rank.name,
+          permissions: "0",
+          color: 0,
+          hoist: false,
+          mentionable: false,
+        }),
+      });
+
+      if (!createResponse.ok) {
+        lines.push(rankSummaryLine("Blocked", rank.name, `Discord API ${createResponse.status}`));
+        continue;
+      }
+
+      const createdRole = asRecord(createResponse.data);
+      lines.push(rankSummaryLine("Created", rank.name, `role ${safeString(createdRole.id, 24) || "unknown"}`));
+      await upsertDiscordResource(createdRole, rank);
+    }
+
+    const intro = apply
+      ? "Rank sync finished. Rank roles are vanity-only; assign them manually in Discord."
+      : "Rank sync preview. No Discord roles were changed.";
+    await editOriginalInteractionResponse(applicationId, interactionToken, `${intro}\n${lines.slice(0, 20).join("\n")}`);
+  } catch (error) {
+    console.error("reaper-discord-interactions rank sync failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    await editOriginalInteractionResponse(
+      applicationId,
+      interactionToken,
+      "Reaper rank sync could not be completed. Check configuration and try preview again.",
+    );
+  }
 }
 
 function verifyDiscordSignature(req: Request, rawBody: string, publicKey: string): boolean {
@@ -277,17 +516,62 @@ Deno.serve(async (req: Request) => {
 
   const data = asRecord(interaction.data);
   const commandName = safeString(data.name, 80)?.toLowerCase() || "";
-  if (commandName !== "submit") {
+  if (!["submit", "sync-ranks"].includes(commandName)) {
     return interactionMessage("That Reaper command is not supported.");
   }
 
   const configuredGuildId = Deno.env.get("DISCORD_GUILD_ID") || "";
   const configuredChannelId = Deno.env.get("DISCORD_GALLERY_CHANNEL_ID") || "";
   const configuredRequiredRoleIds = parseCsv(Deno.env.get("DISCORD_REQUIRED_ROLE_IDS"));
+  const configuredModeratorRoleIds = parseCsv(Deno.env.get("DISCORD_MODERATOR_ROLE_IDS"));
   const guildId = snowflake(interaction.guild_id);
   const channelId = snowflake(interaction.channel_id);
   const member = asRecord(interaction.member);
   const discordUserId = snowflake(asRecord(member.user).id);
+  const memberRoleIds = asStringArray(member.roles);
+  const interactionId = snowflake(interaction.id);
+  const interactionToken = safeString(interaction.token, 512);
+  const applicationId = snowflake(interaction.application_id) || Deno.env.get("DISCORD_APPLICATION_ID") || "";
+
+  if (!interactionId || !interactionToken || !applicationId) {
+    return interactionMessage("Discord interaction could not be identified.");
+  }
+
+  if (commandName === "sync-ranks") {
+    const mode = stringOption(data, "mode", 20)?.toLowerCase() || "preview";
+    const confirm = booleanOption(data, "confirm");
+    const memberPermissions = safeString(member.permissions, 80) || "0";
+    const hasModeratorRole = EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
+
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+      console.error("reaper-discord-interactions missing or mismatched rank sync configuration", {
+        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+        moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
+        configuredModeratorRoleCount: configuredModeratorRoleIds.length,
+      });
+      return interactionMessage("Reaper rank sync is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
+      return interactionMessage("Use this command in the Mōchirīī Discord server.");
+    }
+
+    if (!discordUserId || !hasModeratorRole || !hasPermission(memberPermissions, MANAGE_ROLES_PERMISSION)) {
+      return interactionMessage("Rank sync requires the Moderator role and Discord Manage Roles permission.");
+    }
+
+    if (!["preview", "apply"].includes(mode)) {
+      return interactionMessage("Choose sync-ranks mode preview or apply.");
+    }
+
+    if (mode === "apply" && !confirm) {
+      return interactionMessage("Run /sync-ranks mode:apply confirm:true after reviewing preview.");
+    }
+
+    EdgeRuntime.waitUntil(processRankSync(mode, interactionToken, applicationId));
+    return deferredEphemeralResponse();
+  }
+
   const title = stringOption(data, "title", 90);
   const caption = stringOption(data, "subtitle", 220);
   const instagramOptIn = booleanOption(data, "share_to_instagram");
@@ -297,7 +581,6 @@ Deno.serve(async (req: Request) => {
   const mimeType = normalizedMime(attachment.content_type);
   const sizeBytes = Number(attachment.size);
   const originalFilename = safeString(attachment.filename, 255);
-  const memberRoleIds = asStringArray(member.roles);
   const missingRequestRoleIds = EXPECTED_REQUIRED_ROLE_IDS.filter((roleId) => !memberRoleIds.includes(roleId));
 
   if (
@@ -328,14 +611,6 @@ Deno.serve(async (req: Request) => {
 
   if (!title || !caption) {
     return interactionMessage("Add both a title and subtitle for the gallery submission.");
-  }
-
-  const interactionId = snowflake(interaction.id);
-  const interactionToken = safeString(interaction.token, 512);
-  const applicationId = snowflake(interaction.application_id) || Deno.env.get("DISCORD_APPLICATION_ID") || "";
-
-  if (!interactionId || !interactionToken || !applicationId) {
-    return interactionMessage("Discord submission could not be identified.");
   }
 
   const payload = {

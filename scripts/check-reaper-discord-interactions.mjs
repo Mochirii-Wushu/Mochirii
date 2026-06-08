@@ -60,6 +60,7 @@ assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
 
 [
   '"tweetnacl": "npm:tweetnacl@1.0.3"',
+  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2"',
   '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js/edge-runtime.d.ts"',
 ].forEach((snippet) => assertIncludes("import map", importMap, snippet));
 
@@ -86,6 +87,12 @@ assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
   "caption",
   "Use this command in the gallery submissions channel.",
   "Refresh Discord verification on mochirii.com/account before submitting gallery images.",
+  "sync-ranks",
+  "permissions: \"0\"",
+  "hoist: false",
+  "mentionable: false",
+  "mode === \"apply\" && !confirm",
+  "discord_resources",
 ].forEach((snippet) => assertIncludes("reaper-discord-interactions", functionSource, snippet));
 
 assertMatches(
