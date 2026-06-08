@@ -58,11 +58,11 @@ Optional local Playwright smoke scripts were unavailable on this workstation bec
 ## Release Status
 
 - Draft PR: [#203](https://github.com/Mochirii-Wushu/Mochirii/pull/203).
-- Release commit: `01955f2dc7176c0511f37d17f2c09449176c4cbf`.
-- Vercel preview status: Ready.
+- Initial implementation commit: `01955f2dc7176c0511f37d17f2c09449176c4cbf`.
+- Vercel preview status: tracked by the Vercel status check on PR #203.
 - Vercel preview URL: `https://mochirii-git-codex-home-cinematic-guild-hall-design-mochirii.vercel.app`.
-- Vercel deployment evidence: `https://vercel.com/mochirii/mochirii/JDWHkSPMsSviRsHLqKeSxxHiXJWF`.
-- GitHub checks: `validate`, `validate-next`, CodeQL, Vercel, and Vercel Preview Comments passed; Supabase Preview skipped because no `supabase` directory changes were detected.
+- Vercel deployment evidence: use the current Vercel status target on PR #203 because each report-only push creates a new preview deployment URL in Vercel.
+- GitHub checks: `validate`, `validate-next`, CodeQL, Vercel, and Vercel Preview Comments must pass on the current PR head; Supabase Preview may skip when no `supabase` directory changes are detected.
 - Preview browser note: the in-app browser was redirected to Vercel login/deployment protection for the preview URL, so route-level visual preview still needs an authenticated browser review before merge.
 - Production deployment: pending PR approval, merge to `main`, and Vercel production deployment.
 
