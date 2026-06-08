@@ -271,6 +271,8 @@ export function AccountPanel() {
   const profileIsPublished = profile?.profile_public_enabled === true;
   const profileSlug = text(profile?.profile_slug);
   const latestMedia = (kind: ProfileMediaKind) => profileMedia.find((item) => text(item.media_kind).toLowerCase() === kind);
+  const discordHandle = text(profile?.discord_handle || profile?.discord_username || profile?.discord_global_name, signedInName(user, profile));
+  const bioLength = formState.bio.length;
 
   return (
     <div className="grid-12 grid-gap" id="accountPanel">
@@ -292,6 +294,10 @@ export function AccountPanel() {
             <div>
               <dt>Discord identity</dt>
               <dd>{signedInName(user, profile)}</dd>
+            </div>
+            <div>
+              <dt>Discord handle</dt>
+              <dd>{discordHandle}</dd>
             </div>
             <div>
               <dt>Member status</dt>
@@ -478,6 +484,18 @@ export function AccountPanel() {
           <p className="kicker">Profile</p>
           <h2 className="section-title section-title--sm">Editable Fields</h2>
 
+          <label className="form-field">
+            <span>Discord handle</span>
+            <input
+              id="discord_handle_readonly"
+              value={discordHandle}
+              readOnly
+              aria-readonly="true"
+              disabled={busy}
+            />
+            <small>Verified from Discord and not editable here.</small>
+          </label>
+
           {coreProfileFields.map(([field, label]) => (
             <label className="form-field" key={field}>
               <span>{label}</span>
@@ -496,30 +514,17 @@ export function AccountPanel() {
           ))}
 
           <label className="form-field">
-            <span>Avatar URL</span>
-            <input
-              id="avatar_url"
-              name="avatar_url"
-              maxLength={500}
-              inputMode="url"
-              autoComplete="url"
-              value={formState.avatar_url}
-              onChange={(event) => setFormState((current) => ({ ...current, avatar_url: event.target.value }))}
-              disabled={busy}
-            />
-          </label>
-
-          <label className="form-field">
             <span>Bio</span>
             <textarea
               id="bio"
               name="bio"
-              maxLength={500}
+              maxLength={1000}
               rows={5}
               value={formState.bio}
               onChange={(event) => setFormState((current) => ({ ...current, bio: event.target.value }))}
               disabled={busy}
             />
+            <small>{bioLength} / 1000 characters</small>
           </label>
 
           <div className="auth-actions">

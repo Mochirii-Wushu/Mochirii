@@ -10,6 +10,9 @@ This feature adds members-only profile pages and Discord vanity rank roles while
 - Profiles are members-only. `/members` and `/members/[slug]` require active, recently verified Discord membership.
 - Profile publishing is opt-in. New and existing profiles stay hidden until the member enables publication from Account.
 - Profile media requires moderator approval. Pending, rejected, and archived avatar/banner uploads never appear on profile pages.
+- Discord handle is server-owned. `verify-discord-member` writes it from Discord user data, and the Account form must render it read-only.
+- Editable member fields are limited to display name, game UID, region, timezone, and a bio of up to 1,000 characters.
+- Profile avatar and banner uploads may be up to 50 MB per file, but approved profile pages must continue using private signed URLs rather than public Storage paths.
 - No Discord role mutation happens from CI, local validation, Vercel, or browser code. The `/sync-ranks` command performs live Discord role work only when a moderator runs `mode:apply confirm:true`.
 - No service-role key, Discord bot token, or Storage signing secret reaches Vercel, browser code, docs, screenshots, or PR text.
 
@@ -46,6 +49,13 @@ Migration `20260608210000_add_member_profiles_and_media.sql` adds:
 - `member_profile_media_events`
 - private Storage bucket `member-profile-media`
 
+Migration `20260608233000_refine_member_profile_identity_media.sql` refines the launch profile contract:
+
+- bio limit increases from 500 to 1,000 characters
+- `discord_handle` and legacy `avatar_url` are removed from browser update grants
+- `member-profile-media` avatar/banner size limits become 50 MB per file
+- existing handles are backfilled from stored Discord username/global-name data where available
+
 Direct broad profile reads are not opened. Browser code calls Edge Functions that return safe profile DTOs.
 
 Profile Edge Functions:
@@ -73,8 +83,10 @@ Account adds:
 
 - profile visibility toggle
 - profile link when published
+- read-only Discord handle from verified Discord identity
 - avatar and banner upload controls
 - latest avatar/banner review status
+- editable fields for display name, game UID, region, timezone, and bio only
 
 Leader Dashboard adds:
 
@@ -101,6 +113,11 @@ Manual preview:
 - active verified member can load `/members`
 - unpublished profiles stay hidden
 - published profile loads at `/members/[slug]`
+- filled display fields render on the published profile
+- Discord handle is read-only on Account and visible on the member profile when available
+- 1,000-character bio saves; 1,001-character bio fails validation
+- avatar/banner media up to 50 MB queues for review; larger files fail
+- guild title falls back to Mōchirīī Member unless a fresh Discord verification includes an enabled Reaper rank role
 - pending/rejected media does not render on profiles
 - approved avatar/banner media renders through signed URLs
 - non-moderator cannot open profile media queue

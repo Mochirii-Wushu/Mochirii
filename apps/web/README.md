@@ -193,11 +193,11 @@ Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase 
 
 Member profiles build on the Phase 3 auth/member workflow. `/members` and `/members/[slug]` are members-only, `noindex` routes. They require a signed-in Supabase session plus active, recently verified Discord membership through Supabase Edge Functions.
 
-The Account page lets a member opt in to profile publication and submit avatar/banner images for review. The Leader Dashboard has a separate profile media moderation queue. Approved profile media is served through short-lived signed URLs from the private `member-profile-media` bucket; pending, rejected, and archived media never renders on profiles.
+The Account page lets a member opt in to profile publication, edit safe profile fields, and submit avatar/banner images for review. Discord handle is read-only and refreshed from Discord verification, not typed by the member. Bios allow up to 1,000 characters. Avatar and banner uploads allow up to 50 MB per file before moderation. The Leader Dashboard has a separate profile media moderation queue. Approved profile media is served through short-lived signed URLs from the private `member-profile-media` bucket; pending, rejected, and archived media never renders on profiles.
 
 The Twills route remains protected static profile content, but the visual profile layout is now shared through `components/public-pages/ProfileDisplay.tsx`.
 
-Discord guild titles come from vanity rank role IDs stored in `discord_resources` after Reaper `/sync-ranks` creates or adopts safe zero-permission roles. Vercel/Next never mutates Discord roles and never stores Discord bot tokens.
+Discord guild titles come from fresh verified Discord role snapshots matched against vanity rank role IDs stored in `discord_resources` after Reaper `/sync-ranks` creates or adopts safe zero-permission roles. Vercel/Next never mutates Discord roles and never stores Discord bot tokens.
 
 What Next/Vercel handles:
 

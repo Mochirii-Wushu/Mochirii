@@ -533,7 +533,9 @@ Profile media uses a separate private Storage bucket:
 member-profile-media
 ```
 
-The browser uploads avatar/banner candidates to that bucket and then calls `submit-member-profile-media`. Pending, rejected, and archived media does not appear on profile pages. Approved media is returned only through short-lived signed URLs from Edge Functions.
+The browser uploads avatar/banner candidates to that bucket and then calls `submit-member-profile-media`. Avatar and banner candidates allow up to 50 MB per file, matching the bucket file-size limit, but moderators should approve reasonably optimized images for profile-page performance. Pending, rejected, and archived media does not appear on profile pages. Approved media is returned only through short-lived signed URLs from Edge Functions.
+
+Discord identity fields are service-managed. `verify-discord-member` refreshes `discord_handle` from Discord user data; browser clients may edit only display name, game UID, region, timezone, bio, and profile publication state. Bios are capped at 1,000 characters.
 
 Member profile Edge Functions:
 
@@ -551,7 +553,7 @@ The `reaper-discord-interactions` function also supports the moderator-only rank
 /sync-ranks mode:<preview|apply> confirm:<true|false>
 ```
 
-Rank roles are display-only vanity roles. Reaper creates or adopts only the configured rank list with zero permissions, no hoist, no mentionable state, and no channel overwrites. Created/adopted role IDs are stored in `discord_resources` with metadata for member profile title mapping. Leaders still assign rank roles manually in Discord for v1.
+Rank roles are display-only vanity roles. Reaper creates or adopts only the configured rank list with zero permissions, no hoist, no mentionable state, and no channel overwrites. Created/adopted role IDs are stored in `discord_resources` with metadata for member profile title mapping. Member profile titles render only from fresh verified Discord roles matched to enabled Reaper-managed rank records. Leaders still assign rank roles manually in Discord for v1.
 
 See [`../docs/member-profiles-and-rank-roles.md`](../docs/member-profiles-and-rank-roles.md) for the implementation boundaries and verification checklist.
 

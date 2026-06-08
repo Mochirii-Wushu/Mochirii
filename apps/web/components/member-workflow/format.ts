@@ -6,23 +6,19 @@ import type { User } from "@supabase/supabase-js";
 export const editableProfileFields = [
   "display_name",
   "game_uid",
-  "discord_handle",
   "region",
   "timezone",
-  "avatar_url",
   "bio",
 ] as const;
 
 export const coreProfileFields = [
   ["display_name", "Display name"],
   ["game_uid", "Game UID"],
-  ["discord_handle", "Discord handle"],
   ["region", "Region"],
   ["timezone", "Timezone"],
 ] as const;
 
 export const optionalProfileFields = [
-  ["avatar_url", "Avatar URL"],
   ["bio", "Bio"],
 ] as const;
 

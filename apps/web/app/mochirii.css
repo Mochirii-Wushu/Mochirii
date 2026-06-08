@@ -2982,6 +2982,34 @@ body[data-page="member-profile"] .profile-avatar{
     0 0 42px rgba(218,181,94,.08);
 }
 
+.profile-detail-list{
+  display:grid;
+  gap:10px;
+  margin:18px 0 0;
+}
+
+.profile-detail-list div{
+  display:grid;
+  gap:4px;
+  padding:10px 12px;
+  border:1px solid rgba(220,235,255,.14);
+  border-radius:14px;
+  background:rgba(0,0,0,.16);
+}
+
+.profile-detail-list dt{
+  color:var(--muted);
+  font-size:.78rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.profile-detail-list dd{
+  margin:0;
+  color:var(--text);
+  overflow-wrap:anywhere;
+}
+
 body[data-page="member-profile"] #memberProfileBio{
   width:100%;
   max-width:68ch;

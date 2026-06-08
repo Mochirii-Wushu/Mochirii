@@ -11,8 +11,8 @@ export const CORS_HEADERS = {
 export const PROFILE_MEDIA_BUCKET = "member-profile-media";
 export const PROFILE_MEDIA_SIGNED_URL_SECONDS = 10 * 60;
 export const PROFILE_MEDIA_LIMITS = {
-  avatar: 2 * 1024 * 1024,
-  banner: 5 * 1024 * 1024,
+  avatar: 50 * 1024 * 1024,
+  banner: 50 * 1024 * 1024,
 } as const;
 export const ACCEPTED_PROFILE_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 export const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -317,14 +317,21 @@ export async function publicProfileDto(
   const media = await mediaByIds(adminClient, [avatarId, bannerId]);
   const avatar = media.get(avatarId) || null;
   const banner = media.get(bannerId) || null;
+  const verifiedForTitle =
+    profile.member_status === "active" &&
+    profile.has_required_discord_roles === true &&
+    recentVerification(profile.discord_verified_at);
 
   return {
     id: safeString(profile.id, 80),
     slug: safeString(profile.profile_slug, 80),
     displayName: text(profile.display_name, "Mōchirīī Member"),
+    gameUid: text(profile.game_uid),
+    discordHandle: text(profile.discord_handle || profile.discord_username),
+    region: text(profile.region),
     timezone: text(profile.timezone),
     bio: text(profile.bio),
-    guildTitle: titleFromRoles(profile.discord_roles, rankResources),
+    guildTitle: verifiedForTitle ? titleFromRoles(profile.discord_roles, rankResources) : "Mōchirīī Member",
     avatarUrl: await signedMediaUrl(adminClient, avatar),
     bannerUrl: await signedMediaUrl(adminClient, banner),
     profilePublishedAt: safeString(profile.profile_published_at, 40),

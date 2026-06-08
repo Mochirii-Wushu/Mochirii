@@ -440,7 +440,7 @@ Deno.serve(async (req: Request) => {
     member_status: nextStatus,
     display_name: safeString(profile?.display_name, 40) || discordGlobalName || discordUsername || defaultDisplayName(user),
     avatar_url: safeString(profile?.avatar_url, 500) || discordAvatar,
-    discord_handle: safeString(profile?.discord_handle, 80) || discordUsername,
+    discord_handle: discordUsername || discordGlobalName,
   });
 
   const memberStatus = safeString(updatedProfile?.member_status, 40) || nextStatus;

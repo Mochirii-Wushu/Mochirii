@@ -60,10 +60,8 @@ export type MemberProfile = {
 export type EditableProfilePayload = {
   display_name?: string | null;
   game_uid?: string | null;
-  discord_handle?: string | null;
   region?: string | null;
   timezone?: string | null;
-  avatar_url?: string | null;
   bio?: string | null;
 };
 
@@ -240,6 +238,9 @@ export type PublicMemberProfile = {
   id?: string | null;
   slug?: string | null;
   displayName?: string | null;
+  gameUid?: string | null;
+  discordHandle?: string | null;
+  region?: string | null;
   timezone?: string | null;
   bio?: string | null;
   guildTitle?: string | null;
