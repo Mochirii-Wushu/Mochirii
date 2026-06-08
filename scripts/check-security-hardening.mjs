@@ -13,6 +13,7 @@ const files = {
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
+  cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
   deployment: "docs/deployment.md",
 };
 
@@ -48,13 +49,14 @@ const reaper = read(files.reaper);
 const approvedFeed = read(files.approvedFeed);
 const discordIngest = read(files.discordIngest);
 const report = read(files.report);
+const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
 
 assertIncludes("package.json", packageJson, '"check:security-hardening"');
 assertIncludes("check-all", checkAll, "check:security-hardening");
 
 [
-  "Content-Security-Policy-Report-Only",
+  "Content-Security-Policy",
   "X-Content-Type-Options",
   "nosniff",
   "Referrer-Policy",
@@ -66,13 +68,17 @@ assertIncludes("check-all", checkAll, "check:security-hardening");
   "DENY",
 ].forEach((snippet) => assertIncludes("Next security headers", nextConfig, snippet));
 
+if (nextConfig.includes("Content-Security-Policy-Report-Only")) {
+  failures.push("Next security headers: CSP should be enforced, not report-only.");
+}
+
 [
   "default-src 'self'",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "frame-src 'self' https://discord.com https://open.spotify.com",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
-].forEach((snippet) => assertIncludes("CSP report-only policy", nextConfig, snippet));
+].forEach((snippet) => assertIncludes("CSP policy", nextConfig, snippet));
 
 const verifyJwtFalseFunctions = extractVerifyJwtFalseFunctions(supabaseConfig);
 const expectedUnauthenticatedFunctions = [
@@ -135,7 +141,6 @@ assertMatches(
 [
   "Cloudflare remains DNS-only",
   "Vercel platform-wide DDoS mitigation",
-  "Content-Security-Policy-Report-Only",
   "CodeQL",
   "Dependabot",
   "verify_jwt=false",
@@ -143,8 +148,15 @@ assertMatches(
 ].forEach((snippet) => assertIncludes("security report", report, snippet));
 
 [
+  "Content-Security-Policy",
+  "no CSP report-only console violations",
+  "@vercel/analytics/next",
+  "@vercel/speed-insights/next",
+].forEach((snippet) => assertIncludes("CSP enforcement report", cspReport, snippet));
+
+[
   "Security Hardening",
-  "Content-Security-Policy-Report-Only",
+  "Content-Security-Policy",
   "Cloudflare remains DNS-only",
 ].forEach((snippet) => assertIncludes("deployment docs", deployment, snippet));
 

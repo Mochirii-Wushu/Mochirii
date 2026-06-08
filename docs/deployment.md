@@ -35,14 +35,14 @@ Production security is Vercel-first: `mochirii.com` stays on the canonical Verce
 
 The Next app sets conservative response headers from `apps/web/next.config.ts`:
 
-- `Content-Security-Policy-Report-Only`
+- `Content-Security-Policy`
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Permissions-Policy`
 - `Cross-Origin-Opener-Policy`
 - `X-Frame-Options: DENY`
 
-Keep CSP in report-only mode until production browser checks confirm Discord widgets, Spotify embeds, Supabase signed URLs, and Vercel observability scripts are all clean. After that, promote CSP to enforcement in a separate scoped PR.
+CSP was promoted from report-only to enforcement after a production Chrome pass found no report-only violations across Home, Join, Gallery, Auth, Account, Gallery Submit, Leader Dashboard, Spotify, Members, and member profile routes. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
 
 The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
 
