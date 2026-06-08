@@ -170,6 +170,18 @@ function discordApiHeaders(contentType = false): Headers {
   return headers;
 }
 
+function retryAfterMs(response: Response, data: unknown): number {
+  const headerSeconds = Number(response.headers.get("Retry-After") || "");
+  const bodySeconds = Number(asRecord(data).retry_after || "");
+  const seconds = Number.isFinite(headerSeconds) && headerSeconds > 0 ? headerSeconds : bodySeconds;
+  if (!Number.isFinite(seconds) || seconds <= 0) return 0;
+  return Math.min(Math.ceil(seconds * 1000), 5000);
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function discordApi(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; data: unknown }> {
   const response = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
   const text = await response.text();
@@ -181,6 +193,25 @@ async function discordApi(path: string, init: RequestInit = {}): Promise<{ ok: b
       data = text;
     }
   }
+
+  if (response.status === 429) {
+    const delay = retryAfterMs(response, data);
+    if (delay > 0) {
+      await wait(delay);
+      const retryResponse = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
+      const retryText = await retryResponse.text();
+      let retryData: unknown = null;
+      if (retryText) {
+        try {
+          retryData = JSON.parse(retryText);
+        } catch {
+          retryData = retryText;
+        }
+      }
+      return { ok: retryResponse.ok, status: retryResponse.status, data: retryData };
+    }
+  }
+
   return { ok: response.ok, status: response.status, data };
 }
 
