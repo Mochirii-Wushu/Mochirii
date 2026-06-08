@@ -12,7 +12,7 @@ const SIGNED_URL_SECONDS = 10 * 60;
 const QUEUE_LIMIT = 50;
 const EVENT_LIMIT = 250;
 const MEMBER_GALLERY_BUCKET = "member-gallery";
-const VALID_STATUSES = new Set(["queued", "ineligible", "publishing", "published", "failed", "canceled"]);
+const VALID_STATUSES = new Set(["queued", "ineligible", "publishing", "published", "failed", "canceled", "shared_manually"]);
 
 function normalizeStatus(value: unknown): string {
   const status = safeString(value, 20)?.toLowerCase() || "queued";

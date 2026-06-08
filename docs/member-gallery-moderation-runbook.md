@@ -115,17 +115,23 @@ The queue may show:
 - eligibility
 - job state
 - last error
-- Instagram permalink after publish
+- Instagram permalink after publish or manual share
 
 JPEG images are eligible for the v1 single-image feed workflow. PNG and WebP submissions are marked ineligible instead of being converted or posted.
 
-Before publishing:
+Current launch mode is manual sharing:
 
 - review the image and consent state
 - review or edit the Instagram caption
 - review or edit the alt text
-- confirm that the post is appropriate for the official account
+- download the image from the signed preview URL
+- copy the caption and alt text
+- post manually from the official Instagram account or Meta Business Suite
+- paste the Instagram permalink if available
+- click `Mark shared manually`
 - use the browser final confirmation
+
+Future Meta API publishing should remain disabled until Meta developer registration is available and `INSTAGRAM_*` Supabase secrets are set.
 
 Do not publish test images, live images, or retry failed jobs unless the owner has approved the live Instagram action. Do not paste signed preview URLs into Discord, GitHub, public docs, screenshots, or Meta setup notes.
 
@@ -260,6 +266,7 @@ The known large MP3 asset warning is expected unless the audio asset policy chan
 - `gallery.js`
 - `supabase.js`
 - `supabase/functions/list-instagram-publish-queue`
+- `supabase/functions/mark-instagram-gallery-submission-shared`
 - `supabase/functions/publish-instagram-gallery-submission`
 - `supabase/README.md`
 - `reports/member-gallery-end-to-end-review.md`

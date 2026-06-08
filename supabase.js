@@ -685,6 +685,15 @@
     });
   }
 
+  async function markInstagramGallerySubmissionShared(options = {}) {
+    return invokeEdgeFunction("mark-instagram-gallery-submission-shared", {
+      job_id: String(options.jobId || options.job_id || "").trim(),
+      instagram_permalink: String(options.instagramPermalink || options.instagram_permalink || "").trim(),
+      moderator_note: String(options.moderatorNote || options.moderator_note || "").trim(),
+      confirmManualShare: options.confirmManualShare === true,
+    });
+  }
+
   async function listApprovedGallerySubmissions() {
     return invokeEdgeFunction("list-approved-gallery-submissions", {});
   }
@@ -943,6 +952,7 @@
     moderateGallerySubmission,
     listInstagramPublishQueue,
     publishInstagramGallerySubmission,
+    markInstagramGallerySubmissionShared,
     listApprovedGallerySubmissions,
     request,
     select,

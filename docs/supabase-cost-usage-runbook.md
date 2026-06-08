@@ -29,7 +29,7 @@ Supabase usage comes from the member workflows:
 - Auth: Discord OAuth sign-ins and active member sessions.
 - Database: `member_profiles`, `gallery_submissions`, `gallery_moderation_events`, `discord_resources`, and `discord_sync_log`.
 - Storage: private `member-gallery` image objects for pending, approved, rejected, and archived submissions.
-- Edge Functions: `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-approved-gallery-submissions`, `submit-discord-gallery-image`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission`.
+- Edge Functions: `verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-approved-gallery-submissions`, `submit-discord-gallery-image`, `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, and `publish-instagram-gallery-submission`.
 - Egress: Auth/API responses, Edge Function responses, and Storage signed URL image delivery.
 - Logs: function logs, moderation troubleshooting, and dashboard observability.
 

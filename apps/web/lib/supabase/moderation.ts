@@ -65,3 +65,29 @@ export async function publishInstagramGallerySubmission({
     },
   );
 }
+
+export async function markInstagramGallerySubmissionShared({
+  jobId,
+  instagramPermalink = "",
+  moderatorNote = "",
+  confirmManualShare,
+}: {
+  jobId: string;
+  instagramPermalink?: string;
+  moderatorNote?: string;
+  confirmManualShare: boolean;
+}) {
+  const cleanJobId = String(jobId || "").trim();
+  if (!cleanJobId) return failedResult("Choose an Instagram publishing job before marking it shared.");
+  if (!confirmManualShare) return failedResult("Confirm manual Instagram sharing before marking the job shared.");
+
+  return invokeEdgeFunction<{ job?: InstagramPublishJob; instagramPermalink?: string | null; sharedAt?: string }>(
+    "mark-instagram-gallery-submission-shared",
+    {
+      job_id: cleanJobId,
+      instagram_permalink: String(instagramPermalink || "").trim().slice(0, 500),
+      moderator_note: String(moderatorNote || "").trim().slice(0, 500),
+      confirmManualShare,
+    },
+  );
+}

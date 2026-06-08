@@ -169,7 +169,7 @@ export type GalleryReviewQueue = {
   summary?: Record<string, number | string | undefined>;
 };
 
-export type InstagramPublishJobStatus = "queued" | "ineligible" | "publishing" | "published" | "failed" | "canceled";
+export type InstagramPublishJobStatus = "queued" | "ineligible" | "publishing" | "published" | "failed" | "canceled" | "shared_manually";
 
 export type InstagramPublishEvent = {
   id?: string | null;

@@ -1,6 +1,6 @@
 # Instagram Gallery Publishing Deployment Runbook
 
-This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images.
+This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images. Current launch mode is manual sharing through the Leader Dashboard while Meta developer registration is blocked; direct API publishing remains the future path.
 
 Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
 
@@ -13,7 +13,7 @@ Completed:
 - PR #198 merged to `main`.
 - Vercel production deployed the Next app changes.
 - Supabase production migration `add_instagram_gallery_publishing` is applied.
-- Supabase production has active `list-instagram-publish-queue` and `publish-instagram-gallery-submission` functions with JWT verification enabled.
+- Supabase production has active `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, and `publish-instagram-gallery-submission` functions with JWT verification enabled.
 - The private Reaper bot source repository exists at <https://github.com/Mochirii-Wushu/Reaper>.
 - Reaper has an initial Node/TypeScript Discord command scaffold that matches the Supabase ingest contract.
 - Reaper CI is green on `main` for typecheck, tests, and build.
@@ -29,10 +29,12 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 
 Still pending:
 
-- Set real Instagram production secrets in Supabase.
+- Deploy the manual share status migration and `mark-instagram-gallery-submission-shared` function if this packet is not yet live.
+- Set real Instagram production secrets in Supabase later, after Meta developer verification is available.
 - Complete Meta for Developers SMS verification for the owner account before app/token setup can continue.
 - Run Discord command dry-runs through the webhook after Meta setup, or earlier with a non-sensitive test image if the owner approves that upload.
-- Publish one live Instagram test post only after explicit action-time owner approval.
+- For now, moderators may post manually from the official Instagram account or Meta Business Suite, then paste the permalink and mark the job `shared_manually`.
+- Publish one live Instagram API test post only after explicit action-time owner approval.
 
 ## Public Interface
 
@@ -57,6 +59,16 @@ Reaper's Gallery command must match this interface:
 ```
 
 `subtitle` continues to map to the website Gallery `caption` field. Approval for the public website Gallery does not publish to Instagram; it only creates an Instagram Queue item when the member opted in.
+
+Current manual flow:
+
+1. Moderator approves an opted-in JPEG submission.
+2. The Leader Dashboard creates and shows a queued Instagram job.
+3. Moderator downloads the image through the signed preview URL.
+4. Moderator copies the caption and alt text.
+5. Moderator posts manually from the official Instagram account or Meta Business Suite.
+6. Moderator optionally pastes the Instagram permalink and adds a private note.
+7. Moderator clicks `Mark shared manually` and confirms the browser prompt.
 
 ## Preconditions
 
@@ -123,6 +135,7 @@ supabase functions deploy submit-discord-gallery-image --project-ref deyvmtncimm
 supabase functions deploy list-gallery-review-queue --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy moderate-gallery-submission --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy list-instagram-publish-queue --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy mark-instagram-gallery-submission-shared --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy publish-instagram-gallery-submission --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy reaper-discord-interactions --project-ref deyvmtncimmcinldjyqe
 ```

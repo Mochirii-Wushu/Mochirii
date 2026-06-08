@@ -12,6 +12,7 @@ const files = {
   moderation: "supabase/functions/moderate-gallery-submission/index.ts",
   listQueue: "supabase/functions/list-instagram-publish-queue/index.ts",
   publish: "supabase/functions/publish-instagram-gallery-submission/index.ts",
+  markShared: "supabase/functions/mark-instagram-gallery-submission-shared/index.ts",
   envExample: "supabase/functions/.env.example",
   supabaseReadme: "supabase/README.md",
   moderationRunbook: "docs/member-gallery-moderation-runbook.md",
@@ -74,6 +75,7 @@ const discordIngest = read(files.discordIngest);
 const moderation = read(files.moderation);
 const listQueue = read(files.listQueue);
 const publish = read(files.publish);
+const markShared = read(files.markShared);
 const envExample = read(files.envExample);
 const supabaseReadme = read(files.supabaseReadme);
 const moderationRunbook = read(files.moderationRunbook);
@@ -94,9 +96,11 @@ assertIncludes("check-all", checkAll, "check:instagram-gallery-publishing");
 [
   "[functions.list-instagram-publish-queue]",
   "[functions.publish-instagram-gallery-submission]",
+  "[functions.mark-instagram-gallery-submission-shared]",
   'verify_jwt = true',
   'entrypoint = "./functions/list-instagram-publish-queue/index.ts"',
   'entrypoint = "./functions/publish-instagram-gallery-submission/index.ts"',
+  'entrypoint = "./functions/mark-instagram-gallery-submission-shared/index.ts"',
 ].forEach((snippet) => assertIncludes("supabase config", config, snippet));
 
 [
@@ -113,6 +117,13 @@ assertIncludes("check-all", checkAll, "check:instagram-gallery-publishing");
   "grant all on table public.gallery_instagram_publish_jobs to service_role",
   "grant all on table public.gallery_instagram_publish_events to service_role",
 ].forEach((snippet) => assertIncludes("migration", migration, snippet));
+
+const manualMigration = read("supabase/migrations/20260608173000_add_manual_instagram_share_status.sql");
+[
+  "shared_manually",
+  "drop constraint if exists gallery_instagram_publish_jobs_status_check",
+  "drop constraint if exists gallery_instagram_publish_events_action_check",
+].forEach((snippet) => assertIncludes("manual share migration", manualMigration, snippet));
 
 assertMatches(
   "migration",
@@ -169,6 +180,22 @@ assertNotMatches(
   "status: \"published\"",
 ].forEach((snippet) => assertIncludes("publish-instagram-gallery-submission", publish, snippet));
 
+[
+  "requireModeratorAccess(req)",
+  "confirmManualShare",
+  "shared_manually",
+  "gallery_instagram_publish_jobs",
+  "gallery_instagram_publish_events",
+  "Only queued Instagram jobs can be marked shared manually.",
+].forEach((snippet) => assertIncludes("mark-instagram-gallery-submission-shared", markShared, snippet));
+
+assertNotMatches(
+  "mark-instagram-gallery-submission-shared",
+  markShared,
+  /INSTAGRAM_ACCOUNT_ID|INSTAGRAM_ACCESS_TOKEN|INSTAGRAM_API_VERSION|fetch\(/,
+  "manual sharing function must not call Meta or require Instagram credentials.",
+);
+
 assertNotMatches(
   "publish-instagram-gallery-submission",
   publish,
@@ -189,13 +216,16 @@ assertNotMatches(
   "instagramOptIn",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
+  "mark-instagram-gallery-submission-shared",
   "Instagram credentials live only in Supabase secrets",
   "no automatic Instagram publishing",
+  "manual sharing",
 ].forEach((snippet) => assertIncludes("supabase README", supabaseReadme, snippet));
 
 [
   "Instagram Queue",
   "final confirmation",
+  "Mark shared manually",
   "signed preview URLs",
   "supabase secrets set",
 ].forEach((snippet) => assertIncludes("moderation runbook", moderationRunbook, snippet));
@@ -209,7 +239,9 @@ assertNotMatches(
   "INSTAGRAM_ACCESS_TOKEN",
   "supabase functions deploy list-instagram-publish-queue",
   "supabase functions deploy publish-instagram-gallery-submission",
+  "supabase functions deploy mark-instagram-gallery-submission-shared",
   "\"instagramOptIn\": true",
+  "shared_manually",
   "wrong channel fail-closed",
   "duplicate Discord message/attachment does not change stored consent",
   "Rollback options",
@@ -224,7 +256,9 @@ assertNotMatches(
 [
   "Instagram Queue",
   "publishInstagramGallerySubmission",
+  "markInstagramGallerySubmissionShared",
   "window.confirm",
+  "Mark shared manually",
   "Instagram caption",
   "Instagram alt text",
 ].forEach((snippet) => assertIncludes("Next leader dashboard", nextDashboard, snippet));
@@ -232,8 +266,10 @@ assertNotMatches(
 [
   "listInstagramPublishQueue",
   "publishInstagramGallerySubmission",
+  "markInstagramGallerySubmissionShared",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
+  "mark-instagram-gallery-submission-shared",
 ].forEach((snippet) => assertIncludes("Next moderation helpers", nextHelpers, snippet));
 
 [
@@ -245,6 +281,7 @@ assertNotMatches(
 [
   "listInstagramPublishQueue",
   "publishInstagramGallerySubmission",
+  "markInstagramGallerySubmissionShared",
   "INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION",
 ].forEach((snippet) => assertIncludes("static Supabase helper", staticHelper, snippet));
 
@@ -256,6 +293,8 @@ assertNotMatches(
 assertIncludes("static upload script", staticSubmitJs, "instagramOptIn: data.get(\"instagramOptIn\") === \"true\"");
 assertIncludes("static leader dashboard", staticDashboardHtml, "instagramQueuePanel");
 assertIncludes("static leader dashboard", staticDashboardJs, "publishInstagramGallerySubmission");
+assertIncludes("static leader dashboard", staticDashboardJs, "markInstagramGallerySubmissionShared");
+assertIncludes("static leader dashboard", staticDashboardJs, "Mark shared manually");
 assertIncludes("static leader dashboard", staticDashboardJs, "window.confirm");
 
 const browserFiles = [

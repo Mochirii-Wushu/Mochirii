@@ -4085,6 +4085,25 @@ body[data-page="gallery-submit"] .muted{
   color:rgba(229,238,235,.74);
 }
 
+.submission-status--queued,
+.submission-status--publishing{
+  border-color:rgba(218,181,94,.34);
+  color:rgba(255,238,190,.94);
+}
+
+.submission-status--ineligible,
+.submission-status--failed,
+.submission-status--canceled{
+  border-color:rgba(255,110,110,.34);
+  color:rgba(255,226,226,.92);
+}
+
+.submission-status--published,
+.submission-status--shared_manually{
+  border-color:rgba(48,178,143,.34);
+  color:rgba(220,255,242,.92);
+}
+
 .queue-tabs{
   display:flex;
   flex-wrap:wrap;

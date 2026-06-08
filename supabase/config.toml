@@ -52,3 +52,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/publish-instagram-gallery-submission/deno.json"
 entrypoint = "./functions/publish-instagram-gallery-submission/index.ts"
+
+[functions.mark-instagram-gallery-submission-shared]
+enabled = true
+verify_jwt = true
+import_map = "./functions/mark-instagram-gallery-submission-shared/deno.json"
+entrypoint = "./functions/mark-instagram-gallery-submission-shared/index.ts"

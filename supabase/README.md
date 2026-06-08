@@ -239,6 +239,7 @@ supabase functions serve list-approved-gallery-submissions --env-file supabase/f
 supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local
 supabase functions serve reaper-discord-interactions --env-file supabase/functions/.env.local
 supabase functions serve list-instagram-publish-queue --env-file supabase/functions/.env.local
+supabase functions serve mark-instagram-gallery-submission-shared --env-file supabase/functions/.env.local
 supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
 ```
 
@@ -302,6 +303,7 @@ supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
 supabase functions deploy reaper-discord-interactions
 supabase functions deploy list-instagram-publish-queue
+supabase functions deploy mark-instagram-gallery-submission-shared
 supabase functions deploy publish-instagram-gallery-submission
 ```
 
@@ -319,6 +321,7 @@ supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
 supabase functions deploy reaper-discord-interactions
 supabase functions deploy list-instagram-publish-queue
+supabase functions deploy mark-instagram-gallery-submission-shared
 supabase functions deploy publish-instagram-gallery-submission
 ```
 
@@ -404,10 +407,10 @@ Browser clients do not receive direct insert, update, or delete privileges for m
 `gallery_instagram_publish_jobs` stores the second-stage Instagram publishing queue:
 
 - submission id
-- job status: `queued`, `ineligible`, `publishing`, `published`, `failed`, or `canceled`
+- job status: `queued`, `ineligible`, `publishing`, `published`, `failed`, `canceled`, or `shared_manually`
 - eligibility reason for unsupported v1 media
 - moderator-editable Instagram caption and alt text
-- Meta container/media/permalink IDs after a publish attempt
+- Meta container/media/permalink IDs after an API publish attempt, or a manually pasted permalink after moderator sharing
 - attempt count, last error, queued/published actors, and timestamps
 
 `gallery_instagram_publish_events` stores service-role audit events for Instagram publishing jobs. Browser clients receive no direct table privileges for either Instagram publishing table.
@@ -520,12 +523,13 @@ There is no automatic Instagram publishing. Website gallery approval creates an 
 
 ## Instagram Publishing Queue
 
-Instagram publishing uses two moderator-only Edge Functions:
+Instagram publishing uses three moderator-only Edge Functions:
 
 - `list-instagram-publish-queue`
 - `publish-instagram-gallery-submission`
+- `mark-instagram-gallery-submission-shared`
 
-Both require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private; the publishing function creates a short-lived signed URL only when sending the image URL to Meta.
+All three require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. Current launch mode is manual sharing: moderators download the signed preview, copy caption and alt text, post through the official Instagram account or Meta Business Suite, optionally paste the permalink, and mark the job `shared_manually`. The API publishing function remains available for the future Meta developer path; it creates a short-lived signed URL only when sending the image URL to Meta.
 
 Approval behavior:
 
@@ -534,7 +538,7 @@ Approval behavior:
 - Opted-in PNG or WebP images create an `ineligible` job with a clear reason.
 - Existing submissions are not retroactively opted in.
 
-The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish. Moderators can edit caption and alt text before publishing. The browser must show a final confirmation before calling `publish-instagram-gallery-submission` because publishing is an external public side effect.
+The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish or manual share. Moderators can edit caption and alt text, download the image, copy caption and alt text, enter a manual permalink/note, and mark a job shared manually. The browser must show a final confirmation before calling `mark-instagram-gallery-submission-shared` or future `publish-instagram-gallery-submission` because both record an external publishing decision.
 
 V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Any future live Meta setup, Supabase secret change, Edge Function redeployment, slash-command registration, or real Instagram post requires explicit owner approval.
 
