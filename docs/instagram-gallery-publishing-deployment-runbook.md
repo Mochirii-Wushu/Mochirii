@@ -6,7 +6,7 @@ Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
 
 Do not paste secrets, access tokens, signed Storage URLs, private payloads, or dashboard screenshots with sensitive values into GitHub, Discord, public docs, or reports. No real Instagram post may be created without explicit action-time owner approval.
 
-## Deployment Status - 2026-06-07
+## Deployment Status - 2026-06-08
 
 Completed:
 
@@ -14,12 +14,16 @@ Completed:
 - Vercel production deployed the Next app changes.
 - Supabase production migration `add_instagram_gallery_publishing` is applied.
 - Supabase production has active `list-instagram-publish-queue` and `publish-instagram-gallery-submission` functions with JWT verification enabled.
+- The private Reaper bot source repository exists at <https://github.com/Mochirii-Wushu/Reaper>.
+- Reaper has an initial Node/TypeScript Discord command scaffold that matches the Supabase ingest contract.
+- Reaper CI is green on `main` for typecheck, tests, and build.
 
 Still pending:
 
 - Set real Instagram production secrets in Supabase.
-- Update and register Reaper's slash command outside this repository.
-- Run a non-live Reaper dry-run payload.
+- Set Reaper runtime secrets on the bot host without exposing values.
+- Register Reaper's updated guild-scoped `/submit` command in Discord.
+- Run a non-live Reaper dry-run payload from the runtime.
 - Publish one live Instagram test post only after explicit action-time owner approval.
 
 ## Public Interface
@@ -55,7 +59,7 @@ Complete these checks before any production mutation or future redeployment:
 3. Vercel production for `mochirii/mochirii` is Ready after the merge.
 4. Supabase project is confirmed as `deyvmtncimmcinldjyqe`.
 5. The official Instagram account is a Professional account controlled by Mōchirīī.
-6. Reaper's code repository or runtime is available outside this repository before slash-command changes begin.
+6. Reaper's code repository is available at <https://github.com/Mochirii-Wushu/Reaper>; runtime host secrets and deployment are still separate operator steps.
 7. The Discord submission channel remains `1508077313965817856`.
 
 ## Deployment Sequence

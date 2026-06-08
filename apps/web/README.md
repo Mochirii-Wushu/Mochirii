@@ -172,7 +172,7 @@ vercel build --prod --cwd apps/web
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
 - Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
-- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram publishing migration and Supabase Edge Functions are deployed in production; Reaper command registration, Instagram production secrets, and any real Instagram post remain external owner-approved steps.
+- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram publishing migration and Supabase Edge Functions are deployed in production. The private Reaper source repo now exists at `Mochirii-Wushu/Reaper`; Reaper runtime secrets/command registration, Instagram production secrets, and any real Instagram post remain external owner-approved steps.
 
 What stays in Supabase:
 
@@ -181,7 +181,7 @@ What stays in Supabase:
 
 ## Instagram Gallery Publishing
 
-Website uploads include an optional Instagram opt-in checkbox. Discord/Reaper submissions should send the matching `instagramOptIn` payload from the optional `share_to_instagram` command parameter.
+Website uploads include an optional Instagram opt-in checkbox. Reaper's Discord submissions send the matching `instagramOptIn` payload from the optional `share_to_instagram` command parameter.
 
 Approval for the public Gallery never posts to Instagram automatically. If an approved submission has explicit opt-in consent, Supabase creates an Instagram publishing job. The Leader Dashboard shows that separate Instagram Queue, allows moderator caption and alt-text review, and requires a final browser confirmation before calling the publish Edge Function.
 
