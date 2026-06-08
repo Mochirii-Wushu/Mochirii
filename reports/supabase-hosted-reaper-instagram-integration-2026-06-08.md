@@ -111,3 +111,18 @@ Still required for Instagram:
 - A moderator must confirm each Instagram publish action from the Leader Dashboard.
 - No Discord token, Instagram token, Supabase service-role key, ingest secret, signed URL, or private payload value was committed or recorded.
 - No Vercel, DNS, Supabase Auth redirect, public Gallery display rule, or website copy changes were made in this implementation packet.
+
+## Post-Merge Verification
+
+- Mochirii PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/208>
+- Mochirii merge commit: `d485c61218631a6d486ac62a9392422a43b0be1e`
+- Reaper PR: <https://github.com/Mochirii-Wushu/Reaper/pull/1>
+- Reaper merge commit: `c44ac66ffcda9751e94895694614cc35e8d63bbb`
+- Discord guild command ID: `1508077559982723173`
+- Live route smoke passed for `https://mochirii.com`, `www` redirect, clean routes, and legacy `.html` redirects.
+- Live Vercel route headers returned `Server: Vercel` for `/gallery`, `/gallery-submit`, and `/leader-dashboard`.
+- Supabase Edge Function contract smoke passed.
+- Unsigned direct POST to `reaper-discord-interactions` returned `401 Unauthorized` with `invalid request signature`, confirming the custom Discord signature gate is active.
+- Leader Dashboard showed the Instagram Queue with `Queued - 0`, `Failed - 0`, `Published - 0`, and `No Instagram-ready images.`
+- Meta/Instagram remains blocked at owner SMS verification before real `INSTAGRAM_*` secrets can be created or retrieved.
+- No live Instagram post was attempted.
