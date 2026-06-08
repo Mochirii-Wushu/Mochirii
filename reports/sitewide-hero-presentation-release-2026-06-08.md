@@ -57,7 +57,22 @@ Optional local Playwright smoke scripts were unavailable on this workstation bec
 
 ## Release Status
 
-- Draft PR: pending creation from this branch.
-- Vercel preview: pending draft PR creation.
+- Draft PR: [#203](https://github.com/Mochirii-Wushu/Mochirii/pull/203).
+- Release commit: `01955f2dc7176c0511f37d17f2c09449176c4cbf`.
+- Vercel preview status: Ready.
+- Vercel preview URL: `https://mochirii-git-codex-home-cinematic-guild-hall-design-mochirii.vercel.app`.
+- Vercel deployment evidence: `https://vercel.com/mochirii/mochirii/JDWHkSPMsSviRsHLqKeSxxHiXJWF`.
+- GitHub checks: `validate`, `validate-next`, CodeQL, Vercel, and Vercel Preview Comments passed; Supabase Preview skipped because no `supabase` directory changes were detected.
+- Preview browser note: the in-app browser was redirected to Vercel login/deployment protection for the preview URL, so route-level visual preview still needs an authenticated browser review before merge.
 - Production deployment: pending PR approval, merge to `main`, and Vercel production deployment.
-- Post-merge live verification still required for `/`, `/join`, `/gallery`, `/auth`, `/leader-dashboard`, and the `www` redirect.
+
+Current live domain status after PR creation:
+
+- `https://mochirii.com/`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+- `https://mochirii.com/join`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+- `https://mochirii.com/gallery`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+- `https://mochirii.com/auth`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+- `https://mochirii.com/leader-dashboard`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+- `https://www.mochirii.com/`: `308 Permanent Redirect` to `https://mochirii.com/`, then `200 OK`.
+
+Post-merge live verification is still required for `/`, `/join`, `/gallery`, `/auth`, `/leader-dashboard`, and the `www` redirect after Vercel production deploys the merged commit.
