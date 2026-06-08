@@ -479,7 +479,7 @@ That function has `verify_jwt = false` because it is called by the trusted Reape
 
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved.
 
-Reaper's gallery slash command must include the optional Discord boolean option:
+The private Reaper source repo now exists at `Mochirii-Wushu/Reaper`. Its gallery slash command must include the optional Discord boolean option:
 
 ```text
 /submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>
