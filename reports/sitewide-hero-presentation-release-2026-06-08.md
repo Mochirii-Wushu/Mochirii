@@ -59,20 +59,27 @@ Optional local Playwright smoke scripts were unavailable on this workstation bec
 
 - Draft PR: [#203](https://github.com/Mochirii-Wushu/Mochirii/pull/203).
 - Initial implementation commit: `01955f2dc7176c0511f37d17f2c09449176c4cbf`.
-- Vercel preview status: tracked by the Vercel status check on PR #203.
+- PR #203 status: merged to `main` on 2026-06-08.
+- Design release merge commit: `bd766a31731e019656bc572a8c01f6e53d545c34`.
+- Vercel production status for the design release: Ready.
+- Vercel production deployment evidence: `https://vercel.com/mochirii/mochirii/HbJcD85t2sf1cksfMP95AKPjYmgp`.
+- Vercel preview status: passed before merge.
 - Vercel preview URL: `https://mochirii-git-codex-home-cinematic-guild-hall-design-mochirii.vercel.app`.
-- Vercel deployment evidence: use the current Vercel status target on PR #203 because each report-only push creates a new preview deployment URL in Vercel.
-- GitHub checks: `validate`, `validate-next`, CodeQL, Vercel, and Vercel Preview Comments must pass on the current PR head; Supabase Preview may skip when no `supabase` directory changes are detected.
-- Preview browser note: the in-app browser was redirected to Vercel login/deployment protection for the preview URL, so route-level visual preview still needs an authenticated browser review before merge.
-- Production deployment: pending PR approval, merge to `main`, and Vercel production deployment.
+- GitHub checks: `validate`, `validate-next`, CodeQL, Vercel, and Vercel Preview Comments passed before merge. Supabase Preview skipped on the PR because no `supabase` directory changes were detected, then succeeded on the merged `main` commit.
+- Preview browser note: the in-app browser was redirected to Vercel login/deployment protection for the preview URL before merge.
+- Preview limitation resolution: production route-level browser smoke was completed after merge on the public `https://mochirii.com` routes.
 
-Current live domain status after PR creation:
+Current live domain status after production deployment:
 
-- `https://mochirii.com/`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
-- `https://mochirii.com/join`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
-- `https://mochirii.com/gallery`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
-- `https://mochirii.com/auth`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
-- `https://mochirii.com/leader-dashboard`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+- `https://mochirii.com/`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: PRERENDER`.
+- `https://mochirii.com/join`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: PRERENDER`.
+- `https://mochirii.com/gallery`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: PRERENDER`.
+- `https://mochirii.com/auth`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: PRERENDER`.
+- `https://mochirii.com/leader-dashboard`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: PRERENDER`.
 - `https://www.mochirii.com/`: `308 Permanent Redirect` to `https://mochirii.com/`, then `200 OK`.
 
-Post-merge live verification is still required for `/`, `/join`, `/gallery`, `/auth`, `/leader-dashboard`, and the `www` redirect after Vercel production deploys the merged commit.
+Post-merge browser verification:
+
+- Checked `/`, `/join`, `/gallery`, `/auth`, and `/leader-dashboard` at `390px` and `1440px`.
+- All checked routes rendered a hero image with `object-fit: contain`, `filter: none`, `transform: none`, no intro-card overlap, and no horizontal overflow.
+- No browser console errors were observed during the live route smoke.
