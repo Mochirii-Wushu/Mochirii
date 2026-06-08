@@ -11,6 +11,7 @@ const functions = [
   "moderate-gallery-submission",
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
+  "reaper-discord-interactions",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
 ];

@@ -35,6 +35,12 @@ verify_jwt = false
 import_map = "./functions/submit-discord-gallery-image/deno.json"
 entrypoint = "./functions/submit-discord-gallery-image/index.ts"
 
+[functions.reaper-discord-interactions]
+enabled = true
+verify_jwt = false
+import_map = "./functions/reaper-discord-interactions/deno.json"
+entrypoint = "./functions/reaper-discord-interactions/index.ts"
+
 [functions.list-instagram-publish-queue]
 enabled = true
 verify_jwt = true

@@ -2,7 +2,7 @@
 
 ## Summary
 
-The website and Supabase side of moderator-controlled Instagram publishing remains deployed in production, and the missing Reaper source layer has now been created.
+The website and Supabase side of moderator-controlled Instagram publishing remains deployed in production. Reaper command handling has been pivoted from an unidentified long-running bot host to a Supabase-hosted Discord Interactions webhook.
 
 ## Completed
 
@@ -21,6 +21,15 @@ The website and Supabase side of moderator-controlled Instagram publishing remai
   - Supabase ingest call uses the expected URL, header, and JSON payload.
 - Pushed initial Reaper commit `c9f137d` to `main`.
 - Reaper GitHub Actions CI completed successfully.
+- Added Supabase Edge Function `reaper-discord-interactions`.
+- Deployed `reaper-discord-interactions` to Supabase production with `verify_jwt=false`.
+- Set Discord Interactions Endpoint URL to `https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions`.
+- Discord accepted the endpoint after signed PING verification.
+- Registered guild-scoped `/submit` command with optional boolean `share_to_instagram`.
+- Set Supabase Discord secret names needed by the webhook without recording values:
+  - `DISCORD_PUBLIC_KEY`
+  - `DISCORD_APPLICATION_ID`
+  - `DISCORD_BOT_TOKEN`
 
 ## Website And Supabase Checks
 
@@ -30,26 +39,19 @@ The website and Supabase side of moderator-controlled Instagram publishing remai
 
 ## Remaining Gated Steps
 
-- Set Reaper runtime secrets on the bot host:
-  - `DISCORD_BOT_TOKEN`
-  - `DISCORD_APPLICATION_ID`
-  - `DISCORD_GUILD_ID`
-  - `DISCORD_GALLERY_CHANNEL_ID`
-  - `SUPABASE_FUNCTIONS_URL`
-  - `DISCORD_GALLERY_INGEST_SECRET`
-- Register the updated guild-scoped Discord command from the Reaper runtime.
-- Run one non-live Reaper dry run with `share_to_instagram:false`.
-- Run one non-live Reaper dry run with `share_to_instagram:true`.
+- Complete Meta for Developers phone verification before Instagram app/token setup can continue.
 - Set real Instagram production secrets in Supabase only:
   - `INSTAGRAM_ACCOUNT_ID`
   - `INSTAGRAM_ACCESS_TOKEN`
   - `INSTAGRAM_API_VERSION`
+- Run one non-live Discord webhook dry run with `share_to_instagram:false`.
+- Run one non-live Discord webhook dry run with `share_to_instagram:true`.
 - Verify the Leader Dashboard Instagram Queue with moderator auth.
 - Publish one real Instagram test post only after explicit action-time owner approval.
 
 ## Guardrails
 
-- Reaper does not publish to Instagram.
+- Discord submission does not publish to Instagram.
 - Website gallery approval does not publish to Instagram automatically.
 - Instagram publishing remains a moderator-confirmed Leader Dashboard action.
 - No Instagram token, Discord bot token, Supabase service role key, ingest secret, signed URL, or private payload value was committed or recorded.

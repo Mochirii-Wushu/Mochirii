@@ -56,6 +56,14 @@ It also exposes Auth/profile/gallery helpers:
 
 Instagram production migration and Edge Functions are deployed. Reaper rollout, Instagram secret setup, dry-run payloads, and any live Instagram post are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
 
+Production Reaper gallery submission handling is Supabase-hosted through Discord Interactions, not a persistent Discord Gateway process. The Discord Interactions Endpoint URL is:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
+```
+
+The `reaper-discord-interactions` function validates Discord request signatures with `DISCORD_PUBLIC_KEY`, answers Discord PING requests, accepts the guild-scoped `/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>` command, then calls the existing `submit-discord-gallery-image` ingest function with `instagramOptIn` mapped from the optional boolean.
+
 Script order on pages with Auth or upload behavior is:
 
 ```html
@@ -203,6 +211,8 @@ DISCORD_REQUIRED_ROLE_IDS=1468659807736299520,1078630751077142615
 DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 DISCORD_MODERATOR_ROLE_NAMES=Moderator
+DISCORD_PUBLIC_KEY=<from Discord Developer Portal General Information, never commit>
+DISCORD_APPLICATION_ID=1156448856565887066
 DISCORD_BOT_TOKEN=<set manually, never commit>
 DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
@@ -227,6 +237,7 @@ supabase functions serve list-gallery-review-queue --env-file supabase/functions
 supabase functions serve moderate-gallery-submission --env-file supabase/functions/.env.local
 supabase functions serve list-approved-gallery-submissions --env-file supabase/functions/.env.local
 supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local
+supabase functions serve reaper-discord-interactions --env-file supabase/functions/.env.local
 supabase functions serve list-instagram-publish-queue --env-file supabase/functions/.env.local
 supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
 ```
@@ -239,6 +250,8 @@ supabase secrets set DISCORD_REQUIRED_ROLE_IDS=1468659807736299520,1078630751077
 supabase secrets set DISCORD_REQUIRED_ROLE_NAMES="Mōchirīī - WWM,✅Verified"
 supabase secrets set DISCORD_MODERATOR_ROLE_IDS=1078630751165222984
 supabase secrets set DISCORD_MODERATOR_ROLE_NAMES=Moderator
+supabase secrets set DISCORD_PUBLIC_KEY=<set manually, never commit>
+supabase secrets set DISCORD_APPLICATION_ID=1156448856565887066
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
 supabase secrets set DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 supabase secrets set DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
@@ -287,6 +300,7 @@ supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
+supabase functions deploy reaper-discord-interactions
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy publish-instagram-gallery-submission
 ```
@@ -303,6 +317,7 @@ supabase functions deploy list-gallery-review-queue
 supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
+supabase functions deploy reaper-discord-interactions
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy publish-instagram-gallery-submission
 ```
@@ -324,7 +339,15 @@ https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
 
 3. Copy the Discord Client ID and Client Secret into Supabase Auth provider settings.
 4. Create a Discord bot token for server-side guild-member checks.
-5. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
+5. Copy the Discord Public Key into Supabase secret `DISCORD_PUBLIC_KEY` for the Supabase-hosted Discord Interactions webhook.
+6. Set the Discord Interactions Endpoint URL to:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
+```
+
+7. Register the guild-scoped `/submit` command with optional boolean `share_to_instagram`.
+8. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
 
 ```text
 GET /guilds/1078630751077142608/members/{discord_user_id}
@@ -475,11 +498,17 @@ Discord `/submit image:` uploads use a separate Edge Function:
 submit-discord-gallery-image
 ```
 
-That function has `verify_jwt = false` because it is called by the trusted Reaper bot rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The bot checks live Discord roles before calling it; the Edge Function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
+The public Discord entrypoint is the Supabase-hosted Discord Interactions function:
+
+```sh
+reaper-discord-interactions
+```
+
+That function has `verify_jwt = false` because Discord calls it directly. It validates `x-signature-ed25519` and `x-signature-timestamp` with `DISCORD_PUBLIC_KEY`, answers PING, enforces guild `1078630751077142608`, channel `1508077313965817856`, and required roles, then defers the interaction and calls `submit-discord-gallery-image` in a background task. The ingest function also has `verify_jwt = false` because it is called by the trusted Reaper bridge rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The ingest function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
 
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved.
 
-The private Reaper source repo now exists at `Mochirii-Wushu/Reaper`. Its gallery slash command must include the optional Discord boolean option:
+The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command must include the optional Discord boolean option:
 
 ```text
 /submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>
