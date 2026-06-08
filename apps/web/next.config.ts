@@ -24,7 +24,7 @@ const legacyHtmlRedirects = [
   ["/leader-dashboard.html", "/leader-dashboard"],
 ] as const;
 
-const contentSecurityPolicyReportOnly = [
+const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
@@ -43,8 +43,8 @@ const contentSecurityPolicyReportOnly = [
 
 const securityHeaders = [
   {
-    key: "Content-Security-Policy-Report-Only",
-    value: contentSecurityPolicyReportOnly,
+    key: "Content-Security-Policy",
+    value: contentSecurityPolicy,
   },
   {
     key: "X-Content-Type-Options",
