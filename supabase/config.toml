@@ -58,3 +58,33 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/mark-instagram-gallery-submission-shared/deno.json"
 entrypoint = "./functions/mark-instagram-gallery-submission-shared/index.ts"
+
+[functions.list-member-profiles]
+enabled = true
+verify_jwt = true
+import_map = "./functions/list-member-profiles/deno.json"
+entrypoint = "./functions/list-member-profiles/index.ts"
+
+[functions.get-member-profile]
+enabled = true
+verify_jwt = true
+import_map = "./functions/get-member-profile/deno.json"
+entrypoint = "./functions/get-member-profile/index.ts"
+
+[functions.submit-member-profile-media]
+enabled = true
+verify_jwt = true
+import_map = "./functions/submit-member-profile-media/deno.json"
+entrypoint = "./functions/submit-member-profile-media/index.ts"
+
+[functions.list-member-profile-media-queue]
+enabled = true
+verify_jwt = true
+import_map = "./functions/list-member-profile-media-queue/deno.json"
+entrypoint = "./functions/list-member-profile-media-queue/index.ts"
+
+[functions.moderate-member-profile-media]
+enabled = true
+verify_jwt = true
+import_map = "./functions/moderate-member-profile-media/deno.json"
+entrypoint = "./functions/moderate-member-profile-media/index.ts"

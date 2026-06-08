@@ -16,6 +16,7 @@
 - For Ranks work, follow `docs/ranks-guide.md`. Preserve rank order, group hierarchy, emblem/image conventions, concise duty copy, and mobile readability.
 - For Leaders work, follow `docs/leaders-guide.md`. Preserve leader order, role/group conventions, image conventions, concise stewardship copy, and mobile readability.
 - For Twills/Profile work, follow `docs/twills-guide.md`. Preserve the protected Twills body text, profile purpose, intentional public contact details, image/link conventions, concise personal voice, and mobile readability.
+- For member profile or rank-role work, follow `docs/member-profiles-and-rank-roles.md`. Keep `/members` and `/members/[slug]` members-only and `noindex`, keep profile publishing opt-in, require moderator approval for avatar/banner media, and do not mutate Discord roles outside the owner-approved `/sync-ranks mode:apply confirm:true` flow.
 - For Recruitment work, follow `docs/recruitment-guide.md`. Preserve `data/recruitment.json` `content.paragraphs` and `content.conclusion` exactly; non-body fields may change only when supported by `recruitment.js` and validated.
 - For Home/Shell work, follow `docs/home-shell-guide.md`. Preserve the guild seal poem, shared script order, header/footer/nav behavior, Supabase signed-out safety, cache-query conventions, and mobile readability.
 - For Announcements, Raffles, Spotify, and Spotlight work, follow `docs/side-pages-guide.md`. Preserve page-specific purpose, shared script order, safe link/embed behavior, Supabase signed-out safety, and mobile readability.

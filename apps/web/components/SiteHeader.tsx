@@ -33,6 +33,7 @@ const navGroups: NavGroup[] = [
       { href: "/", label: "Home", nav: "home" },
       { href: "/spotlight", label: "Spotlight", nav: "spotlight" },
       { href: "/gallery", label: "Gallery", nav: "gallery" },
+      { href: "/members", label: "Members", nav: "members", auth: "verified" },
     ],
   },
   {
@@ -61,6 +62,7 @@ const notesLinks: NavItem[] = [
   { href: "/recruitment", label: "Recruitment", nav: "recruitment" },
   { href: "/auth", label: "Login", nav: "auth", auth: "signed-out" },
   { href: "/account", label: "Account", nav: "account", auth: "signed-in" },
+  { href: "/members", label: "Members", nav: "members", auth: "verified" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
   { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "signed-in" },
 ];

@@ -11,6 +11,8 @@ Route migration order:
 3. `/gallery-submit`
 4. `/leader-dashboard`
 
+The follow-on member profile surface adds `/members` and `/members/[slug]` as members-only, `noindex` routes. They continue the same Supabase-first boundary: Vercel/Next renders UI, while Supabase Edge Functions enforce active Discord verification and return safe profile DTOs.
+
 The root GitHub Pages files stay intact as rollback/reference material while the Vercel/Next production surface stabilizes.
 
 ## Supabase-First Architecture Rule
@@ -29,6 +31,8 @@ The member workflow routes now exist in `apps/web` while the root GitHub Pages f
 
 - `/auth`
 - `/account`
+- `/members`
+- `/members/[slug]`
 - `/gallery-submit`
 - `/leader-dashboard`
 
@@ -81,6 +85,8 @@ Shared shell dependencies remain `header.html`, `footer.html`, `utils.js`, and `
 - `public.member_profiles`
 - `public.gallery_submissions`
 - `public.gallery_moderation_events`
+- `public.member_profile_media`
+- `public.member_profile_media_events`
 - `public.discord_resources`
 - `public.discord_sync_log`
 - `storage.buckets`
@@ -89,6 +95,7 @@ Shared shell dependencies remain `header.html`, `footer.html`, `utils.js`, and `
 Current Storage bucket:
 
 - `member-gallery`, private, image-only, 50 MB file limit.
+- `member-profile-media`, private, avatar/banner image-only, reviewed before display.
 
 ## 7. Current Supabase Edge Functions Referenced
 
@@ -98,8 +105,13 @@ Current Storage bucket:
 - `moderate-gallery-submission`
 - `list-instagram-publish-queue`
 - `publish-instagram-gallery-submission`
+- `list-member-profiles`
+- `get-member-profile`
+- `submit-member-profile-media`
+- `list-member-profile-media-queue`
+- `moderate-member-profile-media`
 
-`verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, and `publish-instagram-gallery-submission` require a valid user JWT. `list-approved-gallery-submissions` is currently configured without JWT verification for public approved-gallery reads.
+`verify-discord-member`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, `publish-instagram-gallery-submission`, and the member profile functions require a valid user JWT. `list-approved-gallery-submissions` is currently configured without JWT verification for public approved-gallery reads.
 
 ## 8. Current Discord OAuth and Member Verification Flow
 
@@ -156,6 +168,8 @@ Confirm these route targets are accepted:
 
 - `/auth`
 - `/account`
+- `/members`
+- `/members/[slug]`
 - `/gallery-submit`
 - `/leader-dashboard`
 
@@ -205,6 +219,9 @@ Do not import server-only credentials into Client Components.
 - Instagram publishing queue reads through `list-instagram-publish-queue`.
 - Moderator-confirmed Instagram posts through `publish-instagram-gallery-submission`.
 - Approved submission feed reads through `list-approved-gallery-submissions`.
+- Member profile list/profile reads through `list-member-profiles` and `get-member-profile`.
+- Profile avatar/banner uploads through private `member-profile-media` Storage plus `submit-member-profile-media`.
+- Profile media moderation through `list-member-profile-media-queue` and `moderate-member-profile-media`.
 - Signed preview URL creation.
 - Gallery moderation audit records.
 - Any code path needing service-role, secret key, Discord bot token, or OAuth client secret values.
@@ -259,13 +276,15 @@ cd ../..
 vercel build --prod --cwd apps/web
 ```
 
-Also run targeted browser validation for `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
+Also run targeted browser validation for `/auth`, `/account`, `/members`, `/members/[slug]`, `/gallery-submit`, and `/leader-dashboard`.
 
 ## 19. Browser Smoke Plan
 
 - Signed-out `/auth` shows Discord login.
 - Discord login starts OAuth and returns to `/account`.
 - `/account` displays profile and verification state.
+- `/members` blocks signed-out users and lists only published profiles for active verified members.
+- `/members/[slug]` blocks signed-out users and renders only an opted-in published profile.
 - Verification invokes the Edge Function and handles success/failure.
 - Profile updates save only allowed fields.
 - `/gallery-submit` blocks signed-out and unverified users.

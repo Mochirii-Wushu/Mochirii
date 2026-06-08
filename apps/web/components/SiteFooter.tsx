@@ -11,6 +11,7 @@ const guildLinks = [
   { href: "/", label: "Home" },
   { href: "/spotlight", label: "Spotlight" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/members", label: "Members", hidden: true, auth: "verified" },
   { href: "/gallery-submit", label: "Submit Image", hidden: true, auth: "verified" },
 ] satisfies FooterLink[];
 

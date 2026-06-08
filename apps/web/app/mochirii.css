@@ -2842,6 +2842,169 @@ body[data-page="twills"] .footer-nav:focus-visible{
 }
 
 /* =========================================================
+   MEMBER PROFILES — Twills-style reusable profile presentation
+   ========================================================= */
+body[data-page="member-profile"]{
+  --twills-moon:rgba(218,235,255,.66);
+  --twills-frost:rgba(232,244,255,.42);
+  --twills-frost-soft:rgba(218,235,255,.14);
+  --twills-lantern:rgba(218,181,94,.46);
+  --twills-lantern-soft:rgba(218,181,94,.12);
+  --twills-jade:rgba(48,178,143,.38);
+  --twills-lotus:rgba(222,151,177,.16);
+  --twills-panel:rgba(7,10,13,.82);
+  --twills-panel-strong:rgba(9,13,17,.92);
+  --twills-ink:rgba(244,250,255,.91);
+  --twills-muted:rgba(224,237,247,.70);
+}
+
+body[data-page="member-profile"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(6,9,12,.12), rgba(6,9,12,.18)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(255,255,255,.08) 48%, var(--twills-lantern)) border-box;
+  box-shadow:
+    0 30px 86px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 48px rgba(218,235,255,.10);
+}
+
+body[data-page="member-profile"] .hero-intro,
+body[data-page="member-profile"] .page-main .glass-card,
+body[data-page="member-profile"] .badge-row > span{
+  animation:none;
+}
+
+body[data-page="member-profile"] .hero-intro,
+body[data-page="member-profile"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 14% 0%, var(--twills-frost-soft), transparent 38%),
+    radial-gradient(circle at 92% 12%, var(--twills-lantern-soft), transparent 34%),
+    linear-gradient(155deg, var(--twills-panel-strong), var(--twills-panel)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(255,255,255,.07) 44%, var(--twills-lantern)) border-box;
+  box-shadow:
+    0 24px 66px rgba(0,0,0,.46),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-page="member-profile"] .hero-intro::before,
+body[data-page="member-profile"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.075), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.08), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 54%);
+}
+
+body[data-page="member-profile"] .hero-intro{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.16), transparent 42%),
+    radial-gradient(circle at 90% 14%, rgba(218,181,94,.12), transparent 34%),
+    linear-gradient(155deg, rgba(10,15,20,.94), rgba(7,10,13,.84)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(48,178,143,.18) 46%, var(--twills-lantern)) border-box;
+}
+
+body[data-page="member-profile"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="member-profile"] .glass-pad{
+  padding:clamp(20px, 2.8vw, 30px);
+}
+
+body[data-page="member-profile"] .kicker,
+body[data-page="member-profile"] .meta-text,
+body[data-page="member-profile"] .muted,
+body[data-page="member-profile"] .prose-stack{
+  color:var(--twills-muted);
+}
+
+body[data-page="member-profile"] .display-title,
+body[data-page="member-profile"] .section-title{
+  color:var(--twills-ink);
+  text-shadow:
+    0 10px 28px rgba(218,235,255,.14),
+    0 0 20px rgba(218,181,94,.08);
+}
+
+body[data-page="member-profile"] .badge-row > span{
+  min-height:30px;
+  box-sizing:border-box;
+  border:1px solid rgba(218,235,255,.30);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,.10), transparent 46%),
+    linear-gradient(135deg, rgba(218,235,255,.13), rgba(7,10,13,.30));
+  color:var(--twills-ink);
+  letter-spacing:0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="member-profile"] .col-4 .glass-card{
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.16), transparent 42%),
+    linear-gradient(160deg, rgba(8,12,16,.90), rgba(5,8,11,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,235,255,.58), rgba(255,255,255,.07) 44%, rgba(218,181,94,.30)) border-box;
+}
+
+body[data-page="member-profile"] .col-8 .glass-card{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(218,235,255,.11), transparent 42%),
+    radial-gradient(circle at 100% 8%, rgba(222,151,177,.08), transparent 38%),
+    linear-gradient(160deg, rgba(8,12,16,.90), rgba(6,9,12,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,235,255,.48), rgba(255,255,255,.07) 46%, rgba(48,178,143,.26)) border-box;
+}
+
+body[data-page="member-profile"] .profile-avatar{
+  width:100%;
+  max-width:330px;
+  aspect-ratio:787 / 909;
+  margin:14px auto 0;
+  object-fit:cover;
+  border-radius:24px;
+  border:1px solid rgba(218,235,255,.34);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.38),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    0 0 30px rgba(218,235,255,.12),
+    0 0 42px rgba(218,181,94,.08);
+}
+
+body[data-page="member-profile"] #memberProfileBio{
+  width:100%;
+  max-width:68ch;
+  box-sizing:border-box;
+  padding:clamp(16px, 2.4vw, 22px);
+  border-radius:22px;
+  border:1px solid rgba(218,235,255,.24);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(218,235,255,.10), transparent 42%),
+    linear-gradient(135deg, rgba(218,235,255,.08), rgba(0,0,0,.16));
+  color:rgba(244,250,255,.86);
+  line-height:1.82;
+  gap:16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.24);
+}
+
+body[data-page="member-profile"] #memberProfileBio p{
+  margin:0;
+}
+
+/* =========================================================
    LEADERS — Council intro container (background plate)
    ========================================================= */
 body[data-page="leaders"] .leaders-council-intro{
@@ -3602,6 +3765,7 @@ body[data-page="gallery"] .lightbox-close:focus-visible{
    ========================================================= */
 body[data-page="auth"],
 body[data-page="account"],
+body[data-page="members"],
 body[data-page="leader-dashboard"],
 body[data-page="gallery-submit"]{
   --auth-moon:rgba(220,235,255,.58);
@@ -3614,6 +3778,7 @@ body[data-page="gallery-submit"]{
 
 body[data-page="auth"] .page-hero,
 body[data-page="account"] .page-hero,
+body[data-page="members"] .page-hero,
 body[data-page="leader-dashboard"] .page-hero,
 body[data-page="gallery-submit"] .page-hero{
   border:1px solid transparent;
@@ -3628,10 +3793,12 @@ body[data-page="gallery-submit"] .page-hero{
 
 body[data-page="auth"] .hero-intro,
 body[data-page="account"] .hero-intro,
+body[data-page="members"] .hero-intro,
 body[data-page="leader-dashboard"] .hero-intro,
 body[data-page="gallery-submit"] .hero-intro,
 body[data-page="auth"] .page-main .glass-card,
 body[data-page="account"] .page-main .glass-card,
+body[data-page="members"] .page-main .glass-card,
 body[data-page="leader-dashboard"] .page-main .glass-card,
 body[data-page="gallery-submit"] .page-main .glass-card{
   position:relative;
@@ -3652,10 +3819,12 @@ body[data-page="gallery-submit"] .page-main .glass-card{
 
 body[data-page="auth"] .hero-intro::before,
 body[data-page="account"] .hero-intro::before,
+body[data-page="members"] .hero-intro::before,
 body[data-page="leader-dashboard"] .hero-intro::before,
 body[data-page="gallery-submit"] .hero-intro::before,
 body[data-page="auth"] .page-main .glass-card::before,
 body[data-page="account"] .page-main .glass-card::before,
+body[data-page="members"] .page-main .glass-card::before,
 body[data-page="leader-dashboard"] .page-main .glass-card::before,
 body[data-page="gallery-submit"] .page-main .glass-card::before{
   content:"";
@@ -3671,6 +3840,7 @@ body[data-page="gallery-submit"] .page-main .glass-card::before{
 
 body[data-page="auth"] .muted,
 body[data-page="account"] .muted,
+body[data-page="members"] .muted,
 body[data-page="leader-dashboard"] .muted,
 body[data-page="gallery-submit"] .muted{
   color:var(--auth-muted);
@@ -3874,6 +4044,10 @@ body[data-page="gallery-submit"] .muted{
   margin-bottom:18px;
 }
 
+.profile-publish-panel{
+  margin-bottom:18px;
+}
+
 .profile-progress{
   overflow:hidden;
   height:9px;
@@ -3893,6 +4067,61 @@ body[data-page="gallery-submit"] .muted{
 
 .account-missing-list{
   margin-top:0;
+}
+
+.profile-media-upload-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+
+.profile-media-upload input{
+  min-height:48px;
+  padding:10px;
+}
+
+.profile-media-list{
+  display:grid;
+  gap:10px;
+}
+
+.profile-media-item{
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  gap:8px 10px;
+  align-items:start;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(220,235,255,.12);
+  background:rgba(0,0,0,.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.profile-media-item div{
+  min-width:0;
+}
+
+.profile-media-item strong,
+.profile-media-item span{
+  display:block;
+}
+
+.profile-media-item strong{
+  color:var(--ink-0);
+  font-size:13px;
+  line-height:1.25;
+}
+
+.profile-media-item div > span,
+.profile-media-item small{
+  color:var(--auth-muted);
+  font-size:12px;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+}
+
+.profile-media-item small{
+  grid-column:1 / -1;
 }
 
 .auth-form{
@@ -4083,6 +4312,11 @@ body[data-page="gallery-submit"] .muted{
 .submission-status--archived{
   border-color:rgba(220,235,255,.20);
   color:rgba(229,238,235,.74);
+}
+
+.submission-status--hidden{
+  border-color:rgba(220,235,255,.16);
+  color:rgba(229,238,235,.70);
 }
 
 .submission-status--queued,
@@ -4358,6 +4592,47 @@ body[data-page="gallery-submit"] .muted{
   margin-top:4px;
 }
 
+.member-directory-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:18px;
+}
+
+.member-card{
+  display:grid;
+  grid-template-columns:112px minmax(0, 1fr);
+  gap:16px;
+  align-items:start;
+}
+
+.member-card__avatar{
+  width:112px;
+  aspect-ratio:1;
+  object-fit:cover;
+  border-radius:22px;
+  border:1px solid rgba(220,235,255,.22);
+  background:rgba(0,0,0,.20);
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.32),
+    0 0 0 1px rgba(255,255,255,.045) inset;
+}
+
+.member-card .section-title{
+  margin-bottom:8px;
+}
+
+.member-card p{
+  margin:8px 0 0;
+  color:var(--auth-muted);
+  line-height:1.56;
+  overflow-wrap:anywhere;
+}
+
+.member-card .footer-link{
+  margin-top:12px;
+  width:fit-content;
+}
+
 @media (max-width:720px){
   .auth-panel__head,
   .submission-item__head,
@@ -4372,8 +4647,18 @@ body[data-page="gallery-submit"] .muted{
   .account-summary-grid,
   .review-item,
   .review-meta,
-  .moderation-summary{
+  .moderation-summary,
+  .profile-media-upload-grid,
+  .member-directory-grid{
     grid-template-columns:1fr;
+  }
+
+  .member-card{
+    grid-template-columns:1fr;
+  }
+
+  .member-card__avatar{
+    width:128px;
   }
 }
 

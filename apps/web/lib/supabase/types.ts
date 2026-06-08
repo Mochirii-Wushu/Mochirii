@@ -47,6 +47,11 @@ export type MemberProfile = {
   timezone?: string | null;
   avatar_url?: string | null;
   bio?: string | null;
+  profile_slug?: string | null;
+  profile_public_enabled?: boolean | null;
+  profile_published_at?: string | null;
+  approved_avatar_media_id?: string | null;
+  approved_banner_media_id?: string | null;
   member_status?: MemberStatus | string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -228,6 +233,78 @@ export type ApprovedGallerySubmission = {
 export type ApprovedGalleryFeed = {
   submissions: ApprovedGallerySubmission[];
   count?: number;
+  signedUrlSeconds?: number;
+};
+
+export type PublicMemberProfile = {
+  id?: string | null;
+  slug?: string | null;
+  displayName?: string | null;
+  timezone?: string | null;
+  bio?: string | null;
+  guildTitle?: string | null;
+  avatarUrl?: string | null;
+  bannerUrl?: string | null;
+  profilePublishedAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export type PublicMemberProfileList = {
+  profiles: PublicMemberProfile[];
+  count?: number;
+  signedUrlSeconds?: number;
+};
+
+export type PublicMemberProfileResponse = {
+  profile: PublicMemberProfile | null;
+  signedUrlSeconds?: number;
+};
+
+export type ProfileMediaKind = "avatar" | "banner";
+export type ProfileMediaStatus = "pending" | "approved" | "rejected" | "archived";
+
+export type MemberProfileMedia = {
+  id?: string | null;
+  user_id?: string | null;
+  storage_bucket?: string | null;
+  storage_path?: string | null;
+  original_filename?: string | null;
+  media_kind?: ProfileMediaKind | string | null;
+  mime_type?: string | null;
+  size_bytes?: number | null;
+  status?: ProfileMediaStatus | string | null;
+  rejection_reason?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type ProfileMediaQueueItem = {
+  id?: string | null;
+  status?: ProfileMediaStatus | string | null;
+  kind?: ProfileMediaKind | string | null;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  originalFilename?: string | null;
+  createdAt?: string | null;
+  reviewedAt?: string | null;
+  rejectionReason?: string | null;
+  storagePath?: string | null;
+  signedPreviewUrl?: string | null;
+  uploader?: {
+    displayName?: string | null;
+    discordUsername?: string | null;
+    discordGlobalName?: string | null;
+    profileSlug?: string | null;
+  } | null;
+};
+
+export type ProfileMediaQueue = {
+  media: ProfileMediaQueueItem[];
+  count?: number;
+  status?: string;
+  summary?: Record<string, number | string | undefined>;
   signedUrlSeconds?: number;
 };
 
