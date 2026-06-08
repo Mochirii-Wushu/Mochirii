@@ -15,6 +15,11 @@ const functions = [
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
   "mark-instagram-gallery-submission-shared",
+  "list-member-profiles",
+  "get-member-profile",
+  "submit-member-profile-media",
+  "list-member-profile-media-queue",
+  "moderate-member-profile-media",
 ];
 
 function denoBinary() {

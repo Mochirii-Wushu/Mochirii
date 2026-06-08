@@ -15,6 +15,7 @@ import Link from "next/link";
 import { BodyPageMarker } from "./BodyPageMarker";
 import { EventsBoard } from "./EventsBoard";
 import { GalleryBrowser } from "./GalleryBrowser";
+import { ProfileDisplay } from "./ProfileDisplay";
 import { SpotifyBrowser } from "./SpotifyBrowser";
 import {
   BadgeRow,
@@ -1184,48 +1185,21 @@ export function TwillsPage() {
   return (
     <>
       <BodyPageMarker page="twills" />
-      <PageHero
+      <ProfileDisplay
         page="twills"
         ariaLabel="Twills hero"
-        image={text(hero.image, "./assets/img/profiles/twills/hero.webp")}
-        imageAlt="Twills profile banner artwork"
+        heroImage={text(hero.image, "./assets/img/profiles/twills/hero.webp")}
+        heroAlt="Twills profile banner artwork"
         kicker={text(hero.kicker, "Profile")}
-        title={text(profile.name, "Twills")}
-        meta={<MetaRow label="Twills metadata" items={[profile.timezone]} />}
-        badges={<BadgeRow id="twillsBadges" items={strings(profile.badges, 10)} label="Profile badges" />}
+        name={text(profile.name, "Twills")}
+        timezone={text(profile.timezone)}
+        badges={strings(profile.badges, 10)}
+        cardTitle={text(profile.cardTitle, "Portrait")}
+        avatar={text(profile.avatar, "./assets/img/profiles/twills/avatar.webp")}
+        avatarAlt="Twills profile picture"
+        bioTitle={text(profile.bioTitle, "Bio")}
+        bio={profile.bio}
       />
-      <main className="page-main" id="main">
-        <div className="container">
-          <section>
-            <div className="grid-12 grid-gap">
-              <aside className="col-4">
-                <div className="glass-card glass-card--soft glass-pad">
-                  <h2 className="section-title section-title--sm" id="twillsCardTitle">
-                    {text(profile.cardTitle, "Portrait")}
-                  </h2>
-                  <img
-                    id="twillsAvatar"
-                    className="profile-avatar"
-                    src={publicPath(profile.avatar, "./assets/img/profiles/twills/avatar.webp")}
-                    alt="Twills profile picture"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </aside>
-              <section className="col-8">
-                <div className="glass-card glass-card--primary glass-pad">
-                  <h2 className="section-title" id="twillsBioTitle">
-                    {text(profile.bioTitle, "Bio")}
-                  </h2>
-                  <ProseStack id="twillsBio" lines={profile.bio} />
-                </div>
-              </section>
-              <div className="col-divider" aria-hidden="true" />
-            </div>
-          </section>
-        </div>
-      </main>
     </>
   );
 }
