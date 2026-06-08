@@ -4,6 +4,8 @@
 
 This report records the Vercel Web Analytics and Speed Insights wiring pass for the live Next.js app at `https://mochirii.com`.
 
+Final release status: live on Vercel production.
+
 ## Starting Evidence
 
 - Repository branch before work: `main`.
@@ -45,13 +47,28 @@ This report records the Vercel Web Analytics and Speed Insights wiring pass for 
 
 ## Production Verification
 
-To be completed after merge and Vercel production deployment:
-
-- `https://mochirii.com/` loads the Vercel Web Analytics and Speed Insights scripts after hydration.
-- `https://mochirii.com/join`, `/gallery`, `/auth`, and `/leader-dashboard` load normally.
-- `https://www.mochirii.com/` still redirects to `https://mochirii.com/`.
-- Vercel dashboard shows Web Analytics pageview activity after production visits.
-- Vercel dashboard begins collecting Speed Insights/Core Web Vitals after production traffic.
+- PR: `https://github.com/Mochirii-Wushu/Mochirii/pull/205`.
+- Production commit: `c860ae27a761bd93946f96695f87b9b3f1a99293`.
+- Vercel production deployment: `https://vercel.com/mochirii/mochirii/94pwRir1v5sMDGeb8e2PzKsJHxBT`.
+- Vercel production status: Ready.
+- Live Chrome verification confirmed both scripts after hydration on:
+  - `https://mochirii.com/`
+  - `https://mochirii.com/join`
+  - `https://mochirii.com/gallery`
+  - `https://mochirii.com/auth`
+  - `https://mochirii.com/leader-dashboard`
+- Live script package markers:
+  - `script[data-sdkn="@vercel/analytics/next"][data-sdkv="2.0.1"]`
+  - `script[data-sdkn="@vercel/speed-insights/next"][data-sdkv="2.0.0"]`
+- Header smoke:
+  - `https://mochirii.com/`: `200 OK`, `Server: Vercel`, `X-Vercel-Cache: HIT`.
+  - `https://www.mochirii.com/`: `308 Permanent Redirect` to `https://mochirii.com/`, then `200 OK`.
+  - `/join`, `/gallery`, `/auth`, and `/leader-dashboard`: `200 OK`, `Server: Vercel`.
+- Vercel Analytics dashboard after production visits showed:
+  - `1` visitor.
+  - `5` page views.
+  - Route entries for `/`, `/join`, `/gallery`, `/auth`, and `/leader-dashboard`.
+- Vercel Speed Insights dashboard is enabled and shows Real Experience Score/Core Web Vitals panels. It did not yet have enough real-user metric data for a score at the time of this report.
 
 ## Remaining Notes
 
