@@ -17,13 +17,21 @@ Completed:
 - The private Reaper bot source repository exists at <https://github.com/Mochirii-Wushu/Reaper>.
 - Reaper has an initial Node/TypeScript Discord command scaffold that matches the Supabase ingest contract.
 - Reaper CI is green on `main` for typecheck, tests, and build.
+- Production Reaper is now implemented as a Supabase-hosted Discord Interactions webhook at:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
+```
+- Supabase production has active `reaper-discord-interactions` function with JWT verification disabled and Discord signature verification in the function body.
+- Supabase secret names now include `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, and `DISCORD_BOT_TOKEN`.
+- Discord Developer Portal accepted the Interactions Endpoint URL after a signed PING.
+- The guild-scoped `/submit` command is registered with optional boolean `share_to_instagram`.
 
 Still pending:
 
 - Set real Instagram production secrets in Supabase.
-- Set Reaper runtime secrets on the bot host without exposing values.
-- Register Reaper's updated guild-scoped `/submit` command in Discord.
-- Run a non-live Reaper dry-run payload from the runtime.
+- Complete Meta for Developers SMS verification for the owner account before app/token setup can continue.
+- Run Discord command dry-runs through the webhook after Meta setup, or earlier with a non-sensitive test image if the owner approves that upload.
 - Publish one live Instagram test post only after explicit action-time owner approval.
 
 ## Public Interface
@@ -59,7 +67,7 @@ Complete these checks before any production mutation or future redeployment:
 3. Vercel production for `mochirii/mochirii` is Ready after the merge.
 4. Supabase project is confirmed as `deyvmtncimmcinldjyqe`.
 5. The official Instagram account is a Professional account controlled by Mōchirīī.
-6. Reaper's code repository is available at <https://github.com/Mochirii-Wushu/Reaper>; runtime host secrets and deployment are still separate operator steps.
+6. Reaper's code repository is available at <https://github.com/Mochirii-Wushu/Reaper>; production command handling is hosted by Supabase Edge Function `reaper-discord-interactions`, while the repo remains the command/contract helper and rollback reference.
 7. The Discord submission channel remains `1508077313965817856`.
 
 ## Deployment Sequence
@@ -116,6 +124,7 @@ supabase functions deploy list-gallery-review-queue --project-ref deyvmtncimmcin
 supabase functions deploy moderate-gallery-submission --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy list-instagram-publish-queue --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy publish-instagram-gallery-submission --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy reaper-discord-interactions --project-ref deyvmtncimmcinldjyqe
 ```
 
 Verify deployed function names:
@@ -134,6 +143,9 @@ Required production secret names:
 INSTAGRAM_ACCOUNT_ID
 INSTAGRAM_ACCESS_TOKEN
 INSTAGRAM_API_VERSION
+DISCORD_PUBLIC_KEY
+DISCORD_APPLICATION_ID
+DISCORD_BOT_TOKEN
 DISCORD_GALLERY_CHANNEL_ID
 DISCORD_GALLERY_INGEST_SECRET
 ```
@@ -152,9 +164,19 @@ After setting secrets, confirm only names are present:
 supabase secrets list --project-ref deyvmtncimmcinldjyqe
 ```
 
-### 6. Update Reaper Slash Command
+### 6. Set Discord Interactions Endpoint
 
-Register Reaper's command with the new optional boolean:
+In Discord Developer Portal > Reaper > General Information, set the Discord Interactions Endpoint URL to:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
+```
+
+Discord validates this endpoint with a signed PING. If the save fails, verify `DISCORD_PUBLIC_KEY`, function deployment, and signature handling before retrying.
+
+### 7. Update Reaper Slash Command
+
+Register the guild-scoped `/submit` command with the new optional boolean:
 
 ```text
 share_to_instagram
@@ -166,7 +188,7 @@ Description:
 Allow Mōchirīī to share this image on our official Instagram if approved.
 ```
 
-Reaper must:
+The guild-scoped `/submit` command must:
 
 - reject submissions outside channel `1508077313965817856`
 - default `share_to_instagram` to `false`

@@ -186,7 +186,7 @@ assertNotMatches(
   "browser users cannot set Discord source metadata.",
   "submit-discord-gallery-image",
   "verify_jwt = false",
-  "trusted Reaper bot",
+  "trusted Reaper bridge",
   "existing linked `member_profiles.discord_user_id`",
   "Discord uploads are idempotent by message/attachment ID.",
 ].forEach((snippet) => assertIncludes("supabase README", readme, snippet));
