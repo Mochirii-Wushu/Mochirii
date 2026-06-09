@@ -17,7 +17,7 @@ Keep this page focused on times, RSVP notes, runs, and the rhythm of gathering.
 ## 2. Data Source
 
 - Events data lives in `data/events.json`.
-- Rolling event timing lives in `data/guild-schedule.json`; the live Next Events page derives the Hero's Realm next Friday date from that schedule when an event has `scheduleId`.
+- Rolling event timing lives in `data/guild-schedule.json`; the live Next Events page derives event-board dates from that schedule when an event has `scheduleId`.
 - Keep JSON valid: no trailing commas, comments, or unquoted keys.
 - Preserve the current schema unless the matching renderer is updated in the same scoped task.
 - Add only fields that `events.js` actually supports.
