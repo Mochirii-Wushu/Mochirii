@@ -101,6 +101,7 @@ function assertEqual(label, actual, expected) {
 
 assertEqual("timezone label", schedule.timezone?.label, "UTC+8");
 assertEqual("timezone offset", offsetMinutes(), 480);
+assertEqual("Discord cover version", schedule.discordCoverVersion, "2026-06-10-event-panels");
 assertEqual("first Saturday before rollover", nextFirstSaturday(new Date("2026-06-03T12:00:00Z")), "2026-06-06");
 assertEqual("first Saturday on rollover", nextFirstSaturday(new Date("2026-06-05T17:00:00Z")), "2026-06-06");
 assertEqual("first Saturday after rollover", nextFirstSaturday(new Date("2026-06-07T01:00:00Z")), "2026-07-04");
