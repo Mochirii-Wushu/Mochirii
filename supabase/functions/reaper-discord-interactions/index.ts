@@ -47,6 +47,7 @@ const OPTION_TYPE_BOOLEAN = 5;
 const OPTION_TYPE_ATTACHMENT = 11;
 const DISCORD_EVENT_PRIVACY_GUILD_ONLY = 2;
 const DISCORD_EVENT_ENTITY_EXTERNAL = 3;
+const eventCoverImageCache = new Map<string, string>();
 
 const RANK_ROLES = [
   { name: "Guild Leader", tier: "senior", order: 1 },
@@ -66,8 +67,13 @@ type ScheduleEvent = {
   title: string;
   description: string;
   location: string;
+  websiteLocation: string;
   startIso: string;
   endIso: string;
+  coverImageUrl: string | null;
+  canonicalEventId: string | null;
+  duplicateEventIds: string[];
+  recurrenceRule: JsonRecord | null;
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -130,6 +136,46 @@ function localToUtcIso(localDate: string, time: string, offset: number): string 
   ).toISOString();
 }
 
+function scheduleAssetUrl(value: unknown): string | null {
+  const raw = safeString(value, 300);
+  if (!raw) return null;
+  if (/^https:\/\/[^\s]+$/i.test(raw)) return raw;
+  const normalized = raw.replace(/^\.?\//, "");
+  if (!normalized.startsWith("assets/")) return null;
+  return `https://mochirii.com/${normalized}`;
+}
+
+function recurrenceRule(value: unknown, startIso: string): JsonRecord | null {
+  const rule = asRecord(value);
+  const frequency = Number(rule.frequency);
+  const interval = Number(rule.interval || 1);
+  const byNWeekday = asArray(rule.by_n_weekday)
+    .map(asRecord)
+    .map((entry) => ({
+      n: Number(entry.n),
+      day: Number(entry.day),
+    }))
+    .filter((entry) =>
+      Number.isInteger(entry.n) &&
+      entry.n >= 1 &&
+      entry.n <= 5 &&
+      Number.isInteger(entry.day) &&
+      entry.day >= 0 &&
+      entry.day <= 6
+    );
+
+  if (!Number.isInteger(frequency) || !Number.isInteger(interval) || interval < 1) return null;
+
+  const normalized: JsonRecord = {
+    start: startIso,
+    frequency,
+    interval,
+  };
+
+  if (byNWeekday.length) normalized.by_n_weekday = byNWeekday.slice(0, 1);
+  return normalized;
+}
+
 function eventEndDate(startDate: string, startTime: string, endTime: string): string {
   const start = parseTime(startTime);
   const end = parseTime(endTime);
@@ -173,7 +219,8 @@ function nextWeeklyDate(schedule: JsonRecord, item: JsonRecord, day: number, now
 
 function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonRecord, localDate: string): ScheduleEvent | null {
   const title = safeString(item.title, 100);
-  const location = safeString(item.location, 100) || "https://mochirii.com/events";
+  const websiteLocation = safeString(item.location, 300) || "https://mochirii.com/events";
+  const location = safeString(item.discordLocation, 100) || safeString(item.location, 100) || "https://mochirii.com/events";
   const startTime = safeString(item.startTime, 20) || "00:00";
   const endTime = safeString(item.endTime, 20) || "01:00";
   const offset = scheduleOffsetMinutes(schedule);
@@ -188,8 +235,13 @@ function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonReco
     title,
     description: safeString(item.description || item.summary || item.timeText, 1000) || title,
     location,
+    websiteLocation,
     startIso,
     endIso,
+    coverImageUrl: scheduleAssetUrl(item.discordCoverImage),
+    canonicalEventId: snowflake(item.discordEventId),
+    duplicateEventIds: asArray(item.discordDuplicateEventIds).map(snowflake).filter((id): id is string => Boolean(id)),
+    recurrenceRule: recurrenceRule(item.discordRecurrenceRule, startIso),
   };
 }
 
@@ -650,6 +702,10 @@ async function upsertDiscordEventResource(event: JsonRecord, desired: ScheduleEv
           managedBy: "reaper-event-sync",
           siteEventKey: desired.key,
           location: desired.location,
+          websiteLocation: desired.websiteLocation,
+          coverImageUrl: desired.coverImageUrl,
+          canonicalEventId: desired.canonicalEventId,
+          recurrenceRule: desired.recurrenceRule,
           source: "data/guild-schedule.json",
           startIso: desired.startIso,
           endIso: desired.endIso,
@@ -668,8 +724,83 @@ async function upsertDiscordEventResource(event: JsonRecord, desired: ScheduleEv
   }
 }
 
-function scheduledEventBody(desired: ScheduleEvent): JsonRecord {
-  return {
+async function disableDuplicateEventResource(eventId: string, desired: ScheduleEvent): Promise<void> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const serviceRoleKey = getServiceRoleKey();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Supabase service credentials are not configured for duplicate event registry updates.");
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { error } = await adminClient
+    .from("discord_resources")
+    .update({
+      enabled: false,
+      description: `Retired duplicate scheduled event for ${desired.title}.`,
+      metadata: {
+        managedBy: "reaper-event-sync",
+        siteEventKey: desired.key,
+        duplicateOf: desired.canonicalEventId,
+        retiredBy: "reaper-event-sync",
+        retiredReason: "duplicate-monthly-raffle",
+        retiredAt: new Date().toISOString(),
+      },
+    })
+    .eq("kind", "scheduled_event")
+    .eq("discord_id", eventId);
+
+  if (error) {
+    console.error("reaper-discord-interactions duplicate scheduled event registry update failed", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error("Duplicate scheduled event was removed but could not be retired in the website registry.");
+  }
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+  return btoa(binary);
+}
+
+async function eventCoverImageData(url: string): Promise<string> {
+  const cached = eventCoverImageCache.get(url);
+  if (cached) return cached;
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "image/png,image/jpeg,image/webp",
+      "User-Agent": DISCORD_API_USER_AGENT,
+    },
+  });
+  const contentType = normalizedMime(response.headers.get("Content-Type"));
+  if (!response.ok || !contentType) {
+    throw new Error(`Event cover image fetch failed with HTTP ${response.status}.`);
+  }
+
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  if (!bytes.length) {
+    throw new Error("Event cover image fetch returned an empty file.");
+  }
+
+  const data = `data:${contentType};base64,${bytesToBase64(bytes)}`;
+  eventCoverImageCache.set(url, data);
+  return data;
+}
+
+async function scheduledEventBody(desired: ScheduleEvent, includeImage: boolean): Promise<JsonRecord> {
+  const body: JsonRecord = {
     channel_id: null,
     name: desired.title.slice(0, 100),
     description: desired.description.slice(0, 1000),
@@ -681,6 +812,16 @@ function scheduledEventBody(desired: ScheduleEvent): JsonRecord {
       location: desired.location.slice(0, 100),
     },
   };
+
+  if (desired.recurrenceRule) {
+    body.recurrence_rule = desired.recurrenceRule;
+  }
+
+  if (includeImage && desired.coverImageUrl) {
+    body.image = await eventCoverImageData(desired.coverImageUrl);
+  }
+
+  return body;
 }
 
 function eventLocation(event: JsonRecord): string {
@@ -689,6 +830,35 @@ function eventLocation(event: JsonRecord): string {
 
 function managedEventLine(action: string, desired: ScheduleEvent, detail = ""): string {
   return detail ? `${action}: ${desired.title} (${detail})` : `${action}: ${desired.title}`;
+}
+
+async function processDuplicateScheduledEvents(
+  apply: boolean,
+  desired: ScheduleEvent,
+  existingEvents: JsonRecord[],
+  lines: string[],
+): Promise<void> {
+  for (const duplicateId of desired.duplicateEventIds) {
+    if (!duplicateId || duplicateId === desired.canonicalEventId) continue;
+    const existingDuplicate = existingEvents.find((event) => safeString(event.id, 24) === duplicateId);
+    if (!existingDuplicate) {
+      lines.push(managedEventLine("Duplicate already absent", desired, `event ${duplicateId}`));
+      continue;
+    }
+
+    lines.push(managedEventLine(apply ? "Removed duplicate" : "Would remove duplicate", desired, `event ${duplicateId}`));
+    if (!apply) continue;
+
+    const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events/${duplicateId}`, {
+      method: "DELETE",
+      headers: discordApiHeaders(),
+    });
+    if (!response.ok) {
+      lines[lines.length - 1] = managedEventLine("Blocked duplicate removal", desired, `Discord API ${response.status}`);
+      continue;
+    }
+    await disableDuplicateEventResource(duplicateId, desired);
+  }
 }
 
 async function processEventSync(
@@ -734,6 +904,9 @@ async function processEventSync(
     for (const desired of desiredEvents) {
       const resource = resourceByKey.get(desired.key);
       const resourceEventId = safeString(resource?.discord_id, 24);
+      const existingByCanonical = desired.canonicalEventId
+        ? existingEvents.find((event) => safeString(event.id, 24) === desired.canonicalEventId)
+        : null;
       const existingByResource = resourceEventId
         ? existingEvents.find((event) => safeString(event.id, 24) === resourceEventId)
         : null;
@@ -743,15 +916,22 @@ async function processEventSync(
         Number(event.entity_type) === DISCORD_EVENT_ENTITY_EXTERNAL &&
         eventLocation(event) === desired.location
       );
-      const existing = existingByResource || existingByName;
+      const existing = existingByCanonical || existingByResource || existingByName;
 
       if (existing) {
         lines.push(managedEventLine(apply ? "Updated" : "Would update", desired, `event ${safeString(existing.id, 24) || "unknown"}`));
         if (apply) {
+          let body: JsonRecord;
+          try {
+            body = await scheduledEventBody(desired, true);
+          } catch {
+            lines[lines.length - 1] = managedEventLine("Blocked", desired, "cover image unavailable");
+            continue;
+          }
           const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events/${safeString(existing.id, 24)}`, {
             method: "PATCH",
             headers: discordApiHeaders(true),
-            body: JSON.stringify(scheduledEventBody(desired)),
+            body: JSON.stringify(body),
           });
           if (!response.ok) {
             lines[lines.length - 1] = managedEventLine("Blocked", desired, `Discord API ${response.status}`);
@@ -759,15 +939,23 @@ async function processEventSync(
           }
           await upsertDiscordEventResource(asRecord(response.data), desired);
         }
+        await processDuplicateScheduledEvents(apply, desired, existingEvents, lines);
         continue;
       }
 
       lines.push(managedEventLine(apply ? "Created" : "Would create", desired, "external scheduled event"));
       if (apply) {
+        let body: JsonRecord;
+        try {
+          body = await scheduledEventBody(desired, true);
+        } catch {
+          lines[lines.length - 1] = managedEventLine("Blocked", desired, "cover image unavailable");
+          continue;
+        }
         const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events`, {
           method: "POST",
           headers: discordApiHeaders(true),
-          body: JSON.stringify(scheduledEventBody(desired)),
+          body: JSON.stringify(body),
         });
         if (!response.ok) {
           lines[lines.length - 1] = managedEventLine("Blocked", desired, `Discord API ${response.status}`);
@@ -775,6 +963,7 @@ async function processEventSync(
         }
         await upsertDiscordEventResource(asRecord(response.data), desired);
       }
+      await processDuplicateScheduledEvents(apply, desired, existingEvents, lines);
     }
 
     const intro = apply

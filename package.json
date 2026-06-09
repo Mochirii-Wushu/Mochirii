@@ -9,6 +9,7 @@
     "check:content": "node scripts/check-content-guardrails.mjs",
     "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",
     "check:discord-gallery-ingest": "node scripts/check-discord-gallery-ingest.mjs",
+    "check:discord-event-covers": "node scripts/check-discord-event-covers.mjs",
     "check:dns-cutover-approval-packet": "node scripts/check-dns-cutover-approval-packet.mjs",
     "check:dns-cutover-final-readiness": "node scripts/check-dns-cutover-final-readiness.mjs",
     "check:dns-cutover-pr-readiness": "node scripts/check-dns-cutover-pr-readiness.mjs",
