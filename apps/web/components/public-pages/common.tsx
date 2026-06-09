@@ -1,4 +1,5 @@
-import { Fragment, type ReactNode } from "react";
+import Image from "next/image";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 
 const htmlRouteMap = new Map<string, string>([
   ["index.html", "/"],
@@ -196,15 +197,15 @@ export function PageHero({
     <header className="page-hero-shell" aria-label={ariaLabel}>
       <div className="container">
         <section className="page-hero page-hero--tall">
-          <img
+          <StaticImage
             id={`${page}HeroImage`}
             src={publicPath(image)}
             alt={imageAlt}
             className="page-hero__img"
             width="1536"
             height="1024"
-            loading="eager"
-            decoding="async"
+            priority
+            sizes="(max-width: 1232px) calc(100vw - 32px), 1200px"
           />
           {atmosphere ? (
             <img
@@ -252,8 +253,57 @@ export function ImagePanel({
     <div className="glass-card glass-card--soft glass-pad">
       {title ? <h3 className="section-title section-title--sm">{title}</h3> : null}
       <div className="prose-stack">
-        <img id={id} src={publicPath(src)} alt={alt} loading="lazy" decoding="async" />
+        <StaticImage
+          id={id}
+          src={src}
+          alt={alt}
+          width={960}
+          height={640}
+          className="image-panel__img"
+          sizes="(max-width: 980px) calc(100vw - 68px), 360px"
+        />
       </div>
     </div>
+  );
+}
+
+export function StaticImage({
+  id,
+  src,
+  alt,
+  className,
+  width,
+  height,
+  priority = false,
+  loading = "lazy",
+  sizes,
+  style,
+}: {
+  id?: string;
+  src: unknown;
+  alt: string;
+  className?: string;
+  width: number | `${number}`;
+  height: number | `${number}`;
+  priority?: boolean;
+  loading?: "eager" | "lazy";
+  sizes?: string;
+  style?: CSSProperties;
+}) {
+  const imageSrc = publicPath(src);
+  if (!imageSrc) return null;
+
+  return (
+    <Image
+      id={id}
+      src={imageSrc}
+      alt={alt}
+      className={className}
+      width={Number(width)}
+      height={Number(height)}
+      sizes={sizes}
+      style={style}
+      {...(priority ? { priority: true } : { loading })}
+    />
   );
 }

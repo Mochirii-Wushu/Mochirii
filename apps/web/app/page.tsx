@@ -7,6 +7,7 @@ import { HomeGallerySpotlight } from "@/components/HomeGallerySpotlight";
 import { type GallerySpotlightItem } from "@/components/HomeGalleryLightbox";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { SpotlightProfileCard } from "@/components/public-pages/ProfileCardLinks";
+import { StaticImage } from "@/components/public-pages/common";
 import { monthlyScheduleDate } from "@/lib/guild-schedule";
 
 export const revalidate = 3600;
@@ -198,12 +199,13 @@ function BulletinList({ items }: { items: Bulletin[] }) {
         return (
           <a className="home-bulletin" href={cleanRoute(item.href)} key={item.title}>
             <div className="home-bulletin__media">
-              <img
+              <StaticImage
                 className="home-bulletin__img"
                 src={publicPath(item.image, "/assets/img/bulletins/featured.webp")}
                 alt={cleanLabel(item.imageAlt || "Bulletin cover")}
-                loading="lazy"
-                decoding="async"
+                width={960}
+                height={600}
+                sizes="(max-width: 900px) calc(100vw - 68px), 320px"
               />
               <div className="home-bulletin__scrim" aria-hidden="true" />
               <div className="home-bulletin__tag">{typeLabel(item.type)}</div>
@@ -226,12 +228,13 @@ function DoorGrid({ tiles }: { tiles: DoorTile[] }) {
       {tiles.slice(0, 4).map((tile) => (
         <a className="home-door" href={cleanRoute(tile.href)} key={tile.label}>
           <div className="home-door__media">
-            <img
+            <StaticImage
               className="home-door__img"
               src={publicPath(tile.image)}
               alt={cleanLabel(tile.alt)}
-              loading="lazy"
-              decoding="async"
+              width={960}
+              height={600}
+              sizes="(max-width: 900px) calc(100vw - 68px), 280px"
             />
             <div className="home-door__scrim" aria-hidden="true" />
             <div className="home-door__label">{tile.label}</div>
@@ -263,23 +266,25 @@ export default function Home() {
       <header className="page-hero-shell" aria-label="Home hero">
         <div className="container">
           <section className="page-hero page-hero--tall">
-            <img
+            <StaticImage
               id="heroImage"
               src={publicPath(homeData.hero.image, "/assets/img/hero/hero.webp")}
               alt="Hero artwork for Mōchirīī guild"
               className="page-hero__img"
               width="1536"
               height="1024"
-              loading="eager"
-              decoding="async"
+              priority
+              sizes="(max-width: 1232px) calc(100vw - 32px), 1200px"
             />
             {homeData.hero.atmosphereImage ? (
-              <img
+              <StaticImage
                 id="heroAtmosphere"
                 src={publicPath(homeData.hero.atmosphereImage)}
                 alt=""
                 className="page-hero__atmos"
-                decoding="async"
+                width={1536}
+                height={1024}
+                sizes="(max-width: 1232px) calc(100vw - 32px), 1200px"
                 aria-hidden="true"
               />
             ) : null}
@@ -318,14 +323,14 @@ export default function Home() {
             </section>
 
             <aside className="home-guild-seal" aria-label="Guild seal">
-              <img
+              <StaticImage
                 id="sealImage"
                 src={publicPath(homeData.seal.image, "/assets/img/brand/emblem.webp")}
                 alt={cleanLabel(homeData.seal.imageAlt || "Mōchirīī guild seal")}
                 width="1024"
                 height="1024"
-                loading="eager"
-                decoding="async"
+                priority
+                sizes="(max-width: 900px) 180px, 220px"
               />
               <h2 id="sealTitle" className="home-seal-title">
                 {homeData.seal.title}
@@ -362,13 +367,14 @@ export default function Home() {
                   optionalText(featured, "summary"),
                 ])}
               >
-                <img
+                <StaticImage
                   id="featuredBulletinImage"
                   src={publicPath(featured.image, "/assets/img/bulletins/featured.webp")}
                   alt={cleanLabel(featured.imageAlt)}
                   className="home-featured__img"
-                  loading="lazy"
-                  decoding="async"
+                  width={1280}
+                  height={720}
+                  sizes="(max-width: 1232px) calc(100vw - 68px), 1120px"
                 />
                 <div className="home-featured__scrim" aria-hidden="true" />
 
@@ -429,13 +435,14 @@ export default function Home() {
                 "Spotlight Appreciation",
               ])}
             >
-              <img
+              <StaticImage
                 id="spotlightImage"
                 src={publicPath(spotlight.image, "/assets/img/featured/spotlight.webp")}
                 alt={cleanLabel(spotlight.imageAlt)}
                 className="home-spotlight__img"
-                loading="lazy"
-                decoding="async"
+                width={1536}
+                height={1024}
+                sizes="(max-width: 1232px) calc(100vw - 68px), 1120px"
               />
               <div className="home-spotlight__scrim" aria-hidden="true" />
               <Link
