@@ -34,6 +34,7 @@ Current data sources:
 - Raffles: `data/raffles.json`
 - Spotify: `data/spotify.json`
 - Spotlight: `data/spotlight.json`
+- Rolling dates and weekly schedule timing: `data/guild-schedule.json`
 
 For each file:
 
@@ -77,6 +78,7 @@ How to add or update an announcement safely:
 - Use `pinned: true` only for notices that should sort above regular notices.
 - Keep summaries brief.
 - Use `details[]` for short supporting bullets.
+- The live Next Announcements page derives `weekly-schedule` details from `data/guild-schedule.json`; keep fallback JSON details aligned with that schedule.
 - Use `tags[]` for short labels.
 - Do not add item-level links or images unless `announcements.js` is intentionally updated and validated.
 
@@ -121,6 +123,7 @@ How to add or update a raffle safely:
 - Keep `how[]`, `rules[]`, and `note[]` as plain text arrays.
 - Keep prize and draw details clear enough to understand without extra interpretation.
 - Use `thisMonth` for current raffle timing, prize, and note details.
+- If `thisMonth.scheduleId` is present, the live Next Raffles page derives the visible date from `data/guild-schedule.json`.
 - Use `links[]` only for supported label/href links.
 - Use relative links for site pages.
 - Use full `https://` links for external destinations.
@@ -208,6 +211,7 @@ How to add or update Spotlight safely:
 - Keep body text short and specific to the featured person or moment.
 - Use `highlights[]` for concise appreciation bullets.
 - Keep `spotlight.date` as a date-only value when possible.
+- The live Next Spotlight page derives the visible date from the first day of the current UTC+8 month and may show the configured member's approved avatar/profile link through `list-visible-profile-cards`.
 - Keep hero alt text meaningful.
 - Do not add profile/contact fields unless `spotlight.js` is intentionally updated and validated.
 
@@ -233,6 +237,7 @@ Avoid duplicating Leaders/Twills/Gallery roles. Spotlight should not become a co
 - Decorative or hidden atmosphere images should remain empty-alt and hidden.
 - Spotify/embed URLs must follow current renderer expectations.
 - Spotify embeds should not overflow on mobile.
+- Spotify embeds use a two-column grid on desktop/tablet and a single column on mobile.
 - Spotify iframe titles should remain meaningful.
 - Unsupported link, image, or embed fields should not be added without renderer changes.
 

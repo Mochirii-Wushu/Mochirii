@@ -8,6 +8,7 @@ import rafflesData from "@/public/data/raffles.json";
 import galleryData from "@/public/data/gallery.json";
 import spotlightData from "@/public/data/spotlight.json";
 import spotifyData from "@/public/data/spotify.json";
+import guildScheduleData from "@/public/data/guild-schedule.json";
 import recruitmentData from "@/public/data/recruitment.json";
 import twillsData from "@/public/data/twills.json";
 import type { ReactNode } from "react";
@@ -15,8 +16,16 @@ import Link from "next/link";
 import { BodyPageMarker } from "./BodyPageMarker";
 import { EventsBoard } from "./EventsBoard";
 import { GalleryBrowser } from "./GalleryBrowser";
+import { LeaderProfileButton, SpotlightProfileCard } from "./ProfileCardLinks";
 import { ProfileDisplay } from "./ProfileDisplay";
 import { SpotifyBrowser } from "./SpotifyBrowser";
+import {
+  eventBoardItemsFromSchedule,
+  monthlyScheduleDate,
+  scheduleTimezoneLabel,
+  spotlightScheduleDate,
+  weeklyScheduleLines,
+} from "@/lib/guild-schedule";
 import {
   BadgeRow,
   cleanRoute,
@@ -69,6 +78,14 @@ function linkProps(href: unknown) {
     target: isExternalHref(cleanHref) ? "_blank" : undefined,
     rel: isExternalHref(cleanHref) ? "noopener noreferrer" : undefined,
   };
+}
+
+function scheduleId(value: unknown) {
+  return text(value).trim();
+}
+
+function announcementDetails(item: DataRecord) {
+  return text(item.id) === "weekly-schedule" ? weeklyScheduleLines(guildScheduleData) : strings(item.details);
 }
 
 function ReturnHomeLink() {
@@ -484,11 +501,11 @@ export function LeadersPage() {
                     <p className="muted" style={{ margin: "10px 0 0" }}>
                       {text(leader.summary)}
                     </p>
-                    {text(leader.profileHref) ? (
-                      <a className="footer-link" style={{ display: "inline-flex", marginTop: 12 }} {...linkProps(leader.profileHref)}>
-                        {text(leader.profileLabel, "Open profile")}
-                      </a>
-                    ) : null}
+                    <LeaderProfileButton
+                      slug={text(leader.memberProfileSlug)}
+                      fallbackHref={cleanRoute(leader.profileHref, "")}
+                      label={text(leader.profileLabel, "Open profile")}
+                    />
                   </OverlayCard>
                 </div>
               ))}
@@ -681,6 +698,19 @@ export function EventsPage() {
   const featured = record(data.featured);
   const recurring = record(data.recurring);
   const featuredHref = text(featured.href);
+  const scheduledBoardItems = eventBoardItemsFromSchedule(guildScheduleData);
+  const eventBoardItems = records(data.upcoming).map((item) => {
+    const scheduled = scheduledBoardItems.find((event) => event.id === scheduleId(item.scheduleId));
+    return {
+      date: text(scheduled?.date || item.date),
+      time: text(scheduled?.timeText || item.time),
+      timezone: text(scheduled?.timezone || item.timezone || scheduleTimezoneLabel(guildScheduleData)),
+      title: text(scheduled?.title || item.title),
+      summary: text(scheduled?.summary || item.summary),
+      image: text(scheduled?.image || item.image),
+      href: text(scheduled?.href || item.href),
+    };
+  });
 
   return (
     <>
@@ -760,15 +790,7 @@ export function EventsPage() {
                   Event Board
                 </h3>
                 <EventsBoard
-                  items={records(data.upcoming).map((item) => ({
-                    date: text(item.date),
-                    time: text(item.time),
-                    timezone: text(item.timezone),
-                    title: text(item.title),
-                    summary: text(item.summary),
-                    image: text(item.image),
-                    href: text(item.href),
-                  }))}
+                  items={eventBoardItems}
                 />
               </div>
             </aside>
@@ -870,9 +892,9 @@ export function AnnouncementsPage() {
                     </p>
                     <h3 className="section-title section-title--sm">{text(item.title, "Announcement")}</h3>
                     {text(item.summary) ? <p className="lede">{text(item.summary)}</p> : null}
-                    {strings(item.details).length ? (
+                    {announcementDetails(item).length ? (
                       <ul className="list-stack">
-                        {strings(item.details).map((detail) => (
+                        {announcementDetails(item).map((detail) => (
                           <li key={detail}>{detail}</li>
                         ))}
                       </ul>
@@ -895,6 +917,9 @@ export function RafflesPage() {
   const data = record(rafflesData);
   const meta = record(data.meta);
   const thisMonth = record(data.thisMonth);
+  const raffleDate = monthlyScheduleDate(guildScheduleData, thisMonth.scheduleId || "monthly-raffle", thisMonth.date);
+  const raffleTime = text(thisMonth.time || record(record(guildScheduleData.monthly).raffle).time);
+  const raffleTimezone = text(thisMonth.timezone || scheduleTimezoneLabel(guildScheduleData));
 
   return (
     <>
@@ -937,7 +962,7 @@ export function RafflesPage() {
                 <h3 className="section-title section-title--sm">This month</h3>
                 <div id="rafflesThisMonth" className="prose-stack">
                   <p className="kicker">
-                    {[thisMonth.date, thisMonth.time, thisMonth.timezone]
+                    {[raffleDate, raffleTime, raffleTimezone]
                       .map((value) => text(value))
                       .filter(Boolean)
                       .join(" • ")}
@@ -1009,6 +1034,8 @@ export function SpotlightPage() {
   const data = record(spotlightData);
   const hero = record(data.hero);
   const spotlight = record(data.spotlight);
+  const spotlightDate = spotlightScheduleDate(guildScheduleData, spotlight.date);
+  const spotlightSlug = text(spotlight.memberProfileSlug || record(guildScheduleData.spotlight).memberProfileSlug);
 
   return (
     <>
@@ -1021,7 +1048,7 @@ export function SpotlightPage() {
         atmosphere={text(hero.atmosphereImage)}
         kicker={text(spotlight.kicker, "Member Spotlight")}
         title={text(spotlight.title, "Spotlight")}
-        meta={<MetaRow items={[spotlight.date ? formatDateUTC(spotlight.date, { year: "numeric", month: "long", day: "2-digit" }) : "", spotlight.tag]} />}
+        meta={<MetaRow items={[spotlightDate ? formatDateUTC(spotlightDate, { year: "numeric", month: "long", day: "2-digit" }) : "", spotlight.tag]} />}
         intro={
           <p id="spotlightIntro" className="lede">
             {text(spotlight.intro)}
@@ -1047,6 +1074,7 @@ export function SpotlightPage() {
                     <li key={highlight}>{highlight}</li>
                   ))}
                 </ul>
+                <SpotlightProfileCard slug={spotlightSlug} />
               </div>
             </aside>
             <div className="col-divider" aria-hidden="true" />

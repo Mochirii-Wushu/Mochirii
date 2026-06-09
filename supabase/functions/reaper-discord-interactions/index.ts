@@ -15,8 +15,11 @@ const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
 const EXPECTED_MODERATOR_ROLE_IDS = ["1078630751165222984"];
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
+const GUILD_SCHEDULE_URL = "https://mochirii.com/data/guild-schedule.json";
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
+const MANAGE_EVENTS_PERMISSION = 1n << 33n;
+const CREATE_EVENTS_PERMISSION = 1n << 44n;
 const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
 const EPHEMERAL_FLAG = 1 << 6;
 const INTERACTION_TYPE_PING = 1;
@@ -27,6 +30,8 @@ const INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5;
 const OPTION_TYPE_STRING = 3;
 const OPTION_TYPE_BOOLEAN = 5;
 const OPTION_TYPE_ATTACHMENT = 11;
+const DISCORD_EVENT_PRIVACY_GUILD_ONLY = 2;
+const DISCORD_EVENT_ENTITY_EXTERNAL = 3;
 
 const RANK_ROLES = [
   { name: "Guild Leader", tier: "senior", order: 1 },
@@ -40,6 +45,167 @@ const RANK_ROLES = [
   { name: "Softwind", tier: "members", order: 9 },
   { name: "Rice Sprout", tier: "members", order: 10 },
 ];
+
+type ScheduleEvent = {
+  key: string;
+  title: string;
+  description: string;
+  location: string;
+  startIso: string;
+  endIso: string;
+};
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function pad(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function scheduleOffsetMinutes(schedule: JsonRecord): number {
+  const timezone = asRecord(schedule.timezone);
+  const value = Number(timezone.offsetMinutes);
+  return Number.isFinite(value) ? value : 480;
+}
+
+function localParts(now: Date, offset: number) {
+  const shifted = new Date(now.getTime() + offset * 60 * 1000);
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth() + 1,
+    day: shifted.getUTCDate(),
+    weekday: shifted.getUTCDay(),
+    hour: shifted.getUTCHours(),
+    minute: shifted.getUTCMinutes(),
+  };
+}
+
+function dateKey(year: number, month: number, day: number): string {
+  return `${year}-${pad(month)}-${pad(day)}`;
+}
+
+function parseDateKey(value: string): { year: number; month: number; day: number } | null {
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
+}
+
+function addDays(value: string, days: number): string {
+  const parsed = parseDateKey(value);
+  if (!parsed) return value;
+  const next = new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day) + days * MS_PER_DAY);
+  return dateKey(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate());
+}
+
+function parseTime(value: unknown): { hour: number; minute: number } {
+  const match = String(value || "00:00").match(/^(\d{2}):(\d{2})$/);
+  if (!match) return { hour: 0, minute: 0 };
+  return {
+    hour: Math.min(Math.max(Number(match[1]), 0), 23),
+    minute: Math.min(Math.max(Number(match[2]), 0), 59),
+  };
+}
+
+function localToUtcIso(localDate: string, time: string, offset: number): string {
+  const parsed = parseDateKey(localDate);
+  if (!parsed) return "";
+  const parsedTime = parseTime(time);
+  return new Date(
+    Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsedTime.hour, parsedTime.minute) -
+      offset * 60 * 1000,
+  ).toISOString();
+}
+
+function eventEndDate(startDate: string, startTime: string, endTime: string): string {
+  const start = parseTime(startTime);
+  const end = parseTime(endTime);
+  const crossesMidnight = end.hour * 60 + end.minute <= start.hour * 60 + start.minute;
+  return crossesMidnight ? addDays(startDate, 1) : startDate;
+}
+
+function firstSaturday(year: number, month: number): string {
+  const first = new Date(Date.UTC(year, month - 1, 1));
+  const delta = (6 - first.getUTCDay() + 7) % 7;
+  return dateKey(year, month, 1 + delta);
+}
+
+function nextFirstSaturday(schedule: JsonRecord, now: Date): string {
+  const parts = localParts(now, scheduleOffsetMinutes(schedule));
+  const current = firstSaturday(parts.year, parts.month);
+  const today = dateKey(parts.year, parts.month, parts.day);
+  if (today <= current) return current;
+  const nextMonth = new Date(Date.UTC(parts.year, parts.month, 1));
+  return firstSaturday(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1);
+}
+
+function nextWeeklyDate(schedule: JsonRecord, item: JsonRecord, day: number, now: Date): string {
+  const offset = scheduleOffsetMinutes(schedule);
+  const parts = localParts(now, offset);
+  const today = dateKey(parts.year, parts.month, parts.day);
+  const start = parseTime(item.startTime);
+  const end = parseTime(item.endTime);
+  const nowMinutes = parts.hour * 60 + parts.minute;
+  const startMinutes = start.hour * 60 + start.minute;
+  const endMinutes = end.hour * 60 + end.minute;
+  let delta = (day - parts.weekday + 7) % 7;
+
+  if (delta === 0) {
+    const stillUpcoming = endMinutes <= startMinutes ? nowMinutes < 24 * 60 : nowMinutes < endMinutes;
+    if (!stillUpcoming) delta = 7;
+  }
+
+  return addDays(today, delta);
+}
+
+function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonRecord, localDate: string): ScheduleEvent | null {
+  const title = safeString(item.title, 100);
+  const location = safeString(item.location, 100) || "https://mochirii.com/events";
+  const startTime = safeString(item.startTime, 20) || "00:00";
+  const endTime = safeString(item.endTime, 20) || "01:00";
+  const offset = scheduleOffsetMinutes(schedule);
+  const endDate = eventEndDate(localDate, startTime, endTime);
+  const startIso = localToUtcIso(localDate, startTime, offset);
+  const endIso = localToUtcIso(endDate, endTime, offset);
+
+  if (!title || !startIso || !endIso) return null;
+
+  return {
+    key,
+    title,
+    description: safeString(item.description || item.summary || item.timeText, 1000) || title,
+    location,
+    startIso,
+    endIso,
+  };
+}
+
+function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()): ScheduleEvent[] {
+  const monthly = asRecord(schedule.monthly);
+  const events: ScheduleEvent[] = [];
+
+  Object.entries(monthly).forEach(([fallbackKey, value]) => {
+    const item = asRecord(value);
+    const key = safeString(item.id, 80) || fallbackKey;
+    const localDate = nextFirstSaturday(schedule, now);
+    const event = scheduleEventFromDate(schedule, key, item, localDate);
+    if (event) events.push(event);
+  });
+
+  asArray(schedule.weekly).map(asRecord).forEach((item) => {
+    if (item.discord !== true) return;
+    const key = safeString(item.id, 80);
+    if (!key) return;
+    asArray(item.days)
+      .map((day) => Number(day))
+      .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+      .forEach((day) => {
+        const localDate = nextWeeklyDate(schedule, item, day, now);
+        const event = scheduleEventFromDate(schedule, `${key}-${day}`, item, localDate);
+        if (event) events.push(event);
+      });
+  });
+
+  return events;
+}
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -379,6 +545,231 @@ async function processRankSync(
   }
 }
 
+async function fetchGuildSchedule(): Promise<JsonRecord> {
+  const scheduleUrl = Deno.env.get("GUILD_SCHEDULE_URL") || GUILD_SCHEDULE_URL;
+  const response = await fetch(scheduleUrl, {
+    headers: {
+      Accept: "application/json",
+      "User-Agent": DISCORD_API_USER_AGENT,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Schedule fetch failed with HTTP ${response.status}.`);
+  }
+
+  return asRecord(await response.json());
+}
+
+async function loadManagedEventResources(): Promise<JsonRecord[]> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const serviceRoleKey = getServiceRoleKey();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Supabase service credentials are not configured for event registry lookup.");
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { data, error } = await adminClient
+    .from("discord_resources")
+    .select("id,label,discord_id,metadata,enabled")
+    .eq("kind", "scheduled_event")
+    .eq("enabled", true);
+
+  if (error) {
+    console.error("reaper-discord-interactions scheduled event registry lookup failed", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error("Scheduled event registry could not be read.");
+  }
+
+  return asArray(data).map(asRecord).filter((resource) => {
+    const metadata = asRecord(resource.metadata);
+    return metadata.managedBy === "reaper-event-sync";
+  });
+}
+
+async function upsertDiscordEventResource(event: JsonRecord, desired: ScheduleEvent): Promise<void> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const serviceRoleKey = getServiceRoleKey();
+  const eventId = safeString(event.id, 24);
+
+  if (!supabaseUrl || !serviceRoleKey || !eventId) {
+    throw new Error("Supabase service credentials are not configured for event registry updates.");
+  }
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { error } = await adminClient
+    .from("discord_resources")
+    .upsert(
+      {
+        kind: "scheduled_event",
+        label: desired.title,
+        discord_id: eventId,
+        discord_parent_id: EXPECTED_DISCORD_GUILD_ID,
+        enabled: true,
+        public_url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`,
+        description: desired.description,
+        metadata: {
+          managedBy: "reaper-event-sync",
+          siteEventKey: desired.key,
+          location: desired.location,
+          source: "data/guild-schedule.json",
+          startIso: desired.startIso,
+          endIso: desired.endIso,
+          entityType: "EXTERNAL",
+        },
+      },
+      { onConflict: "kind,discord_id" },
+    );
+
+  if (error) {
+    console.error("reaper-discord-interactions scheduled event registry upsert failed", {
+      code: error.code,
+      message: error.message,
+    });
+    throw new Error("Scheduled event was changed but could not be recorded in the website registry.");
+  }
+}
+
+function scheduledEventBody(desired: ScheduleEvent): JsonRecord {
+  return {
+    channel_id: null,
+    name: desired.title.slice(0, 100),
+    description: desired.description.slice(0, 1000),
+    scheduled_start_time: desired.startIso,
+    scheduled_end_time: desired.endIso,
+    privacy_level: DISCORD_EVENT_PRIVACY_GUILD_ONLY,
+    entity_type: DISCORD_EVENT_ENTITY_EXTERNAL,
+    entity_metadata: {
+      location: desired.location.slice(0, 100),
+    },
+  };
+}
+
+function eventLocation(event: JsonRecord): string {
+  return safeString(asRecord(event.entity_metadata).location, 100) || "";
+}
+
+function managedEventLine(action: string, desired: ScheduleEvent, detail = ""): string {
+  return detail ? `${action}: ${desired.title} (${detail})` : `${action}: ${desired.title}`;
+}
+
+async function processEventSync(
+  mode: string,
+  interactionToken: string,
+  applicationId: string,
+): Promise<void> {
+  const apply = mode === "apply";
+  const lines: string[] = [];
+
+  try {
+    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
+      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper event sync is missing the Discord bot token.");
+      return;
+    }
+
+    const schedule = await fetchGuildSchedule();
+    const desiredEvents = desiredEventsFromSchedule(schedule);
+    if (!desiredEvents.length) {
+      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper event sync found no website schedule events.");
+      return;
+    }
+
+    const [resources, eventsResponse] = await Promise.all([
+      loadManagedEventResources(),
+      discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events`, {
+        headers: discordApiHeaders(),
+      }),
+    ]);
+
+    if (!eventsResponse.ok) {
+      await editOriginalInteractionResponse(
+        applicationId,
+        interactionToken,
+        "Reaper could not read Discord scheduled events. Check bot event permissions.",
+      );
+      return;
+    }
+
+    const existingEvents = asArray(eventsResponse.data).map(asRecord);
+    const resourceByKey = new Map(resources.map((resource) => [safeString(asRecord(resource.metadata).siteEventKey, 100) || "", resource]));
+
+    for (const desired of desiredEvents) {
+      const resource = resourceByKey.get(desired.key);
+      const resourceEventId = safeString(resource?.discord_id, 24);
+      const existingByResource = resourceEventId
+        ? existingEvents.find((event) => safeString(event.id, 24) === resourceEventId)
+        : null;
+      const existingByName = existingEvents.find((event) =>
+        safeString(event.name, 100) === desired.title &&
+        safeString(event.scheduled_start_time, 60) === desired.startIso &&
+        Number(event.entity_type) === DISCORD_EVENT_ENTITY_EXTERNAL &&
+        eventLocation(event) === desired.location
+      );
+      const existing = existingByResource || existingByName;
+
+      if (existing) {
+        lines.push(managedEventLine(apply ? "Updated" : "Would update", desired, `event ${safeString(existing.id, 24) || "unknown"}`));
+        if (apply) {
+          const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events/${safeString(existing.id, 24)}`, {
+            method: "PATCH",
+            headers: discordApiHeaders(true),
+            body: JSON.stringify(scheduledEventBody(desired)),
+          });
+          if (!response.ok) {
+            lines[lines.length - 1] = managedEventLine("Blocked", desired, `Discord API ${response.status}`);
+            continue;
+          }
+          await upsertDiscordEventResource(asRecord(response.data), desired);
+        }
+        continue;
+      }
+
+      lines.push(managedEventLine(apply ? "Created" : "Would create", desired, "external scheduled event"));
+      if (apply) {
+        const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events`, {
+          method: "POST",
+          headers: discordApiHeaders(true),
+          body: JSON.stringify(scheduledEventBody(desired)),
+        });
+        if (!response.ok) {
+          lines[lines.length - 1] = managedEventLine("Blocked", desired, `Discord API ${response.status}`);
+          continue;
+        }
+        await upsertDiscordEventResource(asRecord(response.data), desired);
+      }
+    }
+
+    const intro = apply
+      ? "Event sync finished. Only Reaper-managed external Discord events were created or updated."
+      : "Event sync preview. No Discord scheduled events were changed.";
+    await editOriginalInteractionResponse(applicationId, interactionToken, `${intro}\n${lines.slice(0, 25).join("\n")}`);
+  } catch (error) {
+    console.error("reaper-discord-interactions event sync failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    await editOriginalInteractionResponse(
+      applicationId,
+      interactionToken,
+      "Reaper event sync could not be completed. Check configuration and try preview again.",
+    );
+  }
+}
+
 function verifyDiscordSignature(req: Request, rawBody: string, publicKey: string): boolean {
   const signatureHeader = req.headers.get("x-signature-ed25519") || "";
   const timestampHeader = req.headers.get("x-signature-timestamp") || "";
@@ -549,7 +940,7 @@ Deno.serve(async (req: Request) => {
 
   const data = asRecord(interaction.data);
   const commandName = safeString(data.name, 80)?.toLowerCase() || "";
-  if (!["submit", "sync-ranks"].includes(commandName)) {
+  if (!["submit", "sync-ranks", "sync-events"].includes(commandName)) {
     return interactionMessage("That Reaper command is not supported.");
   }
 
@@ -602,6 +993,48 @@ Deno.serve(async (req: Request) => {
     }
 
     EdgeRuntime.waitUntil(processRankSync(mode, interactionToken, applicationId));
+    return deferredEphemeralResponse();
+  }
+
+  if (commandName === "sync-events") {
+    const mode = stringOption(data, "mode", 20)?.toLowerCase() || "preview";
+    const confirm = booleanOption(data, "confirm");
+    const memberPermissions = safeString(member.permissions, 80) || "0";
+    const hasModeratorRole = EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
+
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+      console.error("reaper-discord-interactions missing or mismatched event sync configuration", {
+        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+        moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
+        configuredModeratorRoleCount: configuredModeratorRoleIds.length,
+      });
+      return interactionMessage("Reaper event sync is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
+      return interactionMessage("Use this command in the Mōchirīī Discord server.");
+    }
+
+    if (!discordUserId || !hasModeratorRole) {
+      return interactionMessage("Event sync requires the Moderator role.");
+    }
+
+    if (!["preview", "apply"].includes(mode)) {
+      return interactionMessage("Choose sync-events mode preview or apply.");
+    }
+
+    if (mode === "apply" && !confirm) {
+      return interactionMessage("Run /sync-events mode:apply confirm:true after reviewing preview.");
+    }
+
+    if (
+      mode === "apply" &&
+      (!hasPermission(memberPermissions, CREATE_EVENTS_PERMISSION) || !hasPermission(memberPermissions, MANAGE_EVENTS_PERMISSION))
+    ) {
+      return interactionMessage("Event sync apply requires Discord Create Events and Manage Events permissions.");
+    }
+
+    EdgeRuntime.waitUntil(processEventSync(mode, interactionToken, applicationId));
     return deferredEphemeralResponse();
   }
 

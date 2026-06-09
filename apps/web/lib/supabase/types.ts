@@ -261,6 +261,23 @@ export type PublicMemberProfileResponse = {
   signedUrlSeconds?: number;
 };
 
+export type VisibleProfileCard = {
+  slug?: string | null;
+  displayName?: string | null;
+  guildTitle?: string | null;
+  avatarUrl?: string | null;
+  profileHref?: string | null;
+  hasApprovedAvatar?: boolean | null;
+  hasVisibleProfile?: boolean | null;
+  hasFilledProfile?: boolean | null;
+};
+
+export type VisibleProfileCardsResponse = {
+  profiles: VisibleProfileCard[];
+  count?: number;
+  signedUrlSeconds?: number;
+};
+
 export type ProfileMediaKind = "avatar" | "banner";
 export type ProfileMediaStatus = "pending" | "approved" | "rejected" | "archived";
 

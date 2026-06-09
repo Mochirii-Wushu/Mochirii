@@ -61,12 +61,15 @@ Direct broad profile reads are not opened. Browser code calls Edge Functions tha
 Profile Edge Functions:
 
 - `list-member-profiles`
+- `list-visible-profile-cards`
 - `get-member-profile`
 - `submit-member-profile-media`
 - `list-member-profile-media-queue`
 - `moderate-member-profile-media`
 
 Member profile listing and profile loading require active, recent Discord verification. Moderator media queue and approval use the same server-side Moderator role check as the Leader Dashboard gallery queue.
+
+`list-visible-profile-cards` is the only public-safe profile-card exception. It accepts explicit configured slugs, returns only display name, mapped guild title, profile link, approved avatar signed URL, and boolean card state, and must not expose Discord handle, game UID, region, timezone, raw Storage paths, or the broader member list.
 
 ## Next App Surface
 

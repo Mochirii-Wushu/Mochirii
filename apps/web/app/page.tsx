@@ -1,9 +1,14 @@
 import { Fragment } from "react";
 import homeData from "@/public/data/home.json";
 import galleryData from "@/public/data/gallery.json";
+import guildScheduleData from "@/public/data/guild-schedule.json";
 import { HomeGallerySpotlight } from "@/components/HomeGallerySpotlight";
 import { type GallerySpotlightItem } from "@/components/HomeGalleryLightbox";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
+import { SpotlightProfileCard } from "@/components/public-pages/ProfileCardLinks";
+import { monthlyScheduleDate } from "@/lib/guild-schedule";
+
+export const revalidate = 3600;
 
 type HomeData = typeof homeData;
 type GalleryData = typeof galleryData;
@@ -187,26 +192,29 @@ function SealVerse({ lines }: { lines: string[] }) {
 function BulletinList({ items }: { items: Bulletin[] }) {
   return (
     <div id="bulletinList" className="home-bulletins" aria-label="More bulletins">
-      {items.slice(0, 5).map((item) => (
-        <a className="home-bulletin" href={cleanRoute(item.href)} key={item.title}>
-          <div className="home-bulletin__media">
-            <img
-              className="home-bulletin__img"
-              src={publicPath(item.image, "/assets/img/bulletins/featured.webp")}
-              alt={cleanLabel(item.imageAlt || "Bulletin cover")}
-              loading="lazy"
-              decoding="async"
-            />
-            <div className="home-bulletin__scrim" aria-hidden="true" />
-            <div className="home-bulletin__tag">{typeLabel(item.type)}</div>
-          </div>
-          <div className="home-bulletin__body">
-            <div className="home-bulletin__date">{formatDateUTC(item.date)}</div>
-            <div className="home-bulletin__title">{item.title}</div>
-            <div className="home-bulletin__summary">{optionalText(item, "summary")}</div>
-          </div>
-        </a>
-      ))}
+      {items.slice(0, 5).map((item) => {
+        const date = monthlyScheduleDate(guildScheduleData, optionalText(item, "scheduleId"), item.date);
+        return (
+          <a className="home-bulletin" href={cleanRoute(item.href)} key={item.title}>
+            <div className="home-bulletin__media">
+              <img
+                className="home-bulletin__img"
+                src={publicPath(item.image, "/assets/img/bulletins/featured.webp")}
+                alt={cleanLabel(item.imageAlt || "Bulletin cover")}
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="home-bulletin__scrim" aria-hidden="true" />
+              <div className="home-bulletin__tag">{typeLabel(item.type)}</div>
+            </div>
+            <div className="home-bulletin__body">
+              <div className="home-bulletin__date">{formatDateUTC(date)}</div>
+              <div className="home-bulletin__title">{item.title}</div>
+              <div className="home-bulletin__summary">{optionalText(item, "summary")}</div>
+            </div>
+          </a>
+        );
+      })}
     </div>
   );
 }
@@ -246,6 +254,7 @@ export default function Home() {
   const galleryItems = getGallerySpotlightCandidates(galleryData);
   const fallbackGalleryItems = getFallbackGallerySpotlightItems(homeData.gallery);
   const spotlight = homeData.spotlight;
+  const featuredDate = featured ? monthlyScheduleDate(guildScheduleData, optionalText(featured, "scheduleId"), featured.date) : "";
 
   return (
     <>
@@ -347,7 +356,7 @@ export default function Home() {
                 aria-label={joinLabel([
                   "Featured bulletin",
                   typeLabel(featured.type),
-                  formatDateUTC(featured.date),
+                  formatDateUTC(featuredDate),
                   featured.title,
                   optionalText(featured, "summary"),
                 ])}
@@ -367,7 +376,7 @@ export default function Home() {
                     {typeLabel(featured.type)}
                   </span>
                   <span id="featuredBulletinDate" className="home-date">
-                    {formatDateUTC(featured.date)}
+                    {formatDateUTC(featuredDate)}
                   </span>
                 </div>
 
@@ -407,10 +416,10 @@ export default function Home() {
               {homeData.copy.spotlightIntro}
             </p>
 
-            <a
+            <div
               id="spotlightCard"
               className="home-spotlight"
-              href={cleanRoute(spotlight.href)}
+              role="group"
               aria-label={joinLabel([
                 "Member spotlight",
                 spotlight.tag,
@@ -439,9 +448,12 @@ export default function Home() {
                 <p id="spotlightSummary" className="home-summary">
                   {spotlight.summary}
                 </p>
-                <div className="home-link">Spotlight Appreciation</div>
+                <a className="home-link" href={cleanRoute(spotlight.href)}>
+                  Spotlight Appreciation
+                </a>
+                <SpotlightProfileCard slug={optionalText(spotlight, "memberProfileSlug")} compact />
               </div>
-            </a>
+            </div>
           </section>
 
           <section

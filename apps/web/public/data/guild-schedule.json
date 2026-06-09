@@ -1,0 +1,95 @@
+{
+  "timezone": {
+    "label": "UTC+8",
+    "offsetMinutes": 480
+  },
+  "monthly": {
+    "gathering": {
+      "id": "monthly-gathering",
+      "title": "Monthly gatherings open to all members to be heard.",
+      "rule": "next-first-saturday",
+      "time": "8:00 PM",
+      "startTime": "20:00",
+      "endTime": "21:00",
+      "location": "https://mochirii.com/events",
+      "description": "Monthly gatherings open to all members to be heard."
+    },
+    "raffle": {
+      "id": "monthly-raffle",
+      "title": "Monthly cosmetics raffle open to all members who sign up each month.",
+      "rule": "next-first-saturday",
+      "time": "8:00 PM",
+      "startTime": "20:00",
+      "endTime": "21:00",
+      "location": "https://mochirii.com/raffles",
+      "description": "Monthly cosmetics raffle open to all members who sign up each month."
+    }
+  },
+  "spotlight": {
+    "id": "member-spotlight",
+    "rule": "first-day-current-month",
+    "memberProfileSlug": "meenari"
+  },
+  "weekly": [
+    {
+      "id": "guild-party",
+      "title": "Guild Party",
+      "days": [0, 1, 2, 3, 4, 5, 6],
+      "dayText": "Every Day",
+      "startTime": "21:30",
+      "endTime": "22:00",
+      "timeText": "9:30 PM - 10 PM",
+      "location": "https://mochirii.com/events",
+      "discord": true
+    },
+    {
+      "id": "breaking-army",
+      "title": "Breaking Army",
+      "days": [1, 3],
+      "dayText": "Mondays & Wednesdays",
+      "startTime": "22:00",
+      "endTime": "00:00",
+      "timeText": "10 PM - 12 AM",
+      "location": "https://mochirii.com/events",
+      "discord": true
+    },
+    {
+      "id": "showdown",
+      "title": "Showdown",
+      "days": [2, 4],
+      "dayText": "Tuesdays & Thursdays",
+      "startTime": "22:00",
+      "endTime": "00:00",
+      "timeText": "10 PM - 12 AM",
+      "location": "https://mochirii.com/events",
+      "discord": true
+    },
+    {
+      "id": "guild-wars",
+      "title": "Guild Wars",
+      "days": [6, 0],
+      "dayText": "Saturdays & Sundays",
+      "startTime": "20:30",
+      "endTime": "23:30",
+      "timeText": "8:30 PM - 11:30 PM",
+      "location": "https://mochirii.com/events",
+      "discord": true
+    },
+    {
+      "id": "guild-heros-realm",
+      "title": "Guild Hero's Realm: Weekly Coordination",
+      "days": [5],
+      "dayText": "Fridays",
+      "startTime": "22:00",
+      "endTime": "23:00",
+      "timeText": "10 PM - 11 PM",
+      "timezone": "UTC+8",
+      "summary": "A weekly Friday window for the guild hero's realm. Show up, ask questions & we'll match groups together.",
+      "image": "./assets/img/events/upcoming-01.webp",
+      "href": "https://discord.com/invite/dPafqMwWPK",
+      "location": "https://mochirii.com/events",
+      "discord": true,
+      "showOnEventsBoard": true
+    }
+  ]
+}
