@@ -42,7 +42,7 @@
 
 The in-app browser blocked localhost with `ERR_BLOCKED_BY_CLIENT`, and Chrome automation was unavailable in this Codex session. Vercel Preview and production browser verification remain the authoritative visual gates after push.
 
-## Pending Live Evidence
+## Live Evidence
 
 - PR: `#233` (`https://github.com/Mochirii-Wushu/Mochirii/pull/233`).
 - Branch commits: `95cd5ea Add United Resolve event`, `a5234c5 Record United Resolve preview status`.
