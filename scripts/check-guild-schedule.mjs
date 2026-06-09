@@ -114,6 +114,15 @@ else {
   assertEqual("Hero's Realm UTC end", localToUtcIso("2026-06-12", heroRealm.endTime), "2026-06-12T15:00:00.000Z");
 }
 
+const unitedResolve = schedule.weekly.find((item) => item.id === "united-resolve");
+if (!unitedResolve) fail("united-resolve weekly event is missing.");
+else {
+  assertEqual("United Resolve next Friday", nextWeeklyDate(unitedResolve, new Date("2026-06-08T12:00:00Z")), "2026-06-12");
+  assertEqual("United Resolve time text", unitedResolve.timeText, "11 PM - 12 AM");
+  assertEqual("United Resolve UTC start", localToUtcIso("2026-06-12", unitedResolve.startTime), "2026-06-12T15:00:00.000Z");
+  assertEqual("United Resolve UTC end next day", localToUtcIso("2026-06-13", unitedResolve.endTime), "2026-06-12T16:00:00.000Z");
+}
+
 const breakingArmy = schedule.weekly.find((item) => item.id === "breaking-army");
 if (!breakingArmy) fail("breaking-army weekly event is missing.");
 else {
@@ -123,7 +132,7 @@ else {
 }
 
 const scheduleLines = schedule.weekly
-  .filter((item) => item.id !== "guild-heros-realm")
+  .filter((item) => item.showOnEventsBoard !== true)
   .map((item) => `${item.title}: ${item.dayText} - ${item.timeText}`);
 [
   "Guild Party: Every Day - 9:30 PM - 10 PM",

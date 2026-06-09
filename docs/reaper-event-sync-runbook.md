@@ -32,6 +32,7 @@ Rules:
 - Showdown: Tuesdays and Thursdays, 10 PM - 12 AM UTC+8.
 - Guild Wars: Saturdays and Sundays, 8:30 PM - 11:30 PM UTC+8.
 - Guild Hero's Realm: Fridays, 10 PM - 11 PM UTC+8.
+- United Resolve: Fridays, 11 PM - 12 AM UTC+8.
 
 ## Deployment
 

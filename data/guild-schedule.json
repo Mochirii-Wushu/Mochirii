@@ -90,6 +90,22 @@
       "location": "https://mochirii.com/events",
       "discord": true,
       "showOnEventsBoard": true
+    },
+    {
+      "id": "united-resolve",
+      "title": "United Resolve",
+      "days": [5],
+      "dayText": "Fridays",
+      "startTime": "23:00",
+      "endTime": "00:00",
+      "timeText": "11 PM - 12 AM",
+      "timezone": "UTC+8",
+      "summary": "A Friday guild window for members gathering after Hero's Realm.",
+      "image": "./assets/img/events/upcoming-01.webp",
+      "href": "https://discord.com/invite/dPafqMwWPK",
+      "location": "https://mochirii.com/events",
+      "discord": true,
+      "showOnEventsBoard": true
     }
   ]
 }

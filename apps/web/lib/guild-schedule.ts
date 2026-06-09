@@ -217,7 +217,7 @@ export function scheduleLine(item: GuildWeeklyScheduleItem): string {
 
 export function weeklyScheduleLines(schedule: GuildScheduleData): string[] {
   return (schedule.weekly || [])
-    .filter((item) => item.id !== "guild-heros-realm")
+    .filter((item) => item.showOnEventsBoard !== true)
     .map(scheduleLine);
 }
 

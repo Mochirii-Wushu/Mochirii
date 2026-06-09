@@ -36,6 +36,16 @@
       "summary": "A weekly Friday window for the guild hero's realm. Show up, ask questions & we'll match groups together.",
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK"
+    },
+    {
+      "scheduleId": "united-resolve",
+      "date": "2026-02-27",
+      "time": "11 PM - 12 AM",
+      "timezone": "UTC+8",
+      "title": "United Resolve",
+      "summary": "A Friday guild window for members gathering after Hero's Realm.",
+      "image": "./assets/img/events/upcoming-01.webp",
+      "href": "https://discord.com/invite/dPafqMwWPK"
     }
   ],
   "recurring": {
