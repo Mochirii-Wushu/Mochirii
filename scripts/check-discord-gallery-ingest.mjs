@@ -38,6 +38,35 @@ function assertNotMatches(label, text, pattern, message) {
   if (pattern.test(text)) failures.push(`${label}: ${message}`);
 }
 
+function extractFunction(text, functionName) {
+  const start = text.indexOf(`function ${functionName}`);
+  if (start < 0) {
+    failures.push(`submit-discord-gallery-image: missing ${functionName} function.`);
+    return "";
+  }
+
+  const open = text.indexOf("{", start);
+  if (open < 0) {
+    failures.push(`submit-discord-gallery-image: malformed ${functionName} function.`);
+    return "";
+  }
+
+  let depth = 0;
+  for (let index = open; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === "{") depth += 1;
+    if (char === "}") depth -= 1;
+    if (depth === 0) return text.slice(start, index + 1);
+  }
+
+  failures.push(`submit-discord-gallery-image: unterminated ${functionName} function.`);
+  return "";
+}
+
+function assertEqual(label, actual, expected) {
+  if (actual !== expected) failures.push(`${label}: expected ${expected}, got ${actual}`);
+}
+
 const config = read(files.config);
 const functionSource = read(files.function);
 const importMap = read(files.importMap);
@@ -82,7 +111,9 @@ assertIncludes("import map", importMap, '"@supabase/supabase-js": "npm:@supabase
   'if (req.method === "OPTIONS")',
   "validAttachmentUrl(body.attachmentUrl)",
   "sniffMime(bytes)",
-  "sniffedMime !== declaredMime",
+  "responseMime",
+  "downloadedSize: bytes.byteLength",
+  "That file could not be read as a JPEG, PNG, or WebP image.",
   ".eq(\"submission_source\", \"discord\")",
   ".eq(\"discord_message_id\", messageId)",
   ".eq(\"discord_attachment_id\", attachmentId)",
@@ -123,8 +154,22 @@ assertMatches(
 assertMatches(
   "submit-discord-gallery-image",
   functionSource,
-  /bytes\.byteLength <= 0 \|\| bytes\.byteLength > MAX_SIZE_BYTES/,
+  /bytes\.byteLength <= 0 \|\| bytes\.byteLength > MAX_SIZE_BYTES \|\| !sniffedMime/,
   "downloaded attachment bytes must be non-empty and bounded.",
+);
+
+assertNotMatches(
+  "submit-discord-gallery-image",
+  functionSource,
+  /sniffedMime\s*!==\s*declaredMime/,
+  "Discord-declared MIME metadata is advisory; sniffed bytes must be the final image type authority.",
+);
+
+assertNotMatches(
+  "submit-discord-gallery-image",
+  functionSource,
+  /!declaredMime[\s\S]{0,180}invalid_discord_submission/,
+  "missing Discord-declared MIME metadata must not reject otherwise valid attachment metadata.",
 );
 
 assertNotMatches(
@@ -133,6 +178,25 @@ assertNotMatches(
   /createSignedUrl|getPublicUrl|publicUrl|signed_url/i,
   "ingest function must not create or expose public/signed image URLs.",
 );
+
+const sniffMimeSource = extractFunction(functionSource, "sniffMime")
+  .replace(/function sniffMime\(bytes: Uint8Array\): string \| null/, "function sniffMime(bytes)");
+const sniffMime = sniffMimeSource
+  ? new Function(`${sniffMimeSource}; return sniffMime;`)()
+  : () => null;
+
+assertEqual(
+  "sniffMime png fixture",
+  sniffMime(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+  "image/png",
+);
+assertEqual("sniffMime jpeg fixture", sniffMime(new Uint8Array([0xff, 0xd8, 0xff, 0xdb])), "image/jpeg");
+assertEqual(
+  "sniffMime webp fixture",
+  sniffMime(new Uint8Array([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])),
+  "image/webp",
+);
+assertEqual("sniffMime non-image fixture", sniffMime(new Uint8Array([0x3c, 0x68, 0x74, 0x6d, 0x6c])), null);
 
 [
   "add column if not exists submission_source text not null default 'website'",

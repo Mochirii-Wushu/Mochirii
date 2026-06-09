@@ -277,7 +277,6 @@ Deno.serve(async (req: Request) => {
     !attachmentId ||
     !discordUserId ||
     !attachmentUrl ||
-    !declaredMime ||
     !Number.isFinite(declaredSize) ||
     declaredSize <= 0 ||
     declaredSize > MAX_SIZE_BYTES
@@ -425,6 +424,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const contentLength = Number(attachmentResponse.headers.get("content-length") || 0);
+  const responseMime = normalizedMime(attachmentResponse.headers.get("content-type"));
   if (Number.isFinite(contentLength) && contentLength > MAX_SIZE_BYTES) {
     return jsonResponse(
       {
@@ -439,12 +439,21 @@ Deno.serve(async (req: Request) => {
   const bytes = new Uint8Array(await attachmentResponse.arrayBuffer());
   const sniffedMime = sniffMime(bytes);
 
-  if (bytes.byteLength <= 0 || bytes.byteLength > MAX_SIZE_BYTES || !sniffedMime || sniffedMime !== declaredMime) {
+  if (bytes.byteLength <= 0 || bytes.byteLength > MAX_SIZE_BYTES || !sniffedMime) {
+    console.error("submit-discord-gallery-image invalid attachment content", {
+      declaredMime,
+      responseMime,
+      sniffedMime,
+      declaredSize,
+      contentLength,
+      downloadedSize: bytes.byteLength,
+    });
+
     return jsonResponse(
       {
         ok: false,
         error: "invalid_attachment_content",
-        message: "Discord attachment must be a JPEG, PNG, or WebP image under 50 MB.",
+        message: "That file could not be read as a JPEG, PNG, or WebP image. Please re-upload the original image file under 50 MB.",
       },
       400,
     );
