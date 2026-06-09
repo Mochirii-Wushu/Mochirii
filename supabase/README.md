@@ -66,6 +66,8 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 
 The `reaper-discord-interactions` function validates Discord request signatures with `DISCORD_PUBLIC_KEY`, answers Discord PING requests, accepts the guild-scoped `/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>` command, then calls the existing `submit-discord-gallery-image` ingest function with `instagramOptIn` mapped from the optional boolean.
 
+The same Interactions endpoint handles the manual Discord vote reminder contract: `Done voting` button clicks, `/vote-status`, `/vote-leaderboard`, and moderator-only `/vote-reminder-preview`. The scheduled sender is the separate `send-vote-reminder` Edge Function. It posts link buttons only; it never automates third-party upvotes, vote submissions, CAPTCHA bypasses, browser clicks, vote-site sessions, or vote-site result checks.
+
 Script order on pages with Auth or upload behavior is:
 
 ```html
@@ -217,6 +219,10 @@ DISCORD_APPLICATION_ID=1156448856565887066
 DISCORD_BOT_TOKEN=<set manually, never commit>
 DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+DISCORD_VOTE_CHANNEL_ID=1082802012095266866
+VOTE_REMINDER_TIME_ZONE=America/Los_Angeles
+VOTE_REMINDER_CRON_SECRET=<set manually, never commit>
+# DISCORD_VOTE_LINKS_JSON=<optional JSON links secret, never commit real private targets if sensitive>
 GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
 INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
 INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
@@ -240,6 +246,7 @@ supabase functions serve moderate-gallery-submission --env-file supabase/functio
 supabase functions serve list-approved-gallery-submissions --env-file supabase/functions/.env.local
 supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local
 supabase functions serve reaper-discord-interactions --env-file supabase/functions/.env.local
+supabase functions serve send-vote-reminder --env-file supabase/functions/.env.local
 supabase functions serve list-visible-profile-cards --env-file supabase/functions/.env.local
 supabase functions serve list-instagram-publish-queue --env-file supabase/functions/.env.local
 supabase functions serve mark-instagram-gallery-submission-shared --env-file supabase/functions/.env.local
@@ -259,6 +266,9 @@ supabase secrets set DISCORD_APPLICATION_ID=1156448856565887066
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
 supabase secrets set DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 supabase secrets set DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+supabase secrets set DISCORD_VOTE_CHANNEL_ID=1082802012095266866
+supabase secrets set VOTE_REMINDER_TIME_ZONE=America/Los_Angeles
+supabase secrets set VOTE_REMINDER_CRON_SECRET=<set manually, never commit>
 supabase secrets set GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
 supabase secrets set INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
 supabase secrets set INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
@@ -306,6 +316,7 @@ supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
 supabase functions deploy reaper-discord-interactions
+supabase functions deploy send-vote-reminder
 supabase functions deploy list-visible-profile-cards
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy mark-instagram-gallery-submission-shared
@@ -325,6 +336,7 @@ supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
 supabase functions deploy reaper-discord-interactions
+supabase functions deploy send-vote-reminder
 supabase functions deploy list-visible-profile-cards
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy mark-instagram-gallery-submission-shared
@@ -357,7 +369,8 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 
 7. Register the guild-scoped `/submit` command with optional boolean `share_to_instagram`.
 8. Register the guild-scoped `/sync-events` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`.
-9. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
+9. Register the guild-scoped `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview` commands. `/vote-reminder-preview` is enforced by the configured Moderator role.
+10. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
 
 ```text
 GET /guilds/1078630751077142608/members/{discord_user_id}
@@ -523,6 +536,24 @@ The same Reaper Interactions endpoint also supports:
 ```
 
 `/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key.
+
+## Discord Vote Reminder
+
+Manual vote reminders use two Edge Functions:
+
+- `send-vote-reminder`: scheduled sender for channel `1082802012095266866`.
+- `reaper-discord-interactions`: Discord interaction endpoint for `Done voting`, `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview`.
+
+The feature presents HTTPS vote links and records a member's manual confirmation after they click `Done voting`. It does not automate third-party voting. The reminder uses `allowed_mentions: { parse: [] }` and creates link buttons plus a single `vote_done:<YYYY-MM-DD>` confirmation button.
+
+Vote links come from `DISCORD_VOTE_LINKS_JSON` when set, otherwise from a pinned vote-channel message containing `[vote-links]`. See [`../docs/vote-reminder-runbook.md`](../docs/vote-reminder-runbook.md) for the pin format, Supabase Cron setup, rollout, rollback, and validation checklist.
+
+The database stores:
+
+- `vote_confirmations`: one manual confirmation per Discord user per vote date.
+- `vote_reminder_sends`: reminder delivery audit rows with status, message ID, and link count.
+
+Both tables have RLS enabled and service-role-only grants. Browser clients receive no direct vote table access.
 
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved. Discord attachment `content_type` is advisory because Discord may omit or mislabel it; `submit-discord-gallery-image` downloads the approved Discord CDN URL and accepts only JPEG, PNG, or WebP byte signatures under 50 MB before storing the sniffed MIME type.
 

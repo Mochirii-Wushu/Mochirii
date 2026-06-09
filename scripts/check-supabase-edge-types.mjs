@@ -12,6 +12,7 @@ const functions = [
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
+  "send-vote-reminder",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
   "mark-instagram-gallery-submission-shared",

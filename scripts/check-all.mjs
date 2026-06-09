@@ -8,6 +8,7 @@ const checks = [
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],
   ["check:discord-gallery-ingest", ["node", "scripts/check-discord-gallery-ingest.mjs"]],
   ["check:reaper-discord-interactions", ["node", "scripts/check-reaper-discord-interactions.mjs"]],
+  ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],

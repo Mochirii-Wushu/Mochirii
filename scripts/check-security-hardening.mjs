@@ -13,6 +13,7 @@ const files = {
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
+  voteReminder: "supabase/functions/send-vote-reminder/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
   deployment: "docs/deployment.md",
@@ -50,6 +51,7 @@ const reaper = read(files.reaper);
 const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
 const discordIngest = read(files.discordIngest);
+const voteReminder = read(files.voteReminder);
 const report = read(files.report);
 const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
@@ -88,6 +90,7 @@ const expectedUnauthenticatedFunctions = [
   "list-visible-profile-cards",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
+  "send-vote-reminder",
 ];
 
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
@@ -125,6 +128,13 @@ assertMatches(
   "bearerOrHeaderSecret(req) !== ingestSecret",
   "invalid_ingest_secret",
 ].forEach((snippet) => assertIncludes("submit-discord-gallery-image", discordIngest, snippet));
+
+[
+  "VOTE_REMINDER_CRON_SECRET",
+  "x-mochirii-vote-reminder-secret",
+  "bearerOrHeaderSecret(req) !== cronSecret",
+  "DISCORD_VOTE_CHANNEL_ID",
+].forEach((snippet) => assertIncludes("send-vote-reminder", voteReminder, snippet));
 
 [
   ".eq(\"status\", \"approved\")",

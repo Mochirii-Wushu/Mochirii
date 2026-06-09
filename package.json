@@ -33,6 +33,7 @@
     "check:vercel-pr-preview": "node scripts/check-vercel-pr-preview.mjs",
     "check:production": "node scripts/check-production.mjs",
     "check:reaper-discord-interactions": "node scripts/check-reaper-discord-interactions.mjs",
+    "check:vote-reminder": "node scripts/check-vote-reminder.mjs",
     "prepare:dns-cutover-private-packets": "node scripts/prepare-dns-cutover-private-packets.mjs",
     "prepare:live-member-cleanup-note": "node scripts/prepare-live-member-cleanup-note.mjs",
     "prepare:live-member-qa-image": "node scripts/prepare-live-member-qa-image.mjs",
@@ -43,6 +44,7 @@
     "smoke:vercel-production": "node scripts/smoke-vercel-production.mjs",
     "smoke:supabase-auth-boundary": "node scripts/smoke-supabase-auth-boundary.mjs",
     "smoke:supabase-edge-functions": "node scripts/smoke-supabase-edge-functions.mjs",
-    "sync:next-public": "node scripts/sync-next-public.mjs"
+    "sync:next-public": "node scripts/sync-next-public.mjs",
+    "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"
   }
 }

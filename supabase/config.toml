@@ -41,6 +41,12 @@ verify_jwt = false
 import_map = "./functions/reaper-discord-interactions/deno.json"
 entrypoint = "./functions/reaper-discord-interactions/index.ts"
 
+[functions.send-vote-reminder]
+enabled = true
+verify_jwt = false
+import_map = "./functions/send-vote-reminder/deno.json"
+entrypoint = "./functions/send-vote-reminder/index.ts"
+
 [functions.list-instagram-publish-queue]
 enabled = true
 verify_jwt = true
