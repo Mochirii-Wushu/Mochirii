@@ -1,8 +1,22 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 import nacl from "tweetnacl";
+import {
+  buildVoteReminderPayload,
+  currentStreak,
+  dateInTimeZone as voteDateInTimeZone,
+  DEFAULT_VOTE_TIME_ZONE,
+  EXPECTED_DISCORD_VOTE_CHANNEL_ID,
+  leaderboardWindowStart,
+  loadVoteLinks,
+  previewText,
+  voteDateFromCustomId,
+} from "../_shared/vote-reminders.ts";
 
 type JsonRecord = Record<string, unknown>;
+type SupabaseAdminClient = {
+  from(table: string): any;
+};
 
 declare const EdgeRuntime: {
   waitUntil(promise: Promise<unknown>): void;
@@ -24,6 +38,7 @@ const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
 const EPHEMERAL_FLAG = 1 << 6;
 const INTERACTION_TYPE_PING = 1;
 const INTERACTION_TYPE_APPLICATION_COMMAND = 2;
+const INTERACTION_TYPE_MESSAGE_COMPONENT = 3;
 const INTERACTION_RESPONSE_PONG = 1;
 const INTERACTION_RESPONSE_CHANNEL_MESSAGE = 4;
 const INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5;
@@ -223,6 +238,9 @@ function interactionMessage(content: string): Response {
       data: {
         content,
         flags: EPHEMERAL_FLAG,
+        allowed_mentions: {
+          parse: [],
+        },
       },
     },
   );
@@ -851,7 +869,12 @@ async function editOriginalInteractionResponse(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({
+      content,
+      allowed_mentions: {
+        parse: [],
+      },
+    }),
   });
 
   if (!response.ok) {
@@ -916,6 +939,160 @@ async function processSubmission(payload: JsonRecord, interactionToken: string, 
   }
 }
 
+function voteTimeZone(): string {
+  return Deno.env.get("VOTE_REMINDER_TIME_ZONE") || DEFAULT_VOTE_TIME_ZONE;
+}
+
+function voteToday(): string {
+  return voteDateInTimeZone(new Date(), voteTimeZone());
+}
+
+function voteAdminClient() {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const serviceRoleKey = getServiceRoleKey();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("Supabase service credentials are not configured for vote reminders.");
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
+function discordDisplayName(member: JsonRecord): string | null {
+  const user = asRecord(member.user);
+  return safeString(user.global_name || user.username, 80);
+}
+
+async function voteDatesForUser(adminClient: SupabaseAdminClient, discordUserId: string, today: string): Promise<string[]> {
+  const { data, error } = await adminClient
+    .from("vote_confirmations")
+    .select("vote_date")
+    .eq("discord_user_id", discordUserId)
+    .gte("vote_date", leaderboardWindowStart(today, 366))
+    .order("vote_date", { ascending: false });
+
+  if (error) throw error;
+  return asArray(data).map((row) => safeString(asRecord(row).vote_date, 20) || "").filter(Boolean);
+}
+
+async function recordVoteConfirmation(options: {
+  discordUserId: string;
+  discordUsername: string | null;
+  voteDate: string;
+  channelId: string | null;
+  interactionId: string;
+}): Promise<{ duplicate: boolean; streak: number }> {
+  const adminClient = voteAdminClient();
+  const { error } = await adminClient
+    .from("vote_confirmations")
+    .insert({
+      discord_user_id: options.discordUserId,
+      discord_username: options.discordUsername,
+      vote_date: options.voteDate,
+      source: "discord_button",
+      discord_guild_id: EXPECTED_DISCORD_GUILD_ID,
+      discord_channel_id: options.channelId,
+      discord_interaction_id: options.interactionId,
+      metadata: {
+        managedBy: "manual-vote-reminder",
+      },
+    });
+
+  if (error && error.code !== "23505") throw error;
+
+  const dates = await voteDatesForUser(adminClient, options.discordUserId, options.voteDate);
+  return {
+    duplicate: error?.code === "23505",
+    streak: currentStreak(dates, options.voteDate),
+  };
+}
+
+async function voteStatusMessage(discordUserId: string): Promise<string> {
+  const today = voteToday();
+  const adminClient = voteAdminClient();
+  const dates = await voteDatesForUser(adminClient, discordUserId, today);
+  const streak = currentStreak(dates, today);
+  const todayDone = dates.includes(today);
+  const lastDate = dates[0] || "none yet";
+
+  return todayDone
+    ? `You are marked done for ${today}. Current streak: ${streak} day(s). Last confirmation: ${lastDate}.`
+    : `You are not marked done for ${today} yet. Current streak: ${streak} day(s). Last confirmation: ${lastDate}.`;
+}
+
+async function voteLeaderboardMessage(): Promise<string> {
+  const today = voteToday();
+  const start = leaderboardWindowStart(today, 30);
+  const adminClient = voteAdminClient();
+  const { data, error } = await adminClient
+    .from("vote_confirmations")
+    .select("discord_user_id,discord_username,vote_date,confirmed_at")
+    .gte("vote_date", start)
+    .order("vote_date", { ascending: false })
+    .order("confirmed_at", { ascending: false });
+
+  if (error) throw error;
+
+  const grouped = new Map<string, { username: string; dates: Set<string>; latest: string }>();
+  for (const row of asArray(data).map(asRecord)) {
+    const userId = snowflake(row.discord_user_id);
+    const voteDate = safeString(row.vote_date, 20);
+    if (!userId || !voteDate) continue;
+
+    const current = grouped.get(userId) || {
+      username: safeString(row.discord_username, 80) || `User ${userId.slice(-4)}`,
+      dates: new Set<string>(),
+      latest: voteDate,
+    };
+    current.dates.add(voteDate);
+    if (voteDate > current.latest) current.latest = voteDate;
+    grouped.set(userId, current);
+  }
+
+  const leaders = [...grouped.entries()]
+    .map(([userId, record]) => ({
+      userId,
+      username: record.username,
+      count: record.dates.size,
+      streak: currentStreak([...record.dates], today),
+      latest: record.latest,
+    }))
+    .sort((left, right) => right.count - left.count || right.streak - left.streak || left.username.localeCompare(right.username))
+    .slice(0, 10);
+
+  if (!leaders.length) {
+    return `No manual vote confirmations have been recorded since ${start}.`;
+  }
+
+  return [
+    `Manual vote leaderboard since ${start}:`,
+    ...leaders.map((leader, index) =>
+      `${index + 1}. ${leader.username}: ${leader.count} day(s), streak ${leader.streak}, latest ${leader.latest}`
+    ),
+  ].join("\n");
+}
+
+async function voteReminderPreviewMessage(voteDate: string): Promise<string> {
+  const links = await loadVoteLinks({
+    channelId: EXPECTED_DISCORD_VOTE_CHANNEL_ID,
+    discordFetch: (path, init) => discordApi(path, init),
+    linksJson: Deno.env.get("DISCORD_VOTE_LINKS_JSON") || "",
+  });
+
+  if (!links.length) {
+    return "No configured or pinned vote links were found. Add DISCORD_VOTE_LINKS_JSON or pin a message containing [vote-links].";
+  }
+
+  const payload = buildVoteReminderPayload(links, voteDate);
+  const rowCount = asArray(payload.components).length;
+  return `${previewText(links, voteDate)}\n\nDiscord component rows: ${rowCount}. Done button custom ID: vote_done:${voteDate}.`;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed.", { status: 405 });
@@ -939,18 +1116,10 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ type: INTERACTION_RESPONSE_PONG });
   }
 
-  if (interaction.type !== INTERACTION_TYPE_APPLICATION_COMMAND) {
-    return interactionMessage("That Discord interaction is not supported.");
-  }
-
   const data = asRecord(interaction.data);
-  const commandName = safeString(data.name, 80)?.toLowerCase() || "";
-  if (!["submit", "sync-ranks", "sync-events"].includes(commandName)) {
-    return interactionMessage("That Reaper command is not supported.");
-  }
-
   const configuredGuildId = Deno.env.get("DISCORD_GUILD_ID") || "";
   const configuredChannelId = Deno.env.get("DISCORD_GALLERY_CHANNEL_ID") || "";
+  const configuredVoteChannelId = Deno.env.get("DISCORD_VOTE_CHANNEL_ID") || "";
   const configuredRequiredRoleIds = parseCsv(Deno.env.get("DISCORD_REQUIRED_ROLE_IDS"));
   const configuredModeratorRoleIds = parseCsv(Deno.env.get("DISCORD_MODERATOR_ROLE_IDS"));
   const guildId = snowflake(interaction.guild_id);
@@ -962,8 +1131,124 @@ Deno.serve(async (req: Request) => {
   const interactionToken = safeString(interaction.token, 512);
   const applicationId = snowflake(interaction.application_id) || Deno.env.get("DISCORD_APPLICATION_ID") || "";
 
-  if (!interactionId || !interactionToken || !applicationId) {
+  if (!interactionId) {
     return interactionMessage("Discord interaction could not be identified.");
+  }
+
+  if (interaction.type === INTERACTION_TYPE_MESSAGE_COMPONENT) {
+    const voteDate = voteDateFromCustomId(data.custom_id);
+    if (!voteDate) {
+      return interactionMessage("That Discord component is not supported.");
+    }
+
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || configuredVoteChannelId !== EXPECTED_DISCORD_VOTE_CHANNEL_ID) {
+      console.error("reaper-discord-interactions missing or mismatched vote reminder configuration", {
+        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+        voteChannelConfigMatches: configuredVoteChannelId === EXPECTED_DISCORD_VOTE_CHANNEL_ID,
+      });
+      return interactionMessage("Vote reminders are not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID || channelId !== EXPECTED_DISCORD_VOTE_CHANNEL_ID) {
+      return interactionMessage("Use the daily vote reminder in the vote channel.");
+    }
+
+    if (!discordUserId) {
+      return interactionMessage("Discord user could not be identified.");
+    }
+
+    try {
+      const result = await recordVoteConfirmation({
+        discordUserId,
+        discordUsername: discordDisplayName(member),
+        voteDate,
+        channelId,
+        interactionId,
+      });
+      const prefix = result.duplicate ? "You were already marked done" : "Done voting recorded";
+      return interactionMessage(`${prefix} for ${voteDate}. Current streak: ${result.streak} day(s).`);
+    } catch (error) {
+      console.error("reaper-discord-interactions vote confirmation failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Vote confirmation could not be recorded.");
+    }
+  }
+
+  if (interaction.type !== INTERACTION_TYPE_APPLICATION_COMMAND) {
+    return interactionMessage("That Discord interaction is not supported.");
+  }
+
+  const commandName = safeString(data.name, 80)?.toLowerCase() || "";
+  if (!["submit", "sync-ranks", "sync-events", "vote-status", "vote-leaderboard", "vote-reminder-preview"].includes(commandName)) {
+    return interactionMessage("That Reaper command is not supported.");
+  }
+
+  if (!interactionToken || !applicationId) {
+    return interactionMessage("Discord interaction could not be identified.");
+  }
+
+  if (commandName === "vote-status") {
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || configuredVoteChannelId !== EXPECTED_DISCORD_VOTE_CHANNEL_ID) {
+      return interactionMessage("Vote reminders are not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId) {
+      return interactionMessage("Use this command in the Mochirii Discord server.");
+    }
+
+    try {
+      return interactionMessage(await voteStatusMessage(discordUserId));
+    } catch (error) {
+      console.error("reaper-discord-interactions vote status failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Vote status could not be read.");
+    }
+  }
+
+  if (commandName === "vote-leaderboard") {
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || configuredVoteChannelId !== EXPECTED_DISCORD_VOTE_CHANNEL_ID) {
+      return interactionMessage("Vote reminders are not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
+      return interactionMessage("Use this command in the Mochirii Discord server.");
+    }
+
+    try {
+      return interactionMessage(await voteLeaderboardMessage());
+    } catch (error) {
+      console.error("reaper-discord-interactions vote leaderboard failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Vote leaderboard could not be read.");
+    }
+  }
+
+  if (commandName === "vote-reminder-preview") {
+    const hasModeratorRole = EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
+
+    if (
+      configuredGuildId !== EXPECTED_DISCORD_GUILD_ID ||
+      configuredVoteChannelId !== EXPECTED_DISCORD_VOTE_CHANNEL_ID ||
+      !expectedModeratorConfigMatches(configuredModeratorRoleIds)
+    ) {
+      return interactionMessage("Vote reminder preview is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole) {
+      return interactionMessage("Vote reminder preview requires the Moderator role.");
+    }
+
+    try {
+      return interactionMessage(await voteReminderPreviewMessage(voteToday()));
+    } catch (error) {
+      console.error("reaper-discord-interactions vote reminder preview failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Vote reminder preview could not be built.");
+    }
   }
 
   if (commandName === "sync-ranks") {
