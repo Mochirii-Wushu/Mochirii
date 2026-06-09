@@ -44,7 +44,9 @@ The in-app browser blocked localhost with `ERR_BLOCKED_BY_CLIENT`, and Chrome au
 
 ## Pending Live Evidence
 
-- PR: pending.
+- PR: `#233` (`https://github.com/Mochirii-Wushu/Mochirii/pull/233`).
+- Branch commit: `95cd5ea Add United Resolve event`.
+- Vercel Preview: Ready at `https://mochirii-git-codex-add-united-resolve-event-mochirii.vercel.app`, but deployment-protected for anonymous HTTP checks.
 - Merge commit: pending.
 - Vercel production deployment: pending.
 - Discord event ID: pending.
