@@ -45,9 +45,20 @@ The in-app browser blocked localhost with `ERR_BLOCKED_BY_CLIENT`, and Chrome au
 ## Pending Live Evidence
 
 - PR: `#233` (`https://github.com/Mochirii-Wushu/Mochirii/pull/233`).
-- Branch commit: `95cd5ea Add United Resolve event`.
+- Branch commits: `95cd5ea Add United Resolve event`, `a5234c5 Record United Resolve preview status`.
 - Vercel Preview: Ready at `https://mochirii-git-codex-add-united-resolve-event-mochirii.vercel.app`, but deployment-protected for anonymous HTTP checks.
-- Merge commit: pending.
-- Vercel production deployment: pending.
-- Discord event ID: pending.
-- Discord sync result: pending.
+- Merge commit: `3f8534c Add United Resolve event`.
+- Vercel production deployment: Ready on `https://mochirii.com`.
+- Live production smoke:
+  - `/data/guild-schedule.json`: contains `united-resolve`.
+  - `/events`: returns `200` from Vercel and contains `United Resolve` plus `11 PM - 12 AM`.
+  - `/announcements`: returns `200` from Vercel and does not contain `United Resolve`.
+  - `/spotify`: returns `200` from Vercel and still contains Spotify embeds.
+- Discord event ID: `1513756743635828858`.
+- Discord sync result: direct Discord Scheduled Events API fallback created one external event for `united-resolve-5` after the live website JSON was confirmed.
+- Discord verification:
+  - Matching United Resolve events: `1`.
+  - Final scheduled event count: `18`.
+  - Start: `2026-06-12T15:00:00+00:00`.
+  - End: `2026-06-12T16:00:00+00:00`.
+  - Location: `https://mochirii.com/events`.
