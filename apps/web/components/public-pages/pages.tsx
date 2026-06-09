@@ -764,7 +764,7 @@ export function EventsPage() {
                           height={640}
                           className="events-featured__img"
                           sizes="(max-width: 980px) calc(100vw - 68px), 760px"
-                          style={{ width: "100%", borderRadius: 18, border: "1px solid rgba(255,255,255,.10)" }}
+                          style={{ width: "100%", height: "auto", borderRadius: 18, border: "1px solid rgba(255,255,255,.10)" }}
                         />
                       </div>
                     ) : null}

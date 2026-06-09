@@ -181,7 +181,7 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
                       height={640}
                       className="events-list__image"
                       sizes="(max-width: 980px) calc(100vw - 86px), 320px"
-                      style={{ width: "100%", borderRadius: 16, border: "1px solid rgba(255,255,255,.10)" }}
+                      style={{ width: "100%", height: "auto", borderRadius: 16, border: "1px solid rgba(255,255,255,.10)" }}
                     />
                   </div>
                 ) : null}

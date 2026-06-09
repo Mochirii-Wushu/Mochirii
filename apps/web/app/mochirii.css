@@ -416,6 +416,9 @@ img{max-width:100%;display:block;}
 .events-featured__img,
 .events-list__image{
   display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
   object-fit:cover;
   aspect-ratio:5 / 2;
   box-shadow:
