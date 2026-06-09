@@ -43,6 +43,34 @@ Optional configured links secret:
 supabase secrets set DISCORD_VOTE_LINKS_JSON='{"links":[{"label":"Vote site","url":"https://example.com/server-vote"}]}'
 ```
 
+Set real vote links only through a secure local shell or the Supabase dashboard. Do not paste real vote links into chat, PR text, screenshots, logs, or committed files. In PowerShell, paste the JSON into a no-echo prompt, then pass it directly to Supabase:
+
+```powershell
+$SecureVoteLinksJson = Read-Host "Paste DISCORD_VOTE_LINKS_JSON" -AsSecureString
+$Bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureVoteLinksJson)
+try {
+  $VoteLinksJson = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($Bstr)
+} finally {
+  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($Bstr)
+}
+supabase secrets set "DISCORD_VOTE_LINKS_JSON=$VoteLinksJson" --project-ref deyvmtncimmcinldjyqe
+Remove-Variable SecureVoteLinksJson, VoteLinksJson, Bstr
+```
+
+If you need to generate a local cron secret on older Windows PowerShell/.NET builds, do not use `RandomNumberGenerator.Fill`. Use one of these compatible forms instead:
+
+```powershell
+$Bytes = New-Object byte[] 32
+$Rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$Rng.GetBytes($Bytes)
+[Convert]::ToBase64String($Bytes)
+$Rng.Dispose()
+```
+
+```powershell
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+```
+
 If `DISCORD_VOTE_LINKS_JSON` is not set, Reaper reads pinned messages in the vote channel and parses the first message containing:
 
 ```text

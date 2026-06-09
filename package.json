@@ -14,6 +14,7 @@
     "check:dns-cutover-pr-readiness": "node scripts/check-dns-cutover-pr-readiness.mjs",
     "check:dns-cutover-rehearsal": "node scripts/check-dns-cutover-rehearsal.mjs",
     "check:dns-cutover-workstation": "node scripts/check-dns-cutover-workstation.mjs",
+    "check:gallery-approved-feed": "node scripts/check-gallery-approved-feed.mjs",
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",
     "check:guild-schedule": "node scripts/check-guild-schedule.mjs",
     "check:instagram-gallery-publishing": "node scripts/check-instagram-gallery-publishing.mjs",
