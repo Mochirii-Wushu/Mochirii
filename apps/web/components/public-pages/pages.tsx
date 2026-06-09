@@ -780,7 +780,7 @@ export function EventsPage() {
             </section>
 
             <aside className="col-4">
-              <div className="glass-card glass-card--soft glass-pad">
+              <div className="glass-card glass-card--soft glass-pad events-board-card">
                 <h3 className="section-title section-title--sm" id="eventsBoardTitle">
                   Event Board
                 </h3>

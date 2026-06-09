@@ -77,6 +77,7 @@ Filter behavior:
 - Active state uses `aria-pressed`.
 - The event count updates in a polite live region.
 - The live Next event board renders the eight Discord/Reaper-managed schedule event types from `data/guild-schedule.json`.
+- The live Next event board is a bounded scroll panel: filters and count stay visible, while the event-card results list scrolls internally.
 
 ## 5. Empty States
 
@@ -139,6 +140,7 @@ Do not add unsupported link fields without updating and validating the renderer 
 - Filter controls should remain keyboard reachable.
 - Touch targets should remain usable on mobile.
 - The event count and event board use polite live regions.
+- The event-card results list is keyboard focusable so keyboard users can scroll the bounded panel without a trap.
 - Empty states should be readable.
 - Mobile layouts should not create horizontal overflow.
 

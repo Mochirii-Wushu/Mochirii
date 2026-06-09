@@ -22,6 +22,7 @@ function assertNotIncludes(label, source, snippet) {
 
 const pagesSource = read("apps/web/components/public-pages/pages.tsx");
 const boardSource = read("apps/web/components/public-pages/EventsBoard.tsx");
+const cssSource = read("apps/web/app/mochirii.css");
 const scheduleSource = read("apps/web/lib/guild-schedule.ts");
 const schedule = JSON.parse(read("data/guild-schedule.json"));
 
@@ -43,6 +44,15 @@ assertIncludes("guild schedule helper", scheduleSource, "item.id === \"monthly-r
 assertIncludes("EventsBoard", boardSource, "parseIso(item.startIso)");
 assertIncludes("EventsBoard", boardSource, "parseIso(item.endIso)");
 assertIncludes("EventsBoard", boardSource, "item.timeText || item.time");
+assertIncludes("EventsPage", eventsSource, "events-board-card");
+assertIncludes("EventsBoard", boardSource, "aria-label=\"Event Board results\"");
+assertIncludes("EventsBoard", boardSource, "tabIndex={0}");
+assertIncludes("Events CSS", cssSource, "body[data-page=\"events\"] .events-board-card");
+assertIncludes("Events CSS", cssSource, "box-sizing:border-box");
+assertIncludes("Events CSS", cssSource, "max-height:clamp(560px, 74vh, 820px)");
+assertIncludes("Events CSS", cssSource, "overflow-y:auto");
+assertIncludes("Events CSS", cssSource, "overscroll-behavior:contain");
+assertIncludes("Events CSS", cssSource, ".events-upcoming:focus-visible");
 
 const monthlyEvents = Object.values(schedule.monthly || {});
 const weeklyEvents = (schedule.weekly || []).filter((item) => item.discord === true);
