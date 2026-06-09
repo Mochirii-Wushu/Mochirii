@@ -157,7 +157,7 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
         </p>
       </div>
 
-      <div id="eventsUpcoming" className="events-upcoming" aria-live="polite">
+      <div id="eventsUpcoming" className="events-upcoming" aria-live="polite" aria-label="Event Board results" tabIndex={0}>
         {visible.length ? (
           visible.map((item) => {
             const metaLine = [formatDateUTC(item.date), item.dayText, item.timeText || item.time, item.timezone]
