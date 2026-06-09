@@ -2311,9 +2311,17 @@ body[data-page="home"] .home-spotlight__plate{
     0 12px 28px rgba(0,0,0,.34);
 }
 
+body[data-page="home"] .home-featured__plate{
+  width:max-content;
+  max-width:calc(100% - clamp(32px, 7vw, 112px));
+  box-sizing:border-box;
+}
+
 body[data-page="home"] .home-featured__plate .home-title{
   white-space:nowrap;
-  font-size:clamp(.94rem, 1.16vw, 1.06rem);
+  max-width:100%;
+  font-size:clamp(.82rem, .98vw, 1rem);
+  letter-spacing:clamp(.08em, .12vw, .14em);
 }
 
 body[data-page="home"] .section-title{
