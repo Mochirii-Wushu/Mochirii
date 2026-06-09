@@ -1,0 +1,120 @@
+{
+  "desiredCount": 16,
+  "created": 16,
+  "updated": 0,
+  "finalScheduledEventCount": 17,
+  "results": [
+    {
+      "action": "created",
+      "key": "monthly-gathering",
+      "id": "1513742238910382170",
+      "title": "Monthly gatherings open to all members to be heard.",
+      "startIso": "2026-07-04T12:00:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "monthly-raffle",
+      "id": "1513742240760070144",
+      "title": "Monthly cosmetics raffle open to all members who sign up each month.",
+      "startIso": "2026-07-04T12:00:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-0",
+      "id": "1513742242404237372",
+      "title": "Guild Party",
+      "startIso": "2026-06-14T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-1",
+      "id": "1513742245252305067",
+      "title": "Guild Party",
+      "startIso": "2026-06-15T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-2",
+      "id": "1513742247298859069",
+      "title": "Guild Party",
+      "startIso": "2026-06-09T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-3",
+      "id": "1513742290944921734",
+      "title": "Guild Party",
+      "startIso": "2026-06-10T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-4",
+      "id": "1513742341033296035",
+      "title": "Guild Party",
+      "startIso": "2026-06-11T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-5",
+      "id": "1513742391771664514",
+      "title": "Guild Party",
+      "startIso": "2026-06-12T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-party-6",
+      "id": "1513742442136862860",
+      "title": "Guild Party",
+      "startIso": "2026-06-13T13:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "breaking-army-1",
+      "id": "1513742492066119902",
+      "title": "Breaking Army",
+      "startIso": "2026-06-15T14:00:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "breaking-army-3",
+      "id": "1513742542464880672",
+      "title": "Breaking Army",
+      "startIso": "2026-06-10T14:00:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "showdown-2",
+      "id": "1513742593056313435",
+      "title": "Showdown",
+      "startIso": "2026-06-09T14:00:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "showdown-4",
+      "id": "1513742643442614302",
+      "title": "Showdown",
+      "startIso": "2026-06-11T14:00:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-wars-6",
+      "id": "1513742693581193340",
+      "title": "Guild Wars",
+      "startIso": "2026-06-13T12:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-wars-0",
+      "id": "1513742744130945084",
+      "title": "Guild Wars",
+      "startIso": "2026-06-14T12:30:00.000Z"
+    },
+    {
+      "action": "created",
+      "key": "guild-heros-realm-5",
+      "id": "1513742794466791465",
+      "title": "Guild Hero's Realm: Weekly Coordination",
+      "startIso": "2026-06-12T14:00:00.000Z"
+    }
+  ]
+}
