@@ -17,6 +17,8 @@ const files = {
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
   deployment: "docs/deployment.md",
+  appReadme: "apps/web/README.md",
+  currentLiveState: "docs/current-live-state.md",
 };
 
 function read(file) {
@@ -55,6 +57,23 @@ const voteReminder = read(files.voteReminder);
 const report = read(files.report);
 const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
+const appReadme = read(files.appReadme);
+const currentLiveState = read(files.currentLiveState);
+
+function assertNoCurrentReportOnlyClaim(label, text) {
+  const stalePatterns = [
+    /current CSP is [`"]?Content-Security-Policy-Report-Only/i,
+    /production CSP is report-only/i,
+    /CSP should stay report-only/i,
+    /Do not promote it to [`"]?Content-Security-Policy/i,
+  ];
+
+  for (const pattern of stalePatterns) {
+    if (pattern.test(text)) {
+      failures.push(`${label}: active docs must not describe current production CSP as report-only.`);
+    }
+  }
+}
 
 assertIncludes("package.json", packageJson, '"check:security-hardening"');
 assertIncludes("check-all", checkAll, "check:security-hardening");
@@ -204,6 +223,30 @@ assertMatches(
   "Content-Security-Policy",
   "Cloudflare remains DNS-only",
 ].forEach((snippet) => assertIncludes("deployment docs", deployment, snippet));
+
+[
+  "Security Headers",
+  "Production CSP is enforced",
+  "Content-Security-Policy",
+  "Cloudflare DNS-only",
+  "@vercel/analytics",
+  "@vercel/speed-insights",
+].forEach((snippet) => assertIncludes("apps/web README", appReadme, snippet));
+
+[
+  "Current Live State",
+  "Production CSP is enforced",
+  "Cloudflare remains DNS-only",
+  "Supabase remains the authority",
+  "Discord event schedule source is `data/guild-schedule.json`",
+  "Vercel Web Analytics and Speed Insights",
+].forEach((snippet) => assertIncludes("current live state docs", currentLiveState, snippet));
+
+[
+  ["deployment docs", deployment],
+  ["apps/web README", appReadme],
+  ["current live state docs", currentLiveState],
+].forEach(([label, text]) => assertNoCurrentReportOnlyClaim(label, text));
 
 if (failures.length) {
   console.error("Security hardening validation failed.");
