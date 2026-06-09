@@ -84,6 +84,9 @@ assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
   "DISCORD_REQUIRED_ROLE_IDS",
   "share_to_instagram",
   "instagramOptIn",
+  "allowedImageFilename",
+  "!declaredMime && !filenameLooksImage",
+  "mimeType: declaredMime",
   "subtitle",
   "caption",
   "Use this command in the gallery submissions channel.",
@@ -124,6 +127,19 @@ assertMatches(
   functionSource,
   /guildId !== EXPECTED_DISCORD_GUILD_ID \|\| channelId !== EXPECTED_DISCORD_GALLERY_CHANNEL_ID/,
   "command invocations must be restricted to the configured guild and gallery channel.",
+);
+
+assertIncludes(
+  "reaper-discord-interactions",
+  functionSource,
+  "return /\\.(jpe?g|png|webp)$/i.test(filename);",
+);
+
+assertNotMatches(
+  "reaper-discord-interactions",
+  functionSource,
+  /!attachmentId \|\| !attachmentUrl \|\| !mimeType/,
+  "Discord-declared attachment MIME metadata is optional and must not be the only image gate.",
 );
 
 assertMatches(

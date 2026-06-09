@@ -288,6 +288,11 @@ function normalizedMime(value: unknown): string | null {
   return mime && ALLOWED_MIME_TYPES.has(mime) ? mime : null;
 }
 
+function allowedImageFilename(value: unknown): boolean {
+  const filename = safeString(value, 255)?.toLowerCase() || "";
+  return /\.(jpe?g|png|webp)$/i.test(filename);
+}
+
 function hexToBytes(value: string): Uint8Array | null {
   const hex = value.trim();
   if (!/^[\da-f]+$/i.test(hex) || hex.length % 2 !== 0) return null;
@@ -1044,9 +1049,10 @@ Deno.serve(async (req: Request) => {
   const attachment = attachmentOption(data, "image");
   const attachmentId = snowflake(attachment.id);
   const attachmentUrl = safeString(attachment.url, 4096);
-  const mimeType = normalizedMime(attachment.content_type);
+  const declaredMime = normalizedMime(attachment.content_type);
   const sizeBytes = Number(attachment.size);
   const originalFilename = safeString(attachment.filename, 255);
+  const filenameLooksImage = allowedImageFilename(originalFilename);
   const missingRequestRoleIds = EXPECTED_REQUIRED_ROLE_IDS.filter((roleId) => !memberRoleIds.includes(roleId));
 
   if (
@@ -1071,7 +1077,13 @@ Deno.serve(async (req: Request) => {
     return interactionMessage("Refresh Discord verification on mochirii.com/account before submitting gallery images.");
   }
 
-  if (!attachmentId || !attachmentUrl || !mimeType || !Number.isFinite(sizeBytes) || sizeBytes <= 0) {
+  if (
+    !attachmentId ||
+    !attachmentUrl ||
+    (!declaredMime && !filenameLooksImage) ||
+    !Number.isFinite(sizeBytes) ||
+    sizeBytes <= 0
+  ) {
     return interactionMessage("Attach a JPEG, PNG, or WebP image for the gallery submission.");
   }
 
@@ -1086,7 +1098,7 @@ Deno.serve(async (req: Request) => {
     attachmentId,
     discordUserId,
     attachmentUrl,
-    mimeType,
+    mimeType: declaredMime,
     sizeBytes,
     title,
     caption,

@@ -524,7 +524,7 @@ The same Reaper Interactions endpoint also supports:
 
 `/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key.
 
-Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved.
+Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved. Discord attachment `content_type` is advisory because Discord may omit or mislabel it; `submit-discord-gallery-image` downloads the approved Discord CDN URL and accepts only JPEG, PNG, or WebP byte signatures under 50 MB before storing the sniffed MIME type.
 
 The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command must include the optional Discord boolean option:
 
