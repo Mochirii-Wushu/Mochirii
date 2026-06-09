@@ -31,8 +31,19 @@
 - Vercel production is deployed from `main` at commit `218a845`.
 - Production `list-visible-profile-cards` responded `200 OK` with a safe empty profile-card result for `meenari`.
 - `reaper-discord-interactions` contract smoke passed against production.
-- Discord `/sync-events` command registration is still pending because the local token file `C:\Users\xtyty\Desktop\DC Bot.txt` was not present during the release pass.
-- `/sync-events mode:preview confirm:false` has not been run live yet.
+- Discord `/sync-events` command registration is complete:
+  - Command ID: `1513739224376152084`
+  - Options: `mode` string with `preview`/`apply`, optional `confirm` boolean
+  - Default member permissions: `17600775979008`
+- The Reaper token was supplied from `C:\Users\xtyty\Desktop\DC Bot.docx` and used only as a local secret input for Discord API registration/verification.
+- Non-mutating Discord API preview completed:
+  - Bot user: `Reaper`
+  - Bot can manage events: `true`
+  - Bot can create events: `true`
+  - Current Discord scheduled event count: `1`
+  - Desired website-managed scheduled event count: `16`
+  - Result: all desired website-managed events would create or update managed Discord Scheduled Events.
+- `/sync-events mode:preview confirm:false` still needs an in-Discord slash-command smoke from a moderator account because Chrome automation was unavailable during this pass.
 - `/sync-events mode:apply confirm:true` was not run; live Discord Scheduled Event mutation remains gated behind clean preview evidence and fresh owner approval.
 
 ## Validation Completed
