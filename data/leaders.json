@@ -37,6 +37,7 @@
       "alt": "Guild Leader portrait",
       "summary": "Guides culture & long-term direction for Mōchirīī.",
       "profileHref": "./twills.html",
+      "memberProfileSlug": "twills",
       "profileLabel": "Open profile"
     },
     {
@@ -45,7 +46,9 @@
       "availability": "Operations & coordination",
       "image": "./assets/img/leaders/leader-silhouette.webp",
       "alt": "Vice Leader portrait",
-      "summary": "Coordinates leaders & helps resolve issues that reach beyond one group."
+      "summary": "Coordinates leaders & helps resolve issues that reach beyond one group.",
+      "memberProfileSlug": "vice-leader",
+      "profileLabel": "Open profile"
     },
     {
       "role": "Hall Leader",
@@ -53,7 +56,9 @@
       "availability": "Hall & group oversight",
       "image": "./assets/img/leaders/leader-silhouette.webp",
       "alt": "Hall Leader portrait",
-      "summary": "First contact for support, event coordination & hall activity."
+      "summary": "First contact for support, event coordination & hall activity.",
+      "memberProfileSlug": "hall-leader",
+      "profileLabel": "Open profile"
     },
     {
       "role": "Dharmapala",
@@ -61,7 +66,9 @@
       "availability": "Community guidance",
       "image": "./assets/img/leaders/dharmapala.webp",
       "alt": "Dharmapala portrait",
-      "summary": "Protects fairness, helps mediate conflict & keeps standards clear."
+      "summary": "Protects fairness, helps mediate conflict & keeps standards clear.",
+      "memberProfileSlug": "isawisima",
+      "profileLabel": "Open profile"
     },
     {
       "role": "Lotus Warden",
@@ -69,7 +76,9 @@
       "availability": "Member support",
       "image": "./assets/img/leaders/lotus_warden.webp",
       "alt": "Lotus Warden portrait",
-      "summary": "Supports member well-being, guides arrivals & helps morale."
+      "summary": "Supports member well-being, guides arrivals & helps morale.",
+      "memberProfileSlug": "sinbell",
+      "profileLabel": "Open profile"
     },
     {
       "role": "Petal Keeper",
@@ -77,7 +86,9 @@
       "availability": "Culture & activity support",
       "image": "./assets/img/leaders/petal_keeper.webp",
       "alt": "Petal Keeper portrait",
-      "summary": "Keeps daily spaces active, welcomes arrivals & helps members find footing."
+      "summary": "Keeps daily spaces active, welcomes arrivals & helps members find footing.",
+      "memberProfileSlug": "meenari",
+      "profileLabel": "Open profile"
     }
   ],
 

@@ -65,6 +65,12 @@ verify_jwt = true
 import_map = "./functions/list-member-profiles/deno.json"
 entrypoint = "./functions/list-member-profiles/index.ts"
 
+[functions.list-visible-profile-cards]
+enabled = true
+verify_jwt = false
+import_map = "./functions/list-visible-profile-cards/deno.json"
+entrypoint = "./functions/list-visible-profile-cards/index.ts"
+
 [functions.get-member-profile]
 enabled = true
 verify_jwt = true

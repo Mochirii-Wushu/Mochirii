@@ -28,11 +28,12 @@
   },
   "upcoming": [
     {
+      "scheduleId": "guild-heros-realm",
       "date": "2026-02-27",
-      "time": "5:00 PM",
+      "time": "10 PM - 11 PM",
       "timezone": "UTC+8",
       "title": "Guild Hero's Realm: Weekly Coordination",
-      "summary": "A window for the guild hero's realm. Show up, ask questions & we'll match groups together.",
+      "summary": "A weekly Friday window for the guild hero's realm. Show up, ask questions & we'll match groups together.",
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK"
     }

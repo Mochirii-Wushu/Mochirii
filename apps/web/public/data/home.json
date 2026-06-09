@@ -34,6 +34,7 @@
     {
       "pinned": true,
       "type": "event",
+      "scheduleId": "monthly-gathering",
       "title": "Monthly gatherings open to all members to be heard.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/featured.webp",
@@ -42,6 +43,7 @@
     },
     {
       "type": "raffle",
+      "scheduleId": "monthly-raffle",
       "title": "Monthly cosmetics raffle open to all members who sign up each month.",
       "date": "2026-02-28",
       "image": "./assets/img/bulletins/raffle.webp",
@@ -93,7 +95,8 @@
     "summary": "For support & a pretty amazing spark.",
     "image": "./assets/img/featured/spotlight.webp",
     "imageAlt": "Spotlight cover",
-    "href": "./spotlight.html"
+    "href": "./spotlight.html",
+    "memberProfileSlug": "meenari"
   },
   "gallery": [
     {

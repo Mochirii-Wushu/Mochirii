@@ -9,6 +9,7 @@ import {
   MEMBER_PROFILE_MEDIA_BUCKET,
 } from "./config";
 import { failedResult, okResult, text, type MemberProfileMedia, type ProfileMediaKind, type ProfileMediaQueue, type PublicMemberProfileList, type PublicMemberProfileResponse } from "./types";
+import type { VisibleProfileCardsResponse } from "./types";
 
 function safeFileName(name: string) {
   const clean = String(name || "profile-image").toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
@@ -25,6 +26,12 @@ export async function listPublishedMemberProfiles() {
 
 export async function getPublishedMemberProfile(slug: string) {
   return invokeEdgeFunction<PublicMemberProfileResponse>("get-member-profile", { slug });
+}
+
+export async function listVisibleProfileCards(slugs: string[]) {
+  const cleanSlugs = Array.from(new Set(slugs.map((slug) => text(slug).toLowerCase()).filter(Boolean))).slice(0, 12);
+  if (!cleanSlugs.length) return okResult<VisibleProfileCardsResponse>({ profiles: [], count: 0 });
+  return invokeEdgeFunction<VisibleProfileCardsResponse>("list-visible-profile-cards", { slugs: cleanSlugs });
 }
 
 export async function listMyProfileMedia() {

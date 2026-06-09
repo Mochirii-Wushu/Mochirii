@@ -8,6 +8,7 @@ const files = {
   packageJson: "package.json",
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
+  visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   migration: "supabase/migrations/20260608210000_add_member_profiles_and_media.sql",
   refinementMigration: "supabase/migrations/20260608233000_refine_member_profile_identity_media.sql",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
@@ -48,6 +49,7 @@ function assertMatches(label, text, pattern, message) {
 const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
+const visibleProfileCards = read(files.visibleProfileCards);
 const migration = read(files.migration);
 const refinementMigration = read(files.refinementMigration);
 const reaper = read(files.reaper);
@@ -72,6 +74,7 @@ assertIncludes("check-all", checkAll, "check:member-profiles-and-ranks");
 
 [
   "[functions.list-member-profiles]",
+  "[functions.list-visible-profile-cards]",
   "[functions.get-member-profile]",
   "[functions.submit-member-profile-media]",
   "[functions.list-member-profile-media-queue]",
@@ -193,6 +196,7 @@ assertIncludes("verify discord member", verifyDiscordMember, "discord_handle: di
 
 [
   "list-member-profiles",
+  "list-visible-profile-cards",
   "get-member-profile",
   "submit-member-profile-media",
   "member_profile_media",
@@ -219,6 +223,14 @@ assertIncludes("css", css, ".member-directory-grid");
   "moderate-member-profile-media",
   "/sync-ranks",
 ].forEach((snippet) => assertIncludes("supabase README", supabaseReadme, snippet));
+
+[
+  "profile_public_enabled",
+  "hasFilledPublicProfile",
+  "titleFromRoles",
+  "signedMediaUrl",
+  "profileHref",
+].forEach((snippet) => assertIncludes("visible profile cards", visibleProfileCards, snippet));
 
 [
   "Discord rank roles are vanity-only",

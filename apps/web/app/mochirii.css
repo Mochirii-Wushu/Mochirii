@@ -1438,6 +1438,8 @@ body[data-page="spotify"] .spotify-chip[aria-pressed="true"]{
 }
 
 body[data-page="spotify"] .spotify-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:clamp(14px, 1.7vw, 20px);
   margin-top:18px;
 }
@@ -1475,6 +1477,12 @@ body[data-page="spotify"] .spotify-embed{
 body[data-page="spotify"] .spotify-embed iframe{
   width:100%;
   max-width:100%;
+}
+
+@media (max-width:640px){
+  body[data-page="spotify"] .spotify-grid{
+    grid-template-columns:1fr;
+  }
 }
 
 body[data-page="spotify"] .spotify-empty{
@@ -2303,8 +2311,74 @@ body[data-page="home"] .home-spotlight__plate{
     0 12px 28px rgba(0,0,0,.34);
 }
 
+body[data-page="home"] .home-featured__plate .home-title{
+  white-space:nowrap;
+  font-size:clamp(.94rem, 1.16vw, 1.06rem);
+}
+
 body[data-page="home"] .section-title{
   text-shadow:0 8px 22px rgba(0,0,0,.36);
+}
+
+.spotlight-profile-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  margin-top:16px;
+  padding:10px;
+  border:1px solid rgba(218,181,94,.22);
+  border-radius:18px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.06), rgba(0,0,0,.24));
+  color:inherit;
+  text-decoration:none;
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+}
+
+.spotlight-profile-card:hover{
+  transform:translateY(-1px);
+  border-color:rgba(218,181,94,.42);
+  background:
+    linear-gradient(135deg, rgba(218,181,94,.12), rgba(0,0,0,.24));
+}
+
+.spotlight-profile-card:focus-visible{
+  outline:2px solid rgba(238,213,135,.78);
+  outline-offset:4px;
+}
+
+.spotlight-profile-card img{
+  width:58px;
+  height:58px;
+  flex:0 0 auto;
+  border-radius:50%;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 8px 20px rgba(0,0,0,.28);
+}
+
+.spotlight-profile-card strong,
+.spotlight-profile-card small{
+  display:block;
+  line-height:1.25;
+}
+
+.spotlight-profile-card small{
+  margin-top:3px;
+  color:var(--muted);
+}
+
+.spotlight-profile-card--compact{
+  max-width:320px;
+  margin-top:14px;
+  padding:8px 10px;
+  background:rgba(4,8,8,.34);
+}
+
+.spotlight-profile-card--compact img{
+  width:46px;
+  height:46px;
 }
 
 body[data-page="home"] .home-featured__img,
@@ -2383,6 +2457,11 @@ body[data-page="home"] .home-door:nth-child(4){
   body[data-page="home"] .home-hero-row{
     grid-template-columns:1fr;
     align-items:stretch;
+  }
+
+  body[data-page="home"] .home-featured__plate .home-title{
+    white-space:normal;
+    font-size:inherit;
   }
 
   body[data-page="home"] .home-guild-seal{

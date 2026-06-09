@@ -188,7 +188,7 @@ Never mirror:
 - private conversations
 - unrestricted Discord message content
 
-Safe to sync when a later branch explicitly scopes it:
+Safe to sync when a scoped branch explicitly enables it:
 
 - scheduled event metadata
 - forum/thread metadata
@@ -198,7 +198,6 @@ Safe to sync when a later branch explicitly scopes it:
 
 These require explicit later branches and review:
 
-- scheduled event sync
 - webhook notifications
 - forum index
 - role assignment automation
@@ -218,6 +217,7 @@ DISCORD_APPLICATION_ID=1156448856565887066
 DISCORD_BOT_TOKEN=<set manually, never commit>
 DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
 INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
 INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
 INSTAGRAM_API_VERSION=<set manually, never commit>
@@ -240,6 +240,7 @@ supabase functions serve moderate-gallery-submission --env-file supabase/functio
 supabase functions serve list-approved-gallery-submissions --env-file supabase/functions/.env.local
 supabase functions serve submit-discord-gallery-image --env-file supabase/functions/.env.local
 supabase functions serve reaper-discord-interactions --env-file supabase/functions/.env.local
+supabase functions serve list-visible-profile-cards --env-file supabase/functions/.env.local
 supabase functions serve list-instagram-publish-queue --env-file supabase/functions/.env.local
 supabase functions serve mark-instagram-gallery-submission-shared --env-file supabase/functions/.env.local
 supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
@@ -258,6 +259,7 @@ supabase secrets set DISCORD_APPLICATION_ID=1156448856565887066
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
 supabase secrets set DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
 supabase secrets set DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+supabase secrets set GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
 supabase secrets set INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
 supabase secrets set INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
 supabase secrets set INSTAGRAM_API_VERSION=<set manually, never commit>
@@ -304,6 +306,7 @@ supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
 supabase functions deploy reaper-discord-interactions
+supabase functions deploy list-visible-profile-cards
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy mark-instagram-gallery-submission-shared
 supabase functions deploy publish-instagram-gallery-submission
@@ -322,6 +325,7 @@ supabase functions deploy moderate-gallery-submission
 supabase functions deploy list-approved-gallery-submissions
 supabase functions deploy submit-discord-gallery-image
 supabase functions deploy reaper-discord-interactions
+supabase functions deploy list-visible-profile-cards
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy mark-instagram-gallery-submission-shared
 supabase functions deploy publish-instagram-gallery-submission
@@ -352,7 +356,8 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 ```
 
 7. Register the guild-scoped `/submit` command with optional boolean `share_to_instagram`.
-8. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
+8. Register the guild-scoped `/sync-events` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`.
+9. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
 
 ```text
 GET /guilds/1078630751077142608/members/{discord_user_id}
@@ -510,6 +515,14 @@ reaper-discord-interactions
 ```
 
 That function has `verify_jwt = false` because Discord calls it directly. It validates `x-signature-ed25519` and `x-signature-timestamp` with `DISCORD_PUBLIC_KEY`, answers PING, enforces guild `1078630751077142608`, channel `1508077313965817856`, and required roles, then defers the interaction and calls `submit-discord-gallery-image` in a background task. The ingest function also has `verify_jwt = false` because it is called by the trusted Reaper bridge rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The ingest function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
+
+The same Reaper Interactions endpoint also supports:
+
+```text
+/sync-events mode:<preview|apply> confirm:<true|false>
+```
+
+`/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key.
 
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved.
 

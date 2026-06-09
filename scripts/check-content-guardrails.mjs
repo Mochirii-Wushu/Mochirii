@@ -9,6 +9,7 @@ const topLevelManifest = {
   "codex.json": ["hero", "intro", "tenets", "etiquette", "rhythm", "recognition"],
   "events.json": ["meta", "featured", "upcoming", "recurring", "participation"],
   "gallery.json": ["meta", "categories", "albums"],
+  "guild-schedule.json": ["timezone", "monthly", "spotlight", "weekly"],
   "home.json": ["copy", "hero", "seal", "bulletins", "tiles", "spotlight", "gallery"],
   "join.json": ["hero", "steps", "quickStart", "checklist", "culture", "notes"],
   "leaders.json": ["hero", "panel", "council", "leaders", "responsibilities"],
@@ -307,6 +308,47 @@ function validateSpotify(data) {
   });
 }
 
+function isTime24(value) {
+  return /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(String(value || ""));
+}
+
+function validateGuildSchedule(data) {
+  const filePath = "data/guild-schedule.json";
+  if (data?.timezone?.label !== "UTC+8") addFailure(`${filePath}.timezone.label: expected UTC+8.`);
+  if (data?.timezone?.offsetMinutes !== 480) addFailure(`${filePath}.timezone.offsetMinutes: expected 480.`);
+
+  ["gathering", "raffle"].forEach((key) => {
+    const item = data?.monthly?.[key];
+    if (!item) {
+      addFailure(`${filePath}.monthly.${key}: expected monthly schedule item.`);
+      return;
+    }
+    if (!isKebab(item.id)) addFailure(`${filePath}.monthly.${key}.id: expected kebab-case id.`);
+    if (item.rule !== "next-first-saturday") addFailure(`${filePath}.monthly.${key}.rule: expected next-first-saturday.`);
+    if (!isTime24(item.startTime)) addFailure(`${filePath}.monthly.${key}.startTime: expected HH:MM.`);
+    if (!isTime24(item.endTime)) addFailure(`${filePath}.monthly.${key}.endTime: expected HH:MM.`);
+  });
+
+  if (data?.spotlight?.rule !== "first-day-current-month") {
+    addFailure(`${filePath}.spotlight.rule: expected first-day-current-month.`);
+  }
+
+  const weekly = Array.isArray(data?.weekly) ? data.weekly : [];
+  if (weekly.length < 5) addFailure(`${filePath}.weekly: expected weekly schedule items.`);
+  weekly.forEach((item, index) => {
+    const base = `${filePath}.weekly.${index}`;
+    if (!isKebab(item?.id)) addFailure(`${base}.id: expected kebab-case id.`);
+    if (!isNonEmptyString(item?.title)) addFailure(`${base}.title: title is required.`);
+    if (!Array.isArray(item?.days) || !item.days.length) addFailure(`${base}.days: expected one or more weekday numbers.`);
+    (Array.isArray(item?.days) ? item.days : []).forEach((day, dayIndex) => {
+      if (!Number.isInteger(day) || day < 0 || day > 6) addFailure(`${base}.days.${dayIndex}: weekday must be 0-6.`);
+    });
+    if (!isTime24(item?.startTime)) addFailure(`${base}.startTime: expected HH:MM.`);
+    if (!isTime24(item?.endTime)) addFailure(`${base}.endTime: expected HH:MM.`);
+    if (!isNonEmptyString(item?.timeText)) addFailure(`${base}.timeText: time text is required.`);
+  });
+}
+
 function validateAllData() {
   const files = readdirSync(dataDir)
     .filter((file) => file.endsWith(".json"))
@@ -322,6 +364,7 @@ function validateAllData() {
     if (fileName === "gallery.json") validateGallery(data);
     if (fileName === "home.json") validateHome(data);
     if (fileName === "events.json") validateEvents(data);
+    if (fileName === "guild-schedule.json") validateGuildSchedule(data);
     if (fileName === "spotify.json") validateSpotify(data);
   });
 

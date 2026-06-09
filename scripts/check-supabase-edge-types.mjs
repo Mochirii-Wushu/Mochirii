@@ -16,6 +16,7 @@ const functions = [
   "publish-instagram-gallery-submission",
   "mark-instagram-gallery-submission-shared",
   "list-member-profiles",
+  "list-visible-profile-cards",
   "get-member-profile",
   "submit-member-profile-media",
   "list-member-profile-media-queue",

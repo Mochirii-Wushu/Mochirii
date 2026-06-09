@@ -11,6 +11,7 @@ const files = {
   supabaseConfig: "supabase/config.toml",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
+  visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
@@ -47,6 +48,7 @@ const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
 const approvedFeed = read(files.approvedFeed);
+const visibleProfileCards = read(files.visibleProfileCards);
 const discordIngest = read(files.discordIngest);
 const report = read(files.report);
 const cspReport = read(files.cspReport);
@@ -83,6 +85,7 @@ if (nextConfig.includes("Content-Security-Policy-Report-Only")) {
 const verifyJwtFalseFunctions = extractVerifyJwtFalseFunctions(supabaseConfig);
 const expectedUnauthenticatedFunctions = [
   "list-approved-gallery-submissions",
+  "list-visible-profile-cards",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
 ];
@@ -130,6 +133,38 @@ assertMatches(
   "signed_url",
   "signedUrlSeconds",
 ].forEach((snippet) => assertIncludes("list-approved-gallery-submissions", approvedFeed, snippet));
+
+[
+  "asArray(body.slugs)",
+  ".in(\"profile_slug\", requestedSlugs)",
+  ".eq(\"profile_public_enabled\", true)",
+  ".eq(\"member_status\", \"active\")",
+  ".eq(\"has_required_discord_roles\", true)",
+  "recentVerification(profile.discord_verified_at)",
+  "signedMediaUrl",
+  "hasApprovedAvatar",
+].forEach((snippet) => assertIncludes("list-visible-profile-cards", visibleProfileCards, snippet));
+
+assertMatches(
+  "list-visible-profile-cards",
+  visibleProfileCards,
+  /return\s+\{[\s\S]*slug:[\s\S]*displayName:[\s\S]*guildTitle:[\s\S]*avatarUrl:[\s\S]*profileHref:[\s\S]*hasApprovedAvatar/s,
+  "public visible profile card must return only safe card fields.",
+);
+
+[
+  "discordHandle:",
+  "gameUid:",
+  "region:",
+  "timezone:",
+  "storagePath:",
+  "storageBucket:",
+  "discordUserId:",
+].forEach((snippet) => {
+  if (visibleProfileCards.includes(snippet)) {
+    failures.push(`list-visible-profile-cards: public card function must not return ${snippet}`);
+  }
+});
 
 assertMatches(
   "list-approved-gallery-submissions",
