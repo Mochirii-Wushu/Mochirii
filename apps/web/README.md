@@ -61,7 +61,7 @@ Do not commit `.vercel/`.
 
 `next.config.ts` owns app-level security headers for the Vercel surface. Keep Cloudflare DNS-only for Vercel web records; use Vercel's platform firewall/DDoS layer as the active edge protection.
 
-The current CSP is `Content-Security-Policy-Report-Only` so Discord widgets, Spotify embeds, Supabase signed URLs, and Vercel observability can be verified before enforcement. Do not promote it to `Content-Security-Policy` without a production browser pass on those surfaces.
+Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, member, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
 
 ## Vercel Observability
 
