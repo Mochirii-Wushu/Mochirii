@@ -97,7 +97,16 @@ Live route header smoke after PR #226 reached Vercel production:
   - All 10 rank roles have `hoist:false`.
   - All 10 rank roles have `mentionable:false`.
   - Unsafe rank-role count: `0`.
-- Token rotation status: blocked on Discord MFA prompt. The token reset was initiated in Chrome, but Discord required MFA before issuing the new token. The old local token still worked for read-only Discord API verification at the time of this report; no token value was printed or committed.
+- Token rotation status: complete.
+- Discord issued a new Reaper token after MFA.
+- Supabase secret `DISCORD_BOT_TOKEN` was replaced successfully; dashboard timestamp after replacement: `09 Jun 2026 00:14:02 (+0000)`.
+- Browser clipboard was cleared after updating Supabase.
+- The new token was verified through Discord API without printing the value:
+  - token identifies the Reaper bot application;
+  - bot member exists in the guild;
+  - bot still has no Administrator role;
+  - bot still has Manage Roles;
+  - all 10 rank roles remain no-permission vanity roles.
 
 ## Validation
 
@@ -106,15 +115,13 @@ Live route header smoke after PR #226 reached Vercel production:
 - `npm run check:production`: passed after local DNS recovered.
 - `npm run smoke:supabase-edge-functions`: passed after local DNS recovered.
 - `npm run check:reaper-discord-interactions`: passed.
+- New Reaper token Discord API verification: passed.
 - `cd apps/web && npm audit --audit-level=moderate`: `found 0 vulnerabilities`.
 - `cd apps/web && npm run lint`: passed.
 - `cd apps/web && npm run build`: passed.
 
 ## Remaining Action-Time Items
 
-- Complete Discord MFA, reset the Reaper bot token, copy the new token directly into Supabase secret `DISCORD_BOT_TOKEN`, then clear the clipboard.
-- After token rotation, rerun:
-  - `npm run check:reaper-discord-interactions`
-  - Discord API bot-role verification with the new token.
-  - `/sync-ranks mode:preview confirm:false` from an approved Discord moderator account if available.
+- Optional Discord UI check: run `/sync-ranks mode:preview confirm:false` from an approved Discord moderator account if a human-visible slash-command smoke is desired.
+- Remove or secure any local plaintext token handoff file after confirming it is no longer needed.
 - Decide whether Vercel's Node.js dashboard setting should be aligned from `24.x` to Node 22 to match GitHub CI and local validation.
