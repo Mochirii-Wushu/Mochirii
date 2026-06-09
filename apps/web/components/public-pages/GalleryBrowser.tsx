@@ -10,6 +10,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useBodyPortalRoot, useBodyScrollLock } from "@/components/useLightboxOverlay";
+import { listApprovedGallerySubmissions } from "@/lib/supabase/gallery-submissions";
+import type { ApprovedGallerySubmission } from "@/lib/supabase/types";
 
 type Category = {
   slug?: string;
@@ -43,6 +45,7 @@ type NormalizedGalleryItem = Omit<GalleryItem, "alt" | "caption" | "categories" 
 
 const allCategory = "all";
 const defaultSort: SortMode = "random";
+const memberSubmissionsCategory = "member-submissions";
 const sortModes = new Set<SortMode>([defaultSort, "newest", "oldest"]);
 const focusableSelector = [
   "a[href]",
@@ -198,6 +201,33 @@ async function copyText(value: string) {
   return fallbackCopyText(value);
 }
 
+function approvedSubmissionCaption(submission: ApprovedGallerySubmission) {
+  const title = text(submission.title);
+  const caption = text(submission.caption);
+  const uploader = text(submission.uploader_display_name || submission.uploader_discord_name);
+
+  return [title, caption, uploader ? `Shared by ${uploader}` : ""].filter(Boolean).join(" - ");
+}
+
+function approvedSubmissionToGalleryItem(submission: ApprovedGallerySubmission): GalleryItem | null {
+  const signedUrl = text(submission.signed_url);
+  if (!signedUrl || submission.preview_error) return null;
+
+  const title = text(submission.title, "Member gallery submission");
+
+  return {
+    id: `approved-${text(submission.id, signedUrl)}`,
+    src: signedUrl,
+    full: signedUrl,
+    thumb: signedUrl,
+    alt: title,
+    caption: approvedSubmissionCaption(submission) || title,
+    category: memberSubmissionsCategory,
+    categories: [memberSubmissionsCategory],
+    galleryAddedAt: text(submission.created_at || submission.reviewed_at),
+  };
+}
+
 export function GalleryBrowser({
   categories,
   items,
@@ -207,6 +237,7 @@ export function GalleryBrowser({
 }) {
   const [activeCategory, setActiveCategory] = useState(allCategory);
   const [activeSort, setActiveSort] = useState<SortMode>(defaultSort);
+  const [approvedItems, setApprovedItems] = useState<GalleryItem[]>([]);
   const [randomSeed, setRandomSeed] = useState<number | null>(null);
   const [shareStatus, setShareStatus] = useState("");
   const [openItemKey, setOpenItemKey] = useState<string | null>(null);
@@ -214,10 +245,11 @@ export function GalleryBrowser({
   const closeRef = useRef<HTMLButtonElement>(null);
   const lastFocusRef = useRef<HTMLElement | null>(null);
   const portalRoot = useBodyPortalRoot();
+  const galleryItems = useMemo(() => [...items, ...approvedItems], [approvedItems, items]);
 
   const usableItems = useMemo(
     () =>
-      items
+      galleryItems
         .map((item, originalIndex): NormalizedGalleryItem => {
           const full = publicPath(item.full || item.src);
           const thumb = publicPath(item.thumb || item.src || item.full);
@@ -236,12 +268,30 @@ export function GalleryBrowser({
           };
         })
         .filter((item) => item.full && item.thumb),
-    [items],
+    [galleryItems],
   );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setRandomSeed(createRandomSeed()), 0);
     return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let canceled = false;
+
+    listApprovedGallerySubmissions()
+      .then((result) => {
+        if (canceled) return;
+        const submissions = result.ok && Array.isArray(result.data?.submissions) ? result.data.submissions : [];
+        setApprovedItems(submissions.map(approvedSubmissionToGalleryItem).filter((item): item is GalleryItem => Boolean(item)));
+      })
+      .catch(() => {
+        if (!canceled) setApprovedItems([]);
+      });
+
+    return () => {
+      canceled = true;
+    };
   }, []);
 
   const filterCategories = useMemo(() => {

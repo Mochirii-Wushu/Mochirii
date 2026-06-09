@@ -13,6 +13,7 @@ const checks = [
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
+  ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
