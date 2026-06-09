@@ -53,6 +53,11 @@ assertIncludes("Events CSS", cssSource, "max-height:clamp(560px, 74vh, 820px)");
 assertIncludes("Events CSS", cssSource, "overflow-y:auto");
 assertIncludes("Events CSS", cssSource, "overscroll-behavior:contain");
 assertIncludes("Events CSS", cssSource, ".events-upcoming:focus-visible");
+assertIncludes("Events CSS", cssSource, ".events-featured__img,\n.events-list__image{\n  display:block;\n  width:100%;\n  max-width:100%;\n  height:auto;");
+assertIncludes("EventsPage", eventsSource, 'className="events-featured__img"');
+assertIncludes("EventsPage", eventsSource, 'height: "auto"');
+assertIncludes("EventsBoard", boardSource, 'className="events-list__image"');
+assertIncludes("EventsBoard", boardSource, 'height: "auto"');
 
 const monthlyEvents = Object.values(schedule.monthly || {});
 const weeklyEvents = (schedule.weekly || []).filter((item) => item.discord === true);
