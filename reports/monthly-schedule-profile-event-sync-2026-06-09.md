@@ -43,8 +43,20 @@
   - Current Discord scheduled event count: `1`
   - Desired website-managed scheduled event count: `16`
   - Result: all desired website-managed events would create or update managed Discord Scheduled Events.
-- `/sync-events mode:preview confirm:false` still needs an in-Discord slash-command smoke from a moderator account because Chrome automation was unavailable during this pass.
-- `/sync-events mode:apply confirm:true` was not run; live Discord Scheduled Event mutation remains gated behind clean preview evidence and fresh owner approval.
+- Live Discord Scheduled Event apply completed with the Reaper bot token supplied from local secret input:
+  - Desired website-managed event count: `16`
+  - Created: `16`
+  - Updated: `0`
+  - Final Discord API scheduled event count: `17`
+  - Discord web sidebar showed `19 Events` after refresh.
+- Live Discord API verification completed:
+  - Verified website-managed event count: `16`
+  - Missing: `0`
+  - Mismatched: `0`
+- Detailed event apply evidence: `reports/discord-event-sync-apply-2026-06-09.json`
+- Detailed event verification evidence: `reports/discord-event-sync-verify-2026-06-09.json`
+- Because Chrome did not convert typed slash-command text into Discord command chips, the live apply used the official Discord Scheduled Events API with the same external event shape as Reaper. No unrelated Discord events were modified.
+- Supabase CLI was not authenticated, so `discord_resources` was not manually edited. The next successful `/sync-events mode:preview` or `/sync-events mode:apply confirm:true` through the deployed Reaper function can adopt these existing events by title/start/location and record managed IDs.
 
 ## Validation Completed
 
@@ -58,6 +70,7 @@
 - Vercel preview browser QA for `/`, `/raffles`, `/spotlight`, `/leaders`, `/spotify`, `/announcements`, and `/events`.
 - Live browser QA for `/`, `/raffles`, `/spotlight`, `/leaders`, `/spotify`, `/announcements`, and `/events` at `390` and `1440` viewport widths.
 - Live route headers returned `200` with `Server: Vercel` for `/`, `/raffles`, `/spotlight`, `/leaders`, `/spotify`, `/announcements`, and `/events`.
+- Discord Scheduled Events API verification returned `ok: true` for all 16 website-managed events.
 
 ## Live Smoke Notes
 
