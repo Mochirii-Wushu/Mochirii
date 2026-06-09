@@ -17,6 +17,7 @@ const checks = [
   ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
+  ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],

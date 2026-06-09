@@ -16,8 +16,10 @@ Keep this page focused on times, RSVP notes, runs, and the rhythm of gathering.
 
 ## 2. Data Source
 
-- Events data lives in `data/events.json`.
-- Rolling event timing lives in `data/guild-schedule.json`; the live Next Events page derives event-board dates from that schedule when an event has `scheduleId`.
+- Events shell copy lives in `data/events.json`.
+- Rolling event timing and the live Next Events board live in `data/guild-schedule.json`.
+- The live Next Events board is schedule-first: it renders one card per Discord/Reaper-managed event type from `websiteEventCardsFromSchedule`, using schedule-derived dates, UTC+8 times, and `discordCoverImage` art.
+- `data/events.json` is page-shell copy only for the Next app: meta, hero, featured lead/bullets fallback, recurring intro, participation text, and fallback content.
 - Keep JSON valid: no trailing commas, comments, or unquoted keys.
 - Preserve the current schema unless the matching renderer is updated in the same scoped task.
 - Add only fields that `events.js` actually supports.
@@ -27,8 +29,8 @@ Keep this page focused on times, RSVP notes, runs, and the rhythm of gathering.
 Current data shape:
 
 - `meta`: page kicker, title, intro, updated date, timezone label, badges, and hero image paths.
-- `featured`: featured-event lead, tag, date, time, timezone, title, image, optional `href`, optional `linkLabel`, and `bullets`.
-- `upcoming`: the event-board source array. Each item may include `date`, `time`, `timezone`, `title`, `summary`, `image`, and `href`.
+- `featured`: featured-event lead, tag, fallback date, fallback time, fallback timezone, fallback title, fallback image, optional `href`, optional `linkLabel`, and `bullets`.
+- `upcoming`: legacy/fallback static event-board data for the rollback surface. It is not the live Next Events board authority.
 - `recurring`: recurring-events intro and an `items` array with `title` and `summary`.
 - `participation`: participation blocks with `title` and `body`.
 
@@ -47,7 +49,7 @@ Not currently implemented:
 - `events.js` parses date-only values with a strict UTC pattern before classifying events.
 - Invalid or missing event dates are treated as upcoming by the current renderer.
 - Event-board dates are rendered with `MochiriiUtils.formatDateUTC`.
-- Featured event dates currently render as the raw `featured.date` string in the featured meta line.
+- Featured event dates in the Next app derive from the first upcoming schedule card; `featured.date` is fallback shell data only.
 - Reaper's `/sync-events` command reads the mirrored guild schedule JSON and must stay aligned with the website schedule helpers.
 
 Current sorting:
@@ -56,7 +58,7 @@ Current sorting:
 - Past sorts newest first.
 - All shows upcoming events first, then past events.
 - Within All, upcoming dates sort soonest first and past dates sort newest first.
-- If dates match, original data order is preserved.
+- If dates match, the Next Events board sorts by `startIso` so same-day UTC+8 events, including midnight-crossing events, stay in chronological order.
 
 ## 4. Filters
 
@@ -74,7 +76,7 @@ Filter behavior:
 - Buttons are real `button` elements.
 - Active state uses `aria-pressed`.
 - The event count updates in a polite live region.
-- The event board renders only items from `data.events.upcoming`, classified by date.
+- The live Next event board renders the eight Discord/Reaper-managed schedule event types from `data/guild-schedule.json`.
 
 ## 5. Empty States
 
@@ -146,6 +148,9 @@ Run:
 
 ```sh
 npm run check
+npm run check:events-page-schedule-sync
+npm run check:guild-schedule
+npm run check:discord-event-covers
 git diff --check
 node scripts/check-json.mjs
 node scripts/check-js.mjs

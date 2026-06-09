@@ -18,6 +18,7 @@
     "check:gallery-approved-feed": "node scripts/check-gallery-approved-feed.mjs",
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",
     "check:guild-schedule": "node scripts/check-guild-schedule.mjs",
+    "check:events-page-schedule-sync": "node scripts/check-events-page-schedule-sync.mjs",
     "check:instagram-gallery-publishing": "node scripts/check-instagram-gallery-publishing.mjs",
     "check:js": "node scripts/check-js.mjs",
     "check:json": "node scripts/check-json.mjs",
