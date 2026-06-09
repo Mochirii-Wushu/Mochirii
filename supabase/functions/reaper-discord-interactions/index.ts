@@ -644,7 +644,7 @@ async function upsertDiscordEventResource(event: JsonRecord, desired: ScheduleEv
         discord_id: eventId,
         discord_parent_id: EXPECTED_DISCORD_GUILD_ID,
         enabled: true,
-        public_url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`,
+        url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`,
         description: desired.description,
         metadata: {
           managedBy: "reaper-event-sync",

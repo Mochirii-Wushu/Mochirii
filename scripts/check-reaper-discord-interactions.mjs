@@ -113,7 +113,15 @@ assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
   "privacy_level: DISCORD_EVENT_PRIVACY_GUILD_ONLY",
   "reaper-event-sync",
   "discord_resources",
+  "url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`",
 ].forEach((snippet) => assertIncludes("reaper-discord-interactions", functionSource, snippet));
+
+assertNotMatches(
+  "reaper-discord-interactions",
+  functionSource,
+  /public_url/,
+  "discord_resources uses the url column; event sync must not write a non-existent public_url column.",
+);
 
 assertMatches(
   "reaper-discord-interactions",
