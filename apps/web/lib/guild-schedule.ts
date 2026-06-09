@@ -3,6 +3,7 @@ export type GuildScheduleData = {
     label?: string;
     offsetMinutes?: number;
   };
+  discordCoverVersion?: string;
   monthly?: Record<string, GuildMonthlyScheduleItem>;
   spotlight?: {
     id?: string;
@@ -50,6 +51,19 @@ export type ScheduledEventOccurrence = GuildWeeklyScheduleItem & {
   date: string;
   startIso: string;
   endIso: string;
+};
+
+export type WebsiteEventCard = Omit<
+  ScheduledEventOccurrence,
+  "endTime" | "id" | "image" | "startTime" | "timeText" | "timezone" | "title"
+> & {
+  endTime: string;
+  id: string;
+  image: string;
+  startTime: string;
+  timeText: string;
+  title: string;
+  timezone: string;
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -106,6 +120,20 @@ function parseTime(value: unknown): { hour: number; minute: number } {
     hour: Math.min(Math.max(Number(match[1]), 0), 23),
     minute: Math.min(Math.max(Number(match[2]), 0), 59),
   };
+}
+
+function formatScheduleTime(value: unknown): string {
+  const parsed = parseTime(value);
+  const period = parsed.hour >= 12 ? "PM" : "AM";
+  const hour = parsed.hour % 12 || 12;
+  const minutes = parsed.minute ? `:${pad(parsed.minute)}` : "";
+  return `${hour}${minutes} ${period}`;
+}
+
+function timeRangeText(startTime: unknown, endTime: unknown, fallback?: unknown): string {
+  const start = formatScheduleTime(startTime);
+  const end = formatScheduleTime(endTime);
+  return start && end ? `${start} - ${end}` : String(fallback || "").trim();
 }
 
 function localToUtcIso(dateKey: string, time: string, schedule: GuildScheduleData): string {
@@ -232,6 +260,74 @@ export function eventBoardItemsFromSchedule(schedule: GuildScheduleData, now = n
     .filter((item) => item.showOnEventsBoard === true)
     .map((item) => nextWeeklyOccurrence(schedule, item, now))
     .filter((item): item is ScheduledEventOccurrence => Boolean(item));
+}
+
+function firstParagraph(value: unknown): string {
+  return String(value || "")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .find(Boolean) || "";
+}
+
+export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now = new Date()): WebsiteEventCard[] {
+  const timezone = scheduleTimezoneLabel(schedule);
+  const monthlyCards: WebsiteEventCard[] = Object.values(schedule.monthly || {})
+    .flatMap((item) => {
+      const date = monthlyScheduleDate(schedule, item.id, "", now);
+      if (!item.id || !item.title || !date) return [];
+
+      const startTime = item.startTime || "00:00";
+      const endTime = item.endTime || "00:00";
+      const endDate = eventEndDate(date, startTime, endTime);
+      const timeText = timeRangeText(startTime, endTime, item.time);
+
+      return [{
+        id: item.id,
+        title: item.title,
+        date,
+        startTime,
+        endTime,
+        startIso: localToUtcIso(date, startTime, schedule),
+        endIso: localToUtcIso(endDate, endTime, schedule),
+        dayText: item.rule === "next-first-saturday" ? "First Saturday" : item.rule,
+        timeText,
+        timezone,
+        location: item.location,
+        href: item.id === "monthly-raffle" ? "/raffles" : item.location,
+        summary: firstParagraph(item.description) || timeText,
+        image: item.discordCoverImage || "",
+        discordCoverImage: item.discordCoverImage,
+        discord: true,
+      }];
+    });
+
+  const weeklyCards: WebsiteEventCard[] = (schedule.weekly || [])
+    .filter((item) => item.discord === true)
+    .flatMap((item) => {
+      const occurrence = nextWeeklyOccurrence(schedule, item, now);
+      const id = occurrence?.id;
+      const title = occurrence?.title;
+      if (!occurrence || !id || !title) return [];
+
+      const timeText = occurrence.timeText || timeRangeText(occurrence.startTime, occurrence.endTime);
+      return [{
+        ...occurrence,
+        id,
+        title,
+        startTime: occurrence.startTime || "00:00",
+        endTime: occurrence.endTime || "00:00",
+        timeText,
+        timezone: occurrence.timezone || timezone,
+        summary: occurrence.summary || [occurrence.dayText, timeText].filter(Boolean).join(" - "),
+        image: occurrence.discordCoverImage || "",
+        href: occurrence.href || occurrence.location,
+      }];
+    });
+
+  return [...monthlyCards, ...weeklyCards].sort((a, b) => {
+    const delta = new Date(a.startIso).getTime() - new Date(b.startIso).getTime();
+    return delta || String(a.id || a.title).localeCompare(String(b.id || b.title));
+  });
 }
 
 export function discordScheduledEventsFromSchedule(schedule: GuildScheduleData, now = new Date()): ScheduledEventOccurrence[] {

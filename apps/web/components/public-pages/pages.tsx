@@ -20,10 +20,10 @@ import { LeaderProfileButton, SpotlightProfileCard } from "./ProfileCardLinks";
 import { ProfileDisplay } from "./ProfileDisplay";
 import { SpotifyBrowser } from "./SpotifyBrowser";
 import {
-  eventBoardItemsFromSchedule,
   monthlyScheduleDate,
   scheduleTimezoneLabel,
   spotlightScheduleDate,
+  websiteEventCardsFromSchedule,
   weeklyScheduleLines,
 } from "@/lib/guild-schedule";
 import {
@@ -78,10 +78,6 @@ function linkProps(href: unknown) {
     target: isExternalHref(cleanHref) ? "_blank" : undefined,
     rel: isExternalHref(cleanHref) ? "noopener noreferrer" : undefined,
   };
-}
-
-function scheduleId(value: unknown) {
-  return text(value).trim();
 }
 
 function announcementDetails(item: DataRecord) {
@@ -697,20 +693,19 @@ export function EventsPage() {
   const meta = record(data.meta);
   const featured = record(data.featured);
   const recurring = record(data.recurring);
-  const featuredHref = text(featured.href);
-  const scheduledBoardItems = eventBoardItemsFromSchedule(guildScheduleData);
-  const eventBoardItems = records(data.upcoming).map((item) => {
-    const scheduled = scheduledBoardItems.find((event) => event.id === scheduleId(item.scheduleId));
-    return {
-      date: text(scheduled?.date || item.date),
-      time: text(scheduled?.timeText || item.time),
-      timezone: text(scheduled?.timezone || item.timezone || scheduleTimezoneLabel(guildScheduleData)),
-      title: text(scheduled?.title || item.title),
-      summary: text(scheduled?.summary || item.summary),
-      image: text(scheduled?.image || item.image),
-      href: text(scheduled?.href || item.href),
-    };
-  });
+  const eventBoardItems = websiteEventCardsFromSchedule(guildScheduleData);
+  const featuredEvent = eventBoardItems[0];
+  const featuredHref = text(featuredEvent?.href || featured.href);
+  const featuredMeta = [
+    featured.tag,
+    featuredEvent?.date ? formatDateUTC(featuredEvent.date) : featured.date,
+    featuredEvent?.dayText,
+    featuredEvent?.timeText || featured.time,
+    featuredEvent?.timezone || featured.timezone || scheduleTimezoneLabel(guildScheduleData),
+  ];
+  const featuredImage = text(featuredEvent?.image || featured.image);
+  const featuredTitle = text(featuredEvent?.title || featured.title);
+  const featuredSummary = text(featuredEvent?.summary || featured.summary);
 
   return (
     <>
@@ -745,16 +740,16 @@ export function EventsPage() {
                 <div id="featuredCard" className="events-featured" aria-live="polite">
                   <div className="glass-card glass-card--soft glass-pad">
                     <p className="kicker">
-                      {[featured.tag, featured.date, featured.time, featured.timezone]
+                      {featuredMeta
                         .map((value) => text(value))
                         .filter(Boolean)
                         .join(" • ")}
                     </p>
-                    {text(featured.image) ? (
+                    {featuredImage ? (
                       <div style={{ marginTop: 12 }}>
                         <img
-                          src={publicPath(featured.image, "./assets/img/events/featured.webp")}
-                          alt={text(featured.title, "Featured event")}
+                          src={publicPath(featuredImage, "./assets/img/events/featured.webp")}
+                          alt={text(featuredTitle, "Featured event")}
                           style={{ width: "100%", borderRadius: 18, border: "1px solid rgba(255,255,255,.10)" }}
                           loading="lazy"
                           decoding="async"
@@ -762,9 +757,9 @@ export function EventsPage() {
                       </div>
                     ) : null}
                     <h3 className="section-title section-title--sm" style={{ marginTop: 14 }}>
-                      {text(featured.title)}
+                      {featuredTitle}
                     </h3>
-                    <p className="lede">{text(featured.summary)}</p>
+                    <p className="lede">{featuredSummary}</p>
                     {strings(featured.bullets).length ? (
                       <ul className="list-stack">
                         {strings(featured.bullets).map((bullet) => (

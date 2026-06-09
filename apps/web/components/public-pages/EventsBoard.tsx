@@ -3,8 +3,13 @@
 import { useMemo, useState } from "react";
 
 type EventItem = {
+  id?: string;
   date?: string;
+  startIso?: string;
+  endIso?: string;
+  dayText?: string;
   time?: string;
+  timeText?: string;
   timezone?: string;
   title?: string;
   summary?: string;
@@ -55,13 +60,24 @@ function todayUTC() {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 }
 
+function parseIso(value: unknown) {
+  const raw = text(value);
+  if (!raw) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function eventStatus(item: EventItem) {
+  const eventEnd = parseIso(item.endIso);
+  if (eventEnd) return eventEnd.getTime() >= Date.now() ? "upcoming" : "past";
   const eventDate = parseDateOnlyUTC(item.date);
   if (!eventDate) return "upcoming";
   return eventDate.getTime() >= todayUTC().getTime() ? "upcoming" : "past";
 }
 
 function eventTimestamp(item: EventItem) {
+  const eventStart = parseIso(item.startIso);
+  if (eventStart) return eventStart.getTime();
   return parseDateOnlyUTC(item.date)?.getTime() ?? 0;
 }
 
@@ -144,14 +160,14 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
       <div id="eventsUpcoming" className="events-upcoming" aria-live="polite">
         {visible.length ? (
           visible.map((item) => {
-            const metaLine = [formatDateUTC(item.date), item.time, item.timezone]
+            const metaLine = [formatDateUTC(item.date), item.dayText, item.timeText || item.time, item.timezone]
               .map((value) => text(value))
               .filter(Boolean)
               .join(" • ");
             const href = text(item.href, "https://discord.com/invite/dPafqMwWPK");
 
             return (
-              <section className="events-list__item" key={`${item.title}-${item.date}`}>
+              <section className="events-list__item" key={`${item.id || item.title}-${item.date}`}>
                 <p className="kicker">{metaLine}</p>
                 <h4 className="section-title section-title--sm">{text(item.title, "Event")}</h4>
                 <p className="muted">{text(item.summary)}</p>
