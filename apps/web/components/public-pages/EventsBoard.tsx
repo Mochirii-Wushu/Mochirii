@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { StaticImage } from "./common";
 
 type EventItem = {
   id?: string;
@@ -173,12 +174,14 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
                 <p className="muted">{text(item.summary)}</p>
                 {item.image ? (
                   <div style={{ marginTop: 12 }}>
-                    <img
+                    <StaticImage
                       src={publicPath(item.image)}
                       alt={text(item.title, "Event")}
+                      width={1600}
+                      height={640}
+                      className="events-list__image"
+                      sizes="(max-width: 980px) calc(100vw - 86px), 320px"
                       style={{ width: "100%", borderRadius: 16, border: "1px solid rgba(255,255,255,.10)" }}
-                      loading="lazy"
-                      decoding="async"
                     />
                   </div>
                 ) : null}

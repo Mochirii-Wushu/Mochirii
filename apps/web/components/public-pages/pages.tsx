@@ -37,6 +37,7 @@ import {
   PageHero,
   ProseStack,
   publicPath,
+  StaticImage,
   text,
 } from "./common";
 
@@ -162,12 +163,13 @@ function OverlayCard({
     <article className="glass-card glass-card--soft" style={{ overflow: "hidden" }}>
       <div style={{ position: "relative", aspectRatio }}>
         {text(image) ? (
-          <img
+          <StaticImage
             src={publicPath(image)}
             alt={text(alt)}
-            loading="lazy"
-            decoding="async"
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            width={960}
+            height={640}
+            className="overlay-card__image"
+            sizes="(max-width: 980px) calc(100vw - 68px), 580px"
           />
         ) : null}
         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.22)" }} aria-hidden="true" />
@@ -597,7 +599,15 @@ export function CodexPage() {
                     <div className="grid-12 grid-gap" style={{ marginTop: 14 }}>
                       <div className="col-6">
                         <div className="glass-card glass-card--soft glass-pad">
-                          <img id={section.image} src={publicPath(section.data.image)} alt={section.alt} loading="lazy" decoding="async" />
+                          <StaticImage
+                            id={section.image}
+                            src={section.data.image}
+                            alt={section.alt}
+                            width={960}
+                            height={640}
+                            className="image-panel__img"
+                            sizes="(max-width: 980px) calc(100vw - 68px), 760px"
+                          />
                           <h3 className="section-title section-title--sm" id={`${section.id}CapTitle`} style={{ marginTop: 12 }}>
                             {text(section.data.captionTitle)}
                           </h3>
@@ -747,12 +757,14 @@ export function EventsPage() {
                     </p>
                     {featuredImage ? (
                       <div style={{ marginTop: 12 }}>
-                        <img
+                        <StaticImage
                           src={publicPath(featuredImage, "./assets/img/events/featured.webp")}
                           alt={text(featuredTitle, "Featured event")}
+                          width={1600}
+                          height={640}
+                          className="events-featured__img"
+                          sizes="(max-width: 980px) calc(100vw - 68px), 760px"
                           style={{ width: "100%", borderRadius: 18, border: "1px solid rgba(255,255,255,.10)" }}
-                          loading="lazy"
-                          decoding="async"
                         />
                       </div>
                     ) : null}
