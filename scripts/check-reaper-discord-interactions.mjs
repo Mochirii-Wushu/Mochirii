@@ -116,6 +116,8 @@ assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
   "scheduleAssetUrl",
   "recurrenceRule",
   "eventCoverImageData",
+  "discordCoverVersion",
+  "searchParams.set(\"v\", version)",
   "recurrence_rule",
   "by_n_weekday",
   "canonicalEventId",

@@ -9,7 +9,7 @@ const topLevelManifest = {
   "codex.json": ["hero", "intro", "tenets", "etiquette", "rhythm", "recognition"],
   "events.json": ["meta", "featured", "upcoming", "recurring", "participation"],
   "gallery.json": ["meta", "categories", "albums"],
-  "guild-schedule.json": ["timezone", "monthly", "spotlight", "weekly"],
+  "guild-schedule.json": ["timezone", "discordCoverVersion", "monthly", "spotlight", "weekly"],
   "home.json": ["copy", "hero", "seal", "bulletins", "tiles", "spotlight", "gallery"],
   "join.json": ["hero", "steps", "quickStart", "checklist", "culture", "notes"],
   "leaders.json": ["hero", "panel", "council", "leaders", "responsibilities"],

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -15,6 +16,17 @@ const expectedCovers = [
   "assets/img/discord-events/guild-heros-realm.png",
   "assets/img/discord-events/united-resolve.png",
 ];
+
+const expectedHashes = {
+  "assets/img/discord-events/breaking-army.png": "81318e370e5fb5ff50e59d2e3fc8a4370db050a16d4adbbb24bc8b5555c2a0aa",
+  "assets/img/discord-events/guild-heros-realm.png": "0d66dbb2b4a52909aa718b09dd756f9b910e2359ded52a9e63628be2750bdf52",
+  "assets/img/discord-events/guild-party.png": "01eef38a5eedfe29ee0f4eea47bc708042f1664dd738b935f300c72922ff2178",
+  "assets/img/discord-events/guild-wars.png": "678ba46c68fbe9d5d182916ffac3cb3388e2336539de55e50115c958d116f617",
+  "assets/img/discord-events/monthly-gathering.png": "7ed90ff1e25e7f95e2b88cce72ceb3a2355af36ea6af47fb0a3742cda5ce9846",
+  "assets/img/discord-events/monthly-raffle.png": "21c4e9d4d00a435b726126e6d59b089ceb2a4bc733e0ee040d25c5c4c012af0e",
+  "assets/img/discord-events/showdown.png": "ca37fb4fe3505d42835458e4b846ca320fd166cd2099a7bb06de9e6ab70f8fe9",
+  "assets/img/discord-events/united-resolve.png": "76488a120fb120e3d36a116f4416b75a8825316951f3a6e7c0b2a2195b48e234",
+};
 
 function fail(message) {
   failures.push(message);
@@ -43,6 +55,10 @@ function pngDimensions(file) {
   };
 }
 
+function sha256(file) {
+  return createHash("sha256").update(readFileSync(file)).digest("hex");
+}
+
 const configured = coverValues();
 const expectedSorted = [...expectedCovers].sort();
 
@@ -56,6 +72,7 @@ for (const cover of expectedSorted) {
 
 for (const cover of configured) {
   if (!expectedSorted.includes(cover)) fail(`unexpected configured Discord event cover: ${cover}`);
+  const hashes = [];
 
   for (const base of ["", "apps/web/public/"]) {
     const file = path.join(root, base, cover);
@@ -78,6 +95,16 @@ for (const cover of configured) {
     if (dimensions.width !== 1600 || dimensions.height !== 640) {
       fail(`${label}: expected 1600x640 release cover, received ${dimensions.width}x${dimensions.height}.`);
     }
+
+    const hash = sha256(file);
+    hashes.push(hash);
+    if (hash !== expectedHashes[cover]) {
+      fail(`${label}: expected approved panel export hash ${expectedHashes[cover]}, received ${hash}.`);
+    }
+  }
+
+  if (hashes.length === 2 && hashes[0] !== hashes[1]) {
+    fail(`${cover}: root and Next public mirror hashes do not match.`);
   }
 }
 

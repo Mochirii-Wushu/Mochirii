@@ -136,13 +136,20 @@ function localToUtcIso(localDate: string, time: string, offset: number): string 
   ).toISOString();
 }
 
-function scheduleAssetUrl(value: unknown): string | null {
+function scheduleAssetUrl(value: unknown, versionValue?: unknown): string | null {
   const raw = safeString(value, 300);
   if (!raw) return null;
-  if (/^https:\/\/[^\s]+$/i.test(raw)) return raw;
+  const version = safeString(versionValue, 80);
+  const withVersion = (url: string) => {
+    if (!version) return url;
+    const parsed = new URL(url);
+    parsed.searchParams.set("v", version);
+    return parsed.toString();
+  };
+  if (/^https:\/\/[^\s]+$/i.test(raw)) return withVersion(raw);
   const normalized = raw.replace(/^\.?\//, "");
   if (!normalized.startsWith("assets/")) return null;
-  return `https://mochirii.com/${normalized}`;
+  return withVersion(`https://mochirii.com/${normalized}`);
 }
 
 function recurrenceRule(value: unknown, startIso: string): JsonRecord | null {
@@ -238,7 +245,7 @@ function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonReco
     websiteLocation,
     startIso,
     endIso,
-    coverImageUrl: scheduleAssetUrl(item.discordCoverImage),
+    coverImageUrl: scheduleAssetUrl(item.discordCoverImage, schedule.discordCoverVersion),
     canonicalEventId: snowflake(item.discordEventId),
     duplicateEventIds: asArray(item.discordDuplicateEventIds).map(snowflake).filter((id): id is string => Boolean(id)),
     recurrenceRule: recurrenceRule(item.discordRecurrenceRule, startIso),

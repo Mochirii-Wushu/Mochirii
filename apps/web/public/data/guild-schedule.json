@@ -3,6 +3,7 @@
     "label": "UTC+8",
     "offsetMinutes": 480
   },
+  "discordCoverVersion": "2026-06-10-event-panels",
   "monthly": {
     "gathering": {
       "id": "monthly-gathering",
