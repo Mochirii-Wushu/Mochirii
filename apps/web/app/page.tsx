@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import Link from "next/link";
 import homeData from "@/public/data/home.json";
 import galleryData from "@/public/data/gallery.json";
 import guildScheduleData from "@/public/data/guild-schedule.json";
@@ -437,6 +438,19 @@ export default function Home() {
                 decoding="async"
               />
               <div className="home-spotlight__scrim" aria-hidden="true" />
+              <Link
+                className="home-spotlight__surface-link"
+                href={cleanRoute(spotlight.href)}
+                aria-label={joinLabel([
+                  "Open member spotlight",
+                  spotlight.tag,
+                  spotlight.title,
+                  spotlight.summary,
+                  "Spotlight Appreciation",
+                ])}
+              >
+                <span className="sr-only">Spotlight Appreciation</span>
+              </Link>
 
               <div className="home-spotlight__plate">
                 <span id="spotlightTag" className="home-pill">
@@ -448,9 +462,9 @@ export default function Home() {
                 <p id="spotlightSummary" className="home-summary">
                   {spotlight.summary}
                 </p>
-                <a className="home-link" href={cleanRoute(spotlight.href)}>
+                <span className="home-link" aria-hidden="true">
                   Spotlight Appreciation
-                </a>
+                </span>
                 <SpotlightProfileCard slug={optionalText(spotlight, "memberProfileSlug")} compact />
               </div>
             </div>
