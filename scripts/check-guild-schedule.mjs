@@ -106,6 +106,43 @@ assertEqual("first Saturday on rollover", nextFirstSaturday(new Date("2026-06-05
 assertEqual("first Saturday after rollover", nextFirstSaturday(new Date("2026-06-07T01:00:00Z")), "2026-07-04");
 assertEqual("spotlight current month first", firstDayOfMonth(new Date("2026-06-21T12:00:00Z")), "2026-06-01");
 
+const monthlyGathering = schedule.monthly?.gathering;
+if (!monthlyGathering) fail("monthly gathering is missing.");
+else {
+  assertEqual("monthly gathering cover", monthlyGathering.discordCoverImage, "./assets/img/discord-events/monthly-gathering.png");
+}
+
+const monthlyRaffle = schedule.monthly?.raffle;
+if (!monthlyRaffle) fail("monthly raffle is missing.");
+else {
+  assertEqual("monthly raffle title", monthlyRaffle.title, "Monthly Guild Raffle");
+  assertEqual("monthly raffle time", monthlyRaffle.time, "9:30 PM");
+  assertEqual("monthly raffle start", monthlyRaffle.startTime, "21:30");
+  assertEqual("monthly raffle end", monthlyRaffle.endTime, "22:00");
+  assertEqual("monthly raffle website location", monthlyRaffle.location, "https://mochirii.com/raffles");
+  assertEqual("monthly raffle Discord location", monthlyRaffle.discordLocation, "Guild Base Pool");
+  assertEqual("monthly raffle cover", monthlyRaffle.discordCoverImage, "./assets/img/discord-events/monthly-raffle.png");
+  assertEqual("monthly raffle canonical Discord event ID", monthlyRaffle.discordEventId, "1479507429598302268");
+  assertEqual("monthly raffle duplicate Discord event ID", monthlyRaffle.discordDuplicateEventIds?.[0], "1513742240760070144");
+  assertEqual("monthly raffle recurrence frequency", monthlyRaffle.discordRecurrenceRule?.frequency, 1);
+  assertEqual("monthly raffle recurrence interval", monthlyRaffle.discordRecurrenceRule?.interval, 1);
+  assertEqual("monthly raffle first Saturday recurrence n", monthlyRaffle.discordRecurrenceRule?.by_n_weekday?.[0]?.n, 1);
+  assertEqual("monthly raffle first Saturday recurrence day", monthlyRaffle.discordRecurrenceRule?.by_n_weekday?.[0]?.day, 5);
+  assertEqual("monthly raffle UTC start", localToUtcIso("2026-07-04", monthlyRaffle.startTime), "2026-07-04T13:30:00.000Z");
+  assertEqual("monthly raffle UTC end", localToUtcIso("2026-07-04", monthlyRaffle.endTime), "2026-07-04T14:00:00.000Z");
+  [
+    "Once a month we host a guild raffle where members can win pretty in-game goodies.",
+    "- All guild event times are UTC+8.",
+    "- Raffles are 9:30 PM at guild base. (Guild Party Time)",
+    "- Sign up through Discord or the in-game event to join.",
+    "- Log in at least once on raffle day, even if you can't be there for the drawing.",
+    "- Any giftable item in the shop that day can be chosen as a prize.",
+    "- If there's something you want that isn't in the shop, just DM Twills & ask. If it's possible, we'll try to make it happen.",
+  ].forEach((snippet) => {
+    if (!String(monthlyRaffle.description || "").includes(snippet)) fail(`monthly raffle description missing: ${snippet}`);
+  });
+}
+
 const heroRealm = schedule.weekly.find((item) => item.id === "guild-heros-realm");
 if (!heroRealm) fail("guild-heros-realm weekly event is missing.");
 else {
@@ -122,6 +159,19 @@ else {
   assertEqual("United Resolve UTC start", localToUtcIso("2026-06-12", unitedResolve.startTime), "2026-06-12T15:00:00.000Z");
   assertEqual("United Resolve UTC end next day", localToUtcIso("2026-06-13", unitedResolve.endTime), "2026-06-12T16:00:00.000Z");
 }
+
+[
+  ["guild-party", "./assets/img/discord-events/guild-party.png"],
+  ["breaking-army", "./assets/img/discord-events/breaking-army.png"],
+  ["showdown", "./assets/img/discord-events/showdown.png"],
+  ["guild-wars", "./assets/img/discord-events/guild-wars.png"],
+  ["guild-heros-realm", "./assets/img/discord-events/guild-heros-realm.png"],
+  ["united-resolve", "./assets/img/discord-events/united-resolve.png"],
+].forEach(([id, expectedCover]) => {
+  const event = schedule.weekly.find((item) => item.id === id);
+  if (!event) fail(`${id} weekly event is missing for cover validation.`);
+  else assertEqual(`${id} Discord cover`, event.discordCoverImage, expectedCover);
+});
 
 const breakingArmy = schedule.weekly.find((item) => item.id === "breaking-army");
 if (!breakingArmy) fail("breaking-army weekly event is missing.");

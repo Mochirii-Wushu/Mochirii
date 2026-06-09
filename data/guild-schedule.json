@@ -12,17 +12,32 @@
       "startTime": "20:00",
       "endTime": "21:00",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/monthly-gathering.png",
       "description": "Monthly gatherings open to all members to be heard."
     },
     "raffle": {
       "id": "monthly-raffle",
-      "title": "Monthly cosmetics raffle open to all members who sign up each month.",
+      "title": "Monthly Guild Raffle",
       "rule": "next-first-saturday",
-      "time": "8:00 PM",
-      "startTime": "20:00",
-      "endTime": "21:00",
+      "time": "9:30 PM",
+      "startTime": "21:30",
+      "endTime": "22:00",
       "location": "https://mochirii.com/raffles",
-      "description": "Monthly cosmetics raffle open to all members who sign up each month."
+      "discordLocation": "Guild Base Pool",
+      "discordCoverImage": "./assets/img/discord-events/monthly-raffle.png",
+      "discordEventId": "1479507429598302268",
+      "discordDuplicateEventIds": ["1513742240760070144"],
+      "discordRecurrenceRule": {
+        "frequency": 1,
+        "interval": 1,
+        "by_n_weekday": [
+          {
+            "n": 1,
+            "day": 5
+          }
+        ]
+      },
+      "description": "Once a month we host a guild raffle where members can win pretty in-game goodies.\n\n- All guild event times are UTC+8.\n- Raffles are 9:30 PM at guild base. (Guild Party Time)\n- Sign up through Discord or the in-game event to join.\n- Log in at least once on raffle day, even if you can't be there for the drawing.\n- Any giftable item in the shop that day can be chosen as a prize.\n- If there's something you want that isn't in the shop, just DM Twills & ask. If it's possible, we'll try to make it happen."
     }
   },
   "spotlight": {
@@ -40,6 +55,7 @@
       "endTime": "22:00",
       "timeText": "9:30 PM - 10 PM",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/guild-party.png",
       "discord": true
     },
     {
@@ -51,6 +67,7 @@
       "endTime": "00:00",
       "timeText": "10 PM - 12 AM",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/breaking-army.png",
       "discord": true
     },
     {
@@ -62,6 +79,7 @@
       "endTime": "00:00",
       "timeText": "10 PM - 12 AM",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/showdown.png",
       "discord": true
     },
     {
@@ -73,6 +91,7 @@
       "endTime": "23:30",
       "timeText": "8:30 PM - 11:30 PM",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/guild-wars.png",
       "discord": true
     },
     {
@@ -88,6 +107,7 @@
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/guild-heros-realm.png",
       "discord": true,
       "showOnEventsBoard": true
     },
@@ -104,6 +124,7 @@
       "image": "./assets/img/events/upcoming-01.webp",
       "href": "https://discord.com/invite/dPafqMwWPK",
       "location": "https://mochirii.com/events",
+      "discordCoverImage": "./assets/img/discord-events/united-resolve.png",
       "discord": true,
       "showOnEventsBoard": true
     }

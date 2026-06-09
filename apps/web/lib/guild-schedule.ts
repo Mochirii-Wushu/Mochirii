@@ -20,6 +20,11 @@ export type GuildMonthlyScheduleItem = {
   startTime?: string;
   endTime?: string;
   location?: string;
+  discordLocation?: string;
+  discordCoverImage?: string;
+  discordEventId?: string;
+  discordDuplicateEventIds?: string[];
+  discordRecurrenceRule?: Record<string, unknown>;
   description?: string;
 };
 
@@ -36,6 +41,7 @@ export type GuildWeeklyScheduleItem = {
   image?: string;
   href?: string;
   location?: string;
+  discordCoverImage?: string;
   discord?: boolean;
   showOnEventsBoard?: boolean;
 };
@@ -241,6 +247,11 @@ export function discordScheduledEventsFromSchedule(schedule: GuildScheduleData, 
       endTime: item.endTime,
       timeText: item.time,
       location: item.location,
+      discordLocation: item.discordLocation,
+      discordCoverImage: item.discordCoverImage,
+      discordEventId: item.discordEventId,
+      discordDuplicateEventIds: item.discordDuplicateEventIds,
+      discordRecurrenceRule: item.discordRecurrenceRule,
       summary: item.description,
       discord: true,
       date,

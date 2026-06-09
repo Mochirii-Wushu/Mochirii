@@ -535,7 +535,7 @@ The same Reaper Interactions endpoint also supports:
 /sync-events mode:<preview|apply> confirm:<true|false>
 ```
 
-`/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key.
+`/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key. Schedule items may include `discordCoverImage`, `discordLocation`, `discordEventId`, `discordDuplicateEventIds`, and `discordRecurrenceRule`; the monthly raffle uses these fields to adopt the canonical recurring event, upload the approved cover image, set the Discord location to `Guild Base Pool`, and retire only the explicit duplicate one-off raffle ID listed in the schedule.
 
 ## Discord Vote Reminder
 
