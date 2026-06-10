@@ -16,8 +16,9 @@ import Link from "next/link";
 import { BodyPageMarker } from "./BodyPageMarker";
 import { EventsBoard } from "./EventsBoard";
 import { GalleryBrowser } from "./GalleryBrowser";
-import { LeaderProfileButton, SpotlightProfileCard } from "./ProfileCardLinks";
+import { LeaderProfileButton } from "./ProfileCardLinks";
 import { ProfileDisplay } from "./ProfileDisplay";
+import { SpotlightWinnerTitle } from "./SpotlightWinnerTitle";
 import { SpotifyBrowser } from "./SpotifyBrowser";
 import {
   monthlyScheduleDate,
@@ -1042,7 +1043,6 @@ export function SpotlightPage() {
   const hero = record(data.hero);
   const spotlight = record(data.spotlight);
   const spotlightDate = spotlightScheduleDate(guildScheduleData, spotlight.date);
-  const spotlightSlug = text(spotlight.memberProfileSlug || record(guildScheduleData.spotlight).memberProfileSlug);
 
   return (
     <>
@@ -1054,7 +1054,7 @@ export function SpotlightPage() {
         imageAlt={text(hero.alt, "Member Spotlight banner artwork")}
         atmosphere={text(hero.atmosphereImage)}
         kicker={text(spotlight.kicker, "Member Spotlight")}
-        title={text(spotlight.title, "Spotlight")}
+        title={<SpotlightWinnerTitle fallbackTitle={text(spotlight.title, "Spotlight")} template="spotlight" />}
         meta={<MetaRow items={[spotlightDate ? formatDateUTC(spotlightDate, { year: "numeric", month: "long", day: "2-digit" }) : "", spotlight.tag]} />}
         intro={
           <p id="spotlightIntro" className="lede">
@@ -1081,7 +1081,6 @@ export function SpotlightPage() {
                     <li key={highlight}>{highlight}</li>
                   ))}
                 </ul>
-                <SpotlightProfileCard slug={spotlightSlug} />
               </div>
             </aside>
             <div className="col-divider" aria-hidden="true" />

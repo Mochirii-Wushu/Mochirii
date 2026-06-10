@@ -187,7 +187,7 @@ export function PageHero({
   imageAlt: string;
   atmosphere?: string;
   kicker: string;
-  title: string;
+  title: ReactNode;
   intro?: ReactNode;
   meta?: ReactNode;
   badges?: ReactNode;

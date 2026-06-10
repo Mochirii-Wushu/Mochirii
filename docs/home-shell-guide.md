@@ -38,7 +38,7 @@ Renderer notes:
 
 - `home.js` loads `data/home.json` through `MochiriiUtils.fetchJson()`.
 - The live Next Home page derives monthly gathering and raffle dates from `data/guild-schedule.json` when a bulletin has `scheduleId`.
-- The live Next Home page may render the configured spotlight member's approved avatar/profile link through `list-visible-profile-cards`; if unavailable, it falls back to the existing static spotlight image.
+- The live Next Home page may replace the configured fallback spotlight title with the finalized monthly Discord poll winner name from `get-current-spotlight-winner`; the poll winner path is name-only and must not expose Discord handles, profile links, avatars, vote counts, or candidate lists.
 - Home descriptor strings render as paragraphs.
 - Home badges render as plain spans.
 - Bulletin dates render through `MochiriiUtils.formatDateUTC()`.

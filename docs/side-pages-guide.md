@@ -211,7 +211,7 @@ How to add or update Spotlight safely:
 - Keep body text short and specific to the featured person or moment.
 - Use `highlights[]` for concise appreciation bullets.
 - Keep `spotlight.date` as a date-only value when possible.
-- The live Next Spotlight page derives the visible date from the first day of the current UTC+8 month and may show the configured member's approved avatar/profile link through `list-visible-profile-cards`.
+- The live Next Spotlight page derives the visible date from the first day of the current UTC+8 month. It may replace the configured fallback title with the finalized monthly Discord poll winner name from `get-current-spotlight-winner`; that public poll path must display the winner name only and must not expose Discord handles, profile links, avatars, vote counts, or candidate lists.
 - Keep hero alt text meaningful.
 - Do not add profile/contact fields unless `spotlight.js` is intentionally updated and validated.
 

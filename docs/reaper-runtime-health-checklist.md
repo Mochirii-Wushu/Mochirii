@@ -5,6 +5,7 @@ Use this checklist for read-only operations reviews. It does not authorize token
 ## Runtime Split
 
 - Supabase Edge Function `reaper-discord-interactions` handles slash commands, message components, gallery ingest, rank sync, event sync, and vote reminder interactions.
+- Supabase scheduled Edge Functions handle manual vote reminders and monthly native Discord spotlight polls; these scheduled functions use cron secrets and server-side Discord bot access only.
 - Reaper Gateway worker handles only `guildMemberAdd` welcome DMs.
 - Vercel/Next does not run Discord bot tokens, service-role keys, webhooks, or Gateway connections.
 
@@ -33,6 +34,14 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 - `/sync-events mode:preview confirm:false` is the only safe first event-sync command.
 - `/sync-events mode:apply confirm:true` remains an owner-approved provider mutation.
 - `/sync-ranks mode:apply confirm:true`, token rotation, and live reminder sends also remain owner-approved provider mutations.
+
+## Monthly Spotlight Polls
+
+- `send-member-spotlight-poll` creates one native Discord poll per month after validating `SPOTLIGHT_POLL_CRON_SECRET`.
+- `DISCORD_SPOTLIGHT_POLL_CHANNEL_ID` is the only configured poll destination.
+- Candidate snapshots include up to 10 active, recently verified, Discord-linked website members because Discord native polls support up to 10 answers.
+- `publish-member-spotlight-winner` waits for finalized Discord poll results before publishing a winner.
+- Public website reads use `get-current-spotlight-winner` and expose only the winner name and month.
 
 ## Scheduled Events
 

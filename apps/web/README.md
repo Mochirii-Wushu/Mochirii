@@ -178,7 +178,7 @@ vercel build --prod --cwd apps/web
 ## Migrated in Phase 3
 
 - Deferred member workflow routes migrated into App Router pages: `/auth`, `/account`, `/gallery-submit`, and `/leader-dashboard`.
-- Browser-safe Supabase helpers added under `lib/supabase/` for Auth session state, Discord OAuth, profile reads/updates, member upload submission, approved feed reads, moderation Edge Function invocations, and the moderator-controlled Instagram publishing queue.
+- Browser-safe Supabase helpers added under `lib/supabase/` for Auth session state, Discord OAuth, profile reads/updates, member upload submission, approved feed reads, moderation Edge Function invocations, the moderator-controlled Instagram publishing queue, and the public-safe monthly spotlight winner name.
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
 - Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
@@ -187,7 +187,11 @@ vercel build --prod --cwd apps/web
 What stays in Supabase:
 
 - Identity, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation authority, signed preview URLs, and audit records.
-- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, and `publish-instagram-gallery-submission`.
+- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, `publish-instagram-gallery-submission`, `send-member-spotlight-poll`, `publish-member-spotlight-winner`, and `get-current-spotlight-winner`.
+
+## Monthly Spotlight Polls
+
+Reaper posts one native Discord poll each month after `send-member-spotlight-poll` runs from Supabase Cron. Because Discord native polls allow up to 10 answers, the function snapshots up to 10 random active, recently verified, Discord-linked website members for that cycle. `publish-member-spotlight-winner` waits for finalized Discord poll results after 7 days and publishes the winner into Supabase. The public site calls `get-current-spotlight-winner` and may show only the winner name on Home and Spotlight; Discord handles, profile links, avatars, candidate lists, and vote counts stay private.
 
 ## Instagram Gallery Publishing
 

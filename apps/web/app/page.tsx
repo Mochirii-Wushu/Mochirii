@@ -6,7 +6,7 @@ import guildScheduleData from "@/public/data/guild-schedule.json";
 import { HomeGallerySpotlight } from "@/components/HomeGallerySpotlight";
 import { type GallerySpotlightItem } from "@/components/HomeGalleryLightbox";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
-import { SpotlightProfileCard } from "@/components/public-pages/ProfileCardLinks";
+import { SpotlightWinnerTitle } from "@/components/public-pages/SpotlightWinnerTitle";
 import { StaticImage } from "@/components/public-pages/common";
 import { monthlyScheduleDate } from "@/lib/guild-schedule";
 
@@ -464,7 +464,7 @@ export default function Home() {
                   {spotlight.tag}
                 </span>
                 <h3 id="spotlightTitle" className="home-title">
-                  {spotlight.title}
+                  <SpotlightWinnerTitle fallbackTitle={spotlight.title} template="home" />
                 </h3>
                 <p id="spotlightSummary" className="home-summary">
                   {spotlight.summary}
@@ -472,7 +472,6 @@ export default function Home() {
                 <span className="home-link" aria-hidden="true">
                   Spotlight Appreciation
                 </span>
-                <SpotlightProfileCard slug={optionalText(spotlight, "memberProfileSlug")} compact />
               </div>
             </div>
           </section>

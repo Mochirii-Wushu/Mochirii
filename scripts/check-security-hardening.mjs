@@ -14,6 +14,10 @@ const files = {
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   voteReminder: "supabase/functions/send-vote-reminder/index.ts",
+  spotlightPollShared: "supabase/functions/_shared/spotlight-polls.ts",
+  spotlightPollSender: "supabase/functions/send-member-spotlight-poll/index.ts",
+  spotlightPollPublisher: "supabase/functions/publish-member-spotlight-winner/index.ts",
+  spotlightPollPublicWinner: "supabase/functions/get-current-spotlight-winner/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
   deployment: "docs/deployment.md",
@@ -58,6 +62,10 @@ const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
 const discordIngest = read(files.discordIngest);
 const voteReminder = read(files.voteReminder);
+const spotlightPollShared = read(files.spotlightPollShared);
+const spotlightPollSender = read(files.spotlightPollSender);
+const spotlightPollPublisher = read(files.spotlightPollPublisher);
+const spotlightPollPublicWinner = read(files.spotlightPollPublicWinner);
 const report = read(files.report);
 const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
@@ -124,6 +132,9 @@ const expectedUnauthenticatedFunctions = [
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
   "send-vote-reminder",
+  "send-member-spotlight-poll",
+  "publish-member-spotlight-winner",
+  "get-current-spotlight-winner",
 ];
 
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
@@ -168,6 +179,40 @@ assertMatches(
   "bearerOrHeaderSecret(req) !== cronSecret",
   "DISCORD_VOTE_CHANNEL_ID",
 ].forEach((snippet) => assertIncludes("send-vote-reminder", voteReminder, snippet));
+
+[
+  "SPOTLIGHT_POLL_CRON_SECRET",
+  "DISCORD_SPOTLIGHT_POLL_CHANNEL_ID",
+].forEach((snippet) => assertIncludes("spotlight-polls shared helper", spotlightPollShared, snippet));
+
+[
+  "bearerOrHeaderSecret(req) !== config.secret",
+  "buildDiscordPollPayload",
+  "duplicate: true",
+].forEach((snippet) => assertIncludes("send-member-spotlight-poll", spotlightPollSender, snippet));
+
+[
+  "bearerOrHeaderSecret(req) !== config.secret",
+  "results.finalized",
+  "winner_display_name",
+].forEach((snippet) => assertIncludes("publish-member-spotlight-winner", spotlightPollPublisher, snippet));
+
+[
+  "winner_display_name",
+  "monthly-discord-poll",
+].forEach((snippet) => assertIncludes("get-current-spotlight-winner", spotlightPollPublicWinner, snippet));
+
+[
+  "discord_user_id",
+  "discord_username",
+  "vote_count",
+  "answer_label",
+  "candidate_order",
+].forEach((snippet) => {
+  if (spotlightPollPublicWinner.includes(snippet)) {
+    failures.push(`get-current-spotlight-winner: public endpoint must not return or select ${snippet}.`);
+  }
+});
 
 [
   ".eq(\"status\", \"approved\")",
