@@ -11,6 +11,12 @@ Use GitHub private vulnerability reporting if available for this repository. If 
 - Reproduction steps
 - Impact and whether any secret, account, or member data may be exposed
 
+The production site also publishes an RFC 9116 `security.txt` contact file at:
+
+```text
+https://mochirii.com/.well-known/security.txt
+```
+
 ## Scope
 
 Security-sensitive areas include:
@@ -27,6 +33,7 @@ Do not include real secrets, tokens, private member data, or exploit payloads be
 
 - `mochirii.com` is served from Vercel/Next; Cloudflare is DNS-only for the Vercel web records.
 - App-level security headers are defined in `apps/web/next.config.ts`.
+- `/.well-known/security.txt` is mirrored to the Vercel public tree and retained static rollback surface.
 - CSP is enforced with `Content-Security-Policy`. Future third-party scripts, embeds, media hosts, or API origins need a scoped browser/CSP pass before launch.
 - Supabase service-role keys, Discord bot tokens, Instagram credentials, and OAuth client secrets must stay in Supabase secrets or other server-only provider storage, never browser code or docs.
 - Run `npm run check:security-hardening` before security-sensitive changes.

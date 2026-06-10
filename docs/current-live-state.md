@@ -27,6 +27,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Security headers include narrowed `Access-Control-Allow-Origin`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and `X-Frame-Options: DENY`.
 - CSP was promoted after a clean browser pass recorded in `reports/csp-enforcement-verification-2026-06-08.md`.
 - Cloudflare remains DNS-only for Vercel web records; Vercel is the active edge/security layer.
+- The public RFC 9116 security contact file is served from `https://mochirii.com/.well-known/security.txt` after the security scan remediation release.
 
 ## Supabase
 
@@ -60,6 +61,7 @@ This is the short source-of-truth index for the current Mochirii production post
 ## Current Improvement Queue
 
 - Continue CSP tightening only after browser passes; `unsafe-inline` remains a future dedicated pass.
+- Keep Cloudflare Security Insights findings reconciled against current DNS/Vercel evidence before changing healthy DNS records.
 - Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
 - Production-safe member workflow QA coverage is guarded by `npm run check:member-workflow-qa` and documented in `docs/member-workflow-production-qa-runbook.md`.
 - Keep Discord live provider readback optional and local-token gated; never require bot tokens in CI.
