@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { requireAuth, onAuthStateChange } from "@/lib/supabase/auth";
 import {
+  manageMochiSocialAlphaAdmin,
+  type MochiSocialAlphaAdmin,
+  type MochiSocialAlphaTester,
+} from "@/lib/mochi-social/alpha";
+import {
   checkLeaderGalleryModerationAccess,
   listGalleryReviewQueue,
   listInstagramPublishQueue,
@@ -452,6 +457,99 @@ function ProfileMediaCard({
   );
 }
 
+function AlphaTesterRow({
+  tester,
+  busy,
+  onRevoke,
+}: {
+  tester: MochiSocialAlphaTester;
+  busy: boolean;
+  onRevoke: (tester: MochiSocialAlphaTester) => void;
+}) {
+  const status = text(tester.status, "unknown").toLowerCase();
+  return (
+    <article className={`review-item review-item--${status}`} data-mochi-alpha-tester={tester.user_id || ""}>
+      <div className="review-details">
+        <div className="review-details__head">
+          <div>
+            <h3>{tester.user_id || "Unknown tester"}</h3>
+            <p className="muted">{tester.notes || "No leader note recorded."}</p>
+          </div>
+          <span className={`submission-status submission-status--${status}`}>{status}</span>
+        </div>
+        <dl className="review-meta">
+          {[
+            ["Updated", formatDate(tester.updated_at, "Not set")],
+            ["Created", formatDate(tester.created_at, "Not set")],
+            ["Invited by", tester.invited_by || "Not set"],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+        {status === "active" ? (
+          <div className="auth-actions">
+            <button className="hero-cta" type="button" onClick={() => onRevoke(tester)} disabled={busy}>Revoke alpha access</button>
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
+  const audit = data?.audit || {};
+  const summary = audit.summary || {};
+  const recentLedger = Array.isArray(audit.recentLedger) ? audit.recentLedger : [];
+  const recentChain = Array.isArray(audit.recentChain) ? audit.recentChain : [];
+  const recentFeedback = Array.isArray(audit.recentFeedback) ? audit.recentFeedback : [];
+  const cards = [
+    ["Active testers", summary.activeTesters],
+    ["Revoked testers", summary.revokedTesters],
+    ["Ledger events", summary.ledgerEvents],
+    ["Active listings", summary.activeListings],
+    ["Offered trades", summary.offeredTrades],
+    ["Pending chain ops", summary.pendingChainOps],
+    ["Feedback", summary.feedbackCount],
+    ["Chat messages", summary.chatMessages],
+  ];
+
+  return (
+    <>
+      <div className="moderation-summary" aria-label="Mochi Social alpha audit summary">
+        {cards.map(([label, value]) => (
+          <div className="moderation-summary__card" key={label}>
+            <span>{label}</span>
+            <strong>{value == null ? "-" : Number(value || 0)}</strong>
+          </div>
+        ))}
+      </div>
+      <div className="review-list" aria-label="Recent Mochi Social alpha audit rows">
+        <details className="review-storage" open>
+          <summary>Recent ledger events</summary>
+          {recentLedger.length ? recentLedger.map((event) => (
+            <code key={`${event.id}-${event.request_id}`}>{event.event_type || "event"} - {event.actor_id || "unknown"} - {formatDate(event.created_at, "Not set")}</code>
+          )) : <p className="muted">No alpha ledger events yet.</p>}
+        </details>
+        <details className="review-storage">
+          <summary>Recent Enjin Canary operations</summary>
+          {recentChain.length ? recentChain.map((operation) => (
+            <code key={operation.request_id || operation.created_at || "chain"}>{operation.operation_type || "chain"} - {operation.status || "pending"} - {operation.network || "CANARY"}</code>
+          )) : <p className="muted">No Canary chain operations yet.</p>}
+        </details>
+        <details className="review-storage">
+          <summary>Recent alpha feedback</summary>
+          {recentFeedback.length ? recentFeedback.map((item) => (
+            <code key={item.id || item.created_at || "feedback"}>{item.category || "alpha"} - {String(item.message || "").slice(0, 160)}</code>
+          )) : <p className="muted">No alpha feedback yet.</p>}
+        </details>
+      </div>
+    </>
+  );
+}
+
 export function LeaderDashboard() {
   const [busy, setBusy] = useState(true);
   const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
@@ -476,6 +574,12 @@ export function LeaderDashboard() {
   const [profileMediaStatus, setProfileMediaStatus] = useState("Profile image queue has not loaded yet.");
   const [profileMediaError, setProfileMediaError] = useState("");
   const [profileMediaReasons, setProfileMediaReasons] = useState<Record<string, string>>({});
+  const [mochiAlpha, setMochiAlpha] = useState<MochiSocialAlphaAdmin | null>(null);
+  const [mochiAlphaBusy, setMochiAlphaBusy] = useState(false);
+  const [mochiAlphaStatus, setMochiAlphaStatus] = useState("Mochi Social alpha controls have not loaded yet.");
+  const [mochiAlphaError, setMochiAlphaError] = useState("");
+  const [mochiAlphaUserId, setMochiAlphaUserId] = useState("");
+  const [mochiAlphaNotes, setMochiAlphaNotes] = useState("");
 
   const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
     const nextStatus = normalizeStatus(status);
@@ -581,6 +685,26 @@ export function LeaderDashboard() {
     setProfileMediaBusy(false);
   }, [profileMediaActiveStatus]);
 
+  const loadMochiAlpha = useCallback(async ({ successMessage = "" }: { successMessage?: string } = {}) => {
+    setMochiAlphaBusy(true);
+    setMochiAlphaError("");
+    setMochiAlphaStatus("Loading Mochi Social alpha access and audit state.");
+
+    const result = await manageMochiSocialAlphaAdmin({ action: "list" });
+    if (!result.ok) {
+      setMochiAlpha(null);
+      setMochiAlphaError(result.message || "Mochi Social alpha controls could not be loaded.");
+      setMochiAlphaStatus("");
+      setMochiAlphaBusy(false);
+      return;
+    }
+
+    const data = result.data || { testers: [] };
+    setMochiAlpha(data);
+    setMochiAlphaStatus(successMessage || `${data.testers?.length || 0} Mochi Social alpha tester${data.testers?.length === 1 ? "" : "s"} shown.`);
+    setMochiAlphaBusy(false);
+  }, []);
+
   const checkAccess = useCallback(async () => {
     setBusy(true);
     setReviewError("");
@@ -604,7 +728,8 @@ export function LeaderDashboard() {
     await loadQueue({ status: activeStatus });
     await loadInstagramQueue({ status: instagramActiveStatus });
     await loadProfileMediaQueue({ status: profileMediaActiveStatus });
-  }, [activeStatus, instagramActiveStatus, loadInstagramQueue, loadProfileMediaQueue, loadQueue, profileMediaActiveStatus]);
+    await loadMochiAlpha();
+  }, [activeStatus, instagramActiveStatus, loadInstagramQueue, loadMochiAlpha, loadProfileMediaQueue, loadQueue, profileMediaActiveStatus]);
 
   useEffect(() => {
     void Promise.resolve().then(() => checkAccess());
@@ -757,6 +882,65 @@ export function LeaderDashboard() {
     });
   }
 
+  async function grantMochiAlphaAccess() {
+    const userId = mochiAlphaUserId.trim();
+    if (!userId) {
+      setMochiAlphaError("Enter a Supabase user id before granting alpha access.");
+      return;
+    }
+
+    setMochiAlphaBusy(true);
+    setMochiAlphaError("");
+    setMochiAlphaStatus("Granting Mochi Social alpha access.");
+    const result = await manageMochiSocialAlphaAdmin({
+      action: "grant",
+      user_id: userId,
+      notes: mochiAlphaNotes.trim(),
+    });
+
+    if (!result.ok) {
+      setMochiAlphaError(result.message || "Mochi Social alpha access could not be granted.");
+      setMochiAlphaStatus("");
+      setMochiAlphaBusy(false);
+      return;
+    }
+
+    setMochiAlphaUserId("");
+    setMochiAlphaNotes("");
+    setMochiAlpha(result.data || { testers: [] });
+    setMochiAlphaStatus(result.message || "Mochi Social alpha access granted.");
+    setMochiAlphaBusy(false);
+  }
+
+  async function revokeMochiAlphaAccess(tester: MochiSocialAlphaTester) {
+    const userId = text(tester.user_id);
+    if (!userId) return;
+    const confirmed =
+      typeof window !== "undefined" &&
+      window.confirm("Revoke Mochi Social alpha access for this tester?");
+    if (!confirmed) return;
+
+    setMochiAlphaBusy(true);
+    setMochiAlphaError("");
+    setMochiAlphaStatus("Revoking Mochi Social alpha access.");
+    const result = await manageMochiSocialAlphaAdmin({
+      action: "revoke",
+      user_id: userId,
+      notes: mochiAlphaNotes.trim() || "Revoked from leader dashboard.",
+    });
+
+    if (!result.ok) {
+      setMochiAlphaError(result.message || "Mochi Social alpha access could not be revoked.");
+      setMochiAlphaStatus("");
+      setMochiAlphaBusy(false);
+      return;
+    }
+
+    setMochiAlpha(result.data || { testers: [] });
+    setMochiAlphaStatus(result.message || "Mochi Social alpha access revoked.");
+    setMochiAlphaBusy(false);
+  }
+
   if (panel === "signed-out") {
     return (
       <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel">
@@ -790,6 +974,7 @@ export function LeaderDashboard() {
   const instagramConfig = instagramStatusConfig(instagramActiveStatus);
   const profileMediaItems = Array.isArray(profileMediaQueue?.media) ? profileMediaQueue.media : [];
   const profileMediaConfig = profileMediaStatusConfig(profileMediaActiveStatus);
+  const mochiAlphaTesters = Array.isArray(mochiAlpha?.testers) ? mochiAlpha.testers : [];
 
   return (
     <>
@@ -946,6 +1131,63 @@ export function LeaderDashboard() {
           })
         ) : (
           <p className="muted">{profileMediaConfig.empty}</p>
+        )}
+      </div>
+    </section>
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="mochiSocialAlphaPanel">
+      <div className="auth-panel__head">
+        <div>
+          <p className="kicker">Mochi Social Alpha</p>
+          <h2 className="section-title">Access And Audit</h2>
+        </div>
+        <button className="hero-cta" type="button" onClick={() => loadMochiAlpha()} disabled={mochiAlphaBusy}>Refresh</button>
+      </div>
+
+      <div className="review-details">
+        <label className="form-field">
+          <span>Supabase user id</span>
+          <input
+            value={mochiAlphaUserId}
+            onChange={(event) => setMochiAlphaUserId(event.target.value)}
+            placeholder="00000000-0000-0000-0000-000000000000"
+            disabled={mochiAlphaBusy}
+          />
+        </label>
+        <label className="form-field">
+          <span>Leader note</span>
+          <textarea
+            maxLength={500}
+            rows={3}
+            value={mochiAlphaNotes}
+            onChange={(event) => setMochiAlphaNotes(event.target.value.slice(0, 500))}
+            placeholder="Closed alpha invite reason, cohort, or revoke note."
+            disabled={mochiAlphaBusy}
+          />
+        </label>
+        <div className="auth-actions">
+          <button className="hero-cta hero-cta--primary" type="button" onClick={grantMochiAlphaAccess} disabled={mochiAlphaBusy || !mochiAlphaUserId.trim()}>
+            Grant alpha access
+          </button>
+        </div>
+      </div>
+
+      <AlphaAuditPanel data={mochiAlpha} />
+
+      <p className="auth-status muted" role="status" aria-live="polite">{mochiAlphaStatus}</p>
+      <p className="auth-error" role="alert" hidden={!mochiAlphaError}>{mochiAlphaError}</p>
+
+      <div className="review-list" aria-live="polite">
+        {mochiAlphaTesters.length ? (
+          mochiAlphaTesters.map((tester) => (
+            <AlphaTesterRow
+              tester={tester}
+              busy={mochiAlphaBusy}
+              key={tester.user_id || `${tester.status}-${tester.updated_at}`}
+              onRevoke={revokeMochiAlphaAccess}
+            />
+          ))
+        ) : (
+          <p className="muted">No Mochi Social alpha testers yet.</p>
         )}
       </div>
     </section>

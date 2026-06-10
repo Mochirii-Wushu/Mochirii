@@ -21,9 +21,16 @@ Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Moch
 ## Supabase Functions
 
 - `mochi-social-alpha-session`: signed-in user access, allowlist, terms acknowledgement, profile prep.
-- `mochi-social-alpha-action`: game-server action ledger using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`.
-- `mochi-social-alpha-admin`: leader/moderator grant, revoke, and list controls for alpha testers.
+- `mochi-social-alpha-action`: game-server action ledger using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`. The game server resolves the short-lived Supabase access token to a user id before forwarding. The function verifies allowlist and terms, then records pet, market, trade, chat, chain, and append-only ledger state.
+- `mochi-social-alpha-admin`: leader/moderator grant, revoke, list, and audit controls for alpha testers.
 - `submit-mochi-social-feedback`: authenticated tester feedback.
+
+## Leader Workflow
+
+- Open `/leader-dashboard` with a Discord Moderator account.
+- Use the `Mochi Social Alpha` panel to grant or revoke closed-alpha access by Supabase user id.
+- Use the same panel to inspect active testers, revoked testers, ledger event count, active fixed-price listings, offered direct trades, pending Enjin Canary operations, feedback count, chat count, and recent ledger/chain/feedback rows.
+- Keep all rows no-real-value and Canary-only until a later production/mainnet review plan is approved.
 
 ## Operator Setup
 

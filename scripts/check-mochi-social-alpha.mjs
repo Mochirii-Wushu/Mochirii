@@ -10,8 +10,24 @@ const checks = [
     includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback']
   },
   {
+    file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
+    includes: ['mochiSocialAlphaPanel', 'Grant alpha access', 'AlphaAuditPanel', 'manageMochiSocialAlphaAdmin']
+  },
+  {
+    file: 'apps/web/lib/mochi-social/alpha.ts',
+    includes: ['MochiSocialAlphaAdmin', 'manageMochiSocialAlphaAdmin', 'mochi-social-alpha-admin']
+  },
+  {
     file: 'supabase/config.toml',
     includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
+  },
+  {
+    file: 'supabase/functions/mochi-social-alpha-action/index.ts',
+    includes: ['alphaAccess(adminClient, playerId)', 'mochi_social_market_listings', 'mochi_social_trades', 'mochi_social_pets']
+  },
+  {
+    file: 'supabase/functions/mochi-social-alpha-admin/index.ts',
+    includes: ['loadAlphaAudit', 'recentLedger', 'pendingChainOps', 'mochi_social_feedback']
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',
