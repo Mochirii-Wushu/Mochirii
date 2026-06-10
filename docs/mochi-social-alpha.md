@@ -2,6 +2,8 @@
 
 Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Mochirii repo owns the website doorway, Supabase schema, Edge Functions, alpha access controls, terms acknowledgement, and tester feedback.
 
+Codex external operations for this website surface are defined in [`docs/mochi-social-alpha-codex-ops.md`](mochi-social-alpha-codex-ops.md). Use it for source hierarchy, tool choice, preview env ownership, Supabase authority, Discord boundaries, preview verification, and secret-entry rules.
+
 ## Alpha Posture
 
 - Closed preview only.
@@ -84,6 +86,8 @@ Required secrets/config stay out of Git:
 - `NEXT_PUBLIC_MOCHI_SOCIAL_URL` in Vercel Preview/Production when the preview is ready.
 - `MOCHI_SOCIAL_GAME_SERVER_TOKEN` in Supabase Edge Function secrets and matching Fly game secrets.
 - `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` when the acknowledgement copy changes.
+
+Use Chrome for logged-in Vercel, Supabase, GitHub, Discord, Fly, and Enjin dashboards. Use CLI for reproducible checks. Use Computer Use only when CLI and Chrome cannot reach a required UI.
 
 Run local verification:
 

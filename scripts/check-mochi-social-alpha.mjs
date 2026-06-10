@@ -49,13 +49,30 @@ const checks = [
   {
     file: 'docs/mochi-social-alpha.md',
     includes: [
+      'mochi-social-alpha-codex-ops.md',
       'Tester Guide',
       'Preview Acceptance',
       'Rollback',
       'npm run alpha:load-smoke',
       'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
       'MOCHI_SOCIAL_AUTH',
-      'Do not roll back by switching to production'
+      'Do not roll back by switching to production',
+      'Computer Use'
+    ]
+  },
+  {
+    file: 'docs/mochi-social-alpha-codex-ops.md',
+    includes: [
+      'Source Hierarchy',
+      'Source Basis',
+      'Tool Choice',
+      'Website Preview Environment Matrix',
+      'Supabase Authority Matrix',
+      'Discord Boundary',
+      'Preview Verification',
+      'Secret Entry Protocol',
+      'MOCHI_SOCIAL_GAME_SERVER_TOKEN',
+      'short-lived access token'
     ]
   }
 ];
