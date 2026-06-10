@@ -60,6 +60,7 @@ Before inviting testers:
 - The game repo `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
 - `npm run check:mochi-social-game-contract` passes with `MOCHI_SOCIAL_GAME_CONTRACT_URL` set to the intended game URL and, when available, `MOCHI_SOCIAL_SITE_ORIGIN` set to the Vercel preview origin.
+- `npm run smoke:mochi-social-alpha-edge` passes with `MOCHI_SOCIAL_ALPHA_EDGE_URL`, `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY`, and optionally the local `MOCHI_SOCIAL_GAME_SERVER_TOKEN` set for the Supabase preview branch.
 - Non-testers are blocked from `/games/mochi-social`.
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only the short-lived Supabase access token through `MOCHI_SOCIAL_AUTH`.
@@ -95,6 +96,7 @@ Run local verification:
 ```powershell
 npm run check:mochi-social-alpha
 npm run check:mochi-social-game-contract
+npm run smoke:mochi-social-alpha-edge
 npm run check:supabase-edge-types
 npm run check
 cd apps/web

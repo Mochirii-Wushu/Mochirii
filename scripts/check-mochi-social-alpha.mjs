@@ -14,6 +14,10 @@ const checks = [
     includes: ['MOCHI_SOCIAL_GAME_CONTRACT_URL', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', '/integration/game-manifest.json', '/integration/alpha/status', 'MOCHI_SOCIAL_AUTH', 'configured-preview-stub']
   },
   {
+    file: 'scripts/smoke-mochi-social-alpha-edge.mjs',
+    includes: ['MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY', 'mochi-social-alpha-session', 'mochi-social-alpha-action', 'invalid_game_server_token', 'invalid_alpha_action']
+  },
+  {
     file: 'apps/web/app/games/mochi-social/page.tsx',
     includes: ['MochiSocialAlphaClient', 'robots', 'index: false']
   },
