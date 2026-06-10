@@ -55,6 +55,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Vercel Web Analytics and Speed Insights are wired from the root layout with `@vercel/analytics/next` and `@vercel/speed-insights/next`.
 - Dashboard data can lag after deployment and needs real production visits.
 - Use `apps/web/README.md` for the browser script inspection snippet.
+- Metadata, noindex, sitemap, observability wiring, and production smoke coverage are guarded by `npm run check:observability-metadata-smoke`.
 
 ## Current Improvement Queue
 
@@ -62,4 +63,5 @@ This is the short source-of-truth index for the current Mochirii production post
 - Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
 - Production-safe member workflow QA coverage is guarded by `npm run check:member-workflow-qa` and documented in `docs/member-workflow-production-qa-runbook.md`.
 - Keep Discord live provider readback optional and local-token gated; never require bot tokens in CI.
+- Keep Vercel observability dashboard data as manual/read-only evidence; enough real production visits are required before dashboard graphs settle.
 - Keep dependency updates targeted; defer preview or major-version tooling changes to compatibility branches.
