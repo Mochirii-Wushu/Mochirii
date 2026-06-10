@@ -25,6 +25,14 @@ Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Moch
 - `mochi-social-alpha-admin`: leader/moderator grant, revoke, list, and audit controls for alpha testers.
 - `submit-mochi-social-feedback`: authenticated tester feedback.
 
+## Chain Finality
+
+- `chain.withdraw_request` and `chain.deposit_request` create pending Canary operation rows.
+- `chain.operation_update` requires a matching operation request id before recording Enjin transaction UUID, optional listing ID, state, and finality evidence.
+- Inventory movement happens only on a transition to `finalized`.
+- Cold-to-hot credits insert hot inventory only after finality; failed, abandoned, timeout, pending, and broadcast states never credit hot inventory.
+- Hot-to-cold updates require a matching request and either mark the referenced inventory cold or insert a cold proof row for the alpha certificate.
+
 ## Leader Workflow
 
 - Open `/leader-dashboard` with a Discord Moderator account.

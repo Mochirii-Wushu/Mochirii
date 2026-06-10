@@ -23,7 +23,16 @@ const checks = [
   },
   {
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
-    includes: ['alphaAccess(adminClient, playerId)', 'mochi_social_market_listings', 'mochi_social_trades', 'mochi_social_pets']
+    includes: [
+      'alphaAccess(adminClient, playerId)',
+      'mochi_social_market_listings',
+      'mochi_social_trades',
+      'mochi_social_pets',
+      'chain.operation_update',
+      'chain_request_missing',
+      'nextStatus === "finalized"',
+      'location: "hot"'
+    ]
   },
   {
     file: 'supabase/functions/mochi-social-alpha-admin/index.ts',

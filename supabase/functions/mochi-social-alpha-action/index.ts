@@ -1,4 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   CORS_HEADERS,
   asRecord,
@@ -13,6 +14,7 @@ import {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
 const VALID_SPECIES = new Set(["momo", "yuzu", "sora"]);
+const VALID_CHAIN_STATUSES = new Set(["pending", "broadcast", "finalized", "failed", "abandoned", "timeout"]);
 
 const VALID_ACTIONS = new Set([
   "chat.send",
@@ -23,6 +25,7 @@ const VALID_ACTIONS = new Set([
   "trade.direct_offer",
   "chain.withdraw_request",
   "chain.deposit_request",
+  "chain.operation_update",
 ]);
 
 Deno.serve(async (req: Request) => {
@@ -104,20 +107,12 @@ Deno.serve(async (req: Request) => {
     if (!result.ok) return result.response;
   }
 
-  if (type.startsWith("chain.")) {
-    const { error } = await adminClient.from("mochi_social_chain_operations").upsert(
-      {
-        request_id: requestId,
-        user_id: playerId || null,
-        operation_type: type,
-        network: "CANARY",
-        status: "pending",
-        payload,
-      },
-      { onConflict: "request_id" },
-    );
-
-    if (error) return jsonResponse({ ok: false, error: "chain_operation_failed", message: "Chain operation could not be recorded." }, 500);
+  if (type === "chain.operation_update") {
+    const result = await recordChainOperationUpdate(adminClient, playerId, payload);
+    if (!result.ok) return result.response;
+  } else if (type.startsWith("chain.")) {
+    const result = await recordChainOperationRequest(adminClient, requestId, playerId, type, payload);
+    if (!result.ok) return result.response;
   }
 
   const ledgerError = await recordLedgerEvent(adminClient, {
@@ -149,7 +144,7 @@ function growthStageFromBond(bond: number) {
   return "seed";
 }
 
-async function recordPetAction(adminClient: ReturnType<typeof createAdminClient>, playerId: string, payload: Record<string, unknown>) {
+async function recordPetAction(adminClient: SupabaseClient, playerId: string, payload: Record<string, unknown>) {
   if (!adminClient) return { ok: false as const, response: jsonResponse({ ok: false, error: "mochi_social_not_configured" }, 500) };
 
   const species = speciesFromPayload(payload);
@@ -185,7 +180,7 @@ async function recordPetAction(adminClient: ReturnType<typeof createAdminClient>
   return { ok: true as const };
 }
 
-async function recordFixedMarketListing(adminClient: ReturnType<typeof createAdminClient>, playerId: string, payload: Record<string, unknown>) {
+async function recordFixedMarketListing(adminClient: SupabaseClient, playerId: string, payload: Record<string, unknown>) {
   if (!adminClient) return { ok: false as const, response: jsonResponse({ ok: false, error: "mochi_social_not_configured" }, 500) };
 
   const itemId = safeString(payload.itemId, 80) || "lantern-charm";
@@ -218,7 +213,7 @@ async function recordFixedMarketListing(adminClient: ReturnType<typeof createAdm
   return { ok: true as const };
 }
 
-async function recordDirectTrade(adminClient: ReturnType<typeof createAdminClient>, playerId: string, payload: Record<string, unknown>) {
+async function recordDirectTrade(adminClient: SupabaseClient, playerId: string, payload: Record<string, unknown>) {
   if (!adminClient) return { ok: false as const, response: jsonResponse({ ok: false, error: "mochi_social_not_configured" }, 500) };
 
   const recipientId = safeString(payload.recipientId, 80);
@@ -238,5 +233,147 @@ async function recordDirectTrade(adminClient: ReturnType<typeof createAdminClien
   });
 
   if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "trade_write_failed", message: "Direct trade proof could not be saved." }, 500) };
+  return { ok: true as const };
+}
+
+function normalizeChainStatus(value: unknown) {
+  const status = String(value || "").trim().toLowerCase();
+  return VALID_CHAIN_STATUSES.has(status) ? status : null;
+}
+
+async function recordChainOperationRequest(
+  adminClient: SupabaseClient,
+  requestId: string,
+  playerId: string,
+  type: string,
+  payload: Record<string, unknown>,
+) {
+  const status = normalizeChainStatus(payload.status) || "pending";
+  const { error } = await adminClient.from("mochi_social_chain_operations").upsert(
+    {
+      request_id: requestId,
+      user_id: playerId,
+      operation_type: type,
+      network: "CANARY",
+      status,
+      enjin_transaction_uuid: safeString(payload.enjinTransactionUuid, 120),
+      enjin_listing_id: safeString(payload.enjinListingId, 120),
+      payload: {
+        ...payload,
+        noRealValue: true,
+        chainNetwork: "CANARY",
+        finalityRequired: true,
+      },
+    },
+    { onConflict: "request_id" },
+  );
+
+  if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "chain_operation_failed", message: "Chain operation could not be recorded." }, 500) };
+  return { ok: true as const };
+}
+
+async function recordChainOperationUpdate(adminClient: SupabaseClient, playerId: string, payload: Record<string, unknown>) {
+  const chainRequestId = safeString(payload.chainRequestId, 120);
+  const nextStatus = normalizeChainStatus(payload.transactionState) || normalizeChainStatus(payload.status);
+  if (!chainRequestId || !nextStatus) {
+    return {
+      ok: false as const,
+      response: jsonResponse({ ok: false, error: "invalid_chain_update", message: "A chainRequestId and valid transactionState are required." }, 400),
+    };
+  }
+
+  const { data: existing, error: lookupError } = await adminClient
+    .from("mochi_social_chain_operations")
+    .select("request_id,user_id,operation_type,status,payload")
+    .eq("request_id", chainRequestId)
+    .maybeSingle();
+
+  if (lookupError) return { ok: false as const, response: jsonResponse({ ok: false, error: "chain_lookup_failed", message: "Chain operation could not be loaded." }, 500) };
+  if (!existing) return { ok: false as const, response: jsonResponse({ ok: false, error: "chain_request_missing", message: "A matching chain request is required before finality updates." }, 404) };
+  if (existing.user_id && existing.user_id !== playerId) {
+    return { ok: false as const, response: jsonResponse({ ok: false, error: "chain_request_owner_mismatch", message: "Chain operation updates must match the original alpha tester." }, 403) };
+  }
+
+  const existingPayload = asRecord(existing.payload);
+  const wasFinalized = String(existing.status || "").toLowerCase() === "finalized";
+  const updatePayload = {
+    ...existingPayload,
+    lastUpdate: {
+      status: nextStatus,
+      enjinTransactionUuid: safeString(payload.enjinTransactionUuid, 120),
+      enjinListingId: safeString(payload.enjinListingId, 120),
+      extrinsicHash: safeString(payload.extrinsicHash, 160),
+      updatedAt: new Date().toISOString(),
+    },
+    noRealValue: true,
+    chainNetwork: "CANARY",
+    finalityRequired: true,
+  };
+
+  const updateRow: Record<string, unknown> = {
+    status: nextStatus,
+    enjin_transaction_uuid: safeString(payload.enjinTransactionUuid, 120),
+    enjin_listing_id: safeString(payload.enjinListingId, 120),
+    payload: updatePayload,
+  };
+  if (nextStatus === "finalized") updateRow.finalized_at = new Date().toISOString();
+
+  const { error: updateError } = await adminClient
+    .from("mochi_social_chain_operations")
+    .update(updateRow)
+    .eq("request_id", chainRequestId);
+
+  if (updateError) return { ok: false as const, response: jsonResponse({ ok: false, error: "chain_update_failed", message: "Chain operation status could not be updated." }, 500) };
+
+  if (nextStatus === "finalized" && !wasFinalized) {
+    const result = await applyFinalizedChainInventory(adminClient, playerId, String(existing.operation_type || ""), existingPayload, payload);
+    if (!result.ok) return { ok: false as const, response: result.response };
+  }
+
+  return { ok: true as const };
+}
+
+async function applyFinalizedChainInventory(
+  adminClient: SupabaseClient,
+  playerId: string,
+  operationType: string,
+  existingPayload: Record<string, unknown>,
+  updatePayload: Record<string, unknown>,
+) {
+  const itemId = safeString(updatePayload.itemId, 80) || safeString(existingPayload.itemId, 80) || "momo-canary-certificate";
+  const quantity = Math.max(1, Math.min(9999, Number(updatePayload.amount || existingPayload.amount || 1) || 1));
+  const inventoryId = safeString(updatePayload.inventoryId, 80) || safeString(existingPayload.inventoryId, 80);
+
+  if (operationType === "chain.deposit_request") {
+    const { error } = await adminClient.from("mochi_social_inventory").insert({
+      owner_id: playerId,
+      item_id: itemId,
+      quantity,
+      location: "hot",
+      tradeable: true,
+    });
+    if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "hot_credit_failed", message: "Finalized cold-to-hot inventory credit could not be saved." }, 500) };
+  }
+
+  if (operationType === "chain.withdraw_request") {
+    if (inventoryId) {
+      const { error } = await adminClient
+        .from("mochi_social_inventory")
+        .update({ location: "cold", updated_at: new Date().toISOString() })
+        .eq("id", inventoryId)
+        .eq("owner_id", playerId);
+      if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "cold_inventory_update_failed", message: "Finalized hot-to-cold inventory update could not be saved." }, 500) };
+    } else {
+      const { error } = await adminClient.from("mochi_social_inventory").insert({
+        owner_id: playerId,
+        item_id: itemId,
+        quantity,
+        location: "cold",
+        tradeable: true,
+      });
+      if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "cold_inventory_insert_failed", message: "Finalized hot-to-cold inventory proof could not be saved." }, 500) };
+    }
+  }
+
   return { ok: true as const };
 }
