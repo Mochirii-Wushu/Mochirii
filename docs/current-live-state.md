@@ -24,7 +24,7 @@ This is the short source-of-truth index for the current Mochirii production post
 ## Security And Headers
 
 - Production CSP is enforced through `Content-Security-Policy` in `apps/web/next.config.ts`.
-- Security headers include `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and `X-Frame-Options: DENY`.
+- Security headers include narrowed `Access-Control-Allow-Origin`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`, and `X-Frame-Options: DENY`.
 - CSP was promoted after a clean browser pass recorded in `reports/csp-enforcement-verification-2026-06-08.md`.
 - Cloudflare remains DNS-only for Vercel web records; Vercel is the active edge/security layer.
 
@@ -57,8 +57,7 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Current Improvement Queue
 
-- Investigate whether the live `Access-Control-Allow-Origin: *` response header is necessary.
-- Run a dedicated CSP tightening pass before removing `unsafe-eval` or `unsafe-inline`.
+- Continue CSP tightening only after browser passes; `unsafe-inline` remains a future dedicated pass.
 - Optimize Gallery image loading and add route image-count guardrails.
 - Add production-safe member workflow QA coverage and cleanup rules.
 - Add read-only Discord Scheduled Event parity checks against `data/guild-schedule.json`.
