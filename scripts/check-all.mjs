@@ -7,6 +7,7 @@ const checks = [
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],
   ["check:discord-gallery-ingest", ["node", "scripts/check-discord-gallery-ingest.mjs"]],
+  ["check:discord-reaper-parity", ["node", "scripts/check-discord-reaper-parity.mjs"]],
   ["check:discord-event-covers", ["node", "scripts/check-discord-event-covers.mjs"]],
   ["check:reaper-discord-interactions", ["node", "scripts/check-reaper-discord-interactions.mjs"]],
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],

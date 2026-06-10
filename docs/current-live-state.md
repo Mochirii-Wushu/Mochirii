@@ -40,6 +40,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Supabase Edge Function `reaper-discord-interactions` handles Discord slash commands, buttons, gallery ingest, rank/event sync, and vote reminder interactions.
 - The separate Reaper Gateway worker handles only Discord member-join welcome DMs when a persistent host is running.
 - Discord event schedule source is `data/guild-schedule.json`; mirrored Next data must stay in sync.
+- Read-only source parity is guarded by `npm run check:discord-reaper-parity`.
 - Event sync is preview-first. `/sync-events mode:apply confirm:true` remains an owner-approved provider mutation.
 
 ## GitHub And Release Flow
@@ -60,5 +61,5 @@ This is the short source-of-truth index for the current Mochirii production post
 - Continue CSP tightening only after browser passes; `unsafe-inline` remains a future dedicated pass.
 - Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
 - Production-safe member workflow QA coverage is guarded by `npm run check:member-workflow-qa` and documented in `docs/member-workflow-production-qa-runbook.md`.
-- Add read-only Discord Scheduled Event parity checks against `data/guild-schedule.json`.
+- Keep Discord live provider readback optional and local-token gated; never require bot tokens in CI.
 - Keep dependency updates targeted; defer preview or major-version tooling changes to compatibility branches.
