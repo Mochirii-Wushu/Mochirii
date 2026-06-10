@@ -91,6 +91,14 @@ Required secrets/config stay out of Git:
 
 Use Chrome for logged-in Vercel, Supabase, GitHub, Discord, Fly, and Enjin dashboards. Use CLI for reproducible checks. Use Computer Use only when CLI and Chrome cannot reach a required UI.
 
+Refresh the local no-secret website-side operator checklist:
+
+```powershell
+npm run prepare:mochi-social-alpha-operator-checklist
+```
+
+The generated file goes to `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-alpha-operator-next-steps.md` by default. It may include PR status, local credential filenames, required env names, and placeholder commands, but it must not contain raw secrets.
+
 Run local verification:
 
 ```powershell

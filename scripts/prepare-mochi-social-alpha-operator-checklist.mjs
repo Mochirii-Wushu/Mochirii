@@ -1,0 +1,204 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { join, resolve } from "node:path";
+
+const root = process.cwd();
+const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
+const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
+const outputPath = resolve(credsDir, process.env.MOCHI_SOCIAL_SITE_OPERATOR_CHECKLIST || "mochirii-mochi-social-alpha-operator-next-steps.md");
+const supabaseProjectRef = process.env.MOCHI_SOCIAL_SUPABASE_PROJECT_REF || "dnxumaiooljdnbjvzbdc";
+const functionsUrl = process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || `https://${supabaseProjectRef}.supabase.co/functions/v1`;
+const gameUrl = process.env.MOCHI_SOCIAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev";
+const sitePreviewUrl = process.env.MOCHI_SOCIAL_SITE_PREVIEW_URL || process.env.NEXT_PUBLIC_SITE_URL || "<vercel-preview-host>";
+const generatedAt = new Date().toISOString();
+
+const externalGateReport = readJson(resolve(gameRepoPath, "reports/alpha-external-gates.json"));
+const gamePr = readPr("xartaiusx/mochi-social", "1");
+const sitePr = readPr("Mochirii-Wushu/Mochirii", "258");
+const credentialFiles = listCredentialFiles();
+
+await mkdir(credsDir, { recursive: true });
+await writeFile(outputPath, renderChecklist(), "utf8");
+console.log(`Wrote no-secret Mochirii Mochi Social alpha operator checklist: ${outputPath}`);
+
+function defaultCredsDir() {
+  if (process.env.USERPROFILE) return join(process.env.USERPROFILE, "Desktop", "Creds");
+  if (process.env.HOME) return join(process.env.HOME, "Desktop", "Creds");
+  return join(root, ".local", "creds");
+}
+
+function listCredentialFiles() {
+  if (!existsSync(credsDir)) return [];
+  return readdirSync(credsDir, { withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => entry.name)
+    .filter((name) => /^mochi-social-alpha|^mochirii-mochi-social-alpha|^supabase-preview-|^enjin-|^fly-/i.test(name))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function readJson(file) {
+  if (!existsSync(file)) return { ok: false, message: "not found", path: file };
+  try {
+    return { ok: true, path: file, data: JSON.parse(readFileSync(file, "utf8")) };
+  } catch {
+    return { ok: false, message: "could not parse", path: file };
+  }
+}
+
+function readPr(repo, number) {
+  const result = spawnSync("gh", ["pr", "view", number, "--repo", repo, "--json", "url,headRefOid,mergeStateStatus,statusCheckRollup"], {
+    cwd: root,
+    encoding: "utf8",
+    shell: false,
+  });
+  if (result.status !== 0) {
+    return {
+      repo,
+      number,
+      ok: false,
+      message: sanitize(result.stderr || result.error?.message || "GitHub PR state could not be read."),
+    };
+  }
+  try {
+    const data = JSON.parse(result.stdout);
+    const checks = Array.isArray(data.statusCheckRollup) ? data.statusCheckRollup : [];
+    const failing = checks
+      .filter((check) => !["SUCCESS", "PASS"].includes(String(check.conclusion || check.state || "").toUpperCase()))
+      .map((check) => check.name || check.context)
+      .filter(Boolean);
+    return {
+      repo,
+      number,
+      ok: data.mergeStateStatus === "CLEAN" && failing.length === 0,
+      url: data.url,
+      headRefOid: data.headRefOid,
+      mergeStateStatus: data.mergeStateStatus,
+      checks: checks.map((check) => check.name || check.context).filter(Boolean),
+      failing,
+    };
+  } catch {
+    return { repo, number, ok: false, message: "GitHub PR JSON could not be parsed." };
+  }
+}
+
+function renderChecklist() {
+  const files = credentialFiles.length
+    ? credentialFiles.map((file) => `- ${file}`).join("\n")
+    : "- No matching local credential checklist files were found.";
+  const externalFailures = externalGateReport.ok && Array.isArray(externalGateReport.data.checks)
+    ? externalGateReport.data.checks
+      .filter((check) => check.status === "fail")
+      .map((check) => `- ${check.name}: ${check.message}`)
+      .join("\n") || "- No failing game external gates were recorded."
+    : `- Game external gate report ${externalGateReport.message}: ${externalGateReport.path}`;
+  const siteOrigin = normalizePreviewOrigin(sitePreviewUrl);
+
+  return `# Mochirii Mochi Social Alpha Operator Next Steps
+
+Generated: ${generatedAt}
+
+This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, and preview acceptance steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into Codex chat, Git, PR comments, screenshots, or reports.
+
+## Local Credential Files
+
+${files}
+
+## PR State
+
+- Game PR: ${formatPr(gamePr)}
+- Site PR: ${formatPr(sitePr)}
+
+## Game External Gate Summary
+
+${externalFailures}
+
+## Vercel Preview Gate
+
+Required preview env names:
+
+- NEXT_PUBLIC_MOCHI_SOCIAL_URL=${gameUrl}
+- NEXT_PUBLIC_SUPABASE_URL=<preview-supabase-url>
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<preview-supabase-publishable-key>
+- NEXT_PUBLIC_SITE_URL=${siteOrigin}
+
+Use the Vercel dashboard or CLI for the Mochirii preview branch only. Do not change production env for Alpha RC unless a later production plan approves it.
+
+After the Fly game URL exists, run from this repo:
+
+\`\`\`powershell
+$env:MOCHI_SOCIAL_GAME_CONTRACT_URL="${gameUrl}"
+$env:MOCHI_SOCIAL_SITE_ORIGIN="${siteOrigin}"
+npm run check:mochi-social-game-contract
+\`\`\`
+
+## Supabase Preview Gate
+
+Preview project ref: ${supabaseProjectRef}
+
+Required Edge Function secret names:
+
+- MOCHI_SOCIAL_GAME_SERVER_TOKEN
+- MOCHI_SOCIAL_ALPHA_TERMS_VERSION
+
+Required Edge smoke inputs stay local:
+
+- MOCHI_SOCIAL_ALPHA_EDGE_URL=${functionsUrl}
+- MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY=<preview-supabase-publishable-key>
+- MOCHI_SOCIAL_GAME_SERVER_TOKEN=<same-scoped-token-as-fly>
+
+\`\`\`powershell
+$env:MOCHI_SOCIAL_ALPHA_EDGE_URL="${functionsUrl}"
+$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY="<preview-supabase-publishable-key>"
+$env:MOCHI_SOCIAL_GAME_SERVER_TOKEN="<same-scoped-token-as-fly>"
+npm run smoke:mochi-social-alpha-edge
+\`\`\`
+
+## Manual Website Gates
+
+Before inviting testers, verify in the Vercel preview:
+
+1. Signed-out users are sent to sign in before entering /games/mochi-social.
+2. Signed-in non-testers see the alpha allowlist block.
+3. Allowlisted testers are blocked until alpha terms are acknowledged.
+4. The iframe loads only after terms are accepted.
+5. The parent page sends MOCHI_SOCIAL_AUTH with a short-lived Supabase access token only.
+6. Feedback submission writes to Supabase and appears in the leader audit panel.
+7. Leader dashboard can grant and revoke alpha access by Supabase user id.
+8. Chain operation rows show Canary, no-real-value status, request id, transaction UUID, optional listing id, and finality state.
+
+## Full Local Verification
+
+\`\`\`powershell
+npm run check:mochi-social-alpha
+npm run check:mochi-social-game-contract
+npm run smoke:mochi-social-alpha-edge
+npm run check:supabase-edge-types
+npm run check
+cd apps/web
+npm run lint
+npm run build
+\`\`\`
+
+Stop at Alpha RC Ready. Do not switch this checklist to production, Enjin mainnet, paid assets, cashout, public UGC, or service-role keys in browser/game code.
+`;
+}
+
+function normalizePreviewOrigin(value) {
+  const normalized = String(value || "").trim().replace(/\/+$/, "");
+  if (!normalized || normalized === "<vercel-preview-host>") return "https://<vercel-preview-host>";
+  return normalized.startsWith("http://") || normalized.startsWith("https://") ? normalized : `https://${normalized}`;
+}
+
+function formatPr(pr) {
+  if (!pr.ok) return `${pr.repo}#${pr.number} not verified (${pr.message || "unknown"})`;
+  return `${pr.url} ${pr.mergeStateStatus} ${pr.headRefOid} checks=${pr.checks.join(", ") || "none"}`;
+}
+
+function sanitize(value) {
+  return String(value || "")
+    .replace(/\b(?:ghp|gho|ghs|ghu|github_pat)_[A-Za-z0-9_]{20,}\b/g, "<redacted-github-token>")
+    .replace(/\bsb_secret_[A-Za-z0-9_-]{8,}\b/g, "<redacted-supabase-secret>")
+    .replace(/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "<redacted-jwt>")
+    .slice(0, 1000);
+}

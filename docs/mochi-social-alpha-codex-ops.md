@@ -45,6 +45,8 @@ Do not use memory as current truth for secrets, deployment URLs, payment/billing
 
 Branch-specific Vercel preview env should override only the Mochi Social values needed for the alpha PR. Production env must not be changed for Alpha RC unless a later production plan is approved.
 
+Use `npm run prepare:mochi-social-alpha-operator-checklist` to refresh the no-secret website-side checklist in `C:\Users\xtyty\Desktop\Creds`.
+
 ## Supabase Authority Matrix
 
 | Capability | Website-side authority |
@@ -87,5 +89,6 @@ Before inviting testers:
 
 - The user types secrets privately.
 - Codex verifies secret names, status, digests, timestamps, health checks, or successful route behavior only.
+- Repo scripts may write no-secret operator checklists into `C:\Users\xtyty\Desktop\Creds`; those files must contain placeholders, secret names, statuses, and commands only.
 - Never paste secret values into docs, logs, PR comments, screenshots, browser-visible UI, or chat.
 - Rotate `MOCHI_SOCIAL_GAME_SERVER_TOKEN`, Discord secrets, Enjin tokens, and provider keys if exposed.

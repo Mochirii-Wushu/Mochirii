@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'scripts/check-all.mjs',
@@ -16,6 +16,10 @@ const checks = [
   {
     file: 'scripts/smoke-mochi-social-alpha-edge.mjs',
     includes: ['MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY', 'mochi-social-alpha-session', 'mochi-social-alpha-action', 'invalid_game_server_token', 'invalid_alpha_action']
+  },
+  {
+    file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
@@ -73,6 +77,7 @@ const checks = [
       'npm run alpha:load-smoke',
       'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
       'MOCHI_SOCIAL_AUTH',
+      'prepare:mochi-social-alpha-operator-checklist',
       'Do not roll back by switching to production',
       'Computer Use'
     ]
