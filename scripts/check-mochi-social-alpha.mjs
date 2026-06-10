@@ -45,6 +45,18 @@ const checks = [
   {
     file: 'apps/web/next.config.ts',
     includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'frame-src', 'connect-src']
+  },
+  {
+    file: 'docs/mochi-social-alpha.md',
+    includes: [
+      'Tester Guide',
+      'Preview Acceptance',
+      'Rollback',
+      'npm run alpha:load-smoke',
+      'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
+      'MOCHI_SOCIAL_AUTH',
+      'Do not roll back by switching to production'
+    ]
   }
 ];
 

@@ -40,6 +40,43 @@ Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Moch
 - Use the same panel to inspect active testers, revoked testers, ledger event count, active fixed-price listings, offered direct trades, pending Enjin Canary operations, feedback count, chat count, and recent ledger/chain/feedback rows.
 - Keep all rows no-real-value and Canary-only until a later production/mainnet review plan is approved.
 
+## Tester Guide
+
+Tell testers:
+
+- This is a closed alpha preview for allowlisted 18+ testers only.
+- Pets, currency, listings, trades, and Enjin Canary operations have no real value.
+- Use a desktop browser and sign in through Mochirii before opening `/games/mochi-social`.
+- Acknowledge the alpha terms before the game iframe loads.
+- Try the first loop: move around town, befriend one Mochi Spirit, care for it, inspect the HUD, send one local chat message, use one emote, create one fixed-price listing proof, create one direct trade proof, and request one Canary certificate proof.
+- Send bugs through the Mochirii feedback form. Do not send secrets, wallet seed phrases, payment information, or private recovery material in feedback.
+
+## Preview Acceptance
+
+Before inviting testers:
+
+- The game repo `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
+- The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
+- Non-testers are blocked from `/games/mochi-social`.
+- Allowlisted testers are blocked until terms are acknowledged.
+- The iframe receives only the short-lived Supabase access token through `MOCHI_SOCIAL_AUTH`.
+- Feedback submissions appear in the leader audit panel.
+- Enjin Canary operation rows record request id, transaction UUID, optional listing id, status, and finality evidence.
+- The 10-25 tester load-smoke report is attached to the PR or release checklist.
+
+## Rollback
+
+If the alpha preview must be stopped:
+
+1. Revoke new tester grants in the `Mochi Social Alpha` leader panel.
+2. Unset or change `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the affected Vercel preview.
+3. Rotate `MOCHI_SOCIAL_GAME_SERVER_TOKEN` in Supabase and Fly if trust is in question.
+4. Disable the game iframe route in the preview branch if the route itself is the problem.
+5. Preserve ledger events, feedback rows, chat reports, chain operation rows, and request ids for audit.
+6. Coordinate with the game repo operator before scaling down Fly, rotating Enjin tokens, or stopping Wallet Daemon signing.
+
+Do not roll back by switching to production, mainnet, cashout, paid assets, public UGC, or browser-exposed service-role keys.
+
 ## Operator Setup
 
 Required secrets/config stay out of Git:
