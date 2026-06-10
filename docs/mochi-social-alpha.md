@@ -50,7 +50,7 @@ Tell testers:
 - Pets, currency, listings, trades, and Enjin Canary operations have no real value.
 - Use a desktop browser and sign in through Mochirii before opening `/games/mochi-social`.
 - Acknowledge the alpha terms before the game iframe loads.
-- Try the first loop: move around town, befriend one Mochi Spirit, care for it, inspect the HUD, send one local chat message, use one emote, create one fixed-price listing proof, create one direct trade proof, and request one Canary certificate proof.
+- Try the first loop: move around town, befriend Momo, care for it, inspect the HUD, send one local chat message, use one emote, create one fixed-price listing proof, create one direct trade proof, and request the Momo Canary certificate proof.
 - Send bugs through the Mochirii feedback form. Do not send secrets, wallet seed phrases, payment information, or private recovery material in feedback.
 
 ## Preview Acceptance

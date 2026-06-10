@@ -28,6 +28,7 @@ const checks = [
       'mochi_social_market_listings',
       'mochi_social_trades',
       'mochi_social_pets',
+      'CERTIFICATE_ELIGIBLE_SPECIES.has(species)',
       'chain.operation_update',
       'chain_request_missing',
       'nextStatus === "finalized"',
@@ -98,6 +99,14 @@ for (const check of checks) {
       throw new Error(`${check.file} appears to contain a real ${label}.`);
     }
   }
+}
+
+const actionFunction = readFileSync('supabase/functions/mochi-social-alpha-action/index.ts', 'utf8');
+if (/certificate_eligible:\s*species\s*===\s*["']sora["']/.test(actionFunction)) {
+  throw new Error('Mochi Social certificate eligibility must stay aligned to Momo, not Sora.');
+}
+if (!/CERTIFICATE_ELIGIBLE_SPECIES\s*=\s*new Set\(\[["']momo["']\]\)/.test(actionFunction)) {
+  throw new Error('Mochi Social certificate eligibility must explicitly name Momo as the alpha certificate species.');
 }
 
 console.log('Mochi Social alpha static checks passed.');

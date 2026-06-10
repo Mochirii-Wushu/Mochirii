@@ -14,6 +14,7 @@ import {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
 const VALID_SPECIES = new Set(["momo", "yuzu", "sora"]);
+const CERTIFICATE_ELIGIBLE_SPECIES = new Set(["momo"]);
 const VALID_CHAIN_STATUSES = new Set(["pending", "broadcast", "finalized", "failed", "abandoned", "timeout"]);
 
 const VALID_ACTIONS = new Set([
@@ -166,8 +167,8 @@ async function recordPetAction(adminClient: SupabaseClient, playerId: string, pa
     nickname: species === "momo" ? "Momo Puff" : species === "yuzu" ? "Yuzu Flicker" : "Sora Drop",
     bond: nextBond,
     growth_stage: growthStageFromBond(nextBond),
-    certificate_eligible: species === "sora",
-    tradeable: species === "sora",
+    certificate_eligible: CERTIFICATE_ELIGIBLE_SPECIES.has(species),
+    tradeable: CERTIFICATE_ELIGIBLE_SPECIES.has(species),
     updated_at: new Date().toISOString(),
   };
 
