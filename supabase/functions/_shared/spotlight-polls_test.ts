@@ -26,6 +26,32 @@ Deno.test("spotlight candidate snapshots cap native poll candidates at 10", () =
   if (uniqueUsers.size !== 10) throw new Error("Expected unique Discord users.");
 });
 
+Deno.test("spotlight candidate snapshots exclude the configured Twills account", () => {
+  const profiles = [
+    activeProfile(1, {
+      id: "0c87159c-e0b4-468d-99a8-7af5116e49aa",
+      display_name: "Renamed leader profile",
+    }),
+    activeProfile(2, {
+      discord_user_id: "341166431041224705",
+      display_name: "Renamed Discord account",
+    }),
+    activeProfile(3, { display_name: "Eligible member" }),
+  ];
+  const candidates = buildCandidateSnapshots(profiles, (items) => items);
+
+  if (candidates.length !== 1) throw new Error(`Expected 1 candidate, got ${candidates.length}.`);
+  if (candidates[0].displayName !== "Eligible member") {
+    throw new Error(`Unexpected candidate: ${candidates[0].displayName}`);
+  }
+  if (candidates.some((candidate) =>
+    candidate.memberProfileId === "0c87159c-e0b4-468d-99a8-7af5116e49aa" ||
+    candidate.discordUserId === "341166431041224705"
+  )) {
+    throw new Error("Configured Twills account must not be eligible for spotlight polls.");
+  }
+});
+
 Deno.test("spotlight candidate labels are Discord poll safe", () => {
   const profiles = [
     activeProfile(1, { display_name: "A very very very very very very very very very long guildie name @everyone" }),
