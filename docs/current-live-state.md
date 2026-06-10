@@ -58,7 +58,7 @@ This is the short source-of-truth index for the current Mochirii production post
 ## Current Improvement Queue
 
 - Continue CSP tightening only after browser passes; `unsafe-inline` remains a future dedicated pass.
-- Optimize Gallery image loading and add route image-count guardrails.
-- Add production-safe member workflow QA coverage and cleanup rules.
+- Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
+- Production-safe member workflow QA coverage is guarded by `npm run check:member-workflow-qa` and documented in `docs/member-workflow-production-qa-runbook.md`.
 - Add read-only Discord Scheduled Event parity checks against `data/guild-schedule.json`.
 - Keep dependency updates targeted; defer preview or major-version tooling changes to compatibility branches.

@@ -7,7 +7,8 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 ## 2. Data Source
 
 - Gallery data lives in `data/gallery.json`.
-- The current Gallery has 39 images in the `general` album.
+- The current static Gallery source has 73 images in the `general` album.
+- Approved member and Discord submissions are added at runtime through Supabase signed URLs and are not written into `data/gallery.json`.
 - Do not change image paths unless assets are actually added, replaced, or removed in the same scoped task.
 - Captions and alt text should match visible image content.
 - Do not invent player identities, events, locations, or actions that are not visible or otherwise confirmed.
@@ -83,14 +84,15 @@ Invalid categories fall back to All and clean the URL. Browser Back and Forward 
 
 Counts appear in filter buttons and are generated from Gallery data.
 
-Expected current counts:
+Expected current static counts:
 
-- All · 39
-- Portraits · 16
-- Gatherings · 11
-- Action · 4
-- Scenery · 4
-- Companions · 4
+- All - 73
+- Portraits - 23
+- Gatherings - 22
+- Action - 7
+- Scenery - 6
+- Companions - 15
+- Member Submissions - runtime approved-feed count only
 
 If image data changes, counts should change from data automatically. Do not patch the labels by hand.
 
@@ -128,7 +130,7 @@ npm run check:production
 - Open `/gallery.html?category=companions`.
 - Open an invalid category URL and confirm it falls back to All.
 - Check mobile widths at 360px, 390px, and 768px.
-- Confirm All shows 39 images.
+- Confirm All shows the current static Gallery image count before approved member submissions load.
 - Confirm counts match current data.
 - Confirm Copy link works.
 - Confirm Browser Back and Forward update the selected filter.

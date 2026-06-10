@@ -1,0 +1,218 @@
+import { readFileSync } from "node:fs";
+
+const failures = [];
+
+function read(path) {
+  return readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+}
+
+function assertIncludes(label, text, snippet) {
+  if (!text.includes(snippet)) failures.push(`${label}: expected snippet not found: ${snippet}`);
+}
+
+function assertRegex(label, text, pattern, message) {
+  if (!pattern.test(text)) failures.push(`${label}: ${message}`);
+}
+
+const packageJson = read("package.json");
+const checkAll = read("scripts/check-all.mjs");
+const runbook = read("docs/member-workflow-production-qa-runbook.md");
+const profileGuide = read("docs/member-profiles-and-rank-roles.md");
+const galleryGuide = read("docs/gallery-guide.md");
+const supabaseReadme = read("supabase/README.md");
+const supabaseConfig = read("supabase/config.toml");
+const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
+const memberWorkflowFormat = read("apps/web/components/member-workflow/format.ts");
+const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
+const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
+const memberProfilesClient = read("apps/web/lib/supabase/member-profiles.ts");
+const profileClient = read("apps/web/lib/supabase/profile.ts");
+const memberProfileShared = read("supabase/functions/_shared/member-profiles.ts");
+const listMemberProfiles = read("supabase/functions/list-member-profiles/index.ts");
+const getMemberProfile = read("supabase/functions/get-member-profile/index.ts");
+const visibleProfileCards = read("supabase/functions/list-visible-profile-cards/index.ts");
+const approvedFeed = read("supabase/functions/list-approved-gallery-submissions/index.ts");
+const migrationGallery = read("supabase/migrations/20260513081523_create_discord_role_gated_gallery_uploads.sql");
+const migrationGalleryModeration = read("supabase/migrations/20260513195853_create_gallery_moderation_events.sql");
+const migrationProfiles = read("supabase/migrations/20260608210000_add_member_profiles_and_media.sql");
+const migrationRefine = read("supabase/migrations/20260608233000_refine_member_profile_identity_media.sql");
+
+[
+  '"check:member-workflow-qa": "node scripts/check-member-workflow-qa.mjs"',
+].forEach((snippet) => assertIncludes("package scripts", packageJson, snippet));
+
+assertIncludes("check-all", checkAll, '["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]]');
+
+[
+  "D02: Live OAuth And Account Smoke",
+  "D03: Live Upload And Moderation Smoke",
+  "https://mochirii.com/auth",
+  "Pending content was not public before approval.",
+  "Cleanup must not be ad hoc.",
+  "Do not record:",
+  "signed URLs",
+].forEach((snippet) => assertIncludes("member workflow runbook", runbook, snippet));
+
+[
+  "Discord handle is server-owned.",
+  "bio of up to 1,000 characters",
+  "50 MB per file",
+  "private signed URLs",
+  "list-visible-profile-cards",
+  "Discord handle is read-only on Account",
+].forEach((snippet) => assertIncludes("member profile guide", profileGuide, snippet));
+
+[
+  "The current static Gallery source has 73 images",
+  "Approved member and Discord submissions are added at runtime",
+  "All - 73",
+  "Member Submissions",
+].forEach((snippet) => assertIncludes("gallery guide", galleryGuide, snippet));
+
+[
+  "public.handle_new_member_profile()",
+  "security definer",
+  "member-gallery",
+  "member-profile-media",
+  "The Storage bucket stays private",
+  "Approved submissions become eligible for the approved public Gallery feed",
+  "Approved media is returned only through short-lived signed URLs from Edge Functions.",
+  "list-visible-profile-cards",
+  "Bios are capped at 1,000 characters.",
+].forEach((snippet) => assertIncludes("supabase readme", supabaseReadme, snippet));
+
+[
+  "[functions.list-member-profiles]",
+  "verify_jwt = true",
+  "[functions.get-member-profile]",
+  "[functions.submit-member-profile-media]",
+  "[functions.list-member-profile-media-queue]",
+  "[functions.moderate-member-profile-media]",
+  "[functions.list-visible-profile-cards]",
+  "verify_jwt = false",
+].forEach((snippet) => assertIncludes("supabase config", supabaseConfig, snippet));
+
+assertRegex(
+  "AccountPanel",
+  accountPanel,
+  /id="discord_handle_readonly"[\s\S]*?readOnly[\s\S]*?aria-readonly="true"[\s\S]*?Verified from Discord and not editable here\./,
+  "Discord handle must remain read-only and server-derived on Account.",
+);
+assertRegex("AccountPanel", accountPanel, /id="bio"[\s\S]*?maxLength=\{1000\}[\s\S]*?\{bioLength\} \/ 1000 characters/, "Bio must stay capped at 1,000 characters with visible counter.");
+assertIncludes("AccountPanel", accountPanel, "Published profiles are visible only to active verified members. Avatar and banner images appear after moderator approval.");
+assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
+
+[
+  'const gateTitle = mode === "signed-out" ? "Login Required" : allowed ? "Upload Ready" : "Role Verification Required";',
+  "verifyDiscordMembership()",
+  "profileIsActive(nextProfile)",
+].forEach((snippet) => assertIncludes("GallerySubmitForm", gallerySubmit, snippet));
+
+[
+  "listProfileMediaQueue",
+  "moderateProfileMedia",
+  "listGalleryReviewQueue",
+  "moderateGallerySubmission",
+  "Add a decline reason before rejecting this profile image.",
+  "profileMediaStatusConfig",
+].forEach((snippet) => assertIncludes("LeaderDashboard", leaderDashboard, snippet));
+
+[
+  'export const editableProfileFields = [',
+  '"display_name"',
+  '"game_uid"',
+  '"region"',
+  '"timezone"',
+  '"bio"',
+].forEach((snippet) => assertIncludes("member workflow format", memberWorkflowFormat, snippet));
+if (memberWorkflowFormat.includes('"discord_handle"') || memberWorkflowFormat.includes('"avatar_url"')) {
+  failures.push("member workflow format: editable profile fields must not include discord_handle or avatar_url.");
+}
+
+[
+  "MAX_PROFILE_AVATAR_BYTES",
+  "MAX_PROFILE_BANNER_BYTES",
+  "MEMBER_PROFILE_MEDIA_BUCKET",
+  "storagePath",
+  "invokeEdgeFunction",
+  "submit-member-profile-media",
+  "list-member-profile-media-queue",
+  "moderate-member-profile-media",
+].forEach((snippet) => assertIncludes("member profile client", memberProfilesClient, snippet));
+
+[
+  "updateCurrentProfile",
+].forEach((snippet) => assertIncludes("profile client", profileClient, snippet));
+assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile updates must use the sanitized editable field payload.");
+
+[
+  'PROFILE_MEDIA_BUCKET = "member-profile-media"',
+  "PROFILE_MEDIA_SIGNED_URL_SECONDS = 10 * 60",
+  "avatar: 50 * 1024 * 1024",
+  "banner: 50 * 1024 * 1024",
+  "requireActiveMember",
+  "titleFromRoles",
+].forEach((snippet) => assertIncludes("member profile shared edge", memberProfileShared, snippet));
+
+[
+  "requireActiveMember(req)",
+  "profile_public_enabled",
+  "signedUrl",
+].forEach((snippet) => assertIncludes("list member profiles", listMemberProfiles, snippet));
+
+[
+  "requireActiveMember(req)",
+  "profile_public_enabled",
+  "signedUrl",
+].forEach((snippet) => assertIncludes("get member profile", getMemberProfile, snippet));
+
+[
+  "profile_cards_not_configured",
+  "slugs",
+  "hasApprovedAvatar",
+  "profileHref",
+  "signedUrl",
+].forEach((snippet) => assertIncludes("visible profile cards", visibleProfileCards, snippet));
+
+[
+  "MEMBER_GALLERY_BUCKET",
+  "signedUrlSeconds",
+  "createSignedUrl",
+  "storage_path",
+].forEach((snippet) => assertIncludes("approved gallery feed", approvedFeed, snippet));
+
+[
+  "alter table public.member_profiles enable row level security;",
+  "alter table public.gallery_submissions enable row level security;",
+  "create or replace function public.handle_new_member_profile()",
+  "security definer",
+  "revoke all on function public.handle_new_member_profile() from public, anon, authenticated;",
+].forEach((snippet) => assertIncludes("gallery/member migration", migrationGallery, snippet));
+
+[
+  "alter table public.gallery_moderation_events enable row level security;",
+  "revoke all on table public.gallery_moderation_events from anon;",
+  "revoke all on table public.gallery_moderation_events from authenticated;",
+  "grant all on table public.gallery_moderation_events to service_role;",
+].forEach((snippet) => assertIncludes("gallery moderation migration", migrationGalleryModeration, snippet));
+
+[
+  "member-profile-media",
+  "alter table public.member_profile_media enable row level security;",
+  "alter table public.member_profile_media_events enable row level security;",
+  "grant all on table public.member_profile_media to service_role;",
+].forEach((snippet) => assertIncludes("profile media migration", migrationProfiles, snippet));
+
+[
+  "char_length(bio) <= 1000",
+  "revoke update (discord_handle, avatar_url) on table public.member_profiles from authenticated;",
+  "52428800",
+].forEach((snippet) => assertIncludes("profile refinement migration", migrationRefine, snippet));
+
+if (failures.length) {
+  console.error("Member workflow QA validation failed.");
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  process.exit(1);
+}
+
+console.log("Member workflow QA validation OK.");

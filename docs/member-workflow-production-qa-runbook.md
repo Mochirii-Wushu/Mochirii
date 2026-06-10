@@ -146,7 +146,7 @@ Preconditions:
 Steps:
 
 1. Run `npm run check:live-member-workflow-preflight -- --strict`.
-2. Open `https://mochirii.vercel.app/auth`.
+2. Open `https://mochirii.com/auth`.
 3. Complete Discord OAuth with the unverified test account.
 4. Confirm return to `/account`.
 5. Confirm missing-role or verification guidance is clear.
