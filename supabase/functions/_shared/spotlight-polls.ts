@@ -18,6 +18,12 @@ export const SPOTLIGHT_POLL_MAX_ANSWER_LENGTH = 55;
 export const SPOTLIGHT_POLL_SECRET_HEADER = "x-mochirii-spotlight-poll-secret";
 export const SPOTLIGHT_POLL_QUESTION = "Who should be our guild member of the month?";
 export const RECENT_MEMBER_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
+export const SPOTLIGHT_POLL_EXCLUDED_MEMBER_PROFILE_IDS = new Set([
+  "0c87159c-e0b4-468d-99a8-7af5116e49aa",
+]);
+export const SPOTLIGHT_POLL_EXCLUDED_DISCORD_USER_IDS = new Set([
+  "341166431041224705",
+]);
 
 export type SpotlightCandidate = {
   memberProfileId: string;
@@ -154,6 +160,13 @@ function truncateAnswerLabel(base: string, suffix = ""): string {
   return `${base.slice(0, Math.max(1, maxBase - 1)).trimEnd()}…${cleanSuffix}`;
 }
 
+export function spotlightPollProfileIsExcluded(profile: JsonRecord): boolean {
+  const memberProfileId = safeString(profile.id, 80) || "";
+  const discordUserId = snowflake(profile.discord_user_id) || "";
+  return SPOTLIGHT_POLL_EXCLUDED_MEMBER_PROFILE_IDS.has(memberProfileId) ||
+    SPOTLIGHT_POLL_EXCLUDED_DISCORD_USER_IDS.has(discordUserId);
+}
+
 export function buildCandidateSnapshots(
   profiles: JsonRecord[],
   shuffle: <T>(items: T[]) => T[] = secureShuffle,
@@ -164,6 +177,7 @@ export function buildCandidateSnapshots(
       profile.member_status === "active" &&
       profile.has_required_discord_roles === true &&
       recentVerification(profile.discord_verified_at, now) &&
+      !spotlightPollProfileIsExcluded(profile) &&
       Boolean(snowflake(profile.discord_user_id))
     )
     .map((profile) => {

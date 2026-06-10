@@ -567,6 +567,8 @@ Monthly member spotlight polls use Discord native polls and Supabase-owned winne
 
 Native Discord polls are limited to 10 answers, so Reaper snapshots up to 10 randomly selected active, recently verified, Discord-linked website members per cycle. If there are 10 or fewer eligible members, all eligible members are included. The poll is single-choice, lasts 168 hours, and uses `allowed_mentions: { parse: [] }`.
 
+The linked Twills account is intentionally excluded from spotlight poll eligibility so owner/admin participation never occupies member poll slots.
+
 Required secrets:
 
 ```text
