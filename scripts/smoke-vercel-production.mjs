@@ -17,6 +17,8 @@ const cleanRoutes = [
   "/twills",
   "/auth",
   "/account",
+  "/members",
+  "/members/twills",
   "/gallery-submit",
   "/leader-dashboard",
 ];
@@ -44,6 +46,8 @@ const legacyRedirects = new Map([
 const bodyChecks = new Map([
   ["/auth", /Login with Discord|Website Sign-In/i],
   ["/account", /Login with Discord|Sign In Required/i],
+  ["/members", /Published profiles|Member Profiles|Sign In Required/i],
+  ["/members/twills", /M[oō]chir[iī][iī] Member Profile|Sign In Required|Access Denied/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Login with Discord|Sign In Required|Access Denied/i],
 ]);

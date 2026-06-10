@@ -88,7 +88,7 @@ Post-deploy production smoke:
 npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
 ```
 
-This verifies clean Vercel routes, legacy `.html` redirects, signed-out member route content, Vercel headers on the apex, and the `www` redirect.
+This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, and the `www` redirect. Static route metadata, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
 
 Post-deploy observability smoke:
 
