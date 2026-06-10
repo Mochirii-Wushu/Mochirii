@@ -20,6 +20,9 @@ const files = {
   appReadme: "apps/web/README.md",
   currentLiveState: "docs/current-live-state.md",
   securityPolicy: "SECURITY.md",
+  securityTxt: ".well-known/security.txt",
+  appSecurityTxt: "apps/web/public/.well-known/security.txt",
+  securityScanReport: "reports/security-scan-remediation-2026-06-10.md",
 };
 
 function read(file) {
@@ -61,6 +64,9 @@ const deployment = read(files.deployment);
 const appReadme = read(files.appReadme);
 const currentLiveState = read(files.currentLiveState);
 const securityPolicy = read(files.securityPolicy);
+const securityTxt = read(files.securityTxt);
+const appSecurityTxt = read(files.appSecurityTxt);
+const securityScanReport = read(files.securityScanReport);
 
 function assertNoCurrentReportOnlyClaim(label, text) {
   const stalePatterns = [
@@ -257,6 +263,42 @@ assertMatches(
   "Discord event schedule source is `data/guild-schedule.json`",
   "Vercel Web Analytics and Speed Insights",
 ].forEach((snippet) => assertIncludes("current live state docs", currentLiveState, snippet));
+
+[
+  "Contact: https://github.com/Mochirii-Wushu/Mochirii/security/policy",
+  "Policy: https://github.com/Mochirii-Wushu/Mochirii/security/policy",
+  "Preferred-Languages: en",
+  "Canonical: https://mochirii.com/.well-known/security.txt",
+  "Expires: 2027-06-10T00:00:00Z",
+].forEach((snippet) => assertIncludes("security.txt", securityTxt, snippet));
+
+if (securityTxt !== appSecurityTxt) {
+  failures.push("security.txt: root rollback copy and Next public copy must match exactly.");
+}
+
+assertMatches(
+  "security.txt",
+  securityTxt,
+  /^Contact:\s+https:\/\/github\.com\/Mochirii-Wushu\/Mochirii\/security\/policy/m,
+  "Contact must use the HTTPS GitHub security policy URL.",
+);
+
+assertMatches(
+  "security.txt",
+  securityTxt,
+  /^Canonical:\s+https:\/\/mochirii\.com\/\.well-known\/security\.txt/m,
+  "Canonical must point to the production security.txt URL.",
+);
+
+[
+  "Cloudflare Security Insights",
+  "Security.txt not configured",
+  "Dangling A Record detected",
+  "Cloudflare remains DNS-only",
+  "Server: Vercel",
+  "CSP inline reduction remains a staged follow-up",
+  "Supabase CLI auditability",
+].forEach((snippet) => assertIncludes("security scan report", securityScanReport, snippet));
 
 [
   ["deployment docs", deployment],

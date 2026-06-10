@@ -63,6 +63,8 @@ Do not commit `.vercel/`.
 
 Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, member, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
 
+The RFC 9116 security contact file is served from `public/.well-known/security.txt` and should match the rollback copy at the repository root.
+
 ## Vercel Observability
 
 The app is wired for Vercel Web Analytics and Speed Insights from the root layout with the official Next.js packages:
