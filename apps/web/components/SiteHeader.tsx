@@ -34,6 +34,7 @@ const navGroups: NavGroup[] = [
       { href: "/spotlight", label: "Spotlight", nav: "spotlight" },
       { href: "/gallery", label: "Gallery", nav: "gallery" },
       { href: "/members", label: "Members", nav: "members", auth: "verified" },
+      { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
     ],
   },
   {
@@ -64,6 +65,7 @@ const notesLinks: NavItem[] = [
   { href: "/account", label: "Account", nav: "account", auth: "signed-in" },
   { href: "/members", label: "Members", nav: "members", auth: "verified" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
+  { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
   { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "signed-in" },
 ];
 

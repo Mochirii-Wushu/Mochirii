@@ -25,6 +25,10 @@ const functions = [
   "submit-member-profile-media",
   "list-member-profile-media-queue",
   "moderate-member-profile-media",
+  "mochi-social-alpha-session",
+  "mochi-social-alpha-action",
+  "mochi-social-alpha-admin",
+  "submit-mochi-social-feedback",
 ];
 
 function denoBinary() {
