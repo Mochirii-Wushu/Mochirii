@@ -2,6 +2,18 @@ import { readFileSync } from 'node:fs';
 
 const checks = [
   {
+    file: 'package.json',
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract']
+  },
+  {
+    file: 'scripts/check-all.mjs',
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract']
+  },
+  {
+    file: 'scripts/check-mochi-social-game-contract.mjs',
+    includes: ['MOCHI_SOCIAL_GAME_CONTRACT_URL', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', '/integration/game-manifest.json', '/integration/alpha/status', 'MOCHI_SOCIAL_AUTH', 'configured-preview-stub']
+  },
+  {
     file: 'apps/web/app/games/mochi-social/page.tsx',
     includes: ['MochiSocialAlphaClient', 'robots', 'index: false']
   },

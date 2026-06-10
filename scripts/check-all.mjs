@@ -14,6 +14,8 @@ const checks = [
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]],
+  ["check:mochi-social-alpha", ["node", "scripts/check-mochi-social-alpha.mjs"]],
+  ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
   ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],

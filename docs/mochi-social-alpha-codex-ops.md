@@ -74,6 +74,7 @@ Before inviting testers:
 - Game PR has green `Verify Mochi Social` CI.
 - Mochirii PR checks are green.
 - Vercel preview has `NEXT_PUBLIC_MOCHI_SOCIAL_URL` set to the Fly game URL.
+- `MOCHI_SOCIAL_GAME_CONTRACT_URL=<fly-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, and optional allowed-origin CORS contract.
 - Non-testers are blocked from `/games/mochi-social`.
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only `MOCHI_SOCIAL_AUTH` with a short-lived access token.
