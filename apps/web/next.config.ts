@@ -30,7 +30,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co",
   "font-src 'self' data:",
@@ -45,6 +45,10 @@ const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: contentSecurityPolicy,
+  },
+  {
+    key: "Access-Control-Allow-Origin",
+    value: "https://mochirii.com",
   },
   {
     key: "X-Content-Type-Options",

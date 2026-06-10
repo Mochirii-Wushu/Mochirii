@@ -19,6 +19,7 @@ const files = {
   deployment: "docs/deployment.md",
   appReadme: "apps/web/README.md",
   currentLiveState: "docs/current-live-state.md",
+  securityPolicy: "SECURITY.md",
 };
 
 function read(file) {
@@ -59,6 +60,7 @@ const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
 const appReadme = read(files.appReadme);
 const currentLiveState = read(files.currentLiveState);
+const securityPolicy = read(files.securityPolicy);
 
 function assertNoCurrentReportOnlyClaim(label, text) {
   const stalePatterns = [
@@ -80,6 +82,8 @@ assertIncludes("check-all", checkAll, "check:security-hardening");
 
 [
   "Content-Security-Policy",
+  "Access-Control-Allow-Origin",
+  "https://mochirii.com",
   "X-Content-Type-Options",
   "nosniff",
   "Referrer-Policy",
@@ -93,6 +97,10 @@ assertIncludes("check-all", checkAll, "check:security-hardening");
 
 if (nextConfig.includes("Content-Security-Policy-Report-Only")) {
   failures.push("Next security headers: CSP should be enforced, not report-only.");
+}
+
+if (nextConfig.includes("'unsafe-eval'")) {
+  failures.push("Next security headers: production CSP should not allow unsafe-eval.");
 }
 
 [
@@ -225,6 +233,13 @@ assertMatches(
 ].forEach((snippet) => assertIncludes("deployment docs", deployment, snippet));
 
 [
+  "Current Hardening Baseline",
+  "CSP is enforced",
+  "apps/web/next.config.ts",
+  "Supabase service-role keys",
+].forEach((snippet) => assertIncludes("security policy", securityPolicy, snippet));
+
+[
   "Security Headers",
   "Production CSP is enforced",
   "Content-Security-Policy",
@@ -236,6 +251,7 @@ assertMatches(
 [
   "Current Live State",
   "Production CSP is enforced",
+  "Access-Control-Allow-Origin",
   "Cloudflare remains DNS-only",
   "Supabase remains the authority",
   "Discord event schedule source is `data/guild-schedule.json`",
@@ -246,6 +262,7 @@ assertMatches(
   ["deployment docs", deployment],
   ["apps/web README", appReadme],
   ["current live state docs", currentLiveState],
+  ["security policy", securityPolicy],
 ].forEach(([label, text]) => assertNoCurrentReportOnlyClaim(label, text));
 
 if (failures.length) {
