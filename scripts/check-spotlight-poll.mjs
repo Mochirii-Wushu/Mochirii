@@ -25,6 +25,23 @@ function assertNotMatches(label, text, pattern, message) {
   if (pattern.test(text)) failures.push(`${label}: ${message}`);
 }
 
+function assertSpotlightLabelsDoNotUseFallbackTitle() {
+  const labelBlocks = [...homePage.matchAll(/aria-label=\{joinLabel\(\[([\s\S]*?)\]\)\}/g)].map((match) => match[1]);
+  const spotlightBlocks = labelBlocks.filter(
+    (block) => block.includes('"Member spotlight"') || block.includes('"Open member spotlight"'),
+  );
+
+  if (spotlightBlocks.length < 2) {
+    failures.push("home page: expected stable spotlight group and link aria-label blocks.");
+  }
+
+  spotlightBlocks.forEach((block) => {
+    if (block.includes("spotlight.title")) {
+      failures.push("home page: spotlight aria labels must not announce the static fallback winner title.");
+    }
+  });
+}
+
 const packageJson = read("package.json");
 const checkAll = read("scripts/check-all.mjs");
 const config = read("supabase/config.toml");
@@ -109,6 +126,7 @@ assertNotMatches(
 
 assertIncludes("home page", homePage, "SpotlightWinnerTitle");
 assertIncludes("spotlight page", sidePages, "SpotlightWinnerTitle");
+assertSpotlightLabelsDoNotUseFallbackTitle();
 assertNotMatches(
   "home page",
   homePage,
@@ -124,6 +142,8 @@ assertNotMatches(
 
 [
   "getCurrentSpotlightWinner",
+  "replaceHomeTitleName",
+  "replaceSpotlightTitleName",
   "Congratulations to: ${winnerName}.",
   "This Month: ${winnerName}",
 ].forEach((snippet) => assertIncludes("winner component", winnerComponent, snippet));

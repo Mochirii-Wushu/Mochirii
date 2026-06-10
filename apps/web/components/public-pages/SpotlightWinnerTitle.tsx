@@ -8,8 +8,22 @@ function clean(value: unknown, fallback = "") {
   return text || fallback;
 }
 
-function titleForWinner(template: "home" | "spotlight", winnerName: string) {
-  return template === "home" ? `Congratulations to: ${winnerName}.` : `This Month: ${winnerName}`;
+function replaceHomeTitleName(fallbackTitle: string, winnerName: string) {
+  const fallback = clean(fallbackTitle, "Congratulations to: Meenari.");
+  const match = fallback.match(/^(Congratulations to:\s*)(.*?)(\.)$/);
+  return match ? `${match[1]}${winnerName}${match[3]}` : `Congratulations to: ${winnerName}.`;
+}
+
+function replaceSpotlightTitleName(fallbackTitle: string, winnerName: string) {
+  const fallback = clean(fallbackTitle, "This Month: Meenari");
+  const match = fallback.match(/^(This Month:\s*)(.+)$/);
+  return match ? `${match[1]}${winnerName}` : `This Month: ${winnerName}`;
+}
+
+function titleForWinner(template: "home" | "spotlight", fallbackTitle: string, winnerName: string) {
+  return template === "home"
+    ? replaceHomeTitleName(fallbackTitle, winnerName)
+    : replaceSpotlightTitleName(fallbackTitle, winnerName);
 }
 
 export function SpotlightWinnerTitle({
@@ -19,20 +33,35 @@ export function SpotlightWinnerTitle({
   fallbackTitle: string;
   template: "home" | "spotlight";
 }) {
-  const [title, setTitle] = useState(clean(fallbackTitle, "Spotlight"));
+  const fallback = clean(fallbackTitle, "Spotlight");
+  const [winnerTitle, setWinnerTitle] = useState<{
+    fallback: string;
+    template: "home" | "spotlight";
+    title: string;
+  } | null>(null);
 
   useEffect(() => {
     let alive = true;
+
     getCurrentSpotlightWinner().then((result) => {
       if (!alive) return;
       const winnerName = clean(result.data?.winnerName);
-      if (result.ok && winnerName) setTitle(titleForWinner(template, winnerName));
+      if (result.ok && winnerName) {
+        setWinnerTitle({
+          fallback,
+          template,
+          title: titleForWinner(template, fallback, winnerName),
+        });
+      }
     });
 
     return () => {
       alive = false;
     };
-  }, [template]);
+  }, [fallback, template]);
+
+  const title =
+    winnerTitle?.fallback === fallback && winnerTitle.template === template ? winnerTitle.title : fallback;
 
   return <>{title}</>;
 }

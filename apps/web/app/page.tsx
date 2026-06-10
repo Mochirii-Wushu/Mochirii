@@ -430,7 +430,6 @@ export default function Home() {
               aria-label={joinLabel([
                 "Member spotlight",
                 spotlight.tag,
-                spotlight.title,
                 spotlight.summary,
                 "Spotlight Appreciation",
               ])}
@@ -451,7 +450,6 @@ export default function Home() {
                 aria-label={joinLabel([
                   "Open member spotlight",
                   spotlight.tag,
-                  spotlight.title,
                   spotlight.summary,
                   "Spotlight Appreciation",
                 ])}
