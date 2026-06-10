@@ -44,6 +44,9 @@ const orderItems = (items, mode) =>
 const fullPath = (item) => String(item?.full || item?.src || "");
 const staticTotal = staticItems.length;
 const portraitsTotal = staticItems.filter((item) => getCategories(item).includes("portraits")).length;
+const galleryBatchSize = 24;
+const initialStaticCount = Math.min(staticTotal, galleryBatchSize);
+const initialPortraitsCount = Math.min(portraitsTotal, galleryBatchSize);
 const newestFirst = fullPath(orderItems(staticItems, "newest")[0]);
 const oldestFirst = fullPath(orderItems(staticItems, "oldest")[0]);
 
@@ -228,11 +231,17 @@ try {
     await waitForGallery(page);
 
     let state = await visibleState(page);
-    assert(state.count === staticTotal, `Static Gallery expected ${staticTotal} items, got ${state.count}.`);
-    assert(state.countText === `Showing ${staticTotal} of ${staticTotal} images.`, `Unexpected static count text: ${state.countText}`);
+    assert(state.count === initialStaticCount, `Static Gallery expected initial ${initialStaticCount} items, got ${state.count}.`);
+    assert(state.countText === `Showing ${initialStaticCount} of ${staticTotal} images.`, `Unexpected static count text: ${state.countText}`);
     assert(state.sortValue === "random", `Expected default random sort, got ${state.sortValue}.`);
     assert(state.invocations.length === 0, "Local static Gallery should not call the approved feed without approvedFeed=1.");
     assert(state.imageSrcs.every((src) => src.includes("/thumbs/")), "Static Gallery grid should use thumbnails.");
+
+    await page.click("#galleryLoadMore");
+    await page.waitForFunction(
+      (expected) => document.querySelectorAll("#galleryGrid .gallery-thumb").length === expected,
+      Math.min(staticTotal, galleryBatchSize * 2),
+    );
 
     await page.selectOption("#gallerySort", "newest");
     await page.waitForFunction(() => document.querySelector("#gallerySort")?.value === "newest");
@@ -247,7 +256,7 @@ try {
     await page.click('#galleryFilters [data-category="portraits"]');
     await page.waitForURL(/category=portraits/);
     state = await visibleState(page);
-    assert(state.count === portraitsTotal, `Portraits filter expected ${portraitsTotal} items, got ${state.count}.`);
+    assert(state.count === initialPortraitsCount, `Portraits filter expected initial ${initialPortraitsCount} items, got ${state.count}.`);
     assert(state.filters.find((filter) => filter.slug === "portraits")?.pressed === "true", "Portraits filter was not active.");
 
     await page.click("#galleryGrid .gallery-thumb");
@@ -273,7 +282,7 @@ try {
     let state = await visibleState(page);
     assert(state.invocations.some((entry) => entry.name === "list-approved-gallery-submissions"), "Approved feed was not invoked.");
     assert(state.count === 1, `Member Submissions filter expected 1 approved item, got ${state.count}.`);
-    assert(state.countText === "Showing 1 image in Member Submissions.", `Unexpected member count text: ${state.countText}`);
+    assert(state.countText === "Showing 1 of 1 image in Member Submissions.", `Unexpected member count text: ${state.countText}`);
     const memberFilterText = state.filters.find((filter) => filter.slug === "member-submissions")?.text || "";
     assert(/^Member Submissions\s+\D\s+1$/.test(memberFilterText), `Member filter count was not rendered: ${memberFilterText}`);
     const allFilterText = state.filters.find((filter) => filter.slug === "all")?.text || "";
@@ -308,7 +317,7 @@ try {
     await waitForGallery(page);
 
     const state = await visibleState(page);
-    assert(state.count === staticTotal, `Approved-feed failure should fall back to ${staticTotal} static items, got ${state.count}.`);
+    assert(state.count === initialStaticCount, `Approved-feed failure should fall back to initial ${initialStaticCount} static items, got ${state.count}.`);
     assert(state.filters.every((filter) => filter.slug !== "member-submissions"), "Member Submissions filter should not render when approved feed fails.");
     assert(state.fulls[0] === newestFirst, "Approved-feed failure should preserve static newest sort.");
 

@@ -46,6 +46,7 @@ type NormalizedGalleryItem = Omit<GalleryItem, "alt" | "caption" | "categories" 
 const allCategory = "all";
 const defaultSort: SortMode = "random";
 const memberSubmissionsCategory = "member-submissions";
+const galleryRenderBatchSize = 24;
 const sortModes = new Set<SortMode>([defaultSort, "newest", "oldest"]);
 const focusableSelector = [
   "a[href]",
@@ -239,6 +240,7 @@ export function GalleryBrowser({
   const [activeSort, setActiveSort] = useState<SortMode>(defaultSort);
   const [approvedItems, setApprovedItems] = useState<GalleryItem[]>([]);
   const [randomSeed, setRandomSeed] = useState<number | null>(null);
+  const [renderWindow, setRenderWindow] = useState({ key: "", limit: galleryRenderBatchSize });
   const [shareStatus, setShareStatus] = useState("");
   const [openItemKey, setOpenItemKey] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -334,12 +336,16 @@ export function GalleryBrowser({
     return [...filtered].sort((a, b) => compareGalleryItems(a, b, sortMode));
   }, [activeCategory, activeSort, randomSeed, usableItems]);
 
+  const renderWindowKey = `${activeCategory}:${activeSort}:${randomSeed ?? "pending"}:${usableItems.length}`;
+  const effectiveRenderLimit = renderWindow.key === renderWindowKey ? renderWindow.limit : galleryRenderBatchSize;
+  const renderedItems = useMemo(() => visibleItems.slice(0, effectiveRenderLimit), [effectiveRenderLimit, visibleItems]);
+  const hasMoreItems = renderedItems.length < visibleItems.length;
   const openItem = openItemKey === null ? null : visibleItems.find((item) => item.stableKey === openItemKey) || null;
   const activeLabel = filterCategories.find((category) => category.slug === activeCategory)?.label || "All";
   const countText =
     activeLabel === "All"
-      ? `Showing ${visibleItems.length} of ${usableItems.length} ${usableItems.length === 1 ? "image" : "images"}.`
-      : `Showing ${visibleItems.length} ${visibleItems.length === 1 ? "image" : "images"} in ${activeLabel}.`;
+      ? `Showing ${renderedItems.length} of ${usableItems.length} ${usableItems.length === 1 ? "image" : "images"}.`
+      : `Showing ${renderedItems.length} of ${visibleItems.length} ${visibleItems.length === 1 ? "image" : "images"} in ${activeLabel}.`;
 
   const closeModal = useCallback(() => {
     setOpenItemKey(null);
@@ -407,6 +413,13 @@ export function GalleryBrowser({
     setActiveSort(nextSort);
     setShareStatus("");
     updateUrl(activeCategory, nextSort);
+  };
+
+  const showMoreImages = () => {
+    setRenderWindow({
+      key: renderWindowKey,
+      limit: Math.min(effectiveRenderLimit + galleryRenderBatchSize, visibleItems.length),
+    });
   };
 
   const openModal = (item: NormalizedGalleryItem) => {
@@ -537,7 +550,7 @@ export function GalleryBrowser({
       </p>
 
       <div id="galleryGrid" className="gallery-grid" aria-live="polite" hidden={visibleItems.length === 0}>
-        {visibleItems.map((item) => (
+        {renderedItems.map((item) => (
           <button
             className="gallery-thumb"
             type="button"
@@ -551,6 +564,14 @@ export function GalleryBrowser({
           </button>
         ))}
       </div>
+
+      {hasMoreItems ? (
+        <div className="gallery-load-more-row">
+          <button id="galleryLoadMore" className="gallery-load-more" type="button" onClick={showMoreImages}>
+            Show more images
+          </button>
+        </div>
+      ) : null}
 
       {portalRoot ? createPortal(lightbox, portalRoot) : null}
     </>
