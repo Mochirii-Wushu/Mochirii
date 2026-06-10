@@ -401,6 +401,8 @@ The website does not assign Discord roles in this phase.
 
 `has_required_discord_roles` means the latest server-side Discord check found both required role IDs. Browser code treats it as UX state; database and Storage RLS enforce access.
 
+`public.handle_new_member_profile()` is the Auth trigger helper that creates or updates the matching `member_profiles` row when a Supabase Auth user appears. It is `security definer`, has its search path fixed by migration, and is revoked from `public`, `anon`, and `authenticated`; browser clients do not call it directly.
+
 `gallery_submissions` stores member-owned pending upload records:
 
 - private Storage bucket/path
