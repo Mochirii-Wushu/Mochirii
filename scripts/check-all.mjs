@@ -23,6 +23,7 @@ const checks = [
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
+  ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],

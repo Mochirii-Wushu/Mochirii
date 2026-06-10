@@ -278,6 +278,13 @@ export type VisibleProfileCardsResponse = {
   signedUrlSeconds?: number;
 };
 
+export type CurrentSpotlightWinner = {
+  winnerName?: string | null;
+  monthKey?: string | null;
+  publishedAt?: string | null;
+  source?: string | null;
+};
+
 export type ProfileMediaKind = "avatar" | "banner";
 export type ProfileMediaStatus = "pending" | "approved" | "rejected" | "archived";
 

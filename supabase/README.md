@@ -557,6 +557,31 @@ The database stores:
 
 Both tables have RLS enabled and service-role-only grants. Browser clients receive no direct vote table access.
 
+## Monthly Member Spotlight Polls
+
+Monthly member spotlight polls use Discord native polls and Supabase-owned winner publication:
+
+- `send-member-spotlight-poll`: scheduled sender that creates one native Discord poll on the 1st of each month at `00:05 UTC+8`.
+- `publish-member-spotlight-winner`: scheduled finalizer that waits for Discord finalized poll results after 7 days.
+- `get-current-spotlight-winner`: public-safe website lookup that returns only the published winner name and month.
+
+Native Discord polls are limited to 10 answers, so Reaper snapshots up to 10 randomly selected active, recently verified, Discord-linked website members per cycle. If there are 10 or fewer eligible members, all eligible members are included. The poll is single-choice, lasts 168 hours, and uses `allowed_mentions: { parse: [] }`.
+
+Required secrets:
+
+```text
+DISCORD_SPOTLIGHT_POLL_CHANNEL_ID
+SPOTLIGHT_POLL_CRON_SECRET
+```
+
+The database stores:
+
+- `spotlight_poll_cycles`: one monthly Discord poll cycle, Discord message IDs, status, winner, and audit timestamps.
+- `spotlight_poll_candidates`: the private candidate snapshot and Discord answer mapping for that cycle.
+- `spotlight_poll_results`: private finalized answer counts and verification metadata.
+
+All three tables have RLS enabled and service-role-only grants. Browser clients receive no direct candidate, Discord ID, voter, or vote-count access. The website Home and Spotlight pages may replace the configured fallback title with the finalized winner name only; they do not expose the winner's Discord handle, profile link, avatar, raw vote totals, or candidate list.
+
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved. Discord attachment `content_type` is advisory because Discord may omit or mislabel it; `submit-discord-gallery-image` downloads the approved Discord CDN URL and accepts only JPEG, PNG, or WebP byte signatures under 50 MB before storing the sniffed MIME type.
 
 The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command must include the optional Discord boolean option:
