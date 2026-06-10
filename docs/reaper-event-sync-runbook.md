@@ -16,6 +16,7 @@ https://mochirii.com/data/guild-schedule.json
 
 Rules:
 
+- Preview first; provider mutation is never the first sync action.
 - `preview` never changes Discord.
 - `apply` requires `confirm:true`.
 - The caller must have the configured Moderator role.
@@ -56,6 +57,8 @@ Run:
 ```
 
 The preview should show one canonical `Monthly Guild Raffle` update and no duplicate creation. If the explicit duplicate one-off raffle event `1513742240760070144` still exists, preview reports it as a duplicate removal. Only after the preview output is clean and owner approval is current, run:
+
+Do not run `apply` if preview shows duplicate creates, unexpected missing managed events, unexpected title/time drift, or any unmanaged Discord event that would be touched.
 
 ```text
 /sync-events mode:apply confirm:true
