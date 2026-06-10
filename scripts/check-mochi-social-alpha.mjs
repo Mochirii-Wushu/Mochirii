@@ -48,11 +48,25 @@ const checks = [
   }
 ];
 
+const forbiddenPatterns = [
+  { label: 'GitHub token', pattern: /\b(?:ghp|gho|ghs|ghu|github_pat)_[A-Za-z0-9_]{20,}\b/ },
+  { label: 'Supabase secret key', pattern: /\bsb_secret_[A-Za-z0-9_-]{20,}\b/ },
+  { label: 'JWT-like token', pattern: /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/ },
+  { label: 'private key block', pattern: /-----BEGIN (?:RSA |EC |OPENSSH |)?PRIVATE KEY-----/ },
+  { label: 'Mochi Social game server token assignment', pattern: /\bMOCHI_SOCIAL_GAME_SERVER_TOKEN\s*=\s*["']?(?!\.\.\.|<|your-|YOUR_|REPLACE_|example\b)[^\s"']{8,}/i },
+  { label: 'Enjin Platform token assignment', pattern: /\bENJIN_PLATFORM_TOKEN\s*=\s*["']?(?!\.\.\.|<|your-|YOUR_|REPLACE_|example\b)[^\s"']{8,}/i }
+];
+
 for (const check of checks) {
   const text = readFileSync(check.file, 'utf8');
   for (const needle of check.includes) {
     if (!text.includes(needle)) {
       throw new Error(`${check.file} is missing ${needle}`);
+    }
+  }
+  for (const { label, pattern } of forbiddenPatterns) {
+    if (pattern.test(text)) {
+      throw new Error(`${check.file} appears to contain a real ${label}.`);
     }
   }
 }
