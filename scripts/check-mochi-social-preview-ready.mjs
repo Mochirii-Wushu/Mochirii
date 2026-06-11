@@ -30,6 +30,7 @@ const manualBrowserGateChecks = [
 const requirements = [];
 
 addCommandRequirement("site.static-alpha", "Mochi Social static alpha checks pass.", "node", ["scripts/check-mochi-social-alpha.mjs"], {});
+addCommandRequirement("site.edge-authority", "Mochi Social Edge authority guard passes before hosted Supabase smoke.", "node", ["scripts/check-mochi-social-edge-authority.mjs"], {});
 addBranchSyncRequirement("site.branch-sync", root, "Local Mochirii site branch");
 addOperatorChecklistRequirement();
 addGamePreviewReadyRequirement();
