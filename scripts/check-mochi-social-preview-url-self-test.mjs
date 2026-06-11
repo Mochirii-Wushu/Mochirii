@@ -33,8 +33,8 @@ function assertOperatorChecklistReadsPreviewUrls() {
   assert(result.status === 0, `operator checklist command failed: ${result.stderr || result.stdout}`);
   const checklist = readFileSync(join(tempDir, "mochirii-mochi-social-alpha-operator-next-steps.md"), "utf8");
   assert(checklist.includes("Local no-secret preview URL file"), "operator checklist should include local preview URL section.");
-  assert(checklist.includes(gameUrl), "operator checklist should include the sanitized game URL.");
-  assert(checklist.includes(siteUrl), "operator checklist should include the sanitized site preview URL.");
+  assertMarkdownFieldEquals(checklist, "Game URL", gameUrl, "operator checklist should include the sanitized game URL.");
+  assertMarkdownFieldEquals(checklist, "Site preview URL", siteUrl, "operator checklist should include the sanitized site preview URL.");
   assertNoLeak("operator checklist", checklist);
 }
 
@@ -63,8 +63,9 @@ function assertPreviewReadyReadsPreviewUrls() {
   assert(report.previewEnv?.gameUrl === gameUrl, "Preview Ready should record the sanitized game URL.");
   assert(report.previewEnv?.sitePreviewUrl === siteUrl, "Preview Ready should record the sanitized site URL.");
   assert(markdown.includes("## Local Preview URL File"), "Preview Ready markdown should include local preview URL section.");
-  assert(markdown.includes(gameUrl), "Preview Ready markdown should include the sanitized game URL.");
-  assert(markdown.includes(siteUrl), "Preview Ready markdown should include the sanitized site preview URL.");
+  const localPreviewSection = readMarkdownSection(markdown, "Local Preview URL File");
+  assertMarkdownFieldEquals(localPreviewSection, "Game URL", gameUrl, "Preview Ready markdown should include the sanitized game URL.");
+  assertMarkdownFieldEquals(localPreviewSection, "Site preview URL", siteUrl, "Preview Ready markdown should include the sanitized site preview URL.");
   assertNoLeak("Preview Ready output", `${result.stdout || ""}${result.stderr || ""}`);
   assertNoLeak("Preview Ready JSON", JSON.stringify(report));
   assertNoLeak("Preview Ready markdown", markdown);
@@ -82,6 +83,24 @@ function writePreviewUrlFile() {
 
 function assertNoLeak(label, text) {
   assert(!String(text || "").includes(fakeToken), `${label} leaked non-URL file content.`);
+}
+
+function assertMarkdownFieldEquals(markdown, label, expected, message) {
+  const prefix = `- ${label}: `;
+  const value = markdown
+    .split(/\r?\n/)
+    .find((line) => line.startsWith(prefix))
+    ?.slice(prefix.length)
+    .trim();
+  assert(value === expected, message);
+}
+
+function readMarkdownSection(markdown, heading) {
+  const lines = markdown.split(/\r?\n/);
+  const start = lines.findIndex((line) => line === `## ${heading}`);
+  assert(start >= 0, `Markdown section is missing: ${heading}`);
+  const end = lines.findIndex((line, index) => index > start && line.startsWith("## "));
+  return lines.slice(start + 1, end >= 0 ? end : undefined).join("\n");
 }
 
 function assert(condition, message) {
