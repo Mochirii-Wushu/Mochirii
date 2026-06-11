@@ -371,14 +371,17 @@ function currentGitStateFailures(state, repoPath, label) {
   if (!state) failures.push(`${label} must include git state`);
   if (!branch.ok) failures.push(`${label} current branch could not be read`);
   if (!localHead.ok) failures.push(`${label} current HEAD could not be read`);
-  if (!upstream.ok) failures.push(`${label} current upstream could not be read`);
   if (!dirty.ok) failures.push(`${label} current worktree status could not be read`);
-  if (!state || !branch.ok || !localHead.ok || !upstream.ok || !dirty.ok) return failures;
+  if (!state || !branch.ok || !localHead.ok || !dirty.ok) return failures;
 
   const currentDirty = dirty.stdout.split(/\r?\n/).filter(Boolean);
   if (state.branch !== firstLine(branch.stdout)) failures.push(`${label} branch does not match current branch`);
   if (state.localHead !== firstLine(localHead.stdout)) failures.push(`${label} localHead does not match current HEAD`);
-  if (state.upstream !== firstLine(upstream.stdout)) failures.push(`${label} upstream does not match current upstream`);
+  if (upstream.ok) {
+    if (state.upstream !== firstLine(upstream.stdout)) failures.push(`${label} upstream does not match current upstream`);
+  } else if (state.upstream) {
+    failures.push(`${label} recorded an upstream but current upstream could not be read`);
+  }
   if (!Array.isArray(state.dirty) || state.dirty.length !== currentDirty.length) failures.push(`${label} dirty state does not match current worktree`);
   return failures;
 }
