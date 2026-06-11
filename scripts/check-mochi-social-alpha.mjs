@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-report-hygiene']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -71,6 +71,10 @@ const checks = [
   {
     file: 'scripts/write-mochi-social-browser-gates.mjs',
     includes: ['Mochi Social browser gate evidence passed', 'reports/mochi-social-browser-gates.json', 'reports/mochi-social-browser-gates.md', 'mochirii-mochi-social-browser-gates.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES', 'assertNoForbiddenMaterial', 'DISCORD_(?:CLIENT_SECRET|BOT_TOKEN)', ...browserGateEnvNames]
+  },
+  {
+    file: 'scripts/check-mochi-social-report-hygiene.mjs',
+    includes: ['Mochi Social report hygiene OK', 'reports/mochi-social-report-hygiene.json', 'reports/mochi-social-report-hygiene.md', 'mochirii-mochi-social-browser-gates.md', 'mochirii-mochi-social-preview-ready.md', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'No secret values were printed', 'Wallet seed file reference', 'Account email']
   },
   {
     file: 'scripts/check-mochi-social-discord-oauth-self-test.mjs',
@@ -140,6 +144,7 @@ const checks = [
       'Manual Browser Gate Evidence',
       ...browserGateEnvNames,
       'prepare:mochi-social-alpha-operator-checklist',
+      'check:mochi-social-report-hygiene',
       'check:mochi-social-preview-ready',
       'Do not roll back by switching to production',
       'Computer Use',

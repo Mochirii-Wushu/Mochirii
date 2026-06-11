@@ -165,6 +165,8 @@ npm run prepare:mochi-social-browser-gates
 
 `npm run prepare:mochi-social-browser-gates` writes ignored no-secret JSON/Markdown plus `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-browser-gates.md`. After that, `npm run check:mochi-social-preview-ready` can consume the saved report; hosted browser evidence still requires `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true` for the audit pass.
 
+Run `npm run check:mochi-social-report-hygiene` after generating Mochi Social reports or no-secret handoff files. It scans only known ignored Mochi Social reports and Desktop Creds handoff files for obvious secret-shaped material, and prints labels/status only.
+
 For the hosted Supabase Edge smoke, prefer the local file pointer over pasting the publishable key into the shell:
 
 ```powershell
