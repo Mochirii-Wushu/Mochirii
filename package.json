@@ -36,6 +36,7 @@
     "check:mochi-social-edge-authority": "node scripts/check-mochi-social-edge-authority.mjs",
     "check:mochi-social-game-contract": "node scripts/check-mochi-social-game-contract.mjs",
     "check:mochi-social-preview-key-loader": "node scripts/check-mochi-social-preview-key-loader.mjs",
+    "check:mochi-social-preview-url": "node scripts/check-mochi-social-preview-url-self-test.mjs",
     "check:mochi-social-preview-ready": "node scripts/check-mochi-social-preview-ready.mjs",
     "check:next-public-sync": "node scripts/check-next-public-sync.mjs",
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",

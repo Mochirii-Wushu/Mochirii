@@ -22,6 +22,7 @@ const checks = [
   ["check:mochi-social-edge-authority", ["node", "scripts/check-mochi-social-edge-authority.mjs"]],
   ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],
   ["check:mochi-social-preview-key-loader", ["node", "scripts/check-mochi-social-preview-key-loader.mjs"]],
+  ["check:mochi-social-preview-url", ["node", "scripts/check-mochi-social-preview-url-self-test.mjs"]],
   ["smoke:mochi-social-alpha-edge", ["node", "scripts/smoke-mochi-social-alpha-edge.mjs"]],
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],

@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -47,6 +47,10 @@ const checks = [
   {
     file: 'scripts/check-mochi-social-preview-key-loader.mjs',
     includes: ['MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'not-loaded-awaiting-hosted-approval', 'publishableKeyPresent === true', 'publishableKeySource', 'assertNoLeak', 'Mochi Social preview publishable-key loader self-test OK']
+  },
+  {
+    file: 'scripts/check-mochi-social-preview-url-self-test.mjs',
+    includes: ['Mochi Social preview URL self-test OK', 'mochi-social-alpha-vercel-preview.local.txt', 'MOCHI_SOCIAL_GAME_URL', 'MOCHI_SOCIAL_SITE_PREVIEW_URL', 'Local no-secret preview URL file', '## Local Preview URL File', 'assertNoLeak', 'fakeToken']
   },
   {
     file: 'scripts/check-mochi-social-auth-bridge.mjs',
