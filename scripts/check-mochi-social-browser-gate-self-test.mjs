@@ -100,6 +100,13 @@ function runAndAssertManualGate(label, env, assertGate) {
   });
   assert(result.status !== 0, `${label} should keep Preview Ready red while self-testing browser gate evidence.`);
   const report = readReport(label);
+  const authorityGate = report.requirements.find((entry) => entry.id === "site.edge-authority");
+  assert(authorityGate, `${label} report did not include site.edge-authority.`);
+  assert(authorityGate.status === "pass", `${label} site.edge-authority should pass before hosted/manual gates.`);
+  assert(
+    authorityGate.evidence?.command === "node scripts/check-mochi-social-edge-authority.mjs",
+    `${label} site.edge-authority should be backed by the local Edge authority checker.`,
+  );
   const gate = report.requirements.find((entry) => entry.id === "site.manual-browser-gates");
   assert(gate, `${label} report did not include site.manual-browser-gates.`);
   assertGate(gate, report);
