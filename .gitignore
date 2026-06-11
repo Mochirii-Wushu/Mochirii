@@ -1,4 +1,6 @@
 reports/lighthouse/
+reports/mochi-social-browser-gates.json
+reports/mochi-social-browser-gates.md
 reports/mochi-social-preview-ready.json
 reports/mochi-social-preview-ready.md
 .lighthouseci/

@@ -75,7 +75,7 @@ function writePreviewUrlFile() {
     "# self-test URL file",
     `MOCHI_SOCIAL_GAME_URL=${gameUrl}`,
     `MOCHI_SOCIAL_SITE_PREVIEW_URL=${siteUrl}`,
-    `IGNORED_FAKE_TOKEN=${fakeToken}`,
+    `IGNORED_FAKE_VALUE=${fakeToken}`,
     "",
   ].join("\n"), "utf8");
 }

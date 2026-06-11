@@ -97,13 +97,15 @@ Run these checks only after hosted verification is explicitly approved. Use Chro
 - Feedback gate: submit a harmless alpha feedback message, then confirm the leader audit panel shows a feedback row/count without exposing private user data in the report.
 - Admin gate: confirm a leader/moderator can grant and revoke alpha access by Supabase user id, then restore the intended tester state.
 
-When all checks pass, stamp the site report with:
+When all checks pass, stamp the durable no-secret browser-gate report with:
 
 ```powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES="<no-secret status notes>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
@@ -112,7 +114,10 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
+npm run prepare:mochi-social-browser-gates
 ```
+
+This writes ignored no-secret evidence to `reports/mochi-social-browser-gates.json`, `reports/mochi-social-browser-gates.md`, and `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-browser-gates.md`. The later `npm run check:mochi-social-preview-ready` pass can read that saved report, but hosted browser evidence still requires `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true` during the Preview Ready audit.
 
 Do not place screenshots containing account email, OAuth consent tokens, Supabase access tokens, cookies, request headers, service-role values, Discord secrets, or Enjin secrets in Git, reports, PR comments, or chat.
 
@@ -155,22 +160,10 @@ $env:MOCHI_SOCIAL_GAME_CONTRACT_URL="https://mochi-social-game.fly.dev"
 $env:MOCHI_SOCIAL_SITE_ORIGIN="<Mochirii Vercel Preview URL>"
 $env:MOCHI_SOCIAL_ALPHA_EDGE_URL="https://<preview-project-ref>.supabase.co/functions/v1"
 $env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE="C:\Users\xtyty\Desktop\Creds\supabase-preview-<preview-project-ref>-api-keys.local.json"
-$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
-$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
-$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
-$env:MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 npm run check:mochi-social-preview-ready
 ```
 
-This writes ignored no-secret reports to `reports/mochi-social-preview-ready.json`, `reports/mochi-social-preview-ready.md`, and `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-preview-ready.md`. It does not approve provider mutations; it stays red until hosted checks, manual browser gates, game Preview Ready, and site branch sync are proven.
+This writes ignored no-secret reports to `reports/mochi-social-preview-ready.json`, `reports/mochi-social-preview-ready.md`, and `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-preview-ready.md`. It does not approve provider mutations; it stays red until hosted checks, saved manual browser gates, game Preview Ready, and site branch sync are proven.
 
 For hosted Preview Ready checks, `npm run check:mochi-social-preview-ready` may load the Supabase publishable key from `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE`, or from the standard `C:\Users\xtyty\Desktop\Creds\supabase-preview-<preview-project-ref>-api-keys.local.json` file after `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true` is set. Reports record only the key source filename/status, never the key value.
 

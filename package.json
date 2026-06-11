@@ -54,6 +54,7 @@
     "generate:discord-event-covers": "node scripts/generate-discord-event-covers.mjs",
     "prepare:dns-cutover-private-packets": "node scripts/prepare-dns-cutover-private-packets.mjs",
     "prepare:mochi-social-alpha-operator-checklist": "node scripts/prepare-mochi-social-alpha-operator-checklist.mjs",
+    "prepare:mochi-social-browser-gates": "node scripts/write-mochi-social-browser-gates.mjs",
     "prepare:live-member-cleanup-note": "node scripts/prepare-live-member-cleanup-note.mjs",
     "prepare:live-member-qa-image": "node scripts/prepare-live-member-qa-image.mjs",
     "prepare:live-member-qa-local": "node scripts/prepare-live-member-qa-local.mjs",

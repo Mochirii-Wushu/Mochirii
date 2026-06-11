@@ -221,13 +221,15 @@ Use Chrome only after hosted browser verification is explicitly approved. Record
 - For the MOCHI_SOCIAL_AUTH gate, verify the shape of the bridge message only: the parent sends MOCHI_SOCIAL_AUTH with a short-lived access-token field and does not send refresh tokens or provider secrets.
 - Feedback/admin evidence should use counts, row ids, route names, and non-secret status notes. Avoid account emails or private user data in reports.
 
-After the browser pass, stamp the site audit with no-secret metadata only:
+After the browser pass, stamp durable site browser evidence with no-secret metadata only:
 
 \`\`\`powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="${siteOrigin}/games/mochi-social"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES="<no-secret status notes>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
@@ -236,7 +238,10 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
+npm run prepare:mochi-social-browser-gates
 \`\`\`
+
+The saved report lives at reports/mochi-social-browser-gates.json plus C:\\Users\\xtyty\\Desktop\\Creds\\mochirii-mochi-social-browser-gates.md. The Preview Ready audit can read that report later without restamping every browser-gate env var.
 
 ## Full Local Verification
 

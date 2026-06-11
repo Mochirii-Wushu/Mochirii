@@ -23,6 +23,7 @@ try {
   assertPartialConfirmationListsMissingGate();
   assertHostedBrowserUrlRequiresHostedApproval();
   assertLocalhostBrowserEvidenceCanPassManualGateOnly();
+  assertStoredBrowserGateReportCanPassManualGateOnly();
   console.log("Mochi Social browser gate self-test OK.");
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
@@ -80,6 +81,57 @@ function assertLocalhostBrowserEvidenceCanPassManualGateOnly() {
     assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "All required browser gates should be recorded as true.");
     assert(report.ok === false, "Preview Ready should still remain red in this self-test because branch/hosted gates are not proven.");
   });
+}
+
+function assertStoredBrowserGateReportCanPassManualGateOnly() {
+  const storedJson = join(tempDir, "stored-browser-gates.json");
+  const storedMd = join(tempDir, "stored-browser-gates.md");
+  const fakeToken = `ghp_${"fakePreviewBrowserGateToken"}${"1234567890"}`;
+  const writer = spawnSync(process.execPath, ["scripts/write-mochi-social-browser-gates.mjs"], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_MD: storedMd,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_HANDOFF: "stored-browser-gates-handoff.md",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES: `No-secret note with ${fakeToken} to verify redaction.`,
+      ...requiredGateEnv,
+    },
+  });
+  assert(writer.status === 0, `stored report writer should pass: ${writer.stderr || writer.stdout}`);
+  const storedReportText = readFileSync(storedJson, "utf8");
+  const storedMarkdown = readFileSync(storedMd, "utf8");
+  assert(!storedReportText.includes(fakeToken), "Stored browser gate report must redact fake tokens.");
+  assert(!storedMarkdown.includes(fakeToken), "Stored browser gate Markdown must redact fake tokens.");
+
+  const result = spawnSync(process.execPath, [checker], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-report"),
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_MD: reportMdPath("stored-report"),
+      MOCHI_SOCIAL_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
+      MOCHI_SOCIAL_GAME_CONTRACT_URL: "https://mochi-social-game.fly.dev",
+      MOCHI_SOCIAL_SITE_ORIGIN: "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app",
+      MOCHI_SOCIAL_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
+    },
+  });
+  assert(result.status !== 0, "Stored report should keep Preview Ready red while branch/hosted gates are not proven.");
+  const report = readReport("stored-report");
+  const gate = report.requirements.find((entry) => entry.id === "site.manual-browser-gates");
+  assert(gate, "Stored report case did not include site.manual-browser-gates.");
+  assert(gate.status === "pass", "Stored report should satisfy the manual browser gate.");
+  assert(gate.evidence.source === storedJson, "Manual gate evidence should point at the stored browser gate report.");
+  assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "Stored report should preserve every required browser gate as true.");
 }
 
 function runAndAssertManualGate(label, env, assertGate) {

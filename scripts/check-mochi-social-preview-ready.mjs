@@ -11,6 +11,7 @@ const previewEnv = readPreviewEnvFile(previewEnvPath);
 const reportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON || "reports/mochi-social-preview-ready.json");
 const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_MD || "reports/mochi-social-preview-ready.md");
 const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
+const browserGateReportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON || "reports/mochi-social-browser-gates.json");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
 const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
 const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev");
@@ -219,6 +220,12 @@ async function addDiscordOAuthProviderRequirement() {
 }
 
 function addManualBrowserGateRequirement() {
+  const envEvidenceRequested = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED === "true" || manualBrowserGateChecks.some(([envName]) => process.env[envName] === "true");
+  if (!envEvidenceRequested && existsSync(browserGateReportPath)) {
+    addStoredManualBrowserGateRequirement();
+    return;
+  }
+
   const confirmed = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED === "true";
   const reviewer = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER || "");
   const browser = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER || "");
@@ -241,11 +248,55 @@ function addManualBrowserGateRequirement() {
     failures.push("hosted browser gate confirmation requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
   }
   add("site.manual-browser-gates", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Manual website browser gates are confirmed.", {
+    source: "environment",
     reviewer: reviewer || null,
     browser: browser || null,
     url: reviewUrl || null,
     hostedChecksAllowed,
     requiredGates: gateResults,
+  });
+}
+
+function addStoredManualBrowserGateRequirement() {
+  const stored = readJson(browserGateReportPath);
+  if (!stored.ok) {
+    add("site.manual-browser-gates", "fail", `Stored browser gate report is missing or invalid: ${stored.message}. Run npm run prepare:mochi-social-browser-gates after the approved Chrome pass.`, {
+      source: browserGateReportPath,
+    });
+    return;
+  }
+
+  const data = stored.data;
+  const failures = currentGitStateFailures(data.git, root, "stored browser gate report");
+  const gateResults = Array.isArray(data.requiredGates) ? data.requiredGates : [];
+  const missingNames = manualBrowserGateChecks
+    .filter(([envName]) => !gateResults.some((gate) => gate.envName === envName && gate.ok === true))
+    .map(([envName]) => envName);
+  if (data.ok !== true) failures.push("stored browser gate report is not ok");
+  if (missingNames.length) failures.push(`stored browser gate report is missing confirmations: ${missingNames.join(", ")}`);
+  const reviewUrl = sanitize(data.url || "");
+  if (!data.reviewer) failures.push("stored browser gate report reviewer is required");
+  if (!data.browser) failures.push("stored browser gate report browser is required");
+  if (!reviewUrl) failures.push("stored browser gate report URL is required");
+  if (reviewUrl && isHostedUrl(reviewUrl) && !hostedChecksAllowed) {
+    failures.push("stored hosted browser gate evidence requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
+  }
+  if (reviewUrl && isHostedUrl(reviewUrl) && data.hostedChecksAllowed !== true) {
+    failures.push("stored hosted browser gate report must be stamped with hosted approval");
+  }
+
+  add("site.manual-browser-gates", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Stored manual website browser gates are confirmed.", {
+    source: browserGateReportPath,
+    reviewer: data.reviewer || null,
+    browser: data.browser || null,
+    url: reviewUrl || null,
+    storedHostedChecksAllowed: data.hostedChecksAllowed === true,
+    hostedChecksAllowed,
+    requiredGates: gateResults.map((gate) => ({
+      envName: gate.envName,
+      label: gate.label,
+      ok: gate.ok === true,
+    })),
   });
 }
 

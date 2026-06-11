@@ -146,10 +146,12 @@ For the iframe auth gate, verify the shape rather than the value: the parent pag
 After the human/browser pass, stamp `npm run check:mochi-social-preview-ready` only with no-secret metadata:
 
 ```powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES="<no-secret status notes>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
@@ -158,7 +160,10 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
+npm run prepare:mochi-social-browser-gates
 ```
+
+`npm run prepare:mochi-social-browser-gates` writes ignored no-secret JSON/Markdown plus `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-browser-gates.md`. After that, `npm run check:mochi-social-preview-ready` can consume the saved report; hosted browser evidence still requires `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true` for the audit pass.
 
 For the hosted Supabase Edge smoke, prefer the local file pointer over pasting the publishable key into the shell:
 
