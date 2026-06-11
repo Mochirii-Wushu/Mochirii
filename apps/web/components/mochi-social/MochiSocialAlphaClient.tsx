@@ -131,6 +131,11 @@ export function MochiSocialAlphaClient() {
           </div>
         </dl>
       </header>
+      <div className="mochi-game-preview-contract" aria-label="Mochi Social preview contract">
+        <span>Chain mode: configured-preview-stub</span>
+        <span>Economy: test soft currency</span>
+        <span>Market: fixed price only</span>
+      </div>
 
       {message ? <p className="form-message">{message}</p> : null}
       {state === "loading" ? <div className="mochi-game-panel">Checking alpha access...</div> : null}

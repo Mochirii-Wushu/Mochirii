@@ -5825,6 +5825,23 @@ body[data-page="gallery-submit"] .muted{
   font-weight:700;
 }
 
+.mochi-game-preview-contract{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+
+.mochi-game-preview-contract span{
+  border:1px solid rgba(221,239,255,.14);
+  border-radius:999px;
+  background:rgba(156,207,255,.10);
+  color:var(--ink-1);
+  font-size:13px;
+  line-height:1.2;
+  padding:7px 10px;
+}
+
 .mochi-game-panel{
   padding:18px;
   border:1px solid rgba(221,239,255,.14);
