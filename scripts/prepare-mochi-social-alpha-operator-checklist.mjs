@@ -17,6 +17,7 @@ const externalGateReport = readJson(resolve(gameRepoPath, "reports/alpha-externa
 const gamePr = readPr("xartaiusx/mochi-social", "1");
 const sitePr = readPr("Mochirii-Wushu/Mochirii", "258");
 const credentialFiles = listCredentialFiles();
+const gitState = readGitState();
 
 await mkdir(credsDir, { recursive: true });
 await writeFile(outputPath, renderChecklist(), "utf8");
@@ -108,6 +109,22 @@ ${files}
 
 - Game PR: ${formatPr(gamePr)}
 - Site PR: ${formatPr(sitePr)}
+
+## Local Branch Sync
+
+- Branch: ${gitState.branch || "unknown"}
+- Upstream: ${gitState.upstream || "unknown"}
+- Local HEAD: ${gitState.localHead || "unknown"}
+- Upstream HEAD: ${gitState.upstreamHead || "unknown"}
+- Ahead: ${gitState.ahead}
+- Behind: ${gitState.behind}
+- Dirty tracked files: ${gitState.dirty.length}
+
+If this branch is ahead or dirty, remote PR checks do not prove the local source. Push only after explicit approval:
+
+\`\`\`text
+I approve pushing C:\\Users\\xtyty\\Documents\\Mochirii branch ${gitState.branch || "<branch>"} to ${gitState.upstream || "origin/<branch>"} and allow GitHub Actions/PR checks to run for Mochirii.
+\`\`\`
 
 ## Game External Gate Summary
 
@@ -201,6 +218,45 @@ function normalizePreviewOrigin(value) {
 function formatPr(pr) {
   if (!pr.ok) return `${pr.repo}#${pr.number} not verified (${pr.message || "unknown"})`;
   return `${pr.url} ${pr.mergeStateStatus} ${pr.headRefOid} checks=${pr.checks.join(", ") || "none"}`;
+}
+
+function readGitState() {
+  const branch = git(["rev-parse", "--abbrev-ref", "HEAD"]);
+  const localHead = git(["rev-parse", "HEAD"]);
+  const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"]);
+  const upstreamHead = upstream.ok ? git(["rev-parse", upstream.stdout.trim()]) : { ok: false, stdout: "", stderr: upstream.stderr };
+  const counts = upstream.ok ? git(["rev-list", "--left-right", "--count", `${upstream.stdout.trim()}...HEAD`]) : { ok: false, stdout: "", stderr: upstream.stderr };
+  const worktree = git(["status", "--porcelain"]);
+  const [behindText = "0", aheadText = "0"] = firstLine(counts.stdout).split(/\s+/);
+  return {
+    branch: firstLine(branch.stdout),
+    localHead: firstLine(localHead.stdout),
+    upstream: firstLine(upstream.stdout),
+    upstreamHead: firstLine(upstreamHead.stdout),
+    ahead: Number.parseInt(aheadText, 10) || 0,
+    behind: Number.parseInt(behindText, 10) || 0,
+    dirty: worktree.ok ? worktree.stdout.split(/\r?\n/).filter(Boolean).map((line) => sanitize(line)) : ["git status unavailable"],
+    errors: [branch, localHead, upstream, upstreamHead, counts, worktree]
+      .filter((result) => !result.ok)
+      .map((result) => sanitize(result.stderr || result.error || "git command failed")),
+  };
+}
+
+function git(args) {
+  const result = spawnSync("git", args, {
+    cwd: root,
+    encoding: "utf8",
+    shell: false,
+  });
+  return {
+    ok: result.status === 0,
+    stdout: result.stdout || "",
+    stderr: result.stderr || result.error?.message || "",
+  };
+}
+
+function firstLine(value) {
+  return String(value || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
 }
 
 function sanitize(value) {

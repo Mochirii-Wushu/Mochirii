@@ -23,7 +23,7 @@ const checks = [
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
-    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy']
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy', 'Local Branch Sync', 'I approve pushing C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
