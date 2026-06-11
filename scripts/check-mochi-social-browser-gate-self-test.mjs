@@ -100,6 +100,13 @@ function runAndAssertManualGate(label, env, assertGate) {
   });
   assert(result.status !== 0, `${label} should keep Preview Ready red while self-testing browser gate evidence.`);
   const report = readReport(label);
+  const bridgeGate = report.requirements.find((entry) => entry.id === "site.bridge-state");
+  assert(bridgeGate, `${label} report did not include site.bridge-state.`);
+  assert(bridgeGate.status === "pass", `${label} site.bridge-state should pass before hosted/manual gates.`);
+  assert(
+    bridgeGate.evidence?.command === "node scripts/check-mochi-social-bridge-state.mjs",
+    `${label} site.bridge-state should be backed by the local bridge state checker.`,
+  );
   const authorityGate = report.requirements.find((entry) => entry.id === "site.edge-authority");
   assert(authorityGate, `${label} report did not include site.edge-authority.`);
   assert(authorityGate.status === "pass", `${label} site.edge-authority should pass before hosted/manual gates.`);
