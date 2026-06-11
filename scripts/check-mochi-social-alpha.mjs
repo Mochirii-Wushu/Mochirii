@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-browser-gates', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-browser-gates', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -47,6 +47,10 @@ const checks = [
   {
     file: 'scripts/check-mochi-social-preview-key-loader.mjs',
     includes: ['MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'not-loaded-awaiting-hosted-approval', 'publishableKeyPresent === true', 'publishableKeySource', 'assertNoLeak', 'Mochi Social preview publishable-key loader self-test OK']
+  },
+  {
+    file: 'scripts/check-mochi-social-auth-bridge.mjs',
+    includes: ['Mochi Social auth bridge check passed', 'payload: { accessToken: token }', 'refreshToken', 'SUPABASE_SERVICE_ROLE_KEY', 'DISCORD_BOT_TOKEN', 'ENJIN_PLATFORM_TOKEN']
   },
   {
     file: 'scripts/check-mochi-social-browser-gate-self-test.mjs',
