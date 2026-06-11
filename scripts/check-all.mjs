@@ -17,6 +17,7 @@ const checks = [
   ["check:mochi-social-alpha", ["node", "scripts/check-mochi-social-alpha.mjs"]],
   ["check:mochi-social-auth-bridge", ["node", "scripts/check-mochi-social-auth-bridge.mjs"]],
   ["check:mochi-social-browser-gates", ["node", "scripts/check-mochi-social-browser-gate-self-test.mjs"]],
+  ["check:mochi-social-edge-authority", ["node", "scripts/check-mochi-social-edge-authority.mjs"]],
   ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],
   ["check:mochi-social-preview-key-loader", ["node", "scripts/check-mochi-social-preview-key-loader.mjs"]],
   ["smoke:mochi-social-alpha-edge", ["node", "scripts/smoke-mochi-social-alpha-edge.mjs"]],

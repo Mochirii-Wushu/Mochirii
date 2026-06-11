@@ -116,6 +116,7 @@ Before inviting testers:
 - Game PR has green `Verify Mochi Social` CI.
 - Mochirii PR checks are green.
 - Vercel preview has `NEXT_PUBLIC_MOCHI_SOCIAL_URL` set to the Fly game URL.
+- `npm run check:mochi-social-edge-authority` passes locally before hosted Edge smoke, so the game action function stays server-token-authorized, Canary/no-real-value-stamped, ledger-backed, and finalized-only for chain inventory movement.
 - `MOCHI_SOCIAL_GAME_CONTRACT_URL=<fly-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, and optional allowed-origin CORS contract.
 - `MOCHI_SOCIAL_ALPHA_EDGE_URL=<preview-functions-url> npm run smoke:mochi-social-alpha-edge` proves the alpha Supabase Edge Functions fail closed for missing user auth, missing game-server trust, and invalid alpha action requests.
 - `npm run check:mochi-social-preview-ready` is the site-side tester-entry audit. It writes no-secret ignored reports, requires game Preview Ready evidence, branch sync, hosted game contract proof, Supabase Edge smoke, Discord OAuth provider readiness, and explicit manual browser gate confirmation, but it does not require funded-chain gates.

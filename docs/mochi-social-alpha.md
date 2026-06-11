@@ -71,6 +71,7 @@ Before inviting testers:
 
 - The game repo `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
+- `npm run check:mochi-social-edge-authority` passes locally, proving server-token authority, append-only/idempotent ledger expectations, Canary/no-real-value stamping, and finalized-only chain inventory movement.
 - `npm run check:mochi-social-game-contract` passes with `MOCHI_SOCIAL_GAME_CONTRACT_URL` set to the intended game URL and, when available, `MOCHI_SOCIAL_SITE_ORIGIN` set to the Vercel preview origin.
 - `npm run smoke:mochi-social-alpha-edge` passes with `MOCHI_SOCIAL_ALPHA_EDGE_URL`, `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY`, and optionally the local `MOCHI_SOCIAL_GAME_SERVER_TOKEN` set for the Supabase preview branch.
 - `npm run check:mochi-social-preview-ready` proves `site.discord-oauth` by verifying the Supabase preview Discord provider starts an OAuth redirect instead of returning `provider is not enabled`.
@@ -174,6 +175,7 @@ Run local verification:
 
 ```powershell
 npm run check:mochi-social-alpha
+npm run check:mochi-social-edge-authority
 npm run check:mochi-social-preview-ready
 npm run check:mochi-social-game-contract
 npm run smoke:mochi-social-alpha-edge
