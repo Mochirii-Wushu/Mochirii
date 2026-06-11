@@ -202,6 +202,23 @@ Before inviting testers, verify in the Vercel preview:
 8. For Alpha Preview Ready, chain request rows show Canary, no-real-value status, request id, and configured-preview-stub/audit-only state.
 9. For Alpha RC Ready only, funded-chain rows show transaction UUID, optional listing id, and finality state.
 
+### Manual Browser Evidence Protocol
+
+Use Chrome only after hosted browser verification is explicitly approved. Record reviewer, browser/version, preview URL, timestamp, and pass/fail notes only.
+
+- Do not copy or screenshot Supabase access tokens, refresh tokens, cookies, Authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, payment details, or private account details.
+- For the MOCHI_SOCIAL_AUTH gate, verify the shape of the bridge message only: the parent sends MOCHI_SOCIAL_AUTH with a short-lived access-token field and does not send refresh tokens or provider secrets.
+- Feedback/admin evidence should use counts, row ids, route names, and non-secret status notes. Avoid account emails or private user data in reports.
+
+After the browser pass, stamp the site audit with no-secret metadata only:
+
+\`\`\`powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="${siteOrigin}/games/mochi-social"
+\`\`\`
+
 ## Full Local Verification
 
 \`\`\`powershell

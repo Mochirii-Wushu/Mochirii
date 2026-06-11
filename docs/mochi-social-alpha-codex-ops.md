@@ -127,6 +127,27 @@ Before inviting testers:
 - For Alpha RC Ready, chain operation rows record request id, transaction UUID, optional listing ID, state, and finality evidence.
 - Two-tab game presence is verified separately in the game runtime.
 
+## Manual Browser Evidence Protocol
+
+Hosted browser gates need explicit approval before Codex opens Chrome against Vercel, Supabase, or the Fly game URL. During that pass, capture only no-secret evidence:
+
+- reviewer, browser/version, preview URL, timestamp, and pass/fail notes;
+- whether signed-out, non-tester, terms, iframe, feedback, admin, and configured-preview-stub gates passed;
+- any non-secret error codes or route names needed for debugging.
+
+Never capture, paste, screenshot, or commit Supabase access tokens, refresh tokens, cookies, request authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, or personal payment/account details.
+
+For the iframe auth gate, verify the shape rather than the value: the parent page sends `MOCHI_SOCIAL_AUTH` with an access-token field, and it does not send refresh tokens or provider secrets. If DevTools exposes raw token text, treat it as private screen-only evidence and do not transcribe it.
+
+After the human/browser pass, stamp `npm run check:mochi-social-preview-ready` only with no-secret metadata:
+
+```powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+```
+
 ## Secret Entry Protocol
 
 - The user types secrets privately.

@@ -81,6 +81,29 @@ Before inviting testers:
 - For Alpha Preview Ready, Enjin Canary request rows may stay audit-only with `configured-preview-stub`; transaction UUID, optional listing id, status, and finality evidence are required only for Alpha RC Ready.
 - The 10-25 tester load-smoke report is attached to the PR or release checklist.
 
+## Manual Browser Gate Evidence
+
+Run these checks only after hosted verification is explicitly approved. Use Chrome with the intended Vercel Preview URL, and record only pass/fail status, reviewer, browser, URL, timestamps, and no-secret notes.
+
+- Signed-out gate: open `/games/mochi-social` in a fresh signed-out session and confirm the page asks for sign-in before the game iframe loads.
+- Non-tester gate: sign in with an account that is not active in `mochi_social_alpha_testers` and confirm the allowlist block appears.
+- Terms gate: sign in with an allowlisted tester that has not acknowledged the current `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` and confirm the terms acknowledgement appears before the iframe loads.
+- Iframe gate: after acknowledgement, confirm the iframe loads `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed` and the game still shows no-real-value/`configured-preview-stub` messaging.
+- Bridge gate: inspect browser DevTools messages or temporary console instrumentation only enough to confirm the parent sends `MOCHI_SOCIAL_AUTH` and not refresh tokens, service-role keys, Discord tokens, Enjin tokens, wallet material, or other secrets. Do not copy or screenshot raw access tokens.
+- Feedback gate: submit a harmless alpha feedback message, then confirm the leader audit panel shows a feedback row/count without exposing private user data in the report.
+- Admin gate: confirm a leader/moderator can grant and revoke alpha access by Supabase user id, then restore the intended tester state.
+
+When all checks pass, stamp the site report with:
+
+```powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+```
+
+Do not place screenshots containing account email, OAuth consent tokens, Supabase access tokens, cookies, request headers, service-role values, Discord secrets, or Enjin secrets in Git, reports, PR comments, or chat.
+
 ## Rollback
 
 If the alpha preview must be stopped:

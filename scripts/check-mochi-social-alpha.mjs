@@ -85,6 +85,8 @@ const checks = [
       'npm run alpha:load-smoke',
       'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
       'MOCHI_SOCIAL_AUTH',
+      'Manual Browser Gate Evidence',
+      'MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED',
       'prepare:mochi-social-alpha-operator-checklist',
       'check:mochi-social-preview-ready',
       'Do not roll back by switching to production',
