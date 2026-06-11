@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -43,6 +43,10 @@ const checks = [
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',
     includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'publishableKeySource', 'not-loaded-awaiting-hosted-approval', 'selectPublishableKey', 'site.game-contract', 'site.edge-smoke', 'site.discord-oauth', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'provider is not enabled', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready', ...browserGateEnvNames]
+  },
+  {
+    file: 'scripts/check-mochi-social-preview-key-loader.mjs',
+    includes: ['MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'not-loaded-awaiting-hosted-approval', 'publishableKeyPresent === true', 'publishableKeySource', 'assertNoLeak', 'Mochi Social preview publishable-key loader self-test OK']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
