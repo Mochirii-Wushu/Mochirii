@@ -15,6 +15,16 @@ const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || proce
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
 const authUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
 const publishableKeyPresent = Boolean(process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY);
+const manualBrowserGateChecks = [
+  ["MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK", "signed-out blocked"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK", "signed-in non-tester blocked"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK", "terms gate"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK", "iframe loads after acknowledgement"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "MOCHI_SOCIAL_AUTH sends access token only"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK", "feedback appears in admin/audit"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK", "chain request remains configured-preview-stub/no-real-value"],
+  ["MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK", "admin grant/revoke works and intended tester state is restored"],
+];
 const requirements = [];
 
 addCommandRequirement("site.static-alpha", "Mochi Social static alpha checks pass.", "node", ["scripts/check-mochi-social-alpha.mjs"], {});
@@ -197,11 +207,20 @@ function addManualBrowserGateRequirement() {
   const reviewer = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER || "");
   const browser = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER || "");
   const reviewUrl = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_URL || "");
+  const gateResults = manualBrowserGateChecks.map(([envName, label]) => ({
+    envName,
+    label,
+    ok: process.env[envName] === "true",
+  }));
+  const missingGates = gateResults.filter((gate) => !gate.ok);
   const failures = [];
   if (!confirmed) failures.push("manual browser gates have not been confirmed");
   if (confirmed && !reviewer) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER is required");
   if (confirmed && !browser) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER is required");
   if (confirmed && !reviewUrl) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_URL is required");
+  if (confirmed && missingGates.length) {
+    failures.push(`manual browser gates missing confirmations: ${missingGates.map((gate) => gate.envName).join(", ")}`);
+  }
   if (reviewUrl && isHostedUrl(reviewUrl) && !hostedChecksAllowed) {
     failures.push("hosted browser gate confirmation requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
   }
@@ -210,15 +229,7 @@ function addManualBrowserGateRequirement() {
     browser: browser || null,
     url: reviewUrl || null,
     hostedChecksAllowed,
-    requiredGates: [
-      "signed-out blocked",
-      "signed-in non-tester blocked",
-      "terms gate",
-      "iframe loads after acknowledgement",
-      "MOCHI_SOCIAL_AUTH sends access token only",
-      "feedback appears in admin/audit",
-      "chain request remains configured-preview-stub/no-real-value",
-    ],
+    requiredGates: gateResults,
   });
 }
 
