@@ -10,6 +10,7 @@ const reportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_JSO
 const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_MD || "reports/mochi-social-preview-ready.md");
 const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
+const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
 const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev");
 const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
@@ -31,7 +32,12 @@ const requirements = [];
 
 addCommandRequirement("site.static-alpha", "Mochi Social static alpha checks pass.", "node", ["scripts/check-mochi-social-alpha.mjs"], {});
 addCommandRequirement("site.bridge-state", "Mochi Social parent bridge state self-test passes before manual browser gates.", "node", ["scripts/check-mochi-social-bridge-state.mjs"], {});
+addCommandRequirement("site.auth-bridge", "Mochi Social auth bridge static guard keeps iframe auth access-token-only.", "node", ["scripts/check-mochi-social-auth-bridge.mjs"], {});
 addCommandRequirement("site.edge-authority", "Mochi Social Edge authority guard passes before hosted Supabase smoke.", "node", ["scripts/check-mochi-social-edge-authority.mjs"], {});
+if (!skipNestedSelfTestCommands) {
+  addCommandRequirement("site.preview-key-loader", "Mochi Social preview publishable-key loader self-test passes without leaking key values.", "node", ["scripts/check-mochi-social-preview-key-loader.mjs"], {});
+  addCommandRequirement("site.discord-oauth-detector", "Mochi Social Discord OAuth detector self-test passes before hosted provider checks.", "node", ["scripts/check-mochi-social-discord-oauth-self-test.mjs"], {});
+}
 addBranchSyncRequirement("site.branch-sync", root, "Local Mochirii site branch");
 addOperatorChecklistRequirement();
 addGamePreviewReadyRequirement();

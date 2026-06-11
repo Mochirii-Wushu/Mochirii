@@ -72,7 +72,7 @@ Before inviting testers:
 - The game repo `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
 - `npm run check:mochi-social-edge-authority` passes locally, proving server-token authority, append-only/idempotent ledger expectations, Canary/no-real-value stamping, and finalized-only chain inventory movement.
-- `npm run check:mochi-social-preview-ready` includes `site.bridge-state` and `site.edge-authority` before hosted Supabase Edge smoke, so hosted checks never stand in for local bridge, authority, or finality invariants.
+- `npm run check:mochi-social-preview-ready` includes `site.bridge-state`, `site.auth-bridge`, `site.preview-key-loader`, `site.discord-oauth-detector`, and `site.edge-authority` before hosted Supabase Edge smoke, so hosted checks never stand in for local bridge, publishable-key loading, Discord detector, authority, or finality invariants.
 - `npm run check:mochi-social-bridge-state` passes locally, proving the parent bridge resolver ignores malformed messages, answers `MOCHI_SOCIAL_READY` with an auth resend, records `MOCHI_SOCIAL_AUTH_STATE` as non-secret status, and reports `MOCHI_SOCIAL_ERROR` with generic copy only.
 - `npm run check:mochi-social-game-contract` passes with `MOCHI_SOCIAL_GAME_CONTRACT_URL` set to the intended game URL and, when available, `MOCHI_SOCIAL_SITE_ORIGIN` set to the Vercel preview origin.
 - `npm run smoke:mochi-social-alpha-edge` passes with `MOCHI_SOCIAL_ALPHA_EDGE_URL`, `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY`, and optionally the local `MOCHI_SOCIAL_GAME_SERVER_TOKEN` set for the Supabase preview branch.

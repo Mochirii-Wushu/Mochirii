@@ -105,6 +105,7 @@ function runChecker(label, authUrl) {
     encoding: "utf8",
     env: {
       ...process.env,
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS: "true",
       MOCHI_SOCIAL_CREDS_DIR: tempDir,
       MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON: reportJsonPath(label),
       MOCHI_SOCIAL_SITE_PREVIEW_READY_MD: reportMdPath(label),

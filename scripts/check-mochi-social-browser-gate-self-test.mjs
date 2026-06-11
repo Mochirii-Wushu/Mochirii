@@ -107,6 +107,7 @@ function runAndAssertManualGate(label, env, assertGate) {
     bridgeGate.evidence?.command === "node scripts/check-mochi-social-bridge-state.mjs",
     `${label} site.bridge-state should be backed by the local bridge state checker.`,
   );
+  assertPassingCommandGate(label, report, "site.auth-bridge", "node scripts/check-mochi-social-auth-bridge.mjs");
   const authorityGate = report.requirements.find((entry) => entry.id === "site.edge-authority");
   assert(authorityGate, `${label} report did not include site.edge-authority.`);
   assert(authorityGate.status === "pass", `${label} site.edge-authority should pass before hosted/manual gates.`);
@@ -114,9 +115,18 @@ function runAndAssertManualGate(label, env, assertGate) {
     authorityGate.evidence?.command === "node scripts/check-mochi-social-edge-authority.mjs",
     `${label} site.edge-authority should be backed by the local Edge authority checker.`,
   );
+  assertPassingCommandGate(label, report, "site.preview-key-loader", "node scripts/check-mochi-social-preview-key-loader.mjs");
+  assertPassingCommandGate(label, report, "site.discord-oauth-detector", "node scripts/check-mochi-social-discord-oauth-self-test.mjs");
   const gate = report.requirements.find((entry) => entry.id === "site.manual-browser-gates");
   assert(gate, `${label} report did not include site.manual-browser-gates.`);
   assertGate(gate, report);
+}
+
+function assertPassingCommandGate(label, report, id, command) {
+  const gate = report.requirements.find((entry) => entry.id === id);
+  assert(gate, `${label} report did not include ${id}.`);
+  assert(gate.status === "pass", `${label} ${id} should pass before hosted/manual gates.`);
+  assert(gate.evidence?.command === command, `${label} ${id} should be backed by ${command}.`);
 }
 
 function readReport(label) {
