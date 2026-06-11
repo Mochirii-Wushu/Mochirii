@@ -15,6 +15,7 @@ const checks = [
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]],
   ["check:mochi-social-alpha", ["node", "scripts/check-mochi-social-alpha.mjs"]],
+  ["check:mochi-social-browser-gates", ["node", "scripts/check-mochi-social-browser-gate-self-test.mjs"]],
   ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],
   ["check:mochi-social-preview-key-loader", ["node", "scripts/check-mochi-social-preview-key-loader.mjs"]],
   ["smoke:mochi-social-alpha-edge", ["node", "scripts/smoke-mochi-social-alpha-edge.mjs"]],
