@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-report-hygiene']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -86,7 +86,11 @@ const checks = [
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
-    includes: ['MochiSocialAlphaClient', 'robots', 'index: false']
+    includes: ['MochiSocialAlphaClient', 'MochiSocialTesterPasswordGate', 'MochiSocialTesterGameClient', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'robots', 'index: false']
+  },
+  {
+    file: 'scripts/check-mochi-social-tester-password-gate.mjs',
+    includes: ['Mochi Social tester password gate check passed', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'MOCHI_SOCIAL_TESTER_PASSWORD_SHA256', 'httpOnly: true', 'NEXT_PUBLIC_MOCHI_SOCIAL_(?:TESTER_)?PASSWORD']
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',

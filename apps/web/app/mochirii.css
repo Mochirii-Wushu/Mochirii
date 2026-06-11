@@ -5859,6 +5859,35 @@ body[data-page="gallery-submit"] .muted{
   color:var(--ink-1);
 }
 
+.mochi-tester-login{
+  display:grid;
+  gap:14px;
+  max-width:560px;
+}
+
+.mochi-tester-login label{
+  display:grid;
+  gap:8px;
+  color:var(--ink-0);
+  font-weight:700;
+}
+
+.mochi-tester-login input{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid rgba(221,239,255,.16);
+  border-radius:14px;
+  background:rgba(7,10,13,.46);
+  color:var(--ink-0);
+  font:inherit;
+  padding:12px;
+}
+
+.mochi-lock-form{
+  display:flex;
+  justify-content:flex-end;
+}
+
 .mochi-game-frame{
   width:100%;
   height:min(72vh,780px);

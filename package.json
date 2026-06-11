@@ -39,6 +39,7 @@
     "check:mochi-social-preview-url": "node scripts/check-mochi-social-preview-url-self-test.mjs",
     "check:mochi-social-preview-ready": "node scripts/check-mochi-social-preview-ready.mjs",
     "check:mochi-social-report-hygiene": "node scripts/check-mochi-social-report-hygiene.mjs",
+    "check:mochi-social-tester-password-gate": "node scripts/check-mochi-social-tester-password-gate.mjs",
     "check:next-public-sync": "node scripts/check-next-public-sync.mjs",
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
