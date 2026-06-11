@@ -23,11 +23,11 @@ const checks = [
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
-    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy', 'Local Branch Sync', 'I approve pushing C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii']
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy', 'Local Branch Sync', 'I approve pushing C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii']
   },
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',
-    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'site.game-contract', 'site.edge-smoke', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready']
+    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'site.game-contract', 'site.edge-smoke', 'site.discord-oauth', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'provider is not enabled', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',

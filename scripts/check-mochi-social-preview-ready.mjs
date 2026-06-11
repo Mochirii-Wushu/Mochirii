@@ -13,6 +13,7 @@ const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HO
 const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev");
 const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
+const authUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
 const publishableKeyPresent = Boolean(process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY);
 const requirements = [];
 
@@ -22,6 +23,7 @@ addOperatorChecklistRequirement();
 addGamePreviewReadyRequirement();
 addGameContractRequirement();
 addEdgeSmokeRequirement();
+await addDiscordOAuthProviderRequirement();
 addManualBrowserGateRequirement();
 
 const summary = summarize(requirements);
@@ -33,6 +35,7 @@ const report = {
   gameUrl,
   siteOrigin,
   functionsUrl,
+  authUrl,
   publishableKeyPresent,
   git: readGitState(root),
   gameGit: existsSync(gameRepoPath) ? readGitState(gameRepoPath) : null,
@@ -142,6 +145,51 @@ function addEdgeSmokeRequirement() {
       MOCHI_SOCIAL_ALPHA_EDGE_URL: functionsUrl,
     },
   });
+}
+
+async function addDiscordOAuthProviderRequirement() {
+  const failures = [];
+  if (!authUrl) failures.push("Supabase Auth URL is required");
+  if (!siteOrigin) failures.push("Mochirii site origin is required");
+  if (isHostedUrl(authUrl) && !hostedChecksAllowed) {
+    failures.push("hosted Discord OAuth provider check requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
+  }
+  if (failures.length) {
+    add("site.discord-oauth", "fail", failures.join("; "), {
+      authUrl,
+      siteOrigin,
+      hostedChecksAllowed,
+    });
+    return;
+  }
+
+  const redirectTo = `${siteOrigin}/account`;
+  const authorizeUrl = `${authUrl}/authorize?provider=discord&redirect_to=${encodeURIComponent(redirectTo)}&scopes=${encodeURIComponent("identify email")}`;
+  try {
+    const response = await fetch(authorizeUrl, {
+      redirect: "manual",
+      signal: AbortSignal.timeout(15000),
+    });
+    const location = response.headers.get("location") || "";
+    const text = await response.text();
+    const unsupportedProvider = /provider is not enabled|Unsupported provider/i.test(text);
+    const redirectsToDiscord = response.status >= 300 && response.status < 400 && /discord(?:app)?\.com/i.test(location);
+    const ok = redirectsToDiscord && !unsupportedProvider;
+    add("site.discord-oauth", ok ? "pass" : "fail", ok ? "Supabase preview Discord OAuth provider begins the OAuth redirect flow." : "Supabase preview Discord OAuth provider is not enabled or did not begin the OAuth redirect flow.", {
+      authUrl,
+      redirectTo,
+      status: response.status,
+      locationHost: safeUrlHost(location),
+      unsupportedProvider,
+      expectedDiscordCallbackUrl: `${new URL(authUrl).origin}/auth/v1/callback`,
+    });
+  } catch (error) {
+    add("site.discord-oauth", "fail", "Supabase preview Discord OAuth provider check failed.", {
+      authUrl,
+      redirectTo,
+      error: sanitize(error instanceof Error ? error.message : String(error)),
+    });
+  }
 }
 
 function addManualBrowserGateRequirement() {
@@ -307,6 +355,7 @@ This file is intentionally no-secret. It verifies the website tester-entry lane 
 - Game URL: ${summaryReport.gameUrl}
 - Site origin: ${summaryReport.siteOrigin}
 - Supabase Edge URL: ${summaryReport.functionsUrl}
+- Supabase Auth URL: ${summaryReport.authUrl}
 - Publishable key present: ${summaryReport.publishableKeyPresent ? "yes" : "no"}
 
 ## Requirements
@@ -341,12 +390,27 @@ function normalizeOrigin(value) {
   }
 }
 
+function inferSupabaseAuthUrl(value) {
+  const normalized = normalizeUrl(value);
+  if (!normalized) return "";
+  return normalized.replace(/\/functions\/v1$/i, "/auth/v1");
+}
+
 function isHostedUrl(value) {
   try {
     const parsed = new URL(value);
     return !["localhost", "127.0.0.1", "::1", "[::1]"].includes(parsed.hostname);
   } catch {
     return false;
+  }
+}
+
+function safeUrlHost(value) {
+  if (!value) return "";
+  try {
+    return new URL(value).host;
+  } catch {
+    return sanitize(value);
   }
 }
 

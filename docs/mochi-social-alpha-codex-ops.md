@@ -65,6 +65,7 @@ Use Mochirii for website, Supabase, allowlist, terms, feedback, and admin change
 | Website preview route | Vercel | `/games/mochi-social` |
 | Game URL | Fly | `NEXT_PUBLIC_MOCHI_SOCIAL_URL` |
 | Supabase public browser config | Vercel Preview | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+| Supabase preview OAuth | Supabase Auth and Discord Developer Portal | Discord provider enabled, Discord OAuth callback set to the Supabase preview `/auth/v1/callback`, site redirect allowed back to `/account` |
 | Site URL | Vercel Preview | `NEXT_PUBLIC_SITE_URL` |
 | Supabase privileged writes | Supabase Edge Functions | service-role stays server-side |
 | Game server trust | Supabase Edge and Fly | shared `MOCHI_SOCIAL_GAME_SERVER_TOKEN` secret name only |
@@ -117,7 +118,7 @@ Before inviting testers:
 - Vercel preview has `NEXT_PUBLIC_MOCHI_SOCIAL_URL` set to the Fly game URL.
 - `MOCHI_SOCIAL_GAME_CONTRACT_URL=<fly-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, and optional allowed-origin CORS contract.
 - `MOCHI_SOCIAL_ALPHA_EDGE_URL=<preview-functions-url> npm run smoke:mochi-social-alpha-edge` proves the alpha Supabase Edge Functions fail closed for missing user auth, missing game-server trust, and invalid alpha action requests.
-- `npm run check:mochi-social-preview-ready` is the site-side tester-entry audit. It writes no-secret ignored reports, requires game Preview Ready evidence, branch sync, hosted game contract proof, Supabase Edge smoke, and explicit manual browser gate confirmation, but it does not require funded-chain gates.
+- `npm run check:mochi-social-preview-ready` is the site-side tester-entry audit. It writes no-secret ignored reports, requires game Preview Ready evidence, branch sync, hosted game contract proof, Supabase Edge smoke, Discord OAuth provider readiness, and explicit manual browser gate confirmation, but it does not require funded-chain gates.
 - Non-testers are blocked from `/games/mochi-social`.
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only `MOCHI_SOCIAL_AUTH` with a short-lived access token.

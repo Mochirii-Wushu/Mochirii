@@ -30,6 +30,7 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 - Public env: `NEXT_PUBLIC_MOCHI_SOCIAL_URL`
 - The route checks Supabase session state, calls `mochi-social-alpha-session`, requires an active allowlist row, requires terms acknowledgement, then embeds `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
 - The page forwards only a short-lived Supabase access token through the existing `MOCHI_SOCIAL_AUTH` postMessage bridge.
+- The Supabase preview project must have Discord OAuth enabled before signed-in browser gates can pass. The Discord Developer Portal must allow the Supabase preview callback URL, for example `https://dnxumaiooljdnbjvzbdc.supabase.co/auth/v1/callback`, and the website redirects back to the preview `/account` route.
 
 ## Supabase Functions
 
@@ -72,6 +73,7 @@ Before inviting testers:
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
 - `npm run check:mochi-social-game-contract` passes with `MOCHI_SOCIAL_GAME_CONTRACT_URL` set to the intended game URL and, when available, `MOCHI_SOCIAL_SITE_ORIGIN` set to the Vercel preview origin.
 - `npm run smoke:mochi-social-alpha-edge` passes with `MOCHI_SOCIAL_ALPHA_EDGE_URL`, `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY`, and optionally the local `MOCHI_SOCIAL_GAME_SERVER_TOKEN` set for the Supabase preview branch.
+- `npm run check:mochi-social-preview-ready` proves `site.discord-oauth` by verifying the Supabase preview Discord provider starts an OAuth redirect instead of returning `provider is not enabled`.
 - Non-testers are blocked from `/games/mochi-social`.
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only the short-lived Supabase access token through `MOCHI_SOCIAL_AUTH`.
