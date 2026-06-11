@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -55,6 +55,10 @@ const checks = [
   {
     file: 'scripts/check-mochi-social-browser-gate-self-test.mjs',
     includes: ['MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_URL', 'hosted browser gate confirmation requires', 'site.manual-browser-gates', 'Preview Ready should still remain red', ...browserGateEnvNames]
+  },
+  {
+    file: 'scripts/check-mochi-social-discord-oauth-self-test.mjs',
+    includes: ['Mochi Social Discord OAuth provider self-test OK', 'Unsupported provider: provider is not enabled', 'site.discord-oauth', 'discord.com', 'MOCHI_SOCIAL_ALPHA_AUTH_URL']
   },
   {
     file: 'scripts/check-mochi-social-edge-authority.mjs',

@@ -120,6 +120,7 @@ Before inviting testers:
 - `npm run check:mochi-social-preview-ready` reports `site.edge-authority` separately from hosted `site.edge-smoke`; do not treat a hosted smoke response as proof that the authority/finality invariants are still wired locally.
 - `MOCHI_SOCIAL_GAME_CONTRACT_URL=<fly-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, and optional allowed-origin CORS contract.
 - `MOCHI_SOCIAL_ALPHA_EDGE_URL=<preview-functions-url> npm run smoke:mochi-social-alpha-edge` proves the alpha Supabase Edge Functions fail closed for missing user auth, missing game-server trust, and invalid alpha action requests.
+- `npm run check:mochi-social-discord-oauth` proves the local `site.discord-oauth` detector can distinguish a Discord redirect from Supabase's unsupported-provider response before any hosted check is approved.
 - `npm run check:mochi-social-preview-ready` is the site-side tester-entry audit. It writes no-secret ignored reports, requires game Preview Ready evidence, branch sync, hosted game contract proof, Supabase Edge smoke, Discord OAuth provider readiness, and explicit manual browser gate confirmation, but it does not require funded-chain gates.
 - Non-testers are blocked from `/games/mochi-social`.
 - Allowlisted testers are blocked until terms are acknowledged.

@@ -76,6 +76,7 @@ Before inviting testers:
 - `npm run check:mochi-social-game-contract` passes with `MOCHI_SOCIAL_GAME_CONTRACT_URL` set to the intended game URL and, when available, `MOCHI_SOCIAL_SITE_ORIGIN` set to the Vercel preview origin.
 - `npm run smoke:mochi-social-alpha-edge` passes with `MOCHI_SOCIAL_ALPHA_EDGE_URL`, `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY`, and optionally the local `MOCHI_SOCIAL_GAME_SERVER_TOKEN` set for the Supabase preview branch.
 - `npm run check:mochi-social-preview-ready` proves `site.discord-oauth` by verifying the Supabase preview Discord provider starts an OAuth redirect instead of returning `provider is not enabled`.
+- `npm run check:mochi-social-discord-oauth` locally self-tests both Discord redirect success and Supabase unsupported-provider failure detection without contacting live Supabase or Discord.
 - Non-testers are blocked from `/games/mochi-social`.
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only the short-lived Supabase access token through `MOCHI_SOCIAL_AUTH`.
