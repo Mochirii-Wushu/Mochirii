@@ -29,7 +29,7 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 - Route: `/games/mochi-social`
 - Public env: `NEXT_PUBLIC_MOCHI_SOCIAL_URL`
 - The route checks Supabase session state, calls `mochi-social-alpha-session`, requires an active allowlist row, requires terms acknowledgement, then embeds `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
-- The page forwards only a short-lived Supabase access token through the existing `MOCHI_SOCIAL_AUTH` postMessage bridge.
+- The page forwards only a short-lived Supabase access token through the existing `MOCHI_SOCIAL_AUTH` postMessage bridge, listens for `MOCHI_SOCIAL_READY`, `MOCHI_SOCIAL_AUTH_STATE`, and `MOCHI_SOCIAL_ERROR` from the configured game origin, and shows only non-secret bridge status.
 - The Supabase preview project must have Discord OAuth enabled before signed-in browser gates can pass. The Discord Developer Portal must allow the Supabase preview callback URL, for example `https://dnxumaiooljdnbjvzbdc.supabase.co/auth/v1/callback`, and the website redirects back to the preview `/account` route.
 
 ## Supabase Functions
@@ -92,7 +92,7 @@ Run these checks only after hosted verification is explicitly approved. Use Chro
 - Non-tester gate: sign in with an account that is not active in `mochi_social_alpha_testers` and confirm the allowlist block appears.
 - Terms gate: sign in with an allowlisted tester that has not acknowledged the current `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` and confirm the terms acknowledgement appears before the iframe loads.
 - Iframe gate: after acknowledgement, confirm the iframe loads `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed` and the game still shows no-real-value/`configured-preview-stub` messaging.
-- Bridge gate: inspect browser DevTools messages or temporary console instrumentation only enough to confirm the parent sends `MOCHI_SOCIAL_AUTH` and not refresh tokens, service-role keys, Discord tokens, Enjin tokens, wallet material, or other secrets. Do not copy or screenshot raw access tokens.
+- Bridge gate: inspect browser DevTools messages or temporary console instrumentation only enough to confirm the parent receives `MOCHI_SOCIAL_READY`, sends `MOCHI_SOCIAL_AUTH`, updates the non-secret bridge status on `MOCHI_SOCIAL_AUTH_STATE`/`MOCHI_SOCIAL_ERROR`, and does not send refresh tokens, service-role keys, Discord tokens, Enjin tokens, wallet material, or other secrets. Do not copy or screenshot raw access tokens.
 - Feedback gate: submit a harmless alpha feedback message, then confirm the leader audit panel shows a feedback row/count without exposing private user data in the report.
 - Admin gate: confirm a leader/moderator can grant and revoke alpha access by Supabase user id, then restore the intended tester state.
 

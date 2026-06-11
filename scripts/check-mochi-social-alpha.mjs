@@ -70,7 +70,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'data-mochi-bridge-state', 'MOCHI_SOCIAL_READY', 'MOCHI_SOCIAL_AUTH_STATE', 'MOCHI_SOCIAL_ERROR']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',

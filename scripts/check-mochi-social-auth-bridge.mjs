@@ -10,6 +10,14 @@ requireSnippet("auth.data?.session?.access_token || null", "initial session read
 requireSnippet("nextSession?.access_token || null", "auth-state updates must use Supabase access_token only.");
 requireSnippet("onLoad={() => sendAuthToGame(accessToken)}", "iframe load must resend the current access-token-only auth message.");
 requireSnippet('frame.postMessage({ type: "MOCHI_SOCIAL_SIGN_OUT", protocolVersion: 1 }, gameOrigin)', "sign-out bridge message must not include token payload data.");
+requireSnippet('window.addEventListener("message", handleGameMessage);', "parent page must listen for game bridge messages.");
+requireSnippet("event.origin !== gameOrigin", "game bridge listener must ignore messages from unexpected origins.");
+requireSnippet("data.protocolVersion !== 1", "game bridge listener must enforce the protocol version.");
+requireSnippet('data.type === "MOCHI_SOCIAL_READY"', "game bridge listener must handle the READY event.");
+requireSnippet("sendAuthToGame(accessToken);", "READY handling must send only the current access token through the existing bridge helper.");
+requireSnippet('data.type === "MOCHI_SOCIAL_AUTH_STATE"', "game bridge listener must handle auth-state replies.");
+requireSnippet('data.type === "MOCHI_SOCIAL_ERROR"', "game bridge listener must handle game-side bridge errors.");
+requireSnippet("data-mochi-bridge-state", "page must expose a non-secret bridge status indicator.");
 
 const authIndex = text.indexOf('type: "MOCHI_SOCIAL_AUTH"');
 if (authIndex === -1) {

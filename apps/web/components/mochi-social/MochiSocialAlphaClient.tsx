@@ -6,6 +6,7 @@ import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { getMochiSocialAlphaSession, submitMochiSocialFeedback, type MochiSocialAlphaSession } from "@/lib/mochi-social/alpha";
 
 type LoadState = "loading" | "signed-out" | "blocked" | "terms" | "ready" | "error";
+type BridgeStatus = "waiting" | "ready" | "linked" | "guest" | "error";
 
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 
@@ -14,6 +15,7 @@ export function MochiSocialAlphaClient() {
   const [state, setState] = useState<LoadState>("loading");
   const [session, setSession] = useState<MochiSocialAlphaSession | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [bridgeStatus, setBridgeStatus] = useState<BridgeStatus>("waiting");
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
@@ -90,6 +92,34 @@ export function MochiSocialAlphaClient() {
     };
   }, [refresh, sendAuthToGame]);
 
+  useEffect(() => {
+    const handleGameMessage = (event: MessageEvent) => {
+      if (event.origin !== gameOrigin || !event.data || typeof event.data !== "object") return;
+      const data = event.data as { type?: string; protocolVersion?: number; payload?: { state?: string } };
+      if (data.protocolVersion !== 1 || typeof data.type !== "string") return;
+
+      if (data.type === "MOCHI_SOCIAL_READY") {
+        setBridgeStatus("ready");
+        sendAuthToGame(accessToken);
+        return;
+      }
+
+      if (data.type === "MOCHI_SOCIAL_AUTH_STATE") {
+        const nextState = data.payload?.state;
+        setBridgeStatus(nextState === "linked" || nextState === "guest" || nextState === "error" ? nextState : "ready");
+        return;
+      }
+
+      if (data.type === "MOCHI_SOCIAL_ERROR") {
+        setBridgeStatus("error");
+        setMessage("Mochi Social reported an auth bridge issue. Refresh or sign in again before testing.");
+      }
+    };
+
+    window.addEventListener("message", handleGameMessage);
+    return () => window.removeEventListener("message", handleGameMessage);
+  }, [accessToken, sendAuthToGame]);
+
   const submitFeedback = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const text = feedback.trim();
@@ -135,6 +165,7 @@ export function MochiSocialAlphaClient() {
         <span>Chain mode: configured-preview-stub</span>
         <span>Economy: test soft currency</span>
         <span>Market: fixed price only</span>
+        <span data-mochi-bridge-state>Bridge: {bridgeStatus}</span>
       </div>
 
       {message ? <p className="form-message">{message}</p> : null}
