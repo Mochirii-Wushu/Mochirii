@@ -16,6 +16,7 @@ const checks = [
   ["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]],
   ["check:mochi-social-alpha", ["node", "scripts/check-mochi-social-alpha.mjs"]],
   ["check:mochi-social-auth-bridge", ["node", "scripts/check-mochi-social-auth-bridge.mjs"]],
+  ["check:mochi-social-bridge-state", ["node", "scripts/check-mochi-social-bridge-state.mjs"]],
   ["check:mochi-social-browser-gates", ["node", "scripts/check-mochi-social-browser-gate-self-test.mjs"]],
   ["check:mochi-social-discord-oauth", ["node", "scripts/check-mochi-social-discord-oauth-self-test.mjs"]],
   ["check:mochi-social-edge-authority", ["node", "scripts/check-mochi-social-edge-authority.mjs"]],

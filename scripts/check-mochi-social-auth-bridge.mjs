@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 
 const componentPath = "apps/web/components/mochi-social/MochiSocialAlphaClient.tsx";
-const text = readFileSync(componentPath, "utf8");
+const helperPath = "apps/web/lib/mochi-social/bridge.ts";
+const componentText = readFileSync(componentPath, "utf8");
+const helperText = readFileSync(helperPath, "utf8");
+const combinedText = `${componentText}\n${helperText}`;
 const failures = [];
 
 requireSnippet("NEXT_PUBLIC_MOCHI_SOCIAL_URL", "game origin must come from the public Mochi Social URL env.");
@@ -12,25 +15,28 @@ requireSnippet("onLoad={() => sendAuthToGame(accessToken)}", "iframe load must r
 requireSnippet('frame.postMessage({ type: "MOCHI_SOCIAL_SIGN_OUT", protocolVersion: 1 }, gameOrigin)', "sign-out bridge message must not include token payload data.");
 requireSnippet('window.addEventListener("message", handleGameMessage);', "parent page must listen for game bridge messages.");
 requireSnippet("event.origin !== gameOrigin", "game bridge listener must ignore messages from unexpected origins.");
+requireSnippet("resolveMochiSocialBridgeMessage(event.data)", "parent page must use the shared bridge message resolver.");
 requireSnippet("data.protocolVersion !== 1", "game bridge listener must enforce the protocol version.");
 requireSnippet('data.type === "MOCHI_SOCIAL_READY"', "game bridge listener must handle the READY event.");
 requireSnippet("sendAuthToGame(accessToken);", "READY handling must send only the current access token through the existing bridge helper.");
 requireSnippet('data.type === "MOCHI_SOCIAL_AUTH_STATE"', "game bridge listener must handle auth-state replies.");
 requireSnippet('data.type === "MOCHI_SOCIAL_ERROR"', "game bridge listener must handle game-side bridge errors.");
 requireSnippet("data-mochi-bridge-state", "page must expose a non-secret bridge status indicator.");
+requireSnippet("MOCHI_SOCIAL_AUTH_BRIDGE_ERROR_MESSAGE", "shared bridge helper must own the generic no-secret error message.");
 
-const authIndex = text.indexOf('type: "MOCHI_SOCIAL_AUTH"');
+const authIndex = componentText.indexOf('type: "MOCHI_SOCIAL_AUTH"');
 if (authIndex === -1) {
   failures.push("MOCHI_SOCIAL_AUTH postMessage block was not found.");
 } else {
-  const authBlock = text.slice(Math.max(0, authIndex - 160), authIndex + 360);
+  const authBlock = componentText.slice(Math.max(0, authIndex - 160), authIndex + 360);
   if (!authBlock.includes("frame.postMessage(")) failures.push("MOCHI_SOCIAL_AUTH must be sent through frame.postMessage.");
   if (!authBlock.includes("gameOrigin")) failures.push("MOCHI_SOCIAL_AUTH postMessage must target gameOrigin.");
   if (!authBlock.includes("payload: { accessToken: token }")) failures.push("MOCHI_SOCIAL_AUTH payload must stay access-token-only.");
   assertNoForbiddenBridgeMaterial("MOCHI_SOCIAL_AUTH block", authBlock);
 }
 
-assertNoForbiddenBridgeMaterial("MochiSocialAlphaClient", text);
+assertNoForbiddenBridgeMaterial("MochiSocialAlphaClient", componentText);
+assertNoForbiddenBridgeMaterial("Mochi Social bridge helper", helperText);
 
 if (failures.length) {
   console.error("Mochi Social auth bridge check failed:");
@@ -41,7 +47,7 @@ if (failures.length) {
 console.log("Mochi Social auth bridge check passed.");
 
 function requireSnippet(snippet, message) {
-  if (!text.includes(snippet)) failures.push(`${message} Missing snippet: ${snippet}`);
+  if (!combinedText.includes(snippet)) failures.push(`${message} Missing snippet: ${snippet}`);
 }
 
 function assertNoForbiddenBridgeMaterial(label, value) {

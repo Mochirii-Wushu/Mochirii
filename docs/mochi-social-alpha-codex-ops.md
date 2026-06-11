@@ -117,6 +117,7 @@ Before inviting testers:
 - Mochirii PR checks are green.
 - Vercel preview has `NEXT_PUBLIC_MOCHI_SOCIAL_URL` set to the Fly game URL.
 - `npm run check:mochi-social-edge-authority` passes locally before hosted Edge smoke, so the game action function stays server-token-authorized, Canary/no-real-value-stamped, ledger-backed, and finalized-only for chain inventory movement.
+- `npm run check:mochi-social-bridge-state` passes locally before manual browser gates, so the parent bridge resolver handles `MOCHI_SOCIAL_READY`, `MOCHI_SOCIAL_AUTH_STATE`, and `MOCHI_SOCIAL_ERROR` without exposing refresh tokens, provider secrets, or arbitrary game-provided status text.
 - `npm run check:mochi-social-preview-ready` reports `site.edge-authority` separately from hosted `site.edge-smoke`; do not treat a hosted smoke response as proof that the authority/finality invariants are still wired locally.
 - `MOCHI_SOCIAL_GAME_CONTRACT_URL=<fly-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, and optional allowed-origin CORS contract.
 - `MOCHI_SOCIAL_ALPHA_EDGE_URL=<preview-functions-url> npm run smoke:mochi-social-alpha-edge` proves the alpha Supabase Edge Functions fail closed for missing user auth, missing game-server trust, and invalid alpha action requests.

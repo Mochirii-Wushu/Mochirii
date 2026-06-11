@@ -232,6 +232,7 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 
 \`\`\`powershell
 npm run check:mochi-social-alpha
+npm run check:mochi-social-bridge-state
 npm run check:mochi-social-game-contract
 npm run smoke:mochi-social-alpha-edge
 npm run check:supabase-edge-types

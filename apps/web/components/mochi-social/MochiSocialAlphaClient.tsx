@@ -4,9 +4,9 @@ import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { getMochiSocialAlphaSession, submitMochiSocialFeedback, type MochiSocialAlphaSession } from "@/lib/mochi-social/alpha";
+import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@/lib/mochi-social/bridge";
 
 type LoadState = "loading" | "signed-out" | "blocked" | "terms" | "ready" | "error";
-type BridgeStatus = "waiting" | "ready" | "linked" | "guest" | "error";
 
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 
@@ -15,7 +15,7 @@ export function MochiSocialAlphaClient() {
   const [state, setState] = useState<LoadState>("loading");
   const [session, setSession] = useState<MochiSocialAlphaSession | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [bridgeStatus, setBridgeStatus] = useState<BridgeStatus>("waiting");
+  const [bridgeStatus, setBridgeStatus] = useState<MochiSocialBridgeStatus>("waiting");
   const [message, setMessage] = useState("");
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
@@ -95,25 +95,22 @@ export function MochiSocialAlphaClient() {
   useEffect(() => {
     const handleGameMessage = (event: MessageEvent) => {
       if (event.origin !== gameOrigin || !event.data || typeof event.data !== "object") return;
-      const data = event.data as { type?: string; protocolVersion?: number; payload?: { state?: string } };
-      if (data.protocolVersion !== 1 || typeof data.type !== "string") return;
+      const bridgeMessage = resolveMochiSocialBridgeMessage(event.data);
+      if (bridgeMessage.action === "ignore") return;
 
-      if (data.type === "MOCHI_SOCIAL_READY") {
-        setBridgeStatus("ready");
+      if (bridgeMessage.action === "send-auth") {
+        setBridgeStatus(bridgeMessage.status);
         sendAuthToGame(accessToken);
         return;
       }
 
-      if (data.type === "MOCHI_SOCIAL_AUTH_STATE") {
-        const nextState = data.payload?.state;
-        setBridgeStatus(nextState === "linked" || nextState === "guest" || nextState === "error" ? nextState : "ready");
+      if (bridgeMessage.action === "set-status") {
+        setBridgeStatus(bridgeMessage.status);
         return;
       }
 
-      if (data.type === "MOCHI_SOCIAL_ERROR") {
-        setBridgeStatus("error");
-        setMessage("Mochi Social reported an auth bridge issue. Refresh or sign in again before testing.");
-      }
+      setBridgeStatus(bridgeMessage.status);
+      setMessage(bridgeMessage.message);
     };
 
     window.addEventListener("message", handleGameMessage);

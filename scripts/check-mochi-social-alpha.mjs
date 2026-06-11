@@ -18,7 +18,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'AGENTS.md',
@@ -26,7 +26,7 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -50,7 +50,15 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-auth-bridge.mjs',
-    includes: ['Mochi Social auth bridge check passed', 'payload: { accessToken: token }', 'refreshToken', 'SUPABASE_SERVICE_ROLE_KEY', 'DISCORD_BOT_TOKEN', 'ENJIN_PLATFORM_TOKEN']
+    includes: ['Mochi Social auth bridge check passed', 'payload: { accessToken: token }', 'resolveMochiSocialBridgeMessage(event.data)', 'MOCHI_SOCIAL_AUTH_BRIDGE_ERROR_MESSAGE', 'refreshToken', 'SUPABASE_SERVICE_ROLE_KEY', 'DISCORD_BOT_TOKEN', 'ENJIN_PLATFORM_TOKEN']
+  },
+  {
+    file: 'scripts/check-mochi-social-bridge-state.mjs',
+    includes: ['Mochi Social bridge state self-test OK', 'MOCHI_SOCIAL_READY', 'MOCHI_SOCIAL_AUTH_STATE', 'MOCHI_SOCIAL_ERROR', 'access-token-only', 'assertNoForbiddenMaterial']
+  },
+  {
+    file: 'apps/web/lib/mochi-social/bridge.ts',
+    includes: ['MochiSocialBridgeStatus', 'resolveMochiSocialBridgeMessage', 'MOCHI_SOCIAL_READY', 'MOCHI_SOCIAL_AUTH_STATE', 'MOCHI_SOCIAL_ERROR', 'MOCHI_SOCIAL_AUTH_BRIDGE_ERROR_MESSAGE']
   },
   {
     file: 'scripts/check-mochi-social-browser-gate-self-test.mjs',
@@ -70,7 +78,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'data-mochi-bridge-state', 'MOCHI_SOCIAL_READY', 'MOCHI_SOCIAL_AUTH_STATE', 'MOCHI_SOCIAL_ERROR']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
