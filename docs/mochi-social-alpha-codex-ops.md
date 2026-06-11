@@ -4,12 +4,13 @@ This website-side runbook keeps Codex aligned while operating the Mochirii previ
 
 ## Source Basis
 
-- Codex manual: `AGENTS.md`, skills, MCP, Chrome, Computer Use, and hooks.
-- GitHub Docs: Actions billing, budgets, branch protection, required checks, and PR checks.
-- Vercel Docs: Preview environment variables.
-- Supabase Docs: Edge Function secrets and authenticated user/session handling.
-- Discord Docs: OAuth2, `state`, scopes, bot tokens, and permissions.
-- OWASP: secrets management, least privilege, rotation, and incident response.
+- OpenAI Codex manual: `AGENTS.md`, skills, MCP, Chrome, Computer Use, hooks, and https://developers.openai.com/codex/codex-manual.md.
+- GitHub Docs: Actions billing, budgets, branch protection, required checks, and PR checks: https://docs.github.com/en/billing/concepts/product-billing/github-actions and https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule.
+- Vercel Docs: preview environments, environment variables, and WebSocket limits: https://vercel.com/docs/deployments/environments, https://vercel.com/docs/environment-variables, and https://vercel.com/kb/guide/do-vercel-serverless-functions-support-websocket-connections.
+- Supabase Docs: Edge Function secrets and authenticated user/session handling: https://supabase.com/docs/guides/functions/secrets and https://supabase.com/docs/reference/javascript/auth-getuser.
+- Enjin Docs: Canary, cENJ, Fuel Tanks, and Wallet Daemon: https://docs.enjin.io/getting-started/quick-start-guide, https://docs.enjin.io/guides/platform/managing-users/using-fuel-tanks, and https://docs.enjin.io/getting-started/using-wallet-daemon.
+- Discord Docs: OAuth2, `state`, scopes, bot tokens, and permissions: https://docs.discord.com/developers/topics/oauth2.
+- OWASP: secrets management, least privilege, rotation, and incident response: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html.
 - Mochi Social game repo docs: Fly, Enjin Canary, Fuel Tank, Wallet Daemon, WebSocket presence, and game-runtime acceptance.
 
 ## Source Hierarchy
@@ -72,6 +73,18 @@ Use Mochirii for website, Supabase, allowlist, terms, feedback, and admin change
 Branch-specific Vercel preview env should override only the Mochi Social values needed for the alpha PR. Production env must not be changed for Alpha RC unless a later production plan is approved.
 
 Use `npm run prepare:mochi-social-alpha-operator-checklist` to refresh the no-secret website-side checklist in `C:\Users\xtyty\Desktop\Creds`.
+
+## Action Approval Rules
+
+Local code, docs, static checks, no-secret reports, and localhost-only verification may proceed without a new approval. The following actions need fresh action-specific approval before Codex runs them:
+
+- Push a branch, rerun GitHub Actions, create or update required checks, or enable branch protection.
+- Deploy, redeploy, promote, restart, mutate, or run hosted smoke/load checks against Vercel, Fly, Supabase, GitHub, Discord, Enjin, or any public preview URL.
+- Set, change, remove, or rotate provider secrets or environment variables in Vercel, Supabase, Fly, GitHub, Discord, or Enjin.
+- Fund cENJ, create or fund a Fuel Tank, submit Enjin transactions, start signer-connected Wallet Daemon work, or mark funded-chain gates green.
+- Set hosted approval flags such as `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true`, `MOCHI_SOCIAL_EXTERNAL_ALLOW_HOSTED_CHECKS=true`, hosted Edge flags, or hosted browser/load-smoke flags.
+
+Each approval request must name the exact account/provider, command or dashboard action, possible cost or usage impact, and no-cost alternative.
 
 ## Supabase Authority Matrix
 
