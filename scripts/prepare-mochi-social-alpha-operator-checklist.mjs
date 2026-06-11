@@ -6,11 +6,13 @@ import { join, resolve } from "node:path";
 const root = process.cwd();
 const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
 const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
+const previewEnvPath = resolve(credsDir, process.env.MOCHI_SOCIAL_PREVIEW_ENV_FILE || "mochi-social-alpha-vercel-preview.local.txt");
+const previewEnv = readPreviewEnvFile(previewEnvPath);
 const outputPath = resolve(credsDir, process.env.MOCHI_SOCIAL_SITE_OPERATOR_CHECKLIST || "mochirii-mochi-social-alpha-operator-next-steps.md");
 const supabaseProjectRef = process.env.MOCHI_SOCIAL_SUPABASE_PROJECT_REF || "dnxumaiooljdnbjvzbdc";
 const functionsUrl = process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || `https://${supabaseProjectRef}.supabase.co/functions/v1`;
-const gameUrl = process.env.MOCHI_SOCIAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev";
-const sitePreviewUrl = process.env.MOCHI_SOCIAL_SITE_PREVIEW_URL || process.env.NEXT_PUBLIC_SITE_URL || "<vercel-preview-host>";
+const gameUrl = process.env.MOCHI_SOCIAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev";
+const sitePreviewUrl = process.env.MOCHI_SOCIAL_SITE_PREVIEW_URL || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "<vercel-preview-host>";
 const generatedAt = new Date().toISOString();
 
 const externalGateReport = readJson(resolve(gameRepoPath, "reports/alpha-external-gates.json"));
@@ -146,6 +148,14 @@ Required preview env names:
 - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<preview-supabase-publishable-key>
 - NEXT_PUBLIC_SITE_URL=${siteOrigin}
 
+Local no-secret preview URL file:
+
+- File: ${previewEnv.path}
+- Present: ${previewEnv.present ? "yes" : "no"}
+- Game URL: ${previewEnv.gameUrl || "not recorded"}
+- Site preview URL: ${previewEnv.sitePreviewUrl || "not recorded"}
+- URL fields read: ${previewEnv.urlFieldsRead.length ? previewEnv.urlFieldsRead.join(", ") : "none"}
+
 Use the Vercel dashboard or CLI for the Mochirii preview branch only. Do not change production env for Alpha RC unless a later production plan approves it.
 
 After the Fly game URL exists, run from this repo:
@@ -250,6 +260,57 @@ function normalizePreviewOrigin(value) {
   const normalized = String(value || "").trim().replace(/\/+$/, "");
   if (!normalized || normalized === "<vercel-preview-host>") return "https://<vercel-preview-host>";
   return normalized.startsWith("http://") || normalized.startsWith("https://") ? normalized : `https://${normalized}`;
+}
+
+function readPreviewEnvFile(file) {
+  const base = {
+    path: pathForReport(file),
+    present: false,
+    gameUrl: "",
+    sitePreviewUrl: "",
+    urlFieldsRead: [],
+  };
+  if (!existsSync(file)) return base;
+
+  const text = readFileSync(file, "utf8");
+  const gameUrl = readNamedUrl(text, ["MOCHI_SOCIAL_GAME_URL", "NEXT_PUBLIC_MOCHI_SOCIAL_URL"]);
+  const sitePreviewUrl = readNamedUrl(text, ["MOCHI_SOCIAL_SITE_PREVIEW_URL", "NEXT_PUBLIC_SITE_URL"]);
+  return {
+    ...base,
+    present: true,
+    gameUrl,
+    sitePreviewUrl,
+    urlFieldsRead: [
+      gameUrl ? "MOCHI_SOCIAL_GAME_URL/NEXT_PUBLIC_MOCHI_SOCIAL_URL" : "",
+      sitePreviewUrl ? "MOCHI_SOCIAL_SITE_PREVIEW_URL/NEXT_PUBLIC_SITE_URL" : "",
+    ].filter(Boolean),
+  };
+}
+
+function readNamedUrl(text, names) {
+  for (const name of names) {
+    const pattern = new RegExp(`^\\s*${name}\\s*=\\s*(.+?)\\s*$`, "m");
+    const match = text.match(pattern);
+    if (!match) continue;
+    const value = sanitizeUrl(match[1]);
+    if (value) return value;
+  }
+  return "";
+}
+
+function sanitizeUrl(value) {
+  const trimmed = String(value || "").trim().replace(/^['"]|['"]$/g, "").replace(/\/+$/, "");
+  if (!/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:\/[^\s]*)?$/.test(trimmed)) return "";
+  return sanitize(trimmed);
+}
+
+function pathForReport(absolutePath) {
+  const normalized = String(absolutePath || "").replace(/\\/g, "/");
+  const normalizedRoot = root.replace(/\\/g, "/");
+  const normalizedCreds = credsDir.replace(/\\/g, "/");
+  if (normalized.startsWith(`${normalizedRoot}/`)) return normalized.slice(normalizedRoot.length + 1);
+  if (normalized.startsWith(`${normalizedCreds}/`)) return normalized.slice(normalizedCreds.length + 1);
+  return sanitize(absolutePath);
 }
 
 function formatPr(pr) {

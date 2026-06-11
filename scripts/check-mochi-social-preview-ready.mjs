@@ -6,13 +6,15 @@ import { spawnSync } from "node:child_process";
 const root = process.cwd();
 const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
 const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
+const previewEnvPath = resolve(credsDir, process.env.MOCHI_SOCIAL_PREVIEW_ENV_FILE || "mochi-social-alpha-vercel-preview.local.txt");
+const previewEnv = readPreviewEnvFile(previewEnvPath);
 const reportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON || "reports/mochi-social-preview-ready.json");
 const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_MD || "reports/mochi-social-preview-ready.md");
 const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
 const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
-const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev");
-const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
+const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev");
+const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
 const authUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
 const supabaseProjectRef = inferSupabaseProjectRef(functionsUrl);
@@ -56,6 +58,7 @@ const report = {
   siteOrigin,
   functionsUrl,
   authUrl,
+  previewEnv,
   publishableKeyPresent,
   publishableKeySource: publishableKey.source,
   git: readGitState(root),
@@ -364,6 +367,8 @@ function renderMarkdown(summaryReport) {
     .filter((item) => item.status !== "pass")
     .map((item) => `- ${item.id}: ${item.message}`)
     .join("\n") || "- None";
+  const previewEnvGame = summaryReport.previewEnv.gameUrl || "not recorded";
+  const previewEnvSite = summaryReport.previewEnv.sitePreviewUrl || "not recorded";
 
   return `# Mochirii Mochi Social Alpha Preview Ready Audit
 
@@ -382,6 +387,16 @@ This file is intentionally no-secret. It verifies the website tester-entry lane 
 - Supabase Auth URL: ${summaryReport.authUrl}
 - Publishable key present: ${summaryReport.publishableKeyPresent ? "yes" : "no"}
 - Publishable key source: ${summaryReport.publishableKeySource}
+
+## Local Preview URL File
+
+- File: ${summaryReport.previewEnv.path}
+- Present: ${summaryReport.previewEnv.present ? "yes" : "no"}
+- Game URL: ${previewEnvGame}
+- Site preview URL: ${previewEnvSite}
+- URL fields read: ${summaryReport.previewEnv.urlFieldsRead.length ? summaryReport.previewEnv.urlFieldsRead.join(", ") : "none"}
+
+This file is no-secret and may only contain preview URLs. Hosted Fly/Vercel/Supabase checks still require explicit approval.
 
 ## Requirements
 
@@ -467,6 +482,57 @@ function selectPublishableKey(parsed) {
   const publishable = usable.find((entry) => String(entry.type || "").toLowerCase() === "publishable");
   const anon = usable.find((entry) => String(entry.name || "").toLowerCase() === "anon");
   return (publishable || anon || usable[0])?.api_key || "";
+}
+
+function readPreviewEnvFile(file) {
+  const base = {
+    path: pathForReport(file),
+    present: false,
+    gameUrl: "",
+    sitePreviewUrl: "",
+    urlFieldsRead: [],
+  };
+  if (!existsSync(file)) return base;
+
+  const text = readFileSync(file, "utf8");
+  const gameUrl = readNamedUrl(text, ["MOCHI_SOCIAL_GAME_URL", "NEXT_PUBLIC_MOCHI_SOCIAL_URL"]);
+  const sitePreviewUrl = readNamedUrl(text, ["MOCHI_SOCIAL_SITE_PREVIEW_URL", "NEXT_PUBLIC_SITE_URL"]);
+  return {
+    ...base,
+    present: true,
+    gameUrl,
+    sitePreviewUrl,
+    urlFieldsRead: [
+      gameUrl ? "MOCHI_SOCIAL_GAME_URL/NEXT_PUBLIC_MOCHI_SOCIAL_URL" : "",
+      sitePreviewUrl ? "MOCHI_SOCIAL_SITE_PREVIEW_URL/NEXT_PUBLIC_SITE_URL" : "",
+    ].filter(Boolean),
+  };
+}
+
+function readNamedUrl(text, names) {
+  for (const name of names) {
+    const pattern = new RegExp(`^\\s*${name}\\s*=\\s*(.+?)\\s*$`, "m");
+    const match = text.match(pattern);
+    if (!match) continue;
+    const value = sanitizeUrl(match[1]);
+    if (value) return value;
+  }
+  return "";
+}
+
+function sanitizeUrl(value) {
+  const trimmed = String(value || "").trim().replace(/^['"]|['"]$/g, "").replace(/\/+$/, "");
+  if (!/^https:\/\/[A-Za-z0-9.-]+(?::\d+)?(?:\/[^\s]*)?$/.test(trimmed)) return "";
+  return sanitize(trimmed);
+}
+
+function pathForReport(absolutePath) {
+  const normalized = String(absolutePath || "").replace(/\\/g, "/");
+  const normalizedRoot = root.replace(/\\/g, "/");
+  const normalizedCreds = credsDir.replace(/\\/g, "/");
+  if (normalized.startsWith(`${normalizedRoot}/`)) return normalized.slice(normalizedRoot.length + 1);
+  if (normalized.startsWith(`${normalizedCreds}/`)) return normalized.slice(normalizedCreds.length + 1);
+  return sanitize(absolutePath);
 }
 
 function isHostedUrl(value) {
