@@ -6,6 +6,10 @@ const checks = [
     includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
+    file: 'AGENTS.md',
+    includes: ['Alpha Preview Ready', 'configured-preview-stub', 'funded-chain-gates', 'dummy Enjin IDs']
+  },
+  {
     file: 'scripts/check-all.mjs',
     includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract']
   },
@@ -19,7 +23,7 @@ const checks = [
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
-    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN']
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
@@ -79,7 +83,12 @@ const checks = [
       'MOCHI_SOCIAL_AUTH',
       'prepare:mochi-social-alpha-operator-checklist',
       'Do not roll back by switching to production',
-      'Computer Use'
+      'Computer Use',
+      'Alpha Preview Ready',
+      'configured-preview-stub',
+      'preview-live-gates',
+      'funded-chain-gates',
+      'Do not set dummy'
     ]
   },
   {
@@ -94,7 +103,12 @@ const checks = [
       'Preview Verification',
       'Secret Entry Protocol',
       'MOCHI_SOCIAL_GAME_SERVER_TOKEN',
-      'short-lived access token'
+      'short-lived access token',
+      'Alpha Preview Ready Lane',
+      'configured-preview-stub',
+      'preview-live-gates',
+      'funded-chain-gates',
+      'Do not set dummy'
     ]
   }
 ];

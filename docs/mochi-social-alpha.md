@@ -7,11 +7,22 @@ Codex external operations for this website surface are defined in [`docs/mochi-s
 ## Alpha Posture
 
 - Closed preview only.
+- First live target is Alpha Preview Ready on Vercel Preview, not production.
 - Enjin Canary only.
 - No real-money value, no cashout, no paid assets, no mainnet.
 - Curated assets only; no open creator uploads.
 - Signed-in allowlisted testers only.
 - Chat/action logs are retained for alpha moderation and audit workflows.
+
+## Alpha Preview Ready
+
+Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Preview can embed the Fly game while Enjin remains visible as `configured-preview-stub`.
+
+- `preview-live-gates`: Vercel Preview route, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, Supabase allowlist, terms, feedback, short-lived `MOCHI_SOCIAL_AUTH`, no-real-value labels, and approved hosted contract checks.
+- `funded-chain-gates`: cENJ, real Enjin collection ID, real Fuel Tank ID, Wallet Daemon signing, and finalized proof smoke.
+- `funded-chain-gates` are expected red until later approval. Do not set dummy `ENJIN_COLLECTION_ID`, dummy `ENJIN_FUEL_TANK_ID`, or fake readiness flags to clear them.
+- Chain request rows may be audit-only preview records while the game reports `configured-preview-stub`; they must not credit inventory, settle trades, settle listings, or imply real player value.
+- Alpha RC Ready comes later, after Alpha Preview Ready plus funded Canary collection, Fuel Tank, Wallet Daemon signing, and finality evidence.
 
 ## Website Route
 
@@ -65,7 +76,7 @@ Before inviting testers:
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only the short-lived Supabase access token through `MOCHI_SOCIAL_AUTH`.
 - Feedback submissions appear in the leader audit panel.
-- Enjin Canary operation rows record request id, transaction UUID, optional listing id, status, and finality evidence.
+- For Alpha Preview Ready, Enjin Canary request rows may stay audit-only with `configured-preview-stub`; transaction UUID, optional listing id, status, and finality evidence are required only for Alpha RC Ready.
 - The 10-25 tester load-smoke report is attached to the PR or release checklist.
 
 ## Rollback

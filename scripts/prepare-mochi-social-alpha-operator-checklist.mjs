@@ -113,6 +113,13 @@ ${files}
 
 ${externalFailures}
 
+## Alpha Preview Ready Lane
+
+- Alpha Preview Ready: Vercel Preview route, Fly game iframe, Supabase allowlist, terms, feedback, short-lived MOCHI_SOCIAL_AUTH, no-real-value labels, and Enjin visible as configured-preview-stub.
+- Funded-chain gates: real cENJ, Enjin collection ID, Fuel Tank ID, Wallet Daemon signing, and finalized proof smoke.
+- Do not set dummy ENJIN_COLLECTION_ID, dummy ENJIN_FUEL_TANK_ID, or fake readiness flags to make funded-chain gates pass.
+- For Preview Ready, chain request rows may be audit-only preview rows and must not credit inventory, settle trades, or settle listings.
+
 ## Vercel Preview Gate
 
 Required preview env names:
@@ -165,7 +172,8 @@ Before inviting testers, verify in the Vercel preview:
 5. The parent page sends MOCHI_SOCIAL_AUTH with a short-lived Supabase access token only.
 6. Feedback submission writes to Supabase and appears in the leader audit panel.
 7. Leader dashboard can grant and revoke alpha access by Supabase user id.
-8. Chain operation rows show Canary, no-real-value status, request id, transaction UUID, optional listing id, and finality state.
+8. For Alpha Preview Ready, chain request rows show Canary, no-real-value status, request id, and configured-preview-stub/audit-only state.
+9. For Alpha RC Ready only, funded-chain rows show transaction UUID, optional listing id, and finality state.
 
 ## Full Local Verification
 
@@ -180,7 +188,7 @@ npm run lint
 npm run build
 \`\`\`
 
-Stop at Alpha RC Ready. Do not switch this checklist to production, Enjin mainnet, paid assets, cashout, public UGC, or service-role keys in browser/game code.
+Stop at Alpha Preview Ready before inviting closed testers, then stop again at Alpha RC Ready after funded-chain evidence exists. Do not switch this checklist to production, Enjin mainnet, paid assets, cashout, public UGC, or service-role keys in browser/game code.
 `;
 }
 

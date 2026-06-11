@@ -23,6 +23,31 @@ Use sources in this order:
 
 Do not use memory as current truth for secrets, deployment URLs, payment/billing state, branch status, or provider dashboard state.
 
+## Alpha Preview Ready Lane
+
+Use Alpha Preview Ready as the first live-site target. It is not the same as Alpha RC Ready.
+
+- `preview-live-gates`: Mochirii Vercel Preview `/games/mochi-social`, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, Supabase allowlist, terms, feedback, short-lived iframe auth, no-real-value labels, Fly game contract, and approved hosted preview checks.
+- `funded-chain-gates`: Enjin collection ID, Fuel Tank ID, cENJ funding, Wallet Daemon signing, live operator smoke, and finalized chain proof.
+
+Codex should optimize for `preview-live-gates` before funded-chain work. `funded-chain-gates` are expected red until the user explicitly approves cENJ, Fuel Tank, signing, and chain transaction work. Do not set dummy `ENJIN_COLLECTION_ID`, dummy `ENJIN_FUEL_TANK_ID`, or fake readiness flags to make Alpha RC pass.
+
+For Alpha Preview Ready, the website may embed the game while the game reports `chainRuntime.mode="configured-preview-stub"`. Chain requests are audit-only preview rows until real Enjin finality exists; never credit inventory, settle listings, settle trades, or imply real player value from a stubbed chain request.
+
+Use these implementation prompts when starting follow-up work:
+
+```text
+Build the next alpha feature against no-real-value Alpha Preview Ready.
+```
+
+```text
+Do not clear funded-chain gates unless cENJ, collection, Fuel Tank, and Wallet Daemon proof approval exists.
+```
+
+```text
+Use Mochirii for website, Supabase, allowlist, terms, feedback, and admin changes; use Mochi Social for runtime/game changes.
+```
+
 ## Tool Choice
 
 - Use CLI for reproducible checks: `gh`, `npm`, Supabase CLI, and PR status.
@@ -42,6 +67,7 @@ Do not use memory as current truth for secrets, deployment URLs, payment/billing
 | Site URL | Vercel Preview | `NEXT_PUBLIC_SITE_URL` |
 | Supabase privileged writes | Supabase Edge Functions | service-role stays server-side |
 | Game server trust | Supabase Edge and Fly | shared `MOCHI_SOCIAL_GAME_SERVER_TOKEN` secret name only |
+| Enjin preview state | Game runtime | Canary-only `configured-preview-stub` until funded-chain approval |
 
 Branch-specific Vercel preview env should override only the Mochi Social values needed for the alpha PR. Production env must not be changed for Alpha RC unless a later production plan is approved.
 
@@ -82,7 +108,8 @@ Before inviting testers:
 - Allowlisted testers are blocked until terms are acknowledged.
 - The iframe receives only `MOCHI_SOCIAL_AUTH` with a short-lived access token.
 - Feedback appears in the leader audit panel.
-- Chain operation rows record request id, transaction UUID, optional listing ID, state, and finality evidence.
+- For Alpha Preview Ready, chain request rows may be audit-only preview records while the game reports `configured-preview-stub`.
+- For Alpha RC Ready, chain operation rows record request id, transaction UUID, optional listing ID, state, and finality evidence.
 - Two-tab game presence is verified separately in the game runtime.
 
 ## Secret Entry Protocol
