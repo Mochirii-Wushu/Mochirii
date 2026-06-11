@@ -1,0 +1,370 @@
+import { existsSync, readFileSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+
+const root = process.cwd();
+const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
+const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
+const reportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON || "reports/mochi-social-preview-ready.json");
+const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_MD || "reports/mochi-social-preview-ready.md");
+const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
+const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
+const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev");
+const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
+const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
+const publishableKeyPresent = Boolean(process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY);
+const requirements = [];
+
+addCommandRequirement("site.static-alpha", "Mochi Social static alpha checks pass.", "node", ["scripts/check-mochi-social-alpha.mjs"], {});
+addBranchSyncRequirement("site.branch-sync", root, "Local Mochirii site branch");
+addOperatorChecklistRequirement();
+addGamePreviewReadyRequirement();
+addGameContractRequirement();
+addEdgeSmokeRequirement();
+addManualBrowserGateRequirement();
+
+const summary = summarize(requirements);
+const report = {
+  ok: summary.failed === 0 && summary.unverified === 0,
+  checkedAt: new Date().toISOString(),
+  scope: "Mochirii Mochi Social Alpha Preview Ready audit. This no-secret report checks the website tester-entry lane only and does not authorize provider mutations.",
+  hostedChecksAllowed,
+  gameUrl,
+  siteOrigin,
+  functionsUrl,
+  publishableKeyPresent,
+  git: readGitState(root),
+  gameGit: existsSync(gameRepoPath) ? readGitState(gameRepoPath) : null,
+  summary,
+  requirements,
+};
+
+const markdown = renderMarkdown(report);
+await mkdir(dirname(reportPath), { recursive: true });
+await mkdir(dirname(handoffPath), { recursive: true });
+await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+await writeFile(reportMdPath, markdown, "utf8");
+await writeFile(handoffPath, markdown, "utf8");
+
+if (!report.ok) {
+  console.error("Mochirii Mochi Social Alpha Preview Ready audit is not ready:");
+  for (const item of requirements.filter((entry) => entry.status !== "pass")) {
+    console.error(`- ${item.id}: ${item.status} - ${item.message}`);
+  }
+  console.error(`Report: ${reportPath}`);
+  process.exit(1);
+}
+
+console.log(`Mochirii Mochi Social Alpha Preview Ready audit passed. Report: ${reportPath}`);
+console.log(`Markdown: ${reportMdPath}`);
+
+function addOperatorChecklistRequirement() {
+  const checklist = resolve(credsDir, "mochirii-mochi-social-alpha-operator-next-steps.md");
+  if (!existsSync(checklist)) {
+    add("site.operator-checklist", "fail", `Website operator checklist is missing: ${checklist}`, { path: checklist });
+    return;
+  }
+  const text = readFileSync(checklist, "utf8");
+  const gitState = readGitState(root);
+  const failures = [];
+  for (const snippet of [
+    "This file is intentionally no-secret",
+    "Alpha Preview Ready Lane",
+    "NEXT_PUBLIC_MOCHI_SOCIAL_URL",
+    "MOCHI_SOCIAL_ALPHA_EDGE_URL",
+    gitState.localHead,
+  ]) {
+    if (!snippet || !text.includes(snippet)) failures.push(`operator checklist missing ${snippet || "<current head>"}`);
+  }
+  add("site.operator-checklist", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Website operator checklist is present and current.", {
+    path: checklist,
+  });
+}
+
+function addGamePreviewReadyRequirement() {
+  const gameReport = readJson(resolve(gameRepoPath, "reports/alpha-preview-ready.json"));
+  if (!gameReport.ok) {
+    add("site.game-preview-ready", "fail", `Game Preview Ready report is missing or invalid: ${gameReport.message}.`, {
+      path: resolve(gameRepoPath, "reports/alpha-preview-ready.json"),
+    });
+    return;
+  }
+  const failures = currentGitStateFailures(gameReport.data?.git, gameRepoPath, "game preview-ready report");
+  if (gameReport.data?.ok !== true) {
+    const failing = (gameReport.data?.requirements || [])
+      .filter((item) => item.status !== "pass")
+      .map((item) => item.id)
+      .join(", ");
+    failures.push(`game preview-ready report is not ok${failing ? `: ${failing}` : ""}`);
+  }
+  add("site.game-preview-ready", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Game Preview Ready report is green and current.", {
+    path: resolve(gameRepoPath, "reports/alpha-preview-ready.json"),
+  });
+}
+
+function addGameContractRequirement() {
+  const failures = [];
+  if (!gameUrl) failures.push("Mochi Social game URL is required");
+  if (!siteOrigin) failures.push("Mochirii site origin is required");
+  if ((isHostedUrl(gameUrl) || isHostedUrl(siteOrigin)) && !hostedChecksAllowed) {
+    failures.push("hosted game/site contract check requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
+  }
+  if (failures.length) {
+    add("site.game-contract", "fail", failures.join("; "), { gameUrl, siteOrigin, hostedChecksAllowed });
+    return;
+  }
+  addCommandRequirement("site.game-contract", "Game contract check passes for the configured site origin.", "node", ["scripts/check-mochi-social-game-contract.mjs"], {
+    env: {
+      MOCHI_SOCIAL_GAME_CONTRACT_URL: gameUrl,
+      MOCHI_SOCIAL_SITE_ORIGIN: siteOrigin,
+    },
+  });
+}
+
+function addEdgeSmokeRequirement() {
+  const failures = [];
+  if (!functionsUrl) failures.push("Supabase Edge functions URL is required");
+  if (!publishableKeyPresent) failures.push("MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY is required locally for preview smoke");
+  if (isHostedUrl(functionsUrl) && !hostedChecksAllowed) {
+    failures.push("hosted Supabase Edge smoke requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
+  }
+  if (failures.length) {
+    add("site.edge-smoke", "fail", failures.join("; "), {
+      functionsUrl,
+      publishableKeyPresent,
+      hostedChecksAllowed,
+    });
+    return;
+  }
+  addCommandRequirement("site.edge-smoke", "Supabase Edge alpha smoke passes for the preview branch.", "node", ["scripts/smoke-mochi-social-alpha-edge.mjs"], {
+    env: {
+      MOCHI_SOCIAL_ALPHA_EDGE_URL: functionsUrl,
+    },
+  });
+}
+
+function addManualBrowserGateRequirement() {
+  const confirmed = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED === "true";
+  const reviewer = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER || "");
+  const browser = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER || "");
+  const reviewUrl = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_URL || "");
+  const failures = [];
+  if (!confirmed) failures.push("manual browser gates have not been confirmed");
+  if (confirmed && !reviewer) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER is required");
+  if (confirmed && !browser) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER is required");
+  if (confirmed && !reviewUrl) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_URL is required");
+  if (reviewUrl && isHostedUrl(reviewUrl) && !hostedChecksAllowed) {
+    failures.push("hosted browser gate confirmation requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
+  }
+  add("site.manual-browser-gates", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Manual website browser gates are confirmed.", {
+    reviewer: reviewer || null,
+    browser: browser || null,
+    url: reviewUrl || null,
+    hostedChecksAllowed,
+    requiredGates: [
+      "signed-out blocked",
+      "signed-in non-tester blocked",
+      "terms gate",
+      "iframe loads after acknowledgement",
+      "MOCHI_SOCIAL_AUTH sends access token only",
+      "feedback appears in admin/audit",
+      "chain request remains configured-preview-stub/no-real-value",
+    ],
+  });
+}
+
+function addCommandRequirement(id, passMessage, command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    cwd: root,
+    encoding: "utf8",
+    shell: false,
+    env: options.env ? { ...process.env, ...options.env } : process.env,
+  });
+  const ok = result.status === 0;
+  add(id, ok ? "pass" : "fail", ok ? passMessage : `${command} ${args.join(" ")} failed with exit code ${result.status}.`, {
+    command: `${command} ${args.join(" ")}`,
+    stdout: sanitize(result.stdout || ""),
+    stderr: sanitize(result.stderr || result.error?.message || ""),
+  });
+}
+
+function addBranchSyncRequirement(id, repoPath, label) {
+  const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
+  const counts = git(["rev-list", "--left-right", "--count", "HEAD...@{u}"], repoPath);
+  const status = git(["status", "--porcelain"], repoPath);
+  const failures = [];
+  let ahead = 0;
+  let behind = 0;
+  if (!upstream.ok) failures.push(`${label} has no upstream branch.`);
+  if (counts.ok) {
+    const [aheadText, behindText] = firstLine(counts.stdout).split(/\s+/);
+    ahead = Number(aheadText || 0);
+    behind = Number(behindText || 0);
+    if (ahead !== 0 || behind !== 0) failures.push(`${label} is ahead ${ahead} / behind ${behind} relative to upstream.`);
+  } else {
+    failures.push(`${label} ahead/behind state could not be read.`);
+  }
+  const dirty = status.ok ? status.stdout.split(/\r?\n/).filter(Boolean) : ["git status unavailable"];
+  if (dirty.length) failures.push(`${label} worktree is dirty.`);
+  add(id, failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : `${label} is clean and synced to upstream.`, {
+    path: repoPath,
+    upstream: firstLine(upstream.stdout),
+    ahead,
+    behind,
+    dirty,
+  });
+}
+
+function currentGitStateFailures(state, repoPath, label) {
+  const failures = [];
+  const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], repoPath);
+  const localHead = git(["rev-parse", "HEAD"], repoPath);
+  const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
+  const dirty = git(["status", "--porcelain"], repoPath);
+  if (!state) failures.push(`${label} must include git state`);
+  if (!branch.ok) failures.push(`${label} current branch could not be read`);
+  if (!localHead.ok) failures.push(`${label} current HEAD could not be read`);
+  if (!upstream.ok) failures.push(`${label} current upstream could not be read`);
+  if (!dirty.ok) failures.push(`${label} current worktree status could not be read`);
+  if (!state || !branch.ok || !localHead.ok || !upstream.ok || !dirty.ok) return failures;
+
+  const currentDirty = dirty.stdout.split(/\r?\n/).filter(Boolean);
+  if (state.branch !== firstLine(branch.stdout)) failures.push(`${label} branch does not match current branch`);
+  if (state.localHead !== firstLine(localHead.stdout)) failures.push(`${label} localHead does not match current HEAD`);
+  if (state.upstream !== firstLine(upstream.stdout)) failures.push(`${label} upstream does not match current upstream`);
+  if (!Array.isArray(state.dirty) || state.dirty.length !== currentDirty.length) failures.push(`${label} dirty state does not match current worktree`);
+  return failures;
+}
+
+function readGitState(repoPath) {
+  const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], repoPath);
+  const localHead = git(["rev-parse", "HEAD"], repoPath);
+  const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
+  const dirty = git(["status", "--porcelain"], repoPath);
+  return {
+    branch: firstLine(branch.stdout),
+    localHead: firstLine(localHead.stdout),
+    upstream: firstLine(upstream.stdout),
+    dirty: dirty.ok ? dirty.stdout.split(/\r?\n/).filter(Boolean).map((line) => sanitize(line)) : ["git status unavailable"],
+    errors: [branch, localHead, upstream, dirty]
+      .filter((result) => !result.ok)
+      .map((result) => sanitize(result.stderr || result.error || "git command failed")),
+  };
+}
+
+function readJson(file) {
+  if (!existsSync(file)) return { ok: false, message: "not found" };
+  try {
+    return { ok: true, data: JSON.parse(readFileSync(file, "utf8")) };
+  } catch {
+    return { ok: false, message: "parse failed" };
+  }
+}
+
+function git(args, cwd) {
+  const result = spawnSync("git", args, { cwd, encoding: "utf8", shell: false });
+  return {
+    ok: result.status === 0,
+    stdout: result.stdout || "",
+    stderr: result.stderr || result.error?.message || "",
+  };
+}
+
+function add(id, status, message, evidence = {}) {
+  requirements.push({ id, status, message, evidence });
+}
+
+function summarize(items) {
+  return {
+    total: items.length,
+    passed: items.filter((item) => item.status === "pass").length,
+    failed: items.filter((item) => item.status === "fail").length,
+    unverified: items.filter((item) => item.status === "unverified").length,
+  };
+}
+
+function renderMarkdown(summaryReport) {
+  const rows = summaryReport.requirements
+    .map((item) => `| ${item.id} | ${item.status} | ${item.message.replace(/\|/g, "/")} |`)
+    .join("\n");
+  const failures = summaryReport.requirements
+    .filter((item) => item.status !== "pass")
+    .map((item) => `- ${item.id}: ${item.message}`)
+    .join("\n") || "- None";
+
+  return `# Mochirii Mochi Social Alpha Preview Ready Audit
+
+Generated: ${summaryReport.checkedAt}
+
+This file is intentionally no-secret. It verifies the website tester-entry lane and does not approve provider mutations, production deploys, Enjin funding, or mainnet work.
+
+## Result
+
+- Ready: ${summaryReport.ok ? "yes" : "no"}
+- Passed: ${summaryReport.summary.passed}/${summaryReport.summary.total}
+- Hosted checks allowed: ${summaryReport.hostedChecksAllowed ? "yes" : "no"}
+- Game URL: ${summaryReport.gameUrl}
+- Site origin: ${summaryReport.siteOrigin}
+- Supabase Edge URL: ${summaryReport.functionsUrl}
+- Publishable key present: ${summaryReport.publishableKeyPresent ? "yes" : "no"}
+
+## Requirements
+
+| Requirement | Status | Message |
+| --- | --- | --- |
+${rows}
+
+## Remaining Site Preview Work
+
+${failures}
+
+## Approval Prompt
+
+\`\`\`text
+I approve the Mochirii hosted Preview Ready verification using MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured Fly game URL, Vercel Preview origin, and Supabase Preview Edge URL. I understand this may hit Fly/Vercel/Supabase preview resources and add usage.
+\`\`\`
+`;
+}
+
+function normalizeUrl(value) {
+  return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function normalizeOrigin(value) {
+  const normalized = normalizeUrl(value);
+  if (!normalized) return "";
+  try {
+    return new URL(normalized).origin;
+  } catch {
+    return normalized;
+  }
+}
+
+function isHostedUrl(value) {
+  try {
+    const parsed = new URL(value);
+    return !["localhost", "127.0.0.1", "::1", "[::1]"].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function firstLine(value) {
+  return String(value || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
+}
+
+function sanitize(value) {
+  return String(value || "")
+    .replace(/\b(?:ghp|gho|ghs|ghu|github_pat)_[A-Za-z0-9_]{20,}\b/g, "<redacted-github-token>")
+    .replace(/\bsb_secret_[A-Za-z0-9_-]{8,}\b/g, "<redacted-supabase-secret>")
+    .replace(/\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g, "<redacted-jwt>")
+    .replace(/\bMOCHI_SOCIAL_GAME_SERVER_TOKEN\s*=\s*["']?[^ \r\n"']+/gi, "MOCHI_SOCIAL_GAME_SERVER_TOKEN=<redacted>")
+    .slice(0, 1000);
+}
+
+function defaultCredsDir() {
+  if (process.env.USERPROFILE) return join(process.env.USERPROFILE, "Desktop", "Creds");
+  if (process.env.HOME) return join(process.env.HOME, "Desktop", "Creds");
+  return join(root, ".local", "creds");
+}

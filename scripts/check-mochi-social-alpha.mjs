@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'prepare:mochi-social-alpha-operator-checklist']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-game-contract', 'check:mochi-social-preview-ready', 'prepare:mochi-social-alpha-operator-checklist']
   },
   {
     file: 'AGENTS.md',
@@ -24,6 +24,10 @@ const checks = [
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
     includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy', 'Local Branch Sync', 'I approve pushing C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii']
+  },
+  {
+    file: 'scripts/check-mochi-social-preview-ready.mjs',
+    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'site.game-contract', 'site.edge-smoke', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
@@ -82,6 +86,7 @@ const checks = [
       'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
       'MOCHI_SOCIAL_AUTH',
       'prepare:mochi-social-alpha-operator-checklist',
+      'check:mochi-social-preview-ready',
       'Do not roll back by switching to production',
       'Computer Use',
       'Alpha Preview Ready',

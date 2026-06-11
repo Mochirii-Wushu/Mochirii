@@ -1,4 +1,6 @@
 reports/lighthouse/
+reports/mochi-social-preview-ready.json
+reports/mochi-social-preview-ready.md
 .lighthouseci/
 *.lhr.json
 node_modules/

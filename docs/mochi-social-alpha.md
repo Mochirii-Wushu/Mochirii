@@ -110,10 +110,28 @@ npm run prepare:mochi-social-alpha-operator-checklist
 
 The generated file goes to `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-alpha-operator-next-steps.md` by default. It may include PR status, local credential filenames, required env names, and placeholder commands, but it must not contain raw secrets.
 
+After the game-side `npm run alpha:preview-ready` report exists, run the website-side Preview Ready audit:
+
+```powershell
+$env:MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_GAME_CONTRACT_URL="https://mochi-social-game.fly.dev"
+$env:MOCHI_SOCIAL_SITE_ORIGIN="<Mochirii Vercel Preview URL>"
+$env:MOCHI_SOCIAL_ALPHA_EDGE_URL="https://<preview-project-ref>.supabase.co/functions/v1"
+$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY="<preview publishable key>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+npm run check:mochi-social-preview-ready
+```
+
+This writes ignored no-secret reports to `reports/mochi-social-preview-ready.json`, `reports/mochi-social-preview-ready.md`, and `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-preview-ready.md`. It does not approve provider mutations; it stays red until hosted checks, manual browser gates, game Preview Ready, and site branch sync are proven.
+
 Run local verification:
 
 ```powershell
 npm run check:mochi-social-alpha
+npm run check:mochi-social-preview-ready
 npm run check:mochi-social-game-contract
 npm run smoke:mochi-social-alpha-edge
 npm run check:supabase-edge-types
