@@ -156,6 +156,14 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 ```
 
+For the hosted Supabase Edge smoke, prefer the local file pointer over pasting the publishable key into the shell:
+
+```powershell
+$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE="C:\Users\xtyty\Desktop\Creds\supabase-preview-<preview-project-ref>-api-keys.local.json"
+```
+
+The Preview Ready audit loads the standard preview key file only after `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true` is set, or when this explicit file path is provided. Reports record only the key source filename/status and never the key value.
+
 ## Secret Entry Protocol
 
 - The user types secrets privately.

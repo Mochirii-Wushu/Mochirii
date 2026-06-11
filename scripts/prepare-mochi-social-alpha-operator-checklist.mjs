@@ -170,6 +170,7 @@ Required Edge smoke inputs stay local:
 - MOCHI_SOCIAL_ALPHA_EDGE_URL=${functionsUrl}
 - MOCHI_SOCIAL_ALPHA_AUTH_URL=https://${supabaseProjectRef}.supabase.co/auth/v1
 - MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY=<preview-supabase-publishable-key>
+- MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE=${join(credsDir, `supabase-preview-${supabaseProjectRef}-api-keys.local.json`)}
 - MOCHI_SOCIAL_GAME_SERVER_TOKEN=<same-scoped-token-as-fly>
 
 Required Discord OAuth setup:
@@ -182,7 +183,7 @@ Required Discord OAuth setup:
 \`\`\`powershell
 $env:MOCHI_SOCIAL_ALPHA_EDGE_URL="${functionsUrl}"
 $env:MOCHI_SOCIAL_ALPHA_AUTH_URL="https://${supabaseProjectRef}.supabase.co/auth/v1"
-$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY="<preview-supabase-publishable-key>"
+$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE="${join(credsDir, `supabase-preview-${supabaseProjectRef}-api-keys.local.json`)}"
 $env:MOCHI_SOCIAL_GAME_SERVER_TOKEN="<same-scoped-token-as-fly>"
 npm run smoke:mochi-social-alpha-edge
 npm run check:mochi-social-preview-ready # Verifies site.discord-oauth after hosted verification approval.

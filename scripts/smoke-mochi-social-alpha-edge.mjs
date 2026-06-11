@@ -1,10 +1,13 @@
+import { existsSync, readFileSync } from "node:fs";
+import { basename, resolve } from "node:path";
+
 const functionsUrl = (process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "").replace(/\/+$/, "");
-const publishableKey = process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY || "";
+const publishableKey = loadPublishableKey();
 const gameServerToken = process.env.MOCHI_SOCIAL_GAME_SERVER_TOKEN || "";
 const timeoutMs = Number(process.env.MOCHI_SOCIAL_ALPHA_EDGE_TIMEOUT_MS || 15000);
 
 if (!functionsUrl || !publishableKey) {
-  console.log("Mochi Social alpha Edge smoke skipped. Set MOCHI_SOCIAL_ALPHA_EDGE_URL and MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY to verify a Supabase preview branch.");
+  console.log("Mochi Social alpha Edge smoke skipped. Set MOCHI_SOCIAL_ALPHA_EDGE_URL and MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY, or explicitly set MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE, to verify a Supabase preview branch.");
   process.exit(0);
 }
 
@@ -151,4 +154,36 @@ function baseHeaders(extra = {}) {
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+function loadPublishableKey() {
+  const envKey = process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY || "";
+  if (envKey) return envKey;
+  const file = process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE || "";
+  if (!file) return "";
+  const resolved = resolve(file);
+  if (!existsSync(resolved)) {
+    console.log(`Mochi Social alpha Edge smoke skipped. Publishable key file was not found: ${basename(resolved)}`);
+    return "";
+  }
+  try {
+    const parsed = JSON.parse(readFileSync(resolved, "utf8").replace(/^\uFEFF/, ""));
+    return selectPublishableKey(parsed);
+  } catch {
+    console.log(`Mochi Social alpha Edge smoke skipped. Publishable key file could not be parsed: ${basename(resolved)}`);
+    return "";
+  }
+}
+
+function selectPublishableKey(parsed) {
+  const entries = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.keys) ? parsed.keys : [parsed];
+  const usable = entries
+    .filter((entry) => entry && typeof entry === "object" && typeof entry.api_key === "string")
+    .filter((entry) => {
+      const text = `${entry.name || ""} ${entry.type || ""} ${entry.description || ""}`.toLowerCase();
+      return !/service[_ -]?role|secret/.test(text);
+    });
+  const publishable = usable.find((entry) => String(entry.type || "").toLowerCase() === "publishable");
+  const anon = usable.find((entry) => String(entry.name || "").toLowerCase() === "anon");
+  return (publishable || anon || usable[0])?.api_key || "";
 }

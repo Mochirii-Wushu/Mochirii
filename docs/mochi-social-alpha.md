@@ -150,7 +150,7 @@ $env:MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED="true"
 $env:MOCHI_SOCIAL_GAME_CONTRACT_URL="https://mochi-social-game.fly.dev"
 $env:MOCHI_SOCIAL_SITE_ORIGIN="<Mochirii Vercel Preview URL>"
 $env:MOCHI_SOCIAL_ALPHA_EDGE_URL="https://<preview-project-ref>.supabase.co/functions/v1"
-$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY="<preview publishable key>"
+$env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE="C:\Users\xtyty\Desktop\Creds\supabase-preview-<preview-project-ref>-api-keys.local.json"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
@@ -167,6 +167,8 @@ npm run check:mochi-social-preview-ready
 ```
 
 This writes ignored no-secret reports to `reports/mochi-social-preview-ready.json`, `reports/mochi-social-preview-ready.md`, and `C:\Users\xtyty\Desktop\Creds\mochirii-mochi-social-preview-ready.md`. It does not approve provider mutations; it stays red until hosted checks, manual browser gates, game Preview Ready, and site branch sync are proven.
+
+For hosted Preview Ready checks, `npm run check:mochi-social-preview-ready` may load the Supabase publishable key from `MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE`, or from the standard `C:\Users\xtyty\Desktop\Creds\supabase-preview-<preview-project-ref>-api-keys.local.json` file after `MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true` is set. Reports record only the key source filename/status, never the key value.
 
 Run local verification:
 

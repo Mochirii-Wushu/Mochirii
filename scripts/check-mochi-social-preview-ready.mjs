@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
@@ -14,7 +14,9 @@ const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || proce
 const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
 const authUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
-const publishableKeyPresent = Boolean(process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY);
+const supabaseProjectRef = inferSupabaseProjectRef(functionsUrl);
+const publishableKey = loadPublishableKey();
+const publishableKeyPresent = Boolean(publishableKey.value);
 const manualBrowserGateChecks = [
   ["MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK", "signed-out blocked"],
   ["MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK", "signed-in non-tester blocked"],
@@ -47,6 +49,7 @@ const report = {
   functionsUrl,
   authUrl,
   publishableKeyPresent,
+  publishableKeySource: publishableKey.source,
   git: readGitState(root),
   gameGit: existsSync(gameRepoPath) ? readGitState(gameRepoPath) : null,
   summary,
@@ -146,6 +149,7 @@ function addEdgeSmokeRequirement() {
     add("site.edge-smoke", "fail", failures.join("; "), {
       functionsUrl,
       publishableKeyPresent,
+      publishableKeySource: publishableKey.source,
       hostedChecksAllowed,
     });
     return;
@@ -153,6 +157,7 @@ function addEdgeSmokeRequirement() {
   addCommandRequirement("site.edge-smoke", "Supabase Edge alpha smoke passes for the preview branch.", "node", ["scripts/smoke-mochi-social-alpha-edge.mjs"], {
     env: {
       MOCHI_SOCIAL_ALPHA_EDGE_URL: functionsUrl,
+      MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY: publishableKey.value,
     },
   });
 }
@@ -368,6 +373,7 @@ This file is intentionally no-secret. It verifies the website tester-entry lane 
 - Supabase Edge URL: ${summaryReport.functionsUrl}
 - Supabase Auth URL: ${summaryReport.authUrl}
 - Publishable key present: ${summaryReport.publishableKeyPresent ? "yes" : "no"}
+- Publishable key source: ${summaryReport.publishableKeySource}
 
 ## Requirements
 
@@ -405,6 +411,54 @@ function inferSupabaseAuthUrl(value) {
   const normalized = normalizeUrl(value);
   if (!normalized) return "";
   return normalized.replace(/\/functions\/v1$/i, "/auth/v1");
+}
+
+function inferSupabaseProjectRef(value) {
+  try {
+    const host = new URL(value).hostname;
+    const [first] = host.split(".");
+    return first || "";
+  } catch {
+    return "";
+  }
+}
+
+function loadPublishableKey() {
+  const envKey = process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY || "";
+  if (envKey) return { value: envKey, source: "env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY" };
+
+  const explicitFile = process.env.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE || "";
+  const defaultFile = supabaseProjectRef ? join(credsDir, `supabase-preview-${supabaseProjectRef}-api-keys.local.json`) : "";
+  if (!explicitFile && !hostedChecksAllowed) {
+    return { value: "", source: "not-loaded-awaiting-hosted-approval" };
+  }
+
+  const file = explicitFile || defaultFile;
+  if (!file) return { value: "", source: "missing-file-path" };
+  const resolved = resolve(file);
+  const source = `file:${basename(resolved)}`;
+  if (!existsSync(resolved)) return { value: "", source: `${source}:not-found` };
+
+  try {
+    const parsed = JSON.parse(readFileSync(resolved, "utf8").replace(/^\uFEFF/, ""));
+    const value = selectPublishableKey(parsed);
+    return { value, source: value ? source : `${source}:publishable-key-not-found` };
+  } catch {
+    return { value: "", source: `${source}:parse-failed` };
+  }
+}
+
+function selectPublishableKey(parsed) {
+  const entries = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.keys) ? parsed.keys : [parsed];
+  const usable = entries
+    .filter((entry) => entry && typeof entry === "object" && typeof entry.api_key === "string")
+    .filter((entry) => {
+      const text = `${entry.name || ""} ${entry.type || ""} ${entry.description || ""}`.toLowerCase();
+      return !/service[_ -]?role|secret/.test(text);
+    });
+  const publishable = usable.find((entry) => String(entry.type || "").toLowerCase() === "publishable");
+  const anon = usable.find((entry) => String(entry.name || "").toLowerCase() === "anon");
+  return (publishable || anon || usable[0])?.api_key || "";
 }
 
 function isHostedUrl(value) {
