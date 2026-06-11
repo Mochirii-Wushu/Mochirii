@@ -12,6 +12,7 @@ const reportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_JSO
 const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_MD || "reports/mochi-social-preview-ready.md");
 const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
 const browserGateReportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON || "reports/mochi-social-browser-gates.json");
+const reportHygienePath = resolve(root, process.env.MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON || "reports/mochi-social-report-hygiene.json");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
 const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
 const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev");
@@ -43,6 +44,7 @@ if (!skipNestedSelfTestCommands) {
 }
 addBranchSyncRequirement("site.branch-sync", root, "Local Mochirii site branch");
 addOperatorChecklistRequirement();
+addReportHygieneRequirement();
 addGamePreviewReadyRequirement();
 addGameContractRequirement();
 addEdgeSmokeRequirement();
@@ -107,6 +109,24 @@ function addOperatorChecklistRequirement() {
   }
   add("site.operator-checklist", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Website operator checklist is present and current.", {
     path: checklist,
+  });
+}
+
+function addReportHygieneRequirement() {
+  const report = readJson(reportHygienePath);
+  if (!report.ok) {
+    add("site.report-hygiene", "fail", `Mochi Social site report hygiene is missing or invalid: ${report.message}. Run npm run check:mochi-social-report-hygiene after generating site reports and handoff files.`, {
+      path: reportHygienePath,
+    });
+    return;
+  }
+
+  const failures = currentGitStateFailures(report.data?.git, root, "site report hygiene");
+  if (report.data?.ok !== true) failures.push("site report hygiene report is not ok");
+  if (!Array.isArray(report.data?.scanned) || report.data.scanned.length === 0) failures.push("site report hygiene must scan at least one no-secret artifact");
+  add("site.report-hygiene", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Site no-secret report hygiene is current and green.", {
+    path: reportHygienePath,
+    scanned: Array.isArray(report.data?.scanned) ? report.data.scanned.length : 0,
   });
 }
 

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
 const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
@@ -65,6 +66,7 @@ const report = {
   })),
   missingOptional: missing,
   failures,
+  git: readGitState(root),
 };
 
 const markdown = renderMarkdown(report);
@@ -140,6 +142,34 @@ function pathForReport(file) {
   if (normalized.startsWith(`${normalizedRoot}/`)) return normalized.slice(normalizedRoot.length + 1);
   if (normalized.startsWith(`${normalizedCreds}/`)) return normalized.slice(normalizedCreds.length + 1);
   return normalized;
+}
+
+function readGitState(repoPath) {
+  const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], repoPath);
+  const localHead = git(["rev-parse", "HEAD"], repoPath);
+  const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
+  const dirty = git(["status", "--porcelain"], repoPath);
+  return {
+    branch: firstLine(branch.stdout),
+    localHead: firstLine(localHead.stdout),
+    upstream: firstLine(upstream.stdout),
+    dirty: dirty.ok ? dirty.stdout.split(/\r?\n/).filter(Boolean) : ["git status unavailable"],
+    errors: [branch, localHead, upstream, dirty].filter((result) => !result.ok).map((result) => result.stderr || result.error || "git command failed"),
+  };
+}
+
+function git(args, cwd) {
+  const result = spawnSync("git", args, { cwd, encoding: "utf8", shell: false });
+  return {
+    ok: result.status === 0,
+    stdout: result.stdout || "",
+    stderr: result.stderr || "",
+    error: result.error?.message || "",
+  };
+}
+
+function firstLine(text) {
+  return String(text || "").split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
 }
 
 function defaultCredsDir() {

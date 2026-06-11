@@ -128,6 +128,7 @@ npm run check:mochi-social-report-hygiene
 ```
 
 This scans the ignored Mochi Social site reports plus the Mochirii no-secret handoff files under `C:\Users\xtyty\Desktop\Creds` for obvious token, key, email, and wallet-file material without printing values.
+`npm run check:mochi-social-preview-ready` requires this hygiene report to be current for the site worktree.
 
 ## Rollback
 
@@ -181,8 +182,8 @@ Run local verification:
 npm run check:mochi-social-alpha
 npm run check:mochi-social-bridge-state
 npm run check:mochi-social-edge-authority
-npm run check:mochi-social-preview-ready
 npm run check:mochi-social-report-hygiene
+npm run check:mochi-social-preview-ready
 npm run check:mochi-social-game-contract
 npm run smoke:mochi-social-alpha-edge
 npm run check:supabase-edge-types

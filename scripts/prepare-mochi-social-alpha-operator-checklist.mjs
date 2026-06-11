@@ -196,6 +196,7 @@ $env:MOCHI_SOCIAL_ALPHA_AUTH_URL="https://${supabaseProjectRef}.supabase.co/auth
 $env:MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE="${join(credsDir, `supabase-preview-${supabaseProjectRef}-api-keys.local.json`)}"
 $env:MOCHI_SOCIAL_GAME_SERVER_TOKEN="<same-scoped-token-as-fly>"
 npm run smoke:mochi-social-alpha-edge
+npm run check:mochi-social-report-hygiene
 npm run check:mochi-social-preview-ready # Verifies site.discord-oauth after hosted verification approval.
 \`\`\`
 
@@ -250,6 +251,7 @@ npm run check:mochi-social-alpha
 npm run check:mochi-social-bridge-state
 npm run check:mochi-social-game-contract
 npm run smoke:mochi-social-alpha-edge
+npm run check:mochi-social-report-hygiene
 npm run check:supabase-edge-types
 npm run check
 cd apps/web
