@@ -526,6 +526,18 @@ async function fetchGuildMembers(): Promise<JsonRecord[]> {
   return members;
 }
 
+async function fetchGuildRoles(): Promise<JsonRecord[]> {
+  const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
+    headers: discordApiHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Guild role fetch failed with Discord API ${response.status}.`);
+  }
+
+  return asArray(response.data).map(asRecord).filter((role) => Boolean(snowflake(role.id)));
+}
+
 async function fetchGuildChannels(): Promise<JsonRecord[]> {
   const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/channels`, {
     headers: discordApiHeaders(),
@@ -578,8 +590,8 @@ async function processPendingVerificationSync(
     }
 
     adminClient = serviceAdminClient("pending verification containment");
-    const [channels, members] = await Promise.all([fetchGuildChannels(), fetchGuildMembers()]);
-    plan = await buildPendingContainmentPlan(adminClient, channels, members);
+    const [channels, members, roles] = await Promise.all([fetchGuildChannels(), fetchGuildMembers(), fetchGuildRoles()]);
+    plan = await buildPendingContainmentPlan(adminClient, channels, members, roles);
     const discordWriteCount = plan.changes.filter((change) => change.discordWrite).length;
 
     if (plan.conflicts.length) {
