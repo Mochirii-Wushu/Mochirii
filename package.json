@@ -49,6 +49,7 @@
     "check:spotlight-poll": "node scripts/check-spotlight-poll.mjs",
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
     "check:supabase-edge-types": "node scripts/check-supabase-edge-types.mjs",
+    "check:universal-hero-spacing": "node scripts/check-universal-hero-spacing.mjs",
     "check:vercel-pr-preview": "node scripts/check-vercel-pr-preview.mjs",
     "check:production": "node scripts/check-production.mjs",
     "check:reaper-discord-interactions": "node scripts/check-reaper-discord-interactions.mjs",

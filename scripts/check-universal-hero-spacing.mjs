@@ -1,0 +1,138 @@
+import { readFileSync } from "node:fs";
+
+const cssPath = "apps/web/app/mochirii.css";
+const css = readFileSync(cssPath, "utf8").replace(/\r\n/g, "\n");
+
+function fail(message) {
+  console.error(message);
+  process.exitCode = 1;
+}
+
+function assertIncludes(label, snippet) {
+  if (!css.includes(snippet)) fail(`${label} is missing from ${cssPath}.`);
+}
+
+assertIncludes("Shared hero shell padding token", "--hero-shell-pad-top:");
+assertIncludes("Shared hero image aspect token", "--hero-image-aspect:3 / 2;");
+assertIncludes("Shared hero image gap token", "--hero-image-to-card-gap:");
+assertIncludes("Shared hero bottom gap token", "--hero-stack-bottom-gap:");
+assertIncludes("Shared hero shell padding", ".page-hero-shell{position:relative; z-index:10; padding-top:var(--hero-shell-pad-top);}");
+assertIncludes("Shared hero aspect ratio", "aspect-ratio:var(--hero-image-aspect);");
+assertIncludes("Shared hero radius", "border-radius:var(--hero-image-radius);");
+assertIncludes("Shared hero image fit", "object-fit:contain;");
+assertIncludes("Shared hero card gap", ".hero-overlap{margin-top:var(--hero-image-to-card-gap); padding-bottom:var(--hero-stack-bottom-gap);}");
+
+const bannedHeroGeometry = new Set([
+  "aspect-ratio",
+  "width",
+  "min-width",
+  "max-width",
+  "height",
+  "min-height",
+  "max-height",
+  "padding",
+  "padding-top",
+  "padding-right",
+  "padding-bottom",
+  "padding-left",
+  "margin",
+  "margin-top",
+  "margin-right",
+  "margin-bottom",
+  "margin-left",
+  "border-radius",
+  "overflow",
+  "isolation",
+  "object-fit",
+  "object-position",
+  "transform",
+  "transform-origin",
+  "filter",
+]);
+
+const bannedHeroImageGeometry = new Set([
+  "aspect-ratio",
+  "width",
+  "min-width",
+  "max-width",
+  "height",
+  "min-height",
+  "max-height",
+  "object-fit",
+  "object-position",
+  "transform",
+  "transform-origin",
+  "filter",
+  "background",
+]);
+
+const bannedHeroShellSpacing = new Set([
+  "padding",
+  "padding-top",
+  "padding-right",
+  "padding-bottom",
+  "padding-left",
+  "margin",
+  "margin-top",
+  "margin-right",
+  "margin-bottom",
+  "margin-left",
+]);
+
+function declarations(body) {
+  return body
+    .split(";")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const colon = line.indexOf(":");
+      if (colon === -1) return null;
+      return {
+        prop: line.slice(0, colon).trim().toLowerCase(),
+        value: line.slice(colon + 1).trim().toLowerCase(),
+      };
+    })
+    .filter(Boolean);
+}
+
+for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+  const selector = match[1].trim();
+  if (!selector.includes("body[data-page=")) continue;
+
+  const props = declarations(match[2]);
+
+  if (selector.includes(".hero-overlap")) {
+    fail(`Page-scoped hero-overlap spacing is not allowed: ${selector}`);
+    continue;
+  }
+
+  if (selector.includes(".page-hero-shell")) {
+    for (const { prop } of props) {
+      if (bannedHeroShellSpacing.has(prop)) {
+        fail(`Page-scoped hero shell spacing is not allowed: ${selector} sets ${prop}.`);
+      }
+    }
+  }
+
+  if (selector.includes(".page-hero__img")) {
+    for (const { prop, value } of props) {
+      if (prop === "transform" && value === "none") continue;
+      if (bannedHeroImageGeometry.has(prop)) {
+        fail(`Page-scoped hero image geometry is not allowed: ${selector} sets ${prop}.`);
+      }
+    }
+  }
+
+  if (selector.includes(".page-hero") && !selector.includes(".page-hero__img") && !selector.includes(".page-hero-shell")) {
+    for (const { prop, value } of props) {
+      if (prop === "transform" && value === "none") continue;
+      if (bannedHeroGeometry.has(prop)) {
+        fail(`Page-scoped hero geometry is not allowed: ${selector} sets ${prop}.`);
+      }
+    }
+  }
+}
+
+if (process.exitCode) process.exit(process.exitCode);
+
+console.log("Universal hero spacing validation OK.");
