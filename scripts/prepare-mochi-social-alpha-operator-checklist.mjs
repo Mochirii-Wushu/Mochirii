@@ -50,7 +50,7 @@ function readJson(file) {
 }
 
 function readPr(repo, number) {
-  const result = spawnSync("gh", ["pr", "view", number, "--repo", repo, "--json", "url,headRefOid,mergeStateStatus,statusCheckRollup"], {
+  const result = spawnSync("gh", ["pr", "view", number, "--repo", repo, "--json", "url,headRefOid,mergeStateStatus,statusCheckRollup,isDraft"], {
     cwd: root,
     encoding: "utf8",
     shell: false,
@@ -73,8 +73,9 @@ function readPr(repo, number) {
     return {
       repo,
       number,
-      ok: data.mergeStateStatus === "CLEAN" && failing.length === 0,
+      ok: (data.mergeStateStatus === "CLEAN" || data.isDraft === true) && failing.length === 0,
       url: data.url,
+      isDraft: data.isDraft === true,
       headRefOid: data.headRefOid,
       mergeStateStatus: data.mergeStateStatus,
       checks: checks.map((check) => check.name || check.context).filter(Boolean),
@@ -343,7 +344,7 @@ function pathForReport(absolutePath) {
 
 function formatPr(pr) {
   if (!pr.ok) return `${pr.repo}#${pr.number} not verified (${pr.message || "unknown"})`;
-  return `${pr.url} ${pr.mergeStateStatus} ${pr.headRefOid} checks=${pr.checks.join(", ") || "none"}`;
+  return `${pr.url} ${pr.isDraft ? "draft" : "ready"} ${pr.mergeStateStatus} ${pr.headRefOid} checks=${pr.checks.join(", ") || "none"}`;
 }
 
 function readGitState() {
