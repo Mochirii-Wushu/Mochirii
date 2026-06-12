@@ -57,11 +57,16 @@ function assertLoadsExplicitPublishableKeyFile() {
 }
 
 function runChecker(label, env) {
+  const childEnv = { ...process.env };
+  delete childEnv.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY;
+  delete childEnv.MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE;
+  delete childEnv.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED;
+
   return spawnSync(process.execPath, [checker], {
     cwd: root,
     encoding: "utf8",
     env: {
-      ...process.env,
+      ...childEnv,
       ...env,
       MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS: "true",
       MOCHI_SOCIAL_CREDS_DIR: tempDir,
