@@ -48,6 +48,20 @@ CSP was promoted from report-only to enforcement after a production Chrome pass 
 
 The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
 
+Before reducing `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'`, update the CSP inline-hardening inventory:
+
+```sh
+npm run check:csp-inline-hardening -- --write
+```
+
+For a release packet that needs production header evidence, opt into the read-only live sweep:
+
+```sh
+npm run check:csp-inline-hardening -- --live --write
+```
+
+Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Social iframe bridge.
+
 ## Supabase Preview Migration History
 
 Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
