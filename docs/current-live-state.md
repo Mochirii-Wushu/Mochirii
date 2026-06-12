@@ -64,6 +64,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Keep Cloudflare Security Insights findings reconciled against current DNS/Vercel evidence before changing healthy DNS records.
 - Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
 - Production-safe member workflow QA coverage is guarded by `npm run check:member-workflow-qa` and documented in `docs/member-workflow-production-qa-runbook.md`.
+- WCAG-oriented route/workflow coverage is guarded by `npm run check:accessibility-route-matrix`; use its report before visual or member-flow polish.
 - Keep Discord live provider readback optional and local-token gated; never require bot tokens in CI.
 - Keep Vercel observability dashboard data as manual/read-only evidence; enough real production visits are required before dashboard graphs settle.
 - Keep dependency updates targeted; defer preview or major-version tooling changes to compatibility branches.

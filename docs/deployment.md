@@ -120,6 +120,14 @@ npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=red
 
 This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, and the `www` redirect. Static route metadata, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
 
+Accessibility review starts with the no-secret route matrix:
+
+```sh
+npm run check:accessibility-route-matrix -- --write
+```
+
+Use the generated report to scope browser or Playwright evidence for keyboard order, visible focus, reduced motion, status messages, form errors, iframe titles, color contrast, and member/admin workflows. Static checks do not prove contrast or screen-reader behavior by themselves.
+
 Post-deploy observability smoke:
 
 ```js
