@@ -98,4 +98,4 @@ npm run lint
 npm run build
 ```
 
-Hosted preview verification, provider setting changes, redeploys, GitHub pushes, and hosted browser gates require fresh action-specific approval before use.
+Hosted preview verification, provider setting changes, redeploys, and hosted browser gates require fresh action-specific approval before use when they can create real provider cost or mutate external state. Public-repo commits and pushes are allowed under the current user policy; verify PR/CI results afterward.
