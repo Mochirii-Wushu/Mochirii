@@ -442,10 +442,10 @@ function checkWorkflowWhitespaceGate() {
   if (!existsSync(workflow)) return { present: false, command: "" };
   const text = readFileSync(workflow, "utf8");
   const hasDiffCheck = /git\s+diff\s+--check/.test(text);
-  const hasCommittedCheck = /git\s+show\s+--check/.test(text);
+  const hasRangeCheck = /BASE_SHA/.test(text) && /HEAD_SHA/.test(text);
   return {
-    present: hasDiffCheck && hasCommittedCheck,
-    command: hasDiffCheck && hasCommittedCheck ? "git diff --check + git show --check" : "",
+    present: hasDiffCheck && hasRangeCheck,
+    command: hasDiffCheck && hasRangeCheck ? "git diff --check BASE_SHA..HEAD_SHA" : "",
   };
 }
 

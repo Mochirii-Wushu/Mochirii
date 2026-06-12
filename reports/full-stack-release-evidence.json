@@ -1,25 +1,20 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-12T23:29:12.627Z",
+  "checkedAt": "2026-06-12T23:54:18.361Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
   "providerReadsEnabled": true,
   "strictProviders": false,
   "git": {
     "branch": "codex/full-stack-release-evidence",
-    "head": "2961fe366f45",
-    "upstream": "",
-    "upstreamStatus": "none",
+    "head": "86123d753c60",
+    "upstream": "origin/codex/full-stack-release-evidence",
+    "upstreamStatus": "configured",
     "ahead": 0,
     "behind": 0,
     "dirty": [
       " M .github/workflows/validate-static-site.yml",
-      " M docs/deployment.md",
-      " M package.json",
-      " M scripts/check-all.mjs",
-      "?? reports/full-stack-release-evidence.json",
-      "?? reports/full-stack-release-evidence.md",
-      "?? scripts/check-full-stack-release-evidence.mjs"
+      " M scripts/check-full-stack-release-evidence.mjs"
     ],
     "errors": []
   },
@@ -37,7 +32,7 @@
     },
     "workflowWhitespace": {
       "present": true,
-      "command": "git diff --check + git show --check"
+      "command": "git diff --check BASE_SHA..HEAD_SHA"
     }
   },
   "vercel": {

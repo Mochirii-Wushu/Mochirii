@@ -1,6 +1,6 @@
 # Mochirii Full-Stack Release Evidence
 
-Generated: 2026-06-12T23:29:12.627Z
+Generated: 2026-06-12T23:54:18.361Z
 
 This file is intentionally no-secret. It records release-readiness evidence only and omits raw tokens, service-role keys, webhook URLs, secret digests, private message content, cookies, and raw headers.
 
@@ -10,14 +10,14 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - Production URL: https://mochirii.com
 - Provider reads: enabled
 - Git branch: codex/full-stack-release-evidence
-- Git head: 2961fe366f45
-- Git dirty entries: 7
+- Git head: 86123d753c60
+- Git dirty entries: 2
 
 ## Local Release Surface
 
 - Required scripts present: 16/16
 - Required files present: 9/9
-- CI whitespace gate: git diff --check + git show --check
+- CI whitespace gate: git diff --check BASE_SHA..HEAD_SHA
 
 ## Vercel
 
