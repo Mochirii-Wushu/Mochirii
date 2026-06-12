@@ -12,6 +12,7 @@ const functions = [
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
+  "reaper-discord-member-sync",
   "send-vote-reminder",
   "send-member-spotlight-poll",
   "publish-member-spotlight-winner",
@@ -25,6 +26,10 @@ const functions = [
   "submit-member-profile-media",
   "list-member-profile-media-queue",
   "moderate-member-profile-media",
+  "mochi-social-alpha-session",
+  "mochi-social-alpha-action",
+  "mochi-social-alpha-admin",
+  "submit-mochi-social-feedback",
 ];
 
 function denoBinary() {

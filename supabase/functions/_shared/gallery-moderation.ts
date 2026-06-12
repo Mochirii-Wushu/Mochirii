@@ -153,6 +153,39 @@ function moderatorConfigMatches(configuredRoleIds: string[]): boolean {
 }
 
 export async function requireModeratorAccess(req: Request): Promise<ModeratorAccessResult> {
+  const authHeader = req.headers.get("Authorization") || "";
+  const accessToken = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  if (!accessToken) {
+    return {
+      ok: false,
+      response: jsonResponse(
+        {
+          ok: false,
+          hasAccess: false,
+          error: "missing_auth",
+          message: "Sign in with Discord before opening gallery moderation.",
+        },
+        401,
+      ),
+    };
+  }
+
+  if (!looksLikeJwt(accessToken)) {
+    return {
+      ok: false,
+      response: jsonResponse(
+        {
+          ok: false,
+          hasAccess: false,
+          error: "invalid_auth",
+          message: "Your sign-in session could not be verified. Please sign in again.",
+        },
+        401,
+      ),
+    };
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceRoleKey = getServiceRoleKey();
   const configuredGuildId = Deno.env.get("DISCORD_GUILD_ID") || "";
@@ -192,24 +225,6 @@ export async function requireModeratorAccess(req: Request): Promise<ModeratorAcc
           message: "Gallery moderation is not configured yet. Please contact leadership.",
         },
         500,
-      ),
-    };
-  }
-
-  const authHeader = req.headers.get("Authorization") || "";
-  const accessToken = authHeader.replace(/^Bearer\s+/i, "").trim();
-
-  if (!accessToken) {
-    return {
-      ok: false,
-      response: jsonResponse(
-        {
-          ok: false,
-          hasAccess: false,
-          error: "missing_auth",
-          message: "Sign in with Discord before opening gallery moderation.",
-        },
-        401,
       ),
     };
   }
@@ -391,4 +406,23 @@ export async function requireModeratorAccess(req: Request): Promise<ModeratorAcc
     discordUserId,
     roleIds: roles,
   };
+}
+
+function looksLikeJwt(token: string): boolean {
+  const parts = token.split(".");
+  if (parts.length !== 3 || parts.some((part) => !part)) return false;
+
+  try {
+    JSON.parse(new TextDecoder().decode(base64UrlDecode(parts[0])));
+    JSON.parse(new TextDecoder().decode(base64UrlDecode(parts[1])));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function base64UrlDecode(value: string): Uint8Array {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 }

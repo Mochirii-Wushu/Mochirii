@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
+const mochiSocialOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 
 const legacyHtmlRedirects = [
   ["/index.html", "/"],
@@ -35,8 +36,8 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co",
   "font-src 'self' data:",
   "media-src 'self' data: blob:",
-  "frame-src 'self' https://discord.com https://open.spotify.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
+  `frame-src 'self' https://discord.com https://open.spotify.com ${mochiSocialOrigin}`,
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com ${mochiSocialOrigin}`,
   "worker-src 'self' blob:",
   "upgrade-insecure-requests",
 ].join("; ");

@@ -10,8 +10,11 @@ const files = {
   nextConfig: "apps/web/next.config.ts",
   supabaseConfig: "supabase/config.toml",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
+  reaperMemberSync: "supabase/functions/reaper-discord-member-sync/index.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
+  mochiSocialAlphaShared: "supabase/functions/_shared/mochi-social-alpha.ts",
+  mochiSocialAlphaAction: "supabase/functions/mochi-social-alpha-action/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   voteReminder: "supabase/functions/send-vote-reminder/index.ts",
   spotlightPollShared: "supabase/functions/_shared/spotlight-polls.ts",
@@ -58,8 +61,11 @@ const checkAll = read(files.checkAll);
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
+const reaperMemberSync = read(files.reaperMemberSync);
 const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
+const mochiSocialAlphaShared = read(files.mochiSocialAlphaShared);
+const mochiSocialAlphaAction = read(files.mochiSocialAlphaAction);
 const discordIngest = read(files.discordIngest);
 const voteReminder = read(files.voteReminder);
 const spotlightPollShared = read(files.spotlightPollShared);
@@ -131,10 +137,12 @@ const expectedUnauthenticatedFunctions = [
   "list-visible-profile-cards",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
+  "reaper-discord-member-sync",
   "send-vote-reminder",
   "send-member-spotlight-poll",
   "publish-member-spotlight-winner",
   "get-current-spotlight-winner",
+  "mochi-social-alpha-action",
 ];
 
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
@@ -150,6 +158,17 @@ for (const name of verifyJwtFalseFunctions) {
 }
 
 [
+  "x-mochi-social-server-token",
+  "MOCHI_SOCIAL_GAME_SERVER_TOKEN",
+].forEach((snippet) => assertIncludes("mochi-social-alpha shared security", mochiSocialAlphaShared, snippet));
+
+[
+  "requireGameServer(req)",
+  "network: \"CANARY\"",
+  "noRealValue: true",
+].forEach((snippet) => assertIncludes("mochi-social-alpha-action", mochiSocialAlphaAction, snippet));
+
+[
   "x-signature-ed25519",
   "x-signature-timestamp",
   "DISCORD_PUBLIC_KEY",
@@ -158,6 +177,17 @@ for (const name of verifyJwtFalseFunctions) {
   "Retry-After",
   "retry_after",
 ].forEach((snippet) => assertIncludes("reaper-discord-interactions", reaper, snippet));
+
+[
+  "x-mochirii-reaper-member-sync-secret",
+  "REAPER_PENDING_VERIFICATION_SYNC_SECRET",
+  "verifyMemberSyncSecret(req)",
+  "fetchCurrentMember",
+  "buildSingleMemberPendingContainmentPlan",
+  "applyPendingContainmentPlan(adminClient, plan, writePendingDiscordOverwrite)",
+  "MAX_PENDING_VERIFICATION_MUTATIONS",
+  "source: \"gateway_member_event\"",
+].forEach((snippet) => assertIncludes("reaper-discord-member-sync", reaperMemberSync, snippet));
 
 assertMatches(
   "reaper-discord-interactions",

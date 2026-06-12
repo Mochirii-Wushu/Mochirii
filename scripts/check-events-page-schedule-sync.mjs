@@ -22,7 +22,7 @@ function assertNotIncludes(label, source, snippet) {
 
 const pagesSource = read("apps/web/components/public-pages/pages.tsx");
 const boardSource = read("apps/web/components/public-pages/EventsBoard.tsx");
-const cssSource = read("apps/web/app/mochirii.css");
+const cssSource = read("apps/web/app/mochirii.css").replace(/\r\n/g, "\n");
 const scheduleSource = read("apps/web/lib/guild-schedule.ts");
 const schedule = JSON.parse(read("data/guild-schedule.json"));
 

@@ -41,6 +41,12 @@ verify_jwt = false
 import_map = "./functions/reaper-discord-interactions/deno.json"
 entrypoint = "./functions/reaper-discord-interactions/index.ts"
 
+[functions.reaper-discord-member-sync]
+enabled = true
+verify_jwt = false
+import_map = "./functions/reaper-discord-member-sync/deno.json"
+entrypoint = "./functions/reaper-discord-member-sync/index.ts"
+
 [functions.send-vote-reminder]
 enabled = true
 verify_jwt = false
@@ -118,3 +124,27 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/moderate-member-profile-media/deno.json"
 entrypoint = "./functions/moderate-member-profile-media/index.ts"
+
+[functions.mochi-social-alpha-session]
+enabled = true
+verify_jwt = true
+import_map = "./functions/mochi-social-alpha-session/deno.json"
+entrypoint = "./functions/mochi-social-alpha-session/index.ts"
+
+[functions.mochi-social-alpha-action]
+enabled = true
+verify_jwt = false
+import_map = "./functions/mochi-social-alpha-action/deno.json"
+entrypoint = "./functions/mochi-social-alpha-action/index.ts"
+
+[functions.mochi-social-alpha-admin]
+enabled = true
+verify_jwt = true
+import_map = "./functions/mochi-social-alpha-admin/deno.json"
+entrypoint = "./functions/mochi-social-alpha-admin/index.ts"
+
+[functions.submit-mochi-social-feedback]
+enabled = true
+verify_jwt = true
+import_map = "./functions/submit-mochi-social-feedback/deno.json"
+entrypoint = "./functions/submit-mochi-social-feedback/index.ts"
