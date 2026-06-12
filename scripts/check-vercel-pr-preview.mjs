@@ -4,6 +4,7 @@ const args = process.argv.slice(2);
 const DEFAULT_PR = "181";
 const DEFAULT_PROJECT = "mochirii";
 const DEFAULT_VERCEL_CONTEXT = "Vercel – mochirii";
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 
 function argValue(name, fallback = "") {
   const match = args.find((value) => value.startsWith(`${name}=`));
@@ -11,9 +12,11 @@ function argValue(name, fallback = "") {
 }
 
 function runJson(command, commandArgs) {
+  const useShell = process.platform === "win32" && /\.cmd$/i.test(command);
   const output = execFileSync(command, commandArgs, {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    shell: useShell,
   });
   return JSON.parse(output);
 }
@@ -51,7 +54,7 @@ function normalizeGithubVercelStatus(entry) {
 }
 
 function latestDeploymentForSha(project, sha) {
-  const data = runJson("npm", [
+  const data = runJson(npmCommand, [
     "exec",
     "--",
     "vercel",

@@ -207,7 +207,7 @@ assert(raffle?.recurrenceRule?.by_n_weekday?.[0]?.day === 5, "Monthly raffle rec
 
 [
   "Supabase Edge Function `reaper-discord-interactions` handles slash commands",
-  "Reaper Gateway worker handles only `guildMemberAdd` welcome DMs.",
+  "Reaper Gateway worker handles `guildMemberAdd` welcome DMs and, after the second release is approved, redacted pending-verification member-event forwarding.",
   "Server Members Intent",
   "Bot does not have `Administrator`.",
   "Discord signatures are validated before JSON parsing.",

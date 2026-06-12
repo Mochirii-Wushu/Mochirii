@@ -4,9 +4,9 @@ Use this checklist for read-only operations reviews. It does not authorize token
 
 ## Runtime Split
 
-- Supabase Edge Function `reaper-discord-interactions` handles slash commands, message components, gallery ingest, rank sync, event sync, and vote reminder interactions.
+- Supabase Edge Function `reaper-discord-interactions` handles slash commands, message components, gallery ingest, rank sync, event sync, pending-verification containment, and vote reminder interactions.
 - Supabase scheduled Edge Functions handle manual vote reminders and monthly native Discord spotlight polls; these scheduled functions use cron secrets and server-side Discord bot access only.
-- Reaper Gateway worker handles only `guildMemberAdd` welcome DMs.
+- Reaper Gateway worker handles `guildMemberAdd` welcome DMs and, after the second release is approved, redacted pending-verification member-event forwarding.
 - Vercel/Next does not run Discord bot tokens, service-role keys, webhooks, or Gateway connections.
 
 ## Gateway Worker
@@ -15,7 +15,9 @@ Use this checklist for read-only operations reviews. It does not authorize token
 - `Server Members Intent` is enabled in Discord Developer Portal.
 - Bot does not have `Administrator`.
 - Bot does not use `Message Content` or `Presences` intents.
-- Bot does not mutate roles for welcome DMs.
+- Bot does not mutate roles for welcome DMs or pending-verification sync.
+- Pending-containment automation through Gateway calls `reaper-discord-member-sync`; the worker must not mutate channel permissions directly.
+- `REAPER_PENDING_VERIFICATION_SYNC_ENABLED=false` remains the safe default until the second release is approved.
 - `WELCOME_DM_ENABLED=true` is set only in runtime secrets.
 - `DISCORD_BOT_TOKEN` and `DISCORD_GUILD_ID` are runtime secrets only.
 - Welcome DM failures are logged with redacted IDs and no public fallback post.
@@ -32,8 +34,11 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 - PING returns PONG.
 - Dynamic responses use `allowed_mentions: { parse: [] }`.
 - `/sync-events mode:preview confirm:false` is the only safe first event-sync command.
+- `/sync-pending-verification mode:preview confirm:false` is the only safe first pending-containment command.
 - `/sync-events mode:apply confirm:true` remains an owner-approved provider mutation.
-- `/sync-ranks mode:apply confirm:true`, token rotation, and live reminder sends also remain owner-approved provider mutations.
+- `/sync-pending-verification mode:apply confirm:true`, `/sync-ranks mode:apply confirm:true`, token rotation, and live reminder sends also remain owner-approved provider mutations.
+- Pending-containment apply mutates only tracked member-specific `VIEW_CHANNEL` overwrites and records owned bits in `discord_managed_permission_overwrites`.
+- `reaper-discord-member-sync` requires `x-mochirii-reaper-member-sync-secret`, fetches current Discord member state before planning, and logs only redacted counts/IDs.
 
 ## Monthly Spotlight Polls
 
