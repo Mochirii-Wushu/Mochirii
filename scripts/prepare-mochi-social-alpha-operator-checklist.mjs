@@ -122,7 +122,7 @@ ${files}
 - Behind: ${gitState.behind}
 - Dirty tracked files: ${gitState.dirty.length}
 
-If this branch is ahead or dirty, remote PR checks do not prove the local source. Public-repo pushes are allowed under the current user policy; push the branch and verify PR/CI results afterward:
+If this branch is ahead or dirty, remote PR checks do not prove the local source. Public-repo pushes are allowed under the current user policy; push the branch and verify PR/CI results afterward without a separate approval prompt:
 
 \`\`\`text
 Push C:\\Users\\xtyty\\Documents\\Mochirii branch ${gitState.branch || "<branch>"} to ${gitState.upstream || "origin/<branch>"}, then verify GitHub Actions/PR checks for Mochirii.
