@@ -84,6 +84,7 @@ export class PendingContainmentApplyError extends Error {
 export const PENDING_BASE_ROLE_ID = "1468659807736299520";
 export const VERIFIED_ROLE_ID = "1078630751077142615";
 export const PENDING_ALLOWED_CATEGORY_ID = "1468658801388290048";
+export const ADMINISTRATOR_PERMISSION = 1n << 3n;
 export const VIEW_CHANNEL_PERMISSION = 1n << 10n;
 export const GUILD_CATEGORY_CHANNEL_TYPE = 4;
 export const DISCORD_MEMBER_OVERWRITE_TYPE = 1;
@@ -186,6 +187,77 @@ export function memberOverwrite(channel: JsonRecord, userId: string): JsonRecord
       return safeString(record.id, 24) === userId && Number(record.type) === DISCORD_MEMBER_OVERWRITE_TYPE;
     }),
   );
+}
+
+function roleOverwriteApplies(overwrite: JsonRecord, roleIds: Set<string>): boolean {
+  return Number(overwrite.type) === 0 && roleIds.has(String(overwrite.id || ""));
+}
+
+function rolePermissionMap(
+  roles: JsonRecord[],
+): Map<string, bigint> {
+  const permissionsByRoleId = new Map<string, bigint>();
+  for (const role of roles) {
+    const roleId = snowflake(role.id);
+    if (!roleId) continue;
+    permissionsByRoleId.set(roleId, permissionBits(role.permissions));
+  }
+  return permissionsByRoleId;
+}
+
+export function memberEffectivePermissions(
+  channel: JsonRecord,
+  member: JsonRecord,
+  roles: JsonRecord[],
+  config: PendingContainmentConfig = DEFAULT_PENDING_CONTAINMENT_CONFIG,
+): bigint {
+  const permissionsByRoleId = rolePermissionMap(roles);
+  const memberRoles = new Set(asStringArray(member.roles).filter((roleId) => Boolean(snowflake(roleId))));
+  let permissions = permissionsByRoleId.get(config.guildId) || 0n;
+
+  for (const roleId of memberRoles) {
+    permissions |= permissionsByRoleId.get(roleId) || 0n;
+  }
+
+  if ((permissions & ADMINISTRATOR_PERMISSION) === ADMINISTRATOR_PERMISSION) {
+    return permissions;
+  }
+
+  const overwrites = asArray(channel.permission_overwrites).map(asRecord);
+  const everyoneOverwrite = overwrites.find((overwrite) => safeString(overwrite.id, 24) === config.guildId);
+  if (everyoneOverwrite) {
+    permissions = withoutPermissionBit(permissions, permissionBits(everyoneOverwrite.deny));
+    permissions |= permissionBits(everyoneOverwrite.allow);
+  }
+
+  let roleDeny = 0n;
+  let roleAllow = 0n;
+  for (const overwrite of overwrites) {
+    if (!roleOverwriteApplies(overwrite, memberRoles)) continue;
+    roleDeny |= permissionBits(overwrite.deny);
+    roleAllow |= permissionBits(overwrite.allow);
+  }
+  permissions &= ~roleDeny;
+  permissions |= roleAllow;
+
+  const userId = memberUserId(member);
+  if (userId) {
+    const overwrite = memberOverwrite(channel, userId);
+    permissions &= ~permissionBits(overwrite.deny);
+    permissions |= permissionBits(overwrite.allow);
+  }
+
+  return permissions;
+}
+
+export function memberCanViewChannel(
+  channel: JsonRecord,
+  member: JsonRecord,
+  roles: JsonRecord[],
+  config: PendingContainmentConfig = DEFAULT_PENDING_CONTAINMENT_CONFIG,
+): boolean {
+  const permissions = memberEffectivePermissions(channel, member, roles, config);
+  return hasPermissionBit(permissions, ADMINISTRATOR_PERMISSION) || hasPermissionBit(permissions, VIEW_CHANNEL_PERMISSION);
 }
 
 export function activeManagedOwned(record: PendingManagedOverwrite | null, side: "allow" | "deny"): boolean {
@@ -361,28 +433,34 @@ export function highOverwriteChannelNames(channels: JsonRecord[]): string[] {
 function buildPlanFromRecords(
   channels: JsonRecord[],
   members: JsonRecord[],
+  roles: JsonRecord[],
   managedRecords: Map<string, PendingManagedOverwrite>,
   config: PendingContainmentConfig,
 ): PendingContainmentPlan {
   const allowedChannelIds = pendingAllowedChannelIds(channels, config);
-  const targetUserIds = members
-    .filter((member) => isPendingVerificationTarget(member, config))
-    .map(memberUserId)
-    .filter((id): id is string => Boolean(id));
+  const targetMembers = members.filter((member) => isPendingVerificationTarget(member, config));
+  const targetUserIds = targetMembers.map(memberUserId).filter((id): id is string => Boolean(id));
   const targetUserIdSet = new Set(targetUserIds);
   const channelById = new Map(channels.map((channel) => [pendingChannelId(channel) || "", channel]));
   const changes = new Map<string, PendingContainmentChange>();
   const conflicts: PendingContainmentConflict[] = [];
 
-  for (const userId of targetUserIds) {
+  for (const member of targetMembers) {
+    const userId = memberUserId(member);
+    if (!userId) continue;
+
     for (const channel of channels) {
       const channelId = pendingChannelId(channel);
       if (!channelId) continue;
       const action: PendingContainmentAction = allowedChannelIds.has(channelId) ? "allow" : "deny";
       const key = pendingOverwriteKey(channelId, userId);
-      const result = desiredPendingChange(action, channel, userId, managedRecords.get(key) || null);
+      const managedRecord = managedRecords.get(key) || null;
+      const result = desiredPendingChange(action, channel, userId, managedRecord);
       if (result.conflict) conflicts.push(result.conflict);
-      if (result.change) changes.set(key, result.change);
+      const currentlyVisible = memberCanViewChannel(channel, member, roles, config);
+      const visibilityNeedsChange = action === "allow" ? !currentlyVisible : currentlyVisible;
+      const hasManagedViewBit = activeManagedOwned(managedRecord, "allow") || activeManagedOwned(managedRecord, "deny");
+      if (result.change && (visibilityNeedsChange || hasManagedViewBit)) changes.set(key, result.change);
     }
   }
 
@@ -416,10 +494,11 @@ export async function buildPendingContainmentPlan(
   adminClient: SupabaseAdminClient,
   channels: JsonRecord[],
   members: JsonRecord[],
+  roles: JsonRecord[],
   config: PendingContainmentConfig = DEFAULT_PENDING_CONTAINMENT_CONFIG,
 ): Promise<PendingContainmentPlan> {
   const managedRecords = await loadManagedPendingOverwrites(adminClient, config);
-  return buildPlanFromRecords(channels, members, managedRecords, config);
+  return buildPlanFromRecords(channels, members, roles, managedRecords, config);
 }
 
 export async function buildSingleMemberPendingContainmentPlan(
@@ -427,11 +506,12 @@ export async function buildSingleMemberPendingContainmentPlan(
   channels: JsonRecord[],
   member: JsonRecord | null,
   discordUserId: string,
+  roles: JsonRecord[],
   config: PendingContainmentConfig = DEFAULT_PENDING_CONTAINMENT_CONFIG,
 ): Promise<PendingContainmentPlan> {
   const managedRecords = await loadManagedPendingOverwrites(adminClient, config, discordUserId);
   const members = member ? [member] : [];
-  return buildPlanFromRecords(channels, members, managedRecords, config);
+  return buildPlanFromRecords(channels, members, roles, managedRecords, config);
 }
 
 async function savePendingOverwriteRecord(

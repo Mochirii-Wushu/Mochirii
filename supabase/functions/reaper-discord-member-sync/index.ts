@@ -186,6 +186,18 @@ async function fetchGuildChannels(): Promise<JsonRecord[]> {
   return asArray(response.data).map(asRecord).filter((channel) => Boolean(pendingChannelId(channel)));
 }
 
+async function fetchGuildRoles(): Promise<JsonRecord[]> {
+  const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
+    headers: discordApiHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Guild role fetch failed with Discord API ${response.status}.`);
+  }
+
+  return asArray(response.data).map(asRecord).filter((role) => Boolean(snowflake(role.id)));
+}
+
 async function fetchCurrentMember(discordUserId: string): Promise<JsonRecord | null> {
   const response = await discordApi(
     `/guilds/${EXPECTED_DISCORD_GUILD_ID}/members/${encodeURIComponent(discordUserId)}`,
@@ -263,11 +275,12 @@ Deno.serve(async (req) => {
     payload = parsePayload(await req.json());
     adminClient = serviceAdminClient("pending verification member sync");
 
-    const [channels, member] = await Promise.all([
+    const [channels, member, roles] = await Promise.all([
       fetchGuildChannels(),
       fetchCurrentMember(payload.discord_user_id),
+      fetchGuildRoles(),
     ]);
-    plan = await buildSingleMemberPendingContainmentPlan(adminClient, channels, member, payload.discord_user_id);
+    plan = await buildSingleMemberPendingContainmentPlan(adminClient, channels, member, payload.discord_user_id, roles);
     const discordWriteCount = plan.changes.filter((change) => change.discordWrite).length;
 
     if (plan.conflicts.length) {

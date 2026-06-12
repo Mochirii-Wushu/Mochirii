@@ -95,18 +95,26 @@ function buildPlan(member, channels, managedRecords = new Map()) {
     };
   }
 
-  return {
-    actions: channels.map((channel) => {
-      const action = channel.id === PENDING_ALLOWED_CATEGORY_ID || channel.parentId === PENDING_ALLOWED_CATEGORY_ID
-        ? "allow"
-        : "deny";
-      return {
+  const actions = [];
+  for (const channel of channels) {
+    const action = channel.id === PENDING_ALLOWED_CATEGORY_ID || channel.parentId === PENDING_ALLOWED_CATEGORY_ID
+      ? "allow"
+      : "deny";
+    const record = managedRecords.get(channel.id) || null;
+    const result = desiredChange(action, channel.overwrite || null, record);
+    const visible = channel.visible === true;
+    const visibilityNeedsChange = action === "allow" ? !visible : visible;
+    const hasManagedViewBit = activeManagedOwned(record, "allow") || activeManagedOwned(record, "deny");
+    if (result.conflict || visibilityNeedsChange || hasManagedViewBit) {
+      actions.push({
         channelId: channel.id,
         action,
-        result: desiredChange(action, channel.overwrite || null, managedRecords.get(channel.id) || null),
-      };
-    }),
-  };
+        result,
+      });
+    }
+  }
+
+  return { actions };
 }
 
 const wwmOnly = { roles: [PENDING_BASE_ROLE_ID], user: { bot: false } };
@@ -120,17 +128,19 @@ assert(!isPendingTarget(extraRole), "Member with extra roles should not match pe
 assert(!isPendingTarget(botMember), "Bot users should not match pending-verification target.");
 
 const channels = [
-  { id: PENDING_ALLOWED_CATEGORY_ID },
-  { id: "1468658801388290049", parentId: PENDING_ALLOWED_CATEGORY_ID },
-  { id: "1078630751077142610" },
+  { id: PENDING_ALLOWED_CATEGORY_ID, visible: true },
+  { id: "1468658801388290049", parentId: PENDING_ALLOWED_CATEGORY_ID, visible: false },
+  { id: "1078630751077142610", visible: true },
+  { id: "1078630751077142611", visible: false },
 ];
 const targetPlan = buildPlan(wwmOnly, channels);
-assert(targetPlan.actions[0]?.action === "allow", "Allowed category should receive a member-specific VIEW_CHANNEL allow.");
+assert(targetPlan.actions.length === 2, "Planner should write only visibility-changing pending-member overwrites.");
+assert(targetPlan.actions[0]?.channelId === "1468658801388290049", "Hidden allowed child should receive the first planned change.");
+assert(targetPlan.actions[0]?.action === "allow", "Hidden allowed child should receive a member-specific VIEW_CHANNEL allow.");
 assert(hasPermission(targetPlan.actions[0]?.result.nextAllow || 0n, VIEW_CHANNEL_PERMISSION), "Allowed category allow bit should be planned.");
-assert(targetPlan.actions[1]?.action === "allow", "Allowed category child should receive a member-specific VIEW_CHANNEL allow.");
-assert(hasPermission(targetPlan.actions[1]?.result.nextAllow || 0n, VIEW_CHANNEL_PERMISSION), "Allowed child allow bit should be planned.");
-assert(targetPlan.actions[2]?.action === "deny", "Outside channels should receive a member-specific VIEW_CHANNEL deny.");
-assert(hasPermission(targetPlan.actions[2]?.result.nextDeny || 0n, VIEW_CHANNEL_PERMISSION), "Outside channel deny bit should be planned.");
+assert(targetPlan.actions[1]?.channelId === "1078630751077142610", "Visible outside channel should receive the second planned change.");
+assert(targetPlan.actions[1]?.action === "deny", "Visible outside channels should receive a member-specific VIEW_CHANNEL deny.");
+assert(hasPermission(targetPlan.actions[1]?.result.nextDeny || 0n, VIEW_CHANNEL_PERMISSION), "Outside channel deny bit should be planned.");
 
 const cleanupRecords = new Map([
   [PENDING_ALLOWED_CATEGORY_ID, { ownedAllow: VIEW_CHANNEL_PERMISSION, ownedDeny: 0n }],
@@ -152,6 +162,11 @@ assert(hasPermission(preserved.nextDeny, VIEW_CHANNEL_PERMISSION), "Reaper shoul
 
 const outsideManualAllow = desiredChange("deny", { allow: VIEW_CHANNEL_PERMISSION, deny: 0n }, null);
 assert(outsideManualAllow.conflict === "manual member allow outside allowed tree", "Manual VIEW_CHANNEL allow outside tree should block apply.");
+
+const hiddenManualOutsidePlan = buildPlan(wwmOnly, [
+  { id: "1078630751077142612", visible: false, overwrite: { allow: VIEW_CHANNEL_PERMISSION, deny: 0n } },
+]);
+assert(hiddenManualOutsidePlan.actions[0]?.result.conflict === "manual member allow outside allowed tree", "Hidden manual VIEW_CHANNEL allow outside tree should still block apply.");
 
 const insideManualDeny = desiredChange("allow", { allow: 0n, deny: VIEW_CHANNEL_PERMISSION }, null);
 assert(insideManualDeny.conflict === "manual member deny inside allowed tree", "Manual VIEW_CHANNEL deny inside tree should block apply.");
