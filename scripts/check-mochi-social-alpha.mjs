@@ -5,13 +5,18 @@ const browserGateEnvNames = [
   'MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER',
   'MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER',
   'MOCHI_SOCIAL_SITE_BROWSER_GATES_URL',
+  'MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE',
   'MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK',
+  'MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK',
+  'MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK',
+  'MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK',
+  'MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK'
 ];
 
@@ -42,7 +47,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',
-    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'Local Preview URL File', 'readPreviewEnvFile', 'urlFieldsRead', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON', 'reports/mochi-social-browser-gates.json', 'addStoredManualBrowserGateRequirement', 'stored browser gate report', 'MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON', 'reports/mochi-social-report-hygiene.json', 'site.report-hygiene', 'check:mochi-social-report-hygiene', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'publishableKeySource', 'not-loaded-awaiting-hosted-approval', 'selectPublishableKey', 'site.bridge-state', 'check-mochi-social-bridge-state.mjs', 'site.auth-bridge', 'check-mochi-social-auth-bridge.mjs', 'site.edge-authority', 'check-mochi-social-edge-authority.mjs', 'site.preview-key-loader', 'check-mochi-social-preview-key-loader.mjs', 'site.discord-oauth-detector', 'check-mochi-social-discord-oauth-self-test.mjs', 'site.game-contract', 'site.edge-smoke', 'site.discord-oauth', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'provider is not enabled', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready', ...browserGateEnvNames]
+    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'Local Preview URL File', 'readPreviewEnvFile', 'urlFieldsRead', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON', 'reports/mochi-social-browser-gates.json', 'addStoredManualBrowserGateRequirement', 'stored browser gate report', 'MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON', 'reports/mochi-social-report-hygiene.json', 'site.report-hygiene', 'check:mochi-social-report-hygiene', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'publishableKeySource', 'not-loaded-awaiting-hosted-approval', 'selectPublishableKey', 'site.bridge-state', 'check-mochi-social-bridge-state.mjs', 'site.auth-bridge', 'check-mochi-social-auth-bridge.mjs', 'site.edge-authority', 'check-mochi-social-edge-authority.mjs', 'site.preview-key-loader', 'check-mochi-social-preview-key-loader.mjs', 'site.discord-oauth-detector', 'check-mochi-social-discord-oauth-self-test.mjs', 'site.game-contract', 'site.edge-smoke', 'site.discord-oauth', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'provider is not enabled', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready', 'browserGateEnvForMode', 'tester-password locked page visible', ...browserGateEnvNames]
   },
   {
     file: 'scripts/check-mochi-social-preview-key-loader.mjs',
@@ -66,11 +71,11 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-browser-gate-self-test.mjs',
-    includes: ['MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_URL', 'hosted browser gate confirmation requires', 'write-mochi-social-browser-gates.mjs', 'stored browser gate report', 'fakeToken', 'site.bridge-state', 'check-mochi-social-bridge-state.mjs', 'site.auth-bridge', 'check-mochi-social-auth-bridge.mjs', 'site.preview-key-loader', 'check-mochi-social-preview-key-loader.mjs', 'site.discord-oauth-detector', 'check-mochi-social-discord-oauth-self-test.mjs', 'site.manual-browser-gates', 'Preview Ready should still remain red', ...browserGateEnvNames]
+    includes: ['MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_URL', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE', 'hosted browser gate confirmation requires', 'write-mochi-social-browser-gates.mjs', 'stored browser gate report', 'stored tester-password report', 'fakeToken', 'site.bridge-state', 'check-mochi-social-bridge-state.mjs', 'site.auth-bridge', 'check-mochi-social-auth-bridge.mjs', 'site.preview-key-loader', 'check-mochi-social-preview-key-loader.mjs', 'site.discord-oauth-detector', 'check-mochi-social-discord-oauth-self-test.mjs', 'site.manual-browser-gates', 'Preview Ready should still remain red', ...browserGateEnvNames]
   },
   {
     file: 'scripts/write-mochi-social-browser-gates.mjs',
-    includes: ['Mochi Social browser gate evidence passed', 'reports/mochi-social-browser-gates.json', 'reports/mochi-social-browser-gates.md', 'mochirii-mochi-social-browser-gates.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES', 'assertNoForbiddenMaterial', 'DISCORD_(?:CLIENT_SECRET|BOT_TOKEN)', ...browserGateEnvNames]
+    includes: ['Mochi Social browser gate evidence passed', 'reports/mochi-social-browser-gates.json', 'reports/mochi-social-browser-gates.md', 'mochirii-mochi-social-browser-gates.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES', 'Access mode', 'browserGateEnvForMode', 'assertNoForbiddenMaterial', 'DISCORD_(?:CLIENT_SECRET|BOT_TOKEN)', ...browserGateEnvNames]
   },
   {
     file: 'scripts/check-mochi-social-report-hygiene.mjs',

@@ -157,17 +157,40 @@ Before inviting testers:
 Hosted browser gates need explicit approval before Codex opens Chrome against Vercel, Supabase, or the Fly game URL. During that pass, capture only no-secret evidence:
 
 - reviewer, browser/version, preview URL, timestamp, and pass/fail notes;
-- whether signed-out, non-tester, terms, iframe, feedback, admin, and configured-preview-stub gates passed;
+- whether the active access mode is `tester-password` or `supabase`;
+- for `tester-password`: locked page, iframe absent while locked, invalid-password error, iframe after unlock, guest bridge, configured-preview-stub, and hosted two-tab presence;
+- for `supabase`: signed-out, non-tester, terms, iframe, feedback, admin, auth bridge, and configured-preview-stub gates;
 - any non-secret error codes or route names needed for debugging.
 
 Never capture, paste, screenshot, or commit Supabase access tokens, refresh tokens, cookies, request authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, or personal payment/account details.
 
 For the iframe auth gate, verify the shape rather than the value: the parent page sends `MOCHI_SOCIAL_AUTH` with an access-token field, and it does not send refresh tokens or provider secrets. If DevTools exposes raw token text, treat it as private screen-only evidence and do not transcribe it.
 
-After the human/browser pass, stamp `npm run check:mochi-social-preview-ready` only with no-secret metadata:
+After the human/browser pass, stamp `npm run check:mochi-social-preview-ready` only with no-secret metadata. For the default password-first Preview Ready page:
 
 ```powershell
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="tester-password"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES="<no-secret status notes>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
+npm run prepare:mochi-social-browser-gates
+```
+
+For a later strict Supabase/Discord allowlist pass, stamp the strict mode only after those gates actually pass:
+
+```powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="supabase"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"

@@ -18,12 +18,24 @@ const requiredGateEnv = {
   MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK: "true",
 };
 
+const testerPasswordGateEnv = {
+  MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK: "true",
+};
+
 try {
   assertNoConfirmationFails();
   assertPartialConfirmationListsMissingGate();
   assertHostedBrowserUrlRequiresHostedApproval();
   assertLocalhostBrowserEvidenceCanPassManualGateOnly();
+  assertTesterPasswordBrowserEvidenceCanPassManualGateOnly();
   assertStoredBrowserGateReportCanPassManualGateOnly();
+  assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly();
   console.log("Mochi Social browser gate self-test OK.");
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
@@ -83,6 +95,22 @@ function assertLocalhostBrowserEvidenceCanPassManualGateOnly() {
   });
 }
 
+function assertTesterPasswordBrowserEvidenceCanPassManualGateOnly() {
+  runAndAssertManualGate("tester-password-confirmed", {
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE: "tester-password",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
+    ...testerPasswordGateEnv,
+  }, (gate, report) => {
+    assert(gate.status === "pass", "Tester-password browser evidence should satisfy the manual browser gate.");
+    assert(gate.evidence.accessMode === "tester-password", "Tester-password gate should record its access mode.");
+    assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "All tester-password required browser gates should be recorded as true.");
+    assert(report.ok === false, "Preview Ready should still remain red in this self-test because branch/hosted gates are not proven.");
+  });
+}
+
 function assertStoredBrowserGateReportCanPassManualGateOnly() {
   const storedJson = join(tempDir, "stored-browser-gates.json");
   const storedMd = join(tempDir, "stored-browser-gates.md");
@@ -132,6 +160,52 @@ function assertStoredBrowserGateReportCanPassManualGateOnly() {
   assert(gate.status === "pass", "Stored report should satisfy the manual browser gate.");
   assert(gate.evidence.source === storedJson, "Manual gate evidence should point at the stored browser gate report.");
   assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "Stored report should preserve every required browser gate as true.");
+}
+
+function assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly() {
+  const storedJson = join(tempDir, "stored-tester-password-browser-gates.json");
+  const storedMd = join(tempDir, "stored-tester-password-browser-gates.md");
+  const writer = spawnSync(process.execPath, ["scripts/write-mochi-social-browser-gates.mjs"], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_MD: storedMd,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_HANDOFF: "stored-tester-password-browser-gates-handoff.md",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE: "tester-password",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
+      ...testerPasswordGateEnv,
+    },
+  });
+  assert(writer.status === 0, `stored tester-password report writer should pass: ${writer.stderr || writer.stdout}`);
+
+  const result = spawnSync(process.execPath, [checker], {
+    cwd: root,
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-tester-password-report"),
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_MD: reportMdPath("stored-tester-password-report"),
+      MOCHI_SOCIAL_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
+      MOCHI_SOCIAL_GAME_CONTRACT_URL: "https://mochi-social-game.fly.dev",
+      MOCHI_SOCIAL_SITE_ORIGIN: "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app",
+      MOCHI_SOCIAL_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
+    },
+  });
+  assert(result.status !== 0, "Stored tester-password report should keep Preview Ready red while branch/hosted gates are not proven.");
+  const report = readReport("stored-tester-password-report");
+  const gate = report.requirements.find((entry) => entry.id === "site.manual-browser-gates");
+  assert(gate, "Stored tester-password report case did not include site.manual-browser-gates.");
+  assert(gate.status === "pass", "Stored tester-password report should satisfy the manual browser gate.");
+  assert(gate.evidence.accessMode === "tester-password", "Stored tester-password report should preserve access mode.");
+  assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "Stored tester-password report should preserve every required browser gate as true.");
 }
 
 function runAndAssertManualGate(label, env, assertGate) {

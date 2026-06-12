@@ -103,10 +103,31 @@ Run these checks only after hosted verification is explicitly approved. Use Chro
 - Feedback gate: submit a harmless alpha feedback message, then confirm the leader audit panel shows a feedback row/count without exposing private user data in the report.
 - Admin gate: confirm a leader/moderator can grant and revoke alpha access by Supabase user id, then restore the intended tester state.
 
-When all checks pass, stamp the durable no-secret browser-gate report with:
+For the default password-first Preview Ready page, stamp the durable no-secret browser-gate report with:
 
 ```powershell
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="tester-password"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="<Mochirii Vercel Preview /games/mochi-social URL>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES="<no-secret status notes>"
+$env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
+npm run prepare:mochi-social-browser-gates
+```
+
+For the later strict Supabase/Discord allowlist mode, use `MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="supabase"` and stamp the strict gate set only after those checks actually pass:
+
+```powershell
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="supabase"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER="<operator name>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER="<browser/version>"
