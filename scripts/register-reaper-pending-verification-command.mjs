@@ -89,8 +89,22 @@ function commandFields(command) {
   };
 }
 
+function normalizeCommandFields(command) {
+  const fields = commandFields(command);
+  return {
+    ...fields,
+    dm_permission: fields.dm_permission ?? false,
+    options: Array.isArray(fields.options)
+      ? fields.options.map((option) => ({
+        ...option,
+        required: option.required ?? false,
+      }))
+      : fields.options,
+  };
+}
+
 function samePayload(existing) {
-  return JSON.stringify(commandFields(existing)) === JSON.stringify(commandPayload);
+  return JSON.stringify(normalizeCommandFields(existing)) === JSON.stringify(normalizeCommandFields(commandPayload));
 }
 
 async function main() {
