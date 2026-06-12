@@ -6,7 +6,7 @@ const checks = [
     includes: [
       "import \"server-only\"",
       "MOCHI_SOCIAL_TESTER_PASSWORD",
-      "MOCHI_SOCIAL_TESTER_PASSWORD_SHA256",
+      "scryptSync",
       "timingSafeEqual",
       "MOCHI_SOCIAL_TESTER_COOKIE",
       "cookies()",
@@ -68,7 +68,6 @@ const checks = [
     includes: [
       "MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password",
       "MOCHI_SOCIAL_TESTER_PASSWORD=",
-      "MOCHI_SOCIAL_TESTER_PASSWORD_SHA256=",
     ],
   },
   {
@@ -76,7 +75,6 @@ const checks = [
     includes: [
       "tester-password",
       "MOCHI_SOCIAL_TESTER_PASSWORD",
-      "MOCHI_SOCIAL_TESTER_PASSWORD_SHA256",
       "password-unlocked preview",
     ],
   },
@@ -92,8 +90,8 @@ const forbidden = [
     pattern: /\bMOCHI_SOCIAL_TESTER_PASSWORD[ \t]*=[ \t]*["']?(?![ \t]*(?:$|<|your-|YOUR_|REPLACE_|example\b))[^\s"']{8,}/im,
   },
   {
-    label: "committed tester password hash",
-    pattern: /\bMOCHI_SOCIAL_TESTER_PASSWORD_SHA256\s*=\s*["']?[a-f0-9]{64}\b/i,
+    label: "weak tester password SHA env",
+    pattern: /\bMOCHI_SOCIAL_TESTER_PASSWORD_SHA256\b/i,
   },
 ];
 

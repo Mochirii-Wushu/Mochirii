@@ -90,7 +90,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-tester-password-gate.mjs',
-    includes: ['Mochi Social tester password gate check passed', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'MOCHI_SOCIAL_TESTER_PASSWORD_SHA256', 'httpOnly: true', 'NEXT_PUBLIC_MOCHI_SOCIAL_(?:TESTER_)?PASSWORD']
+    includes: ['Mochi Social tester password gate check passed', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'scryptSync', 'httpOnly: true', 'NEXT_PUBLIC_MOCHI_SOCIAL_(?:TESTER_)?PASSWORD']
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',

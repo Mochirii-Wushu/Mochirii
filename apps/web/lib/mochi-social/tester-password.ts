@@ -1,50 +1,44 @@
 import "server-only";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 export const MOCHI_SOCIAL_TESTER_COOKIE = "mochi_social_tester_access";
 export const MOCHI_SOCIAL_TESTER_COOKIE_MAX_AGE = 60 * 60 * 8;
 
 const SESSION_PURPOSE = "mochi-social-tester-session:v1";
+const PASSWORD_PURPOSE = "mochi-social-tester-password:v1";
+const DERIVED_KEY_LENGTH = 64;
 
-function normalizeHash(value: string) {
-  return value.trim().toLowerCase();
-}
-
-function sha256(value: string) {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
-
-function configuredPasswordHash() {
-  const explicitHash = normalizeHash(process.env.MOCHI_SOCIAL_TESTER_PASSWORD_SHA256 || "");
-  if (/^[a-f0-9]{64}$/.test(explicitHash)) return explicitHash;
-
+function configuredPassword() {
   const password = process.env.MOCHI_SOCIAL_TESTER_PASSWORD || "";
-  if (!password) return "";
-
-  return sha256(password);
+  return password.trim() ? password : "";
 }
 
-function safeEqual(left: string, right: string) {
-  const leftBuffer = Buffer.from(left);
-  const rightBuffer = Buffer.from(right);
-  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+function derivePasswordKey(password: string, purpose: string) {
+  return scryptSync(password, purpose, DERIVED_KEY_LENGTH);
+}
+
+function safeEqual(left: Buffer, right: Buffer) {
+  return left.length === right.length && timingSafeEqual(left, right);
 }
 
 export function isMochiSocialTesterPasswordConfigured() {
-  return Boolean(configuredPasswordHash());
+  return Boolean(configuredPassword());
 }
 
 export function verifyMochiSocialTesterPassword(password: string) {
-  const expectedHash = configuredPasswordHash();
-  if (!expectedHash || !password) return false;
-  return safeEqual(sha256(password), expectedHash);
+  const expectedPassword = configuredPassword();
+  if (!expectedPassword || !password) return false;
+  return safeEqual(
+    derivePasswordKey(password, PASSWORD_PURPOSE),
+    derivePasswordKey(expectedPassword, PASSWORD_PURPOSE),
+  );
 }
 
 export function createMochiSocialTesterSessionValue() {
-  const expectedHash = configuredPasswordHash();
-  if (!expectedHash) return "";
-  return sha256(`${SESSION_PURPOSE}:${expectedHash}`);
+  const expectedPassword = configuredPassword();
+  if (!expectedPassword) return "";
+  return derivePasswordKey(expectedPassword, SESSION_PURPOSE).toString("hex");
 }
 
 export async function hasMochiSocialTesterSession() {
@@ -53,5 +47,5 @@ export async function hasMochiSocialTesterSession() {
 
   const cookieStore = await cookies();
   const currentValue = cookieStore.get(MOCHI_SOCIAL_TESTER_COOKIE)?.value || "";
-  return safeEqual(currentValue, expectedValue);
+  return safeEqual(Buffer.from(currentValue, "hex"), Buffer.from(expectedValue, "hex"));
 }

@@ -29,7 +29,7 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 - Route: `/games/mochi-social`
 - Public env: `NEXT_PUBLIC_MOCHI_SOCIAL_URL`
 - Default live preview mode is `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password`. The route shows a password-unlocked preview screen, verifies the tester password through a server-only route, sets an HttpOnly cookie scoped to `/games/mochi-social`, then embeds `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
-- Server-only password config is one of `MOCHI_SOCIAL_TESTER_PASSWORD` or `MOCHI_SOCIAL_TESTER_PASSWORD_SHA256`. Do not use a `NEXT_PUBLIC_*` password value and do not commit the password or hash.
+- Server-only password config is `MOCHI_SOCIAL_TESTER_PASSWORD`. The app derives comparison keys with `scrypt`; do not use a `NEXT_PUBLIC_*` password value and do not commit the password.
 - Strict Supabase mode is still available with `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=supabase`. In that mode the route checks Supabase session state, calls `mochi-social-alpha-session`, requires an active allowlist row, requires terms acknowledgement, then embeds `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
 - Supabase mode forwards only a short-lived Supabase access token through the existing `MOCHI_SOCIAL_AUTH` postMessage bridge, listens for `MOCHI_SOCIAL_READY`, `MOCHI_SOCIAL_AUTH_STATE`, and `MOCHI_SOCIAL_ERROR` from the configured game origin, and shows only non-secret bridge status. Password mode sends a sign-out/guest bridge message only.
 - The Supabase preview project must have Discord OAuth enabled before signed-in browser gates can pass. The Discord Developer Portal must allow the Supabase preview callback URL, for example `https://dnxumaiooljdnbjvzbdc.supabase.co/auth/v1/callback`, and the website redirects back to the preview `/account` route.
@@ -73,7 +73,7 @@ Before inviting testers:
 
 - The game repo `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
-- The Mochirii preview has `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password` plus a server-only tester password or SHA-256 hash configured before testers are invited.
+- The Mochirii preview has `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password` plus a server-only tester password configured before testers are invited.
 - The password-unlocked preview renders the iframe and keeps the game no-real-value/`configured-preview-stub`.
 - `npm run check:mochi-social-edge-authority` passes locally, proving server-token authority, append-only/idempotent ledger expectations, Canary/no-real-value stamping, and finalized-only chain inventory movement.
 - `npm run check:mochi-social-preview-ready` includes `site.bridge-state`, `site.auth-bridge`, `site.preview-key-loader`, `site.discord-oauth-detector`, and `site.edge-authority` before hosted Supabase Edge smoke, so hosted checks never stand in for local bridge, publishable-key loading, Discord detector, authority, or finality invariants.
@@ -153,7 +153,7 @@ Required secrets/config stay out of Git:
 
 - `NEXT_PUBLIC_MOCHI_SOCIAL_URL` in Vercel Preview/Production when the preview is ready.
 - `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password` for the password-unlocked preview, or `supabase` for the strict allowlist path.
-- `MOCHI_SOCIAL_TESTER_PASSWORD` or `MOCHI_SOCIAL_TESTER_PASSWORD_SHA256` in Vercel server env for the password-unlocked preview.
+- `MOCHI_SOCIAL_TESTER_PASSWORD` in Vercel server env for the password-unlocked preview.
 - `MOCHI_SOCIAL_GAME_SERVER_TOKEN` in Supabase Edge Function secrets and matching Fly game secrets.
 - `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` when the acknowledgement copy changes.
 
