@@ -218,6 +218,7 @@ function runAndAssertManualGate(label, env, assertGate) {
       MOCHI_SOCIAL_CREDS_DIR: tempDir,
       MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON: reportJsonPath(label),
       MOCHI_SOCIAL_SITE_PREVIEW_READY_MD: reportMdPath(label),
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: join(tempDir, `${label}-browser-gates.json`),
       MOCHI_SOCIAL_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
       MOCHI_SOCIAL_GAME_CONTRACT_URL: "https://mochi-social-game.fly.dev",
       MOCHI_SOCIAL_SITE_ORIGIN: "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app",
