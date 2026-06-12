@@ -29,3 +29,8 @@ jobs:
 
       - name: Run validation
         run: npm run check
+
+      - name: Check whitespace errors
+        run: |
+          git diff --check
+          git show --check --format=short --summary HEAD

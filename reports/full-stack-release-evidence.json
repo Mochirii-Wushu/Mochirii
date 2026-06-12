@@ -1,0 +1,392 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-12T23:29:12.627Z",
+  "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
+  "productionUrl": "https://mochirii.com",
+  "providerReadsEnabled": true,
+  "strictProviders": false,
+  "git": {
+    "branch": "codex/full-stack-release-evidence",
+    "head": "2961fe366f45",
+    "upstream": "",
+    "upstreamStatus": "none",
+    "ahead": 0,
+    "behind": 0,
+    "dirty": [
+      " M .github/workflows/validate-static-site.yml",
+      " M docs/deployment.md",
+      " M package.json",
+      " M scripts/check-all.mjs",
+      "?? reports/full-stack-release-evidence.json",
+      "?? reports/full-stack-release-evidence.md",
+      "?? scripts/check-full-stack-release-evidence.mjs"
+    ],
+    "errors": []
+  },
+  "local": {
+    "packageName": "mochirii-guild-site",
+    "requiredScripts": {
+      "total": 16,
+      "present": 16,
+      "missing": []
+    },
+    "requiredFiles": {
+      "total": 9,
+      "present": 9,
+      "missing": []
+    },
+    "workflowWhitespace": {
+      "present": true,
+      "command": "git diff --check + git show --check"
+    }
+  },
+  "vercel": {
+    "status": "checked",
+    "cli": {
+      "available": true,
+      "version": "54.12.2"
+    },
+    "production": {
+      "name": "mochirii",
+      "target": "production",
+      "readyState": "READY",
+      "url": "https://mochirii-hxjsg57j9-mochirii.vercel.app",
+      "aliases": [
+        "mochirii.com",
+        "mochirii.vercel.app",
+        "mochirii-mochirii.vercel.app",
+        "mochirii-git-main-mochirii.vercel.app",
+        "www.mochirii.com"
+      ],
+      "createdAt": 1781275744671
+    },
+    "environmentNames": {
+      "production": {
+        "status": "checked",
+        "target": "production",
+        "names": [
+          "NEXT_PUBLIC_SITE_URL",
+          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+          "NEXT_PUBLIC_SUPABASE_URL"
+        ],
+        "count": 3
+      },
+      "preview": {
+        "status": "checked",
+        "target": "preview",
+        "names": [
+          "MOCHI_SOCIAL_ALPHA_ACCESS_MODE",
+          "MOCHI_SOCIAL_TESTER_PASSWORD",
+          "MOCHI_SOCIAL_TESTER_PASSWORD_SHA256",
+          "NEXT_PUBLIC_SITE_URL",
+          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+          "NEXT_PUBLIC_SUPABASE_URL"
+        ],
+        "count": 8
+      }
+    }
+  },
+  "supabase": {
+    "status": "checked",
+    "cli": {
+      "available": true,
+      "version": "2.105.0"
+    },
+    "projectRef": "deyvmtncimmcinldjyqe",
+    "localMigrations": {
+      "total": 16,
+      "versions": [
+        "20260513081523",
+        "20260513193110",
+        "20260513195853",
+        "20260514010338",
+        "20260524114802",
+        "20260524115932",
+        "20260607094500",
+        "20260607125027",
+        "20260608093407",
+        "20260608173000",
+        "20260608210000",
+        "20260608233000",
+        "20260609090000",
+        "20260610090000",
+        "20260610120000",
+        "20260612105232"
+      ],
+      "files": [
+        "20260513081523_create_discord_role_gated_gallery_uploads.sql",
+        "20260513193110_increase_member_gallery_upload_limit_to_50mb.sql",
+        "20260513195853_create_gallery_moderation_events.sql",
+        "20260514010338_create_discord_integration_hub.sql",
+        "20260524114802_add_discord_gallery_submission_source.sql",
+        "20260524115932_revoke_public_rls_auto_enable_execute.sql",
+        "20260607094500_restore_instagram_gallery_publishing_history.sql",
+        "20260607125027_add_instagram_gallery_publishing.sql",
+        "20260608093407_restore_manual_instagram_share_history.sql",
+        "20260608173000_add_manual_instagram_share_status.sql",
+        "20260608210000_add_member_profiles_and_media.sql",
+        "20260608233000_refine_member_profile_identity_media.sql",
+        "20260609090000_add_discord_vote_reminders.sql",
+        "20260610090000_add_mochi_social_alpha.sql",
+        "20260610120000_add_member_spotlight_polls.sql",
+        "20260612105232_add_reaper_pending_verification_overwrites.sql"
+      ]
+    },
+    "localFunctions": {
+      "total": 24,
+      "names": [
+        "get-current-spotlight-winner",
+        "get-member-profile",
+        "list-approved-gallery-submissions",
+        "list-gallery-review-queue",
+        "list-instagram-publish-queue",
+        "list-member-profile-media-queue",
+        "list-member-profiles",
+        "list-visible-profile-cards",
+        "mark-instagram-gallery-submission-shared",
+        "mochi-social-alpha-action",
+        "mochi-social-alpha-admin",
+        "mochi-social-alpha-session",
+        "moderate-gallery-submission",
+        "moderate-member-profile-media",
+        "publish-instagram-gallery-submission",
+        "publish-member-spotlight-winner",
+        "reaper-discord-interactions",
+        "reaper-discord-member-sync",
+        "send-member-spotlight-poll",
+        "send-vote-reminder",
+        "submit-discord-gallery-image",
+        "submit-member-profile-media",
+        "submit-mochi-social-feedback",
+        "verify-discord-member"
+      ],
+      "verifyJwt": {
+        "verify-discord-member": true,
+        "list-gallery-review-queue": true,
+        "moderate-gallery-submission": true,
+        "list-approved-gallery-submissions": false,
+        "submit-discord-gallery-image": false,
+        "reaper-discord-interactions": false,
+        "reaper-discord-member-sync": false,
+        "send-vote-reminder": false,
+        "send-member-spotlight-poll": false,
+        "publish-member-spotlight-winner": false,
+        "get-current-spotlight-winner": false,
+        "list-instagram-publish-queue": true,
+        "publish-instagram-gallery-submission": true,
+        "mark-instagram-gallery-submission-shared": true,
+        "list-member-profiles": true,
+        "list-visible-profile-cards": false,
+        "get-member-profile": true,
+        "submit-member-profile-media": true,
+        "list-member-profile-media-queue": true,
+        "moderate-member-profile-media": true,
+        "mochi-social-alpha-session": true,
+        "mochi-social-alpha-action": false,
+        "mochi-social-alpha-admin": true,
+        "submit-mochi-social-feedback": true
+      }
+    },
+    "remoteMigrations": {
+      "totalRows": 16,
+      "versions": [
+        "20260513081523",
+        "20260513193110",
+        "20260513195853",
+        "20260514010338",
+        "20260524114802",
+        "20260524115932",
+        "20260607094500",
+        "20260607125027",
+        "20260608093407",
+        "20260608173000",
+        "20260608210000",
+        "20260608233000",
+        "20260609090000",
+        "20260610090000",
+        "20260610120000",
+        "20260612105232"
+      ],
+      "rows": [
+        {
+          "local": "20260513081523",
+          "remote": "20260513081523"
+        },
+        {
+          "local": "20260513193110",
+          "remote": "20260513193110"
+        },
+        {
+          "local": "20260513195853",
+          "remote": "20260513195853"
+        },
+        {
+          "local": "20260514010338",
+          "remote": "20260514010338"
+        },
+        {
+          "local": "20260524114802",
+          "remote": "20260524114802"
+        },
+        {
+          "local": "20260524115932",
+          "remote": "20260524115932"
+        },
+        {
+          "local": "20260607094500",
+          "remote": "20260607094500"
+        },
+        {
+          "local": "20260607125027",
+          "remote": "20260607125027"
+        },
+        {
+          "local": "20260608093407",
+          "remote": "20260608093407"
+        },
+        {
+          "local": "20260608173000",
+          "remote": "20260608173000"
+        },
+        {
+          "local": "20260608210000",
+          "remote": "20260608210000"
+        },
+        {
+          "local": "20260608233000",
+          "remote": "20260608233000"
+        },
+        {
+          "local": "20260609090000",
+          "remote": "20260609090000"
+        },
+        {
+          "local": "20260610090000",
+          "remote": "20260610090000"
+        },
+        {
+          "local": "20260610120000",
+          "remote": "20260610120000"
+        },
+        {
+          "local": "20260612105232",
+          "remote": "20260612105232"
+        }
+      ],
+      "mismatch": {
+        "localOnly": [],
+        "remoteOnly": []
+      }
+    },
+    "remoteFunctions": {
+      "total": 24,
+      "active": 24,
+      "names": [
+        "get-current-spotlight-winner",
+        "get-member-profile",
+        "list-approved-gallery-submissions",
+        "list-gallery-review-queue",
+        "list-instagram-publish-queue",
+        "list-member-profile-media-queue",
+        "list-member-profiles",
+        "list-visible-profile-cards",
+        "mark-instagram-gallery-submission-shared",
+        "mochi-social-alpha-action",
+        "mochi-social-alpha-admin",
+        "mochi-social-alpha-session",
+        "moderate-gallery-submission",
+        "moderate-member-profile-media",
+        "publish-instagram-gallery-submission",
+        "publish-member-spotlight-winner",
+        "reaper-discord-interactions",
+        "reaper-discord-member-sync",
+        "send-member-spotlight-poll",
+        "send-vote-reminder",
+        "submit-discord-gallery-image",
+        "submit-member-profile-media",
+        "submit-mochi-social-feedback",
+        "verify-discord-member"
+      ],
+      "inactive": [],
+      "localConfiguredMissingRemote": []
+    },
+    "secrets": "not read by this no-secret evidence command"
+  },
+  "discordReaper": {
+    "status": "static-checked",
+    "slashCommandRepairPath": {
+      "registerScript": true,
+      "rollbackScript": true,
+      "packageScripts": {
+        "register": true,
+        "rollback": true,
+        "parity": true,
+        "containment": true
+      }
+    },
+    "gatewayAutomation": {
+      "expectedSecondGate": true,
+      "directDiscordMutationExpectedHere": false
+    },
+    "docs": [
+      "docs/vote-reminder-runbook.md"
+    ]
+  },
+  "mochiSocial": {
+    "status": "report-read",
+    "previewReadyReportPresent": true,
+    "previewReadyReport": {
+      "ok": true,
+      "hostedChecksAllowed": true,
+      "browserGateMode": "supabase",
+      "gameUrlPresent": true,
+      "siteOriginPresent": true,
+      "summary": {
+        "total": 14,
+        "passed": 14,
+        "failed": 0,
+        "unverified": 0
+      }
+    },
+    "packageScripts": {
+      "alpha": true,
+      "bridgeState": true,
+      "edgeAuthority": true,
+      "reportHygiene": true,
+      "gameContract": true
+    },
+    "hostedFlyDeployRequiresSeparateApproval": true
+  },
+  "enjin": {
+    "status": "static-checked",
+    "previewOnlyExpected": true,
+    "fundedChainActionsAuthorized": false,
+    "evidence": [
+      {
+        "file": "docs/mochi-social-visual-polish.md",
+        "configuredPreviewStub": true,
+        "fundedChainGate": true
+      },
+      {
+        "file": "scripts/check-mochi-social-alpha.mjs",
+        "configuredPreviewStub": true,
+        "fundedChainGate": true
+      },
+      {
+        "file": "scripts/check-mochi-social-edge-authority.mjs",
+        "configuredPreviewStub": false,
+        "fundedChainGate": false
+      }
+    ]
+  },
+  "codexAgents": {
+    "status": "static-checked",
+    "agentsGuidancePresent": true,
+    "codexGuidePresent": true,
+    "scopedBranchExpected": true,
+    "noSecretReportsExpected": true
+  },
+  "warnings": [],
+  "skipped": [],
+  "failures": []
+}
