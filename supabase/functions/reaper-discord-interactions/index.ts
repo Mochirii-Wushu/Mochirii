@@ -550,6 +550,14 @@ async function fetchGuildChannels(): Promise<JsonRecord[]> {
   return asArray(response.data).map(asRecord).filter((channel) => Boolean(pendingChannelId(channel)));
 }
 
+function discordApiErrorDetail(data: unknown): string {
+  const record = asRecord(data);
+  const code = safeString(record.code, 40);
+  const message = safeString(record.message, 140);
+  const details = [code ? `code ${code}` : "", message].filter(Boolean).join(": ");
+  return details ? ` (${details})` : "";
+}
+
 async function writePendingDiscordOverwrite(change: PendingContainmentChange): Promise<void> {
   const auditHeaders = discordApiHeaders(change.nextAllow !== 0n || change.nextDeny !== 0n);
   auditHeaders.set("X-Audit-Log-Reason", encodeURIComponent(PENDING_VERIFICATION_AUDIT_REASON));
@@ -571,7 +579,9 @@ async function writePendingDiscordOverwrite(change: PendingContainmentChange): P
     });
 
   if (!response.ok) {
-    throw new Error(`Discord overwrite ${change.detail} failed with API ${response.status}.`);
+    throw new Error(
+      `Discord overwrite ${change.detail} on ${change.channelName}:${change.channelId} user:${change.userId} failed with API ${response.status}${discordApiErrorDetail(response.data)}.`,
+    );
   }
 }
 
