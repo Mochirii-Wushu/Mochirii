@@ -51,13 +51,16 @@ if (sourceInventory.blockingHits.length) {
     failures.push(`${hit.file}:${hit.line}: ${hit.label} requires a CSP review before inline hardening.`);
   }
 }
-if (!policy.directiveMap["frame-src"]?.some((source) => source.includes("open.spotify.com"))) {
+if (!directiveHasSource(policy.directiveMap, "frame-src", "https://open.spotify.com")) {
   failures.push("CSP frame-src must explicitly allow Spotify embeds.");
 }
-if (!policy.directiveMap["frame-src"]?.some((source) => source.includes("mochi-social-game.fly.dev") || source.includes("mochiSocialOrigin"))) {
+if (!directiveHasSource(policy.directiveMap, "frame-src", "https://mochi-social-game.fly.dev")) {
   failures.push("CSP frame-src must explicitly allow the Mochi Social game origin.");
 }
-if (!policy.directiveMap["connect-src"]?.some((source) => source.includes("supabase.co"))) {
+if (
+  !directiveHasSource(policy.directiveMap, "connect-src", "https://*.supabase.co") ||
+  !directiveHasSource(policy.directiveMap, "connect-src", "wss://*.supabase.co")
+) {
   failures.push("CSP connect-src must allow Supabase API and realtime origins.");
 }
 
@@ -297,6 +300,10 @@ function parseCspHeader(header) {
     if (directive) parsed[directive] = sources;
   }
   return parsed;
+}
+
+function directiveHasSource(directiveMap, directive, expectedSource) {
+  return Array.isArray(directiveMap[directive]) && directiveMap[directive].includes(expectedSource);
 }
 
 function renderMarkdown(report) {
