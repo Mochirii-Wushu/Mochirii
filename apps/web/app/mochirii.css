@@ -43,6 +43,11 @@
   --container:1200px;
   --section-gap:clamp(20px, 3vw, 32px);
   --card-pad:clamp(18px, 2.5vw, 26px);
+  --hero-shell-pad-top:clamp(10px, 2.5vw, 26px);
+  --hero-image-aspect:3 / 2;
+  --hero-image-radius:clamp(24px, 4vw, 42px);
+  --hero-image-to-card-gap:clamp(18px, 3vw, 34px);
+  --hero-stack-bottom-gap:clamp(10px, 2vw, 22px);
 
   --dd-gap:10px;
   --dd-radius:16px;
@@ -181,16 +186,16 @@ img{max-width:100%;display:block;}
 /* =========================================================
    HERO — Hero image shell + overlap card positioning
    ========================================================= */
-.page-hero-shell{position:relative; z-index:10;}
+.page-hero-shell{position:relative; z-index:10; padding-top:var(--hero-shell-pad-top);}
 .page-hero{
   position:relative;
   box-sizing:border-box;
   overflow:hidden;
   isolation:isolate;
   width:100%;
-  aspect-ratio:3 / 2;
+  aspect-ratio:var(--hero-image-aspect);
   min-height:0;
-  border-radius:clamp(24px, 4vw, 42px);
+  border-radius:var(--hero-image-radius);
   border:1px solid color-mix(in srgb, var(--rim-moon) 72%, var(--line));
   box-shadow:
     var(--shadow-strong),
@@ -213,11 +218,15 @@ img{max-width:100%;display:block;}
 .page-hero__scrim,
 .page-hero__fade{display:none!important;}
 
-.hero-overlap{margin-top:clamp(18px, 3vw, 34px); padding-bottom:16px;}
+.hero-overlap{margin-top:var(--hero-image-to-card-gap); padding-bottom:var(--hero-stack-bottom-gap);}
 
 @media (max-width:640px){
-  .hero-overlap{margin-top:18px;}
-  .page-hero{border-radius:24px;}
+  :root{
+    --hero-shell-pad-top:4px;
+    --hero-image-radius:24px;
+    --hero-image-to-card-gap:18px;
+    --hero-stack-bottom-gap:16px;
+  }
 }
 
 /* =========================================================
@@ -2150,17 +2159,8 @@ body[data-page="home"]{
   --home-stage-shadow:0 30px 90px rgba(0,0,0,.52);
 }
 
-body[data-page="home"] .page-hero-shell{
-  padding-top:clamp(10px, 2.5vw, 26px);
-}
-
 body[data-page="home"] .page-hero{
-  aspect-ratio:3 / 2;
-  min-height:0;
   border:1px solid transparent;
-  border-radius:clamp(24px, 4vw, 42px);
-  overflow:hidden;
-  isolation:isolate;
   background:
     linear-gradient(transparent, transparent) padding-box,
     linear-gradient(135deg, rgba(220,232,226,.36), rgba(48,178,143,.24), rgba(218,181,94,.34)) border-box;
@@ -2173,19 +2173,6 @@ body[data-page="home"] .page-hero{
 body[data-page="home"] .page-hero::before,
 body[data-page="home"] .page-hero::after{
   display:none;
-}
-
-body[data-page="home"] .page-hero__img{
-  object-fit:contain;
-  transform:none;
-  transform-origin:58% 48%;
-  filter:none;
-  background:rgba(4,7,7,.84);
-}
-
-body[data-page="home"] .hero-overlap{
-  margin-top:clamp(18px, 3vw, 34px);
-  padding-bottom:clamp(10px, 2vw, 22px);
 }
 
 body[data-page="home"] .home-hero-row{
@@ -2609,10 +2596,6 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 @media (max-width:900px){
-  body[data-page="home"] .hero-overlap{
-    margin-top:clamp(18px, 4vw, 28px);
-  }
-
   body[data-page="home"] .home-hero-row{
     grid-template-columns:1fr;
     align-items:stretch;
@@ -2629,27 +2612,6 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 @media (max-width:640px){
-  body[data-page="home"] .page-hero-shell{
-    padding-top:4px;
-  }
-
-  body[data-page="home"] .page-hero{
-    aspect-ratio:3 / 2;
-    min-height:0;
-    border-radius:24px;
-  }
-
-  body[data-page="home"] .page-hero__img{
-    object-fit:contain;
-    transform:none;
-    transform-origin:58% 45%;
-    filter:none;
-  }
-
-  body[data-page="home"] .hero-overlap{
-    margin-top:18px;
-  }
-
   body[data-page="home"] .hero-intro,
   body[data-page="home"] .home-guild-seal,
   body[data-page="home"] .page-main .glass-card{

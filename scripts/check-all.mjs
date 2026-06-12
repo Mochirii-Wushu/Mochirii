@@ -40,6 +40,7 @@ const checks = [
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
+  ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],
 ];
 
 let failed = false;
