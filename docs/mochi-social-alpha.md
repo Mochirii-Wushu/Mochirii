@@ -4,6 +4,8 @@ Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Moch
 
 Codex external operations for this website surface are defined in [`docs/mochi-social-alpha-codex-ops.md`](mochi-social-alpha-codex-ops.md). Use it for source hierarchy, tool choice, preview env ownership, Supabase authority, Discord boundaries, preview verification, and secret-entry rules.
 
+Visual work uses the same Cozy Wushu world direction as the game, but ownership remains split: Mochirii owns the tester-password gate, strict Supabase/Discord access screens, and unlocked iframe shell; the Mochi Social game repo owns RPGJS maps, sprites, HUD, manifests, and asset ledger. Vercel Deployment Protection, the tester-password gate, and Supabase/Discord allowlist are separate access layers and should not be treated as interchangeable.
+
 ## Alpha Posture
 
 - Closed preview only.

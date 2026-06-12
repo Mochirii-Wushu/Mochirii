@@ -35,6 +35,27 @@ Codex should optimize for `preview-live-gates` before funded-chain work. `funded
 
 For Alpha Preview Ready, the website may embed the game while the game reports `chainRuntime.mode="configured-preview-stub"`. Chain requests are audit-only preview rows until real Enjin finality exists; never credit inventory, settle listings, settle trades, or imply real player value from a stubbed chain request.
 
+## Visual Polish Lane
+
+Use visual polish to improve Alpha Preview Ready clarity without changing the external-ops lane.
+
+- Theme: Cozy Wushu arrival gate into Mochi Social.
+- Art relationship: Mochirii gate art and Mochi Social game art should share one Cozy Wushu world, but the website owns only the tester doorway and unlocked shell. RPGJS runtime sprites, maps, HUD, manifests, and the game asset ledger remain in the separate Mochi Social game repo.
+- Website scope: `/games/mochi-social`, `/games/mochi-social/tester-login`, and `/games/mochi-social/tester-logout` presentation only.
+- Locked state: an arrival gate with tester-password form, inline error, missing-config state, no iframe, and visible no-real-value labels.
+- Unlocked state: a live game shell with bridge status, no-real-value contract labels, lock action, and the Fly iframe.
+- Strict Supabase mode: keep allowlist/terms/auth flows intact and present them as the stricter gate path, not as the default password-gate polish target.
+- Access layers: Vercel Deployment Protection or automation bypass is hosting/preview access; the tester-password gate is player access; Supabase/Discord allowlist is strict auth/admin access. Do not conflate these layers in copy, tests, or troubleshooting notes.
+- Provider boundary: do not mutate Vercel, Supabase, Discord, Fly, Enjin, or GitHub provider settings from a visual pass without fresh action-specific approval.
+- Funded-chain boundary: Enjin remains `configured-preview-stub`; do not clear funded-chain gates, set dummy IDs, fund cENJ, or imply real settlement.
+- Cost boundary: Vercel advanced protection, provider add-ons, hosted checks, redeploys, and any Enjin funding/signing work can add usage or cost and need fresh action-specific approval.
+
+Implementation prompt:
+
+```text
+Polish the Mochi Social tester gate for no-real-value Alpha Preview Ready. Keep iframe absent until unlocked, keep password material server-only, and keep Enjin visible as configured-preview-stub.
+```
+
 Use these implementation prompts when starting follow-up work:
 
 ```text
