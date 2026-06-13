@@ -41,6 +41,7 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Use a password input with `id="current-password"`, `name="testerPassword"`, and `autocomplete="current-password"`.
 - Place invalid-password and missing-config errors near the field with `role="alert"`.
 - Lead with player-facing badges: closed alpha, no purchases, test coins only, and progress may reset.
+- Keep a compact `Today's path` panel near the password gate so testers know the intended flow: unlock, explore, and report.
 - Replace `Preview boundaries` with tester sections:
   - `What you can test`: raise Mochi Spirits, explore the town, try local chat/emotes, and test market board/direct trade.
   - `Your playtest mission`: befriend a pet, care for it, wave/chat, inspect the market board, and send feedback.
@@ -64,6 +65,8 @@ High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same compos
 
 - Preserve the iframe embed and postMessage bridge contract.
 - Keep a visible bridge status pill.
+- Treat bridge/game messages as polite status updates so testers using assistive technology receive the same state changes.
+- Keep a compact `Session cues` panel before the iframe with player-facing checks for pet care, presence, and market-board testing.
 - Keep no-real-value and configured-preview-stub language visible as small preview safety copy while the game is loaded.
 - Use player-facing badges for the main unlocked shell: local town, Mochi Spirit care, test coins only, market board preview, and no real value.
 - Preserve the lock-page form and route.

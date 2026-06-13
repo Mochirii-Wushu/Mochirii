@@ -5852,11 +5852,12 @@ body[data-page="gallery-submit"] .muted{
 }
 
 .mochi-game-shell--locked{
-  grid-template-columns:minmax(280px, .82fr) minmax(300px, .62fr) minmax(260px, .56fr);
+  grid-template-columns:minmax(280px, .82fr) minmax(320px, 1.18fr);
   grid-template-areas:
-    "scene status status"
-    "scene gate notes"
-    "scene contract contract";
+    "scene status"
+    "scene gate"
+    "scene notes"
+    "scene contract";
   align-content:start;
 }
 
@@ -5865,6 +5866,7 @@ body[data-page="gallery-submit"] .muted{
   grid-template-areas:
     "status"
     "contract"
+    "brief"
     "toolbar"
     "frame";
   align-content:start;
@@ -6128,6 +6130,7 @@ body[data-page="gallery-submit"] .muted{
   align-self:stretch;
   display:grid;
   grid-area:notes;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
   gap:14px;
 }
 
@@ -6139,6 +6142,7 @@ body[data-page="gallery-submit"] .muted{
 }
 
 .mochi-gate-notes section:last-child{
+  grid-column:1 / -1;
   padding-bottom:0;
   border-bottom:0;
 }
@@ -6155,6 +6159,80 @@ body[data-page="gallery-submit"] .muted{
 
 .mochi-gate-notes li::marker{
   color:var(--lantern);
+}
+
+.mochi-gate-progress ol,
+.mochi-session-brief ul{
+  display:grid;
+  gap:10px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.mochi-gate-progress li,
+.mochi-session-brief li{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:10px;
+  align-items:start;
+  min-width:0;
+  padding:10px;
+  border:1px solid rgba(221,239,255,.12);
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+}
+
+.mochi-progress-index{
+  display:grid;
+  place-items:center;
+  width:30px;
+  aspect-ratio:1;
+  border:1px solid rgba(218,181,94,.34);
+  border-radius:999px;
+  background:rgba(218,181,94,.14);
+  color:var(--lantern);
+  font-size:13px;
+  font-weight:900;
+}
+
+.mochi-progress-copy,
+.mochi-session-brief li{
+  min-width:0;
+}
+
+.mochi-progress-copy,
+.mochi-session-brief li span{
+  display:grid;
+  gap:3px;
+  color:var(--ink-1);
+  line-height:1.4;
+}
+
+.mochi-progress-copy strong,
+.mochi-session-brief li strong{
+  color:var(--ink-0);
+  line-height:1.25;
+}
+
+.mochi-session-brief{
+  grid-area:brief;
+  display:grid;
+  grid-template-columns:minmax(220px, .42fr) 1fr;
+  gap:14px;
+  align-items:start;
+}
+
+.mochi-session-brief h2{
+  margin-bottom:0;
+}
+
+.mochi-session-brief ul{
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+}
+
+.mochi-session-brief li{
+  grid-template-columns:1fr;
 }
 
 .mochi-preview-safety{
@@ -6271,6 +6349,14 @@ body[data-page="gallery-submit"] .muted{
   .mochi-gate-layout{
     grid-template-columns:1fr;
   }
+
+  .mochi-gate-notes{
+    grid-template-columns:1fr;
+  }
+
+  .mochi-gate-notes section:last-child{
+    grid-column:auto;
+  }
 }
 
 @media (max-width:720px){
@@ -6281,6 +6367,8 @@ body[data-page="gallery-submit"] .muted{
   .mochi-game-status dl{justify-content:flex-start;}
   .mochi-arrival-scene{min-height:360px;}
   .mochi-arrival-scene__caption{left:12px; right:12px; bottom:12px;}
+  .mochi-session-brief{grid-template-columns:1fr;}
+  .mochi-session-brief ul{grid-template-columns:1fr;}
   .mochi-live-toolbar{align-items:flex-start; flex-direction:column;}
   .mochi-lock-form{justify-content:flex-start;}
   .mochi-game-frame{min-height:520px; height:70vh;}

@@ -66,7 +66,7 @@ export function MochiSocialTesterGameClient() {
           </div>
           <div>
             <dt>Bridge</dt>
-            <dd data-mochi-bridge-state>{bridgeStatus}</dd>
+            <dd data-mochi-bridge-state role="status" aria-live="polite" aria-atomic="true">{bridgeStatus}</dd>
           </div>
         </dl>
       </header>
@@ -77,6 +77,26 @@ export function MochiSocialTesterGameClient() {
         <span>Market board preview</span>
         <span>No real value</span>
       </div>
+      <section className="mochi-game-panel mochi-session-brief" aria-label="Mochi Social session cues">
+        <div>
+          <p className="mochi-gate-kicker">Session cues</p>
+          <h2>Make this run count</h2>
+        </div>
+        <ul>
+          <li>
+            <strong>Try the loop.</strong>
+            <span>Care for a Mochi Spirit, then note where the next step feels unclear.</span>
+          </li>
+          <li>
+            <strong>Find another tester.</strong>
+            <span>Use chat, waves, or emotes so presence feedback can be checked.</span>
+          </li>
+          <li>
+            <strong>Touch the economy.</strong>
+            <span>Inspect the market board with test coins only; no real value is created.</span>
+          </li>
+        </ul>
+      </section>
       <div className="mochi-live-toolbar">
         <p>
           Blockchain features are in preview safety mode. Canary requests are test records only;
@@ -87,7 +107,11 @@ export function MochiSocialTesterGameClient() {
           <button className="hero-cta" type="submit">Lock game page</button>
         </form>
       </div>
-      {message ? <p className="form-message mochi-form-message">{message}</p> : null}
+      {message ? (
+        <p className="form-message mochi-form-message" role="status" aria-live="polite" aria-atomic="true">
+          {message}
+        </p>
+      ) : null}
       <div className="mochi-game-frame-shell" aria-label="Mochi Social embedded game">
         <iframe
           ref={iframeRef}

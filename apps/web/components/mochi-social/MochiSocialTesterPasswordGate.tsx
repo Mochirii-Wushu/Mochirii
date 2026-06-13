@@ -11,6 +11,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
   const hasError = Boolean(error);
   const descriptionId = "mochi-social-gate-description";
   const errorId = "mochi-social-gate-error";
+  const journeyId = "mochi-social-gate-journey";
 
   return (
     <section className="mochi-game-shell mochi-game-shell--locked" aria-label="Mochi Social tester access">
@@ -68,7 +69,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <div>
           <p className="mochi-gate-kicker">Guild invitation</p>
           <h2>Enter the town</h2>
-          <p>Use the tester password from your Mochirii playtest invite.</p>
+          <p>Use the tester password from your Mochirii playtest invite, then follow the short path below.</p>
           <span className="sr-only">Tester password required</span>
         </div>
         {error ? (
@@ -91,6 +92,32 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <button className="hero-cta hero-cta--primary mochi-gate-submit" type="submit">Unlock playtest</button>
       </form>
       <aside className="mochi-game-panel mochi-gate-notes" aria-label="Mochi Social access notes">
+        <section className="mochi-gate-progress" aria-labelledby={journeyId}>
+          <h2 id={journeyId}>Today&apos;s path</h2>
+          <ol>
+            <li>
+              <span className="mochi-progress-index" aria-hidden="true">1</span>
+              <span className="mochi-progress-copy">
+                <strong>Unlock</strong>
+                <span>Enter with the tester password from your invite.</span>
+              </span>
+            </li>
+            <li>
+              <span className="mochi-progress-index" aria-hidden="true">2</span>
+              <span className="mochi-progress-copy">
+                <strong>Explore</strong>
+                <span>Walk the town and check your first Mochi Spirit loop.</span>
+              </span>
+            </li>
+            <li>
+              <span className="mochi-progress-index" aria-hidden="true">3</span>
+              <span className="mochi-progress-copy">
+                <strong>Report</strong>
+                <span>Send feedback on anything confusing, broken, or delightful.</span>
+              </span>
+            </li>
+          </ol>
+        </section>
         <section>
           <h2>What you can test</h2>
           <ul>

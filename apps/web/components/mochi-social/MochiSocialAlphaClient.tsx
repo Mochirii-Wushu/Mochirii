@@ -156,16 +156,24 @@ export function MochiSocialAlphaClient() {
             <dt>Access</dt>
             <dd>Allowlist</dd>
           </div>
+          <div>
+            <dt>Bridge</dt>
+            <dd data-mochi-bridge-state role="status" aria-live="polite" aria-atomic="true">{bridgeStatus}</dd>
+          </div>
         </dl>
       </header>
       <div className="mochi-game-preview-contract" aria-label="Mochi Social preview contract">
         <span>Chain mode: configured-preview-stub</span>
         <span>Economy: test soft currency</span>
         <span>Market: fixed price only</span>
-        <span data-mochi-bridge-state>Bridge: {bridgeStatus}</span>
+        <span>Bridge: {bridgeStatus}</span>
       </div>
 
-      {message ? <p className="form-message">{message}</p> : null}
+      {message ? (
+        <p className="form-message" role="status" aria-live="polite" aria-atomic="true">
+          {message}
+        </p>
+      ) : null}
       {state === "loading" ? <div className="mochi-game-panel">Checking alpha access...</div> : null}
 
       {state === "signed-out" ? (
@@ -203,6 +211,26 @@ export function MochiSocialAlphaClient() {
 
       {state === "ready" ? (
         <>
+          <section className="mochi-game-panel mochi-session-brief" aria-label="Mochi Social session cues">
+            <div>
+              <p className="mochi-gate-kicker">Session cues</p>
+              <h2>Make this run count</h2>
+            </div>
+            <ul>
+              <li>
+                <strong>Try the loop.</strong>
+                <span>Care for a Mochi Spirit, then note where the next step feels unclear.</span>
+              </li>
+              <li>
+                <strong>Find another tester.</strong>
+                <span>Use chat, waves, or emotes so presence feedback can be checked.</span>
+              </li>
+              <li>
+                <strong>Touch the economy.</strong>
+                <span>Inspect the market board with test coins only; no real value is created.</span>
+              </li>
+            </ul>
+          </section>
           <iframe
             ref={iframeRef}
             className="mochi-game-frame"

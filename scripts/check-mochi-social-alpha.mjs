@@ -99,7 +99,15 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'data-mochi-bridge-state', 'role="status"', 'aria-live="polite"', 'Session cues', 'Make this run count', 'no real value is created', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
+  },
+  {
+    file: 'apps/web/components/mochi-social/MochiSocialTesterPasswordGate.tsx',
+    includes: ['Today&apos;s path', 'Unlock', 'Explore', 'Report', 'What you can test', 'Your playtest mission', 'configured-preview-stub']
+  },
+  {
+    file: 'apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx',
+    includes: ['Session cues', 'Make this run count', 'data-mochi-bridge-state', 'role="status"', 'aria-live="polite"', 'configured-preview-stub', 'no real value is created']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
