@@ -88,6 +88,7 @@ function inspectLocalReleaseSurface() {
     "check:production",
     "check:security-hardening",
     "check:supabase-edge-types",
+    "check:supabase-advisor-cadence",
     "check:discord-reaper-parity",
     "check:reaper-discord-interactions",
     "check:reaper-pending-verification",
@@ -107,6 +108,7 @@ function inspectLocalReleaseSurface() {
     "AGENTS.md",
     "docs/deployment.md",
     "docs/current-live-state.md",
+    "docs/supabase-advisor-cadence.md",
     "docs/dns-cutover-readiness-and-rollback.md",
     "docs/member-profiles-and-rank-roles.md",
     "docs/mochi-social-visual-polish.md",
@@ -133,6 +135,10 @@ function inspectLocalReleaseSurface() {
       total: requiredFiles.length,
       present: requiredFiles.length - missingFiles.length,
       missing: missingFiles,
+    },
+    supabaseAdvisorCadence: {
+      script: Boolean(scripts["check:supabase-advisor-cadence"]),
+      runbook: existsSync(resolve(root, "docs/supabase-advisor-cadence.md")),
     },
     workflowWhitespace,
   };
@@ -581,6 +587,7 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - Required scripts present: ${scripts.present}/${scripts.total}
 - Required files present: ${files.present}/${files.total}
 - CI whitespace gate: ${data.local.workflowWhitespace.present ? data.local.workflowWhitespace.command : "missing"}
+- Supabase advisor cadence: ${data.local.supabaseAdvisorCadence.script && data.local.supabaseAdvisorCadence.runbook ? "present" : "missing"}
 
 ## Vercel
 

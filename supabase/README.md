@@ -381,6 +381,10 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 GET /guilds/1078630751077142608/members/{discord_user_id}
 ```
 
+## Recurring Database Safety Review
+
+Use [`docs/supabase-advisor-cadence.md`](../docs/supabase-advisor-cadence.md) for the monthly Dashboard Security Advisor and Performance Advisor review plus the `supabase db lint` cadence. Record only redacted counts/status. This cadence must not run migrations, deploy functions, rotate secrets, or mutate production rows.
+
 The website does not assign Discord roles in this phase.
 
 ## Database Tables

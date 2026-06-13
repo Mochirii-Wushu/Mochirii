@@ -102,6 +102,12 @@ npm run check:full-stack-release-evidence -- --providers --write
 
 This command may summarize Vercel deployment/env names and Supabase migration/function status, but it must not record raw secret values, secret digests, tokens, cookies, webhook URLs, or private message content.
 
+Supabase advisor/lint review is a recurring no-secret operator cadence, not a production mutation. Use [`docs/supabase-advisor-cadence.md`](supabase-advisor-cadence.md) monthly and before Supabase schema/auth/storage/function-sensitive releases. The local guard is:
+
+```sh
+npm run check:supabase-advisor-cadence
+```
+
 Optional Vercel-local validation, when authenticated:
 
 ```sh
