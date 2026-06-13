@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-12T23:57:04.892Z",
+  "checkedAt": "2026-06-13T00:07:36.300Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {

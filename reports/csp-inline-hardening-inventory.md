@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-06-12T23:57:04.892Z
+Generated: 2026-06-13T00:07:36.300Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
