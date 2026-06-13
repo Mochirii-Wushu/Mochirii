@@ -154,6 +154,15 @@ npm run check:next-public-sync
 
 The sync check is included in `npm run check` so drift is caught in CI.
 
+For the retained root static rollback/reference surface itself, run:
+
+```sh
+npm run check:rollback-surface-drift
+npm run check:rollback-surface-drift -- --write
+```
+
+This no-secret audit verifies that root rollback files, legacy `.html` redirects, mirrored `assets/` and `data/`, `security.txt`, and deployment docs still agree. It does not authorize deleting root files, changing GitHub Pages, changing DNS, or changing provider settings.
+
 ## Rollback And Stabilization Guardrails
 
 - Do not change DNS, Vercel domains, GitHub Pages settings, Cloudflare settings, Supabase settings, or Discord settings during ordinary docs/content/theme work.

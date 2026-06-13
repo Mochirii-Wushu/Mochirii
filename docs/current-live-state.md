@@ -19,6 +19,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Root `data/` and `assets/` remain the editable source while the static rollback surface is retained.
 - The Next app reads mirrored copies in `apps/web/public/data/` and `apps/web/public/assets/`.
 - Sync and verify with `npm run sync:next-public` and `npm run check:next-public-sync`.
+- Verify the retained root static rollback/reference surface with `npm run check:rollback-surface-drift`; use `-- --write` when refreshing the no-secret report.
 - The large `assets/audio/mochiriiiiii.mp3` warning is intentional and non-blocking unless the user separately approves audio optimization.
 
 ## Security And Headers

@@ -1,0 +1,917 @@
+{
+  "generated_at": "2026-06-13T01:29:35.314Z",
+  "status": "pass",
+  "summary": {
+    "passed": 125,
+    "failed": 0,
+    "legacy_pages": 17
+  },
+  "decision": {
+    "current_state": "retain-root-static-rollback-reference",
+    "next_review": "Revisit retirement only after a separate stabilization-window approval packet.",
+    "guardrail": "This audit does not authorize deleting root static files, changing GitHub Pages, changing DNS, or changing provider settings."
+  },
+  "checks": [
+    {
+      "area": "rollback files",
+      "name": "CNAME",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "styles.css",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "site.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "utils.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "supabase.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "header.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "footer.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "robots.txt",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "sitemap.xml",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": "favicon.ico",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "rollback files",
+      "name": ".well-known/security.txt",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "index.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "home.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/home.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "index.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "index.html -> home.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "join.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "join.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/join.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "join.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "join.html -> join.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "gallery.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "gallery.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/gallery.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "gallery.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "gallery.html -> gallery.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "leaders.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "leaders.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/leaders.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "leaders.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "leaders.html -> leaders.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "ranks.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "ranks.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/ranks.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "ranks.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "ranks.html -> ranks.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "codex.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "codex.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/codex.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "codex.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "codex.html -> codex.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "events.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "events.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/events.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "events.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "events.html -> events.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "announcements.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "announcements.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/announcements.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "announcements.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "announcements.html -> announcements.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "raffles.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "raffles.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/raffles.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "raffles.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "raffles.html -> raffles.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "recruitment.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "recruitment.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/recruitment.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "recruitment.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "recruitment.html -> recruitment.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "auth.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "auth.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "auth.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "auth.html -> auth.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "account.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "account.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "account.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "account.html -> account.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "gallery-submit.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "gallery-submit.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "gallery-submit.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "gallery-submit.html -> gallery-submit.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "spotify.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "spotify.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/spotify.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "spotify.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "spotify.html -> spotify.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "spotlight.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "spotlight.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/spotlight.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "spotlight.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "spotlight.html -> spotlight.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "twills.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "twills.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy data",
+      "name": "data/twills.json",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "twills.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "twills.html -> twills.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy pages",
+      "name": "leader-dashboard.html",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy scripts",
+      "name": "leader-dashboard.js",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "leader-dashboard.html",
+      "status": "pass",
+      "detail": "loads shared rollback scripts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy page wiring",
+      "name": "leader-dashboard.html -> leader-dashboard.js",
+      "status": "pass",
+      "detail": "loads matching page script",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/index.html -> /",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/join.html -> /join",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/gallery.html -> /gallery",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/leaders.html -> /leaders",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/ranks.html -> /ranks",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/codex.html -> /codex",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/events.html -> /events",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/announcements.html -> /announcements",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/raffles.html -> /raffles",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/recruitment.html -> /recruitment",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/auth.html -> /auth",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/account.html -> /account",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/gallery-submit.html -> /gallery-submit",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/spotify.html -> /spotify",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/spotlight.html -> /spotlight",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/twills.html -> /twills",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "legacy redirects",
+      "name": "/leader-dashboard.html -> /leader-dashboard",
+      "status": "pass",
+      "detail": "configured in apps/web/next.config.ts",
+      "evidence": {}
+    },
+    {
+      "area": "public sync",
+      "name": "assets -> apps/web/public/assets",
+      "status": "pass",
+      "detail": "229 files match",
+      "evidence": {}
+    },
+    {
+      "area": "public sync",
+      "name": "data -> apps/web/public/data",
+      "status": "pass",
+      "detail": "14 files match",
+      "evidence": {}
+    },
+    {
+      "area": "security.txt",
+      "name": "RFC 9116 mirror",
+      "status": "pass",
+      "detail": "root and Next public copies match",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "README.md",
+      "status": "pass",
+      "detail": "README.md names the retained root static surface",
+      "evidence": {
+        "snippet": "root static"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "README.md",
+      "status": "pass",
+      "detail": "README.md names rollback/reference status",
+      "evidence": {
+        "snippet": "rollback/reference"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "apps/web/README.md",
+      "status": "pass",
+      "detail": "apps/web/README.md names the retained root static surface",
+      "evidence": {
+        "snippet": "root static"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "apps/web/README.md",
+      "status": "pass",
+      "detail": "apps/web/README.md names rollback/reference status",
+      "evidence": {
+        "snippet": "rollback/reference"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/deployment.md",
+      "status": "pass",
+      "detail": "docs/deployment.md names the retained root static surface",
+      "evidence": {
+        "snippet": "root static"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/deployment.md",
+      "status": "pass",
+      "detail": "docs/deployment.md names rollback/reference status",
+      "evidence": {
+        "snippet": "rollback/reference"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/current-live-state.md",
+      "status": "pass",
+      "detail": "docs/current-live-state.md names the retained root static surface",
+      "evidence": {
+        "snippet": "root static"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/current-live-state.md",
+      "status": "pass",
+      "detail": "docs/current-live-state.md names rollback/reference status",
+      "evidence": {
+        "snippet": "rollback/reference"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/dns-cutover-readiness-and-rollback.md",
+      "status": "pass",
+      "detail": "docs/dns-cutover-readiness-and-rollback.md names the retained root static surface",
+      "evidence": {
+        "snippet": "root static"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/dns-cutover-readiness-and-rollback.md",
+      "status": "pass",
+      "detail": "docs/dns-cutover-readiness-and-rollback.md names rollback/reference status",
+      "evidence": {
+        "snippet": "rollback/reference"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/deployment.md",
+      "status": "pass",
+      "detail": "deployment source of truth keeps retirement approval boundary",
+      "evidence": {
+        "snippet": "until a later stabilization task explicitly retires them"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/current-live-state.md",
+      "status": "pass",
+      "detail": "live-state index keeps retirement boundary",
+      "evidence": {
+        "snippet": "until a later stabilization task retires them"
+      }
+    },
+    {
+      "area": "docs",
+      "name": "docs/dns-cutover-readiness-and-rollback.md",
+      "status": "pass",
+      "detail": "rollback runbook marks removal as approval-gated",
+      "evidence": {
+        "snippet": "Removing root static files or legacy workflow files"
+      }
+    }
+  ]
+}

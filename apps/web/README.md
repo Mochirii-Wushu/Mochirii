@@ -92,6 +92,7 @@ From the repository root, mirror and verify the copies with:
 ```sh
 npm run sync:next-public
 npm run check:next-public-sync
+npm run check:rollback-surface-drift
 ```
 
 ## Supabase Environment Variables

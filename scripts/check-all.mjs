@@ -41,6 +41,7 @@ const checks = [
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
+  ["check:rollback-surface-drift", ["node", "scripts/check-rollback-surface-drift.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
   ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],

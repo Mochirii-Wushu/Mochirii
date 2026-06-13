@@ -47,6 +47,7 @@
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:refs": "node scripts/check-refs.mjs",
+    "check:rollback-surface-drift": "node scripts/check-rollback-surface-drift.mjs",
     "check:security-hardening": "node scripts/check-security-hardening.mjs",
     "check:shop-brand": "node scripts/check-shop-brand-guardrails.mjs",
     "check:spotlight-poll": "node scripts/check-spotlight-poll.mjs",
