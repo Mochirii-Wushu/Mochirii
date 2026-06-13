@@ -46,6 +46,8 @@ The public RFC 9116 security contact file is tracked at `.well-known/security.tx
 
 CSP was promoted from report-only to enforcement after a production Chrome pass found no report-only violations across Home, Join, Gallery, Auth, Account, Gallery Submit, Leader Dashboard, Spotify, Members, and member profile routes. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
 
+The app stylesheet imports Google Fonts for the current visual identity, so CSP explicitly allows `https://fonts.googleapis.com` in `style-src` and `https://fonts.gstatic.com` in `font-src`. Keep those entries while `apps/web/app/mochirii.css` imports the remote font CSS; remove them only if the fonts are self-hosted or the import is removed in a separate browser-verified CSP pass.
+
 The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
 
 Before reducing `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'`, update the CSP inline-hardening inventory. The app source should stay at zero React inline style props; any remaining style allowance decision must be based on a browser pass because Next image/runtime helpers can still emit framework-managed style attributes:
@@ -127,6 +129,14 @@ npm run check:accessibility-route-matrix -- --write
 ```
 
 Use the generated report to scope browser or Playwright evidence for keyboard order, visible focus, reduced motion, status messages, form errors, iframe titles, color contrast, and member/admin workflows. Static checks do not prove contrast or screen-reader behavior by themselves.
+
+For a browser heuristic pass against a local, preview, or production URL, run:
+
+```sh
+npm run smoke:accessibility-basics -- --base-url=https://mochirii.com
+```
+
+This optional smoke uses Playwright when available and checks rendered route names, visible control names, visible form labels, 24px target-size heuristics, signed-out member gates, mobile menu focus trap/return, and Gallery lightbox dialog focus. Treat it as regression evidence, not a formal WCAG conformance claim. It is grounded in WCAG 2.2 AA-oriented criteria and WAI-ARIA dialog/focus practices, while live signed-in member/moderator positive paths still require approved test accounts and cleanup rules.
 
 Post-deploy observability smoke:
 

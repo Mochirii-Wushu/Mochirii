@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-13T00:10:39.020Z",
+  "checkedAt": "2026-06-13T01:08:59.904Z",
   "scope": "WCAG 2.2 AA-oriented accessibility route matrix for the Mochirii Vercel/Next app. This is a no-secret static pass that guards shell foundations, route workflow coverage, status messaging, forms, iframes, reduced motion, focus visibility, and protected noindex boundaries.",
   "shell": {
     "htmlLang": true,
@@ -518,7 +518,8 @@
     "Color contrast for muted text, status pills, form errors, badges, and glass panels in light and dark image areas.",
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
     "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, leader queues, and Mochi Social gate errors.",
-    "Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Social embeds."
+    "Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Social embeds.",
+    "Reusable Playwright heuristic: npm run smoke:accessibility-basics -- --base-url=<preview-or-production-url>."
   ],
   "warnings": [
     "/ranks: no route-specific live region found; confirm static-only page status remains intentional.",

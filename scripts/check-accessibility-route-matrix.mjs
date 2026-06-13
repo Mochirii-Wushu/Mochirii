@@ -10,6 +10,15 @@ const checkedAt = new Date().toISOString();
 const failures = [];
 const warnings = [];
 
+const packageJson = JSON.parse(readRequired("package.json"));
+const accessibilitySmokeScript = existsSync(resolve(root, "scripts/smoke-accessibility-basics.mjs"));
+if (!packageJson.scripts?.["smoke:accessibility-basics"]) {
+  failures.push("package.json: missing smoke:accessibility-basics script.");
+}
+if (!accessibilitySmokeScript) {
+  failures.push("scripts/smoke-accessibility-basics.mjs: missing reusable accessibility basics smoke.");
+}
+
 const routes = [
   { route: "/", label: "Home", file: "apps/web/app/page.tsx", type: "public", workflow: "guild overview", expectsLiveRegion: true },
   { route: "/join", label: "Join", file: "apps/web/app/join/page.tsx", type: "public", workflow: "website to Discord funnel" },
@@ -60,6 +69,7 @@ const report = {
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
     "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, leader queues, and Mochi Social gate errors.",
     "Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Social embeds.",
+    "Reusable Playwright heuristic: npm run smoke:accessibility-basics -- --base-url=<preview-or-production-url>.",
   ],
   warnings,
   failures,
@@ -241,6 +251,7 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 - Routes with alerts: ${report.summary.routesWithAlerts}
 - Routes with forms: ${report.summary.routesWithForms}
 - Routes with iframes: ${report.summary.routesWithIframes}
+- Reusable browser smoke: ${accessibilitySmokeScript ? "`npm run smoke:accessibility-basics`" : "missing"}
 
 ## Shell Foundations
 

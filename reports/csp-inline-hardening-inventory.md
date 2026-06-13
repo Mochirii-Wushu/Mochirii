@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-06-13T00:39:27.825Z
+Generated: 2026-06-13T01:08:59.904Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
@@ -24,9 +24,9 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 | frame-ancestors | 'none' |
 | form-action | 'self' |
 | script-src | 'self' 'unsafe-inline' |
-| style-src | 'self' 'unsafe-inline' |
+| style-src | 'self' 'unsafe-inline' https://fonts.googleapis.com |
 | img-src | 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co |
-| font-src | 'self' data: |
+| font-src | 'self' data: https://fonts.gstatic.com |
 | media-src | 'self' data: blob: |
 | frame-src | 'self' https://discord.com https://open.spotify.com https://mochi-social-game.fly.dev |
 | connect-src | 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com https://mochi-social-game.fly.dev |
@@ -51,7 +51,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 | Origin | Allowed by CSP | Files |
 | --- | --- | --- |
 | https://discord.com | frame-src, connect-src | apps/web/app/page.tsx<br>apps/web/components/SiteFooter.tsx<br>apps/web/components/SiteHeader.tsx<br>apps/web/components/member-workflow/AccountPanel.tsx<br>apps/web/components/public-pages/EventsBoard.tsx<br>apps/web/components/public-pages/pages.tsx |
-| https://fonts.googleapis.com | none | apps/web/app/mochirii.css |
+| https://fonts.googleapis.com | style-src | apps/web/app/mochirii.css |
 | https://mochi-social-game.fly.dev | frame-src, connect-src | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx<br>apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx |
 | https://mochirii.com | default-src, base-uri, form-action, script-src, style-src, img-src, font-src, media-src, frame-src, connect-src, worker-src | apps/web/app/account/page.tsx<br>apps/web/app/auth/page.tsx<br>apps/web/app/gallery-submit/page.tsx<br>apps/web/app/layout.tsx<br>apps/web/app/leader-dashboard/page.tsx<br>apps/web/components/public-pages/metadata.ts |
 | https://www.instagram.com | none | apps/web/components/member-workflow/LeaderDashboard.tsx |
@@ -78,23 +78,12 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 | Route | Status | CSP | Report-only | Unsafe-inline |
 | --- | ---: | --- | --- | --- |
-| / | 200 | yes | no | script-src, style-src |
-| /join | 200 | yes | no | script-src, style-src |
-| /events | 200 | yes | no | script-src, style-src |
-| /gallery | 200 | yes | no | script-src, style-src |
-| /auth | 200 | yes | no | script-src, style-src |
-| /account | 200 | yes | no | script-src, style-src |
-| /members | 200 | yes | no | script-src, style-src |
-| /gallery-submit | 200 | yes | no | script-src, style-src |
-| /leader-dashboard | 200 | yes | no | script-src, style-src |
-| /spotify | 200 | yes | no | script-src, style-src |
-| /spotlight | 200 | yes | no | script-src, style-src |
-| /games/mochi-social | 200 | yes | no | script-src, style-src |
-| /codex | 200 | yes | no | script-src, style-src |
+| skipped | run with --live to check production headers | n/a | n/a | n/a |
 
 ## Next Steps
 
 - Keep React inline style props at zero before any style-src unsafe-inline removal.
+- Keep Google Fonts style/font origins explicit while the CSS imports Zhi Mang Xing and Noto Serif SC.
 - Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.
 - Keep Spotify and Mochi Social iframe routes in the browser route sweep.
 - Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.
@@ -102,7 +91,6 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 ## Warnings
 
-- https://fonts.googleapis.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.
 - https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.
 
 ## Failures

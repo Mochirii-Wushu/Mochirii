@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-13T00:39:27.825Z",
+  "checkedAt": "2026-06-13T01:08:59.904Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
@@ -13,9 +13,9 @@
       "frame-ancestors 'none'",
       "form-action 'self'",
       "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://fonts.gstatic.com",
       "media-src 'self' data: blob:",
       "frame-src 'self' https://discord.com https://open.spotify.com https://mochi-social-game.fly.dev",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com https://mochi-social-game.fly.dev",
@@ -44,7 +44,8 @@
       ],
       "style-src": [
         "'self'",
-        "'unsafe-inline'"
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com"
       ],
       "img-src": [
         "'self'",
@@ -58,7 +59,8 @@
       ],
       "font-src": [
         "'self'",
-        "data:"
+        "data:",
+        "https://fonts.gstatic.com"
       ],
       "media-src": [
         "'self'",
@@ -118,6 +120,18 @@
         "allowedBy": [
           "frame-src",
           "connect-src"
+        ]
+      },
+      {
+        "origin": "https://fonts.googleapis.com",
+        "allowedBy": [
+          "style-src"
+        ]
+      },
+      {
+        "origin": "https://fonts.gstatic.com",
+        "allowedBy": [
+          "font-src"
         ]
       },
       {
@@ -291,7 +305,9 @@
       },
       {
         "origin": "https://fonts.googleapis.com",
-        "allowedBy": [],
+        "allowedBy": [
+          "style-src"
+        ],
         "files": [
           "apps/web/app/mochirii.css"
         ]
@@ -447,163 +463,18 @@
     }
   ],
   "live": {
-    "status": "checked",
-    "baseUrl": "https://mochirii.com",
-    "routes": [
-      {
-        "route": "/",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/join",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/events",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/gallery",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/auth",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/account",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/members",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/gallery-submit",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/leader-dashboard",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/spotify",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/spotlight",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/games/mochi-social",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/codex",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      }
-    ]
+    "status": "skipped",
+    "reason": "run with --live to check production headers"
   },
   "nextSteps": [
     "Keep React inline style props at zero before any style-src unsafe-inline removal.",
+    "Keep Google Fonts style/font origins explicit while the CSS imports Zhi Mang Xing and Noto Serif SC.",
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
     "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
     "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions."
   ],
   "warnings": [
-    "https://fonts.googleapis.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",
     "https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening."
   ],
   "failures": []

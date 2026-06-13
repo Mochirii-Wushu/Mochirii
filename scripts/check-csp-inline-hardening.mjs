@@ -63,6 +63,12 @@ if (
 ) {
   failures.push("CSP connect-src must allow Supabase API and realtime origins.");
 }
+if (!directiveHasSource(policy.directiveMap, "style-src", "https://fonts.googleapis.com")) {
+  failures.push("CSP style-src must allow the existing Google Fonts stylesheet import.");
+}
+if (!directiveHasSource(policy.directiveMap, "font-src", "https://fonts.gstatic.com")) {
+  failures.push("CSP font-src must allow the existing Google Fonts font files.");
+}
 
 const report = {
   ok: failures.length === 0,
@@ -76,6 +82,7 @@ const report = {
   live,
   nextSteps: [
     "Keep React inline style props at zero before any style-src unsafe-inline removal.",
+    "Keep Google Fonts style/font origins explicit while the CSS imports Zhi Mang Xing and Noto Serif SC.",
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
     "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
     "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",

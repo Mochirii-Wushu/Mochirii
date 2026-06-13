@@ -1,6 +1,6 @@
 # Accessibility Route Matrix
 
-Generated: 2026-06-13T00:10:39.020Z
+Generated: 2026-06-13T01:08:59.904Z
 
 This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibility coverage for Mochirii route workflows and names the browser checks that still require manual or Playwright evidence.
 
@@ -13,6 +13,7 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 - Routes with alerts: 5
 - Routes with forms: 3
 - Routes with iframes: 3
+- Reusable browser smoke: `npm run smoke:accessibility-basics`
 
 ## Shell Foundations
 
@@ -64,6 +65,7 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 - Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.
 - Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, leader queues, and Mochi Social gate errors.
 - Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Social embeds.
+- Reusable Playwright heuristic: npm run smoke:accessibility-basics -- --base-url=<preview-or-production-url>.
 
 ## Warnings
 
