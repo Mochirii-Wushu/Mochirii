@@ -2,9 +2,9 @@
   "hero": {
     "kicker": "Join",
     "title": "Join Mōchirīī",
-    "updated": "2026-02-01",
+    "updated": "2026-06-13",
     "timezone": "UTC+8",
-    "intro": "Mōchirīī is a guild home for players who enjoy good company & pretty greetings. Optional Discord, always welcome.",
+    "intro": "Mōchirīī is a guild home for players who enjoy good company, clear roles & pretty greetings. Discord is the main door; the website helps you keep your account, events & profile in step.",
     "image": "./assets/img/join/hero.webp",
     "imageAlt": "Join Mōchirīī banner artwork",
     "atmosphereImage": "",
@@ -12,64 +12,74 @@
       "Welcome within a day",
       "Discord onboarding",
       "Newcomer support",
-      "Ground rules"
+      "Ground rules",
+      "First event path"
     ]
   },
   "steps": {
     "title": "The Joining Path",
     "intro": [
-      "These steps carry you from hello to first run. Leaders handle setup; you bring your in-game name, time zone & patience while roles are assigned."
+      "These steps carry you from hello to first run. Discord handles the live welcome; the website keeps the guides, profile tools & event trail easy to find."
     ],
     "items": [
       {
         "number": "1",
-        "title": "Enter the Hall",
-        "description": "Join Discord & tell a mod you are here for the guild. Verification opens the server & the game channels appear once your role is set. If you feel stuck, DM a mod or ask in game; one greeting can open the door."
+        "title": "Enter the Discord hall",
+        "description": "Join Discord, follow the server rules and onboarding prompts, then say you are here for the guild. If a prompt or channel feels confusing, ask a mod before guessing."
       },
       {
         "number": "2",
-        "title": "Read the Codex & Ranks",
-        "description": "Skim the Codex & Ranks pages so you know our tone, etiquette, leadership path & support flow before you settle in."
+        "title": "Verify and share your IGN",
+        "description": "Complete verification, then share your in-game name or UID and time zone. This helps leaders match you with the right roles, channels and event windows."
       },
       {
         "number": "3",
-        "title": "Share your IGN & time zone",
-        "description": "Post your in-game name & time zone so leaders can match you with channels, roles & event windows. Mōchirīī is global, so time zones help everyone avoid guesswork."
+        "title": "Read the Codex and Ranks",
+        "description": "Skim the Codex and Ranks pages so you know the guild tone, etiquette, leadership path and support flow before you settle in."
       },
       {
         "number": "4",
-        "title": "Receive your starting rank",
-        "description": "A leader gives your starting rank & points you to the channels, roles & weekly notes you need first."
+        "title": "Set up your website account",
+        "description": "After Discord verification, sign in on the website to check your member status, profile basics and gallery access. Keep Discord as the source for live roles."
       },
       {
         "number": "5",
-        "title": "Join an event",
-        "description": "Pick an upcoming event, RSVP if planning is needed & show up when you can. Ask questions early so the run starts well & everyone can share the road."
+        "title": "Join your first event",
+        "description": "Pick an upcoming event, RSVP if planning is needed and ask questions early. Showing up prepared helps the run start well and gives people an easy reason to remember you."
       }
     ]
   },
   "quickStart": {
     "title": "Quick Start",
     "body": [
-      "Come say hello.",
-      "Presence matters & questions always welcome."
+      "Join Discord first, then use the website to read, verify and keep track of your next step.",
+      "Questions are welcome. A clear hello is enough to begin."
     ],
     "links": [
+      { "label": "Join Discord", "href": "https://discord.com/invite/dPafqMwWPK" },
       { "label": "Events", "href": "./events.html" },
-      { "label": "Guild Codex", "href": "./codex.html" },
-      { "label": "Ranks", "href": "./ranks.html" }
+      { "label": "Account", "href": "./account.html" },
+      { "label": "Guild Codex", "href": "./codex.html" }
     ]
   },
   "checklist": {
     "eyebrow": "Before You Join",
     "title": "New Cupcake Checklist",
-    "intro": "A quick way to step in ready to be welcomed.",
+    "intro": "A quick way to step in with the right roles, context and first plan.",
     "items": [
       {
         "title": "Join the Discord",
-        "text": "Use Discord for announcements, event planning & the having fun.",
+        "text": "Use Discord for live announcements, event planning and welcome messages.",
         "href": "https://discord.com/invite/dPafqMwWPK",
-        "label": "Open Discord"
+        "label": "Join Discord"
+      },
+      {
+        "title": "Accept the server rules",
+        "text": "Complete Discord's rules and onboarding prompts before asking for roles. They keep the first steps clear and help protect the server."
+      },
+      {
+        "title": "Complete verification",
+        "text": "Verification opens the right channels once your role is set. If it stalls, ask a mod for help instead of repeating random steps."
       },
       {
         "title": "Know your in-game name or UID",
@@ -82,14 +92,20 @@
         "label": "Read the Codex"
       },
       {
-        "title": "Check event expectations",
-        "text": "Events are announced as scheduled. Join when you can, speak up when life gets busy & keep the atmosphere friendly.",
+        "title": "Set up your profile",
+        "text": "After you verify, open Account to check member status and start your public profile only when you are ready.",
+        "href": "./account.html",
+        "label": "Open Account"
+      },
+      {
+        "title": "Choose a first event",
+        "text": "Events are announced as scheduled. Join when you can, speak up when life gets busy and keep the atmosphere friendly.",
         "href": "./events.html",
         "label": "View Events"
       },
       {
-        "title": "Say hello",
-        "text": "A simple greeting helps everyone recognize you; small welcomes become the start of shared runs."
+        "title": "Ask where to go next",
+        "text": "A simple greeting or help request gives leaders a clear place to guide you. Small welcomes become the start of shared runs."
       }
     ]
   },
@@ -120,9 +136,9 @@
   "notes": {
     "title": "Notes",
     "body": [
-      "Voice chat is optional unless an event post says otherwise. Discord is the clearest place for roles, announcements & coordination.",
+      "Voice chat is optional unless an event post says otherwise. Discord is the clearest place for rules, roles, announcements and coordination.",
       "Need a break? Tell a leader before a longer Cupcake nap so roles & expectations remain for you.",
-      "If you feel lost, tag a leader. Getting unstuck keeps the game fun."
+      "If you feel lost, tag a leader or ask in the welcome/help channel. Getting unstuck keeps the game fun."
     ],
     "links": [
       { "label": "Leaders Hall", "href": "./leaders.html" },

@@ -71,9 +71,9 @@ Current checklist item shape:
 - optional `href`
 - optional `label`
 
-Each item should describe one concrete preparation step. Current checklist topics cover Discord, in-game name or UID readiness, Codex review, Events expectations, and saying hello.
+Each item should describe one concrete preparation step. Current checklist topics cover Discord, server rules and onboarding prompts, verification, in-game name or UID readiness, Codex review, profile setup, first-event expectations, and where to ask for help.
 
-Checklist links render only when both `href` and `label` are present. Current checklist links point to Discord, Codex, and Events.
+Checklist links render only when both `href` and `label` are present. Current checklist links point to Discord, Codex, Account, and Events.
 
 Checklist copy should remain clear, not overly poetic. Do not add interactive completion behavior, checkbox state, local storage, or unsupported fields without updating `join.js` in a separate scoped task.
 
@@ -145,6 +145,7 @@ Use `npm run smoke:gallery` as a general regression check when relevant to the r
 - Confirm quick-start links render.
 - Confirm newcomer checklist renders.
 - Confirm Discord link works.
+- Confirm Account link works.
 - Confirm Codex link works.
 - Confirm Events link works.
 - Confirm Ranks, Leaders, and Home links work where present.

@@ -1,0 +1,95 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T02:03:05.534Z",
+  "scope": "No-secret static audit for the Join page website-to-Discord onboarding funnel, checklist coverage, supported data shape, and Next public data sync.",
+  "sourceFiles": [
+    "data/join.json",
+    "apps/web/public/data/join.json",
+    "docs/join-guide.md"
+  ],
+  "counts": {
+    "steps": 5,
+    "checklistItems": 8,
+    "quickStartLinks": 4,
+    "checklistLinks": 4
+  },
+  "schemaChecks": {
+    "hero": true,
+    "steps": true,
+    "quickStart": true,
+    "checklist": true,
+    "culture": true,
+    "notes": true
+  },
+  "conceptChecks": [
+    {
+      "id": "discord",
+      "label": "Discord join path",
+      "present": true
+    },
+    {
+      "id": "rules",
+      "label": "server rules",
+      "present": true
+    },
+    {
+      "id": "onboarding",
+      "label": "onboarding prompts",
+      "present": true
+    },
+    {
+      "id": "verification",
+      "label": "verification",
+      "present": true
+    },
+    {
+      "id": "identity",
+      "label": "in-game identity",
+      "present": true
+    },
+    {
+      "id": "codex",
+      "label": "Codex review",
+      "present": true
+    },
+    {
+      "id": "profile",
+      "label": "website account or profile",
+      "present": true
+    },
+    {
+      "id": "event",
+      "label": "first event",
+      "present": true
+    },
+    {
+      "id": "help",
+      "label": "help path",
+      "present": true
+    }
+  ],
+  "linkChecks": [
+    {
+      "label": "Discord invite",
+      "href": "https://discord.com/invite/dPafqMwWPK",
+      "present": true
+    },
+    {
+      "label": "Codex",
+      "href": "./codex.html",
+      "present": true
+    },
+    {
+      "label": "Account",
+      "href": "./account.html",
+      "present": true
+    },
+    {
+      "label": "Events",
+      "href": "./events.html",
+      "present": true
+    }
+  ],
+  "warnings": [],
+  "failures": []
+}
