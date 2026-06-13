@@ -22,22 +22,7 @@ jobs:
       - name: Run Lighthouse audits
         run: |
           set -euo pipefail
-          mkdir -p reports/lighthouse
-
-          npx --yes lighthouse "https://mochirii.com/" \
-            --output=html --output=json \
-            --output-path=reports/lighthouse/home \
-            --chrome-flags="--headless --no-sandbox"
-
-          npx --yes lighthouse "https://mochirii.com/recruitment" \
-            --output=html --output=json \
-            --output-path=reports/lighthouse/recruitment \
-            --chrome-flags="--headless --no-sandbox"
-
-          npx --yes lighthouse "https://mochirii.com/gallery" \
-            --output=html --output=json \
-            --output-path=reports/lighthouse/gallery \
-            --chrome-flags="--headless --no-sandbox"
+          node scripts/run-lighthouse-route-matrix.mjs --base-url=https://mochirii.com --out-dir=reports/lighthouse
 
       - name: Upload Lighthouse reports
         uses: actions/upload-artifact@v7

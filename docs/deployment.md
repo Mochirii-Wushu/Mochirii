@@ -128,6 +128,14 @@ npm run check:accessibility-route-matrix -- --write
 
 Use the generated report to scope browser or Playwright evidence for keyboard order, visible focus, reduced motion, status messages, form errors, iframe titles, color contrast, and member/admin workflows. Static checks do not prove contrast or screen-reader behavior by themselves.
 
+Periodic Lighthouse/Core Web Vitals evidence is optional and manual, not a required score gate. Keep its route coverage aligned with the live app using:
+
+```sh
+npm run check:lighthouse-route-matrix -- --write
+```
+
+When production evidence is needed, run the GitHub Actions workflow **Manual Lighthouse audit**. It uploads raw Lighthouse HTML/JSON artifacts for the route matrix, including public, signed-out member, moderator-gated, and Mochi Social doorway routes. Do not commit those generated artifacts.
+
 Post-deploy observability smoke:
 
 ```js

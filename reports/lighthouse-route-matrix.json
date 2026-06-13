@@ -1,0 +1,544 @@
+{
+  "generated_at": "2026-06-13T01:44:14.948Z",
+  "status": "pass",
+  "source_basis": [
+    {
+      "label": "Chrome Lighthouse",
+      "url": "https://developer.chrome.com/docs/lighthouse/overview",
+      "note": "Lighthouse audits page quality across performance, accessibility, SEO, and related categories."
+    },
+    {
+      "label": "web.dev Web Vitals",
+      "url": "https://web.dev/articles/vitals",
+      "note": "Core Web Vitals keep LCP, CLS, and INP visible as current user-experience signals."
+    },
+    {
+      "label": "web.dev Lighthouse CI",
+      "url": "https://web.dev/articles/lighthouse-ci",
+      "note": "Repeatable Lighthouse evidence is useful for tracking changes over time without making this a required score gate."
+    },
+    {
+      "label": "GitHub Actions artifacts",
+      "url": "https://docs.github.com/en/actions/tutorials/store-and-share-data",
+      "note": "Manual workflow artifacts keep bulky Lighthouse HTML/JSON output out of Git."
+    }
+  ],
+  "summary": {
+    "routes": 11,
+    "audit_targets": 13,
+    "required_routes": 11,
+    "failures": 0
+  },
+  "routes": [
+    {
+      "id": "home",
+      "path": "/",
+      "label": "Home",
+      "workflow": "public landing and guild identity",
+      "profiles": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "id": "join",
+      "path": "/join",
+      "label": "Join",
+      "workflow": "website to Discord funnel",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "events",
+      "path": "/events",
+      "label": "Events",
+      "workflow": "community heartbeat",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "gallery",
+      "path": "/gallery",
+      "label": "Gallery",
+      "workflow": "public gallery discovery",
+      "profiles": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "id": "recruitment",
+      "path": "/recruitment",
+      "label": "Recruitment",
+      "workflow": "public recruiting context",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "auth",
+      "path": "/auth",
+      "label": "Auth",
+      "workflow": "Discord login entry",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "account",
+      "path": "/account",
+      "label": "Account",
+      "workflow": "signed-out and member account boundary",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "members",
+      "path": "/members",
+      "label": "Members",
+      "workflow": "members-only directory boundary",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "gallery-submit",
+      "path": "/gallery-submit",
+      "label": "Gallery Submit",
+      "workflow": "member upload gate",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "leader-dashboard",
+      "path": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "workflow": "moderator workflow gate",
+      "profiles": [
+        "mobile"
+      ]
+    },
+    {
+      "id": "mochi-social",
+      "path": "/games/mochi-social",
+      "label": "Mochi Social",
+      "workflow": "tester game doorway",
+      "profiles": [
+        "mobile"
+      ]
+    }
+  ],
+  "audit_targets": [
+    {
+      "id": "home",
+      "output_id": "home-mobile",
+      "label": "Home",
+      "path": "/",
+      "profile": "mobile",
+      "workflow": "public landing and guild identity"
+    },
+    {
+      "id": "home",
+      "output_id": "home-desktop",
+      "label": "Home",
+      "path": "/",
+      "profile": "desktop",
+      "workflow": "public landing and guild identity"
+    },
+    {
+      "id": "join",
+      "output_id": "join-mobile",
+      "label": "Join",
+      "path": "/join",
+      "profile": "mobile",
+      "workflow": "website to Discord funnel"
+    },
+    {
+      "id": "events",
+      "output_id": "events-mobile",
+      "label": "Events",
+      "path": "/events",
+      "profile": "mobile",
+      "workflow": "community heartbeat"
+    },
+    {
+      "id": "gallery",
+      "output_id": "gallery-mobile",
+      "label": "Gallery",
+      "path": "/gallery",
+      "profile": "mobile",
+      "workflow": "public gallery discovery"
+    },
+    {
+      "id": "gallery",
+      "output_id": "gallery-desktop",
+      "label": "Gallery",
+      "path": "/gallery",
+      "profile": "desktop",
+      "workflow": "public gallery discovery"
+    },
+    {
+      "id": "recruitment",
+      "output_id": "recruitment-mobile",
+      "label": "Recruitment",
+      "path": "/recruitment",
+      "profile": "mobile",
+      "workflow": "public recruiting context"
+    },
+    {
+      "id": "auth",
+      "output_id": "auth-mobile",
+      "label": "Auth",
+      "path": "/auth",
+      "profile": "mobile",
+      "workflow": "Discord login entry"
+    },
+    {
+      "id": "account",
+      "output_id": "account-mobile",
+      "label": "Account",
+      "path": "/account",
+      "profile": "mobile",
+      "workflow": "signed-out and member account boundary"
+    },
+    {
+      "id": "members",
+      "output_id": "members-mobile",
+      "label": "Members",
+      "path": "/members",
+      "profile": "mobile",
+      "workflow": "members-only directory boundary"
+    },
+    {
+      "id": "gallery-submit",
+      "output_id": "gallery-submit-mobile",
+      "label": "Gallery Submit",
+      "path": "/gallery-submit",
+      "profile": "mobile",
+      "workflow": "member upload gate"
+    },
+    {
+      "id": "leader-dashboard",
+      "output_id": "leader-dashboard-mobile",
+      "label": "Leader Dashboard",
+      "path": "/leader-dashboard",
+      "profile": "mobile",
+      "workflow": "moderator workflow gate"
+    },
+    {
+      "id": "mochi-social",
+      "output_id": "mochi-social-mobile",
+      "label": "Mochi Social",
+      "path": "/games/mochi-social",
+      "profile": "mobile",
+      "workflow": "tester game doorway"
+    }
+  ],
+  "checks": [
+    {
+      "area": "static wiring",
+      "name": "package script",
+      "status": "pass",
+      "detail": "includes \"check:lighthouse-route-matrix\": \"node scripts/check-lighthouse-route-matrix.mjs\"",
+      "evidence": {}
+    },
+    {
+      "area": "static wiring",
+      "name": "check-all",
+      "status": "pass",
+      "detail": "includes [\"check:lighthouse-route-matrix\", [\"node\", \"scripts/check-lighthouse-route-matrix.mjs\"]]",
+      "evidence": {}
+    },
+    {
+      "area": "static wiring",
+      "name": "manual workflow runner",
+      "status": "pass",
+      "detail": "includes node scripts/run-lighthouse-route-matrix.mjs",
+      "evidence": {}
+    },
+    {
+      "area": "static wiring",
+      "name": "manual workflow base URL",
+      "status": "pass",
+      "detail": "includes --base-url=https://mochirii.com",
+      "evidence": {}
+    },
+    {
+      "area": "static wiring",
+      "name": "manual workflow artifact",
+      "status": "pass",
+      "detail": "includes path: reports/lighthouse/",
+      "evidence": {}
+    },
+    {
+      "area": "static wiring",
+      "name": "deployment docs",
+      "status": "pass",
+      "detail": "includes npm run check:lighthouse-route-matrix -- --write",
+      "evidence": {}
+    },
+    {
+      "area": "static wiring",
+      "name": "live-state docs",
+      "status": "pass",
+      "detail": "includes npm run check:lighthouse-route-matrix",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/",
+      "status": "pass",
+      "detail": "Home is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/join",
+      "status": "pass",
+      "detail": "Join is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/events",
+      "status": "pass",
+      "detail": "Events is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/gallery",
+      "status": "pass",
+      "detail": "Gallery is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/recruitment",
+      "status": "pass",
+      "detail": "Recruitment is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/auth",
+      "status": "pass",
+      "detail": "Auth is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/account",
+      "status": "pass",
+      "detail": "Account is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/members",
+      "status": "pass",
+      "detail": "Members is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/gallery-submit",
+      "status": "pass",
+      "detail": "Gallery Submit is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/leader-dashboard",
+      "status": "pass",
+      "detail": "Leader Dashboard is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route coverage",
+      "name": "/games/mochi-social",
+      "status": "pass",
+      "detail": "Mochi Social is included in the Lighthouse route matrix.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "home",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "home:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "home:desktop",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "join",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "join:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "events",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "events:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "gallery",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "gallery:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "gallery:desktop",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "recruitment",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "recruitment:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "auth",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "auth:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "account",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "account:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "members",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "members:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "gallery-submit",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "gallery-submit:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "leader-dashboard",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "leader-dashboard:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "route ids",
+      "name": "mochi-social",
+      "status": "pass",
+      "detail": "route id is URL/file safe.",
+      "evidence": {}
+    },
+    {
+      "area": "route profiles",
+      "name": "mochi-social:mobile",
+      "status": "pass",
+      "detail": "supported profile.",
+      "evidence": {}
+    },
+    {
+      "area": "audit target count",
+      "name": "targets",
+      "status": "pass",
+      "detail": "13 Lighthouse audits are configured.",
+      "evidence": {}
+    }
+  ]
+}

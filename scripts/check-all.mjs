@@ -13,6 +13,7 @@ const checks = [
   ["check:reaper-pending-verification", ["node", "scripts/check-reaper-pending-verification.mjs"]],
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
+  ["check:lighthouse-route-matrix", ["node", "scripts/check-lighthouse-route-matrix.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]],
   ["check:mochi-social-alpha", ["node", "scripts/check-mochi-social-alpha.mjs"]],

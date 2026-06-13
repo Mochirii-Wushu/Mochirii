@@ -26,6 +26,7 @@
     "check:instagram-gallery-publishing": "node scripts/check-instagram-gallery-publishing.mjs",
     "check:js": "node scripts/check-js.mjs",
     "check:json": "node scripts/check-json.mjs",
+    "check:lighthouse-route-matrix": "node scripts/check-lighthouse-route-matrix.mjs",
     "check:live-member-cleanup-note": "node scripts/check-live-member-cleanup-note.mjs",
     "check:live-member-workflow-preflight": "node scripts/check-live-member-workflow-preflight.mjs",
     "check:live-member-workflow-result-packet": "node scripts/check-live-member-workflow-result-packet.mjs",
