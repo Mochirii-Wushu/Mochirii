@@ -76,6 +76,8 @@ Filter behavior:
 - Buttons are real `button` elements.
 - Active state uses `aria-pressed`.
 - The event count updates in a polite live region.
+- Filter buttons include data-derived counts for Upcoming, Past, and All.
+- The board includes a compact Next up strip derived from the next upcoming event, falling back to a Discord watch note when nothing is scheduled.
 - The live Next event board renders the eight Discord/Reaper-managed schedule event types from `data/guild-schedule.json`.
 - The live Next event board is a bounded scroll panel: filters and count stay visible, while the event-card results list scrolls internally.
 
@@ -175,6 +177,8 @@ Use `npm run smoke:gallery` only as a general regression check when relevant to 
 - Confirm links work.
 - Confirm filters are keyboard reachable.
 - Confirm `aria-pressed` updates.
+- Confirm filter counts match the rendered event set.
+- Confirm the Next up strip reflects the next upcoming event or the Discord fallback.
 - Check mobile widths at 360px, 390px, and 768px for horizontal overflow.
 - Confirm there are no console-breaking errors.
 

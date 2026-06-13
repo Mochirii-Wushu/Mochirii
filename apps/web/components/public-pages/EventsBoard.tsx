@@ -95,6 +95,13 @@ function formatDateUTC(value: unknown) {
   }).format(date);
 }
 
+function eventMetaLine(item: EventItem) {
+  return [formatDateUTC(item.date), item.dayText, item.timeText || item.time, item.timezone]
+    .map((value) => text(value))
+    .filter(Boolean)
+    .join(" - ");
+}
+
 function isExternal(href: string) {
   return /^https?:\/\//i.test(href);
 }
@@ -131,6 +138,23 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
     });
   }, [activeFilter, normalized]);
 
+  const filterCounts = useMemo(() => ({
+    upcoming: normalized.filter((item) => item.status === "upcoming").length,
+    past: normalized.filter((item) => item.status === "past").length,
+    all: normalized.length,
+  }), [normalized]);
+
+  const nextUpcoming = useMemo(
+    () =>
+      [...normalized]
+        .filter((item) => item.status === "upcoming")
+        .sort((a, b) => {
+          const delta = eventTimestamp(a) - eventTimestamp(b);
+          return delta || a.index - b.index;
+        })[0] || null,
+    [normalized],
+  );
+
   const filterMeta = filters[activeFilter];
   const countText = visible.length
     ? `${filterMeta.label}: ${visible.length} ${visible.length === 1 ? "event" : "events"}`
@@ -146,12 +170,29 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
               type="button"
               data-events-filter={key}
               aria-pressed={activeFilter === key}
+              aria-label={`${meta.label}, ${filterCounts[key as FilterKey]} ${filterCounts[key as FilterKey] === 1 ? "event" : "events"}`}
               key={key}
               onClick={() => setActiveFilter(key as FilterKey)}
             >
-              {meta.label}
+              <span>{meta.label}</span>
+              <span className="events-filter__count" aria-hidden="true">{filterCounts[key as FilterKey]}</span>
             </button>
           ))}
+        </div>
+        <div className="events-next" aria-label="Next scheduled event">
+          {nextUpcoming ? (
+            <>
+              <span className="events-next__label">Next up</span>
+              <strong>{text(nextUpcoming.title, "Event")}</strong>
+              <span>{eventMetaLine(nextUpcoming)}</span>
+            </>
+          ) : (
+            <>
+              <span className="events-next__label">Next up</span>
+              <strong>Watch Discord</strong>
+              <span>The next gathering will be posted there first.</span>
+            </>
+          )}
         </div>
         <p className="events-count muted" id="eventsCount" aria-live="polite">
           {countText}

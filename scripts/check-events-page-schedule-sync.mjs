@@ -24,6 +24,8 @@ const pagesSource = read("apps/web/components/public-pages/pages.tsx");
 const boardSource = read("apps/web/components/public-pages/EventsBoard.tsx");
 const cssSource = read("apps/web/app/mochirii.css").replace(/\r\n/g, "\n");
 const scheduleSource = read("apps/web/lib/guild-schedule.ts");
+const staticEventsHtml = read("events.html");
+const staticEventsJs = read("events.js");
 const schedule = JSON.parse(read("data/guild-schedule.json"));
 
 const eventsStart = pagesSource.indexOf("export function EventsPage()");
@@ -44,10 +46,16 @@ assertIncludes("guild schedule helper", scheduleSource, "item.id === \"monthly-r
 assertIncludes("EventsBoard", boardSource, "parseIso(item.startIso)");
 assertIncludes("EventsBoard", boardSource, "parseIso(item.endIso)");
 assertIncludes("EventsBoard", boardSource, "item.timeText || item.time");
+assertIncludes("EventsBoard", boardSource, "filterCounts");
+assertIncludes("EventsBoard", boardSource, "nextUpcoming");
+assertIncludes("EventsBoard", boardSource, 'className="events-filter__count"');
+assertIncludes("EventsBoard", boardSource, 'className="events-next"');
 assertIncludes("EventsPage", eventsSource, "events-board-card");
 assertIncludes("EventsBoard", boardSource, "aria-label=\"Event Board results\"");
 assertIncludes("EventsBoard", boardSource, "tabIndex={0}");
 assertIncludes("Events CSS", cssSource, "body[data-page=\"events\"] .events-board-card");
+assertIncludes("Events CSS", cssSource, ".events-filter__count");
+assertIncludes("Events CSS", cssSource, ".events-next");
 assertIncludes("Events CSS", cssSource, "box-sizing:border-box");
 assertIncludes("Events CSS", cssSource, "max-height:clamp(560px, 74vh, 820px)");
 assertIncludes("Events CSS", cssSource, "overflow-y:auto");
@@ -56,6 +64,9 @@ assertIncludes("Events CSS", cssSource, ".events-upcoming:focus-visible");
 assertIncludes("Events CSS", cssSource, ".events-featured__img,\n.events-list__image{\n  display:block;\n  width:100%;\n  max-width:100%;\n  height:auto;");
 assertIncludes("EventsPage", eventsSource, 'className="events-featured__img"');
 assertIncludes("EventsBoard", boardSource, 'className="events-list__image"');
+assertIncludes("static Events markup", staticEventsHtml, 'id="eventsNext"');
+assertIncludes("static Events script", staticEventsJs, "function renderFilterCounts");
+assertIncludes("static Events script", staticEventsJs, "function renderNextEvent");
 assertNotIncludes("EventsPage", eventsSource, "style={{ width: \"100%\", height: \"auto\"");
 assertNotIncludes("EventsBoard", boardSource, "style={{ width: \"100%\", height: \"auto\"");
 

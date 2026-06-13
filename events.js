@@ -92,6 +92,53 @@
     });
   }
 
+  function eventMetaLine(item) {
+    return [formatDate(item?.date), item?.dayText, item?.timeText || item?.time, item?.timezone]
+      .filter(Boolean)
+      .join(" - ");
+  }
+
+  function eventCounts(events) {
+    return {
+      upcoming: events.filter((item) => item._status === "upcoming").length,
+      past: events.filter((item) => item._status === "past").length,
+      all: events.length,
+    };
+  }
+
+  function renderFilterCounts(events) {
+    const counts = eventCounts(events);
+
+    document.querySelectorAll("[data-events-filter]").forEach((button) => {
+      const key = button.getAttribute("data-events-filter");
+      const meta = FILTERS[key] || FILTERS.upcoming;
+      const count = counts[key] || 0;
+      const noun = count === 1 ? "event" : "events";
+      button.setAttribute("aria-label", `${meta.label}, ${count} ${noun}`);
+      button.innerHTML = `<span>${esc(meta.label)}</span><span class="events-filter__count" aria-hidden="true">${count}</span>`;
+    });
+  }
+
+  function renderNextEvent(mount, events) {
+    if (!mount) return;
+
+    const next = filteredEvents(events, "upcoming")[0];
+    if (!next) {
+      mount.innerHTML = `
+        <span class="events-next__label">Next up</span>
+        <strong>Watch Discord</strong>
+        <span>The next gathering will be posted there first.</span>
+      `;
+      return;
+    }
+
+    mount.innerHTML = `
+      <span class="events-next__label">Next up</span>
+      <strong>${esc(next?.title || "Event")}</strong>
+      <span>${esc(eventMetaLine(next))}</span>
+    `;
+  }
+
   function applyHero(meta) {
     const heroImg = $("#eventsHeroImage");
     const atmos = $("#eventsAtmosphere");
@@ -223,6 +270,8 @@
 
   function setActiveFilter(filter) {
     state.activeFilter = FILTERS[filter] ? filter : "upcoming";
+    renderFilterCounts(state.events);
+    renderNextEvent($("#eventsNext"), state.events);
 
     document.querySelectorAll("[data-events-filter]").forEach((button) => {
       const active = button.getAttribute("data-events-filter") === state.activeFilter;
