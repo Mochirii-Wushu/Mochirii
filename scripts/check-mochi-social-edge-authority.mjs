@@ -11,8 +11,30 @@ const migration = readFileSync(migrationPath, "utf8");
 const expectedActions = [
   "chat.send",
   "emote.send",
-  "pet.befriend",
-  "pet.care",
+  "spirit.capture",
+  "spirit.route_invite",
+  "world.route_mastery",
+  "spirit.habitat_bond",
+  "spirit.research",
+  "spirit.attune",
+  "spirit.journal",
+  "world.expedition",
+  "spirit.technique",
+  "battle.tactic_scroll",
+  "guild.rank_trial",
+  "spirit.growth_rite",
+  "battle.affinity_trial",
+  "party.set",
+  "party.harmony_form",
+  "battle.harmony_trial",
+  "battle.team_spar_match",
+  "battle.spar_ladder",
+  "spirit.bond",
+  "spirit.care",
+  "spirit.train",
+  "spirit.raise",
+  "quest.accept",
+  "quest.progress",
   "market.fixed_list",
   "trade.direct_offer",
   "chain.withdraw_request",
@@ -38,7 +60,7 @@ assertBefore(actionPath, action, 'if (type === "chain.operation_update")', "cons
 assertRegex(actionPath, action, /data:\s*{\s*requestId,\s*type,\s*duplicate:\s*true,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY"\s*}/s);
 assertRegex(actionPath, action, /delta:\s*{\s*\.\.\.payload,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY"\s*}/s);
 assertRegex(actionPath, action, /VALID_CHAIN_STATUSES\s*=\s*new Set\(\[\s*"pending",\s*"broadcast",\s*"finalized",\s*"failed",\s*"abandoned",\s*"timeout"\s*\]\)/s);
-assertRegex(actionPath, action, /CERTIFICATE_ELIGIBLE_SPECIES\s*=\s*new Set\(\["momo"\]\)/);
+assertRegex(actionPath, action, /CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\["lirabao"\]\)/);
 
 for (const needle of [
   'network: "CANARY"',
@@ -80,6 +102,11 @@ for (const needle of [
   "request_id text",
   "mochi_social_ledger_request_idx",
   "mochi_social_ledger_read_own",
+  "mochi_social_spirits",
+  "spirit_id text not null check (spirit_id in ('lirabao', 'jintari', 'aozhen'))",
+  "mochi_social_spirits_read_own",
+  "grant select on table public.mochi_social_spirits to authenticated",
+  "grant all on table public.mochi_social_spirits to service_role",
   "mochi_social_chain_operations",
   "request_id text not null unique",
   "network text not null default 'CANARY' check (network = 'CANARY')",

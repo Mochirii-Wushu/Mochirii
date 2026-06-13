@@ -43,7 +43,7 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Lead with player-facing badges: closed alpha, no purchases, test coins only, and progress may reset.
 - Replace `Preview boundaries` with tester sections:
   - `What you can test`: raise Mochi Spirits, explore the town, try local chat/emotes, and test market board/direct trade.
-  - `Your playtest mission`: befriend a pet, care for it, wave/chat, inspect the market board, and send feedback.
+  - `Your playtest mission`: invite a Mochi Spirit, care for it, wave/chat, inspect the market board, and send feedback.
   - `Good to know`: no real money, no permanent blockchain value, desktop recommended, and Vercel may show a preview access screen first.
 - Keep Enjin Canary, `configured-preview-stub`, and Vercel protection language in a small preview-safety note.
 

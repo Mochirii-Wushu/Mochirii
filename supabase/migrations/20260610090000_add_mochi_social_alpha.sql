@@ -28,17 +28,20 @@ create table if not exists public.mochi_social_profiles (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.mochi_social_pets (
+create table if not exists public.mochi_social_spirits (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
-  species text not null check (species in ('momo', 'yuzu', 'sora')),
+  spirit_id text not null check (spirit_id in ('lirabao', 'jintari', 'aozhen')),
   nickname text,
   bond integer not null default 1 check (bond between 0 and 5),
   growth_stage text not null default 'seed' check (growth_stage in ('seed', 'sprout', 'glow')),
+  journal jsonb not null default '{}'::jsonb,
+  care jsonb not null default '{}'::jsonb,
   certificate_eligible boolean not null default false,
   tradeable boolean not null default false,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (owner_id, spirit_id)
 );
 
 create table if not exists public.mochi_social_inventory (
@@ -128,7 +131,7 @@ create table if not exists public.mochi_social_feedback (
 alter table public.mochi_social_alpha_testers enable row level security;
 alter table public.mochi_social_terms_acknowledgements enable row level security;
 alter table public.mochi_social_profiles enable row level security;
-alter table public.mochi_social_pets enable row level security;
+alter table public.mochi_social_spirits enable row level security;
 alter table public.mochi_social_inventory enable row level security;
 alter table public.mochi_social_market_listings enable row level security;
 alter table public.mochi_social_trades enable row level security;
@@ -141,7 +144,7 @@ alter table public.mochi_social_feedback enable row level security;
 create policy "mochi_social_alpha_testers_read_own" on public.mochi_social_alpha_testers for select using (auth.uid() = user_id);
 create policy "mochi_social_terms_read_own" on public.mochi_social_terms_acknowledgements for select using (auth.uid() = user_id);
 create policy "mochi_social_profiles_manage_own" on public.mochi_social_profiles for all using (auth.uid() = id) with check (auth.uid() = id);
-create policy "mochi_social_pets_read_own" on public.mochi_social_pets for select using (auth.uid() = owner_id);
+create policy "mochi_social_spirits_read_own" on public.mochi_social_spirits for select using (auth.uid() = owner_id);
 create policy "mochi_social_inventory_read_own" on public.mochi_social_inventory for select using (auth.uid() = owner_id);
 create policy "mochi_social_market_read_active" on public.mochi_social_market_listings for select using (status = 'active' or auth.uid() = seller_id);
 create policy "mochi_social_trades_read_participant" on public.mochi_social_trades for select using (auth.uid() = requester_id or auth.uid() = recipient_id);
@@ -151,6 +154,34 @@ create policy "mochi_social_chain_operations_read_own" on public.mochi_social_ch
 create policy "mochi_social_ledger_read_own" on public.mochi_social_ledger_events for select using (auth.uid() = actor_id);
 create policy "mochi_social_feedback_insert_own" on public.mochi_social_feedback for insert with check (auth.uid() = user_id);
 
+grant select on table public.mochi_social_alpha_testers to authenticated;
+grant select on table public.mochi_social_terms_acknowledgements to authenticated;
+grant select, insert, update on table public.mochi_social_profiles to authenticated;
+grant select on table public.mochi_social_spirits to authenticated;
+grant select on table public.mochi_social_inventory to authenticated;
+grant select on table public.mochi_social_market_listings to authenticated;
+grant select on table public.mochi_social_trades to authenticated;
+grant select on table public.mochi_social_chat_messages to authenticated;
+grant insert on table public.mochi_social_chat_reports to authenticated;
+grant select on table public.mochi_social_chain_operations to authenticated;
+grant select on table public.mochi_social_ledger_events to authenticated;
+grant insert on table public.mochi_social_feedback to authenticated;
+
+grant all on table public.mochi_social_alpha_testers to service_role;
+grant all on table public.mochi_social_terms_acknowledgements to service_role;
+grant all on table public.mochi_social_profiles to service_role;
+grant all on table public.mochi_social_spirits to service_role;
+grant all on table public.mochi_social_inventory to service_role;
+grant all on table public.mochi_social_market_listings to service_role;
+grant all on table public.mochi_social_trades to service_role;
+grant all on table public.mochi_social_chat_messages to service_role;
+grant all on table public.mochi_social_chat_reports to service_role;
+grant all on table public.mochi_social_chain_operations to service_role;
+grant all on table public.mochi_social_ledger_events to service_role;
+grant all on table public.mochi_social_feedback to service_role;
+grant usage, select on sequence public.mochi_social_ledger_events_id_seq to service_role;
+
 create index if not exists mochi_social_ledger_request_idx on public.mochi_social_ledger_events(request_id);
 create index if not exists mochi_social_chat_expires_idx on public.mochi_social_chat_messages(expires_at);
 create index if not exists mochi_social_market_status_idx on public.mochi_social_market_listings(status, created_at desc);
+create index if not exists mochi_social_spirits_owner_idx on public.mochi_social_spirits(owner_id, spirit_id);

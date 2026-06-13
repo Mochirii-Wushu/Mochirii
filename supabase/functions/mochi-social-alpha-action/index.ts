@@ -13,15 +13,42 @@ import {
 } from "../_shared/mochi-social-alpha.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
-const VALID_SPECIES = new Set(["momo", "yuzu", "sora"]);
-const CERTIFICATE_ELIGIBLE_SPECIES = new Set(["momo"]);
+const VALID_SPIRITS = new Set(["lirabao", "jintari", "aozhen"]);
+const CERTIFICATE_ELIGIBLE_SPIRITS = new Set(["lirabao"]);
+const SPIRIT_DISPLAY_NAMES: Record<string, string> = {
+  lirabao: "Lirabao",
+  jintari: "Jintari",
+  aozhen: "Aozhen",
+};
 const VALID_CHAIN_STATUSES = new Set(["pending", "broadcast", "finalized", "failed", "abandoned", "timeout"]);
 
 const VALID_ACTIONS = new Set([
   "chat.send",
   "emote.send",
-  "pet.befriend",
-  "pet.care",
+  "spirit.capture",
+  "spirit.route_invite",
+  "world.route_mastery",
+  "spirit.habitat_bond",
+  "spirit.research",
+  "spirit.attune",
+  "spirit.journal",
+  "world.expedition",
+  "spirit.technique",
+  "battle.tactic_scroll",
+  "guild.rank_trial",
+  "spirit.growth_rite",
+  "battle.affinity_trial",
+  "party.set",
+  "party.harmony_form",
+  "battle.harmony_trial",
+  "battle.team_spar_match",
+  "battle.spar_ladder",
+  "spirit.bond",
+  "spirit.care",
+  "spirit.train",
+  "spirit.raise",
+  "quest.accept",
+  "quest.progress",
   "market.fixed_list",
   "trade.direct_offer",
   "chain.withdraw_request",
@@ -93,8 +120,8 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  if (type === "pet.befriend" || type === "pet.care") {
-    const result = await recordPetAction(adminClient, playerId, payload);
+  if (recordsSpiritSnapshot(type)) {
+    const result = await recordSpiritAction(adminClient, playerId, type, payload);
     if (!result.ok) return result.response;
   }
 
@@ -133,10 +160,28 @@ Deno.serve(async (req: Request) => {
   });
 });
 
-function speciesFromPayload(payload: Record<string, unknown>) {
+function recordsSpiritSnapshot(type: string) {
+  return (
+    type.startsWith("spirit.") ||
+    type.startsWith("world.") ||
+    type.startsWith("battle.") ||
+    type.startsWith("guild.") ||
+    type.startsWith("party.") ||
+    type.startsWith("quest.")
+  );
+}
+
+function spiritFromPayload(payload: Record<string, unknown>) {
   const state = asRecord(payload.state);
-  const rawSpecies = safeString(payload.species, 24) || safeString(state.petId, 24) || "momo";
-  return VALID_SPECIES.has(rawSpecies) ? rawSpecies : "momo";
+  const candidates = [
+    safeString(payload.spiritId, 24),
+    safeString(payload.activeSpiritId, 24),
+    safeString(state.spiritId, 24),
+    safeString(state.activeSpiritId, 24),
+    safeString(state.lastInspectedSpiritId, 24),
+  ].filter((candidate): candidate is string => Boolean(candidate));
+  const spiritId = candidates.find((candidate) => VALID_SPIRITS.has(candidate));
+  return spiritId || "lirabao";
 }
 
 function growthStageFromBond(bond: number) {
@@ -145,46 +190,71 @@ function growthStageFromBond(bond: number) {
   return "seed";
 }
 
-async function recordPetAction(adminClient: SupabaseClient, playerId: string, payload: Record<string, unknown>) {
+function growthStageFromPayload(payload: Record<string, unknown>, bond: number) {
+  const state = asRecord(payload.state);
+  const growth = safeString(payload.growth, 24) || safeString(state.growth, 24) || safeString(state.growthStage, 24) || "";
+  return ["seed", "sprout", "glow"].includes(growth) ? growth : growthStageFromBond(bond);
+}
+
+async function recordSpiritAction(adminClient: SupabaseClient, playerId: string, type: string, payload: Record<string, unknown>) {
   if (!adminClient) return { ok: false as const, response: jsonResponse({ ok: false, error: "mochi_social_not_configured" }, 500) };
 
-  const species = speciesFromPayload(payload);
-  const { data: existingPet, error: existingError } = await adminClient
-    .from("mochi_social_pets")
+  const spiritId = spiritFromPayload(payload);
+  const state = asRecord(payload.state);
+  const incomingBond = Number(payload.bond || state.bond || 0) || 0;
+  const { data: existingSpirit, error: existingError } = await adminClient
+    .from("mochi_social_spirits")
     .select("id,bond")
     .eq("owner_id", playerId)
-    .eq("species", species)
+    .eq("spirit_id", spiritId)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (existingError) return { ok: false as const, response: jsonResponse({ ok: false, error: "pet_lookup_failed", message: "Pet state could not be loaded." }, 500) };
+  if (existingError) return { ok: false as const, response: jsonResponse({ ok: false, error: "spirit_lookup_failed", message: "Mochi Spirit state could not be loaded." }, 500) };
 
-  const nextBond = Math.min(5, Number(existingPet?.bond || 0) + 1);
+  const existingBond = Number(existingSpirit?.bond || 0) || 0;
+  const nextBond = Math.max(1, Math.min(5, Math.max(existingBond, incomingBond || existingBond + 1)));
   const row = {
     owner_id: playerId,
-    species,
-    nickname: species === "momo" ? "Momo Puff" : species === "yuzu" ? "Yuzu Flicker" : "Sora Drop",
+    spirit_id: spiritId,
+    nickname: SPIRIT_DISPLAY_NAMES[spiritId],
     bond: nextBond,
-    growth_stage: growthStageFromBond(nextBond),
-    certificate_eligible: CERTIFICATE_ELIGIBLE_SPECIES.has(species),
-    tradeable: CERTIFICATE_ELIGIBLE_SPECIES.has(species),
+    growth_stage: growthStageFromPayload(payload, nextBond),
+    journal: {
+      actionType: type,
+      journalDiscoveredCount: Number(payload.journalDiscoveredCount || state.journalDiscoveredCount || 0) || 0,
+      routeMasteryProof: Boolean(payload.routeMasteryProof || state.routeMasteryProof),
+      habitatBondProof: Boolean(payload.habitatBondProof || state.habitatBondProof),
+      researchProof: Boolean(payload.researchProof || state.researchProof),
+      questChainProof: Boolean(payload.questChainProof || state.questChainProof),
+      noRealValue: true,
+    },
+    care: {
+      trainingXp: Number(payload.trainingXp || state.trainingXp || 0) || 0,
+      raisingProof: Boolean(payload.raisingProof || state.raisingProof),
+      growthRiteProof: Boolean(payload.growthRiteProof || state.growthRiteProof),
+      updatedBy: type,
+      noRealValue: true,
+    },
+    certificate_eligible: CERTIFICATE_ELIGIBLE_SPIRITS.has(spiritId),
+    tradeable: CERTIFICATE_ELIGIBLE_SPIRITS.has(spiritId),
     updated_at: new Date().toISOString(),
   };
 
-  const query = existingPet?.id
-    ? adminClient.from("mochi_social_pets").update(row).eq("id", existingPet.id)
-    : adminClient.from("mochi_social_pets").insert(row);
+  const query = existingSpirit?.id
+    ? adminClient.from("mochi_social_spirits").update(row).eq("id", existingSpirit.id)
+    : adminClient.from("mochi_social_spirits").insert(row);
 
   const { error } = await query;
-  if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "pet_write_failed", message: "Pet state could not be saved." }, 500) };
+  if (error) return { ok: false as const, response: jsonResponse({ ok: false, error: "spirit_write_failed", message: "Mochi Spirit state could not be saved." }, 500) };
   return { ok: true as const };
 }
 
 async function recordFixedMarketListing(adminClient: SupabaseClient, playerId: string, payload: Record<string, unknown>) {
   if (!adminClient) return { ok: false as const, response: jsonResponse({ ok: false, error: "mochi_social_not_configured" }, 500) };
 
-  const itemId = safeString(payload.itemId, 80) || "lantern-charm";
+  const itemId = safeString(payload.itemId, 80) || "jade-thread-charm";
   const priceSoft = Math.max(1, Math.min(9999, Number(payload.priceSoft || 25) || 25));
   const { data: inventory, error: inventoryError } = await adminClient
     .from("mochi_social_inventory")
@@ -218,7 +288,7 @@ async function recordDirectTrade(adminClient: SupabaseClient, playerId: string, 
   if (!adminClient) return { ok: false as const, response: jsonResponse({ ok: false, error: "mochi_social_not_configured" }, 500) };
 
   const recipientId = safeString(payload.recipientId, 80);
-  const offered = Array.isArray(payload.offered) ? payload.offered : [{ item_id: "lantern-charm", quantity: 1, no_real_value: true }];
+  const offered = Array.isArray(payload.offered) ? payload.offered : [{ item_id: "jade-thread-charm", quantity: 1, no_real_value: true }];
   const requested = Array.isArray(payload.requested) ? payload.requested : [{ soft_currency: 10, no_real_value: true }];
 
   if (recipientId && !UUID_RE.test(recipientId)) {
@@ -341,7 +411,7 @@ async function applyFinalizedChainInventory(
   existingPayload: Record<string, unknown>,
   updatePayload: Record<string, unknown>,
 ) {
-  const itemId = safeString(updatePayload.itemId, 80) || safeString(existingPayload.itemId, 80) || "momo-canary-certificate";
+  const itemId = safeString(updatePayload.itemId, 80) || safeString(existingPayload.itemId, 80) || "lirabao-canary-certificate";
   const quantity = Math.max(1, Math.min(9999, Number(updatePayload.amount || existingPayload.amount || 1) || 1));
   const inventoryId = safeString(updatePayload.inventoryId, 80) || safeString(existingPayload.inventoryId, 80);
 

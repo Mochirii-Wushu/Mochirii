@@ -119,8 +119,11 @@ const checks = [
       'alphaAccess(adminClient, playerId)',
       'mochi_social_market_listings',
       'mochi_social_trades',
-      'mochi_social_pets',
-      'CERTIFICATE_ELIGIBLE_SPECIES.has(species)',
+      'mochi_social_spirits',
+      'CERTIFICATE_ELIGIBLE_SPIRITS.has(spiritId)',
+      'spirit.research',
+      'jade-thread-charm',
+      'lirabao-canary-certificate',
       'chain.operation_update',
       'chain_request_missing',
       'nextStatus === "finalized"',
@@ -213,11 +216,11 @@ for (const check of checks) {
 }
 
 const actionFunction = readFileSync('supabase/functions/mochi-social-alpha-action/index.ts', 'utf8');
-if (/certificate_eligible:\s*species\s*===\s*["']sora["']/.test(actionFunction)) {
-  throw new Error('Mochi Social certificate eligibility must stay aligned to Momo, not Sora.');
+if (/CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\[["']aozhen["']\]\)/.test(actionFunction)) {
+  throw new Error('Mochi Social certificate eligibility must stay aligned to Lirabao, not Aozhen.');
 }
-if (!/CERTIFICATE_ELIGIBLE_SPECIES\s*=\s*new Set\(\[["']momo["']\]\)/.test(actionFunction)) {
-  throw new Error('Mochi Social certificate eligibility must explicitly name Momo as the alpha certificate species.');
+if (!/CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\[["']lirabao["']\]\)/.test(actionFunction)) {
+  throw new Error('Mochi Social certificate eligibility must explicitly name Lirabao as the alpha certificate spirit.');
 }
 
 console.log('Mochi Social alpha static checks passed.');
