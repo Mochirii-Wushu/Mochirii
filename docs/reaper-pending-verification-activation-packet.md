@@ -80,7 +80,7 @@ The registration script must use `default_member_permissions: "268435456"` for D
 
 ## Discord-Native Safety Checklist
 
-Before live apply, confirm:
+Use [`docs/discord-native-safety-audit.md`](discord-native-safety-audit.md) for the recurring Discord Native Safety Audit. Before live apply, keep its evidence current and confirm:
 
 - Category `1468658801388290048` contains clear verification, rules, and help channels.
 - Rules Screening and Community Onboarding are intentionally configured.

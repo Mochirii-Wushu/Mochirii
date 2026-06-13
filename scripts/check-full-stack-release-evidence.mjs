@@ -88,6 +88,7 @@ function inspectLocalReleaseSurface() {
     "check:production",
     "check:security-hardening",
     "check:supabase-edge-types",
+    "check:discord-native-safety-audit",
     "check:discord-reaper-parity",
     "check:reaper-discord-interactions",
     "check:reaper-pending-verification",
@@ -107,6 +108,7 @@ function inspectLocalReleaseSurface() {
     "AGENTS.md",
     "docs/deployment.md",
     "docs/current-live-state.md",
+    "docs/discord-native-safety-audit.md",
     "docs/dns-cutover-readiness-and-rollback.md",
     "docs/member-profiles-and-rank-roles.md",
     "docs/mochi-social-visual-polish.md",
@@ -301,6 +303,7 @@ function inspectDiscordReaper() {
       expectedSecondGate: true,
       directDiscordMutationExpectedHere: false,
     },
+    discordNativeSafetyAudit: existsSync(resolve(root, "docs/discord-native-safety-audit.md")),
     docs,
   };
 }
@@ -607,6 +610,7 @@ This file is intentionally no-secret. It records release-readiness evidence only
 
 - Slash-command registration script: ${data.discordReaper.slashCommandRepairPath.registerScript ? "present" : "missing"}
 - Rollback script: ${data.discordReaper.slashCommandRepairPath.rollbackScript ? "present" : "missing"}
+- Discord-native safety audit: ${data.discordReaper.discordNativeSafetyAudit ? "present" : "missing"}
 - Gateway direct permission mutation expected here: ${data.discordReaper.gatewayAutomation.directDiscordMutationExpectedHere ? "yes" : "no"}
 
 ## Mochi Social, Fly, And Enjin

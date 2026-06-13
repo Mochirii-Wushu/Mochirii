@@ -6,7 +6,7 @@ Reaper can repair pending-verification Discord visibility with the Supabase-host
 /sync-pending-verification mode:<preview|apply> confirm:<true|false>
 ```
 
-This is a containment backstop, not the primary onboarding model. Discord Rules Screening, Community Onboarding, AutoMod, Raid Protection, verification level, role hierarchy, and moderator 2FA stay separate Discord-native controls.
+This is a containment backstop, not the primary onboarding model. Discord Rules Screening, Community Onboarding, AutoMod, Raid Protection, verification level, role hierarchy, and moderator 2FA stay separate Discord-native controls. Use [`discord-native-safety-audit.md`](discord-native-safety-audit.md) for the recurring native safety review.
 
 ## Scope
 
