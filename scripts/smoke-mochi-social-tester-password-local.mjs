@@ -59,12 +59,12 @@ if (!report.ok) {
   console.error("Mochi Social tester password local smoke failed.");
   for (const failure of failures) console.error(`- ${failure}`);
   console.error("No tester password, cookies, or secrets were printed.");
-  console.error(`Report: ${reportPath}`);
+  console.error("Report written to the configured local JSON report path.");
   process.exit(1);
 }
 
 console.log(`Mochi Social tester password local smoke OK (${steps.length} checks).`);
-console.log(`Report: ${reportPath}`);
+console.log("Report written to the configured local JSON report path.");
 
 async function checkLockedPage(siteUrl) {
   const result = await request(siteUrl, "/games/mochi-social");
