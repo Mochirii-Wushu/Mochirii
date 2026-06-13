@@ -93,7 +93,7 @@ export function SpotifyBrowser({
 
       <div className="spotify-toolbar" aria-label="Playlist tools">
         <div className="spotify-search">
-          <label className="muted" htmlFor="spotifySearch" style={{ display: "block", marginBottom: 6 }}>
+          <label className="muted u-block u-mb-6" htmlFor="spotifySearch">
             Search
           </label>
           <input
@@ -132,12 +132,11 @@ export function SpotifyBrowser({
                   {item.subtitle ? `${item.subtitle} • ` : ""}
                   {item.type}
                 </div>
-                {item.description ? <p className="muted" style={{ margin: "10px 0 0 0" }}>{item.description}</p> : null}
+                {item.description ? <p className="muted u-mt-10">{item.description}</p> : null}
               </div>
             </div>
-            <div className="spotify-embed" style={{ marginTop: 12 }}>
+            <div className="spotify-embed u-mt-12">
               <iframe
-                style={{ borderRadius: 12 }}
                 src={item.src}
                 width="100%"
                 height={item.height}
@@ -151,7 +150,7 @@ export function SpotifyBrowser({
       </div>
 
       <div className="spotify-empty" id="spotifyEmpty" hidden={filtered.length > 0}>
-        <p className="muted" style={{ margin: 0 }}>
+        <p className="muted u-m-0">
           No matches. Try clearing filters or using fewer keywords.
         </p>
       </div>

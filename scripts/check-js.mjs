@@ -3,7 +3,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
-const ignoreDirs = new Set([".git", "node_modules"]);
+const ignoreDirs = new Set([".git", ".next", ".vercel", "node_modules"]);
 
 function walk(dir) {
   const out = [];

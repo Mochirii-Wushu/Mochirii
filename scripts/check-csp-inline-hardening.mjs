@@ -75,10 +75,11 @@ const report = {
   routeMatrix,
   live,
   nextSteps: [
-    "Move repeated React inline styles into classes or CSS variables before removing style-src unsafe-inline.",
+    "Keep React inline style props at zero before any style-src unsafe-inline removal.",
+    "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
     "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
     "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
-    "Remove script-src unsafe-inline only after a Vercel Preview browser pass shows no Next, analytics, auth, or embed regressions.",
+    "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions.",
   ],
   warnings,
   failures,

@@ -60,7 +60,7 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Current Improvement Queue
 
-- Continue CSP tightening only after browser passes; `unsafe-inline` remains a future dedicated pass guarded by `npm run check:csp-inline-hardening`.
+- Continue CSP tightening only after browser passes; React inline style props are guarded at zero by `npm run check:csp-inline-hardening`, while `unsafe-inline` removal remains a future Vercel Preview nonce/SRI decision.
 - Keep Cloudflare Security Insights findings reconciled against current DNS/Vercel evidence before changing healthy DNS records.
 - Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
 - Production-safe member workflow QA coverage is guarded by `npm run check:member-workflow-qa` and documented in `docs/member-workflow-production-qa-runbook.md`.
