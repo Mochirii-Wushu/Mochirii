@@ -7,6 +7,7 @@
     "check": "node scripts/check-all.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "check:content": "node scripts/check-content-guardrails.mjs",
+    "check:csp-inline-hardening": "node scripts/check-csp-inline-hardening.mjs",
     "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",
     "check:discord-gallery-ingest": "node scripts/check-discord-gallery-ingest.mjs",
     "check:discord-reaper-parity": "node scripts/check-discord-reaper-parity.mjs",
