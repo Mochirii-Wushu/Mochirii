@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-13T00:07:36.300Z",
+  "checkedAt": "2026-06-13T00:39:27.825Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
@@ -180,335 +180,9 @@
       "inlineStyleProp": {
         "label": "React inline style prop",
         "severity": "inventory",
-        "count": 60,
-        "files": [
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "count": 47
-          },
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "count": 5
-          },
-          {
-            "file": "apps/web/app/page.tsx",
-            "count": 3
-          },
-          {
-            "file": "apps/web/components/public-pages/EventsBoard.tsx",
-            "count": 3
-          },
-          {
-            "file": "apps/web/components/member-workflow/AccountPanel.tsx",
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/ProfileCardLinks.tsx",
-            "count": 1
-          }
-        ],
-        "hits": [
-          {
-            "file": "apps/web/app/page.tsx",
-            "line": 406,
-            "count": 1
-          },
-          {
-            "file": "apps/web/app/page.tsx",
-            "line": 418,
-            "count": 1
-          },
-          {
-            "file": "apps/web/app/page.tsx",
-            "line": 479,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/member-workflow/AccountPanel.tsx",
-            "line": 425,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/EventsBoard.tsx",
-            "line": 176,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/EventsBoard.tsx",
-            "line": 184,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/EventsBoard.tsx",
-            "line": 188,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 91,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 103,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 106,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 118,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 121,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 141,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 142,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 164,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 165,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 176,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 177,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 178,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 327,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 405,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 417,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 420,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 468,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 480,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 489,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 493,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 497,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 500,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 514,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 522,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 526,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 529,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 590,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 600,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 612,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 623,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 628,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 641,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 654,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 659,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 668,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 676,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 686,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 760,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 768,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 772,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 784,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 808,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 843,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 958,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 992,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 1171,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 1176,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/ProfileCardLinks.tsx",
-            "line": 59,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 96,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 135,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 138,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 140,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 154,
-            "count": 1
-          }
-        ]
+        "count": 0,
+        "files": [],
+        "hits": []
       },
       "iframeElement": {
         "label": "iframe element",
@@ -545,7 +219,7 @@
           },
           {
             "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 276,
+            "line": 278,
             "count": 1
           },
           {
@@ -922,10 +596,11 @@
     ]
   },
   "nextSteps": [
-    "Move repeated React inline styles into classes or CSS variables before removing style-src unsafe-inline.",
+    "Keep React inline style props at zero before any style-src unsafe-inline removal.",
+    "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
     "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
     "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
-    "Remove script-src unsafe-inline only after a Vercel Preview browser pass shows no Next, analytics, auth, or embed regressions."
+    "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions."
   ],
   "warnings": [
     "https://fonts.googleapis.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",

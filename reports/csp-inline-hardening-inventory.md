@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-06-13T00:07:36.300Z
+Generated: 2026-06-13T00:39:27.825Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
@@ -37,7 +37,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 | Pattern | Severity | Count | Files |
 | --- | --- | ---: | --- |
-| inlineStyleProp | inventory | 60 | apps/web/components/public-pages/pages.tsx (47)<br>apps/web/components/public-pages/SpotifyBrowser.tsx (5)<br>apps/web/app/page.tsx (3)<br>apps/web/components/public-pages/EventsBoard.tsx (3)<br>apps/web/components/member-workflow/AccountPanel.tsx (1)<br>apps/web/components/public-pages/ProfileCardLinks.tsx (1) |
+| inlineStyleProp | inventory | 0 | none |
 | iframeElement | inventory | 4 | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx (1)<br>apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx (1)<br>apps/web/components/public-pages/pages.tsx (1)<br>apps/web/components/public-pages/SpotifyBrowser.tsx (1) |
 | scriptElement | review | 0 | none |
 | nextScriptImport | review | 0 | none |
@@ -94,10 +94,11 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 ## Next Steps
 
-- Move repeated React inline styles into classes or CSS variables before removing style-src unsafe-inline.
+- Keep React inline style props at zero before any style-src unsafe-inline removal.
+- Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.
 - Keep Spotify and Mochi Social iframe routes in the browser route sweep.
 - Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.
-- Remove script-src unsafe-inline only after a Vercel Preview browser pass shows no Next, analytics, auth, or embed regressions.
+- Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions.
 
 ## Warnings
 

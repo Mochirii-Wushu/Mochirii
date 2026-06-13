@@ -173,7 +173,7 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
                 <h4 className="section-title section-title--sm">{text(item.title, "Event")}</h4>
                 <p className="muted">{text(item.summary)}</p>
                 {item.image ? (
-                  <div style={{ marginTop: 12 }}>
+                  <div className="u-mt-12">
                     <StaticImage
                       src={publicPath(item.image)}
                       alt={text(item.title, "Event")}
@@ -181,11 +181,10 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
                       height={640}
                       className="events-list__image"
                       sizes="(max-width: 980px) calc(100vw - 86px), 320px"
-                      style={{ width: "100%", height: "auto", borderRadius: 16, border: "1px solid rgba(255,255,255,.10)" }}
                     />
                   </div>
                 ) : null}
-                <div className="badge-row" style={{ marginTop: 14 }}>
+                <div className="badge-row u-mt-14">
                   <span>
                     <a href={href} target={isExternal(href) ? "_blank" : undefined} rel={isExternal(href) ? "noopener noreferrer" : undefined}>
                       Open details

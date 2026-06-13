@@ -48,7 +48,7 @@ CSP was promoted from report-only to enforcement after a production Chrome pass 
 
 The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
 
-Before reducing `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'`, update the CSP inline-hardening inventory:
+Before reducing `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'`, update the CSP inline-hardening inventory. The app source should stay at zero React inline style props; any remaining style allowance decision must be based on a browser pass because Next image/runtime helpers can still emit framework-managed style attributes:
 
 ```sh
 npm run check:csp-inline-hardening -- --write
@@ -60,7 +60,7 @@ For a release packet that needs production header evidence, opt into the read-on
 npm run check:csp-inline-hardening -- --live --write
 ```
 
-Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Social iframe bridge.
+Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Social iframe bridge. For `script-src`, choose a Next-compatible nonce or SRI path before enforcement.
 
 ## Supabase Preview Migration History
 

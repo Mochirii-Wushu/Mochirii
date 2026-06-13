@@ -421,9 +421,9 @@ export function AccountPanel() {
         <section className="glass-card glass-card--soft glass-pad auth-panel profile-completion-panel" aria-labelledby="profileCompletionTitle">
           <p className="kicker">Profile Setup</p>
           <h2 className="section-title section-title--sm" id="profileCompletionTitle">Completeness</h2>
-          <div className="profile-progress" aria-hidden="true">
-            <span style={{ width: `${completion.percent}%` }} />
-          </div>
+          <progress className="profile-progress" value={completion.percent} max={100} aria-hidden="true">
+            {completion.percent}%
+          </progress>
           <p className="auth-status muted">
             {completion.complete} / {completion.total} core fields complete. Optional fields complete: {completion.optionalComplete} / {optionalProfileFields.length}.
           </p>
