@@ -1,0 +1,169 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T02:48:41.260Z",
+  "scope": "Mochirii visual screenshot evidence matrix. This is a local-only, no-secret guardrail for deciding when and how screenshot evidence should be captured after UI changes.",
+  "sources": [
+    "https://playwright.dev/docs/screenshots",
+    "https://playwright.dev/docs/test-snapshots",
+    "https://www.w3.org/TR/WCAG22/",
+    "https://www.w3.org/WAI/WCAG22/Understanding/reflow.html",
+    "https://web.dev/articles/vitals"
+  ],
+  "viewports": [
+    {
+      "width": 360,
+      "height": 800,
+      "label": "tight mobile"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "label": "common mobile"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "label": "tablet portrait"
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "label": "compact desktop"
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "label": "wide desktop"
+    }
+  ],
+  "publicRoutes": [
+    {
+      "route": "/",
+      "file": "apps/web/app/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/join",
+      "file": "apps/web/app/join/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/events",
+      "file": "apps/web/app/events/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/gallery",
+      "file": "apps/web/app/gallery/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/ranks",
+      "file": "apps/web/app/ranks/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/leaders",
+      "file": "apps/web/app/leaders/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/codex",
+      "file": "apps/web/app/codex/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/recruitment",
+      "file": "apps/web/app/recruitment/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/announcements",
+      "file": "apps/web/app/announcements/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/raffles",
+      "file": "apps/web/app/raffles/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/spotify",
+      "file": "apps/web/app/spotify/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/spotlight",
+      "file": "apps/web/app/spotlight/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    },
+    {
+      "route": "/twills",
+      "file": "apps/web/app/twills/page.tsx",
+      "screenshotPolicy": "public signed-out screenshots allowed only when useful and reviewed"
+    }
+  ],
+  "protectedRoutes": [
+    {
+      "route": "/auth",
+      "file": "apps/web/app/auth/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    },
+    {
+      "route": "/account",
+      "file": "apps/web/app/account/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    },
+    {
+      "route": "/gallery-submit",
+      "file": "apps/web/app/gallery-submit/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    },
+    {
+      "route": "/leader-dashboard",
+      "file": "apps/web/app/leader-dashboard/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    },
+    {
+      "route": "/members",
+      "file": "apps/web/app/members/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    },
+    {
+      "route": "/members/[slug]",
+      "file": "apps/web/app/members/[slug]/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    },
+    {
+      "route": "/games/mochi-social",
+      "file": "apps/web/app/games/mochi-social/page.tsx",
+      "screenshotPolicy": "do not commit; use DOM metrics or private operator evidence",
+      "noindexExpected": true
+    }
+  ],
+  "capturePolicy": {
+    "defaultCommittedScreenshots": "none",
+    "publicReportsPrefer": [
+      "route matrix",
+      "DOM measurements",
+      "pass/fail notes",
+      "redacted Markdown/JSON"
+    ],
+    "privateEvidenceOnlyFor": [
+      "logged-in member workflows",
+      "moderator queues",
+      "provider dashboards",
+      "real Discord channel state"
+    ],
+    "stableBaselineRequirement": "generate and compare screenshot baselines in one stable CI/browser environment before making them blocking"
+  },
+  "committedScreenshotArtifacts": [],
+  "warnings": [],
+  "failures": []
+}

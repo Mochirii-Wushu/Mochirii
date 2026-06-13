@@ -37,6 +37,7 @@ const checks = [
   ["check:full-stack-release-evidence", ["node", "scripts/check-full-stack-release-evidence.mjs"]],
   ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],
   ["check:accessibility-route-matrix", ["node", "scripts/check-accessibility-route-matrix.mjs"]],
+  ["check:visual-screenshot-evidence", ["node", "scripts/check-visual-screenshot-evidence.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],

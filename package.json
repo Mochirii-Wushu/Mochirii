@@ -54,6 +54,7 @@
     "check:supabase-edge-types": "node scripts/check-supabase-edge-types.mjs",
     "check:universal-hero-spacing": "node scripts/check-universal-hero-spacing.mjs",
     "check:vercel-pr-preview": "node scripts/check-vercel-pr-preview.mjs",
+    "check:visual-screenshot-evidence": "node scripts/check-visual-screenshot-evidence.mjs",
     "check:production": "node scripts/check-production.mjs",
     "check:reaper-discord-interactions": "node scripts/check-reaper-discord-interactions.mjs",
     "check:reaper-pending-verification": "node scripts/check-reaper-pending-verification.mjs",
