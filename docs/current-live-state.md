@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-06-10.
+Last checked for this index: 2026-06-13.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -46,7 +46,11 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## GitHub And Release Flow
 
-- `main` is protected by required checks including static validation, Next validation, CodeQL, Vercel, and Supabase Preview.
+- `main` is governed by the active `Primary Rules` repository ruleset for the default branch.
+- Production pull requests require one approving review and all review threads resolved before merge.
+- Required checks include static validation, Next validation, CodeQL, Vercel, and Supabase Preview.
+- Strict required status checks are enabled, so production branches must be current with the base branch before merge.
+- The ruleset currently has no bypass actors; emergency release bypass requires a deliberate owner/admin ruleset change with same-window evidence and follow-up restoration.
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.

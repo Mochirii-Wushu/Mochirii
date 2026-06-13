@@ -62,6 +62,25 @@ npm run check:csp-inline-hardening -- --live --write
 
 Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Social iframe bridge. For `script-src`, choose a Next-compatible nonce or SRI path before enforcement.
 
+## GitHub Production Review Gate
+
+The default branch is governed by the active `Primary Rules` repository ruleset. Production changes must arrive through pull requests and must satisfy:
+
+- one approving review before merge
+- all review threads resolved
+- strict required status checks
+- required checks: `validate`, `validate-next`, `CodeQL`, `Vercel`, and `Supabase Preview`
+- deletion and non-fast-forward protections
+
+The ruleset has no bypass actors. Treat emergency release bypass as a provider mutation, not a normal merge path:
+
+1. Capture the production incident or release blocker in the private release ledger.
+2. Deliberately edit or disable the ruleset through GitHub Settings or the GitHub API only for the needed window.
+3. Complete the release action.
+4. Restore the ruleset and record readback evidence showing the one-review gate and required checks are active again.
+
+Do not silently push to `main`, remove required checks, or add broad bypass actors as part of ordinary release work.
+
 ## Supabase Preview Migration History
 
 Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
