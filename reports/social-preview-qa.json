@@ -1,0 +1,193 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T02:42:30.269Z",
+  "scope": "Mochirii Next social preview QA. This report is local-only and redacted; it records metadata structure, sitemap policy, noindex coverage, and manual platform checks without provider mutations.",
+  "sources": [
+    "https://nextjs.org/docs/app/getting-started/metadata-and-og-images",
+    "https://nextjs.org/docs/app/api-reference/functions/generate-metadata",
+    "https://ogp.me/",
+    "https://vercel.com/docs/og-image-generation",
+    "https://support.discord.com/hc/en-us/community/posts/360055886251-Extended-metadata-tags-for-embeds"
+  ],
+  "publicRoutes": [
+    {
+      "route": "/",
+      "label": "Home",
+      "metadataOwner": "apps/web/app/layout.tsx",
+      "image": "/assets/img/hero/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/join/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/events",
+      "label": "Events",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/events/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/gallery/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/ranks",
+      "label": "Ranks",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/ranks/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/leaders",
+      "label": "Leaders",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/leaders/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/codex",
+      "label": "Codex",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/codex/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/recruitment",
+      "label": "Recruitment",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/recruitment/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/announcements",
+      "label": "Announcements",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/announcements/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/raffles",
+      "label": "Raffles",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/raffles/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/spotify",
+      "label": "Spotify",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/spotify/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/spotlight",
+      "label": "Spotlight",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/spotlight/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    },
+    {
+      "route": "/twills",
+      "label": "Twills",
+      "metadataOwner": "apps/web/components/public-pages/metadata.ts",
+      "image": "/assets/img/profiles/twills/hero.webp",
+      "imagePresent": true,
+      "sitemapExpected": true
+    }
+  ],
+  "protectedRoutes": [
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "source": "apps/web/app/auth/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "source": "apps/web/app/account/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    },
+    {
+      "route": "/gallery-submit",
+      "label": "Gallery Submit",
+      "source": "apps/web/app/gallery-submit/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "source": "apps/web/app/leader-dashboard/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    },
+    {
+      "route": "/members",
+      "label": "Members",
+      "source": "apps/web/app/members/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    },
+    {
+      "route": "/members/[slug]",
+      "label": "Member Profile",
+      "source": "apps/web/app/members/[slug]/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    },
+    {
+      "route": "/games/mochi-social",
+      "label": "Mochi Social Alpha",
+      "source": "apps/web/app/games/mochi-social/page.tsx",
+      "noindexExpected": true,
+      "sitemapExpected": false,
+      "publicSafePreviewOnly": true
+    }
+  ],
+  "manualPlatformChecks": [
+    "https://mochirii.com/",
+    "https://mochirii.com/join",
+    "https://mochirii.com/events",
+    "https://mochirii.com/gallery",
+    "https://mochirii.com/recruitment",
+    "https://mochirii.com/games/mochi-social"
+  ],
+  "stopLines": [
+    "no tokens, cookies, service-role keys, bot tokens, OAuth secrets, webhook URLs, or raw request headers",
+    "no signed URLs or private Supabase Storage object paths",
+    "no Discord IDs, email addresses, account names, or private member profile data",
+    "no screenshots from logged-in private member or moderator pages",
+    "no real Discord channel posts, automated preview spam, or provider mutations without an approved release packet"
+  ],
+  "warnings": [],
+  "failures": []
+}
