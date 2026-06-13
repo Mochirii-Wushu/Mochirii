@@ -408,6 +408,15 @@ The website does not assign Discord roles in this phase.
 
 `public.handle_new_member_profile()` is the Auth trigger helper that creates or updates the matching `member_profiles` row when a Supabase Auth user appears. It is `security definer`, has its search path fixed by migration, and is revoked from `public`, `anon`, and `authenticated`; browser clients do not call it directly.
 
+Track this helper with the no-secret static audit:
+
+```sh
+npm run check:supabase-security-definer-audit
+npm run check:supabase-security-definer-audit -- --write
+```
+
+The current `public.handle_new_member_profile()` placement is a documented exception, not the long-term target. The approved hardening shape is in [`../docs/supabase-security-definer-hardening.md`](../docs/supabase-security-definer-hardening.md): move the helper to a private schema in a separate migration window, keep browser roles without `EXECUTE`, rerun local and linked Supabase advisors, and do not run live database mutation from the audit alone.
+
 `gallery_submissions` stores member-owned pending upload records:
 
 - private Storage bucket/path

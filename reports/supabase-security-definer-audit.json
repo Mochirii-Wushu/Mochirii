@@ -1,0 +1,216 @@
+{
+  "generated_at": "2026-06-13T01:36:29.033Z",
+  "status": "pass",
+  "summary": {
+    "security_definer_functions": 1,
+    "public_security_definer_functions": 1,
+    "allowed_public_exceptions": 1,
+    "passed": 20,
+    "warnings": 1,
+    "failed": 0
+  },
+  "source_basis": [
+    {
+      "label": "Supabase Database Functions",
+      "url": "https://supabase.com/docs/guides/database/functions",
+      "note": "Security invoker is preferred; if security definer is needed, set search_path."
+    },
+    {
+      "label": "Supabase Securing your API",
+      "url": "https://supabase.com/docs/guides/api/securing-your-api",
+      "note": "Data API access is governed by grants plus RLS, and function EXECUTE grants should be explicit."
+    },
+    {
+      "label": "Supabase Row Level Security",
+      "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "note": "RLS must be enabled for tables in exposed schemas such as public."
+    },
+    {
+      "label": "Supabase Database Advisors",
+      "url": "https://supabase.com/docs/guides/database/database-advisors",
+      "note": "Security advisors include executable security-definer function findings."
+    },
+    {
+      "label": "Supabase security-definer troubleshooting",
+      "url": "https://supabase.com/docs/guides/troubleshooting/do-i-need-to-expose-security-definer-functions-in-row-level-security-policies-iI0uOw",
+      "note": "Security-definer helpers do not need to be exposed to PostgREST when referenced with schema-qualified names."
+    }
+  ],
+  "current_decision": {
+    "posture": "report-first",
+    "live_mutation": "none",
+    "migration_target": "Move public.handle_new_member_profile() to an unexposed schema in a separate approved migration window if local and linked advisors stay clean."
+  },
+  "functions": [
+    {
+      "id": "public.handle_new_member_profile",
+      "schema": "public",
+      "file": "supabase/migrations/20260513081523_create_discord_role_gated_gallery_uploads.sql",
+      "line": 296,
+      "search_path": "public, auth, pg_temp",
+      "allowed_exception": true
+    }
+  ],
+  "checks": [
+    {
+      "area": "inventory",
+      "name": "security definer functions",
+      "status": "pass",
+      "detail": "1 security-definer function(s) found in local migrations.",
+      "evidence": {
+        "functions": [
+          {
+            "id": "public.handle_new_member_profile",
+            "file": "supabase/migrations/20260513081523_create_discord_role_gated_gallery_uploads.sql",
+            "line": 296
+          }
+        ]
+      }
+    },
+    {
+      "area": "allowlist",
+      "name": "public.handle_new_member_profile",
+      "status": "pass",
+      "detail": "matches the documented current exception.",
+      "evidence": {
+        "file": "supabase/migrations/20260513081523_create_discord_role_gated_gallery_uploads.sql",
+        "line": 296
+      }
+    },
+    {
+      "area": "hardening target",
+      "name": "public.handle_new_member_profile",
+      "status": "warn",
+      "detail": "currently lives in the exposed public schema; keep as an explicit exception until the approved private-schema migration.",
+      "evidence": {
+        "followUp": "Move to an unexposed schema with fully qualified relation references after an approved database migration window."
+      }
+    },
+    {
+      "area": "search_path",
+      "name": "public.handle_new_member_profile",
+      "status": "pass",
+      "detail": "has fixed search_path: public, auth, pg_temp",
+      "evidence": {}
+    },
+    {
+      "area": "required SQL",
+      "name": "public.handle_new_member_profile: set search_path = public, auth, pg_temp",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "required SQL",
+      "name": "public.handle_new_member_profile: revoke all on function public.handle_new_member_profile() from public, anon, authenticated;",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "required SQL",
+      "name": "public.handle_new_member_profile: drop trigger if exists on_auth_user_created_member_profile on auth.users;",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "required SQL",
+      "name": "public.handle_new_member_profile: create trigger on_auth_user_created_member_profile",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "required SQL",
+      "name": "public.handle_new_member_profile: after insert on auth.users",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "required SQL",
+      "name": "public.handle_new_member_profile: execute function public.handle_new_member_profile();",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "supabase/README.md: public.handle_new_member_profile()",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "supabase/README.md: security definer",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "supabase/README.md: check:supabase-security-definer-audit",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "supabase/README.md: docs/supabase-security-definer-hardening.md",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "docs/supabase-security-definer-hardening.md: public.handle_new_member_profile()",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "docs/supabase-security-definer-hardening.md: private schema",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "docs/supabase-security-definer-hardening.md: supabase db advisors --local",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "docs/supabase-security-definer-hardening.md: supabase migration new",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "docs/supabase-security-definer-hardening.md: No live database mutation is authorized by this document.",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "package.json: \"check:supabase-security-definer-audit\": \"node scripts/check-supabase-security-definer-audit.mjs\"",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    },
+    {
+      "area": "docs",
+      "name": "scripts/check-all.mjs: [\"check:supabase-security-definer-audit\", [\"node\", \"scripts/check-supabase-security-definer-audit.mjs\"]]",
+      "status": "pass",
+      "detail": "present",
+      "evidence": {}
+    }
+  ]
+}
