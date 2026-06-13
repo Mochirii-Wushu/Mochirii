@@ -19,6 +19,7 @@
   const ALL_CATEGORY = "all";
   const CATEGORY_PARAM = "category";
   const SORT_PARAM = "sort";
+  const SEARCH_PARAM = "q";
   const COPY_SUCCESS = "Link copied";
   const COPY_FAILURE = "Copy failed";
   const MEMBER_CATEGORY = "member-submissions";
@@ -38,6 +39,16 @@
       .replace(/[^a-z0-9-]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
+  const normalizeSearchQuery = (value) =>
+    text(value, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 80);
+
+  const normalizeSearchIndex = (value) =>
+    text(value, "")
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+
   function getItemCategory(item) {
     return getItemCategories(item)[0] || "";
   }
@@ -48,6 +59,10 @@
       : [item?.category];
 
     return [...new Set(values.map((value) => normalizeSlug(value)).filter(Boolean))];
+  }
+
+  function getItemTags(item) {
+    return [...new Set(asArray(item?.tags).map((value) => normalizeSlug(value)).filter(Boolean))];
   }
 
   function hasCategory(categories, slug) {
@@ -72,16 +87,18 @@
     const hasSortParam = params.has(SORT_PARAM);
     const requestedSort = text(params.get(SORT_PARAM), "").toLowerCase();
     const validSort = SORT_MODES.has(requestedSort);
+    const query = normalizeSearchQuery(params.get(SEARCH_PARAM));
 
     return {
       category: valid ? requested : ALL_CATEGORY,
       sort: validSort ? requestedSort : DEFAULT_SORT,
+      query,
       hasParam: hasCategoryParam || hasSortParam,
       valid: (!hasCategoryParam || Boolean(valid)) && (!hasSortParam || validSort),
     };
   }
 
-  function updateGalleryUrl(category, sort, { replace = false } = {}) {
+  function updateGalleryUrl(category, sort, query, { replace = false } = {}) {
     const url = new URL(window.location.href);
     if (category === ALL_CATEGORY) {
       url.searchParams.delete(CATEGORY_PARAM);
@@ -93,13 +110,19 @@
     } else {
       url.searchParams.set(SORT_PARAM, sort);
     }
+    const cleanQuery = normalizeSearchQuery(query);
+    if (cleanQuery) {
+      url.searchParams.set(SEARCH_PARAM, cleanQuery);
+    } else {
+      url.searchParams.delete(SEARCH_PARAM);
+    }
 
     const next = `${url.pathname}${url.search}${url.hash}`;
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (next === current) return;
 
     const method = replace ? "replaceState" : "pushState";
-    window.history[method]({ galleryCategory: category }, "", next);
+    window.history[method]({ galleryCategory: category, gallerySearch: cleanQuery }, "", next);
   }
 
   function setShareStatus(statusEl, message) {
@@ -242,8 +265,22 @@
   }
 
   function filterItems(items, category) {
-    if (category === ALL_CATEGORY) return items;
-    return items.filter((item) => getItemCategories(item).includes(category));
+    return category === ALL_CATEGORY ? items : items.filter((item) => getItemCategories(item).includes(category));
+  }
+
+  function matchesSearch(item, query) {
+    const terms = normalizeSearchIndex(query).split(" ").filter(Boolean);
+    if (!terms.length) return true;
+
+    const index = normalizeSearchIndex([
+      item?.alt,
+      item?.caption,
+      item?.id,
+      ...getItemCategories(item),
+      ...getItemTags(item),
+    ].join(" "));
+
+    return terms.every((term) => index.includes(term));
   }
 
   function shuffleGalleryItems(items) {
@@ -279,10 +316,17 @@
     });
   }
 
-  function formatCount(count, total, categoryLabel) {
+  function formatCount(count, total, categoryLabel, query) {
     const noun = count === 1 ? "image" : "images";
-    if (!categoryLabel || categoryLabel === "All") return `Showing ${count} of ${total} ${total === 1 ? "image" : "images"}.`;
-    return `Showing ${count} ${noun} in ${categoryLabel}.`;
+    const searchSuffix = query ? ` matching "${query}"` : "";
+    if (!categoryLabel || categoryLabel === "All") return `Showing ${count} of ${total} ${total === 1 ? "image" : "images"}${searchSuffix}.`;
+    return `Showing ${count} ${noun} in ${categoryLabel}${searchSuffix}.`;
+  }
+
+  function emptyText(categoryLabel, query) {
+    if (!query) return "No images in this category yet.";
+    if (!categoryLabel || categoryLabel === "All") return `No images match "${query}".`;
+    return `No images in ${categoryLabel} match "${query}".`;
   }
 
   function flattenItems(data) {
@@ -387,6 +431,8 @@
       const items = [...staticItems, ...approvedItems];
       const filters = $("#galleryFilters");
       const sortSelect = $("#gallerySort");
+      const searchInput = $("#gallerySearch");
+      const searchClear = $("#gallerySearchClear");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
       const copyLink = $("#galleryCopyLink");
@@ -395,38 +441,52 @@
       const initialState = readGalleryStateFromUrl(categories);
       let activeCategory = initialState.category;
       let activeSort = initialState.sort;
+      let activeSearch = initialState.query;
 
-      const applyGalleryState = (category, sort, { updateUrl = false, replaceUrl = false } = {}) => {
+      const applyGalleryState = (category, sort, query, { updateUrl = false, replaceUrl = false } = {}) => {
         activeCategory = normalizeCategory(categories, category);
         activeSort = normalizeSort(sort);
-        const visibleItems = orderGalleryItems(filterItems(items, activeCategory), activeSort);
+        activeSearch = normalizeSearchQuery(query);
+        const visibleItems = orderGalleryItems(filterItems(items, activeCategory).filter((item) => matchesSearch(item, activeSearch)), activeSort);
         const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
 
         renderGrid(grid, visibleItems);
         updateFilterState(filters, activeCategory);
         updateSortState(sortSelect, activeSort);
+        if (searchInput) searchInput.value = activeSearch;
+        if (searchClear) searchClear.hidden = !activeSearch;
 
-        if (count) setText(count, formatCount(visibleItems.length, items.length, activeLabel));
-        if (empty) empty.hidden = visibleItems.length > 0;
+        if (count) setText(count, formatCount(visibleItems.length, items.length, activeLabel, activeSearch));
+        if (empty) {
+          setText(empty, emptyText(activeLabel, activeSearch));
+          empty.hidden = visibleItems.length > 0;
+        }
         grid.hidden = visibleItems.length === 0;
         if (shareStatus) shareStatus.textContent = "";
 
         if (updateUrl || replaceUrl) {
-          updateGalleryUrl(activeCategory, activeSort, { replace: replaceUrl });
+          updateGalleryUrl(activeCategory, activeSort, activeSearch, { replace: replaceUrl });
         }
       };
 
       renderFilters(filters, categories, activeCategory, (category) => {
-        applyGalleryState(category, activeSort, { updateUrl: true });
+        applyGalleryState(category, activeSort, activeSearch, { updateUrl: true });
       });
       sortSelect?.addEventListener("change", () => {
-        applyGalleryState(activeCategory, sortSelect.value, { updateUrl: true });
+        applyGalleryState(activeCategory, sortSelect.value, activeSearch, { updateUrl: true });
       });
-      applyGalleryState(activeCategory, activeSort, { replaceUrl: initialState.hasParam && !initialState.valid });
+      searchInput?.addEventListener("input", () => {
+        applyGalleryState(activeCategory, activeSort, searchInput.value, { replaceUrl: true });
+      });
+      searchClear?.addEventListener("click", () => {
+        applyGalleryState(activeCategory, activeSort, "", { updateUrl: true });
+        searchInput?.focus();
+      });
+      applyGalleryState(activeCategory, activeSort, activeSearch, { replaceUrl: initialState.hasParam && !initialState.valid });
 
       window.addEventListener("popstate", () => {
         const nextState = readGalleryStateFromUrl(categories);
-        applyGalleryState(nextState.category, nextState.sort);
+        applyGalleryState(nextState.category, nextState.sort, nextState.query);
       });
 
       copyLink?.addEventListener("click", async () => {

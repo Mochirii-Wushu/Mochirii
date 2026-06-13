@@ -27,6 +27,7 @@ type GalleryItem = {
   caption?: string;
   category?: string;
   categories?: string[];
+  tags?: string[];
   galleryAddedAt?: string;
 };
 
@@ -37,9 +38,11 @@ type NormalizedGalleryItem = Omit<GalleryItem, "alt" | "caption" | "categories" 
   categories: string[];
   full: string;
   originalIndex: number;
+  searchText: string;
   sortTimestamp: number;
   stableKey: string;
   stableSequence: number;
+  tags: string[];
   thumb: string;
 };
 
@@ -74,6 +77,14 @@ function normalizeSlug(value: unknown) {
     .replace(/^-+|-+$/g, "");
 }
 
+function normalizeSearchQuery(value: unknown) {
+  return text(value).replace(/\s+/g, " ").slice(0, 80);
+}
+
+function normalizeSearchIndex(value: unknown) {
+  return text(value).toLowerCase().replace(/\s+/g, " ");
+}
+
 function toTitle(slug: string) {
   return slug
     .split("-")
@@ -85,6 +96,10 @@ function toTitle(slug: string) {
 function itemCategories(item: GalleryItem) {
   const values = Array.isArray(item.categories) && item.categories.length ? item.categories : [item.category];
   return [...new Set(values.map(normalizeSlug).filter(Boolean))];
+}
+
+function itemTags(item: GalleryItem) {
+  return [...new Set((Array.isArray(item.tags) ? item.tags : []).map(normalizeSlug).filter(Boolean))];
 }
 
 function normalizeSort(value: unknown): SortMode {
@@ -225,6 +240,7 @@ function approvedSubmissionToGalleryItem(submission: ApprovedGallerySubmission):
     caption: approvedSubmissionCaption(submission) || title,
     category: memberSubmissionsCategory,
     categories: [memberSubmissionsCategory],
+    tags: ["member-submission"],
     galleryAddedAt: text(submission.created_at || submission.reviewed_at),
   };
 }
@@ -241,6 +257,7 @@ export function GalleryBrowser({
   const [approvedItems, setApprovedItems] = useState<GalleryItem[]>([]);
   const [randomSeed, setRandomSeed] = useState<number | null>(null);
   const [renderWindow, setRenderWindow] = useState({ key: "", limit: galleryRenderBatchSize });
+  const [searchQuery, setSearchQuery] = useState("");
   const [shareStatus, setShareStatus] = useState("");
   const [openItemKey, setOpenItemKey] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -255,18 +272,25 @@ export function GalleryBrowser({
         .map((item, originalIndex): NormalizedGalleryItem => {
           const full = publicPath(item.full || item.src);
           const thumb = publicPath(item.thumb || item.src || item.full);
+          const alt = text(item.alt || item.caption, "Gallery image");
+          const caption = text(item.caption);
+          const categories = itemCategories(item);
+          const tags = itemTags(item);
+          const stableKey = text(item.id || full || thumb, `gallery-${originalIndex}`);
 
           return {
             ...item,
             full,
             thumb,
-            alt: text(item.alt || item.caption, "Gallery image"),
-            caption: text(item.caption),
-            categories: itemCategories(item),
+            alt,
+            caption,
+            categories,
             originalIndex,
+            searchText: normalizeSearchIndex([alt, caption, ...categories, ...tags].join(" ")),
             sortTimestamp: getSortTimestamp(item),
-            stableKey: text(item.id || full || thumb, `gallery-${originalIndex}`),
+            stableKey,
             stableSequence: getStableSequence({ ...item, full, thumb }, originalIndex),
+            tags,
           };
         })
         .filter((item) => item.full && item.thumb),
@@ -319,33 +343,50 @@ export function GalleryBrowser({
     return [{ slug: allCategory, label: "All", count: counts.get(allCategory) || 0 }, ...declared, ...inferred];
   }, [categories, usableItems]);
 
+  const searchTerms = useMemo(
+    () => normalizeSearchIndex(searchQuery).split(" ").filter(Boolean),
+    [searchQuery],
+  );
+
   const visibleItems = useMemo(() => {
+    const matchesSearch = (item: NormalizedGalleryItem) =>
+      searchTerms.length === 0 || searchTerms.every((term) => item.searchText.includes(term));
+
     if (activeSort === defaultSort) {
       const randomized = randomSeed === null ? usableItems : shuffleWithSeed(usableItems, randomSeed);
-      return activeCategory === allCategory
+      const categoryItems = activeCategory === allCategory
         ? randomized
         : randomized.filter((item) => item.categories.includes(activeCategory));
+
+      return categoryItems.filter(matchesSearch);
     }
 
-    const filtered =
+    const filtered = (
       activeCategory === allCategory
         ? usableItems
-        : usableItems.filter((item) => item.categories.includes(activeCategory));
+        : usableItems.filter((item) => item.categories.includes(activeCategory))
+    ).filter(matchesSearch);
 
     const sortMode = activeSort === "oldest" ? "oldest" : "newest";
     return [...filtered].sort((a, b) => compareGalleryItems(a, b, sortMode));
-  }, [activeCategory, activeSort, randomSeed, usableItems]);
+  }, [activeCategory, activeSort, randomSeed, searchTerms, usableItems]);
 
-  const renderWindowKey = `${activeCategory}:${activeSort}:${randomSeed ?? "pending"}:${usableItems.length}`;
+  const renderWindowKey = `${activeCategory}:${activeSort}:${normalizeSearchIndex(searchQuery)}:${randomSeed ?? "pending"}:${usableItems.length}`;
   const effectiveRenderLimit = renderWindow.key === renderWindowKey ? renderWindow.limit : galleryRenderBatchSize;
   const renderedItems = useMemo(() => visibleItems.slice(0, effectiveRenderLimit), [effectiveRenderLimit, visibleItems]);
   const hasMoreItems = renderedItems.length < visibleItems.length;
   const openItem = openItemKey === null ? null : visibleItems.find((item) => item.stableKey === openItemKey) || null;
   const activeLabel = filterCategories.find((category) => category.slug === activeCategory)?.label || "All";
+  const searchSuffix = searchQuery ? ` matching "${searchQuery}"` : "";
   const countText =
     activeLabel === "All"
-      ? `Showing ${renderedItems.length} of ${usableItems.length} ${usableItems.length === 1 ? "image" : "images"}.`
-      : `Showing ${renderedItems.length} of ${visibleItems.length} ${visibleItems.length === 1 ? "image" : "images"} in ${activeLabel}.`;
+      ? `Showing ${renderedItems.length} of ${visibleItems.length} ${visibleItems.length === 1 ? "image" : "images"}${searchSuffix}.`
+      : `Showing ${renderedItems.length} of ${visibleItems.length} ${visibleItems.length === 1 ? "image" : "images"} in ${activeLabel}${searchSuffix}.`;
+  const emptyText = searchQuery
+    ? activeLabel === "All"
+      ? `No images match "${searchQuery}".`
+      : `No images in ${activeLabel} match "${searchQuery}".`
+    : "No images in this category yet.";
 
   const closeModal = useCallback(() => {
     setOpenItemKey(null);
@@ -362,10 +403,12 @@ export function GalleryBrowser({
       const params = new URLSearchParams(window.location.search);
       const category = normalizeSlug(params.get("category"));
       const sort = normalizeSort(params.get("sort"));
+      const query = normalizeSearchQuery(params.get("q"));
       const validCategory = filterCategories.some((item) => item.slug === category);
 
       setActiveCategory(category && validCategory ? category : allCategory);
       setActiveSort(sort);
+      setSearchQuery(query);
     };
 
     readState();
@@ -389,7 +432,7 @@ export function GalleryBrowser({
     };
   }, [closeModal, openItem]);
 
-  const updateUrl = (category: string, sort: string) => {
+  const updateUrl = (category: string, sort: string, query: string, { replace = false } = {}) => {
     const url = new URL(window.location.href);
     if (category === allCategory) url.searchParams.delete("category");
     else url.searchParams.set("category", category);
@@ -397,22 +440,40 @@ export function GalleryBrowser({
     if (sort === defaultSort) url.searchParams.delete("sort");
     else url.searchParams.set("sort", sort);
 
+    const cleanQuery = normalizeSearchQuery(query);
+    if (cleanQuery) url.searchParams.set("q", cleanQuery);
+    else url.searchParams.delete("q");
+
     const next = `${url.pathname}${url.search}${url.hash}`;
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    if (next !== current) window.history.pushState({ galleryCategory: category }, "", next);
+    if (next !== current) {
+      const method = replace ? "replaceState" : "pushState";
+      window.history[method]({ galleryCategory: category, gallerySearch: cleanQuery }, "", next);
+    }
   };
 
   const chooseCategory = (category: string) => {
     setActiveCategory(category);
     setShareStatus("");
-    updateUrl(category, activeSort);
+    updateUrl(category, activeSort, searchQuery);
   };
 
   const chooseSort = (sort: string) => {
     const nextSort = normalizeSort(sort);
     setActiveSort(nextSort);
     setShareStatus("");
-    updateUrl(activeCategory, nextSort);
+    updateUrl(activeCategory, nextSort, searchQuery);
+  };
+
+  const chooseSearch = (query: string) => {
+    const nextQuery = normalizeSearchQuery(query);
+    setSearchQuery(nextQuery);
+    setShareStatus("");
+    updateUrl(activeCategory, activeSort, nextQuery, { replace: true });
+  };
+
+  const clearSearch = () => {
+    chooseSearch("");
   };
 
   const showMoreImages = () => {
@@ -533,6 +594,25 @@ export function GalleryBrowser({
               <option value="oldest">Oldest first</option>
             </select>
           </label>
+          <div className="gallery-refine" role="search">
+            <label className="gallery-search" htmlFor="gallerySearch">
+              <span className="gallery-search__label">Find images</span>
+              <input
+                id="gallerySearch"
+                className="gallery-search__input"
+                type="search"
+                value={searchQuery}
+                placeholder="Search gallery"
+                autoComplete="off"
+                onChange={(event) => chooseSearch(event.target.value)}
+              />
+            </label>
+            {searchQuery ? (
+              <button className="gallery-search-clear" type="button" onClick={clearSearch}>
+                Clear
+              </button>
+            ) : null}
+          </div>
           <button id="galleryCopyLink" className="gallery-copy-link" type="button" onClick={copyCurrentLink}>
             Copy link
           </button>
@@ -546,7 +626,7 @@ export function GalleryBrowser({
       </div>
 
       <p id="galleryEmpty" className="gallery-empty" role="status" hidden={visibleItems.length > 0}>
-        No images in this category yet.
+        {emptyText}
       </p>
 
       <div id="galleryGrid" className="gallery-grid" aria-live="polite" hidden={visibleItems.length === 0}>

@@ -202,6 +202,7 @@ function GalleryItems() {
       caption: text(item.caption),
       category: text(item.category),
       categories: strings(item.categories),
+      tags: strings(item.tags),
       galleryAddedAt: text(item.galleryAddedAt),
     })),
   );

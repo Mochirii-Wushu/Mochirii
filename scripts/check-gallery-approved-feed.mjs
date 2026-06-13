@@ -12,6 +12,8 @@ function assertIncludes(label, text, snippet) {
 
 const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
 const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
+const galleryStaticHtml = read("gallery.html");
+const galleryStaticJs = read("gallery.js");
 const runbook = read("docs/vote-reminder-runbook.md");
 
 [
@@ -21,8 +23,12 @@ const runbook = read("docs/vote-reminder-runbook.md");
   "const galleryRenderBatchSize = 24;",
   'const [renderWindow, setRenderWindow] = useState({ key: "", limit: galleryRenderBatchSize });',
   "const renderWindowKey =",
+  "normalizeSearchQuery",
+  'const [searchQuery, setSearchQuery] = useState("");',
   "const effectiveRenderLimit = renderWindow.key === renderWindowKey ? renderWindow.limit : galleryRenderBatchSize;",
   "const renderedItems = useMemo(() => visibleItems.slice(0, effectiveRenderLimit)",
+  'id="gallerySearch"',
+  'url.searchParams.set("q", cleanQuery);',
   "id=\"galleryLoadMore\"",
   "submission.signed_url",
   "submission.preview_error",
@@ -39,6 +45,20 @@ const runbook = read("docs/vote-reminder-runbook.md");
   "method: \"POST\"",
   "Approved gallery feed could not be loaded.",
 ].forEach((snippet) => assertIncludes("gallery submissions public feed", gallerySubmissions, snippet));
+
+[
+  'id="gallerySearch"',
+  'id="gallerySearchClear"',
+  "2026-06-gallery-search",
+].forEach((snippet) => assertIncludes("static Gallery search markup", galleryStaticHtml, snippet));
+
+[
+  'const SEARCH_PARAM = "q";',
+  "normalizeSearchQuery",
+  "matchesSearch",
+  "gallerySearchClear",
+  "updateGalleryUrl(activeCategory, activeSort, activeSearch",
+].forEach((snippet) => assertIncludes("static Gallery search script", galleryStaticJs, snippet));
 
 [
   "RandomNumberGenerator]::Create()",

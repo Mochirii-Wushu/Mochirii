@@ -61,6 +61,8 @@ Category rules:
 ## 7. URL State
 
 Gallery category URLs use `?category=`.
+Gallery search URLs use `?q=`.
+Gallery sort URLs use `?sort=`.
 
 Valid examples:
 
@@ -69,13 +71,17 @@ Valid examples:
 - `gallery.html?category=action`
 - `gallery.html?category=scenery`
 - `gallery.html?category=companions`
+- `gallery.html?q=lantern`
+- `gallery.html?category=gatherings&q=courtyard&sort=newest`
 
 Invalid categories fall back to All and clean the URL. Browser Back and Forward should preserve the selected filter, image count, and `aria-pressed` state.
+Search should match captions, alt text, categories, and tags. Search must preserve the 24-item render window in the Next app and must not alter thumbnail/full-image behavior.
 
 ## 8. Copy Link
 
 - Copy link copies the current Gallery URL.
 - Category URLs include the selected category.
+- Search URLs include the selected query.
 - All uses the clean `gallery.html` URL where possible.
 - Feedback uses a short `aria-live` status message.
 - Keep the control plain: `Copy link`, `Link copied`, and `Copy failed`.
@@ -131,6 +137,8 @@ npm run check:production
 - Open an invalid category URL and confirm it falls back to All.
 - Check mobile widths at 360px, 390px, and 768px.
 - Confirm All shows the current static Gallery image count before approved member submissions load.
+- Search for a caption or tag and confirm the URL includes `q=`.
+- Combine a search with a category and confirm Browser Back and Forward restore both.
 - Confirm counts match current data.
 - Confirm Copy link works.
 - Confirm Browser Back and Forward update the selected filter.

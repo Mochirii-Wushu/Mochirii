@@ -2997,6 +2997,7 @@ body[data-page="gallery"] .gallery-controls{
   align-items:center;
   justify-content:center;
   gap:8px;
+  width:100%;
 }
 
 body[data-page="gallery"] .gallery-filters{
@@ -3008,6 +3009,8 @@ body[data-page="gallery"] .gallery-filters{
 
 body[data-page="gallery"] .gallery-filter,
 body[data-page="gallery"] .gallery-copy-link,
+body[data-page="gallery"] .gallery-search-clear,
+body[data-page="gallery"] .gallery-search__input,
 body[data-page="gallery"] .gallery-order__select{
   min-height:42px;
   display:inline-flex;
@@ -3033,6 +3036,10 @@ body[data-page="gallery"] .gallery-filter:hover,
 body[data-page="gallery"] .gallery-filter:focus-visible,
 body[data-page="gallery"] .gallery-copy-link:hover,
 body[data-page="gallery"] .gallery-copy-link:focus-visible,
+body[data-page="gallery"] .gallery-search-clear:hover,
+body[data-page="gallery"] .gallery-search-clear:focus-visible,
+body[data-page="gallery"] .gallery-search__input:hover,
+body[data-page="gallery"] .gallery-search__input:focus-visible,
 body[data-page="gallery"] .gallery-order__select:hover,
 body[data-page="gallery"] .gallery-order__select:focus-visible{
   transform:translateY(-1px);
@@ -3049,6 +3056,8 @@ body[data-page="gallery"] .gallery-order__select:focus-visible{
 
 body[data-page="gallery"] .gallery-filter:focus-visible,
 body[data-page="gallery"] .gallery-copy-link:focus-visible,
+body[data-page="gallery"] .gallery-search-clear:focus-visible,
+body[data-page="gallery"] .gallery-search__input:focus-visible,
 body[data-page="gallery"] .gallery-order__select:focus-visible{
   outline-color:rgba(220,235,255,.78);
   box-shadow:
@@ -3072,6 +3081,47 @@ body[data-page="gallery"] .gallery-filter[aria-pressed="true"]{
 
 body[data-page="gallery"] .gallery-copy-link{
   border-style:solid;
+  border-color:rgba(218,181,94,.24);
+}
+
+body[data-page="gallery"] .gallery-refine{
+  display:inline-flex;
+  flex:1 1 320px;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  max-width:440px;
+  min-width:min(100%, 280px);
+}
+
+body[data-page="gallery"] .gallery-search{
+  display:inline-flex;
+  flex:1 1 240px;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+}
+
+body[data-page="gallery"] .gallery-search__label{
+  color:rgba(220,235,255,.72);
+  font-size:13px;
+  line-height:1.35;
+  white-space:nowrap;
+}
+
+body[data-page="gallery"] .gallery-search__input{
+  width:100%;
+  min-width:140px;
+  border-color:rgba(134,185,210,.24);
+  cursor:text;
+}
+
+body[data-page="gallery"] .gallery-search__input::placeholder{
+  color:rgba(220,235,255,.48);
+}
+
+body[data-page="gallery"] .gallery-search-clear{
   border-color:rgba(218,181,94,.24);
 }
 
@@ -3223,10 +3273,20 @@ body[data-page="gallery"] .gallery-thumb:focus-visible img{
 @media (max-width:480px){
   body[data-page="gallery"] .gallery-filter,
   body[data-page="gallery"] .gallery-copy-link,
+  body[data-page="gallery"] .gallery-refine,
+  body[data-page="gallery"] .gallery-search,
+  body[data-page="gallery"] .gallery-search__input,
+  body[data-page="gallery"] .gallery-search-clear,
   body[data-page="gallery"] .gallery-order,
   body[data-page="gallery"] .gallery-order__select{
     flex:1 1 auto;
     min-height:44px;
+  }
+
+  body[data-page="gallery"] .gallery-refine,
+  body[data-page="gallery"] .gallery-search{
+    width:100%;
+    max-width:none;
   }
 
   body[data-page="gallery"] .gallery-order{
