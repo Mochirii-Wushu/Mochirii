@@ -23,7 +23,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-tester-password-local']
   },
   {
     file: 'AGENTS.md',
@@ -79,7 +79,11 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-report-hygiene.mjs',
-    includes: ['Mochi Social report hygiene OK', 'reports/mochi-social-report-hygiene.json', 'reports/mochi-social-report-hygiene.md', 'mochirii-mochi-social-browser-gates.md', 'mochirii-mochi-social-preview-ready.md', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'No secret values were printed', 'Wallet seed file reference', 'Account email', 'readGitState(root)']
+    includes: ['Mochi Social report hygiene OK', 'reports/mochi-social-report-hygiene.json', 'reports/mochi-social-report-hygiene.md', 'reports/mochi-social-tester-password-local.json', 'reports/mochi-social-tester-password-local.md', 'mochirii-mochi-social-browser-gates.md', 'mochirii-mochi-social-preview-ready.md', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'No secret values were printed', 'Wallet seed file reference', 'Account email', 'readGitState(root)']
+  },
+  {
+    file: 'scripts/smoke-mochi-social-tester-password-local.mjs',
+    includes: ['Mochi Social tester password local smoke OK', 'MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_BASE_URL', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'reports/mochi-social-tester-password-local.json', 'Tester password required', 'Mochi Social unlocked', 'No real value', 'configured-preview-stub', 'HttpOnly', 'SameSite=Lax']
   },
   {
     file: 'scripts/check-mochi-social-discord-oauth-self-test.mjs',
@@ -150,6 +154,7 @@ const checks = [
       'Preview Acceptance',
       'Rollback',
       'npm run alpha:load-smoke',
+      'smoke:mochi-social-tester-password-local',
       'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
       'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE',
       'MOCHI_SOCIAL_AUTH',

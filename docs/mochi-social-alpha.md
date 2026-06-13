@@ -77,6 +77,7 @@ Before inviting testers:
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
 - The Mochirii preview has `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password` plus a server-only tester password configured before testers are invited.
 - The password-unlocked preview renders the iframe and keeps the game no-real-value/`configured-preview-stub`.
+- `npm run smoke:mochi-social-tester-password-local` passes locally, proving the `/games/mochi-social` tester-password lock, invalid-password redirect, scoped HttpOnly cookie, iframe shell, no-real-value/`configured-preview-stub` copy, and logout path without contacting hosted providers.
 - `npm run check:mochi-social-edge-authority` passes locally, proving server-token authority, append-only/idempotent ledger expectations, Canary/no-real-value stamping, and finalized-only chain inventory movement.
 - `npm run check:mochi-social-preview-ready` includes `site.bridge-state`, `site.auth-bridge`, `site.preview-key-loader`, `site.discord-oauth-detector`, and `site.edge-authority` before hosted Supabase Edge smoke, so hosted checks never stand in for local bridge, publishable-key loading, Discord detector, authority, or finality invariants.
 - `npm run check:mochi-social-bridge-state` passes locally, proving the parent bridge resolver ignores malformed messages, answers `MOCHI_SOCIAL_READY` with an auth resend, records `MOCHI_SOCIAL_AUTH_STATE` as non-secret status, and reports `MOCHI_SOCIAL_ERROR` with generic copy only.
@@ -211,6 +212,7 @@ Run local verification:
 npm run check:mochi-social-alpha
 npm run check:mochi-social-bridge-state
 npm run check:mochi-social-edge-authority
+npm run smoke:mochi-social-tester-password-local
 npm run check:mochi-social-report-hygiene
 npm run check:mochi-social-preview-ready
 npm run check:mochi-social-game-contract

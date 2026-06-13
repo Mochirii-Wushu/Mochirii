@@ -14,6 +14,8 @@ const targets = [
   { label: "preview-ready-md", path: resolve(root, "reports/mochi-social-preview-ready.md"), required: false },
   { label: "browser-gates-json", path: resolve(root, "reports/mochi-social-browser-gates.json"), required: false },
   { label: "browser-gates-md", path: resolve(root, "reports/mochi-social-browser-gates.md"), required: false },
+  { label: "tester-password-local-json", path: resolve(root, "reports/mochi-social-tester-password-local.json"), required: false },
+  { label: "tester-password-local-md", path: resolve(root, "reports/mochi-social-tester-password-local.md"), required: false },
   { label: "operator-handoff", path: resolve(credsDir, "mochirii-mochi-social-alpha-operator-next-steps.md"), required: false },
   { label: "preview-ready-handoff", path: resolve(credsDir, "mochirii-mochi-social-preview-ready.md"), required: false },
   { label: "browser-gates-handoff", path: resolve(credsDir, "mochirii-mochi-social-browser-gates.md"), required: false },
