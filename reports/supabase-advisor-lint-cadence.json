@@ -1,0 +1,45 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T02:21:43.940Z",
+  "scope": "Mochirii Supabase advisor and lint cadence static report. This report is no-secret and validates read-only monthly database hygiene guidance without contacting Supabase.",
+  "docs": {
+    "runbook": "docs/supabase-advisor-lint-cadence.md",
+    "requiredFiles": [
+      {
+        "file": "docs/supabase-advisor-lint-cadence.md",
+        "present": true
+      },
+      {
+        "file": "supabase/README.md",
+        "present": true
+      },
+      {
+        "file": "reports/supabase-production-security-review.md",
+        "present": true
+      },
+      {
+        "file": "reports/supabase-ci-and-parity-review.md",
+        "present": true
+      },
+      {
+        "file": "reports/supabase-manual-parity-runbook.md",
+        "present": true
+      }
+    ]
+  },
+  "commands": [
+    "supabase --version",
+    "supabase db lint --help",
+    "supabase db advisors --help",
+    "supabase inspect db --help",
+    "supabase db lint --local --schema public --level warning --fail-on none",
+    "supabase db advisors --local --type all --level info --fail-on none",
+    "supabase migration list --linked",
+    "supabase db lint --linked --schema public --level warning --fail-on none",
+    "supabase db advisors --linked --type all --level info --fail-on none"
+  ],
+  "sourceCount": 8,
+  "requiredTermCount": 19,
+  "warnings": [],
+  "failures": []
+}

@@ -40,6 +40,7 @@ const checks = [
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
+  ["check:supabase-advisor-lint-cadence", ["node", "scripts/check-supabase-advisor-lint-cadence.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],

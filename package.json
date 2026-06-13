@@ -50,6 +50,7 @@
     "check:security-hardening": "node scripts/check-security-hardening.mjs",
     "check:shop-brand": "node scripts/check-shop-brand-guardrails.mjs",
     "check:spotlight-poll": "node scripts/check-spotlight-poll.mjs",
+    "check:supabase-advisor-lint-cadence": "node scripts/check-supabase-advisor-lint-cadence.mjs",
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
     "check:supabase-edge-types": "node scripts/check-supabase-edge-types.mjs",
     "check:universal-hero-spacing": "node scripts/check-universal-hero-spacing.mjs",
