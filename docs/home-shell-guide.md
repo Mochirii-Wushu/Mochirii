@@ -244,6 +244,7 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 - Seal poem renders unchanged.
 - Key links resolve.
 - Mobile widths `360px`, `390px`, and `768px` have no horizontal overflow.
+- For shared typography, dense panels, dashboard cards, or responsive layout edits, also use `docs/visual-hierarchy-text-fit-audit.md` and `npm run check:visual-hierarchy-text-fit`.
 - No console-breaking errors occur.
 - Supabase page shell does not cause signed-out runtime errors.
 - Protected recruitment body remains unchanged.

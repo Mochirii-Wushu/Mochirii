@@ -44,6 +44,7 @@ const checks = [
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
   ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],
+  ["check:visual-hierarchy-text-fit", ["node", "scripts/check-visual-hierarchy-text-fit-audit.mjs"]],
 ];
 
 let failed = false;

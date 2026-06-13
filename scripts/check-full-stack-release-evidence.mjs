@@ -95,6 +95,7 @@ function inspectLocalReleaseSurface() {
     "check:mochi-social-bridge-state",
     "check:mochi-social-edge-authority",
     "check:mochi-social-report-hygiene",
+    "check:visual-hierarchy-text-fit",
     "smoke:vercel-production",
     "smoke:supabase-edge-functions",
     "register:reaper-pending-verification-command",
@@ -110,6 +111,7 @@ function inspectLocalReleaseSurface() {
     "docs/dns-cutover-readiness-and-rollback.md",
     "docs/member-profiles-and-rank-roles.md",
     "docs/mochi-social-visual-polish.md",
+    "docs/visual-hierarchy-text-fit-audit.md",
     "supabase/config.toml",
     ".github/workflows/validate-static-site.yml",
     ".github/workflows/validate-next-app.yml",
@@ -135,6 +137,7 @@ function inspectLocalReleaseSurface() {
       missing: missingFiles,
     },
     workflowWhitespace,
+    visualHierarchyTextFitAudit: existsSync(resolve(root, "docs/visual-hierarchy-text-fit-audit.md")),
   };
 }
 
@@ -581,6 +584,7 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - Required scripts present: ${scripts.present}/${scripts.total}
 - Required files present: ${files.present}/${files.total}
 - CI whitespace gate: ${data.local.workflowWhitespace.present ? data.local.workflowWhitespace.command : "missing"}
+- Visual hierarchy/text-fit audit: ${data.local.visualHierarchyTextFitAudit ? "present" : "missing"}
 
 ## Vercel
 
