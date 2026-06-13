@@ -74,6 +74,20 @@ npm run lint
 npm run build
 ```
 
+For a no-secret full-stack release evidence summary, run the local/static pass:
+
+```sh
+npm run check:full-stack-release-evidence
+```
+
+When authenticated CLIs are available and a release packet needs provider evidence, opt in to read-only provider checks and report writing:
+
+```sh
+npm run check:full-stack-release-evidence -- --providers --write
+```
+
+This command may summarize Vercel deployment/env names and Supabase migration/function status, but it must not record raw secret values, secret digests, tokens, cookies, webhook URLs, or private message content.
+
 Optional Vercel-local validation, when authenticated:
 
 ```sh
