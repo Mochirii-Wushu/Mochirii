@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T02:14:42.047Z",
+  "scope": "Mochirii community health signal matrix. This no-secret report validates aggregate-only, no-message-content, no-provider-mutation boundaries for future operator dashboards.",
+  "docs": {
+    "matrix": "docs/community-health-signals.md",
+    "requiredFiles": [
+      {
+        "file": "docs/community-health-signals.md",
+        "present": true
+      },
+      {
+        "file": "supabase/README.md",
+        "present": true
+      },
+      {
+        "file": "docs/vote-reminder-runbook.md",
+        "present": true
+      },
+      {
+        "file": "docs/member-workflow-production-qa-runbook.md",
+        "present": true
+      },
+      {
+        "file": "docs/reaper-pending-verification-containment.md",
+        "present": true
+      },
+      {
+        "file": "docs/mochi-social-alpha-codex-ops.md",
+        "present": true
+      },
+      {
+        "file": "reports/full-stack-release-evidence.md",
+        "present": true
+      }
+    ]
+  },
+  "signals": [
+    {
+      "id": "onboarding_completion",
+      "sourceTables": [
+        "member_profiles",
+        "discord_sync_log"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "verified_conversion",
+      "sourceTables": [
+        "member_profiles",
+        "discord_sync_log",
+        "discord_managed_permission_overwrites"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "profile_setup",
+      "sourceTables": [
+        "member_profiles"
+      ],
+      "stopLineCount": 1
+    },
+    {
+      "id": "gallery_participation",
+      "sourceTables": [
+        "gallery_submissions",
+        "gallery_moderation_events"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "event_heartbeat",
+      "sourceTables": [
+        "discord_resources",
+        "discord_sync_log"
+      ],
+      "stopLineCount": 1
+    },
+    {
+      "id": "vote_reminder_engagement",
+      "sourceTables": [
+        "vote_reminder_sends",
+        "vote_confirmations"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "spotlight_participation",
+      "sourceTables": [
+        "spotlight_poll_cycles",
+        "spotlight_poll_candidates",
+        "spotlight_poll_results"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "discord_resource_hygiene",
+      "sourceTables": [
+        "discord_resources",
+        "discord_sync_log"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "moderation_throughput",
+      "sourceTables": [
+        "gallery_submissions"
+      ],
+      "stopLineCount": 2
+    },
+    {
+      "id": "mochi_social_alpha_health",
+      "sourceTables": [],
+      "stopLineCount": 3
+    }
+  ],
+  "sourceCount": 8,
+  "requiredTermCount": 22,
+  "warnings": [],
+  "failures": []
+}
