@@ -84,6 +84,7 @@ function inspectLocalReleaseSurface() {
   const scripts = packageJson?.scripts || {};
   const requiredScripts = [
     "check",
+    "check:ci-release-ladder",
     "check:full-stack-release-evidence",
     "check:production",
     "check:security-hardening",
@@ -113,6 +114,7 @@ function inspectLocalReleaseSurface() {
     "supabase/config.toml",
     ".github/workflows/validate-static-site.yml",
     ".github/workflows/validate-next-app.yml",
+    ".github/workflows/production-smoke.yml",
   ];
   const missingFiles = requiredFiles.filter((file) => !existsSync(resolve(root, file)));
   if (missingFiles.length) failures.push(`missing release source-of-truth file(s): ${missingFiles.join(", ")}`);
@@ -120,6 +122,11 @@ function inspectLocalReleaseSurface() {
   const workflowWhitespace = checkWorkflowWhitespaceGate();
   if (!workflowWhitespace.present) {
     failures.push("GitHub validation workflow is missing the committed whitespace check.");
+  }
+
+  const productionSmoke = checkProductionSmokeGate();
+  if (!productionSmoke.present) {
+    failures.push("Production smoke workflow is missing the scheduled/manual release-ladder smoke sequence.");
   }
 
   return {
@@ -135,6 +142,7 @@ function inspectLocalReleaseSurface() {
       missing: missingFiles,
     },
     workflowWhitespace,
+    productionSmoke,
   };
 }
 
@@ -449,6 +457,25 @@ function checkWorkflowWhitespaceGate() {
   };
 }
 
+function checkProductionSmokeGate() {
+  const workflow = resolve(root, ".github/workflows/production-smoke.yml");
+  if (!existsSync(workflow)) return { present: false, commands: [] };
+  const text = readFileSync(workflow, "utf8");
+  const commands = [
+    "npm run check:production",
+    "npm run smoke:vercel-production -- --base-url=https://mochirii.com",
+    "npm run smoke:supabase-edge-functions",
+    "npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect",
+  ];
+  const hasTriggers = /workflow_dispatch:/.test(text) && /schedule:/.test(text);
+  const presentCommands = commands.filter((command) => text.includes(command));
+  return {
+    present: hasTriggers && presentCommands.length === commands.length,
+    commands: presentCommands,
+    expectedCommands: commands,
+  };
+}
+
 function hasPackageScript(name) {
   const packageJson = readJson(resolve(root, "package.json")) || {};
   return Boolean(packageJson.scripts?.[name]);
@@ -581,6 +608,7 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - Required scripts present: ${scripts.present}/${scripts.total}
 - Required files present: ${files.present}/${files.total}
 - CI whitespace gate: ${data.local.workflowWhitespace.present ? data.local.workflowWhitespace.command : "missing"}
+- Scheduled production smoke ladder: ${data.local.productionSmoke.present ? data.local.productionSmoke.commands.join("; ") : "missing"}
 
 ## Vercel
 
