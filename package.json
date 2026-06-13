@@ -7,6 +7,7 @@
     "check": "node scripts/check-all.mjs",
     "check:accessibility-route-matrix": "node scripts/check-accessibility-route-matrix.mjs",
     "check:assets": "node scripts/check-assets.mjs",
+    "check:ci-release-ladder": "node scripts/check-ci-release-ladder.mjs",
     "check:content": "node scripts/check-content-guardrails.mjs",
     "check:csp-inline-hardening": "node scripts/check-csp-inline-hardening.mjs",
     "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",

@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 const checks = [
   ["check:js", ["node", "scripts/check-js.mjs"]],
   ["check:json", ["node", "scripts/check-json.mjs"]],
+  ["check:ci-release-ladder", ["node", "scripts/check-ci-release-ladder.mjs"]],
   ["check:protected-content", ["node", "scripts/check-protected-content.mjs"]],
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],

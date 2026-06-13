@@ -120,6 +120,17 @@ npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=red
 
 This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, and the `www` redirect. Static route metadata, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
 
+The scheduled/manual production smoke workflow mirrors the safe read-only release ladder:
+
+```sh
+npm run check:production
+npm run smoke:vercel-production -- --base-url=https://mochirii.com
+npm run smoke:supabase-edge-functions
+npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
+```
+
+The workflow shape is guarded by `npm run check:ci-release-ladder` so PR CI keeps static validation, Deno/Supabase Edge typing, whitespace checks, Next lint/build, and production-safe scheduled smokes aligned with the documented release path. Live Discord writes, Supabase migrations, Discord command registration, Fly deploys, and Enjin funded-chain actions stay outside CI and remain operator-approved release steps.
+
 Accessibility review starts with the no-secret route matrix:
 
 ```sh

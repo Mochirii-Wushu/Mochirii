@@ -21,5 +21,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Run production smoke check
+      - name: Run production metadata smoke
         run: npm run check:production
+
+      - name: Run Vercel production route smoke
+        run: npm run smoke:vercel-production -- --base-url=https://mochirii.com
+
+      - name: Run Supabase Edge contract smoke
+        run: npm run smoke:supabase-edge-functions
+
+      - name: Run custom-domain DNS smoke
+        run: npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
