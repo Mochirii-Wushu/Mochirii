@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T02:29:18.340Z",
+  "scope": "Mochirii website-side Fly release evidence guard for Mochi Social. This report is no-secret and static; it does not contact Fly, Vercel, Supabase, Discord, or Enjin.",
+  "docs": {
+    "runbook": "docs/mochi-social-fly-release-evidence.md",
+    "requiredFiles": [
+      {
+        "file": "docs/mochi-social-fly-release-evidence.md",
+        "present": true
+      },
+      {
+        "file": "docs/mochi-social-alpha.md",
+        "present": true
+      },
+      {
+        "file": "docs/mochi-social-alpha-codex-ops.md",
+        "present": true
+      },
+      {
+        "file": "docs/mochi-social-visual-polish.md",
+        "present": true
+      },
+      {
+        "file": "scripts/check-mochi-social-game-contract.mjs",
+        "present": true
+      },
+      {
+        "file": "scripts/check-mochi-social-preview-ready.mjs",
+        "present": true
+      },
+      {
+        "file": "reports/mochi-social-preview-ready.md",
+        "present": true
+      }
+    ]
+  },
+  "sourceCount": 9,
+  "gamePreDeployCommands": [
+    "npm ci",
+    "npm run secret-scan",
+    "npm run alpha:local-suite",
+    "npm run alpha:local-evidence",
+    "npm run alpha:operator-checklist",
+    "npm run alpha:report-hygiene",
+    "npm run typecheck",
+    "npm run lint",
+    "npm test",
+    "npm run build",
+    "git diff --check"
+  ],
+  "websiteAcceptanceCommands": [
+    "npm run check:mochi-social-alpha",
+    "npm run check:mochi-social-bridge-state",
+    "npm run check:mochi-social-auth-bridge",
+    "npm run check:mochi-social-edge-authority",
+    "npm run check:mochi-social-preview-key-loader",
+    "npm run check:mochi-social-discord-oauth",
+    "npm run check:mochi-social-game-contract",
+    "npm run check:mochi-social-report-hygiene"
+  ],
+  "warnings": [],
+  "failures": []
+}
