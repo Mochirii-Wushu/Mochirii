@@ -45,6 +45,7 @@
     "check:mochi-social-tester-password-gate": "node scripts/check-mochi-social-tester-password-gate.mjs",
     "check:next-public-sync": "node scripts/check-next-public-sync.mjs",
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",
+    "check:route-information-architecture": "node scripts/check-route-information-architecture.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:security-hardening": "node scripts/check-security-hardening.mjs",

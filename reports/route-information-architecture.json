@@ -1,0 +1,636 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T03:16:11.316Z",
+  "scope": "Mochirii route information architecture guard. This is a no-secret static check for route inventory, navigation grouping, auth-gated utility links, footer coverage, protected noindex, and Mochi Social repo-boundary clarity.",
+  "git": {
+    "branch": "codex/route-information-architecture-audit",
+    "head": "7a33d8a793b9",
+    "dirty": [
+      " M package.json",
+      " M scripts/check-all.mjs",
+      "?? docs/route-information-architecture.md",
+      "?? reports/route-information-architecture.json",
+      "?? reports/route-information-architecture.md",
+      "?? scripts/check-route-information-architecture.mjs"
+    ]
+  },
+  "routeGroups": [
+    {
+      "id": "guild",
+      "label": "Guild",
+      "purpose": "Repeated guild destinations members naturally revisit.",
+      "routes": [
+        "/",
+        "/spotlight",
+        "/gallery",
+        "/members",
+        "/games/mochi-social"
+      ]
+    },
+    {
+      "id": "culture",
+      "label": "Culture",
+      "purpose": "Stable identity and conduct reference material.",
+      "routes": [
+        "/join",
+        "/ranks",
+        "/leaders",
+        "/codex",
+        "/spotify"
+      ]
+    },
+    {
+      "id": "updates",
+      "label": "Updates",
+      "purpose": "Time-sensitive community activity and notices.",
+      "routes": [
+        "/announcements",
+        "/events",
+        "/raffles"
+      ]
+    },
+    {
+      "id": "account-tools",
+      "label": "Account and Tools",
+      "purpose": "Auth-gated or utility workflows that should not dominate public browsing.",
+      "routes": [
+        "/auth",
+        "/account",
+        "/gallery-submit",
+        "/leader-dashboard",
+        "/recruitment"
+      ]
+    },
+    {
+      "id": "contextual",
+      "label": "Contextual",
+      "purpose": "Routes reached from cards, profile links, or direct workflow context.",
+      "routes": [
+        "/twills",
+        "/members/[slug]"
+      ]
+    }
+  ],
+  "discoveredRoutes": [
+    {
+      "route": "/",
+      "file": "apps/web/app/page.tsx"
+    },
+    {
+      "route": "/account",
+      "file": "apps/web/app/account/page.tsx"
+    },
+    {
+      "route": "/announcements",
+      "file": "apps/web/app/announcements/page.tsx"
+    },
+    {
+      "route": "/auth",
+      "file": "apps/web/app/auth/page.tsx"
+    },
+    {
+      "route": "/codex",
+      "file": "apps/web/app/codex/page.tsx"
+    },
+    {
+      "route": "/events",
+      "file": "apps/web/app/events/page.tsx"
+    },
+    {
+      "route": "/gallery",
+      "file": "apps/web/app/gallery/page.tsx"
+    },
+    {
+      "route": "/gallery-submit",
+      "file": "apps/web/app/gallery-submit/page.tsx"
+    },
+    {
+      "route": "/games/mochi-social",
+      "file": "apps/web/app/games/mochi-social/page.tsx"
+    },
+    {
+      "route": "/join",
+      "file": "apps/web/app/join/page.tsx"
+    },
+    {
+      "route": "/leader-dashboard",
+      "file": "apps/web/app/leader-dashboard/page.tsx"
+    },
+    {
+      "route": "/leaders",
+      "file": "apps/web/app/leaders/page.tsx"
+    },
+    {
+      "route": "/members",
+      "file": "apps/web/app/members/page.tsx"
+    },
+    {
+      "route": "/members/[slug]",
+      "file": "apps/web/app/members/[slug]/page.tsx"
+    },
+    {
+      "route": "/raffles",
+      "file": "apps/web/app/raffles/page.tsx"
+    },
+    {
+      "route": "/ranks",
+      "file": "apps/web/app/ranks/page.tsx"
+    },
+    {
+      "route": "/recruitment",
+      "file": "apps/web/app/recruitment/page.tsx"
+    },
+    {
+      "route": "/spotify",
+      "file": "apps/web/app/spotify/page.tsx"
+    },
+    {
+      "route": "/spotlight",
+      "file": "apps/web/app/spotlight/page.tsx"
+    },
+    {
+      "route": "/twills",
+      "file": "apps/web/app/twills/page.tsx"
+    }
+  ],
+  "header": {
+    "groups": {
+      "guild": [
+        "/",
+        "/spotlight",
+        "/gallery",
+        "/members",
+        "/games/mochi-social"
+      ],
+      "culture": [
+        "/join",
+        "/ranks",
+        "/leaders",
+        "/codex",
+        "/spotify"
+      ],
+      "updates": [
+        "/announcements",
+        "/events",
+        "/raffles"
+      ]
+    },
+    "utility": [
+      "/recruitment",
+      "/auth",
+      "/account",
+      "/members",
+      "/gallery-submit",
+      "/games/mochi-social",
+      "/leader-dashboard"
+    ],
+    "allRoutes": [
+      "/",
+      "/spotlight",
+      "/gallery",
+      "/members",
+      "/games/mochi-social",
+      "/join",
+      "/ranks",
+      "/leaders",
+      "/codex",
+      "/spotify",
+      "/announcements",
+      "/events",
+      "/raffles",
+      "/recruitment",
+      "/auth",
+      "/account",
+      "/gallery-submit",
+      "/leader-dashboard"
+    ],
+    "primaryNavLabel": true,
+    "mobileNavLabel": true,
+    "skipLink": true,
+    "authMarkers": {
+      "signedOut": true,
+      "signedIn": true,
+      "verified": true
+    }
+  },
+  "footer": {
+    "guild": [
+      "/",
+      "/spotlight",
+      "/gallery",
+      "/members",
+      "/gallery-submit"
+    ],
+    "culture": [
+      "/join",
+      "/ranks",
+      "/leaders",
+      "/codex",
+      "/spotify",
+      "/auth",
+      "/account"
+    ],
+    "updates": [
+      "/announcements",
+      "/events",
+      "/raffles"
+    ],
+    "actions": [
+      "/",
+      "/recruitment"
+    ],
+    "allRoutes": [
+      "/",
+      "/spotlight",
+      "/gallery",
+      "/members",
+      "/gallery-submit",
+      "/join",
+      "/ranks",
+      "/leaders",
+      "/codex",
+      "/spotify",
+      "/auth",
+      "/account",
+      "/announcements",
+      "/events",
+      "/raffles"
+    ],
+    "footerNavigationLabel": true
+  },
+  "routes": [
+    {
+      "route": "/",
+      "title": "Home",
+      "surface": "public",
+      "file": "apps/web/app/page.tsx",
+      "group": "guild",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "home",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/spotlight",
+      "title": "Spotlight",
+      "surface": "public",
+      "file": "apps/web/app/spotlight/page.tsx",
+      "group": "guild",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/gallery",
+      "title": "Gallery",
+      "surface": "public",
+      "file": "apps/web/app/gallery/page.tsx",
+      "group": "guild",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/members",
+      "title": "Members",
+      "surface": "member",
+      "file": "apps/web/app/members/page.tsx",
+      "group": "guild",
+      "primaryHeader": true,
+      "utilityHeader": true,
+      "footer": true,
+      "auth": "verified",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "members",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/games/mochi-social",
+      "title": "Mochi Social",
+      "surface": "alpha",
+      "file": "apps/web/app/games/mochi-social/page.tsx",
+      "group": "guild",
+      "primaryHeader": true,
+      "utilityHeader": true,
+      "footer": false,
+      "auth": "signed-in",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "games-mochi-social",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/join",
+      "title": "Join",
+      "surface": "public",
+      "file": "apps/web/app/join/page.tsx",
+      "group": "culture",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/ranks",
+      "title": "Ranks",
+      "surface": "public",
+      "file": "apps/web/app/ranks/page.tsx",
+      "group": "culture",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/leaders",
+      "title": "Leaders",
+      "surface": "public",
+      "file": "apps/web/app/leaders/page.tsx",
+      "group": "culture",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/codex",
+      "title": "Codex",
+      "surface": "public",
+      "file": "apps/web/app/codex/page.tsx",
+      "group": "culture",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/spotify",
+      "title": "Playlists",
+      "surface": "public",
+      "file": "apps/web/app/spotify/page.tsx",
+      "group": "culture",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/announcements",
+      "title": "Announcements",
+      "surface": "public",
+      "file": "apps/web/app/announcements/page.tsx",
+      "group": "updates",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/events",
+      "title": "Events",
+      "surface": "public",
+      "file": "apps/web/app/events/page.tsx",
+      "group": "updates",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/raffles",
+      "title": "Raffles",
+      "surface": "public",
+      "file": "apps/web/app/raffles/page.tsx",
+      "group": "updates",
+      "primaryHeader": true,
+      "utilityHeader": false,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/recruitment",
+      "title": "Recruitment",
+      "surface": "utility",
+      "file": "apps/web/app/recruitment/page.tsx",
+      "group": "account-tools",
+      "primaryHeader": false,
+      "utilityHeader": true,
+      "footer": true,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/auth",
+      "title": "Login",
+      "surface": "account",
+      "file": "apps/web/app/auth/page.tsx",
+      "group": "account-tools",
+      "primaryHeader": false,
+      "utilityHeader": true,
+      "footer": true,
+      "auth": "signed-out",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "auth",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/account",
+      "title": "Account",
+      "surface": "account",
+      "file": "apps/web/app/account/page.tsx",
+      "group": "account-tools",
+      "primaryHeader": false,
+      "utilityHeader": true,
+      "footer": true,
+      "auth": "signed-in",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "account",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/gallery-submit",
+      "title": "Submit Image",
+      "surface": "member-tool",
+      "file": "apps/web/app/gallery-submit/page.tsx",
+      "group": "account-tools",
+      "primaryHeader": false,
+      "utilityHeader": true,
+      "footer": true,
+      "auth": "verified",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "gallery-submit",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/leader-dashboard",
+      "title": "Leader Dashboard",
+      "surface": "moderator-tool",
+      "file": "apps/web/app/leader-dashboard/page.tsx",
+      "group": "account-tools",
+      "primaryHeader": false,
+      "utilityHeader": true,
+      "footer": false,
+      "auth": "signed-in",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "leader-dashboard",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/twills",
+      "title": "Twills",
+      "surface": "contextual",
+      "file": "apps/web/app/twills/page.tsx",
+      "group": "contextual",
+      "primaryHeader": false,
+      "utilityHeader": false,
+      "footer": false,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": false,
+      "noindex": false,
+      "mainTarget": true,
+      "bodyPage": "",
+      "metadataCanonical": true
+    },
+    {
+      "route": "/members/[slug]",
+      "title": "Member Profile",
+      "surface": "contextual-member",
+      "file": "apps/web/app/members/[slug]/page.tsx",
+      "group": "contextual",
+      "primaryHeader": false,
+      "utilityHeader": false,
+      "footer": false,
+      "auth": "public/contextual",
+      "headerAuth": true,
+      "footerAuth": true,
+      "noindexExpected": true,
+      "noindex": true,
+      "mainTarget": true,
+      "bodyPage": "member-profile",
+      "metadataCanonical": false
+    }
+  ],
+  "sourceBasis": [
+    "https://www.w3.org/TR/WCAG22/",
+    "https://www.w3.org/WAI/WCAG21/Understanding/consistent-navigation.html",
+    "https://www.w3.org/WAI/WCAG22/Understanding/bypass-blocks",
+    "https://web.dev/learn/html/navigation",
+    "https://web.dev/articles/headings-and-landmarks",
+    "https://designsystem.digital.gov/components/header/",
+    "https://designsystem.digital.gov/components/in-page-navigation/"
+  ],
+  "providerMutationsAuthorized": false,
+  "liveProviderReads": false,
+  "warnings": [],
+  "failures": []
+}
