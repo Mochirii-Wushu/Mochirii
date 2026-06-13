@@ -1,6 +1,6 @@
 # Mochi Social Fly Release Evidence Report
 
-Generated: 2026-06-13T02:29:18.340Z
+Generated: 2026-06-13T02:33:27.239Z
 
 This file is intentionally no-secret. It validates the website-side Fly release evidence runbook for Mochi Social without contacting hosted providers.
 
@@ -22,7 +22,6 @@ This file is intentionally no-secret. It validates the website-side Fly release 
 | docs/mochi-social-visual-polish.md | present |
 | scripts/check-mochi-social-game-contract.mjs | present |
 | scripts/check-mochi-social-preview-ready.mjs | present |
-| reports/mochi-social-preview-ready.md | present |
 
 ## Game Repo Evidence Commands
 

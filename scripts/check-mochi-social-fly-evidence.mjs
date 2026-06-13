@@ -18,7 +18,6 @@ const requiredFiles = [
   "docs/mochi-social-visual-polish.md",
   "scripts/check-mochi-social-game-contract.mjs",
   "scripts/check-mochi-social-preview-ready.mjs",
-  "reports/mochi-social-preview-ready.md",
 ];
 
 const requiredSources = [

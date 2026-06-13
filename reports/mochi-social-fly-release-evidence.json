@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-13T02:29:18.340Z",
+  "checkedAt": "2026-06-13T02:33:27.239Z",
   "scope": "Mochirii website-side Fly release evidence guard for Mochi Social. This report is no-secret and static; it does not contact Fly, Vercel, Supabase, Discord, or Enjin.",
   "docs": {
     "runbook": "docs/mochi-social-fly-release-evidence.md",
@@ -27,10 +27,6 @@
       },
       {
         "file": "scripts/check-mochi-social-preview-ready.mjs",
-        "present": true
-      },
-      {
-        "file": "reports/mochi-social-preview-ready.md",
         "present": true
       }
     ]
