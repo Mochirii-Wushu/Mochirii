@@ -1,38 +1,50 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-12T23:54:18.361Z",
+  "checkedAt": "2026-06-13T01:00:41.136Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
   "providerReadsEnabled": true,
   "strictProviders": false,
   "git": {
-    "branch": "codex/full-stack-release-evidence",
-    "head": "86123d753c60",
-    "upstream": "origin/codex/full-stack-release-evidence",
+    "branch": "codex/pr-ci-release-ladder",
+    "head": "8f72a0565141",
+    "upstream": "origin/codex/pr-ci-release-ladder",
     "upstreamStatus": "configured",
-    "ahead": 0,
+    "ahead": 1,
     "behind": 0,
-    "dirty": [
-      " M .github/workflows/validate-static-site.yml",
-      " M scripts/check-full-stack-release-evidence.mjs"
-    ],
+    "dirty": [],
     "errors": []
   },
   "local": {
     "packageName": "mochirii-guild-site",
     "requiredScripts": {
-      "total": 16,
-      "present": 16,
+      "total": 17,
+      "present": 17,
       "missing": []
     },
     "requiredFiles": {
-      "total": 9,
-      "present": 9,
+      "total": 10,
+      "present": 10,
       "missing": []
     },
     "workflowWhitespace": {
       "present": true,
       "command": "git diff --check BASE_SHA..HEAD_SHA"
+    },
+    "productionSmoke": {
+      "present": true,
+      "commands": [
+        "npm run check:production",
+        "npm run smoke:vercel-production -- --base-url=https://mochirii.com",
+        "npm run smoke:supabase-edge-functions",
+        "npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect"
+      ],
+      "expectedCommands": [
+        "npm run check:production",
+        "npm run smoke:vercel-production -- --base-url=https://mochirii.com",
+        "npm run smoke:supabase-edge-functions",
+        "npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect"
+      ]
     }
   },
   "vercel": {
@@ -45,7 +57,7 @@
       "name": "mochirii",
       "target": "production",
       "readyState": "READY",
-      "url": "https://mochirii-hxjsg57j9-mochirii.vercel.app",
+      "url": "https://mochirii-klf1yrcg9-mochirii.vercel.app",
       "aliases": [
         "mochirii.com",
         "mochirii.vercel.app",
@@ -53,7 +65,7 @@
         "mochirii-git-main-mochirii.vercel.app",
         "www.mochirii.com"
       ],
-      "createdAt": 1781275744671
+      "createdAt": 1781311371924
     },
     "environmentNames": {
       "production": {

@@ -1,6 +1,6 @@
 # Mochirii Full-Stack Release Evidence
 
-Generated: 2026-06-12T23:54:18.361Z
+Generated: 2026-06-13T01:00:41.136Z
 
 This file is intentionally no-secret. It records release-readiness evidence only and omits raw tokens, service-role keys, webhook URLs, secret digests, private message content, cookies, and raw headers.
 
@@ -9,15 +9,16 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - OK: yes
 - Production URL: https://mochirii.com
 - Provider reads: enabled
-- Git branch: codex/full-stack-release-evidence
-- Git head: 86123d753c60
-- Git dirty entries: 2
+- Git branch: codex/pr-ci-release-ladder
+- Git head: 8f72a0565141
+- Git dirty entries: 0
 
 ## Local Release Surface
 
-- Required scripts present: 16/16
-- Required files present: 9/9
+- Required scripts present: 17/17
+- Required files present: 10/10
 - CI whitespace gate: git diff --check BASE_SHA..HEAD_SHA
+- Scheduled production smoke ladder: npm run check:production; npm run smoke:vercel-production -- --base-url=https://mochirii.com; npm run smoke:supabase-edge-functions; npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
 
 ## Vercel
 
