@@ -1,0 +1,382 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T01:56:06.185Z",
+  "scope": "No-secret Mochirii operator index audit for live-domain runbook coverage, provider boundaries, and release/rollback source-of-truth links.",
+  "indexPath": "docs/operator-index.md",
+  "pathChecks": [
+    {
+      "path": "AGENTS.md",
+      "category": "repository guidance",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/current-live-state.md",
+      "category": "live state",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/deployment.md",
+      "category": "release",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "apps/web/README.md",
+      "category": "vercel-next",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/dns-cutover-readiness-and-rollback.md",
+      "category": "rollback",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/dns-cutover-approval-packet.md",
+      "category": "rollback",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/full-stack-release-evidence.md",
+      "category": "release",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/live-site-verification-2026-06-07.md",
+      "category": "release",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "supabase/README.md",
+      "category": "supabase",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/member-profiles-and-rank-roles.md",
+      "category": "supabase",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/member-workflow-production-qa-runbook.md",
+      "category": "supabase",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/supabase-cost-usage-runbook.md",
+      "category": "supabase",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/supabase-manual-parity-runbook.md",
+      "category": "supabase",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/reaper-runtime-health-checklist.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/reaper-event-sync-runbook.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/reaper-rank-role-sync.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/reaper-pending-verification-containment.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/reaper-pending-verification-activation-packet.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/vote-reminder-runbook.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/discord-reaper-parity-2026-06-10.md",
+      "category": "discord-reaper",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/gallery-guide.md",
+      "category": "gallery",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/member-gallery-moderation-runbook.md",
+      "category": "gallery",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/member-gallery-cleanup-plan.md",
+      "category": "gallery",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/instagram-gallery-publishing-deployment-runbook.md",
+      "category": "gallery",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/mochi-social-alpha.md",
+      "category": "mochi-social",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/mochi-social-alpha-codex-ops.md",
+      "category": "mochi-social",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/mochi-social-visual-polish.md",
+      "category": "mochi-social",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/mochi-social-preview-ready.md",
+      "category": "mochi-social",
+      "optionalGenerated": true,
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/mochi-social-report-hygiene.md",
+      "category": "mochi-social",
+      "optionalGenerated": true,
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/mochi-social-browser-gates.md",
+      "category": "mochi-social",
+      "optionalGenerated": true,
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/accessibility-route-matrix.md",
+      "category": "accessibility-performance-security",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "reports/csp-inline-hardening-inventory.md",
+      "category": "accessibility-performance-security",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/content-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/home-shell-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/join-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/events-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/ranks-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/leaders-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/codex-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/recruitment-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/side-pages-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/twills-guide.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    },
+    {
+      "path": "docs/roadmap.md",
+      "category": "content",
+      "exists": true,
+      "linked": true
+    }
+  ],
+  "phraseChecks": [
+    {
+      "phrase": "https://mochirii.com",
+      "present": true
+    },
+    {
+      "phrase": "apps/web",
+      "present": true
+    },
+    {
+      "phrase": "root static",
+      "present": true
+    },
+    {
+      "phrase": "Supabase",
+      "present": true
+    },
+    {
+      "phrase": "Discord/Reaper",
+      "present": true
+    },
+    {
+      "phrase": "Mochi Social",
+      "present": true
+    },
+    {
+      "phrase": "Fly",
+      "present": true
+    },
+    {
+      "phrase": "Enjin",
+      "present": true
+    },
+    {
+      "phrase": "no live provider mutation",
+      "present": true
+    },
+    {
+      "phrase": "no secrets",
+      "present": true
+    },
+    {
+      "phrase": "service-role",
+      "present": true
+    },
+    {
+      "phrase": "funded-chain",
+      "present": true
+    },
+    {
+      "phrase": "reports/full-stack-release-evidence.md",
+      "present": true
+    }
+  ],
+  "categorySummary": {
+    "repository guidance": {
+      "total": 1,
+      "linked": 1,
+      "missing": 0
+    },
+    "live state": {
+      "total": 1,
+      "linked": 1,
+      "missing": 0
+    },
+    "release": {
+      "total": 3,
+      "linked": 3,
+      "missing": 0
+    },
+    "vercel-next": {
+      "total": 1,
+      "linked": 1,
+      "missing": 0
+    },
+    "rollback": {
+      "total": 2,
+      "linked": 2,
+      "missing": 0
+    },
+    "supabase": {
+      "total": 5,
+      "linked": 5,
+      "missing": 0
+    },
+    "discord-reaper": {
+      "total": 7,
+      "linked": 7,
+      "missing": 0
+    },
+    "gallery": {
+      "total": 4,
+      "linked": 4,
+      "missing": 0
+    },
+    "mochi-social": {
+      "total": 6,
+      "linked": 6,
+      "missing": 0
+    },
+    "accessibility-performance-security": {
+      "total": 2,
+      "linked": 2,
+      "missing": 0
+    },
+    "content": {
+      "total": 11,
+      "linked": 11,
+      "missing": 0
+    }
+  },
+  "warnings": [],
+  "failures": []
+}

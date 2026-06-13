@@ -22,6 +22,7 @@
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",
     "check:full-stack-release-evidence": "node scripts/check-full-stack-release-evidence.mjs",
     "check:guild-schedule": "node scripts/check-guild-schedule.mjs",
+    "check:operator-index": "node scripts/check-operator-index.mjs",
     "check:events-page-schedule-sync": "node scripts/check-events-page-schedule-sync.mjs",
     "check:instagram-gallery-publishing": "node scripts/check-instagram-gallery-publishing.mjs",
     "check:js": "node scripts/check-js.mjs",
