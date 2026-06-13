@@ -1,0 +1,78 @@
+{
+  "ok": true,
+  "checkedAt": "2026-06-13T03:07:25.715Z",
+  "scope": "Mochirii parallel-agent merge coordination. This is a local, no-secret, provider-read-free guard for website/game branch ownership and merge evidence.",
+  "git": {
+    "branch": "codex/parallel-agent-merge-coordination",
+    "head": "7a33d8a793b9",
+    "originMainAhead": 0,
+    "originMainBehind": 0,
+    "dirty": [
+      " M package.json",
+      " M scripts/check-all.mjs",
+      "?? docs/parallel-agent-merge-coordination.md",
+      "?? scripts/check-parallel-agent-merge-coordination.mjs"
+    ],
+    "errors": []
+  },
+  "branchPolicy": {
+    "scopedCodexBranch": true,
+    "currentBranchIsMain": false,
+    "requiresCurrentOriginMainBeforeNewWork": true,
+    "failOnMain": false
+  },
+  "ownership": {
+    "mochirii": "website, Vercel/Next, Supabase, Discord/Reaper, allowlist, terms, feedback, admin, tester doorway",
+    "mochiSocial": "RPGJS runtime, maps, sprites, HUD, manifests, game art, asset ledger, Fly runtime, Enjin runtime/finality",
+    "sharedContracts": [
+      "NEXT_PUBLIC_MOCHI_SOCIAL_URL",
+      "iframe bridge messages",
+      "/integration/game-manifest.json",
+      "/integration/alpha/status",
+      "Supabase Edge request and response shapes",
+      "configured-preview-stub readiness claims"
+    ]
+  },
+  "providerMutationsAuthorized": false,
+  "fundedChainActionsAuthorized": false,
+  "liveProviderReads": false,
+  "validations": [
+    {
+      "file": "AGENTS.md",
+      "present": true,
+      "required": 3,
+      "missing": []
+    },
+    {
+      "file": "docs/mochi-social-alpha-codex-ops.md",
+      "present": true,
+      "required": 4,
+      "missing": []
+    },
+    {
+      "file": "docs/mochi-social-alpha.md",
+      "present": true,
+      "required": 4,
+      "missing": []
+    },
+    {
+      "file": "docs/parallel-agent-merge-coordination.md",
+      "present": true,
+      "required": 8,
+      "missing": []
+    },
+    {
+      "file": "scripts/check-parallel-agent-merge-coordination.mjs",
+      "present": true,
+      "required": 4,
+      "missing": []
+    }
+  ],
+  "packageScriptPresent": true,
+  "checkAllIncludesScript": true,
+  "warnings": [],
+  "skipped": [
+    "provider reads disabled by design"
+  ],
+  "failures": []
+}
