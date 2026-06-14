@@ -68,6 +68,8 @@ The `reaper-discord-interactions` function validates Discord request signatures 
 
 The same Interactions endpoint handles the manual Discord vote reminder contract: `Done voting` button clicks, `/vote-status`, `/vote-leaderboard`, and moderator-only `/vote-reminder-preview`. The scheduled sender is the separate `send-vote-reminder` Edge Function. It posts link buttons only; it never automates third-party upvotes, vote submissions, CAPTCHA bypasses, browser clicks, vote-site sessions, or vote-site result checks.
 
+The Interactions endpoint also supports moderator-only pending-verification containment with `/sync-pending-verification mode:<preview|apply> confirm:<true|false>`. It is preview-first and only manages tracked member-specific `VIEW_CHANNEL` overwrites for WWM-only, unverified Discord members. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md).
+
 Script order on pages with Auth or upload behavior is:
 
 ```html
@@ -158,6 +160,8 @@ Discord remains the live community layer: chat, voice, forum conversations, sche
 `discord_resources` is the service-managed registry for known Discord resources: the guild, roles, channels, forums, threads, scheduled events, webhooks, bots, and safe external targets. It stores IDs, labels, optional parent IDs, optional public/deep links, descriptions, enabled state, and non-secret metadata so future page scripts and Edge Functions do not hardcode every Discord resource.
 
 `discord_sync_log` records future sync attempts and bridge jobs: scheduled-event imports, forum/thread index updates, webhook notifications, slash-command entry points, role checks, manual tests, and skipped or failed attempts. Log details must stay operational and redacted; never store tokens, webhook URLs, private conversations, or unrestricted message content.
+
+`discord_managed_permission_overwrites` records only Reaper-owned Discord permission overwrite bits by guild, channel, Discord user, and managing service. It is service-role-only and currently backs pending-verification containment for member-specific `VIEW_CHANNEL` allows/denies. Browser code receives no grants and must not read or write this table.
 
 Known foundation resources:
 
@@ -369,8 +373,9 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 
 7. Register the guild-scoped `/submit` command with optional boolean `share_to_instagram`.
 8. Register the guild-scoped `/sync-events` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`.
-9. Register the guild-scoped `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview` commands. `/vote-reminder-preview` is enforced by the configured Moderator role.
-10. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
+9. Register the guild-scoped `/sync-pending-verification` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`. Use `npm run register:reaper-pending-verification-command` for dry run first; approved apply uses `npm run register:reaper-pending-verification-command -- --apply`.
+10. Register the guild-scoped `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview` commands. `/vote-reminder-preview` is enforced by the configured Moderator role.
+11. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
 
 ```text
 GET /guilds/1078630751077142608/members/{discord_user_id}
@@ -492,6 +497,13 @@ No public read access is granted.
 - anon and authenticated browser clients receive no direct table privileges.
 - service_role can manage rows from trusted Edge Functions after moderator verification.
 
+`discord_managed_permission_overwrites`:
+
+- RLS is enabled.
+- anon and authenticated browser clients receive no direct table privileges.
+- service_role can manage rows from trusted Edge Functions after moderator verification.
+- Rows store only owned permission bitfields and Discord IDs for Reaper-managed overwrites.
+
 Storage `member-gallery`:
 
 - authenticated active verified members can upload only into their own first path segment.
@@ -529,15 +541,26 @@ The public Discord entrypoint is the Supabase-hosted Discord Interactions functi
 reaper-discord-interactions
 ```
 
+The private Gateway member-event endpoint for the second pending-verification release is:
+
+```sh
+reaper-discord-member-sync
+```
+
 That function has `verify_jwt = false` because Discord calls it directly. It validates `x-signature-ed25519` and `x-signature-timestamp` with `DISCORD_PUBLIC_KEY`, answers PING, enforces guild `1078630751077142608`, channel `1508077313965817856`, and required roles, then defers the interaction and calls `submit-discord-gallery-image` in a background task. The ingest function also has `verify_jwt = false` because it is called by the trusted Reaper bridge rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The ingest function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
 
 The same Reaper Interactions endpoint also supports:
 
 ```text
 /sync-events mode:<preview|apply> confirm:<true|false>
+/sync-pending-verification mode:<preview|apply> confirm:<true|false>
 ```
 
 `/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key. Schedule items may include `discordCoverImage`, `discordLocation`, `discordEventId`, `discordDuplicateEventIds`, and `discordRecurrenceRule`; the monthly raffle uses these fields to adopt the canonical recurring event, upload the approved cover image, set the Discord location to `Guild Base Pool`, and retire only the explicit duplicate one-off raffle ID listed in the schedule.
+
+`/sync-pending-verification` targets only Discord members whose roles array is exactly `["1468659807736299520"]` and who do not have `1078630751077142615`. Preview fetches the current guild channels and members, builds the allowed tree from category `1468658801388290048`, detects manual member-specific `VIEW_CHANNEL` conflicts, and writes a redacted `discord_sync_log` row. Apply requires `confirm:true`, the configured Moderator role, and Discord Manage Roles permission. It writes only tracked member-specific `VIEW_CHANNEL` permission overwrites and records Reaper-owned bits in `discord_managed_permission_overwrites`.
+
+`reaper-discord-member-sync` is the second-release Gateway automation endpoint. It has `verify_jwt = false` and requires `x-mochirii-reaper-member-sync-secret`; the private Gateway worker posts `guildMemberAdd` and role-changing `guildMemberUpdate` events, and the function fetches the current Discord member before planning or mutating. It uses the same shared pending-verification containment policy as `/sync-pending-verification`, blocks manual conflicts, enforces the same max-mutation guard, and logs redacted `role_check` counts. The Gateway worker must not mutate roles or channel permissions directly and must not store Supabase service-role keys.
 
 ## Discord Vote Reminder
 
@@ -595,6 +618,18 @@ The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/
 `share_to_instagram` defaults to `false`. Reaper maps `subtitle` to the existing website `caption` field and sends `instagramOptIn` in the `submit-discord-gallery-image` JSON payload. The user-facing Discord copy should say whether Instagram sharing was enabled. Duplicate Discord message/attachment submissions stay idempotent and do not mutate existing stored consent.
 
 There is no automatic Instagram publishing. Website gallery approval creates an Instagram publishing job only when the submission has explicit opt-in consent. Moderators then review the separate Instagram Queue before any external post is sent.
+
+## Pending Verification Containment
+
+Pending-verification containment is a moderator-only Discord repair path for members who only have role `1468659807736299520` and have not received role `1078630751077142615`.
+
+```text
+/sync-pending-verification mode:<preview|apply> confirm:<true|false>
+```
+
+Reaper computes the allowed channel tree as category `1468658801388290048` plus its current child channels. It then plans member-specific `VIEW_CHANNEL` allows inside that tree and member-specific `VIEW_CHANNEL` denies outside that tree. It preserves unrelated overwrite bits and removes only Reaper-owned bits when a member no longer matches the target predicate. Manual member-specific `VIEW_CHANNEL` allows outside the allowed tree or denies inside the allowed tree block apply.
+
+Preview is the safe first command. Apply requires `confirm:true`, Moderator role `1078630751165222984`, and Discord Manage Roles permission. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md) for the conflict policy and [`../docs/reaper-pending-verification-activation-packet.md`](../docs/reaper-pending-verification-activation-packet.md) for live activation, Gateway release, and rollback steps.
 
 ## Member Profiles And Vanity Rank Roles
 

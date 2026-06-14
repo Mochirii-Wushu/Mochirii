@@ -402,8 +402,7 @@ export default function Home() {
           </section>
 
           <section
-            className="glass-card glass-card--primary glass-pad"
-            style={{ marginTop: 24 }}
+            className="glass-card glass-card--primary glass-pad u-mt-24"
             aria-label="Four doors"
           >
             <h2 className="section-title">Four Doors</h2>
@@ -414,8 +413,7 @@ export default function Home() {
           </section>
 
           <section
-            className="glass-card glass-card--primary glass-pad"
-            style={{ marginTop: 24 }}
+            className="glass-card glass-card--primary glass-pad u-mt-24"
             aria-label="Member spotlight"
           >
             <h2 className="section-title">Member Spotlight</h2>
@@ -475,8 +473,7 @@ export default function Home() {
           </section>
 
           <section
-            className="glass-card glass-card--primary glass-pad"
-            style={{ marginTop: 24 }}
+            className="glass-card glass-card--primary glass-pad u-mt-24"
             aria-label="Screenshot spotlight"
           >
             <h2 className="section-title">Screenshot Spotlight</h2>

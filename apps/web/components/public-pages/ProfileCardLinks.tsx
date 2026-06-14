@@ -56,7 +56,7 @@ export function LeaderProfileButton({
   if (!shouldShow) return null;
 
   return (
-    <a className="footer-link leader-profile-link" href={href} style={{ display: "inline-flex", marginTop: 12 }}>
+    <a className="footer-link leader-profile-link u-inline-flex u-mt-12" href={href}>
       {clean(label, "Open profile")}
     </a>
   );

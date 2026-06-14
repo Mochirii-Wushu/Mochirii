@@ -88,7 +88,7 @@ function announcementDetails(item: DataRecord) {
 
 function ReturnHomeLink() {
   return (
-    <div style={{ marginTop: 18 }}>
+    <div className="u-mt-18">
       <Link href="/" className="footer-link">
         Return to Home
       </Link>
@@ -100,10 +100,10 @@ function MiniCard({ title, description }: { title: unknown; description: unknown
   return (
     <div className="col-6">
       <article className="glass-card glass-card--soft glass-pad">
-        <h3 className="section-title section-title--sm" style={{ margin: 0 }}>
+        <h3 className="section-title section-title--sm u-m-0">
           {text(title, "Title")}
         </h3>
-        <p className="muted" style={{ margin: "10px 0 0" }}>
+        <p className="muted u-mt-10">
           {text(description)}
         </p>
       </article>
@@ -115,10 +115,10 @@ function ListBlock({ title, items }: { title: unknown; items: unknown }) {
   return (
     <div className="col-12">
       <article className="glass-card glass-card--soft glass-pad">
-        <h3 className="section-title section-title--sm" style={{ margin: 0 }}>
+        <h3 className="section-title section-title--sm u-m-0">
           {text(title, "Section")}
         </h3>
-        <ul style={{ margin: "12px 0 0", paddingLeft: 18 }}>
+        <ul className="u-list-inset">
           {strings(items, 10).map((item) => (
             <li key={item}>{item}</li>
           ))}
@@ -138,8 +138,8 @@ function RankCards({ ranks }: { ranks: unknown }) {
   return (
     <>
       {items.map((rank) => (
-        <div className="glass-card glass-card--soft glass-pad" style={{ boxShadow: "none" }} key={text(rank.name, "Rank")}>
-          <h3 className="section-title section-title--sm" style={{ marginBottom: 8 }}>
+        <div className="glass-card glass-card--soft glass-pad u-card-no-shadow" key={text(rank.name, "Rank")}>
+          <h3 className="section-title section-title--sm u-mb-8">
             {text(rank.name, "Rank")}
           </h3>
           <ProseStack lines={rank.body} />
@@ -157,12 +157,14 @@ function OverlayCard({
 }: {
   image: unknown;
   alt: unknown;
-  aspectRatio: string;
+  aspectRatio: "3 / 4" | "16 / 10";
   children: ReactNode;
 }) {
+  const frameClass = aspectRatio === "3 / 4" ? "overlay-card__frame--portrait" : "overlay-card__frame--wide";
+
   return (
-    <article className="glass-card glass-card--soft" style={{ overflow: "hidden" }}>
-      <div style={{ position: "relative", aspectRatio }}>
+    <article className="glass-card glass-card--soft overlay-card">
+      <div className={`overlay-card__frame ${frameClass}`}>
         {text(image) ? (
           <StaticImage
             src={publicPath(image)}
@@ -173,9 +175,9 @@ function OverlayCard({
             sizes="(max-width: 980px) calc(100vw - 68px), 580px"
           />
         ) : null}
-        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,.22)" }} aria-hidden="true" />
-        <div style={{ position: "absolute", left: 16, right: 16, bottom: 16 }}>
-          <div className="glass-card glass-card--primary" style={{ padding: 14, borderRadius: 18, boxShadow: "none" }}>
+        <div className="overlay-card__scrim" aria-hidden="true" />
+        <div className="overlay-card__content">
+          <div className="glass-card glass-card--primary overlay-card__panel">
             {children}
           </div>
         </div>
@@ -324,7 +326,7 @@ export function JoinPage() {
             <div className="col-divider" aria-hidden="true" />
           </div>
 
-          <div className="grid-12 grid-gap" style={{ marginTop: 24 }}>
+          <div className="grid-12 grid-gap u-mt-24">
             <section className="col-8">
               <div className="glass-card glass-card--primary glass-pad">
                 <h2 className="section-title" id="joinCultureTitle">
@@ -402,7 +404,7 @@ export function RanksPage() {
             { id: "middle", data: middle, asideTitle: "Guardianship & Mentorship", label: "Middle Leadership artwork" },
             { id: "members", data: members, asideTitle: "Growth & Fellowship", label: "Members artwork" },
           ].map((tier) => (
-            <div className="grid-12 grid-gap" style={{ marginTop: 24 }} key={tier.id}>
+            <div className="grid-12 grid-gap u-mt-24" key={tier.id}>
               <section className="col-8">
                 <div className="glass-card glass-card--primary glass-pad">
                   <h2 className="section-title" id={`${tier.id}Title`}>
@@ -414,10 +416,10 @@ export function RanksPage() {
                   {tier.id !== "senior" ? (
                     <BadgeRow id={`${tier.id}Pills`} items={strings(tier.data.pills, 10)} label={`${text(tier.data.title)} categories`} />
                   ) : null}
-                  <div id={`${tier.id}Ranks`} className="prose-stack" style={{ marginTop: 14 }}>
+                  <div id={`${tier.id}Ranks`} className="prose-stack u-mt-14">
                     <RankCards ranks={tier.data.ranks} />
                   </div>
-                  <p className="muted" id={`${tier.id}Note`} style={{ marginTop: 14 }}>
+                  <p className="muted u-mt-14" id={`${tier.id}Note`}>
                     {text(tier.data.note)}
                   </p>
                   {tier.id === "members" ? <ReturnHomeLink /> : null}
@@ -465,7 +467,7 @@ export function LeadersPage() {
                     {text(panel.title, "Guild Leadership")}
                   </h2>
                   <ProseStack id="leadersPanelBody" lines={panel.body} />
-                  <p className="muted" id="leadersPanelNote" style={{ marginTop: 14 }}>
+                  <p className="muted u-mt-14" id="leadersPanelNote">
                     {text(panel.note)}
                   </p>
                 </div>
@@ -477,7 +479,7 @@ export function LeadersPage() {
             </div>
           </section>
 
-          <section style={{ marginTop: 24 }}>
+          <section className="u-mt-24">
             <div className="leaders-council-intro">
               <h2 className="section-title" id="leadersGridTitle">
                 {text(council.title, "The Council")}
@@ -486,18 +488,18 @@ export function LeadersPage() {
                 {text(council.description)}
               </p>
             </div>
-            <div id="leadersGrid" className="grid-12 grid-gap" style={{ marginTop: 14 }} aria-label="Leadership roster">
+            <div id="leadersGrid" className="grid-12 grid-gap u-mt-14" aria-label="Leadership roster">
               {records(data.leaders).slice(0, 12).map((leader) => (
                 <div className="col-4" key={`${text(leader.role)}-${text(leader.name)}`}>
                   <OverlayCard image={leader.image || "./assets/img/leaders/leader-silhouette.webp"} alt={leader.alt || `${text(leader.role, "Leader")} portrait`} aspectRatio="3 / 4">
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                    <div className="overlay-card__meta">
                       <BadgeRow items={[text(leader.role, "Role")]} />
                       <span className="meta-text">{text(leader.availability)}</span>
                     </div>
-                    <h3 className="section-title section-title--sm" style={{ margin: "10px 0 0" }}>
+                    <h3 className="section-title section-title--sm u-mt-10">
                       {text(leader.name, "Leader")}
                     </h3>
-                    <p className="muted" style={{ margin: "10px 0 0" }}>
+                    <p className="muted u-mt-10">
                       {text(leader.summary)}
                     </p>
                     <LeaderProfileButton
@@ -511,7 +513,7 @@ export function LeadersPage() {
             </div>
           </section>
 
-          <section style={{ marginTop: 24 }}>
+          <section className="u-mt-24">
             <div className="glass-card glass-card--primary glass-pad">
               <h2 className="section-title" id="respTitle">
                 {text(responsibilities.title, "Responsibilities")}
@@ -519,14 +521,14 @@ export function LeadersPage() {
               <p className="muted" id="respDesc">
                 {text(responsibilities.description)}
               </p>
-              <div id="respGrid" className="grid-12 grid-gap" style={{ marginTop: 14 }} aria-label="Leadership responsibilities">
+              <div id="respGrid" className="grid-12 grid-gap u-mt-14" aria-label="Leadership responsibilities">
                 {records(responsibilities.items).slice(0, 6).map((item) => (
                   <div className="col-4" key={text(item.title, "Responsibility")}>
                     <OverlayCard image={item.image} alt={item.alt || "Responsibilities visual panel"} aspectRatio="16 / 10">
-                      <h3 className="section-title section-title--sm" style={{ margin: 0 }}>
+                      <h3 className="section-title section-title--sm u-m-0">
                         {text(item.title, "Responsibility")}
                       </h3>
-                      <p className="muted" style={{ margin: "10px 0 0" }}>
+                      <p className="muted u-mt-10">
                         {text(item.description)}
                       </p>
                     </OverlayCard>
@@ -587,7 +589,7 @@ export function CodexPage() {
             { data: tenets, id: "tenets", image: "tenetsImage", alt: "Tenets artwork", grid: "tenetsGrid" },
             { data: rhythm, id: "rhythm", image: "rhythmImage", alt: "Guild rhythm artwork", grid: "rhythmGrid" },
           ].map((section) => (
-            <section style={{ marginTop: 24 }} key={section.id}>
+            <section className="u-mt-24" key={section.id}>
               <div className="grid-12 grid-gap">
                 <section className="col-12">
                   <div className="glass-card glass-card--primary glass-pad">
@@ -597,7 +599,7 @@ export function CodexPage() {
                     <p className="muted" id={`${section.id}Desc`}>
                       {text(section.data.description)}
                     </p>
-                    <div className="grid-12 grid-gap" style={{ marginTop: 14 }}>
+                    <div className="grid-12 grid-gap u-mt-14">
                       <div className="col-6">
                         <div className="glass-card glass-card--soft glass-pad">
                           <StaticImage
@@ -609,7 +611,7 @@ export function CodexPage() {
                             className="image-panel__img"
                             sizes="(max-width: 980px) calc(100vw - 68px), 760px"
                           />
-                          <h3 className="section-title section-title--sm" id={`${section.id}CapTitle`} style={{ marginTop: 12 }}>
+                          <h3 className="section-title section-title--sm u-mt-12" id={`${section.id}CapTitle`}>
                             {text(section.data.captionTitle)}
                           </h3>
                           <p className="muted" id={`${section.id}CapDesc`}>
@@ -620,12 +622,12 @@ export function CodexPage() {
                       <div className="col-6">
                         <div className="glass-card glass-card--soft glass-pad">
                           <BadgeRow id={`${section.id}Pills`} items={strings(section.data.pills, 12)} label={`${text(section.data.title)} categories`} />
-                          <div id={section.grid} className="grid-12 grid-gap" style={{ marginTop: 12 }}>
+                          <div id={section.grid} className="grid-12 grid-gap u-mt-12">
                             {records(section.data.items).map((item) => (
                               <MiniCard key={text(item.title, "Title")} title={item.title} description={item.description} />
                             ))}
                           </div>
-                          <p className="muted" id={`${section.id}Note`} style={{ marginTop: 12 }}>
+                          <p className="muted u-mt-12" id={`${section.id}Note`}>
                             {text(section.data.note)}
                           </p>
                         </div>
@@ -638,7 +640,7 @@ export function CodexPage() {
             </section>
           ))}
 
-          <section style={{ marginTop: 24 }}>
+          <section className="u-mt-24">
             <div className="grid-12 grid-gap">
               <aside className="col-4">
                 <ImagePanel id="etiquetteImage" src={text(etiquette.image)} alt="Etiquette artwork" title={text(etiquette.badge, "How we treat each other")} />
@@ -651,12 +653,12 @@ export function CodexPage() {
                   <p className="muted" id="etiquetteDesc">
                     {text(etiquette.description)}
                   </p>
-                  <div id="etiquetteBlocks" className="grid-12 grid-gap" style={{ marginTop: 14 }}>
+                  <div id="etiquetteBlocks" className="grid-12 grid-gap u-mt-14">
                     {records(etiquette.blocks).slice(0, 6).map((block) => (
                       <ListBlock key={text(block.title, "Section")} title={block.title} items={block.items} />
                     ))}
                   </div>
-                  <p className="muted" id="etiquetteNote" style={{ marginTop: 12 }}>
+                  <p className="muted u-mt-12" id="etiquetteNote">
                     {text(etiquette.note)}
                   </p>
                 </div>
@@ -665,7 +667,7 @@ export function CodexPage() {
             </div>
           </section>
 
-          <section style={{ marginTop: 24 }}>
+          <section className="u-mt-24">
             <div className="glass-card glass-card--primary glass-pad">
               <h2 className="section-title" id="recTitle">
                 {text(recognition.title, "Recognition")}
@@ -673,7 +675,7 @@ export function CodexPage() {
               <p className="muted" id="recDesc">
                 {text(recognition.description)}
               </p>
-              <div className="grid-12 grid-gap" style={{ marginTop: 14 }}>
+              <div className="grid-12 grid-gap u-mt-14">
                 <aside className="col-4">
                   <ImagePanel id="recImage" src={text(recognition.image)} alt="Recognition artwork" />
                 </aside>
@@ -683,7 +685,7 @@ export function CodexPage() {
                       <MiniCard key={text(item.title, "Title")} title={item.title} description={item.description} />
                     ))}
                   </div>
-                  <div style={{ marginTop: 16 }}>
+                  <div className="u-mt-16">
                     <a id="recLink" href={cleanRoute(recognition.ranksHref, "/ranks")} className="footer-link">
                       View Ranks
                     </a>
@@ -757,7 +759,7 @@ export function EventsPage() {
                         .join(" • ")}
                     </p>
                     {featuredImage ? (
-                      <div style={{ marginTop: 12 }}>
+                      <div className="u-mt-12">
                         <StaticImage
                           src={publicPath(featuredImage, "./assets/img/events/featured.webp")}
                           alt={text(featuredTitle, "Featured event")}
@@ -765,11 +767,10 @@ export function EventsPage() {
                           height={640}
                           className="events-featured__img"
                           sizes="(max-width: 980px) calc(100vw - 68px), 760px"
-                          style={{ width: "100%", height: "auto", borderRadius: 18, border: "1px solid rgba(255,255,255,.10)" }}
                         />
                       </div>
                     ) : null}
-                    <h3 className="section-title section-title--sm" style={{ marginTop: 14 }}>
+                    <h3 className="section-title section-title--sm u-mt-14">
                       {featuredTitle}
                     </h3>
                     <p className="lede">{featuredSummary}</p>
@@ -781,7 +782,7 @@ export function EventsPage() {
                       </ul>
                     ) : null}
                     {featuredHref ? (
-                      <div className="badge-row" style={{ marginTop: 14 }}>
+                      <div className="badge-row u-mt-14">
                         <span>
                           <a {...linkProps(featuredHref)}>{text(featured.linkLabel, "Open details")}</a>
                         </span>
@@ -805,7 +806,7 @@ export function EventsPage() {
             <div className="col-divider" aria-hidden="true" />
           </div>
 
-          <div className="grid-12 grid-gap" style={{ marginTop: 24 }}>
+          <div className="grid-12 grid-gap u-mt-24">
             <section className="col-8">
               <div className="glass-card glass-card--primary glass-pad">
                 <h2 className="section-title">Recurring Events</h2>
@@ -840,7 +841,7 @@ export function EventsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="badge-row" style={{ marginTop: 14 }}>
+                <div className="badge-row u-mt-14">
                   <span>
                     <a href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">
                       Discord RSVP
@@ -955,7 +956,7 @@ export function RafflesPage() {
               <div className="glass-card glass-card--primary glass-pad">
                 <h2 className="section-title">How it works</h2>
                 <ProseStack id="rafflesHow" lines={data.how} />
-                <h3 className="section-title section-title--sm" style={{ marginTop: 18 }}>
+                <h3 className="section-title section-title--sm u-mt-18">
                   Rules
                 </h3>
                 <ul id="rafflesRules" className="list-stack">
@@ -989,7 +990,7 @@ export function RafflesPage() {
             </aside>
             <div className="col-divider" aria-hidden="true" />
           </div>
-          <div style={{ marginTop: 24 }}>
+          <div className="u-mt-24">
             <section className="glass-card glass-card--primary glass-pad">
               <h2 className="section-title">Raffle note</h2>
               <ProseStack id="rafflesNote" lines={data.note} />
@@ -1168,12 +1169,12 @@ export function RecruitmentPage() {
                 <p className="muted" id="recruitmentAudioDesc">
                   {text(audio.description)}
                 </p>
-                <div style={{ width: "100%", marginTop: 12 }}>
+                <div className="u-full-width u-mt-12">
                   <audio
                     id="recruitmentAudio"
                     controls={sources.length > 0}
                     preload="none"
-                    style={{ width: "100%" }}
+                    className="u-full-width"
                     aria-labelledby="recruitmentAudioTitle"
                     aria-describedby="recruitmentAudioDesc"
                   >

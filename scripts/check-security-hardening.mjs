@@ -10,6 +10,7 @@ const files = {
   nextConfig: "apps/web/next.config.ts",
   supabaseConfig: "supabase/config.toml",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
+  reaperMemberSync: "supabase/functions/reaper-discord-member-sync/index.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   mochiSocialAlphaShared: "supabase/functions/_shared/mochi-social-alpha.ts",
@@ -60,6 +61,7 @@ const checkAll = read(files.checkAll);
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
+const reaperMemberSync = read(files.reaperMemberSync);
 const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
 const mochiSocialAlphaShared = read(files.mochiSocialAlphaShared);
@@ -135,6 +137,7 @@ const expectedUnauthenticatedFunctions = [
   "list-visible-profile-cards",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
+  "reaper-discord-member-sync",
   "send-vote-reminder",
   "send-member-spotlight-poll",
   "publish-member-spotlight-winner",
@@ -174,6 +177,17 @@ for (const name of verifyJwtFalseFunctions) {
   "Retry-After",
   "retry_after",
 ].forEach((snippet) => assertIncludes("reaper-discord-interactions", reaper, snippet));
+
+[
+  "x-mochirii-reaper-member-sync-secret",
+  "REAPER_PENDING_VERIFICATION_SYNC_SECRET",
+  "verifyMemberSyncSecret(req)",
+  "fetchCurrentMember",
+  "buildSingleMemberPendingContainmentPlan",
+  "applyPendingContainmentPlan(adminClient, plan, writePendingDiscordOverwrite)",
+  "MAX_PENDING_VERIFICATION_MUTATIONS",
+  "source: \"gateway_member_event\"",
+].forEach((snippet) => assertIncludes("reaper-discord-member-sync", reaperMemberSync, snippet));
 
 assertMatches(
   "reaper-discord-interactions",

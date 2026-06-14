@@ -48,6 +48,20 @@ CSP was promoted from report-only to enforcement after a production Chrome pass 
 
 The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
 
+Before reducing `script-src 'unsafe-inline'` or `style-src 'unsafe-inline'`, update the CSP inline-hardening inventory. The app source should stay at zero React inline style props; any remaining style allowance decision must be based on a browser pass because Next image/runtime helpers can still emit framework-managed style attributes:
+
+```sh
+npm run check:csp-inline-hardening -- --write
+```
+
+For a release packet that needs production header evidence, opt into the read-only live sweep:
+
+```sh
+npm run check:csp-inline-hardening -- --live --write
+```
+
+Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Social iframe bridge. For `script-src`, choose a Next-compatible nonce or SRI path before enforcement.
+
 ## Supabase Preview Migration History
 
 Supabase Preview checks compare the linked production migration history with local files under `supabase/migrations/`. Keep remote-applied migration versions represented locally even when a migration is later renamed for clarity.
@@ -74,6 +88,20 @@ npm run lint
 npm run build
 ```
 
+For a no-secret full-stack release evidence summary, run the local/static pass:
+
+```sh
+npm run check:full-stack-release-evidence
+```
+
+When authenticated CLIs are available and a release packet needs provider evidence, opt in to read-only provider checks and report writing:
+
+```sh
+npm run check:full-stack-release-evidence -- --providers --write
+```
+
+This command may summarize Vercel deployment/env names and Supabase migration/function status, but it must not record raw secret values, secret digests, tokens, cookies, webhook URLs, or private message content.
+
 Optional Vercel-local validation, when authenticated:
 
 ```sh
@@ -91,6 +119,14 @@ npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=red
 ```
 
 This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, and the `www` redirect. Static route metadata, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
+
+Accessibility review starts with the no-secret route matrix:
+
+```sh
+npm run check:accessibility-route-matrix -- --write
+```
+
+Use the generated report to scope browser or Playwright evidence for keyboard order, visible focus, reduced motion, status messages, form errors, iframe titles, color contrast, and member/admin workflows. Static checks do not prove contrast or screen-reader behavior by themselves.
 
 Post-deploy observability smoke:
 

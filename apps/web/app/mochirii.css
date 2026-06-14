@@ -43,6 +43,11 @@
   --container:1200px;
   --section-gap:clamp(20px, 3vw, 32px);
   --card-pad:clamp(18px, 2.5vw, 26px);
+  --hero-shell-pad-top:clamp(10px, 2.5vw, 26px);
+  --hero-image-aspect:3 / 2;
+  --hero-image-radius:clamp(24px, 4vw, 42px);
+  --hero-image-to-card-gap:clamp(18px, 3vw, 34px);
+  --hero-stack-bottom-gap:clamp(10px, 2vw, 22px);
 
   --dd-gap:10px;
   --dd-radius:16px;
@@ -181,16 +186,16 @@ img{max-width:100%;display:block;}
 /* =========================================================
    HERO — Hero image shell + overlap card positioning
    ========================================================= */
-.page-hero-shell{position:relative; z-index:10;}
+.page-hero-shell{position:relative; z-index:10; padding-top:var(--hero-shell-pad-top);}
 .page-hero{
   position:relative;
   box-sizing:border-box;
   overflow:hidden;
   isolation:isolate;
   width:100%;
-  aspect-ratio:3 / 2;
+  aspect-ratio:var(--hero-image-aspect);
   min-height:0;
-  border-radius:clamp(24px, 4vw, 42px);
+  border-radius:var(--hero-image-radius);
   border:1px solid color-mix(in srgb, var(--rim-moon) 72%, var(--line));
   box-shadow:
     var(--shadow-strong),
@@ -213,11 +218,15 @@ img{max-width:100%;display:block;}
 .page-hero__scrim,
 .page-hero__fade{display:none!important;}
 
-.hero-overlap{margin-top:clamp(18px, 3vw, 34px); padding-bottom:16px;}
+.hero-overlap{margin-top:var(--hero-image-to-card-gap); padding-bottom:var(--hero-stack-bottom-gap);}
 
 @media (max-width:640px){
-  .hero-overlap{margin-top:18px;}
-  .page-hero{border-radius:24px;}
+  :root{
+    --hero-shell-pad-top:4px;
+    --hero-image-radius:24px;
+    --hero-image-to-card-gap:18px;
+    --hero-stack-bottom-gap:16px;
+  }
 }
 
 /* =========================================================
@@ -395,6 +404,24 @@ img{max-width:100%;display:block;}
   line-height:1.75;
 }
 
+.u-mt-10{margin:10px 0 0;}
+.u-mt-12{margin-top:12px;}
+.u-mt-14{margin-top:14px;}
+.u-mt-16{margin-top:16px;}
+.u-mt-18{margin-top:18px;}
+.u-mt-24{margin-top:24px;}
+.u-mb-8{margin-bottom:8px;}
+.u-mb-6{margin-bottom:6px;}
+.u-m-0{margin:0;}
+.u-block{display:block;}
+.u-inline-flex{display:inline-flex;}
+.u-full-width{width:100%;}
+.u-card-no-shadow{box-shadow:none;}
+.u-list-inset{
+  margin:12px 0 0;
+  padding-left:18px;
+}
+
 .image-panel__img{
   width:100%;
   height:auto;
@@ -413,6 +440,49 @@ img{max-width:100%;display:block;}
   object-fit:cover;
 }
 
+.overlay-card{
+  overflow:hidden;
+}
+
+.overlay-card__frame{
+  position:relative;
+}
+
+.overlay-card__frame--portrait{
+  aspect-ratio:3 / 4;
+}
+
+.overlay-card__frame--wide{
+  aspect-ratio:16 / 10;
+}
+
+.overlay-card__scrim{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.22);
+}
+
+.overlay-card__content{
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:16px;
+}
+
+.overlay-card__panel{
+  padding:14px;
+  border-radius:18px;
+  box-shadow:none;
+}
+
+.overlay-card__meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
 .events-featured__img,
 .events-list__image{
   display:block;
@@ -421,6 +491,8 @@ img{max-width:100%;display:block;}
   height:auto;
   object-fit:cover;
   aspect-ratio:5 / 2;
+  border-radius:var(--radius-media);
+  border:1px solid var(--surface-hairline);
   box-shadow:
     inset 0 1px 0 var(--surface-shine),
     0 16px 34px rgba(0,0,0,.26);
@@ -1592,7 +1664,7 @@ body[data-page="spotify"] .spotify-card__meta{
 }
 
 body[data-page="spotify"] .spotify-embed{
-  margin-top:14px;
+  margin-top:12px;
   border:1px solid rgba(220,235,255,.14);
   background:rgba(0,0,0,.22);
   box-shadow:
@@ -1603,6 +1675,7 @@ body[data-page="spotify"] .spotify-embed{
 body[data-page="spotify"] .spotify-embed iframe{
   width:100%;
   max-width:100%;
+  border-radius:12px;
 }
 
 @media (max-width:640px){
@@ -2150,17 +2223,8 @@ body[data-page="home"]{
   --home-stage-shadow:0 30px 90px rgba(0,0,0,.52);
 }
 
-body[data-page="home"] .page-hero-shell{
-  padding-top:clamp(10px, 2.5vw, 26px);
-}
-
 body[data-page="home"] .page-hero{
-  aspect-ratio:3 / 2;
-  min-height:0;
   border:1px solid transparent;
-  border-radius:clamp(24px, 4vw, 42px);
-  overflow:hidden;
-  isolation:isolate;
   background:
     linear-gradient(transparent, transparent) padding-box,
     linear-gradient(135deg, rgba(220,232,226,.36), rgba(48,178,143,.24), rgba(218,181,94,.34)) border-box;
@@ -2173,19 +2237,6 @@ body[data-page="home"] .page-hero{
 body[data-page="home"] .page-hero::before,
 body[data-page="home"] .page-hero::after{
   display:none;
-}
-
-body[data-page="home"] .page-hero__img{
-  object-fit:contain;
-  transform:none;
-  transform-origin:58% 48%;
-  filter:none;
-  background:rgba(4,7,7,.84);
-}
-
-body[data-page="home"] .hero-overlap{
-  margin-top:clamp(18px, 3vw, 34px);
-  padding-bottom:clamp(10px, 2vw, 22px);
 }
 
 body[data-page="home"] .home-hero-row{
@@ -2609,10 +2660,6 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 @media (max-width:900px){
-  body[data-page="home"] .hero-overlap{
-    margin-top:clamp(18px, 4vw, 28px);
-  }
-
   body[data-page="home"] .home-hero-row{
     grid-template-columns:1fr;
     align-items:stretch;
@@ -2629,27 +2676,6 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 @media (max-width:640px){
-  body[data-page="home"] .page-hero-shell{
-    padding-top:4px;
-  }
-
-  body[data-page="home"] .page-hero{
-    aspect-ratio:3 / 2;
-    min-height:0;
-    border-radius:24px;
-  }
-
-  body[data-page="home"] .page-hero__img{
-    object-fit:contain;
-    transform:none;
-    transform-origin:58% 45%;
-    filter:none;
-  }
-
-  body[data-page="home"] .hero-overlap{
-    margin-top:18px;
-  }
-
   body[data-page="home"] .hero-intro,
   body[data-page="home"] .home-guild-seal,
   body[data-page="home"] .page-main .glass-card{
@@ -4341,6 +4367,10 @@ body[data-page="gallery-submit"] .muted{
 }
 
 .profile-progress{
+  display:block;
+  width:100%;
+  appearance:none;
+  -webkit-appearance:none;
   overflow:hidden;
   height:9px;
   border-radius:999px;
@@ -4348,9 +4378,18 @@ body[data-page="gallery-submit"] .muted{
   background:rgba(0,0,0,.22);
 }
 
-.profile-progress span{
-  display:block;
-  width:0;
+.profile-progress::-webkit-progress-bar{
+  background:transparent;
+}
+
+.profile-progress::-webkit-progress-value{
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg, rgba(48,178,143,.86), rgba(218,181,94,.82));
+  transition:width .2s ease;
+}
+
+.profile-progress::-moz-progress-bar{
   height:100%;
   border-radius:inherit;
   background:linear-gradient(90deg, rgba(48,178,143,.86), rgba(218,181,94,.82));

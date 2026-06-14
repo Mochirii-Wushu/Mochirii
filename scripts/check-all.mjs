@@ -10,6 +10,7 @@ const checks = [
   ["check:discord-reaper-parity", ["node", "scripts/check-discord-reaper-parity.mjs"]],
   ["check:discord-event-covers", ["node", "scripts/check-discord-event-covers.mjs"]],
   ["check:reaper-discord-interactions", ["node", "scripts/check-reaper-discord-interactions.mjs"]],
+  ["check:reaper-pending-verification", ["node", "scripts/check-reaper-pending-verification.mjs"]],
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
@@ -33,12 +34,16 @@ const checks = [
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],
+  ["check:full-stack-release-evidence", ["node", "scripts/check-full-stack-release-evidence.mjs"]],
+  ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],
+  ["check:accessibility-route-matrix", ["node", "scripts/check-accessibility-route-matrix.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
   ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
+  ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],
 ];
 
 let failed = false;

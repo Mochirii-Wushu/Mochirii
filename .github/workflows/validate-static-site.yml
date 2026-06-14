@@ -29,3 +29,11 @@ jobs:
 
       - name: Run validation
         run: npm run check
+
+      - name: Check whitespace errors
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "${BASE_SHA}" "${HEAD_SHA}"
+          git diff --check "${BASE_SHA}" "${HEAD_SHA}"

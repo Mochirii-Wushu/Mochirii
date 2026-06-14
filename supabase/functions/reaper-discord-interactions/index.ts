@@ -12,8 +12,21 @@ import {
   previewText,
   voteDateFromCustomId,
 } from "../_shared/vote-reminders.ts";
+import {
+  applyPendingContainmentPlan,
+  buildPendingContainmentPlan,
+  memberUserId,
+  PendingContainmentApplyError,
+  pendingChannelId,
+  pendingPlanMessage,
+  logPendingContainmentSync,
+  type JsonRecord as SharedJsonRecord,
+  type PendingContainmentChange,
+  type PendingContainmentMode,
+  type PendingContainmentPlan,
+} from "../_shared/pending-verification-containment.ts";
 
-type JsonRecord = Record<string, unknown>;
+type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
   from(table: string): any;
 };
@@ -29,11 +42,24 @@ const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
 const EXPECTED_MODERATOR_ROLE_IDS = ["1078630751165222984"];
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
+const PENDING_BASE_ROLE_ID = "1468659807736299520";
+const VERIFIED_ROLE_ID = "1078630751077142615";
+const PENDING_ALLOWED_CATEGORY_ID = "1468658801388290048";
 const GUILD_SCHEDULE_URL = "https://mochirii.com/data/guild-schedule.json";
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const VIEW_CHANNEL_PERMISSION = 1n << 10n;
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const MANAGE_EVENTS_PERMISSION = 1n << 33n;
 const CREATE_EVENTS_PERMISSION = 1n << 44n;
+const GUILD_CATEGORY_CHANNEL_TYPE = 4;
+const DISCORD_MEMBER_OVERWRITE_TYPE = 1;
+const MAX_PENDING_VERIFICATION_MUTATIONS = 500;
+const DISCORD_API_MAX_RETRIES = 2;
+const DISCORD_FUNCTION_RETRY_BUDGET_MS = 45_000;
+const DISCORD_WRITE_BATCH_SIZE = 10;
+const DISCORD_WRITE_BATCH_PAUSE_MS = 250;
+const PENDING_VERIFICATION_MANAGED_BY = "reaper-pending-verification";
+const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment";
 const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
 const EPHEMERAL_FLAG = 1 << 6;
 const INTERACTION_TYPE_PING = 1;
@@ -354,6 +380,22 @@ function getServiceRoleKey(): string {
   }
 }
 
+function serviceAdminClient(purpose: string): SupabaseAdminClient {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const serviceRoleKey = getServiceRoleKey();
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error(`Supabase service credentials are not configured for ${purpose}.`);
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
 function snowflake(value: unknown): string | null {
   const id = safeString(value, 24);
   return id && /^\d{16,22}$/.test(id) ? id : null;
@@ -423,7 +465,7 @@ function retryAfterMs(response: Response, data: unknown): number {
   const bodySeconds = Number(asRecord(data).retry_after || "");
   const seconds = Number.isFinite(headerSeconds) && headerSeconds > 0 ? headerSeconds : bodySeconds;
   if (!Number.isFinite(seconds) || seconds <= 0) return 0;
-  return Math.min(Math.ceil(seconds * 1000), 5000);
+  return Math.ceil(seconds * 1000);
 }
 
 function wait(ms: number): Promise<void> {
@@ -431,36 +473,208 @@ function wait(ms: number): Promise<void> {
 }
 
 async function discordApi(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; data: unknown }> {
-  const response = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
-  const text = await response.text();
-  let data: unknown = null;
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = text;
-    }
-  }
-
-  if (response.status === 429) {
-    const delay = retryAfterMs(response, data);
-    if (delay > 0) {
-      await wait(delay);
-      const retryResponse = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
-      const retryText = await retryResponse.text();
-      let retryData: unknown = null;
-      if (retryText) {
-        try {
-          retryData = JSON.parse(retryText);
-        } catch {
-          retryData = retryText;
-        }
+  for (let attempt = 0; attempt <= DISCORD_API_MAX_RETRIES; attempt += 1) {
+    const response = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
+    const text = await response.text();
+    let data: unknown = null;
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = text;
       }
-      return { ok: retryResponse.ok, status: retryResponse.status, data: retryData };
     }
+
+    if (response.status === 429 && attempt < DISCORD_API_MAX_RETRIES) {
+      const delay = retryAfterMs(response, data);
+      if (delay > 0 && delay <= DISCORD_FUNCTION_RETRY_BUDGET_MS) {
+        await wait(delay);
+        continue;
+      }
+      throw new Error("Discord rate limit retry_after exceeds the Edge Function retry budget.");
+    }
+
+    return { ok: response.ok, status: response.status, data };
   }
 
-  return { ok: response.ok, status: response.status, data };
+  return { ok: false, status: 429, data: { error: "Discord rate limit retry budget exhausted." } };
+}
+
+async function fetchGuildMembers(): Promise<JsonRecord[]> {
+  const members: JsonRecord[] = [];
+  let after = "0";
+
+  for (let page = 0; page < 25; page += 1) {
+    const response = await discordApi(
+      `/guilds/${EXPECTED_DISCORD_GUILD_ID}/members?limit=1000&after=${encodeURIComponent(after)}`,
+      { headers: discordApiHeaders() },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Guild member fetch failed with Discord API ${response.status}.`);
+    }
+
+    const batch = asArray(response.data).map(asRecord);
+    members.push(...batch);
+    if (batch.length < 1000) break;
+
+    const lastUserId = memberUserId(batch[batch.length - 1]);
+    if (!lastUserId || lastUserId === after) break;
+    after = lastUserId;
+  }
+
+  return members;
+}
+
+async function fetchGuildRoles(): Promise<JsonRecord[]> {
+  const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
+    headers: discordApiHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Guild role fetch failed with Discord API ${response.status}.`);
+  }
+
+  return asArray(response.data).map(asRecord).filter((role) => Boolean(snowflake(role.id)));
+}
+
+async function fetchGuildChannels(): Promise<JsonRecord[]> {
+  const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/channels`, {
+    headers: discordApiHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Guild channel fetch failed with Discord API ${response.status}.`);
+  }
+
+  return asArray(response.data).map(asRecord).filter((channel) => Boolean(pendingChannelId(channel)));
+}
+
+function discordApiErrorDetail(data: unknown): string {
+  const record = asRecord(data);
+  const code = safeString(record.code, 40);
+  const message = safeString(record.message, 140);
+  const details = [code ? `code ${code}` : "", message].filter(Boolean).join(": ");
+  return details ? ` (${details})` : "";
+}
+
+async function writePendingDiscordOverwrite(change: PendingContainmentChange): Promise<void> {
+  const auditHeaders = discordApiHeaders(change.nextAllow !== 0n || change.nextDeny !== 0n);
+  auditHeaders.set("X-Audit-Log-Reason", encodeURIComponent(PENDING_VERIFICATION_AUDIT_REASON));
+
+  const removeOverwrite = change.nextAllow === 0n && change.nextDeny === 0n;
+  const response = removeOverwrite
+    ? await discordApi(`/channels/${change.channelId}/permissions/${change.userId}`, {
+      method: "DELETE",
+      headers: auditHeaders,
+    })
+    : await discordApi(`/channels/${change.channelId}/permissions/${change.userId}`, {
+      method: "PUT",
+      headers: auditHeaders,
+      body: JSON.stringify({
+        allow: change.nextAllow.toString(),
+        deny: change.nextDeny.toString(),
+        type: DISCORD_MEMBER_OVERWRITE_TYPE,
+      }),
+    });
+
+  if (!response.ok) {
+    throw new Error(
+      `Discord overwrite ${change.detail} on ${change.channelName}:${change.channelId} user:${change.userId} failed with API ${response.status}${discordApiErrorDetail(response.data)}.`,
+    );
+  }
+}
+
+async function processPendingVerificationSync(
+  mode: PendingContainmentMode,
+  interactionToken: string,
+  applicationId: string,
+): Promise<void> {
+  let adminClient: SupabaseAdminClient | null = null;
+  let plan: PendingContainmentPlan | null = null;
+
+  try {
+    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
+      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper pending verification sync is missing the Discord bot token.");
+      return;
+    }
+
+    adminClient = serviceAdminClient("pending verification containment");
+    const [channels, members, roles] = await Promise.all([fetchGuildChannels(), fetchGuildMembers(), fetchGuildRoles()]);
+    plan = await buildPendingContainmentPlan(adminClient, channels, members, roles);
+    const discordWriteCount = plan.changes.filter((change) => change.discordWrite).length;
+
+    if (plan.conflicts.length) {
+      await logPendingContainmentSync(adminClient, mode, "warning", "Manual VIEW_CHANNEL conflicts blocked containment.", plan);
+      await editOriginalInteractionResponse(applicationId, interactionToken, pendingPlanMessage(mode, plan));
+      return;
+    }
+
+    if (mode === "apply" && discordWriteCount > MAX_PENDING_VERIFICATION_MUTATIONS) {
+      await logPendingContainmentSync(
+        adminClient,
+        mode,
+        "warning",
+        "Pending verification containment exceeded the mutation guard.",
+        plan,
+        { maxMutationGuard: MAX_PENDING_VERIFICATION_MUTATIONS },
+      );
+      await editOriginalInteractionResponse(
+        applicationId,
+        interactionToken,
+        `${pendingPlanMessage("preview", plan)}\nBlocked: planned Discord writes exceed safety limit ${MAX_PENDING_VERIFICATION_MUTATIONS}.`,
+      );
+      return;
+    }
+
+    if (mode === "preview") {
+      await logPendingContainmentSync(adminClient, mode, "skipped", "Pending verification containment preview completed.", plan);
+      await editOriginalInteractionResponse(applicationId, interactionToken, pendingPlanMessage(mode, plan));
+      return;
+    }
+
+    const result = await applyPendingContainmentPlan(adminClient, plan, writePendingDiscordOverwrite);
+    await logPendingContainmentSync(
+      adminClient,
+      mode,
+      "success",
+      "Pending verification containment apply completed.",
+      plan,
+      result,
+    );
+    await editOriginalInteractionResponse(applicationId, interactionToken, pendingPlanMessage(mode, plan, result));
+  } catch (error) {
+    console.error("reaper-discord-interactions pending verification containment failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+
+    if (adminClient) {
+      const partialApply = error instanceof PendingContainmentApplyError ? error.result : null;
+      await logPendingContainmentSync(
+        adminClient,
+        mode,
+        "failed",
+        "Pending verification containment failed.",
+        plan,
+        {
+          error: error instanceof Error ? error.message.slice(0, 160) : "Unknown error",
+          failedDiscordWriteCount: partialApply?.failedWrites || 0,
+          skippedDiscordWriteCount: partialApply?.skippedWrites || 0,
+          appliedDiscordWriteCount: partialApply?.discordWrites || 0,
+          registryWriteCountBeforeFailure: partialApply?.dbWrites || 0,
+        },
+      );
+    }
+
+    const partialMessage = error instanceof PendingContainmentApplyError
+      ? ` Discord writes applied before failure: ${error.result.discordWrites}. Failed writes: ${error.result.failedWrites}. Skipped writes: ${error.result.skippedWrites}.`
+      : "";
+    await editOriginalInteractionResponse(
+      applicationId,
+      interactionToken,
+      `Reaper pending verification containment could not be completed.${partialMessage} Rerun preview and check configuration.`,
+    );
+  }
 }
 
 function hasChannelOverwrite(channels: JsonRecord[], roleId: string): boolean {
@@ -1376,7 +1590,15 @@ Deno.serve(async (req: Request) => {
   }
 
   const commandName = safeString(data.name, 80)?.toLowerCase() || "";
-  if (!["submit", "sync-ranks", "sync-events", "vote-status", "vote-leaderboard", "vote-reminder-preview"].includes(commandName)) {
+  if (![
+    "submit",
+    "sync-ranks",
+    "sync-events",
+    "sync-pending-verification",
+    "vote-status",
+    "vote-leaderboard",
+    "vote-reminder-preview",
+  ].includes(commandName)) {
     return interactionMessage("That Reaper command is not supported.");
   }
 
@@ -1445,6 +1667,46 @@ Deno.serve(async (req: Request) => {
       });
       return interactionMessage("Vote reminder preview could not be built.");
     }
+  }
+
+  if (commandName === "sync-pending-verification") {
+    const modeValue = stringOption(data, "mode", 20)?.toLowerCase() || "preview";
+    const confirm = booleanOption(data, "confirm");
+    const memberPermissions = safeString(member.permissions, 80) || "0";
+    const hasModeratorRole = EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
+
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+      console.error("reaper-discord-interactions missing or mismatched pending verification configuration", {
+        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+        moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
+        configuredModeratorRoleCount: configuredModeratorRoleIds.length,
+      });
+      return interactionMessage("Reaper pending verification containment is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
+      return interactionMessage("Use this command in the Mochirii Discord server.");
+    }
+
+    if (!discordUserId || !hasModeratorRole) {
+      return interactionMessage("Pending verification containment requires the Moderator role.");
+    }
+
+    if (!["preview", "apply"].includes(modeValue)) {
+      return interactionMessage("Choose sync-pending-verification mode preview or apply.");
+    }
+
+    if (modeValue === "apply" && !confirm) {
+      return interactionMessage("Run /sync-pending-verification mode:apply confirm:true after reviewing preview.");
+    }
+
+    if (modeValue === "apply" && !hasPermission(memberPermissions, MANAGE_ROLES_PERMISSION)) {
+      return interactionMessage("Pending verification containment apply requires Discord Manage Roles permission.");
+    }
+
+    const mode: PendingContainmentMode = modeValue === "apply" ? "apply" : "preview";
+    EdgeRuntime.waitUntil(processPendingVerificationSync(mode, interactionToken, applicationId));
+    return deferredEphemeralResponse();
   }
 
   if (commandName === "sync-ranks") {
