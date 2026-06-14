@@ -64,6 +64,7 @@
     "smoke:gallery": "node scripts/smoke-gallery-lightbox.mjs",
     "smoke:gallery-approved-feed": "node scripts/smoke-gallery-approved-feed.mjs",
     "smoke:mochi-social-alpha-edge": "node scripts/smoke-mochi-social-alpha-edge.mjs",
+    "smoke:mochi-social-browser-gates-local": "node scripts/smoke-mochi-social-browser-gates-local.mjs",
     "smoke:mochi-social-tester-password-local": "node scripts/smoke-mochi-social-tester-password-local.mjs",
     "smoke:vercel-production": "node scripts/smoke-vercel-production.mjs",
     "smoke:supabase-auth-boundary": "node scripts/smoke-supabase-auth-boundary.mjs",

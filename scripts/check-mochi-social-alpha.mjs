@@ -23,7 +23,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-tester-password-local']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-browser-gates-local', 'smoke:mochi-social-tester-password-local']
   },
   {
     file: 'AGENTS.md',
@@ -84,6 +84,10 @@ const checks = [
   {
     file: 'scripts/smoke-mochi-social-tester-password-local.mjs',
     includes: ['Mochi Social tester password local smoke OK', 'MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_BASE_URL', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'reports/mochi-social-tester-password-local.json', 'Tester password required', 'Mochi Social unlocked', 'No real value', 'configured-preview-stub', 'HttpOnly', 'SameSite=Lax']
+  },
+  {
+    file: 'scripts/smoke-mochi-social-browser-gates-local.mjs',
+    includes: ['Localhost-only Mochi Social tester-password browser gate smoke', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_LOCAL_URL', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_GAME_URL', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_TESTER_PASSWORD', 'MOCHI_SOCIAL_PLAYWRIGHT_MODULE_DIR', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_STAMP_REPORT', 'MOCHI_SOCIAL_READY', 'MOCHI_SOCIAL_AUTH_STATE', 'mochi_social_tester_access', 'Nearby:\\s*2 testers', 'configured-preview-stub/no-real-value', 'write-mochi-social-browser-gates.mjs']
   },
   {
     file: 'scripts/check-mochi-social-discord-oauth-self-test.mjs',
