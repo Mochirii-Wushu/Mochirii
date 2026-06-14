@@ -23,15 +23,23 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-clean-room', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-browser-gates-local', 'smoke:mochi-social-tester-password-local']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-clean-room', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-monero-treasury', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-browser-gates-local', 'smoke:mochi-social-tester-password-local']
   },
   {
     file: 'AGENTS.md',
-    includes: ['Alpha Preview Ready', 'configured-preview-stub', 'funded-chain-gates', 'dummy Enjin IDs']
+    includes: ['Alpha Preview Ready', 'configured-preview-stub', 'funded-chain-gates', 'dummy Enjin IDs', 'Monero treasury', 'operator-only', 'no browser mining']
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-clean-room', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-clean-room', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-monero-treasury', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
+  },
+  {
+    file: 'docs/mochi-social-monero-treasury.md',
+    includes: ['Monero can mine XMR, but it cannot directly fund Enjin Canary cENJ', 'no browser mining', 'no GitHub Actions mining', 'Supabase owns budget and finality authority', 'min(fuelTankRemaining, tankBudget, perUserBudget, operatorCap, dailyCap) - pendingReservations', 'Enjin state is `FINALIZED`', 'Discord remains an auth/community surface', 'configured-preview-stub', 'Starting a miner is also cost-bearing']
+  },
+  {
+    file: 'scripts/check-mochi-social-monero-treasury.mjs',
+    includes: ['Mochi Social Monero treasury guardrails OK', 'forbiddenTrackedFilePatterns', 'Monero wallet password assignment', 'Monero private spend key assignment', 'Exchange API secret assignment', 'monero-wallet-cli.exe', 'xmrig.exe', 'p2pool.exe']
   },
   {
     file: 'scripts/check-mochi-social-clean-room.mjs',

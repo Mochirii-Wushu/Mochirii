@@ -23,6 +23,7 @@ const checks = [
   ["check:mochi-social-discord-oauth", ["node", "scripts/check-mochi-social-discord-oauth-self-test.mjs"]],
   ["check:mochi-social-edge-authority", ["node", "scripts/check-mochi-social-edge-authority.mjs"]],
   ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],
+  ["check:mochi-social-monero-treasury", ["node", "scripts/check-mochi-social-monero-treasury.mjs"]],
   ["check:mochi-social-preview-key-loader", ["node", "scripts/check-mochi-social-preview-key-loader.mjs"]],
   ["check:mochi-social-preview-url", ["node", "scripts/check-mochi-social-preview-url-self-test.mjs"]],
   ["check:mochi-social-tester-password-gate", ["node", "scripts/check-mochi-social-tester-password-gate.mjs"]],
