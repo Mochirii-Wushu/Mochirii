@@ -7,6 +7,7 @@ reports/mochi-social-report-hygiene.json
 reports/mochi-social-report-hygiene.md
 reports/mochi-social-tester-password-local.json
 reports/mochi-social-tester-password-local.md
+.local/
 .lighthouseci/
 *.lhr.json
 node_modules/
