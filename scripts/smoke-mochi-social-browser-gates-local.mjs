@@ -4,6 +4,7 @@ import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { resolveMochiSocialGameNodeModuleDirs } from "./mochi-social-game-repo-path.mjs";
 
 const root = process.cwd();
 const siteUrl = normalizeBaseUrl(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_LOCAL_URL || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_BASE_URL || "http://127.0.0.1:3000");
@@ -179,10 +180,7 @@ async function loadChromium() {
     }
   }
 
-  const candidateDirs = [
-    process.env.MOCHI_SOCIAL_PLAYWRIGHT_MODULE_DIR,
-    resolve(root, "../Local RPG/node_modules"),
-  ].filter(Boolean);
+  const candidateDirs = resolveMochiSocialGameNodeModuleDirs(root);
   for (const dir of candidateDirs) {
     for (const packageName of ["playwright", "playwright-core"]) {
       try {

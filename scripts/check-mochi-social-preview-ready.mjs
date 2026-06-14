@@ -2,9 +2,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { resolveMochiSocialGameRepoPath } from "./mochi-social-game-repo-path.mjs";
 
 const root = process.cwd();
-const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
+const gameRepoPath = resolveMochiSocialGameRepoPath(root);
 const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
 const previewEnvPath = resolve(credsDir, process.env.MOCHI_SOCIAL_PREVIEW_ENV_FILE || "mochi-social-alpha-vercel-preview.local.txt");
 const previewEnv = readPreviewEnvFile(previewEnvPath);
