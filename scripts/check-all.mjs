@@ -19,6 +19,7 @@ const checks = [
   ["check:mochi-social-auth-bridge", ["node", "scripts/check-mochi-social-auth-bridge.mjs"]],
   ["check:mochi-social-bridge-state", ["node", "scripts/check-mochi-social-bridge-state.mjs"]],
   ["check:mochi-social-browser-gates", ["node", "scripts/check-mochi-social-browser-gate-self-test.mjs"]],
+  ["check:mochi-social-clean-room", ["node", "scripts/check-mochi-social-clean-room.mjs"]],
   ["check:mochi-social-discord-oauth", ["node", "scripts/check-mochi-social-discord-oauth-self-test.mjs"]],
   ["check:mochi-social-edge-authority", ["node", "scripts/check-mochi-social-edge-authority.mjs"]],
   ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],

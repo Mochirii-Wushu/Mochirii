@@ -34,7 +34,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           <p className="eyebrow">Closed Mochirii Playtest</p>
           <h1>Mochi Social</h1>
           <p id={descriptionId}>
-            A cozy Wushu RPG town where approved testers can raise Mochi Spirits, meet guild friends,
+            A lantern-lit wuxia RPG town where approved testers can raise Mochi Spirits, meet guild friends,
             and try early social trading.
           </p>
         </div>
@@ -95,7 +95,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           <h2>What you can test</h2>
           <ul>
             <li>Raise Mochi Spirits and check the care loop.</li>
-            <li>Explore the first Wushu town and guild gathering spots.</li>
+            <li>Explore the first wuxia town and guild gathering spots.</li>
             <li>Try local chat, waves, emotes, and nearby tester presence.</li>
             <li>Open the market board and direct trade preview.</li>
           </ul>
@@ -103,7 +103,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <section>
           <h2>Your playtest mission</h2>
           <ol>
-            <li>Befriend a pet and care for it.</li>
+            <li>Invite a Mochi Spirit and care for it.</li>
             <li>Wave or chat with another tester.</li>
             <li>Inspect the market board.</li>
             <li>Send feedback before you leave.</li>

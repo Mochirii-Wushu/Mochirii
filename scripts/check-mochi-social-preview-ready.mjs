@@ -28,6 +28,7 @@ const manualBrowserGateChecks = browserGateEnvForMode(browserGateMode);
 const requirements = [];
 
 addCommandRequirement("site.static-alpha", "Mochi Social static alpha checks pass.", "node", ["scripts/check-mochi-social-alpha.mjs"], {});
+addCommandRequirement("site.clean-room", "Mochi Social site clean-room scan passes before preview gates.", "node", ["scripts/check-mochi-social-clean-room.mjs"], {});
 addCommandRequirement("site.bridge-state", "Mochi Social parent bridge state self-test passes before manual browser gates.", "node", ["scripts/check-mochi-social-bridge-state.mjs"], {});
 addCommandRequirement("site.auth-bridge", "Mochi Social auth bridge static guard keeps iframe auth access-token-only.", "node", ["scripts/check-mochi-social-auth-bridge.mjs"], {});
 addCommandRequirement("site.edge-authority", "Mochi Social Edge authority guard passes before hosted Supabase smoke.", "node", ["scripts/check-mochi-social-edge-authority.mjs"], {});

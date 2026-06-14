@@ -39,8 +39,8 @@ For Alpha Preview Ready, the website may embed the game while the game reports `
 
 Use visual polish to improve Alpha Preview Ready clarity without changing the external-ops lane.
 
-- Theme: Cozy Wushu arrival gate into Mochi Social.
-- Art relationship: Mochirii gate art and Mochi Social game art should share one Cozy Wushu world, but the website owns only the tester doorway and unlocked shell. RPGJS runtime sprites, maps, HUD, manifests, and the game asset ledger remain in the separate Mochi Social game repo.
+- Theme: Mochirii High-Fidelity Wuxia arrival gate into Mochi Social.
+- Art relationship: Mochirii gate art and Mochi Social game art should share one high-fidelity wuxia world, but the website owns only the tester doorway and unlocked shell. RPGJS runtime sprites, maps, HUD, manifests, and the game asset ledger remain in the separate Mochi Social game repo.
 - Website scope: `/games/mochi-social`, `/games/mochi-social/tester-login`, and `/games/mochi-social/tester-logout` presentation only.
 - Locked state: an arrival gate with tester-password form, inline error, missing-config state, no iframe, and visible no-real-value labels.
 - Unlocked state: a live game shell with bridge status, no-real-value contract labels, lock action, and the Fly iframe.

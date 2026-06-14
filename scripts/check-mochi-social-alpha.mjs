@@ -23,7 +23,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-browser-gates-local', 'smoke:mochi-social-tester-password-local']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-clean-room', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-browser-gates-local', 'smoke:mochi-social-tester-password-local']
   },
   {
     file: 'AGENTS.md',
@@ -31,7 +31,11 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-clean-room', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
+  },
+  {
+    file: 'scripts/check-mochi-social-clean-room.mjs',
+    includes: ['Mochi Social site clean-room scan passed', 'MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST_PATH', 'MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST', '.local/mochi-social-clean-room-denylist.txt', 'builtInFingerprints', 'clean-room fingerprint', 'private clean-room denylist literal']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
@@ -51,7 +55,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',
-    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'Local Preview URL File', 'readPreviewEnvFile', 'urlFieldsRead', 'resolveMochiSocialGameRepoPath', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON', 'reports/mochi-social-browser-gates.json', 'addStoredManualBrowserGateRequirement', 'stored browser gate report', 'MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON', 'reports/mochi-social-report-hygiene.json', 'site.report-hygiene', 'check:mochi-social-report-hygiene', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'publishableKeySource', 'not-loaded-awaiting-hosted-approval', 'selectPublishableKey', 'site.bridge-state', 'check-mochi-social-bridge-state.mjs', 'site.auth-bridge', 'check-mochi-social-auth-bridge.mjs', 'site.edge-authority', 'check-mochi-social-edge-authority.mjs', 'site.preview-key-loader', 'check-mochi-social-preview-key-loader.mjs', 'site.discord-oauth-detector', 'check-mochi-social-discord-oauth-self-test.mjs', 'site.game-contract', 'site.edge-smoke', 'site.discord-oauth', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'provider is not enabled', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready', 'browserGateEnvForMode', 'tester-password locked page visible', ...browserGateEnvNames]
+    includes: ['Mochirii Mochi Social Alpha Preview Ready audit', 'reports/mochi-social-preview-ready.json', 'mochirii-mochi-social-preview-ready.md', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED', 'MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'Local Preview URL File', 'readPreviewEnvFile', 'urlFieldsRead', 'resolveMochiSocialGameRepoPath', 'MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON', 'reports/mochi-social-browser-gates.json', 'addStoredManualBrowserGateRequirement', 'stored browser gate report', 'MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON', 'reports/mochi-social-report-hygiene.json', 'site.report-hygiene', 'check:mochi-social-report-hygiene', 'site.clean-room', 'check-mochi-social-clean-room.mjs', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'publishableKeySource', 'not-loaded-awaiting-hosted-approval', 'selectPublishableKey', 'site.bridge-state', 'check-mochi-social-bridge-state.mjs', 'site.auth-bridge', 'check-mochi-social-auth-bridge.mjs', 'site.edge-authority', 'check-mochi-social-edge-authority.mjs', 'site.preview-key-loader', 'check-mochi-social-preview-key-loader.mjs', 'site.discord-oauth-detector', 'check-mochi-social-discord-oauth-self-test.mjs', 'site.game-contract', 'site.edge-smoke', 'site.discord-oauth', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'provider is not enabled', 'site.manual-browser-gates', 'site.branch-sync', 'site.game-preview-ready', 'browserGateEnvForMode', 'tester-password locked page visible', ...browserGateEnvNames]
   },
   {
     file: 'scripts/check-mochi-social-preview-key-loader.mjs',

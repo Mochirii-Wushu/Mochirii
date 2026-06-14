@@ -15,14 +15,14 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 
 ## Design Target
 
-- Theme: Cozy Wushu arrival gate.
+- Theme: Mochirii High-Fidelity Wuxia arrival gate.
 - Audience: approved Mochirii guild testers, not operators or developers.
 - Stop point: Alpha Preview Ready visual polish, not production launch.
 - Primary state: tester-password mode.
 - Secondary state: strict Supabase/Discord allowlist mode remains supported.
 - Chain state: Enjin Canary `configured-preview-stub`, no real value, fixed-price only. Keep this visible as preview safety context, not as the page's main story.
 - Art relationship: the website gate image and the game runtime art should feel like the same Mochirii world, but they remain separate asset surfaces. The website may use high-fidelity decorative WebP art; the game repo owns RPGJS runtime sprites, maps, HUD, and its own asset ledger.
-- Game-art style reference: high-fidelity Cozy Wushu painterly/pixel hybrid, dusk lantern lighting, jade/red timber palette, readable silhouettes, and strong interaction cues. Do not make website docs the source of truth for game runtime dimensions or Tiled/RPGJS contracts.
+- Game-art style reference: Mochirii High-Fidelity Wuxia, smooth modern illustrated 2D, soft dusk lantern lighting, painterly jade/red lacquer/gold/silk/paper material cues, readable silhouettes, and strong interaction cues. Avoid pixel-art language, retro styling, and third-party visual reference dependency. Do not make website docs the source of truth for game runtime dimensions or Tiled/RPGJS contracts.
 
 ## Locked Page
 
@@ -30,7 +30,7 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Use the tester-facing copy:
   - Eyebrow: `Closed Mochirii Playtest`
   - Headline: `Mochi Social`
-  - Lead: `A cozy Wushu RPG town where approved testers can raise Mochi Spirits, meet guild friends, and try early social trading.`
+  - Lead: `A lantern-lit wuxia RPG town where approved testers can raise Mochi Spirits, meet guild friends, and try early social trading.`
   - Form heading: `Enter the town`
   - Button: `Unlock playtest`
   - Invalid password: `That password did not work. Check the tester invite and try again.`
@@ -57,7 +57,7 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Prompt:
 
 ```text
-High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same composition as the current tester gate template: symmetrical red timber roof, two warm paper lanterns, golden stone path leading toward a cozy hidden town, bamboo and misty mountain background, refined guild sanctuary atmosphere, warm jade and lantern palette, no text, no logos, no people, no UI, vertical card composition.
+High-fidelity illustrated wuxia mountain gate at dusk, same composition as the current tester gate template: symmetrical red timber roof, two warm paper lanterns, golden stone path leading toward a hidden guild town, bamboo and misty mountain background, refined guild sanctuary atmosphere, warm jade and lantern palette, smooth modern materials, no text, no logos, no people, no UI, vertical card composition.
 ```
 
 ## Unlocked Page
@@ -89,6 +89,7 @@ High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same compos
 Run the local checks after website changes:
 
 ```powershell
+npm run check:mochi-social-clean-room
 npm run check:mochi-social-tester-password-gate
 npm run check:mochi-social-alpha
 npm run check:assets
@@ -97,5 +98,7 @@ cd apps/web
 npm run lint
 npm run build
 ```
+
+For restricted upstream and legacy local literal checks, keep private terms in `.local/mochi-social-clean-room-denylist.txt` or `MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST`. Do not commit the private denylist or paste those terms into public reports.
 
 Hosted preview verification, provider setting changes, redeploys, and hosted browser gates require fresh action-specific approval before use when they can create real provider cost or mutate external state. Public-repo commits and pushes are allowed under the current user policy; verify PR/CI results afterward.
