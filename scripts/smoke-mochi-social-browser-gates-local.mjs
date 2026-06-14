@@ -113,6 +113,7 @@ async function verifyBrowserGates(chromiumBrowser) {
   await pageOne.waitForSelector('iframe[title="Mochi Social"]', { timeout: 30000 });
   const unlockedText = await pageOne.locator("body").innerText();
   const iframeCount = await pageOne.locator('iframe[title="Mochi Social"]').count();
+  const iframeSrc = await pageOne.locator('iframe[title="Mochi Social"]').first().getAttribute("src");
   record("tester-password-iframe-loads", goodLogin.status() === 303 && Boolean(sessionCookie) && unlockedText.includes("Mochi Social unlocked") && iframeCount === 1, "Valid tester password route sets scoped session cookie, unlocks page, and renders one game iframe.", {
     status: goodLogin.status(),
     hasSessionCookie: Boolean(sessionCookie),
@@ -120,6 +121,7 @@ async function verifyBrowserGates(chromiumBrowser) {
     httpOnly: sessionCookie?.httpOnly,
     sameSite: sessionCookie?.sameSite,
     iframeCount,
+    iframeSrc,
     url: pageOne.url(),
   });
   const frameOne = await gameFrame(pageOne);
@@ -208,12 +210,14 @@ async function installMessageCapture(page) {
 }
 
 async function gameFrame(page) {
+  let frameUrls = [];
   for (let i = 0; i < 80; i += 1) {
+    frameUrls = page.frames().map((candidate) => candidate.url()).filter(Boolean);
     const frame = page.frames().find((candidate) => candidate.url().startsWith(`${gameUrl}/embed`));
     if (frame) return frame;
     await page.waitForTimeout(250);
   }
-  throw new Error("Game iframe did not attach to the configured local /embed URL.");
+  throw new Error(`Game iframe did not attach to the configured local /embed URL. Expected ${gameUrl}/embed. Frames seen: ${frameUrls.join(", ") || "none"}. Rebuild or start the local site with NEXT_PUBLIC_MOCHI_SOCIAL_URL=${gameUrl}.`);
 }
 
 async function frameBodyText(frame) {
