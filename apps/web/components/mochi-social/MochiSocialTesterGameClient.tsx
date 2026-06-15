@@ -40,6 +40,21 @@ export function MochiSocialTesterGameClient() {
     return () => window.removeEventListener("message", handleGameMessage);
   }, [sendGuestStateToGame]);
 
+  useEffect(() => {
+    if (bridgeStatus !== "waiting" && bridgeStatus !== "ready") return;
+
+    let attempts = 0;
+    const interval = window.setInterval(() => {
+      attempts += 1;
+      sendGuestStateToGame();
+      if (attempts >= 8) window.clearInterval(interval);
+    }, 750);
+
+    sendGuestStateToGame();
+
+    return () => window.clearInterval(interval);
+  }, [bridgeStatus, sendGuestStateToGame]);
+
   return (
     <section className="mochi-game-shell mochi-game-shell--unlocked" aria-label="Mochi Social tester game">
       <header className="mochi-game-status mochi-game-status--live">
