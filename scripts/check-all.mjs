@@ -10,6 +10,7 @@ const checks = [
   ["check:discord-reaper-parity", ["node", "scripts/check-discord-reaper-parity.mjs"]],
   ["check:discord-event-covers", ["node", "scripts/check-discord-event-covers.mjs"]],
   ["check:reaper-discord-interactions", ["node", "scripts/check-reaper-discord-interactions.mjs"]],
+  ["check:reaper-modmail-audit", ["node", "scripts/check-reaper-modmail-audit.mjs"]],
   ["check:reaper-pending-verification", ["node", "scripts/check-reaper-pending-verification.mjs"]],
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],

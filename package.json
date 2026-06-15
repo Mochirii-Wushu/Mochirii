@@ -57,6 +57,7 @@
     "check:vercel-pr-preview": "node scripts/check-vercel-pr-preview.mjs",
     "check:production": "node scripts/check-production.mjs",
     "check:reaper-discord-interactions": "node scripts/check-reaper-discord-interactions.mjs",
+    "check:reaper-modmail-audit": "node scripts/check-reaper-modmail-audit.mjs",
     "check:reaper-pending-verification": "node scripts/check-reaper-pending-verification.mjs",
     "check:vote-reminder": "node scripts/check-vote-reminder.mjs",
     "generate:discord-event-covers": "node scripts/generate-discord-event-covers.mjs",
@@ -66,6 +67,7 @@
     "prepare:live-member-cleanup-note": "node scripts/prepare-live-member-cleanup-note.mjs",
     "prepare:live-member-qa-image": "node scripts/prepare-live-member-qa-image.mjs",
     "prepare:live-member-qa-local": "node scripts/prepare-live-member-qa-local.mjs",
+    "register:reaper-modmail-audit-command": "node scripts/register-reaper-modmail-audit-command.mjs",
     "register:reaper-pending-verification-command": "node scripts/register-reaper-pending-verification-command.mjs",
     "rollback:reaper-pending-verification": "node scripts/rollback-reaper-pending-verification-overwrites.mjs",
     "smoke:dns-cutover-post": "node scripts/smoke-dns-cutover-post.mjs",
@@ -77,6 +79,7 @@
     "smoke:supabase-edge-functions": "node scripts/smoke-supabase-edge-functions.mjs",
     "sync:next-public": "node scripts/sync-next-public.mjs",
     "test:spotlight-poll": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
+    "test:modmail-audit": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/modmail-audit_test.ts",
     "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"
   },
   "devDependencies": {

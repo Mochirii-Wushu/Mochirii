@@ -90,6 +90,7 @@ function inspectLocalReleaseSurface() {
     "check:supabase-edge-types",
     "check:discord-reaper-parity",
     "check:reaper-discord-interactions",
+    "check:reaper-modmail-audit",
     "check:reaper-pending-verification",
     "check:mochi-social-alpha",
     "check:mochi-social-bridge-state",
@@ -98,6 +99,7 @@ function inspectLocalReleaseSurface() {
     "smoke:vercel-production",
     "smoke:supabase-edge-functions",
     "register:reaper-pending-verification-command",
+    "register:reaper-modmail-audit-command",
     "rollback:reaper-pending-verification",
   ];
   const missingScripts = requiredScripts.filter((script) => !scripts[script]);
@@ -109,6 +111,7 @@ function inspectLocalReleaseSurface() {
     "docs/current-live-state.md",
     "docs/dns-cutover-readiness-and-rollback.md",
     "docs/member-profiles-and-rank-roles.md",
+    "docs/reaper-modmail-audit.md",
     "docs/mochi-social-visual-polish.md",
     "supabase/config.toml",
     ".github/workflows/validate-static-site.yml",
@@ -278,10 +281,12 @@ function inspectDiscordReaper() {
   const packageJson = readJson(resolve(root, "package.json")) || {};
   const scripts = packageJson.scripts || {};
   const commandScript = existsSync(resolve(root, "scripts/register-reaper-pending-verification-command.mjs"));
+  const modmailCommandScript = existsSync(resolve(root, "scripts/register-reaper-modmail-audit-command.mjs"));
   const rollbackScript = existsSync(resolve(root, "scripts/rollback-reaper-pending-verification-overwrites.mjs"));
   const docs = [
     "docs/discord-reaper-parity.md",
     "docs/reaper-pending-verification-activation.md",
+    "docs/reaper-modmail-audit.md",
     "docs/vote-reminder-runbook.md",
   ].filter((file) => existsSync(resolve(root, file)));
 
@@ -292,10 +297,21 @@ function inspectDiscordReaper() {
       rollbackScript,
       packageScripts: {
         register: Boolean(scripts["register:reaper-pending-verification-command"]),
+        modmailRegister: Boolean(scripts["register:reaper-modmail-audit-command"]),
         rollback: Boolean(scripts["rollback:reaper-pending-verification"]),
         parity: Boolean(scripts["check:discord-reaper-parity"]),
         containment: Boolean(scripts["check:reaper-pending-verification"]),
+        modmailAudit: Boolean(scripts["check:reaper-modmail-audit"]),
       },
+    },
+    modmailAudit: {
+      registerScript: modmailCommandScript,
+      command: "/audit-modmail",
+      botUserId: "575252669443211264",
+      logChannelId: "1165567735871311914",
+      moderatorRoleId: "1078630751165222984",
+      nativeSetupOnly: true,
+      messageContentExpected: false,
     },
     gatewayAutomation: {
       expectedSecondGate: true,
@@ -607,6 +623,8 @@ This file is intentionally no-secret. It records release-readiness evidence only
 
 - Slash-command registration script: ${data.discordReaper.slashCommandRepairPath.registerScript ? "present" : "missing"}
 - Rollback script: ${data.discordReaper.slashCommandRepairPath.rollbackScript ? "present" : "missing"}
+- ModMail audit command registration script: ${data.discordReaper.modmailAudit.registerScript ? "present" : "missing"}
+- ModMail audit command: ${data.discordReaper.modmailAudit.command}
 - Gateway direct permission mutation expected here: ${data.discordReaper.gatewayAutomation.directDiscordMutationExpectedHere ? "yes" : "no"}
 
 ## Mochi Social, Fly, And Enjin
