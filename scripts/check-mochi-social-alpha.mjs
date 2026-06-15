@@ -43,7 +43,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-clean-room.mjs',
-    includes: ['Mochi Social site clean-room scan passed', 'MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST_PATH', 'MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST', '.local/mochi-social-clean-room-denylist.txt', 'builtInFingerprints', 'clean-room fingerprint', 'private clean-room denylist literal']
+    includes: ['Mochi Social site clean-room scan passed', 'MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST_PATH', 'MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST', '.local/mochi-social-clean-room-denylist.txt', 'builtInFingerprints', 'legacyIdentityFingerprints', 'legacy identity fingerprint', 'clean-room fingerprint', 'private clean-room denylist literal']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',

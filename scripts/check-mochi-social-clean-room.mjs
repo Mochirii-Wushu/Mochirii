@@ -32,6 +32,20 @@ const builtInFingerprints = [
   { id: "built-in-020", tokenCount: 3, hash: "29e1f5a83d3865675c00dcc9eff32b7e6679339717756e79f8bdc9af9f80e841" }
 ];
 
+const legacyIdentityFingerprints = [
+  { id: "legacy-identity-001", tokenCount: 1, hash: "3100486406b39efc3f3d3565bc97cc3b9e2d7b6e3427b194f4442ef4beb05b41" },
+  { id: "legacy-identity-002", tokenCount: 1, hash: "cfe1ad9ec0024032ab6debc6a6e5d20b65893273e9731dc00033fdd02bca93b1" },
+  { id: "legacy-identity-003", tokenCount: 1, hash: "a4c745facd3a921565e2c12d2db6a4021d4764f633a18400634d68df575ffb35" },
+  { id: "legacy-identity-004", tokenCount: 2, hash: "5333301f3bff77fcb44b3ff51774dfd5b91eb8e9debd2bb31324b2cf4a756b15" },
+  { id: "legacy-identity-005", tokenCount: 2, hash: "9d75e9f3c105291242d7ba17fb773791ed112057ffbf68a960b3de37bdff4d35" },
+  { id: "legacy-identity-006", tokenCount: 2, hash: "179eb733ffba30ec704b5da48625f80d723b681333192d59f129ef7e72eb32e1" },
+  { id: "legacy-identity-007", tokenCount: 2, hash: "c6d1665178883aad5322b48cb11c05f4cb190949ac5842aa59521d3e7fc3f516" },
+  { id: "legacy-identity-008", tokenCount: 2, hash: "529f4ca28d278bc42bab6d0e56c07ea4a323d5848cf22d31f920913693b69022" },
+  { id: "legacy-identity-009", tokenCount: 2, hash: "a7387e2573cf5571f784d5560e187d51102253d1404d07ea42d6b033c28af62c" },
+  { id: "legacy-identity-010", tokenCount: 2, hash: "9e7cb753be0b237a5a93048af258c6b6d7566bae99f23864a08d0cc2804e0b6d" },
+  { id: "legacy-identity-011", tokenCount: 3, hash: "99b5a72e57abaf28e5242346a15c5f6bab393f868367e51c2d4282ad94ba1bc0" }
+];
+
 const ignoredDirectories = new Set([".git", ".local", ".next", ".vercel", "coverage", "dist", "node_modules", "out", "reports"]);
 const textExtensions = new Set([".css", ".html", ".js", ".json", ".md", ".mjs", ".sql", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml"]);
 const failures = [];
@@ -79,19 +93,23 @@ function scanFile(file) {
     for (let index = 0; index <= tokens.length - tokenCount; index += 1) {
       const hash = sha256(tokens.slice(index, index + tokenCount).join(" "));
       const match = entries.find((entry) => entry.hash === hash);
-      if (match) failures.push(`${pathForReport(file)} matches clean-room fingerprint ${match.id}.`);
+      if (match) failures.push(`${pathForReport(file)} matches ${fingerprintLabel(match)} ${match.id}.`);
     }
   }
 }
 
 function groupFingerprintsByCount() {
   const groups = new Map();
-  for (const entry of builtInFingerprints) {
+  for (const entry of [...legacyIdentityFingerprints, ...builtInFingerprints]) {
     const entries = groups.get(entry.tokenCount) || [];
     entries.push(entry);
     groups.set(entry.tokenCount, entries);
   }
   return groups;
+}
+
+function fingerprintLabel(entry) {
+  return entry.id.startsWith("legacy-identity-") ? "legacy identity fingerprint" : "clean-room fingerprint";
 }
 
 function shouldScan(file) {

@@ -99,6 +99,6 @@ npm run lint
 npm run build
 ```
 
-For restricted upstream and legacy local literal checks, keep private terms in `.local/mochi-social-clean-room-denylist.txt` or `MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST`. Do not commit the private denylist or paste those terms into public reports.
+For restricted upstream and legacy local literal checks, keep private terms in `.local/mochi-social-clean-room-denylist.txt` or `MOCHI_SOCIAL_SITE_CLEAN_ROOM_DENYLIST`. The committed scanner also carries hashed legacy-identity fingerprints so retired names stay out of the repo while still failing local checks. Do not commit the private denylist or paste those terms into public reports.
 
 Hosted preview verification, provider setting changes, redeploys, and hosted browser gates require fresh action-specific approval before use when they can create real provider cost or mutate external state. Public-repo commits and pushes are allowed under the current user policy; verify PR/CI results afterward.
