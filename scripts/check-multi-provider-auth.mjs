@@ -47,6 +47,7 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   '"facebook"',
   '"google"',
   '"kakao"',
+  'scopes: "profile_nickname profile_image"',
   '"twitch"',
   '"spotify"',
   'process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true"',
@@ -156,6 +157,7 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "reviewMemberVerification",
   "review-member-verification",
   "CONFIGURED_AUTH_PROVIDER_IDS",
+  'scopes: "profile_nickname profile_image"',
 ].forEach((snippet) => assertIncludes("static Supabase helper", staticSupabase, snippet));
 
 [

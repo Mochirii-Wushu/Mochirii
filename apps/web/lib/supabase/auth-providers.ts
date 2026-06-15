@@ -89,9 +89,10 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     label: "Kakao",
     shortLabel: "Kakao",
     kind: "oauth",
+    scopes: "profile_nickname profile_image",
     approvalRequired: true,
     automaticVerification: false,
-    setupNote: "Kakao account_email is preferred; missing email requires manual review.",
+    setupNote: "Kakao uses profile-only scopes unless the app is approved as a Kakao Biz App for account_email.",
   },
   twitch: {
     id: "twitch",

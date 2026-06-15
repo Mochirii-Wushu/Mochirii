@@ -25,7 +25,7 @@ This feature separates four layers that must stay distinct:
 - Apple: member review required; schedule six-month OAuth secret rotation.
 - Facebook: request `email`; missing email requires manual review.
 - Google: use minimal `openid email profile` scopes.
-- Kakao: prefer `account_email`; missing email requires manual review.
+- Kakao: use `profile_nickname profile_image` unless the app is approved as a Kakao Biz App for `account_email`; missing email requires manual review.
 - Twitch and Spotify: identity evidence only, not membership proof.
 - Phone: SMS control only; moderator review is still required for gallery access.
 
