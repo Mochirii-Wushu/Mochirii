@@ -9,6 +9,7 @@ import {
   okResult,
   text,
   type EditableProfilePayload,
+  type MemberAccessResponse,
   type MemberProfile,
   type VerificationResponse,
 } from "./types";
@@ -36,8 +37,12 @@ export function profileHasVerifiedRoles(profile?: MemberProfile | null) {
   return Boolean(profile?.has_required_discord_roles === true && hasRecentVerification(profile));
 }
 
-export function profileIsActive(profile?: MemberProfile | null) {
-  return Boolean(profileHasVerifiedRoles(profile) && profile?.member_status === "active");
+export function memberAccessIsApproved(access?: MemberAccessResponse | null) {
+  return Boolean(access?.galleryEligible === true);
+}
+
+export function profileIsActive(profile?: MemberProfile | null, access?: MemberAccessResponse | null) {
+  return Boolean(profile?.member_status === "active" && (profileHasVerifiedRoles(profile) || memberAccessIsApproved(access)));
 }
 
 function fieldLabel(key: string) {
@@ -145,6 +150,12 @@ export async function verifyDiscordMembership() {
   return invokeEdgeFunction<VerificationResponse>("verify-discord-member", {});
 }
 
+export async function verifyMemberAccess(options: { refreshDiscord?: boolean } = {}) {
+  return invokeEdgeFunction<MemberAccessResponse>("verify-member-access", {
+    refreshDiscord: options.refreshDiscord === true,
+  });
+}
+
 export async function requireVerifiedGuildMember(options: { refresh?: boolean } = {}) {
   const auth = await requireAuth();
   if (!auth.ok || !auth.data?.user) {
@@ -156,18 +167,17 @@ export async function requireVerifiedGuildMember(options: { refresh?: boolean } 
       error: auth.error || createError("Sign in before continuing."),
     });
   }
-  if (options.refresh) await verifyDiscordMembership();
 
-  const profileResult = await getCurrentProfile();
-  const profile = profileResult.data;
+  const accessResult = await verifyMemberAccess({ refreshDiscord: options.refresh === true });
+  const profile = accessResult.data?.profile || null;
 
-  if (!profileResult.ok || !profile || !profileHasVerifiedRoles(profile)) {
+  if (!accessResult.ok || !profile || !memberAccessIsApproved(accessResult.data)) {
     return createResult<MemberAccessResult>({
       ok: false,
       status: 403,
       statusText: "Forbidden",
       data: { user: auth.data.user, profile },
-      error: createError("Discord membership and both required roles must be verified first."),
+      error: createError(accessResult.message || "Member verification must be approved before continuing."),
     });
   }
 

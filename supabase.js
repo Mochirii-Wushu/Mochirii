@@ -29,6 +29,23 @@
     caption: 300,
     category: 40,
   };
+  const AUTH_PROVIDER_REGISTRY = Object.freeze({
+    discord: { id: "discord", label: "Discord", kind: "oauth", scopes: "identify email", automaticVerification: true },
+    phone: { id: "phone", label: "Phone OTP", kind: "phone", automaticVerification: false },
+    apple: { id: "apple", label: "Apple", kind: "oauth", automaticVerification: false },
+    facebook: { id: "facebook", label: "Facebook", kind: "oauth", scopes: "email", automaticVerification: false },
+    google: { id: "google", label: "Google", kind: "oauth", scopes: "openid email profile", automaticVerification: false },
+    kakao: { id: "kakao", label: "Kakao", kind: "oauth", automaticVerification: false },
+    twitch: { id: "twitch", label: "Twitch", kind: "oauth", automaticVerification: false },
+    spotify: { id: "spotify", label: "Spotify", kind: "oauth", automaticVerification: false },
+  });
+  const AUTH_PROVIDER_IDS = Object.freeze(Object.keys(AUTH_PROVIDER_REGISTRY));
+  const CONFIGURED_AUTH_PROVIDER_IDS = Object.freeze(
+    String(window.MOCHIRII_AUTH_PROVIDER_IDS || "discord")
+      .split(",")
+      .map((item) => item.trim().toLowerCase())
+      .filter((item) => AUTH_PROVIDER_IDS.includes(item)),
+  );
 
   const config = Object.freeze({
     projectRef: SUPABASE_PROJECT_REF,
@@ -41,6 +58,8 @@
     maxUploadBytes: MAX_UPLOAD_BYTES,
     acceptedImageTypes: [...ACCEPTED_IMAGE_TYPES],
     recentVerificationMs: RECENT_VERIFICATION_MS,
+    authProviderIds: [...CONFIGURED_AUTH_PROVIDER_IDS],
+    authProviders: AUTH_PROVIDER_REGISTRY,
   });
 
   const restUrl = `${config.url}/rest/v1`;
@@ -412,15 +431,22 @@
     return new URL("./account.html", window.location.href).href;
   }
 
-  async function signInWithDiscord(options = {}) {
+  function enabledAuthProviders() {
+    return CONFIGURED_AUTH_PROVIDER_IDS.map((providerId) => AUTH_PROVIDER_REGISTRY[providerId]).filter(Boolean);
+  }
+
+  async function signInWithProvider(providerId, options = {}) {
     try {
+      const provider = AUTH_PROVIDER_REGISTRY[String(providerId || "").toLowerCase()];
+      if (!provider || provider.kind !== "oauth") throw new Error("That sign-in provider is not supported here.");
+
       const instance = requireClient();
       const redirectTo = resolveRedirectTo(options.redirectTo || options.next);
       const { data, error } = await instance.auth.signInWithOAuth({
-        provider: "discord",
+        provider: provider.id,
         options: {
           redirectTo,
-          scopes: "identify email",
+          ...(provider.scopes ? { scopes: provider.scopes } : {}),
           ...(options.options || {}),
         },
       });
@@ -429,6 +455,80 @@
     } catch (error) {
       return failedResult(error);
     }
+  }
+
+  async function linkProviderIdentity(providerId, options = {}) {
+    try {
+      const provider = AUTH_PROVIDER_REGISTRY[String(providerId || "").toLowerCase()];
+      if (!provider || provider.kind !== "oauth") throw new Error("That sign-in provider is not supported here.");
+
+      const instance = requireClient();
+      const redirectTo = resolveRedirectTo(options.redirectTo || options.next);
+      const { data, error } = await instance.auth.linkIdentity({
+        provider: provider.id,
+        options: {
+          redirectTo,
+          ...(provider.scopes ? { scopes: provider.scopes } : {}),
+        },
+      });
+      if (error) return failedResult(error);
+      return okResult(data);
+    } catch (error) {
+      return failedResult(error);
+    }
+  }
+
+  async function getLinkedIdentities() {
+    try {
+      const instance = requireClient();
+      if (typeof instance.auth.getUserIdentities === "function") {
+        const { data, error } = await instance.auth.getUserIdentities();
+        if (error) return failedResult(error);
+        return okResult(Array.isArray(data) ? data : Array.isArray(data?.identities) ? data.identities : []);
+      }
+      const user = await getUser();
+      if (!user.ok) return user;
+      return okResult(Array.isArray(user.data?.identities) ? user.data.identities : []);
+    } catch (error) {
+      return failedResult(error);
+    }
+  }
+
+  async function signInWithPhoneOtp(options = {}) {
+    try {
+      const phone = String(options.phone || "").trim();
+      if (!phone) throw new Error("Enter a phone number before requesting a code.");
+      const instance = requireClient();
+      const { data, error } = await instance.auth.signInWithOtp({
+        phone,
+        options: {
+          shouldCreateUser: options.shouldCreateUser !== false,
+          ...(options.captchaToken ? { captchaToken: options.captchaToken } : {}),
+        },
+      });
+      if (error) return failedResult(error);
+      return okResult(data, "Code sent. Check your phone.");
+    } catch (error) {
+      return failedResult(error);
+    }
+  }
+
+  async function verifyPhoneOtp(options = {}) {
+    try {
+      const phone = String(options.phone || "").trim();
+      const token = String(options.token || "").trim();
+      if (!phone || !token) throw new Error("Enter the phone number and verification code.");
+      const instance = requireClient();
+      const { data, error } = await instance.auth.verifyOtp({ phone, token, type: "sms" });
+      if (error) return failedResult(error);
+      return okResult(data, "Phone sign-in complete.");
+    } catch (error) {
+      return failedResult(error);
+    }
+  }
+
+  async function signInWithDiscord(options = {}) {
+    return signInWithProvider("discord", options);
   }
 
   async function signOut() {
@@ -608,6 +708,14 @@
     }
   }
 
+  async function verifyMemberAccess(options = {}) {
+    const result = await invokeEdgeFunction("verify-member-access", {
+      refreshDiscord: options.refreshDiscord === true,
+    });
+    if (result.ok) await renderAuthNavState();
+    return result;
+  }
+
   async function invokeEdgeFunction(functionName, body = {}) {
     try {
       const instance = requireClient();
@@ -669,6 +777,23 @@
     });
   }
 
+  async function reviewMemberVerification(options = {}) {
+    const cleanUserId = String(options.userId || options.user_id || "").trim();
+    const cleanAction = String(options.action || "").trim().toLowerCase();
+    if (!cleanUserId) return failedResult("Choose a member before reviewing verification.");
+    if (!["approve", "reject", "revoke"].includes(cleanAction)) {
+      return failedResult("Review action must be approve, reject, or revoke.");
+    }
+
+    return invokeEdgeFunction("review-member-verification", {
+      user_id: cleanUserId,
+      action: cleanAction,
+      method: String(options.method || "manual_review").trim().toLowerCase(),
+      reason: String(options.reason || options.redacted_reason || "").trim().slice(0, 500),
+      expires_at: String(options.expiresAt || options.expires_at || "").trim(),
+    });
+  }
+
   async function listInstagramPublishQueue(options = {}) {
     const status = typeof options === "string" ? options : options.status;
     return invokeEdgeFunction("list-instagram-publish-queue", {
@@ -708,8 +833,8 @@
     return Boolean(profile?.has_required_discord_roles && isRecentVerification(profile?.discord_verified_at));
   }
 
-  function profileIsActive(profile) {
-    return Boolean(profileHasVerifiedRoles(profile) && profile?.member_status === "active");
+  function profileIsActive(profile, accessState) {
+    return Boolean(profile?.member_status === "active" && (profileHasVerifiedRoles(profile) || accessState?.galleryEligible === true));
   }
 
   async function requireAuth(options = {}) {
@@ -728,7 +853,7 @@
       status: 401,
       statusText: "Unauthorized",
       data: { user: null, profile: null },
-      error: createError(options.message || "Sign in with Discord first."),
+      error: createError(options.message || "Choose a sign-in method first."),
       count: null,
     });
   }
@@ -737,17 +862,15 @@
     const auth = await requireAuth(options);
     if (!auth.ok) return auth;
 
-    if (options.refresh) await verifyDiscordMembership();
-
-    const profileResult = await getCurrentProfile();
-    const profile = profileResult.data;
-    if (!profileResult.ok || !profile || !profileHasVerifiedRoles(profile)) {
+    const accessResult = await verifyMemberAccess({ refreshDiscord: options.refresh === true });
+    const profile = accessResult.data?.profile || null;
+    if (!accessResult.ok || !profile || accessResult.data?.galleryEligible !== true) {
       return createResult({
         ok: false,
         status: 403,
         statusText: "Forbidden",
         data: { user: auth.data.user, profile },
-        error: createError("Discord membership and both required roles must be verified first."),
+        error: createError(accessResult.message || "Member verification must be approved before continuing."),
         count: null,
       });
     }
@@ -936,11 +1059,18 @@
     getSession,
     getUser,
     onAuthStateChange,
+    enabledAuthProviders,
+    signInWithProvider,
+    linkProviderIdentity,
+    getLinkedIdentities,
+    signInWithPhoneOtp,
+    verifyPhoneOtp,
     signInWithDiscord,
     signOut,
     getCurrentProfile,
     updateCurrentProfile,
     verifyDiscordMembership,
+    verifyMemberAccess,
     requireAuth,
     requireVerifiedGuildMember,
     requireActiveMember,
@@ -950,6 +1080,7 @@
     checkLeaderGalleryModerationAccess,
     listGalleryReviewQueue,
     moderateGallerySubmission,
+    reviewMemberVerification,
     listInstagramPublishQueue,
     publishInstagramGallerySubmission,
     markInstagramGallerySubmissionShared,

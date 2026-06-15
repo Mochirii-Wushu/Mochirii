@@ -1,4 +1,4 @@
-/* gallery-submit.js - role-gated pending gallery uploads */
+/* gallery-submit.js - member-verified pending gallery uploads */
 (() => {
   "use strict";
 
@@ -43,6 +43,10 @@
     );
   }
 
+  function activeMemberAccess(profile, accessState) {
+    return Boolean(activeVerified(profile) || (profile?.member_status === "active" && accessState?.galleryEligible === true));
+  }
+
   function renderGate(mode, message) {
     const allowed = mode === "allowed";
     $("#uploadPanel").hidden = !allowed;
@@ -51,8 +55,8 @@
     $("#refreshVerification").hidden = mode !== "needs-verification";
     $("#uploadAccountLink").hidden = mode === "signed-out" || allowed;
 
-    setText("#uploadGateState", mode === "signed-out" ? "Signed out" : mode === "allowed" ? "Ready" : "Needs roles");
-    setText("#uploadGateTitle", mode === "signed-out" ? "Login Required" : mode === "allowed" ? "Upload Ready" : "Role Verification Required");
+    setText("#uploadGateState", mode === "signed-out" ? "Signed out" : mode === "allowed" ? "Ready" : "Needs review");
+    setText("#uploadGateTitle", mode === "signed-out" ? "Login Required" : mode === "allowed" ? "Upload Ready" : "Member Verification Required");
     setText("#uploadGateMessage", message);
   }
 
@@ -128,26 +132,24 @@
     const auth = await S.requireAuth();
     if (!auth.ok) {
       accessState = null;
-      renderGate("signed-out", "Login with Discord before submitting images.");
+      renderGate("signed-out", "Choose a sign-in method before submitting images.");
       setBusy(false);
       return;
     }
 
-    if (refresh) {
-      const verify = await S.verifyDiscordMembership();
-      if (!verify.ok) {
-        setError("#uploadError", verify.message || "Discord verification could not be checked.");
-      }
+    const verification = await S.verifyMemberAccess({ refreshDiscord: refresh === true });
+    if (!verification.ok) {
+      setError("#uploadError", verification.message || "Member verification could not be checked.");
     }
 
     const profileResult = await S.getCurrentProfile();
-    const profile = profileResult.data;
-    accessState = { user: auth.data.user, profile };
+    const profile = verification.data?.profile || profileResult.data;
+    accessState = { user: auth.data.user, profile, verification: verification.data };
 
-    if (!profileResult.ok || !activeVerified(profile)) {
+    if (!profileResult.ok || !activeMemberAccess(profile, verification.data)) {
       renderGate(
         "needs-verification",
-        "Gallery upload access requires Discord server membership, completed onboarding, Mōchirīī - WWM, ✅Verified, active member status, and a recent verification check.",
+        verification.data?.message || "Gallery upload access requires Discord verification or moderator-approved member verification.",
       );
       setBusy(false);
       return;
@@ -167,10 +169,10 @@
     setError("#uploadError", "");
     setText("#uploadStatus", "Submitting image for moderation.");
 
-    if (!activeVerified(accessState?.profile)) {
+    if (!activeMemberAccess(accessState?.profile, accessState?.verification)) {
       await checkAccess({ refresh: true });
-      if (!activeVerified(accessState?.profile)) {
-        setError("#uploadError", "Discord verification and active member status are required before upload.");
+      if (!activeMemberAccess(accessState?.profile, accessState?.verification)) {
+        setError("#uploadError", "Member verification and active member status are required before upload.");
         setText("#uploadStatus", "");
         setBusy(false);
         return;

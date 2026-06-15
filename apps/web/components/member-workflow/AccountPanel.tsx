@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
-import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyDiscordMembership } from "@/lib/supabase/profile";
+import { enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
+import { getLinkedIdentities, linkProviderIdentity } from "@/lib/supabase/auth";
+import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
 import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
 import { listMyProfileMedia, updateProfileVisibility, uploadProfileMedia } from "@/lib/supabase/member-profiles";
 import { onAuthStateChange, requireAuth, signOut } from "@/lib/supabase/auth";
-import { type EditableProfilePayload, type GallerySubmission, type MemberProfile, type MemberProfileMedia, type ProfileMediaKind, text } from "@/lib/supabase/types";
+import { type EditableProfilePayload, type GallerySubmission, type MemberAccessIdentity, type MemberAccessResponse, type MemberProfile, type MemberProfileMedia, type ProfileMediaKind, text } from "@/lib/supabase/types";
 import type { User } from "@supabase/supabase-js";
 import {
   coreProfileFields,
@@ -88,6 +90,8 @@ export function AccountPanel() {
   const [busy, setBusy] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<MemberProfile | null>(null);
+  const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
+  const [linkedIdentities, setLinkedIdentities] = useState<MemberAccessIdentity[]>([]);
   const [formState, setFormState] = useState<FormState>(emptyFormState);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
   const [profileMedia, setProfileMedia] = useState<MemberProfileMedia[]>([]);
@@ -121,6 +125,35 @@ export function AccountPanel() {
     setProfileMedia(Array.isArray(result.data) ? result.data : []);
   }, []);
 
+  const refreshMemberAccess = useCallback(async (options: { refreshDiscord?: boolean } = {}) => {
+    const result = await verifyMemberAccess({ refreshDiscord: options.refreshDiscord === true });
+    if (result.ok) {
+      const nextAccess = result.data || null;
+      setMemberAccess(nextAccess);
+      setLinkedIdentities(Array.isArray(nextAccess?.identities) ? nextAccess.identities : []);
+      if (nextAccess?.profile) setProfile(nextAccess.profile);
+      return result;
+    }
+
+    const identities = await getLinkedIdentities();
+    if (identities.ok && Array.isArray(identities.data)) {
+      setLinkedIdentities(
+        identities.data
+          .map((identity) => {
+            const record = identity && typeof identity === "object" ? identity as Record<string, unknown> : {};
+            return {
+              provider: text(record.provider),
+              providerSubject: text(record.provider_id || record.id),
+              displayLabel: text(record.provider || record.provider_id || record.id),
+            };
+          })
+          .filter((identity) => identity.provider),
+      );
+    }
+
+    return result;
+  }, []);
+
   const loadAccount = useCallback(async () => {
     setBusy(true);
     setVerifyError("");
@@ -133,6 +166,8 @@ export function AccountPanel() {
     if (!auth.ok || !auth.data?.user) {
       setUser(null);
       setProfile(null);
+      setMemberAccess(null);
+      setLinkedIdentities([]);
       setSubmissions([]);
       setProfileMedia([]);
       setModeratorAvailable(false);
@@ -153,13 +188,15 @@ export function AccountPanel() {
     const nextProfile = profileResult.data || null;
     setProfile(nextProfile);
     setFormState(formStateFromProfile(nextProfile));
+    const accessResult = await refreshMemberAccess();
+    if (!accessResult.ok) setVerifyError(accessResult.message || "Member verification state could not be loaded.");
     await loadSubmissions();
     await loadProfileMedia();
 
     const moderation = await checkLeaderGalleryModerationAccess();
     setModeratorAvailable(moderation.ok === true);
     setBusy(false);
-  }, [loadProfileMedia, loadSubmissions]);
+  }, [loadProfileMedia, loadSubmissions, refreshMemberAccess]);
 
   useEffect(() => {
     void Promise.resolve().then(() => loadAccount());
@@ -171,14 +208,14 @@ export function AccountPanel() {
     };
   }, [loadAccount]);
 
-  async function verifyDiscord() {
+  async function checkMemberAccess() {
     setBusy(true);
     setVerifyError("");
-    setVerifyStatus("Checking Discord membership and required roles.");
-    const result = await verifyDiscordMembership();
+    setVerifyStatus("Checking member verification and linked sign-in methods.");
+    const result = await refreshMemberAccess({ refreshDiscord: true });
     const message = result.ok
-      ? result.data?.message || result.message || "Discord verification checked."
-      : result.message || "Discord verification failed.";
+      ? result.data?.message || result.message || "Member verification checked."
+      : result.message || "Member verification failed.";
     await loadAccount();
 
     if (!result.ok) {
@@ -188,6 +225,18 @@ export function AccountPanel() {
       setVerifyStatus(message);
     }
     setBusy(false);
+  }
+
+  async function linkProvider(providerId: OAuthProviderId) {
+    setBusy(true);
+    setVerifyError("");
+    setVerifyStatus(`Opening ${providerId} account link.`);
+    const result = await linkProviderIdentity(providerId, { redirectTo: "/account" });
+    if (!result.ok) {
+      setVerifyError(result.message || "Provider link could not start.");
+      setVerifyStatus("");
+      setBusy(false);
+    }
   }
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
@@ -254,8 +303,8 @@ export function AccountPanel() {
     return (
       <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel">
         <p className="kicker">Sign In Required</p>
-        <h2 className="section-title">Login with Discord</h2>
-        <p className="muted">A website account is required before Discord membership and role verification can be checked.</p>
+        <h2 className="section-title">Choose a Sign-In Method</h2>
+        <p className="muted">A website account is required before member verification and gallery access can be checked.</p>
         <div className="auth-actions">
           <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link>
         </div>
@@ -263,10 +312,13 @@ export function AccountPanel() {
     );
   }
 
-  const access = uploadAccess(profile);
+  const access = uploadAccess(profile, memberAccess);
   const completion = profileCompletion(profile);
   const hasRoles = profile?.has_required_discord_roles === true;
   const recentRoles = profileHasVerifiedRoles(profile);
+  const enabledProviders = enabledOAuthProviders();
+  const linkedProviderIds = new Set(linkedIdentities.map((identity) => text(identity.provider).toLowerCase()).filter(Boolean));
+  const availableLinkProviders = enabledProviders.filter((provider) => !linkedProviderIds.has(provider.id));
   const counts = countSubmissions(submissions);
   const profileIsPublished = profile?.profile_public_enabled === true;
   const profileSlug = text(profile?.profile_slug);
@@ -308,6 +360,10 @@ export function AccountPanel() {
               <dd>{access.label}</dd>
             </div>
             <div>
+              <dt>Access method</dt>
+              <dd>{memberAccess?.method ? prettyStatus(memberAccess.method) : "Not approved"}</dd>
+            </div>
+            <div>
               <dt>Last Discord check</dt>
               <dd>{formatDate(profile?.discord_checked_at)}</dd>
             </div>
@@ -324,7 +380,7 @@ export function AccountPanel() {
           <div className="auth-panel__head">
             <div>
               <p className="kicker">Verification</p>
-              <h2 className="section-title">Discord Access</h2>
+              <h2 className="section-title">Member Verification</h2>
             </div>
           </div>
 
@@ -338,6 +394,10 @@ export function AccountPanel() {
               <dd>{hasRoles ? "Both required roles verified" : "Required roles not verified"}</dd>
             </div>
             <div>
+              <dt>Review status</dt>
+              <dd>{prettyStatus(memberAccess?.verification?.status || "pending_review")}</dd>
+            </div>
+            <div>
               <dt>Moderator access</dt>
               <dd>{moderatorAvailable ? "Moderator access available" : "Not available"}</dd>
             </div>
@@ -348,9 +408,9 @@ export function AccountPanel() {
           </dl>
 
           <div className="account-action-grid" aria-label="Account actions">
-            <button className="account-action-card account-action-card--button" type="button" onClick={verifyDiscord} disabled={busy}>
+            <button className="account-action-card account-action-card--button" type="button" onClick={checkMemberAccess} disabled={busy}>
               <span>Check Verification</span>
-              <small>Refresh Discord membership and role status.</small>
+              <small>Refresh linked identities, review state, and Discord role status.</small>
             </button>
             {access.ok ? (
               <Link className="account-action-card" href="/gallery-submit">
@@ -385,12 +445,46 @@ export function AccountPanel() {
               <li>Complete Discord server verification.</li>
               <li>Have Mōchirīī - WWM.</li>
               <li>Have ✅Verified.</li>
+              <li>Or have moderator-approved member verification.</li>
             </ul>
           </div>
 
           <p className="auth-status muted" id="verifyStatus" role="status" aria-live="polite">{verifyStatus}</p>
           <p className="auth-error" id="verifyError" role="alert" hidden={!verifyError}>{verifyError}</p>
         </div>
+
+        <section className="glass-card glass-card--primary glass-pad auth-panel" aria-labelledby="linkedMethodsTitle">
+          <div className="auth-panel__head">
+            <div>
+              <p className="kicker">Identity Linking</p>
+              <h2 className="section-title" id="linkedMethodsTitle">Sign-In Methods</h2>
+            </div>
+            <StatusPill tone={linkedIdentities.length ? "active" : "muted"}>{linkedIdentities.length ? `${linkedIdentities.length} linked` : "None synced"}</StatusPill>
+          </div>
+
+          <div className="identity-list" aria-live="polite">
+            {linkedIdentities.length ? linkedIdentities.map((identity) => (
+              <article className="identity-item" key={`${identity.provider}-${identity.providerSubject}`}>
+                <div>
+                  <strong>{prettyStatus(identity.provider)}</strong>
+                  <span>{text(identity.displayLabel || identity.providerSubject, "Identity on file")}</span>
+                </div>
+                <small>{identity.emailVerified || identity.phoneVerified ? "Verified by provider" : "Provider identity evidence"}</small>
+              </article>
+            )) : <p className="muted">Linked methods appear after the next member verification check.</p>}
+          </div>
+
+          {availableLinkProviders.length ? (
+            <div className="provider-grid provider-grid--compact" aria-label="Link another sign-in method">
+              {availableLinkProviders.map((provider) => (
+                <button className="provider-button" type="button" onClick={() => linkProvider(provider.id)} disabled={busy} key={provider.id}>
+                  <span>Link {provider.shortLabel}</span>
+                  <small>{provider.automaticVerification ? "Automatic Discord role check" : "Review required"}</small>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </section>
 
         <section className="glass-card glass-card--primary glass-pad auth-panel" aria-labelledby="accountSubmissionsTitle">
           <div className="auth-panel__head">

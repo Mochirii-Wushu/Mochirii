@@ -36,11 +36,17 @@ It also exposes Auth/profile/gallery helpers:
 - `getSession()`
 - `getUser()`
 - `onAuthStateChange(callback)`
-- `signInWithDiscord(options)`
+- `signInWithProvider(provider, options)`
+- `signInWithPhoneOtp(options)`
+- `verifyPhoneOtp(options)`
+- `linkProviderIdentity(provider, options)`
+- `getLinkedIdentities()`
+- `signInWithDiscord(options)` compatibility wrapper
 - `signOut()`
 - `getCurrentProfile()`
 - `updateCurrentProfile(payload)`
-- `verifyDiscordMembership()`
+- `verifyDiscordMembership()` compatibility check
+- `verifyMemberAccess(options)`
 - `requireAuth(options)`
 - `requireVerifiedGuildMember(options)`
 - `requireActiveMember(options)`
@@ -84,26 +90,38 @@ Script order on pages with Auth or upload behavior is:
 
 `account.html` summarizes the signed-in member's profile state, Discord verification state, upload eligibility, profile completeness, and recent gallery submission statuses. It uses existing browser-safe helpers and the signed-in user's own RLS-limited `gallery_submissions` rows. Profile completeness is informational only; it does not block saving, Discord verification, or gallery upload eligibility.
 
-The Account page does not expose private Storage URLs. It shows submission text metadata and moderation status only. Upload permission remains enforced by `verify-discord-member`, `member_profiles`, `gallery_submissions` RLS, and private `member-gallery` Storage policies.
+The Account page does not expose private Storage URLs. It shows submission text metadata and moderation status only. Upload permission remains enforced by `verify-member-access`, `verify-discord-member`, `member_profiles`, `member_verifications`, `gallery_submissions` RLS, and private `member-gallery` Storage policies.
 
-## Discord Auth Setup
+## Multi-Provider Auth Setup
 
-Discord login through Supabase Auth proves identity only. It does not prove guild membership or role ownership. Guild membership and role checks happen in the `verify-discord-member` Edge Function.
+Discord, Phone, Apple, Facebook, Google, Kakao, Twitch, and Spotify sign-in through Supabase Auth prove account control only. They do not automatically prove guild membership, role ownership, alpha access, game access, or Enjin readiness. Discord remains the only automatic member verification path because guild membership and role checks happen server-side through `verify-discord-member` and `verify-member-access`.
+
+Non-Discord identities are synced as redacted evidence in `member_auth_identities` and become gallery-eligible only after moderator approval in `member_verifications`. See `docs/multi-provider-login-and-verification.md` for the setup packet.
 
 In Supabase Dashboard:
 
 1. Open Authentication Provider settings.
-2. Enable Discord.
-3. Add the Discord Client ID.
-4. Add the Discord Client Secret.
+2. Enable only the providers that are ready for live callbacks.
+3. Add each provider's Client ID / public app identifier.
+4. Add each provider's Client Secret in Supabase only.
 5. Set the production Site URL to the public site URL.
 6. Add production redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
 7. Add local development redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
-8. Confirm the callback URL in Discord Developer Portal matches:
+8. Confirm every provider callback URL matches:
 
 ```text
 https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
 ```
+
+The browser/provider allowlist is controlled separately with public-safe env only:
+
+```text
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google
+NEXT_PUBLIC_PHONE_AUTH_READY=false
+NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
+```
+
+Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured.
 
 Recommended redirect URLs:
 
@@ -118,16 +136,10 @@ http://127.0.0.1:8765/gallery-submit.html
 http://127.0.0.1:8765/leader-dashboard.html
 ```
 
-The browser login uses:
+The browser OAuth login uses the provider registry:
 
 ```js
-supabase.auth.signInWithOAuth({
-  provider: "discord",
-  options: {
-    redirectTo: "<current account/auth URL>",
-    scopes: "identify email"
-  }
-});
+signInWithProvider("discord", { redirectTo: "/account" });
 ```
 
 ## Discord Server And Roles

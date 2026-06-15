@@ -8,6 +8,7 @@ reports/mochi-social-report-hygiene.md
 .lighthouseci/
 *.lhr.json
 node_modules/
+.local/
 
 # Local environment values; .env.example stays commit-safe.
 .env

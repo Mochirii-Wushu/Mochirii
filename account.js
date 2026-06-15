@@ -30,6 +30,7 @@
 
   let currentUser = null;
   let currentProfile = null;
+  let currentAccess = null;
 
   function setText(selector, value, fallback = "Not set") {
     const el = $(selector);
@@ -131,6 +132,7 @@
     const status = U.text(profile?.member_status, "pending").toLowerCase();
     const hasRoles = profile?.has_required_discord_roles === true;
     const recent = hasRecentVerification(profile);
+    const manualApproved = currentAccess?.manualApproved === true && currentAccess?.galleryEligible === true;
     const roleNames = config.requiredRoleNames || ["Mochirii role", "Verified"];
 
     if (status === "suspended" || status === "archived") {
@@ -143,13 +145,23 @@
       };
     }
 
+    if (status === "active" && manualApproved) {
+      return {
+        ok: true,
+        label: "Approved by review",
+        tone: "active",
+        next: "Submit an image or review your gallery submission history.",
+        guidance: "Gallery upload access is available from moderator-approved member verification.",
+      };
+    }
+
     if (!hasRoles) {
       return {
         ok: false,
-        label: "Missing required roles",
+        label: currentAccess?.verification?.status === "pending_review" ? "Review pending" : "Missing required roles",
         tone: "warning",
-        next: "Complete Discord onboarding, then ask leadership for the required roles.",
-        guidance: `Upload access needs both Discord roles: ${roleNames.join(" and ")}.`,
+        next: currentAccess?.next || "Complete Discord verification or ask leadership to review your member verification.",
+        guidance: currentAccess?.message || `Upload access needs both Discord roles: ${roleNames.join(" and ")} or moderator approval.`,
       };
     }
 
@@ -350,6 +362,9 @@
 
     const auth = await S.requireAuth();
     if (!auth.ok) {
+      currentUser = null;
+      currentProfile = null;
+      currentAccess = null;
       $("#signedOutPanel").hidden = false;
       $("#accountPanel").hidden = true;
       $("#leaderDashboardLink").hidden = true;
@@ -364,6 +379,11 @@
     const profileResult = await S.getCurrentProfile();
     if (profileResult.ok) {
       currentProfile = profileResult.data || {};
+      const accessResult = await S.verifyMemberAccess();
+      if (accessResult.ok) {
+        currentAccess = accessResult.data || null;
+        if (currentAccess?.profile) currentProfile = currentAccess.profile;
+      }
       renderProfileForm(currentProfile);
       renderStatus();
       await Promise.all([renderLeaderDashboardLink(), loadSubmissions()]);
@@ -381,12 +401,12 @@
   async function verifyDiscord() {
     setBusy(true);
     setError("#verifyError", "");
-    setText("#verifyStatus", "Checking Discord membership and required roles.", "");
+    setText("#verifyStatus", "Checking member verification and linked sign-in methods.", "");
 
-    const result = await S.verifyDiscordMembership();
+    const result = await S.verifyMemberAccess({ refreshDiscord: true });
     const message = result.ok
-      ? result.data?.message || result.message || "Discord verification checked."
-      : result.message || "Discord verification failed.";
+      ? result.data?.message || result.message || "Member verification checked."
+      : result.message || "Member verification failed.";
     await loadAccount();
 
     if (!result.ok) {

@@ -64,7 +64,7 @@ export function MembersDirectory() {
     setSignedIn(Boolean(auth.ok));
     if (!auth.ok) {
       setProfiles([]);
-      setMessage("Sign in with Discord to view member profiles.");
+      setMessage("Choose a sign-in method to view member profiles.");
       setBusy(false);
       return;
     }
@@ -92,7 +92,7 @@ export function MembersDirectory() {
   }, [load]);
 
   if (!signedIn && !busy) {
-    return <GateMessage title="Login with Discord" message={message} />;
+    return <GateMessage title="Sign In Required" message={message} />;
   }
 
   return (
@@ -124,7 +124,7 @@ export function MemberProfileView({ slug }: { slug: string }) {
     setSignedIn(Boolean(auth.ok));
     if (!auth.ok) {
       setProfile(null);
-      setMessage("Sign in with Discord to view member profiles.");
+      setMessage("Choose a sign-in method to view member profiles.");
       setBusy(false);
       return;
     }
@@ -155,7 +155,7 @@ export function MemberProfileView({ slug }: { slug: string }) {
       <main className="page-main" id="main">
         <div className="container">
           {!signedIn && !busy ? (
-            <GateMessage title="Login with Discord" message={message} />
+            <GateMessage title="Sign In Required" message={message} />
           ) : (
             <section className="glass-card glass-card--primary glass-pad auth-panel">
               <p className="kicker">Member Profile</p>

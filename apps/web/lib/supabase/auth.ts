@@ -1,4 +1,10 @@
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import {
+  AUTH_PROVIDER_REGISTRY,
+  isOAuthProviderId,
+  providerToSupabaseProvider,
+  type OAuthProviderId,
+} from "./auth-providers";
 import { requireBrowserSupabaseClient } from "./client";
 import { failedResult, okResult, createResult, createError, type AuthSessionResult, type AuthUserResult } from "./types";
 
@@ -24,7 +30,7 @@ export async function getCurrentUser() {
         status: 401,
         statusText: "Unauthorized",
         data: null,
-        error: createError("Sign in with Discord first."),
+        error: createError("Choose a sign-in method first."),
       });
     }
     return okResult<AuthUserResult>({ user: data.user });
@@ -47,14 +53,17 @@ function resolveRedirectTo(value = "/account") {
   return new URL(value, window.location.origin).href;
 }
 
-export async function signInWithDiscord(options: { redirectTo?: string } = {}) {
+export async function signInWithProvider(provider: OAuthProviderId, options: { redirectTo?: string } = {}) {
   try {
+    if (!isOAuthProviderId(provider)) throw new Error("That sign-in provider is not supported.");
+
     const client = requireBrowserSupabaseClient();
+    const config = AUTH_PROVIDER_REGISTRY[provider];
     const { data, error } = await client.auth.signInWithOAuth({
-      provider: "discord",
+      provider: providerToSupabaseProvider(provider),
       options: {
         redirectTo: resolveRedirectTo(options.redirectTo || "/account"),
-        scopes: "identify email",
+        ...(config.scopes ? { scopes: config.scopes } : {}),
       },
     });
     if (error) return failedResult(error);
@@ -62,6 +71,98 @@ export async function signInWithDiscord(options: { redirectTo?: string } = {}) {
   } catch (error) {
     return failedResult(error);
   }
+}
+
+export async function linkProviderIdentity(provider: OAuthProviderId, options: { redirectTo?: string } = {}) {
+  try {
+    if (!isOAuthProviderId(provider)) throw new Error("That sign-in provider is not supported.");
+
+    const client = requireBrowserSupabaseClient();
+    const config = AUTH_PROVIDER_REGISTRY[provider];
+    const { data, error } = await client.auth.linkIdentity({
+      provider: providerToSupabaseProvider(provider),
+      options: {
+        redirectTo: resolveRedirectTo(options.redirectTo || "/account"),
+        ...(config.scopes ? { scopes: config.scopes } : {}),
+      },
+    });
+    if (error) return failedResult(error);
+    return okResult(data);
+  } catch (error) {
+    return failedResult(error);
+  }
+}
+
+export async function getLinkedIdentities() {
+  try {
+    const client = requireBrowserSupabaseClient();
+    const authWithIdentities = client.auth as typeof client.auth & {
+      getUserIdentities?: () => Promise<{ data?: { identities?: unknown[] } | unknown[] | null; error?: unknown }>;
+    };
+    if (typeof authWithIdentities.getUserIdentities === "function") {
+      const { data, error } = await authWithIdentities.getUserIdentities();
+      if (error) return failedResult(error);
+      const identities = Array.isArray(data) ? data : Array.isArray(data?.identities) ? data.identities : [];
+      return okResult(identities);
+    }
+
+    const user = await getCurrentUser();
+    if (!user.ok) return user;
+    return okResult(Array.isArray(user.data?.user.identities) ? user.data.user.identities : []);
+  } catch (error) {
+    return failedResult(error);
+  }
+}
+
+export async function signInWithPhoneOtp({
+  phone,
+  captchaToken,
+  shouldCreateUser = true,
+}: {
+  phone: string;
+  captchaToken?: string;
+  shouldCreateUser?: boolean;
+}) {
+  try {
+    const cleanPhone = String(phone || "").trim();
+    if (!cleanPhone) throw new Error("Enter a phone number before requesting a code.");
+
+    const client = requireBrowserSupabaseClient();
+    const { data, error } = await client.auth.signInWithOtp({
+      phone: cleanPhone,
+      options: {
+        shouldCreateUser,
+        ...(captchaToken ? { captchaToken } : {}),
+      },
+    });
+    if (error) return failedResult(error);
+    return okResult(data, "Code sent. Check your phone.");
+  } catch (error) {
+    return failedResult(error);
+  }
+}
+
+export async function verifyPhoneOtp({ phone, token }: { phone: string; token: string }) {
+  try {
+    const cleanPhone = String(phone || "").trim();
+    const cleanToken = String(token || "").trim();
+    if (!cleanPhone || !cleanToken) throw new Error("Enter the phone number and verification code.");
+
+    const client = requireBrowserSupabaseClient();
+    const { data, error } = await client.auth.verifyOtp({
+      phone: cleanPhone,
+      token: cleanToken,
+      type: "sms",
+    });
+    if (error) return failedResult(error);
+    return okResult(data, "Phone sign-in complete.");
+  } catch (error) {
+    return failedResult(error);
+  }
+}
+
+export async function signInWithDiscord(options: { redirectTo?: string } = {}) {
+  return signInWithProvider("discord", options);
 }
 
 export async function signOut() {
