@@ -301,7 +301,7 @@ Deno.serve(async (req: Request) => {
         pending: false,
         missingRoleIds: requiredRoleIds,
         memberStatus,
-        message: "Discord identity was not found on this account. Sign in with Discord and try again.",
+        message: "Discord identity was not found on this account. Link Discord from Account and try again.",
       }),
     );
   }

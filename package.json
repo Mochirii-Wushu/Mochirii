@@ -30,6 +30,7 @@
     "check:live-member-workflow-preflight": "node scripts/check-live-member-workflow-preflight.mjs",
     "check:live-member-workflow-result-packet": "node scripts/check-live-member-workflow-result-packet.mjs",
     "check:member-workflow-qa": "node scripts/check-member-workflow-qa.mjs",
+    "check:multi-provider-auth": "node scripts/check-multi-provider-auth.mjs",
     "check:member-profiles-and-ranks": "node scripts/check-member-profiles-and-ranks.mjs",
     "check:mochi-social-alpha": "node scripts/check-mochi-social-alpha.mjs",
     "check:mochi-social-auth-bridge": "node scripts/check-mochi-social-auth-bridge.mjs",
@@ -77,5 +78,8 @@
     "sync:next-public": "node scripts/sync-next-public.mjs",
     "test:spotlight-poll": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
     "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"
+  },
+  "devDependencies": {
+    "playwright": "^1.60.0"
   }
 }

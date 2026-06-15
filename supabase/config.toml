@@ -11,6 +11,18 @@ entrypoint = "./functions/verify-discord-member/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/verify-discord-member/*.html" ]
 
+[functions.verify-member-access]
+enabled = true
+verify_jwt = true
+import_map = "./functions/verify-member-access/deno.json"
+entrypoint = "./functions/verify-member-access/index.ts"
+
+[functions.review-member-verification]
+enabled = true
+verify_jwt = true
+import_map = "./functions/review-member-verification/deno.json"
+entrypoint = "./functions/review-member-verification/index.ts"
+
 [functions.list-gallery-review-queue]
 enabled = true
 verify_jwt = true

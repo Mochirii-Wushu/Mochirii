@@ -55,7 +55,7 @@
     <div class="container">
       <section class="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel" hidden>
         <p class="kicker">Sign In Required</p>
-        <h2 class="section-title">Login with Discord</h2>
+        <h2 class="section-title">Sign In Required</h2>
         <p class="muted">Moderator access is checked against Discord after website sign-in.</p>
         <div class="auth-actions">
           <a class="hero-cta hero-cta--primary" href="./auth.html">Login</a>
@@ -94,6 +94,52 @@
         <p class="auth-error" id="reviewError" role="alert" hidden></p>
 
         <div class="review-list" id="reviewList" aria-live="polite"></div>
+      </section>
+
+      <section class="glass-card glass-card--primary glass-pad auth-panel" id="memberVerificationPanel" hidden>
+        <div class="auth-panel__head">
+          <div>
+            <p class="kicker">Member Verification</p>
+            <h2 class="section-title">Review Gallery Access</h2>
+          </div>
+          <span class="status-pill">Moderator only</span>
+        </div>
+
+        <div class="review-details">
+          <label class="form-field">
+            <span>Supabase user id</span>
+            <input id="memberVerificationUserId" placeholder="00000000-0000-0000-0000-000000000000" />
+          </label>
+          <label class="form-field">
+            <span>Verification method</span>
+            <select id="memberVerificationMethod">
+              <option value="manual_review">Manual Review</option>
+              <option value="phone">Phone</option>
+              <option value="apple">Apple</option>
+              <option value="facebook">Facebook</option>
+              <option value="google">Google</option>
+              <option value="kakao">Kakao</option>
+              <option value="twitch">Twitch</option>
+              <option value="spotify">Spotify</option>
+            </select>
+          </label>
+          <label class="form-field">
+            <span>Expiry</span>
+            <input id="memberVerificationExpiresAt" type="datetime-local" />
+          </label>
+          <label class="form-field">
+            <span>Redacted note</span>
+            <textarea id="memberVerificationReason" maxlength="500" rows="3" placeholder="Short approval, rejection, or revoke note. Do not paste private messages."></textarea>
+          </label>
+          <div class="auth-actions">
+            <button class="hero-cta hero-cta--primary" type="button" data-member-verification-action="approve">Approve access</button>
+            <button class="hero-cta" type="button" data-member-verification-action="reject">Reject</button>
+            <button class="hero-cta" type="button" data-member-verification-action="revoke">Revoke</button>
+          </div>
+          <p class="auth-status muted" id="memberVerificationStatus" role="status" aria-live="polite">Member verification review is ready.</p>
+          <p class="auth-error" id="memberVerificationError" role="alert" hidden></p>
+          <div id="memberVerificationResult"></div>
+        </div>
       </section>
 
       <section class="glass-card glass-card--primary glass-pad auth-panel" id="instagramQueuePanel" hidden>

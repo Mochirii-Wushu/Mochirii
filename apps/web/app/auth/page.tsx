@@ -5,7 +5,7 @@ import { BadgeRow, PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Login • Guild Account",
-  description: "Sign in with Discord to manage a Mōchirīī website account and request gallery upload access.",
+  description: "Choose a Mōchirīī sign-in method, link identities, and request member verification for gallery upload access.",
   robots: {
     index: false,
     follow: true,
@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Mōchirīī",
     title: "Mōchirīī Login • Guild Account",
-    description: "Sign in with Discord to manage a Mōchirīī website account and request gallery upload access.",
+    description: "Choose a Mōchirīī sign-in method, link identities, and request member verification for gallery upload access.",
     url: "https://mochirii.com/auth",
     images: ["/assets/img/join/hero.webp"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Mōchirīī Login • Guild Account",
-    description: "Sign in with Discord to manage a Mōchirīī website account and request gallery upload access.",
+    description: "Choose a Mōchirīī sign-in method, link identities, and request member verification for gallery upload access.",
     images: ["/assets/img/join/hero.webp"],
   },
 };
@@ -43,10 +43,10 @@ export default function AuthPage() {
         center={false}
         intro={
           <p className="lede">
-            Discord sign-in connects your website account. Gallery upload access is checked separately against server membership and the required Discord roles.
+            Sign-in connects your website account. Gallery upload access is checked separately through Discord roles or moderator-approved member verification.
           </p>
         }
-        badges={<BadgeRow items={["Mōchirīī - WWM", "✅Verified"]} label="Required roles" />}
+        badges={<BadgeRow items={["Discord verified", "Moderator review"]} label="Verification routes" />}
       />
       <main className="page-main" id="main">
         <div className="container">

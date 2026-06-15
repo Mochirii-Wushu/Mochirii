@@ -4,6 +4,7 @@ import {
   type GalleryReviewQueue,
   type InstagramPublishQueue,
   type InstagramPublishJob,
+  type MemberVerificationReviewResponse,
   type ModerationStatus,
 } from "./types";
 
@@ -32,6 +33,35 @@ export async function moderateGallerySubmission(submissionId: string, action: st
     submission_id: cleanSubmissionId,
     action: cleanAction,
     reason: String(reason || "").trim().slice(0, 500),
+  });
+}
+
+export async function reviewMemberVerification({
+  userId,
+  action,
+  method = "manual_review",
+  reason = "",
+  expiresAt = "",
+}: {
+  userId: string;
+  action: "approve" | "reject" | "revoke";
+  method?: string;
+  reason?: string;
+  expiresAt?: string;
+}) {
+  const cleanUserId = String(userId || "").trim();
+  const cleanAction = String(action || "").trim().toLowerCase();
+  if (!cleanUserId) return failedResult("Choose a member before reviewing verification.");
+  if (!["approve", "reject", "revoke"].includes(cleanAction)) {
+    return failedResult("Review action must be approve, reject, or revoke.");
+  }
+
+  return invokeEdgeFunction<MemberVerificationReviewResponse>("review-member-verification", {
+    user_id: cleanUserId,
+    action: cleanAction,
+    method: String(method || "manual_review").trim().toLowerCase(),
+    reason: String(reason || "").trim().slice(0, 500),
+    expires_at: String(expiresAt || "").trim(),
   });
 }
 

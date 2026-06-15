@@ -103,9 +103,9 @@ assertIncludes("AccountPanel", accountPanel, "Published profiles are visible onl
 assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
 
 [
-  'const gateTitle = mode === "signed-out" ? "Login Required" : allowed ? "Upload Ready" : "Role Verification Required";',
-  "verifyDiscordMembership()",
-  "profileIsActive(nextProfile)",
+  'const gateTitle = mode === "signed-out" ? "Login Required" : allowed ? "Upload Ready" : "Member Verification Required";',
+  "verifyMemberAccess({ refreshDiscord: refresh })",
+  "profileIsActive(nextProfile, accessResult.data)",
 ].forEach((snippet) => assertIncludes("GallerySubmitForm", gallerySubmit, snippet));
 
 [

@@ -1,6 +1,6 @@
 import { DISCORD_REQUIRED_ROLE_NAMES } from "@/lib/supabase/config";
 import { hasRecentVerification, signedInName } from "@/lib/supabase/profile";
-import { text, type GallerySubmission, type MemberProfile } from "@/lib/supabase/types";
+import { text, type GallerySubmission, type MemberAccessResponse, type MemberProfile } from "@/lib/supabase/types";
 import type { User } from "@supabase/supabase-js";
 
 export const editableProfileFields = [
@@ -65,10 +65,12 @@ export function displayName(user: User | null, profile?: MemberProfile | null) {
   return profile?.display_name || signedInName(user, profile);
 }
 
-export function uploadAccess(profile?: MemberProfile | null) {
+export function uploadAccess(profile?: MemberProfile | null, accessState?: MemberAccessResponse | null) {
   const status = text(profile?.member_status, "pending").toLowerCase();
   const hasRoles = profile?.has_required_discord_roles === true;
   const recent = hasRecentVerification(profile);
+  const manualApproved = accessState?.manualApproved === true;
+  const galleryEligible = accessState?.galleryEligible === true;
   const roleNames = [...DISCORD_REQUIRED_ROLE_NAMES];
 
   if (status === "suspended" || status === "archived") {
@@ -81,13 +83,23 @@ export function uploadAccess(profile?: MemberProfile | null) {
     };
   }
 
+  if (status === "active" && galleryEligible && manualApproved) {
+    return {
+      ok: true,
+      label: "Approved by review",
+      tone: "active",
+      next: "Submit an image or review your gallery submission history.",
+      guidance: "Gallery upload access is available from moderator-approved member verification.",
+    };
+  }
+
   if (!hasRoles) {
     return {
       ok: false,
-      label: "Missing required roles",
+      label: accessState?.verification?.status === "pending_review" ? "Review pending" : "Missing required roles",
       tone: "warning",
-      next: "Complete Discord onboarding, then ask leadership for the required roles.",
-      guidance: `Upload access needs both Discord roles: ${roleNames.join(" and ")}.`,
+      next: accessState?.next || "Complete Discord verification or ask leadership to review your member verification.",
+      guidance: accessState?.message || `Upload access needs both Discord roles: ${roleNames.join(" and ")} or moderator approval.`,
     };
   }
 

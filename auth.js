@@ -1,4 +1,4 @@
-/* auth.js - Discord login page */
+/* auth.js - member login page */
 (() => {
   "use strict";
 
@@ -20,10 +20,29 @@
   }
 
   function setBusy(busy) {
-    const login = $("#discordLogin");
+    const login = $("#providerGrid");
     const signOut = $("#signOutButton");
-    if (login) login.disabled = busy;
+    if (login) login.querySelectorAll("button").forEach((button) => { button.disabled = busy; });
     if (signOut) signOut.disabled = busy;
+  }
+
+  function renderProviders() {
+    const grid = $("#providerGrid");
+    if (!grid || !S.enabledAuthProviders) return;
+    const providers = S.enabledAuthProviders().filter((provider) => provider.kind === "oauth");
+    if (!providers.length) return;
+
+    grid.innerHTML = providers.map((provider) => `
+      <button
+        class="provider-button${provider.id === "discord" ? " provider-button--primary" : ""}"
+        type="button"
+        id="${provider.id === "discord" ? "discordLogin" : `provider-${provider.id}`}"
+        data-provider="${provider.id}"
+      >
+        <span>${provider.label}</span>
+        <small>${provider.automaticVerification ? "Automatic Discord role check" : "Moderator review required"}</small>
+      </button>
+    `).join("");
   }
 
   async function render() {
@@ -43,23 +62,24 @@
     if (signedIn) {
       const identity = user.user_metadata?.global_name || user.user_metadata?.full_name || user.email || "Signed in";
       setText("#authState", "Signed in");
-      setText("#authStatus", `Signed in as ${identity}. Open Account to check Discord role verification.`);
+      setText("#authStatus", `Signed in as ${identity}. Open Account to check member verification.`);
     } else {
       setText("#authState", "Signed out");
-      setText("#authStatus", "Use Discord to sign in. No password signup is used here.");
+      setText("#authStatus", "Choose a sign-in method. Gallery upload access is verified separately.");
     }
 
     setBusy(false);
   }
 
-  async function login() {
+  async function login(providerId = "discord") {
+    const provider = S.getConfig().authProviders?.[providerId] || { label: "provider" };
     setBusy(true);
     setError("");
-    setText("#authStatus", "Opening Discord sign-in.");
+    setText("#authStatus", `Opening ${provider.label} sign-in.`);
 
-    const result = await S.signInWithDiscord({ redirectTo: "./account.html" });
+    const result = await S.signInWithProvider(providerId, { redirectTo: "./account.html" });
     if (!result.ok) {
-      setError(result.message || "Discord sign-in could not start.");
+      setError(result.message || "Sign-in could not start.");
       setText("#authStatus", "");
       setBusy(false);
     }
@@ -74,7 +94,12 @@
   }
 
   function boot() {
-    $("#discordLogin")?.addEventListener("click", login);
+    renderProviders();
+    $("#providerGrid")?.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-provider]");
+      if (!button) return;
+      login(button.dataset.provider || "discord");
+    });
     $("#signOutButton")?.addEventListener("click", signOut);
     S.onAuthStateChange(() => {
       render();

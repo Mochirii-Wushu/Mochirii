@@ -154,7 +154,7 @@ export async function requireActiveMember(req: Request): Promise<ActiveMemberAcc
         {
           ok: false,
           error: "missing_auth",
-          message: "Sign in with Discord before viewing member profiles.",
+          message: "Choose a sign-in method before viewing member profiles.",
         },
         401,
       ),

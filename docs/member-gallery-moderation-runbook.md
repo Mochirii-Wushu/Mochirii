@@ -177,7 +177,7 @@ The audit trail is for operational accountability. Do not manually edit audit ro
 
 | State | What it means | Response |
 | --- | --- | --- |
-| Signed out | Browser has no active website session. | Sign in with Discord again. |
+| Signed out | Browser has no active website session. | Choose a sign-in method again. |
 | Access denied | The signed-in account does not pass moderator verification. | Confirm Discord Moderator role and server-side config. |
 | No pending submissions | The pending queue is empty. | No action needed. |
 | Preview unavailable | Signed preview URL could not be created or object is missing. | Refresh once; if still missing, leave pending and escalate. |

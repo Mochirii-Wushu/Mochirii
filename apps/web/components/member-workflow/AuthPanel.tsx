@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { getCurrentUser, onAuthStateChange, signInWithDiscord, signOut } from "@/lib/supabase/auth";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { enabledAuthProviders, enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
+import { getCurrentUser, onAuthStateChange, signInWithPhoneOtp, signInWithProvider, signOut, verifyPhoneOtp } from "@/lib/supabase/auth";
 import { signedInName } from "@/lib/supabase/profile";
 import type { User } from "@supabase/supabase-js";
 
@@ -11,6 +12,12 @@ export function AuthPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState("Checking your current session.");
   const [error, setError] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneCode, setPhoneCode] = useState("");
+  const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const providers = useMemo(() => enabledAuthProviders(), []);
+  const oauthProviders = useMemo(() => enabledOAuthProviders(), []);
+  const phoneProvider = providers.find((provider) => provider.id === "phone");
 
   async function load() {
     setBusy(true);
@@ -20,8 +27,8 @@ export function AuthPanel() {
     setUser(currentUser);
     setStatus(
       currentUser
-        ? `Signed in as ${signedInName(currentUser)}. Open Account to check Discord role verification.`
-        : "Use Discord to sign in. No password signup is used here.",
+        ? `Signed in as ${signedInName(currentUser)}. Open Account to check member verification.`
+        : "Choose a sign-in method. Gallery upload access is verified separately.",
     );
     setBusy(false);
   }
@@ -36,16 +43,52 @@ export function AuthPanel() {
     };
   }, []);
 
-  async function login() {
+  async function login(providerId: OAuthProviderId) {
     setBusy(true);
     setError("");
-    setStatus("Opening Discord sign-in.");
-    const result = await signInWithDiscord({ redirectTo: "/account" });
+    const provider = providers.find((item) => item.id === providerId);
+    setStatus(`Opening ${provider?.label || "provider"} sign-in.`);
+    const result = await signInWithProvider(providerId, { redirectTo: "/account" });
     if (!result.ok) {
-      setError(result.message || "Discord sign-in could not start.");
+      setError(result.message || "Sign-in could not start.");
       setStatus("");
       setBusy(false);
     }
+  }
+
+  async function requestPhoneCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    setStatus("Sending phone verification code.");
+    const result = await signInWithPhoneOtp({ phone });
+    if (!result.ok) {
+      setError(result.message || "Phone code could not be sent.");
+      setStatus("");
+      setBusy(false);
+      return;
+    }
+    setPhoneCodeSent(true);
+    setStatus(result.message || "Code sent. Check your phone.");
+    setBusy(false);
+  }
+
+  async function verifyPhoneCode(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    setStatus("Checking phone code.");
+    const result = await verifyPhoneOtp({ phone, token: phoneCode });
+    if (!result.ok) {
+      setError(result.message || "Phone code could not be verified.");
+      setStatus("");
+      setBusy(false);
+      return;
+    }
+    setPhoneCode("");
+    setPhoneCodeSent(false);
+    setStatus(result.message || "Phone sign-in complete.");
+    await load();
   }
 
   async function endSession() {
@@ -62,7 +105,7 @@ export function AuthPanel() {
     <section className="glass-card glass-card--primary glass-pad auth-panel" aria-labelledby="authTitle">
       <div className="auth-panel__head">
         <div>
-          <p className="kicker">Discord Auth</p>
+          <p className="kicker">Member Auth</p>
           <h2 className="section-title" id="authTitle">Website Sign-In</h2>
         </div>
         <p className="status-pill" id="authState">{busy ? "Checking" : signedIn ? "Signed in" : "Signed out"}</p>
@@ -70,16 +113,27 @@ export function AuthPanel() {
 
       <div className="prose-stack auth-copy">
         <p>
-          Sign in with Discord to create or open your website account. Discord login proves identity only; upload access
-          still requires guild membership, completed Discord onboarding, and both required roles.
+          Sign in to create or open your website account. Sign-in proves account control only; gallery upload access
+          still requires Discord role verification or a moderator-approved member verification.
         </p>
       </div>
 
       <div className="auth-actions" aria-label="Authentication actions">
         {!signedIn ? (
-          <button className="hero-cta hero-cta--primary" type="button" onClick={login} disabled={busy}>
-            Login with Discord
-          </button>
+          <div className="provider-grid" role="list" aria-label="Available sign-in providers">
+            {oauthProviders.map((provider) => (
+              <button
+                className={`provider-button${provider.id === "discord" ? " provider-button--primary" : ""}`}
+                type="button"
+                onClick={() => login(provider.id)}
+                disabled={busy}
+                key={provider.id}
+              >
+                <span>{provider.label}</span>
+                <small>{provider.automaticVerification ? "Automatic Discord role check" : "Moderator review required"}</small>
+              </button>
+            ))}
+          </div>
         ) : null}
         {signedIn ? (
           <>
@@ -88,6 +142,48 @@ export function AuthPanel() {
           </>
         ) : null}
       </div>
+
+      {!signedIn && phoneProvider ? (
+        <div className="phone-auth-panel">
+          {!phoneCodeSent ? (
+            <form className="auth-form" onSubmit={requestPhoneCode}>
+              <label className="form-field">
+                <span>Phone number</span>
+                <input
+                  type="tel"
+                  autoComplete="tel"
+                  inputMode="tel"
+                  value={phone}
+                  disabled={busy}
+                  onChange={(event) => setPhone(event.target.value)}
+                  placeholder="+1 555 010 0000"
+                />
+              </label>
+              <div className="auth-actions">
+                <button className="hero-cta" type="submit" disabled={busy}>Send code</button>
+              </div>
+            </form>
+          ) : (
+            <form className="auth-form" onSubmit={verifyPhoneCode}>
+              <label className="form-field">
+                <span>Verification code</span>
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={phoneCode}
+                  disabled={busy}
+                  onChange={(event) => setPhoneCode(event.target.value)}
+                />
+              </label>
+              <div className="auth-actions">
+                <button className="hero-cta hero-cta--primary" type="submit" disabled={busy}>Verify code</button>
+                <button className="hero-cta" type="button" onClick={() => setPhoneCodeSent(false)} disabled={busy}>Use another phone</button>
+              </div>
+            </form>
+          )}
+          <p className="auth-status muted">{phoneProvider.setupNote}</p>
+        </div>
+      ) : null}
 
       <p className="auth-status muted" id="authStatus" role="status" aria-live="polite">
         {status}

@@ -44,12 +44,12 @@ const legacyRedirects = new Map([
 ]);
 
 const bodyChecks = new Map([
-  ["/auth", /Login with Discord|Website Sign-In/i],
-  ["/account", /Login with Discord|Sign In Required/i],
+  ["/auth", /Choose a sign-in method|Website Sign-In/i],
+  ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/members", /Published profiles|Member Profiles|Sign In Required/i],
   ["/members/twills", /M[oō]chir[iī][iī] Member Profile|Sign In Required|Access Denied/i],
   ["/gallery-submit", /Login Required|Access Check/i],
-  ["/leader-dashboard", /Login with Discord|Sign In Required|Access Denied/i],
+  ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
 ]);
 
 const requestHeaders = {
