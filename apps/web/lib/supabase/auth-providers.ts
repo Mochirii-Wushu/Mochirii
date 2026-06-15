@@ -23,6 +23,7 @@ export const OAUTH_PROVIDER_IDS = [
 
 export type AuthProviderId = (typeof AUTH_PROVIDER_IDS)[number];
 export type OAuthProviderId = (typeof OAUTH_PROVIDER_IDS)[number];
+export type AuthCaptchaProvider = "turnstile" | "hcaptcha";
 
 export type AuthProviderConfig = {
   id: AuthProviderId;
@@ -116,6 +117,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
 
 const PROVIDER_ID_SET = new Set<string>(AUTH_PROVIDER_IDS);
 const OAUTH_PROVIDER_ID_SET = new Set<string>(OAUTH_PROVIDER_IDS);
+const CAPTCHA_PROVIDER_ID_SET = new Set<string>(["turnstile", "hcaptcha"]);
 
 function splitProviderEnv(value: string | undefined) {
   return String(value || "")
@@ -141,11 +143,25 @@ export function providerToSupabaseProvider(provider: OAuthProviderId): Provider 
   return provider as Provider;
 }
 
-export function phoneAuthReady() {
+export function authCaptchaProvider(): AuthCaptchaProvider | null {
+  const provider = String(process.env.NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER || "").trim().toLowerCase();
+  return CAPTCHA_PROVIDER_ID_SET.has(provider) ? (provider as AuthCaptchaProvider) : null;
+}
+
+export function authCaptchaSiteKey() {
+  return String(process.env.NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY || "").trim();
+}
+
+export function authCaptchaReady() {
   return (
-    process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true" &&
-    process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true"
+    process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true" &&
+    Boolean(authCaptchaProvider()) &&
+    Boolean(authCaptchaSiteKey())
   );
+}
+
+export function phoneAuthReady() {
+  return process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true" && authCaptchaReady();
 }
 
 export function enabledAuthProviders() {

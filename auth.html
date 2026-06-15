@@ -81,6 +81,33 @@
           <button class="hero-cta" type="button" id="signOutButton" hidden>Sign out</button>
         </div>
 
+        <div class="phone-auth-panel" id="phoneAuthPanel" hidden>
+          <form class="auth-form" id="phoneCodeRequestForm">
+            <label class="form-field">
+              <span>Phone number</span>
+              <input id="phoneNumberInput" type="tel" autocomplete="tel" inputmode="tel" placeholder="+1 555 010 0000" />
+            </label>
+            <div class="captcha-challenge" aria-label="Security check">
+              <div class="captcha-challenge__widget" id="authCaptchaWidget"></div>
+              <p class="captcha-challenge__status" id="authCaptchaStatus" role="status" aria-live="polite">Loading security check.</p>
+            </div>
+            <div class="auth-actions">
+              <button class="hero-cta" type="submit" id="sendPhoneCodeButton" disabled>Send code</button>
+            </div>
+          </form>
+          <form class="auth-form" id="phoneCodeVerifyForm" hidden>
+            <label class="form-field">
+              <span>Verification code</span>
+              <input id="phoneCodeInput" inputmode="numeric" autocomplete="one-time-code" />
+            </label>
+            <div class="auth-actions">
+              <button class="hero-cta hero-cta--primary" type="submit">Verify code</button>
+              <button class="hero-cta" type="button" id="useAnotherPhoneButton">Use another phone</button>
+            </div>
+          </form>
+          <p class="auth-status muted" id="phoneAuthNote"></p>
+        </div>
+
         <p class="auth-status muted" id="authStatus" role="status" aria-live="polite"></p>
         <p class="auth-error" id="authError" role="alert" hidden></p>
       </section>

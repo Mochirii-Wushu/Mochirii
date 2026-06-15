@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { CaptchaChallenge } from "@/components/member-workflow/CaptchaChallenge";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
-import { enabledAuthProviders, enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
+import { authCaptchaProvider, authCaptchaSiteKey, enabledAuthProviders, enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getCurrentUser, onAuthStateChange, signInWithPhoneOtp, signInWithProvider, signOut, verifyPhoneOtp } from "@/lib/supabase/auth";
 import { signedInName } from "@/lib/supabase/profile";
 import type { User } from "@supabase/supabase-js";
@@ -16,9 +17,14 @@ export function AuthPanel() {
   const [phone, setPhone] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaStatus, setCaptchaStatus] = useState("");
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
   const providers = useMemo(() => enabledAuthProviders(), []);
   const oauthProviders = useMemo(() => enabledOAuthProviders(), []);
   const phoneProvider = providers.find((provider) => provider.id === "phone");
+  const captchaProvider = useMemo(() => authCaptchaProvider(), []);
+  const captchaSiteKey = useMemo(() => authCaptchaSiteKey(), []);
 
   async function load() {
     setBusy(true);
@@ -61,8 +67,16 @@ export function AuthPanel() {
     event.preventDefault();
     setBusy(true);
     setError("");
+    if (!captchaToken) {
+      setError("Complete the security check before requesting a phone code.");
+      setStatus("");
+      setBusy(false);
+      return;
+    }
     setStatus("Sending phone verification code.");
-    const result = await signInWithPhoneOtp({ phone });
+    const result = await signInWithPhoneOtp({ phone, captchaToken });
+    setCaptchaToken("");
+    setCaptchaResetKey((value) => value + 1);
     if (!result.ok) {
       setError(result.message || "Phone code could not be sent.");
       setStatus("");
@@ -163,8 +177,17 @@ export function AuthPanel() {
                   placeholder="+1 555 010 0000"
                 />
               </label>
+              {captchaProvider && captchaSiteKey ? (
+                <CaptchaChallenge
+                  provider={captchaProvider}
+                  siteKey={captchaSiteKey}
+                  resetKey={captchaResetKey}
+                  onToken={setCaptchaToken}
+                  onStatus={setCaptchaStatus}
+                />
+              ) : null}
               <div className="auth-actions">
-                <button className="hero-cta" type="submit" disabled={busy}>Send code</button>
+                <button className="hero-cta" type="submit" disabled={busy || !captchaToken}>Send code</button>
               </div>
             </form>
           ) : (
@@ -186,6 +209,7 @@ export function AuthPanel() {
             </form>
           )}
           <p className="auth-status muted">{phoneProvider.setupNote}</p>
+          {captchaStatus ? <p className="auth-status muted">{captchaStatus}</p> : null}
         </div>
       ) : null}
 

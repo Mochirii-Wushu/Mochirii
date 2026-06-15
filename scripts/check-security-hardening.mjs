@@ -127,8 +127,10 @@ if (nextConfig.includes("'unsafe-eval'")) {
   "default-src 'self'",
   "frame-ancestors 'none'",
   "object-src 'none'",
-  "frame-src 'self' https://discord.com https://open.spotify.com",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
+  "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com",
+  "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com",
+  "frame-src 'self' https://discord.com https://open.spotify.com https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com https://challenges.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com",
 ].forEach((snippet) => assertIncludes("CSP policy", nextConfig, snippet));
 
 const verifyJwtFalseFunctions = extractVerifyJwtFalseFunctions(supabaseConfig);

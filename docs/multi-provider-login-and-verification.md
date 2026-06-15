@@ -16,6 +16,8 @@ This feature separates four layers that must stay distinct:
   - `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,...`
   - `NEXT_PUBLIC_PHONE_AUTH_READY=true`
   - `NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=true`
+  - `NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER=turnstile` or `hcaptcha`
+  - `NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY=<public site key>`
 - OAuth client secrets stay only in Supabase Auth provider settings.
 - Phone stays disabled unless SMS provider, CAPTCHA, Auth rate limits, country/cost expectations, and abuse handling are configured.
 
@@ -27,7 +29,7 @@ This feature separates four layers that must stay distinct:
 - Google: use minimal `openid email profile` scopes.
 - Kakao: use `profile_nickname profile_image` unless the app is approved as a Kakao Biz App for `account_email`; missing email requires manual review.
 - Twitch and Spotify: identity evidence only, not membership proof.
-- Phone: SMS control only; moderator review is still required for gallery access.
+- Phone: SMS control only; moderator review is still required for gallery access. The public phone form must stay hidden until the SMS provider, Supabase CAPTCHA secret, public CAPTCHA site key, rate limits, and cost/abuse expectations are configured.
 
 ## Tables And Policies
 
@@ -52,7 +54,7 @@ This feature separates four layers that must stay distinct:
 
 1. Configure providers privately in Supabase Auth.
 2. Set public provider allowlist only after each provider is dashboard-ready.
-3. Keep Phone disabled until CAPTCHA/rate-limit/cost checks are complete.
+3. Keep Phone disabled until SMS provider, CAPTCHA provider/secret/site key, rate-limit, and cost checks are complete.
 4. Deploy `verify-member-access` and `review-member-verification`.
 5. Smoke each enabled provider flow without recording tokens, cookies, raw headers, or OAuth payloads.
 6. Confirm a non-Discord account remains blocked until moderator approval.

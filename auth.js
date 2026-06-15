@@ -6,6 +6,13 @@
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const S = window.MochiriiSupabase;
+  const CAPTCHA_SCRIPT_URLS = {
+    turnstile: "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
+    hcaptcha: "https://js.hcaptcha.com/1/api.js?render=explicit",
+  };
+  const captchaScriptLoads = {};
+  let captchaToken = "";
+  let captchaWidgetId = null;
 
   function setText(selector, value) {
     const el = $(selector);
@@ -24,6 +31,79 @@
     const signOut = $("#signOutButton");
     if (login) login.querySelectorAll("button").forEach((button) => { button.disabled = busy; });
     if (signOut) signOut.disabled = busy;
+    $("#phoneAuthPanel")?.querySelectorAll("input, button").forEach((control) => {
+      control.disabled = busy || (control.id === "sendPhoneCodeButton" && !captchaToken);
+    });
+  }
+
+  function setCaptchaStatus(message, token = "") {
+    captchaToken = token;
+    setText("#authCaptchaStatus", message);
+    const sendButton = $("#sendPhoneCodeButton");
+    if (sendButton) sendButton.disabled = !captchaToken;
+  }
+
+  function captchaApi(provider) {
+    return provider === "turnstile" ? window.turnstile : window.hcaptcha;
+  }
+
+  function ensureCaptchaScript(provider) {
+    if (captchaApi(provider)) return Promise.resolve();
+    if (captchaScriptLoads[provider]) return captchaScriptLoads[provider];
+
+    captchaScriptLoads[provider] = new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[data-mochirii-captcha="${provider}"]`);
+      if (existing) {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", () => reject(new Error("Security check could not load.")), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = CAPTCHA_SCRIPT_URLS[provider];
+      script.async = true;
+      script.defer = true;
+      script.dataset.mochiriiCaptcha = provider;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error("Security check could not load."));
+      document.head.appendChild(script);
+    });
+
+    return captchaScriptLoads[provider];
+  }
+
+  async function renderCaptcha() {
+    const config = S.getConfig();
+    const provider = config.authCaptchaProvider;
+    const siteKey = config.authCaptchaSiteKey;
+    const container = $("#authCaptchaWidget");
+    if (!container || !provider || !siteKey) return;
+
+    container.innerHTML = "";
+    setCaptchaStatus("Loading security check.");
+    try {
+      await ensureCaptchaScript(provider);
+      const api = captchaApi(provider);
+      if (!api?.render) throw new Error("Security check did not initialize.");
+      captchaWidgetId = api.render(container, {
+        sitekey: siteKey,
+        theme: "dark",
+        size: "normal",
+        callback: (token) => setCaptchaStatus("Security check complete.", token),
+        "expired-callback": () => setCaptchaStatus("Security check expired. Complete it again."),
+        "error-callback": () => setCaptchaStatus("Security check failed to load. Refresh and try again."),
+      });
+      setCaptchaStatus("Complete the security check before requesting a code.");
+    } catch {
+      setCaptchaStatus("Security check failed to load. Refresh and try again.");
+    }
+  }
+
+  function resetCaptcha() {
+    const provider = S.getConfig().authCaptchaProvider;
+    const api = captchaApi(provider);
+    if (api?.reset && captchaWidgetId !== null) api.reset(captchaWidgetId);
+    setCaptchaStatus("Complete the security check before requesting a code.");
   }
 
   function providerLogo(providerId) {
@@ -45,8 +125,13 @@
     const grid = $("#providerGrid");
     if (!grid || !S.enabledAuthProviders) return;
     const providers = S.enabledAuthProviders().filter((provider) => provider.kind === "oauth");
-    if (!providers.length) return;
-
+    const phoneProvider = S.enabledAuthProviders().find((provider) => provider.id === "phone");
+    const phonePanel = $("#phoneAuthPanel");
+    if (phonePanel) {
+      phonePanel.hidden = !phoneProvider;
+      setText("#phoneAuthNote", phoneProvider?.setupNote || "");
+      if (phoneProvider) void renderCaptcha();
+    }
     grid.innerHTML = providers.map((provider) => `
       <button
         class="provider-button${provider.id === "discord" ? " provider-button--primary" : ""}"
@@ -72,10 +157,16 @@
     const userResult = await S.getUser();
     const user = userResult.data;
     const signedIn = Boolean(userResult.ok && user);
+    const phoneProvider = S.enabledAuthProviders?.().find((provider) => provider.id === "phone");
 
-    $("#discordLogin").hidden = signedIn;
-    $("#accountLink").hidden = !signedIn;
-    $("#signOutButton").hidden = !signedIn;
+    const discordLogin = $("#discordLogin");
+    const phonePanel = $("#phoneAuthPanel");
+    const accountLink = $("#accountLink");
+    const signOutButton = $("#signOutButton");
+    if (discordLogin) discordLogin.hidden = signedIn;
+    if (phonePanel) phonePanel.hidden = signedIn || !phoneProvider;
+    if (accountLink) accountLink.hidden = !signedIn;
+    if (signOutButton) signOutButton.hidden = !signedIn;
 
     if (signedIn) {
       const identity = user.user_metadata?.global_name || user.user_metadata?.full_name || user.email || "Signed in";
@@ -111,6 +202,54 @@
     await render();
   }
 
+  async function requestPhoneCode(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    if (!captchaToken) {
+      setError("Complete the security check before requesting a phone code.");
+      setText("#authStatus", "");
+      setBusy(false);
+      return;
+    }
+
+    const phone = $("#phoneNumberInput")?.value || "";
+    setText("#authStatus", "Sending phone verification code.");
+    const result = await S.signInWithPhoneOtp({ phone, captchaToken });
+    resetCaptcha();
+    if (!result.ok) {
+      setError(result.message || "Phone code could not be sent.");
+      setText("#authStatus", "");
+      setBusy(false);
+      return;
+    }
+    $("#phoneCodeRequestForm").hidden = true;
+    $("#phoneCodeVerifyForm").hidden = false;
+    setText("#authStatus", result.message || "Code sent. Check your phone.");
+    setBusy(false);
+  }
+
+  async function verifyPhoneCode(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    const phone = $("#phoneNumberInput")?.value || "";
+    const token = $("#phoneCodeInput")?.value || "";
+    setText("#authStatus", "Checking phone code.");
+    const result = await S.verifyPhoneOtp({ phone, token });
+    if (!result.ok) {
+      setError(result.message || "Phone code could not be verified.");
+      setText("#authStatus", "");
+      setBusy(false);
+      return;
+    }
+    $("#phoneCodeInput").value = "";
+    $("#phoneCodeRequestForm").hidden = false;
+    $("#phoneCodeVerifyForm").hidden = true;
+    setText("#authStatus", result.message || "Phone sign-in complete.");
+    await render();
+  }
+
   function boot() {
     renderProviders();
     $("#providerGrid")?.addEventListener("click", (event) => {
@@ -119,6 +258,13 @@
       login(button.dataset.provider || "discord");
     });
     $("#signOutButton")?.addEventListener("click", signOut);
+    $("#phoneCodeRequestForm")?.addEventListener("submit", requestPhoneCode);
+    $("#phoneCodeVerifyForm")?.addEventListener("submit", verifyPhoneCode);
+    $("#useAnotherPhoneButton")?.addEventListener("click", () => {
+      $("#phoneCodeRequestForm").hidden = false;
+      $("#phoneCodeVerifyForm").hidden = true;
+      resetCaptcha();
+    });
     S.onAuthStateChange(() => {
       render();
     });

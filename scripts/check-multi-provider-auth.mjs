@@ -18,11 +18,14 @@ const packageJson = read("package.json");
 const checkAll = read("scripts/check-all.mjs");
 const providerRegistry = read("apps/web/lib/supabase/auth-providers.ts");
 const providerLogo = read("apps/web/components/member-workflow/ProviderLogo.tsx");
+const captchaChallenge = read("apps/web/components/member-workflow/CaptchaChallenge.tsx");
 const authClient = read("apps/web/lib/supabase/auth.ts");
+const publicConfig = read("apps/web/lib/supabase/config.ts");
 const profileClient = read("apps/web/lib/supabase/profile.ts");
 const authPanel = read("apps/web/components/member-workflow/AuthPanel.tsx");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
 const nextCss = read("apps/web/app/mochirii.css");
+const nextConfig = read("apps/web/next.config.ts");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
 const moderationClient = read("apps/web/lib/supabase/moderation.ts");
@@ -31,6 +34,7 @@ const migration = read("supabase/migrations/20260615041842_add_multi_provider_me
 const verifyMemberAccess = read("supabase/functions/verify-member-access/index.ts");
 const reviewMemberVerification = read("supabase/functions/review-member-verification/index.ts");
 const staticSupabase = read("supabase.js");
+const staticAuthHtml = read("auth.html");
 const staticAuth = read("auth.js");
 const staticGallerySubmit = read("gallery-submit.js");
 const staticLeaderDashboard = read("leader-dashboard.js");
@@ -54,8 +58,19 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   '"spotify"',
   'process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true"',
   'process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true"',
+  "authCaptchaProvider",
+  "authCaptchaSiteKey",
+  "authCaptchaReady",
+  "NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY",
   'requestedProviderIds()',
 ].forEach((snippet) => assertIncludes("auth provider registry", providerRegistry, snippet));
+
+[
+  "NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER",
+  "NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY",
+  "authCaptchaProvider",
+  "authCaptchaSiteKey",
+].forEach((snippet) => assertIncludes("public Supabase config", publicConfig, snippet));
 
 [
   "provider-logo--${provider}",
@@ -69,6 +84,17 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   'provider === "phone"',
   "aria-hidden=\"true\"",
 ].forEach((snippet) => assertIncludes("provider logo component", providerLogo, snippet));
+
+[
+  "CaptchaChallenge",
+  "challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
+  "js.hcaptcha.com/1/api.js?render=explicit",
+  "turnstile",
+  "hcaptcha",
+  "callback",
+  "expired-callback",
+  "error-callback",
+].forEach((snippet) => assertIncludes("captcha challenge component", captchaChallenge, snippet));
 
 [
   "signInWithProvider",
@@ -90,8 +116,13 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "Choose a sign-in method",
   "provider-grid",
   "ProviderLogo",
+  "CaptchaChallenge",
+  "captchaToken",
+  "authCaptchaProvider",
+  "authCaptchaSiteKey",
   "signInWithProvider",
   "signInWithPhoneOtp",
+  "signInWithPhoneOtp({ phone, captchaToken })",
   "verifyPhoneOtp",
 ].forEach((snippet) => assertIncludes("AuthPanel", authPanel, snippet));
 
@@ -107,8 +138,16 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   ".provider-logo",
   ".provider-logo--discord",
   ".provider-logo--google",
+  ".provider-logo--phone",
+  ".captcha-challenge",
   ".provider-button__copy",
 ].forEach((snippet) => assertIncludes("Next auth CSS", nextCss, snippet));
+
+[
+  "https://challenges.cloudflare.com",
+  "https://hcaptcha.com",
+  "https://*.hcaptcha.com",
+].forEach((snippet) => assertIncludes("Next CSP", nextConfig, snippet));
 
 [
   "Member Verification Required",
@@ -181,18 +220,35 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "reviewMemberVerification",
   "review-member-verification",
   "CONFIGURED_AUTH_PROVIDER_IDS",
+  "MOCHIRII_PHONE_AUTH_READY",
+  "MOCHIRII_AUTH_CAPTCHA_ENABLED",
+  "MOCHIRII_AUTH_CAPTCHA_PROVIDER",
+  "MOCHIRII_AUTH_CAPTCHA_SITE_KEY",
+  "AUTH_CAPTCHA_PROVIDER_IDS.includes(AUTH_CAPTCHA_PROVIDER)",
   'scopes: "profile_nickname profile_image"',
 ].forEach((snippet) => assertIncludes("static Supabase helper", staticSupabase, snippet));
 
 [
+  "phoneAuthPanel",
+  "phoneCodeRequestForm",
+  "authCaptchaWidget",
+  "authCaptchaStatus",
+  "sendPhoneCodeButton",
+].forEach((snippet) => assertIncludes("static auth html", staticAuthHtml, snippet));
+
+[
   "providerGrid",
   "providerLogo",
+  "renderCaptcha",
+  "captchaToken",
   "provider-logo--${id}",
   "discord:",
   "google:",
   "twitch:",
   "Choose a sign-in method",
   "signInWithProvider",
+  "signInWithPhoneOtp({ phone, captchaToken })",
+  "verifyPhoneOtp",
 ].forEach((snippet) => assertIncludes("static auth", staticAuth, snippet));
 
 [

@@ -119,6 +119,8 @@ The browser/provider allowlist is controlled separately with public-safe env onl
 NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google
 NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
+NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER=turnstile
+NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY=<public site key only>
 ```
 
 Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured.

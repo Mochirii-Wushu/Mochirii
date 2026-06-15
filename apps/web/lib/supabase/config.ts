@@ -5,6 +5,8 @@ export const NEXT_PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "").rep
 export const NEXT_PUBLIC_AUTH_PROVIDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_IDS || "discord";
 export const NEXT_PUBLIC_PHONE_AUTH_READY = process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true";
 export const NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
+export const NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER = (process.env.NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER || "").trim().toLowerCase();
+export const NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY = (process.env.NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY || "").trim();
 
 export const DISCORD_GUILD_ID = "1078630751077142608";
 export const DISCORD_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"] as const;
@@ -55,6 +57,8 @@ export function getSupabasePublicConfig() {
     authProviderIds: NEXT_PUBLIC_AUTH_PROVIDER_IDS,
     phoneAuthReady: NEXT_PUBLIC_PHONE_AUTH_READY,
     authCaptchaEnabled: NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED,
+    authCaptchaProvider: NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER,
+    authCaptchaSiteKey: NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY,
     isConfigured: isSupabaseConfigured(),
   };
 }

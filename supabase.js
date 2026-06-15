@@ -52,6 +52,11 @@
       .map((item) => item.trim().toLowerCase())
       .filter((item) => AUTH_PROVIDER_IDS.includes(item)),
   );
+  const AUTH_CAPTCHA_PROVIDER = String(window.MOCHIRII_AUTH_CAPTCHA_PROVIDER || "").trim().toLowerCase();
+  const AUTH_CAPTCHA_SITE_KEY = String(window.MOCHIRII_AUTH_CAPTCHA_SITE_KEY || "").trim();
+  const AUTH_CAPTCHA_PROVIDER_IDS = Object.freeze(["turnstile", "hcaptcha"]);
+  const PHONE_AUTH_READY = window.MOCHIRII_PHONE_AUTH_READY === true;
+  const AUTH_CAPTCHA_ENABLED = window.MOCHIRII_AUTH_CAPTCHA_ENABLED === true;
 
   const config = Object.freeze({
     projectRef: SUPABASE_PROJECT_REF,
@@ -66,6 +71,10 @@
     recentVerificationMs: RECENT_VERIFICATION_MS,
     authProviderIds: [...CONFIGURED_AUTH_PROVIDER_IDS],
     authProviders: AUTH_PROVIDER_REGISTRY,
+    phoneAuthReady: PHONE_AUTH_READY,
+    authCaptchaEnabled: AUTH_CAPTCHA_ENABLED,
+    authCaptchaProvider: AUTH_CAPTCHA_PROVIDER,
+    authCaptchaSiteKey: AUTH_CAPTCHA_SITE_KEY,
   });
 
   const restUrl = `${config.url}/rest/v1`;
@@ -438,7 +447,18 @@
   }
 
   function enabledAuthProviders() {
-    return CONFIGURED_AUTH_PROVIDER_IDS.map((providerId) => AUTH_PROVIDER_REGISTRY[providerId]).filter(Boolean);
+    return CONFIGURED_AUTH_PROVIDER_IDS
+      .filter((providerId) => {
+        if (providerId !== "phone") return true;
+        return (
+          PHONE_AUTH_READY &&
+          AUTH_CAPTCHA_ENABLED &&
+          AUTH_CAPTCHA_PROVIDER_IDS.includes(AUTH_CAPTCHA_PROVIDER) &&
+          Boolean(AUTH_CAPTCHA_SITE_KEY)
+        );
+      })
+      .map((providerId) => AUTH_PROVIDER_REGISTRY[providerId])
+      .filter(Boolean);
   }
 
   async function signInWithProvider(providerId, options = {}) {
