@@ -96,6 +96,7 @@ Run these checks only after hosted verification is explicitly approved. Use Chro
 
 - Password gate: open `/games/mochi-social` in a fresh session and confirm the page asks for the tester password before the game iframe loads.
 - Password iframe gate: enter the approved tester password and confirm the iframe loads `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
+- Alpha route-sheet gate: confirm the unlocked tester page shows the Jade Lantern Court route sheet with Arrival, Spirits, Routes, Battle, Social, and Canary loops, including no-real-value/`configured-preview-stub` Canary copy.
 - Signed-out gate for strict Supabase mode: open `/games/mochi-social` in a fresh signed-out session with `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=supabase` and confirm the page asks for sign-in before the game iframe loads.
 - Non-tester gate: sign in with an account that is not active in `mochi_social_alpha_testers` and confirm the allowlist block appears.
 - Terms gate: sign in with an allowlisted tester that has not acknowledged the current `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` and confirm the terms acknowledgement appears before the iframe loads.
@@ -121,6 +122,8 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_TESTER_ROUTE_SHEET_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_TESTER_FEEDBACK_DRAFT_OK="true"
 npm run prepare:mochi-social-browser-gates
 ```
 

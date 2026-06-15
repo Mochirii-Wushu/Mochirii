@@ -5865,6 +5865,7 @@ body[data-page="gallery-submit"] .muted{
   grid-template-areas:
     "status"
     "contract"
+    "route"
     "toolbar"
     "frame"
     "feedback";
@@ -6040,6 +6041,56 @@ body[data-page="gallery-submit"] .muted{
   border-color:rgba(218,181,94,.26);
   background:rgba(218,181,94,.13);
   color:var(--ink-0);
+}
+
+.mochi-route-sheet{
+  grid-area:route;
+  display:grid;
+  grid-template-columns:minmax(180px,.32fr) 1fr;
+  gap:12px;
+  align-items:start;
+  padding:14px;
+  border:1px solid rgba(221,239,255,.12);
+  border-radius:18px;
+  background:rgba(7,10,13,.50);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.mochi-route-sheet h2{
+  margin:3px 0 0;
+  color:var(--ink-0);
+  font-size:20px;
+  line-height:1.15;
+}
+
+.mochi-route-sheet ol{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+
+.mochi-route-sheet li{
+  min-width:0;
+  display:grid;
+  gap:4px;
+  padding:10px;
+  border:1px solid rgba(221,239,255,.12);
+  border-radius:14px;
+  background:rgba(255,255,255,.055);
+}
+
+.mochi-route-sheet strong{
+  color:var(--ink-0);
+  font-size:13px;
+}
+
+.mochi-route-sheet span{
+  color:var(--ink-1);
+  font-size:12px;
+  line-height:1.35;
 }
 
 .mochi-game-panel{
@@ -6294,6 +6345,8 @@ body[data-page="gallery-submit"] .muted{
   .mochi-game-status dl{justify-content:flex-start;}
   .mochi-arrival-scene{min-height:360px;}
   .mochi-arrival-scene__caption{left:12px; right:12px; bottom:12px;}
+  .mochi-route-sheet{grid-template-columns:1fr;}
+  .mochi-route-sheet ol{grid-template-columns:1fr;}
   .mochi-live-toolbar{align-items:flex-start; flex-direction:column;}
   .mochi-lock-form{justify-content:flex-start;}
   .mochi-game-frame{min-height:520px; height:70vh;}

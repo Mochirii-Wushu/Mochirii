@@ -161,6 +161,25 @@ async function verifyBrowserGates(chromiumBrowser) {
 
   record("canary-chain-stub", /configured-preview-stub/i.test(unlockedText) && /Canary preview stub - no real value/i.test(frameOneInitial), "Unlocked page and game iframe both show Canary configured-preview-stub/no-real-value safety copy.");
 
+  const routeSheetText = await pageOne.locator("[data-mochi-alpha-route-sheet]").innerText({ timeout: 30000 });
+  const routeStepCount = await pageOne.locator("[data-mochi-alpha-route-step]").count();
+  record(
+    "tester-password-route-sheet",
+    routeStepCount === 6 &&
+      /Jade Lantern Court loop/i.test(routeSheetText) &&
+      /Starter vow/i.test(routeSheetText) &&
+      /Moonbridge/i.test(routeSheetText) &&
+      /Cloudbell/i.test(routeSheetText) &&
+      /Market receipt/i.test(routeSheetText) &&
+      /configured-preview-stub/i.test(routeSheetText) &&
+      /no real value/i.test(routeSheetText),
+    "Tester-password unlocked page renders a compact no-real-value alpha route sheet for major playtest loops.",
+    {
+      routeStepCount,
+      routeSheetPreview: routeSheetText.slice(0, 240),
+    }
+  );
+
   const feedbackText = `Local tester feedback draft ${randomUUID()}`;
   await pageOne.fill("[data-mochi-tester-feedback]", feedbackText, { timeout: 30000 });
   await pageOne.click("[data-mochi-tester-feedback-save]", { timeout: 30000 });
@@ -445,6 +464,7 @@ function stampBrowserGateReport(reportPathForNotes) {
       MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK: "true",
       MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK: "true",
       MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK: "true",
+      MOCHI_SOCIAL_SITE_BROWSER_TESTER_ROUTE_SHEET_OK: "true",
       MOCHI_SOCIAL_SITE_BROWSER_TESTER_FEEDBACK_DRAFT_OK: "true",
     },
   });

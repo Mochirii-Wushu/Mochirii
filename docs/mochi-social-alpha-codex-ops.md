@@ -159,7 +159,7 @@ Hosted browser gates need explicit approval before Codex opens Chrome against Ve
 
 - reviewer, browser/version, preview URL, timestamp, and pass/fail notes;
 - whether the active access mode is `tester-password` or `supabase`;
-- for `tester-password`: locked page, iframe absent while locked, invalid-password error, iframe after unlock, guest bridge, configured-preview-stub, and hosted two-tab presence;
+- for `tester-password`: locked page, iframe absent while locked, invalid-password error, iframe after unlock, guest bridge, configured-preview-stub, hosted two-tab presence, alpha route sheet, and local feedback draft handoff;
 - for `supabase`: signed-out, non-tester, terms, iframe, feedback, admin, auth bridge, and configured-preview-stub gates;
 - any non-secret error codes or route names needed for debugging.
 
@@ -184,6 +184,8 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_TESTER_ROUTE_SHEET_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_TESTER_FEEDBACK_DRAFT_OK="true"
 npm run prepare:mochi-social-browser-gates
 ```
 

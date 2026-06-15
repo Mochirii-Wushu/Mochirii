@@ -6,6 +6,33 @@ import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 const testerFeedbackStorageKey = "mochiSocial.testerFeedbackDraft";
 
+const alphaRouteSheet = [
+  {
+    title: "Arrival",
+    detail: "Jade Lantern Court, Sifu Narao, guild seal, Lirabao",
+  },
+  {
+    title: "Spirits",
+    detail: "Starter vow, capture rite, journal, care, growth, lineage",
+  },
+  {
+    title: "Routes",
+    detail: "Moonbridge, Cloudbell, field accord, patrol, waystone",
+  },
+  {
+    title: "Battle",
+    detail: "Loadout, tactic, matrix, ladder, rival, council, summit",
+  },
+  {
+    title: "Social",
+    detail: "Presence, chat, rally, market receipt, exchange accord",
+  },
+  {
+    title: "Canary",
+    detail: "Configured-preview-stub, staged request, no real value",
+  },
+];
+
 type TesterFeedbackDraft = {
   category: "tester-password-alpha";
   message: string;
@@ -147,6 +174,20 @@ export function MochiSocialTesterGameClient() {
         <span>Market board preview</span>
         <span>No real value</span>
       </div>
+      <section className="mochi-route-sheet" data-mochi-alpha-route-sheet aria-label="Mochi Social alpha route sheet">
+        <div>
+          <p className="eyebrow">Alpha route sheet</p>
+          <h2>Jade Lantern Court loop</h2>
+        </div>
+        <ol>
+          {alphaRouteSheet.map((item) => (
+            <li key={item.title} data-mochi-alpha-route-step={item.title.toLowerCase()}>
+              <strong>{item.title}</strong>
+              <span>{item.detail}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
       <div className="mochi-live-toolbar">
         <p>
           Blockchain features are in preview safety mode. Canary requests are test records only;
