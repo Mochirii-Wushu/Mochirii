@@ -35,7 +35,13 @@
     apple: { id: "apple", label: "Apple", kind: "oauth", automaticVerification: false },
     facebook: { id: "facebook", label: "Facebook", kind: "oauth", scopes: "email", automaticVerification: false },
     google: { id: "google", label: "Google", kind: "oauth", scopes: "openid email profile", automaticVerification: false },
-    kakao: { id: "kakao", label: "Kakao", kind: "oauth", automaticVerification: false },
+    kakao: {
+      id: "kakao",
+      label: "Kakao",
+      kind: "oauth",
+      scopes: "profile_nickname profile_image",
+      automaticVerification: false,
+    },
     twitch: { id: "twitch", label: "Twitch", kind: "oauth", automaticVerification: false },
     spotify: { id: "spotify", label: "Spotify", kind: "oauth", automaticVerification: false },
   });
