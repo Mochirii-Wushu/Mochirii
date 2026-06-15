@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
 import { enabledAuthProviders, enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getCurrentUser, onAuthStateChange, signInWithPhoneOtp, signInWithProvider, signOut, verifyPhoneOtp } from "@/lib/supabase/auth";
 import { signedInName } from "@/lib/supabase/profile";
@@ -129,8 +130,11 @@ export function AuthPanel() {
                 disabled={busy}
                 key={provider.id}
               >
-                <span>{provider.label}</span>
-                <small>{provider.automaticVerification ? "Automatic Discord role check" : "Moderator review required"}</small>
+                <ProviderLogo provider={provider.id} />
+                <span className="provider-button__copy">
+                  <span>{provider.label}</span>
+                  <small>{provider.automaticVerification ? "Automatic Discord role check" : "Moderator review required"}</small>
+                </span>
               </button>
             ))}
           </div>

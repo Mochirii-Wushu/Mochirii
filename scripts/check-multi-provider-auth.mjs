@@ -17,10 +17,12 @@ function assertNotIncludes(label, text, snippet) {
 const packageJson = read("package.json");
 const checkAll = read("scripts/check-all.mjs");
 const providerRegistry = read("apps/web/lib/supabase/auth-providers.ts");
+const providerLogo = read("apps/web/components/member-workflow/ProviderLogo.tsx");
 const authClient = read("apps/web/lib/supabase/auth.ts");
 const profileClient = read("apps/web/lib/supabase/profile.ts");
 const authPanel = read("apps/web/components/member-workflow/AuthPanel.tsx");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
+const nextCss = read("apps/web/app/mochirii.css");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
 const moderationClient = read("apps/web/lib/supabase/moderation.ts");
@@ -56,6 +58,19 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
 ].forEach((snippet) => assertIncludes("auth provider registry", providerRegistry, snippet));
 
 [
+  "provider-logo--${provider}",
+  'provider === "discord"',
+  'provider === "google"',
+  'provider === "twitch"',
+  'provider === "spotify"',
+  'provider === "kakao"',
+  'provider === "apple"',
+  'provider === "facebook"',
+  'provider === "phone"',
+  "aria-hidden=\"true\"",
+].forEach((snippet) => assertIncludes("provider logo component", providerLogo, snippet));
+
+[
   "signInWithProvider",
   "signInWithPhoneOtp",
   "verifyPhoneOtp",
@@ -74,6 +89,7 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
 [
   "Choose a sign-in method",
   "provider-grid",
+  "ProviderLogo",
   "signInWithProvider",
   "signInWithPhoneOtp",
   "verifyPhoneOtp",
@@ -82,9 +98,17 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
 [
   "Identity Linking",
   "linkProviderIdentity",
+  "ProviderLogo",
   "refreshMemberAccess({ refreshDiscord: true })",
   "moderator-approved member verification",
 ].forEach((snippet) => assertIncludes("AccountPanel", accountPanel, snippet));
+
+[
+  ".provider-logo",
+  ".provider-logo--discord",
+  ".provider-logo--google",
+  ".provider-button__copy",
+].forEach((snippet) => assertIncludes("Next auth CSS", nextCss, snippet));
 
 [
   "Member Verification Required",
@@ -162,6 +186,11 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
 
 [
   "providerGrid",
+  "providerLogo",
+  "provider-logo--${id}",
+  "discord:",
+  "google:",
+  "twitch:",
   "Choose a sign-in method",
   "signInWithProvider",
 ].forEach((snippet) => assertIncludes("static auth", staticAuth, snippet));

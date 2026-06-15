@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
 import { enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getLinkedIdentities, linkProviderIdentity } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
@@ -478,8 +479,11 @@ export function AccountPanel() {
             <div className="provider-grid provider-grid--compact" aria-label="Link another sign-in method">
               {availableLinkProviders.map((provider) => (
                 <button className="provider-button" type="button" onClick={() => linkProvider(provider.id)} disabled={busy} key={provider.id}>
-                  <span>Link {provider.shortLabel}</span>
-                  <small>{provider.automaticVerification ? "Automatic Discord role check" : "Review required"}</small>
+                  <ProviderLogo provider={provider.id} />
+                  <span className="provider-button__copy">
+                    <span>Link {provider.shortLabel}</span>
+                    <small>{provider.automaticVerification ? "Automatic Discord role check" : "Review required"}</small>
+                  </span>
                 </button>
               ))}
             </div>
