@@ -1,12 +1,16 @@
 import { readFileSync } from "node:fs";
 
 const actionPath = "supabase/functions/mochi-social-alpha-action/index.ts";
+const progressPath = "supabase/functions/mochi-social-alpha-progress/index.ts";
 const sharedPath = "supabase/functions/_shared/mochi-social-alpha.ts";
 const migrationPath = "supabase/migrations/20260610090000_add_mochi_social_alpha.sql";
+const progressMigrationPath = "supabase/migrations/20260615050311_add_mochi_social_progress_snapshots.sql";
 
 const action = readFileSync(actionPath, "utf8");
+const progress = readFileSync(progressPath, "utf8");
 const shared = readFileSync(sharedPath, "utf8");
 const migration = readFileSync(migrationPath, "utf8");
+const progressMigration = readFileSync(progressMigrationPath, "utf8");
 
 const expectedActions = [
   "chat.send",
@@ -56,8 +60,9 @@ assertBefore(actionPath, action, "if (!serverAccess.ok) return serverAccess.resp
 assertBefore(actionPath, action, '.from("mochi_social_ledger_events")', 'if (type === "chat.send")');
 assertBefore(actionPath, action, "if (existingLedger)", 'if (type === "chat.send")');
 assertBefore(actionPath, action, 'if (type === "chain.operation_update")', "const ledgerError = await recordLedgerEvent");
+assertBefore(actionPath, action, "const ledgerError = await recordLedgerEvent", "upsertAlphaProgressSnapshot(adminClient");
 
-assertRegex(actionPath, action, /data:\s*{\s*requestId,\s*type,\s*duplicate:\s*true,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY"\s*}/s);
+assertRegex(actionPath, action, /data:\s*{\s*requestId,\s*type,\s*duplicate:\s*true,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY",\s*progress:\s*normalizeAlphaProgressSnapshot\(data\)\s*}/s);
 assertRegex(actionPath, action, /delta:\s*{\s*\.\.\.payload,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY"\s*}/s);
 assertRegex(actionPath, action, /VALID_CHAIN_STATUSES\s*=\s*new Set\(\[\s*"pending",\s*"broadcast",\s*"finalized",\s*"failed",\s*"abandoned",\s*"timeout"\s*\]\)/s);
 assertRegex(actionPath, action, /CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\["lirabao"\]\)/);
@@ -98,6 +103,27 @@ assertIncludes(`${actionPath} finalized inventory section`, inventorySection, 'i
 assertIncludes(`${actionPath} finalized inventory section`, inventorySection, 'location: "cold"');
 
 for (const needle of [
+  "requireGameServer(req)",
+  "alphaAccess(adminClient, playerId)",
+  "loadAlphaProgressSnapshot(adminClient, playerId)",
+  "normalizeAlphaProgressSnapshot(data)",
+  "alpha_terms_required",
+]) {
+  assertIncludes(progressPath, progress, needle);
+}
+
+for (const needle of [
+  "normalizeAlphaProgressSnapshot",
+  "loadAlphaProgressSnapshot",
+  "upsertAlphaProgressSnapshot",
+  "mochi_social_progress_snapshots",
+  'authority: "mochirii-edge"',
+  'chainNetwork: "CANARY"',
+]) {
+  assertIncludes(sharedPath, shared, needle);
+}
+
+for (const needle of [
   "mochi_social_ledger_events",
   "request_id text",
   "mochi_social_ledger_request_idx",
@@ -114,6 +140,20 @@ for (const needle of [
   "finalized_at timestamptz",
 ]) {
   assertIncludes(migrationPath, migration, needle);
+}
+
+for (const needle of [
+  "mochi_social_progress_snapshots",
+  "user_id uuid primary key references auth.users(id) on delete cascade",
+  "authority text not null default 'mochirii-edge'",
+  "revision integer not null default 0",
+  "state jsonb not null default '{}'::jsonb",
+  "mochi_social_progress_read_own",
+  "grant select on table public.mochi_social_progress_snapshots to authenticated",
+  "grant all on table public.mochi_social_progress_snapshots to service_role",
+  "mochi_social_progress_updated_idx",
+]) {
+  assertIncludes(progressMigrationPath, progressMigration, needle);
 }
 
 for (const forbidden of [/MAINNET/i, /cashout/i, /price_usd/i, /priceUsd/i, /fiat/i, /wallet_seed/i, /service_role/i]) {

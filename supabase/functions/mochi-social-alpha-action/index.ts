@@ -6,10 +6,13 @@ import {
   alphaAccess,
   createAdminClient,
   jsonResponse,
+  loadAlphaProgressSnapshot,
+  normalizeAlphaProgressSnapshot,
   readJsonBody,
   recordLedgerEvent,
   requireGameServer,
   safeString,
+  upsertAlphaProgressSnapshot,
 } from "../_shared/mochi-social-alpha.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
@@ -100,9 +103,10 @@ Deno.serve(async (req: Request) => {
   }
 
   if (existingLedger) {
+    const { data } = await loadAlphaProgressSnapshot(adminClient, playerId);
     return jsonResponse({
       ok: true,
-      data: { requestId, type, duplicate: true, noRealValue: true, chainNetwork: "CANARY" },
+      data: { requestId, type, duplicate: true, noRealValue: true, chainNetwork: "CANARY", progress: normalizeAlphaProgressSnapshot(data) },
       message: "Alpha action already recorded.",
     });
   }
@@ -154,9 +158,12 @@ Deno.serve(async (req: Request) => {
 
   if (ledgerError) return jsonResponse({ ok: false, error: "ledger_insert_failed", message: "Alpha ledger event could not be recorded." }, 500);
 
+  const { data: progressData, error: progressError } = await upsertAlphaProgressSnapshot(adminClient, playerId, { requestId, type, payload });
+  if (progressError) return jsonResponse({ ok: false, error: "alpha_progress_snapshot_failed", message: "Alpha progress snapshot could not be saved." }, 500);
+
   return jsonResponse({
     ok: true,
-    data: { requestId, type, noRealValue: true, chainNetwork: "CANARY" },
+    data: { requestId, type, noRealValue: true, chainNetwork: "CANARY", progress: normalizeAlphaProgressSnapshot(progressData) },
   });
 });
 

@@ -178,3 +178,64 @@ export async function recordLedgerEvent(
 
   return error;
 }
+
+export function normalizeAlphaProgressSnapshot(data: unknown) {
+  const row = asRecord(data);
+  if (!Object.keys(row).length) return null;
+  const revision = Math.max(0, Math.floor(Number(row.revision || 0)));
+  const state = asRecord(row.state);
+  const updatedAt = safeString(row.updated_at || row.updatedAt, 80) || new Date(0).toISOString();
+  return {
+    authority: safeString(row.authority, 80) || "mochirii-edge",
+    revision,
+    state,
+    updatedAt,
+  };
+}
+
+export async function loadAlphaProgressSnapshot(adminClient: SupabaseClient, userId: string) {
+  return await adminClient
+    .from("mochi_social_progress_snapshots")
+    .select("user_id,authority,revision,state,updated_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+}
+
+export async function upsertAlphaProgressSnapshot(
+  adminClient: SupabaseClient,
+  userId: string,
+  action: { requestId?: string | null; type: string; payload: JsonRecord },
+) {
+  const { data: existing, error: loadError } = await loadAlphaProgressSnapshot(adminClient, userId);
+  if (loadError) return { data: null, error: loadError };
+
+  const existingSnapshot = normalizeAlphaProgressSnapshot(existing);
+  const existingState = asRecord(existingSnapshot?.state);
+  const incomingState = asRecord(action.payload.state);
+  const revision = Math.max(0, Number(existingSnapshot?.revision || 0)) + 1;
+  const state = {
+    ...existingState,
+    ...incomingState,
+    lastSyncedAction: action.type,
+    lastSyncedRequestId: action.requestId || null,
+    noRealValue: true,
+    chainNetwork: "CANARY",
+  };
+
+  return await adminClient
+    .from("mochi_social_progress_snapshots")
+    .upsert(
+      {
+        user_id: userId,
+        authority: "mochirii-edge",
+        revision,
+        state,
+        last_request_id: action.requestId || null,
+        last_action_type: action.type,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    )
+    .select("user_id,authority,revision,state,updated_at")
+    .single();
+}

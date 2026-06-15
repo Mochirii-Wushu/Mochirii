@@ -15,6 +15,7 @@ const files = {
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   mochiSocialAlphaShared: "supabase/functions/_shared/mochi-social-alpha.ts",
   mochiSocialAlphaAction: "supabase/functions/mochi-social-alpha-action/index.ts",
+  mochiSocialAlphaProgress: "supabase/functions/mochi-social-alpha-progress/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   voteReminder: "supabase/functions/send-vote-reminder/index.ts",
   spotlightPollShared: "supabase/functions/_shared/spotlight-polls.ts",
@@ -66,6 +67,7 @@ const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
 const mochiSocialAlphaShared = read(files.mochiSocialAlphaShared);
 const mochiSocialAlphaAction = read(files.mochiSocialAlphaAction);
+const mochiSocialAlphaProgress = read(files.mochiSocialAlphaProgress);
 const discordIngest = read(files.discordIngest);
 const voteReminder = read(files.voteReminder);
 const spotlightPollShared = read(files.spotlightPollShared);
@@ -143,6 +145,7 @@ const expectedUnauthenticatedFunctions = [
   "publish-member-spotlight-winner",
   "get-current-spotlight-winner",
   "mochi-social-alpha-action",
+  "mochi-social-alpha-progress",
 ];
 
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
@@ -167,6 +170,13 @@ for (const name of verifyJwtFalseFunctions) {
   "network: \"CANARY\"",
   "noRealValue: true",
 ].forEach((snippet) => assertIncludes("mochi-social-alpha-action", mochiSocialAlphaAction, snippet));
+
+[
+  "requireGameServer(req)",
+  "alphaAccess(adminClient, playerId)",
+  "loadAlphaProgressSnapshot(adminClient, playerId)",
+  "normalizeAlphaProgressSnapshot(data)",
+].forEach((snippet) => assertIncludes("mochi-social-alpha-progress", mochiSocialAlphaProgress, snippet));
 
 [
   "x-signature-ed25519",

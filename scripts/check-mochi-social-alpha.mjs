@@ -51,7 +51,7 @@ const checks = [
   },
   {
     file: 'scripts/smoke-mochi-social-alpha-edge.mjs',
-    includes: ['MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'selectPublishableKey', 'mochi-social-alpha-session', 'mochi-social-alpha-action', 'invalid_game_server_token', 'invalid_alpha_action']
+    includes: ['MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'selectPublishableKey', 'mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-progress', 'invalid_game_server_token', 'invalid_alpha_action', 'missing_alpha_player']
   },
   {
     file: 'scripts/mochi-social-game-repo-path.mjs',
@@ -111,7 +111,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-edge-authority.mjs',
-    includes: ['MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'x-mochi-social-server-token', 'mochi_social_ledger_events', 'noRealValue: true', 'chainNetwork: "CANARY"', 'finalityRequired: true', 'applyFinalizedChainInventory', 'Mochi Social Edge authority check passed']
+    includes: ['MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'x-mochi-social-server-token', 'mochi_social_ledger_events', 'mochi_social_progress_snapshots', 'upsertAlphaProgressSnapshot', 'loadAlphaProgressSnapshot', 'normalizeAlphaProgressSnapshot', 'noRealValue: true', 'chainNetwork: "CANARY"', 'finalityRequired: true', 'applyFinalizedChainInventory', 'Mochi Social Edge authority check passed']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
@@ -135,7 +135,7 @@ const checks = [
   },
   {
     file: 'supabase/config.toml',
-    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
+    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-progress', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
   },
   {
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
@@ -149,14 +149,23 @@ const checks = [
       'jade-thread-charm',
       'lirabao-canary-certificate',
       'chain.operation_update',
+      'upsertAlphaProgressSnapshot(adminClient',
       'chain_request_missing',
       'nextStatus === "finalized"',
       'location: "hot"'
     ]
   },
   {
+    file: 'supabase/functions/mochi-social-alpha-progress/index.ts',
+    includes: ['requireGameServer(req)', 'alphaAccess(adminClient, playerId)', 'loadAlphaProgressSnapshot(adminClient, playerId)', 'normalizeAlphaProgressSnapshot(data)', 'alpha_terms_required']
+  },
+  {
     file: 'supabase/functions/mochi-social-alpha-admin/index.ts',
     includes: ['loadAlphaAudit', 'recentLedger', 'pendingChainOps', 'mochi_social_feedback']
+  },
+  {
+    file: 'supabase/migrations/20260615050311_add_mochi_social_progress_snapshots.sql',
+    includes: ['mochi_social_progress_snapshots', "authority text not null default 'mochirii-edge'", 'revision integer not null default 0', 'mochi_social_progress_read_own', 'grant all on table public.mochi_social_progress_snapshots to service_role']
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',

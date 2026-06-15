@@ -26,7 +26,7 @@ try {
 }
 
 async function run() {
-  for (const name of ["mochi-social-alpha-session", "mochi-social-alpha-action", "mochi-social-alpha-admin", "submit-mochi-social-feedback"]) {
+  for (const name of ["mochi-social-alpha-session", "mochi-social-alpha-action", "mochi-social-alpha-progress", "mochi-social-alpha-admin", "submit-mochi-social-feedback"]) {
     await checkOptions(name);
   }
 
@@ -84,6 +84,20 @@ async function run() {
     error: "invalid_game_server_token",
   });
 
+  await expectJson("mochi-social-alpha-progress", "progress without game token", {
+    playerId: "00000000-0000-4000-8000-000000000000",
+  }, {
+    status: 401,
+    error: "invalid_game_server_token",
+  });
+  await expectJson("mochi-social-alpha-progress", "progress invalid game token", {
+    playerId: "00000000-0000-4000-8000-000000000000",
+  }, {
+    gameServerToken: "invalid-game-server-token",
+    status: 401,
+    error: "invalid_game_server_token",
+  });
+
   if (gameServerToken) {
     await expectJson("mochi-social-alpha-action", "trusted game invalid action", {
       requestId: `edge-smoke-${Date.now().toString(36)}-trusted`,
@@ -94,6 +108,13 @@ async function run() {
       gameServerToken,
       status: 400,
       error: "invalid_alpha_action",
+    });
+    await expectJson("mochi-social-alpha-progress", "trusted game invalid player", {
+      playerId: "not-a-user-id",
+    }, {
+      gameServerToken,
+      status: 401,
+      error: "missing_alpha_player",
     });
   }
 }
