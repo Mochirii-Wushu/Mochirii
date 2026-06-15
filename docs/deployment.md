@@ -26,6 +26,7 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - Deployment protection: enabled for previews if member/auth workflow state should not be public
 - Web Analytics: enabled for `mochirii/mochirii`
 - Speed Insights: enabled for `mochirii/mochirii`
+- Supabase Metrics API: operator-only monitoring, documented in `docs/supabase-metrics-observability.md`; credentials must never be exposed to the browser or game runtime
 - Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
@@ -119,6 +120,14 @@ npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=red
 ```
 
 This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, and the `www` redirect. Static route metadata, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
+
+Supabase Metrics API observability is a separate operator-only lane for hosted Supabase database metrics. The static guardrail is:
+
+```sh
+npm run check:supabase-metrics-observability
+```
+
+This check verifies the no-secret documentation boundary for the Prometheus-compatible endpoint, 60 second scrape interval, dedicated Secret API key handling, Grafana/self-hosted options, and log-drain exclusion. It does not contact Supabase or configure providers.
 
 Accessibility review starts with the no-secret route matrix:
 

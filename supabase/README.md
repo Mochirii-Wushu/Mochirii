@@ -10,6 +10,7 @@ This repository serves the live Vercel/Next.js production app from `apps/web`; t
 
 - Browser code may only use the Supabase URL and publishable key.
 - Secret keys, service-role keys, database passwords, JWT secrets, Discord bot tokens, and private environment values stay outside public files.
+- Metrics API Secret API keys such as the documented `sb_secret_...` key class are operator-only collector credentials. They do not belong in browser code, `NEXT_PUBLIC_*`, Vercel public env vars, the Mochi Social game runtime, screenshots, reports, PRs, Discord, or chat.
 - Database schema changes should be created through Supabase migrations.
 - Tables exposed to browser clients require explicit grants and RLS policies.
 - anon access should be minimal and feature-specific.
@@ -292,6 +293,7 @@ supabase secrets list
 ## Operational Runbooks
 
 - Cost and usage monitoring: [`docs/supabase-cost-usage-runbook.md`](../docs/supabase-cost-usage-runbook.md)
+- Metrics API observability: [`docs/supabase-metrics-observability.md`](../docs/supabase-metrics-observability.md)
 
 Do not commit `supabase/functions/.env.local`.
 

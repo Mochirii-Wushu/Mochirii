@@ -19,6 +19,7 @@ const targets = [
   { label: "operator-handoff", path: resolve(credsDir, "mochirii-mochi-social-alpha-operator-next-steps.md"), required: false },
   { label: "preview-ready-handoff", path: resolve(credsDir, "mochirii-mochi-social-preview-ready.md"), required: false },
   { label: "browser-gates-handoff", path: resolve(credsDir, "mochirii-mochi-social-browser-gates.md"), required: false },
+  { label: "supabase-metrics-operator-checklist", path: resolve(credsDir, "supabase-metrics-operator-checklist.md"), required: false },
 ];
 
 const forbiddenPatterns = [
@@ -27,8 +28,10 @@ const forbiddenPatterns = [
   { label: "JWT-like token", pattern: /\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/ },
   { label: "Discord bot token", pattern: /\b[A-Za-z0-9_-]{23,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{27,}\b/ },
   { label: "Discord webhook URL", pattern: /https:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[A-Za-z0-9_-]+/ },
+  { label: "Grafana service account token", pattern: /\bgl(?:c|sa)_[A-Za-z0-9_=-]{20,}\b/i },
   { label: "Private key block", pattern: /-----BEGIN (?:RSA |EC |OPENSSH |)?PRIVATE KEY-----/ },
   { label: "Supabase service-role assignment", pattern: /\bSUPABASE_SERVICE_ROLE_KEY\s*=\s*["']?(?!<|REDACTED|redacted|placeholder)[^\s"']+/i },
+  { label: "Supabase metrics key assignment", pattern: /\bSUPABASE_METRICS_(?:SECRET_API_KEY|API_KEY|PASSWORD)\s*=\s*["']?(?!<|REDACTED|redacted|placeholder)[^\s"']+/i },
   { label: "Mochi Social game token assignment", pattern: /\bMOCHI_SOCIAL_GAME_SERVER_TOKEN\s*=\s*["']?(?!<|REDACTED|redacted|placeholder)[^\s"']+/i },
   { label: "Discord client secret assignment", pattern: /\bDISCORD_CLIENT_SECRET\s*=\s*["']?(?!<|REDACTED|redacted|placeholder)[^\s"']+/i },
   { label: "Discord bot token assignment", pattern: /\bDISCORD_BOT_TOKEN\s*=\s*["']?(?!<|REDACTED|redacted|placeholder)[^\s"']+/i },

@@ -36,6 +36,7 @@ const checks = [
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],
+  ["check:supabase-metrics-observability", ["node", "scripts/check-supabase-metrics-observability.mjs"]],
   ["check:full-stack-release-evidence", ["node", "scripts/check-full-stack-release-evidence.mjs"]],
   ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],
   ["check:accessibility-route-matrix", ["node", "scripts/check-accessibility-route-matrix.mjs"]],

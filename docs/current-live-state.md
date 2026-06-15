@@ -58,6 +58,14 @@ This is the short source-of-truth index for the current Mochirii production post
 - Use `apps/web/README.md` for the browser script inspection snippet.
 - Metadata, noindex, sitemap, observability wiring, and production smoke coverage are guarded by `npm run check:observability-metadata-smoke`.
 
+## Supabase Metrics Observability
+
+- Supabase Metrics API monitoring is documented as an operator-only lane in `docs/supabase-metrics-observability.md`.
+- Production metrics endpoint shape: `https://deyvmtncimmcinldjyqe.supabase.co/customer/v1/privileged/metrics`.
+- Metrics credentials must be dedicated Supabase Secret API keys stored only in an approved collector or secret manager.
+- Metrics credentials do not belong in `NEXT_PUBLIC_*`, browser code, Mochi Social game runtime env, Vercel public env vars, reports, screenshots, PRs, Discord, or chat.
+- Local no-secret coverage is guarded by `npm run check:supabase-metrics-observability`.
+
 ## Current Improvement Queue
 
 - Continue CSP tightening only after browser passes; React inline style props are guarded at zero by `npm run check:csp-inline-hardening`, while `unsafe-inline` removal remains a future Vercel Preview nonce/SRI decision.

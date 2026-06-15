@@ -83,6 +83,8 @@ Vercel can serve those scripts from project-specific unique paths rather than th
 
 Analytics and Core Web Vitals data can take a few minutes, and enough real production visits, to appear in the Vercel dashboard.
 
+Supabase Metrics API monitoring is separate from Vercel observability. It is operator-only Prometheus-compatible database telemetry for hosted Supabase projects, documented in [`../../docs/supabase-metrics-observability.md`](../../docs/supabase-metrics-observability.md). Do not add Supabase Metrics API Secret API keys to this app, `NEXT_PUBLIC_*`, browser code, or the Mochi Social game runtime.
+
 ## Public Assets And Data
 
 While the root static rollback surface remains available, root `assets/` and `data/` are the editable content source. The Next app reads copied files from `public/assets/` and `public/data/`.

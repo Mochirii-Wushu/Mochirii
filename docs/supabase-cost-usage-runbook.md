@@ -16,6 +16,10 @@ Official Supabase references checked for this runbook:
 - Egress usage: <https://supabase.com/docs/guides/platform/manage-your-usage/egress>
 - Monthly Active Users usage: <https://supabase.com/docs/guides/platform/manage-your-usage/monthly-active-users>
 - Storage file limits: <https://supabase.com/docs/guides/storage/uploads/file-limits>
+- Metrics API: <https://supabase.com/docs/guides/telemetry/metrics>
+- Metrics API with Grafana Cloud: <https://supabase.com/docs/guides/telemetry/metrics/grafana-cloud>
+- Metrics API with Prometheus and Grafana: <https://supabase.com/docs/guides/telemetry/metrics/grafana-self-hosted>
+- Vendor-neutral Metrics API setup: <https://supabase.com/docs/guides/telemetry/metrics/vendor-agnostic>
 - Supabase changelog index: <https://supabase.com/changelog.md>
 
 The 2026-05-14 changelog scan did not show a G13 blocker for member Gallery cost monitoring. Recent platform notes still matter for future work: Postgres 14 support ends on 2026-07-01, Supabase is dropping Node.js 20 support, and Edge Function recursive/nested call limits should remain in mind if future functions call other functions.
@@ -62,6 +66,7 @@ Check these at least monthly, and immediately after high-traffic guild events:
 - Auth usage: Monthly Active Users and OAuth sign-in volume.
 - Database size: table growth for member and moderation tables.
 - Logs: repeated `401`, `403`, `429`, `5xx`, or signed URL failures.
+- Metrics API dashboards, if configured through [`supabase-metrics-observability.md`](./supabase-metrics-observability.md): database CPU, IO, WAL, connection saturation, disk growth, and long-running transaction signals.
 
 Safe dashboard actions:
 
@@ -79,6 +84,7 @@ Do not perform these from a routine cost check:
 - table row deletion or manual status edits
 - secret changes
 - plan upgrades, add-ons, Spend Cap changes, or billing mutations
+- log drain setup, paid observability add-ons, or external collector changes
 
 Those require explicit owner approval and a scoped branch or admin task.
 
@@ -188,6 +194,18 @@ supabase secrets set
 ```
 
 Do not run Storage deletion or table mutation commands from this runbook.
+
+## Supabase Metrics API Boundary
+
+The Supabase Metrics API is an operator-only monitoring lane, not a browser or game feature. The production endpoint shape is:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/customer/v1/privileged/metrics
+```
+
+Authenticate with HTTP Basic Auth using `service_role` as the username and a dedicated Supabase Secret API key such as the documented `sb_secret_...` key class as the password. Store the key only in Grafana Cloud, a private Prometheus secret manager, or another approved operator secret store. Keep the scrape interval at 60 seconds unless Supabase updates its guidance. Do not put metrics credentials in `NEXT_PUBLIC_*`, Vercel browser env vars, Mochi Social game runtime env, screenshots, reports, PR text, Discord, or chat.
+
+Log drains are separate from Metrics API dashboards and can be plan-sensitive or cost-bearing. Do not enable log drains from this runbook without a later approved provider-action plan.
 
 ## Definition Of Healthy
 
