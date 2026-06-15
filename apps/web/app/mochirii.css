@@ -6254,6 +6254,13 @@ body[data-page="gallery-submit"] .muted{
   resize:vertical;
 }
 
+.mochi-feedback__handoff textarea{
+  min-height:172px;
+  background:rgba(7,10,13,.62);
+  color:rgba(255,255,255,.82);
+  resize:vertical;
+}
+
 .mochi-feedback--tester{
   max-width:920px;
 }

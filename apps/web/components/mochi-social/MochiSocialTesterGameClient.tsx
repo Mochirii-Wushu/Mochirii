@@ -6,11 +6,38 @@ import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 const testerFeedbackStorageKey = "mochiSocial.testerFeedbackDraft";
 
+type TesterFeedbackDraft = {
+  category: "tester-password-alpha";
+  message: string;
+  bridgeStatus: MochiSocialBridgeStatus;
+  gameOrigin: string;
+  noRealValue: true;
+  providerSubmitted: false;
+  createdAt: string;
+  handoffNote: string;
+};
+
+function buildTesterFeedbackHandoff(draft: Omit<TesterFeedbackDraft, "handoffNote">) {
+  return [
+    "Mochi Social Alpha Tester Feedback",
+    `Category: ${draft.category}`,
+    `Bridge status: ${draft.bridgeStatus}`,
+    `Game origin: ${draft.gameOrigin}`,
+    "No real value: true",
+    "Provider submitted: false",
+    `Created at: ${draft.createdAt}`,
+    "",
+    "Message:",
+    draft.message,
+  ].join("\n");
+}
+
 export function MochiSocialTesterGameClient() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [bridgeStatus, setBridgeStatus] = useState<MochiSocialBridgeStatus>("waiting");
   const [message, setMessage] = useState("");
   const [feedbackDraft, setFeedbackDraft] = useState("");
+  const [feedbackHandoff, setFeedbackHandoff] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const embedUrl = useMemo(() => `${gameOrigin}/embed`, []);
 
@@ -63,7 +90,7 @@ export function MochiSocialTesterGameClient() {
     const text = feedbackDraft.trim();
     if (!text) return;
 
-    const draft = {
+    const draftBase: Omit<TesterFeedbackDraft, "handoffNote"> = {
       category: "tester-password-alpha",
       message: text,
       bridgeStatus,
@@ -72,9 +99,14 @@ export function MochiSocialTesterGameClient() {
       providerSubmitted: false,
       createdAt: new Date().toISOString(),
     };
+    const draft: TesterFeedbackDraft = {
+      ...draftBase,
+      handoffNote: buildTesterFeedbackHandoff(draftBase),
+    };
 
     window.localStorage.setItem(testerFeedbackStorageKey, JSON.stringify(draft));
     setFeedbackDraft("");
+    setFeedbackHandoff(draft.handoffNote);
     setFeedbackMessage("Feedback draft saved locally for tester follow-up. No provider submission was made.");
   }, [bridgeStatus, feedbackDraft]);
 
@@ -161,6 +193,17 @@ export function MochiSocialTesterGameClient() {
           <p className="form-message mochi-form-message" data-mochi-tester-feedback-status role="status">
             {feedbackMessage}
           </p>
+        ) : null}
+        {feedbackHandoff ? (
+          <label className="mochi-feedback__handoff">
+            <span>Tester handoff note</span>
+            <textarea
+              data-mochi-tester-feedback-handoff
+              readOnly
+              rows={7}
+              value={feedbackHandoff}
+            />
+          </label>
         ) : null}
       </form>
     </section>

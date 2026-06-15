@@ -149,7 +149,7 @@ function browserGateEnvForMode(mode) {
       ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "guest bridge sends sign-out/no access token only"],
       ["MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK", "chain request remains configured-preview-stub/no-real-value"],
       ["MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK", "two hosted game tabs show nearby tester presence"],
-      ["MOCHI_SOCIAL_SITE_BROWSER_TESTER_FEEDBACK_DRAFT_OK", "tester-password feedback draft saves locally without provider submission"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_TESTER_FEEDBACK_DRAFT_OK", "tester-password feedback draft and handoff note save locally without provider submission"],
     ];
   }
 

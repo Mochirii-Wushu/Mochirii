@@ -173,18 +173,24 @@ async function verifyBrowserGates(chromiumBrowser) {
       return null;
     }
   });
+  const feedbackHandoff = await pageOne.locator("[data-mochi-tester-feedback-handoff]").inputValue({ timeout: 30000 });
   record(
     "tester-password-feedback-draft",
     feedbackStatus.includes("Feedback draft saved locally") &&
       feedbackDraft?.message === feedbackText &&
       feedbackDraft?.providerSubmitted === false &&
-      feedbackDraft?.noRealValue === true,
-    "Tester-password path saves a local feedback draft without provider submission.",
+      feedbackDraft?.noRealValue === true &&
+      feedbackDraft?.handoffNote === feedbackHandoff &&
+      feedbackHandoff.includes(feedbackText) &&
+      feedbackHandoff.includes("No real value: true") &&
+      feedbackHandoff.includes("Provider submitted: false"),
+    "Tester-password path saves a local feedback draft and no-secret handoff note without provider submission.",
     {
       status: feedbackStatus,
       category: feedbackDraft?.category || "",
       providerSubmitted: feedbackDraft?.providerSubmitted ?? null,
       noRealValue: feedbackDraft?.noRealValue ?? null,
+      hasHandoffNote: Boolean(feedbackHandoff),
     }
   );
 
