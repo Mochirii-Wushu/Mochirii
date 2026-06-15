@@ -4,7 +4,7 @@ Use this checklist for read-only operations reviews. It does not authorize token
 
 ## Runtime Split
 
-- Supabase Edge Function `reaper-discord-interactions` handles slash commands, message components, gallery ingest, rank sync, event sync, pending-verification containment, and vote reminder interactions.
+- Supabase Edge Function `reaper-discord-interactions` handles slash commands, message components, gallery ingest, rank sync, event sync, pending-verification containment, native ModMail audit, and vote reminder interactions.
 - Supabase scheduled Edge Functions handle manual vote reminders and monthly native Discord spotlight polls; these scheduled functions use cron secrets and server-side Discord bot access only.
 - Reaper Gateway worker handles `guildMemberAdd` welcome DMs and, after the second release is approved, redacted pending-verification member-event forwarding.
 - Vercel/Next does not run Discord bot tokens, service-role keys, webhooks, or Gateway connections.
@@ -35,9 +35,10 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 - Dynamic responses use `allowed_mentions: { parse: [] }`.
 - `/sync-events mode:preview confirm:false` is the only safe first event-sync command.
 - `/sync-pending-verification mode:preview confirm:false` is the only safe first pending-containment command.
+- `/audit-modmail` is read-only and metadata-only; use it before live ModMail ticket tests.
 - `/sync-events mode:apply confirm:true` remains an owner-approved provider mutation.
 - `/sync-pending-verification mode:apply confirm:true`, `/sync-ranks mode:apply confirm:true`, token rotation, and live reminder sends also remain owner-approved provider mutations.
-- Pending-containment apply mutates only tracked member-specific `VIEW_CHANNEL` overwrites and records owned bits in `discord_managed_permission_overwrites`.
+- Pending-containment apply mutates only tracked member-specific containment overwrites and records owned bits in `discord_managed_permission_overwrites`.
 - `reaper-discord-member-sync` requires `x-mochirii-reaper-member-sync-secret`, fetches current Discord member state before planning, and logs only redacted counts/IDs.
 
 ## Monthly Spotlight Polls

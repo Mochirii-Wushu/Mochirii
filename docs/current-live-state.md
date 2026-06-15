@@ -38,7 +38,7 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Discord And Reaper
 
-- Supabase Edge Function `reaper-discord-interactions` handles Discord slash commands, buttons, gallery ingest, rank/event sync, and vote reminder interactions.
+- Supabase Edge Function `reaper-discord-interactions` handles Discord slash commands, buttons, gallery ingest, rank/event sync, native ModMail audit, and vote reminder interactions.
 - The separate Reaper Gateway worker handles only Discord member-join welcome DMs when a persistent host is running.
 - Discord event schedule source is `data/guild-schedule.json`; mirrored Next data must stay in sync.
 - Read-only source parity is guarded by `npm run check:discord-reaper-parity`.

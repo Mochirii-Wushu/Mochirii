@@ -16,9 +16,14 @@ The command targets only members whose Discord member `roles` array is exactly:
 ["1468659807736299520"]
 ```
 
-Members with role `1078630751077142615`, any extra role, or a bot user are skipped. Reaper manages only `VIEW_CHANNEL` visibility for the target members. It does not grant or deny send, voice, moderation, invite, mention, event, or thread permissions.
+Members with role `1078630751077142615`, any extra role, or a bot user are skipped. Reaper manages only member-specific channel overwrites for the target members. In the two allowed text channels it owns `VIEW_CHANNEL`, `SEND_MESSAGES`, and `READ_MESSAGE_HISTORY` allows; outside those channels it owns only `VIEW_CHANNEL` denies. It does not grant or deny voice, moderation, invite, mention, event, or thread permissions.
 
-The allowed tree is category `1468658801388290048` plus every current guild channel whose `parent_id` is `1468658801388290048`.
+The allowed channels are:
+
+```text
+1468658915594997760
+1480143854014300335
+```
 
 ## Permission Model
 
@@ -26,16 +31,16 @@ Reaper uses member-specific permission overwrites, because Discord applies membe
 
 On apply:
 
-- Inside the allowed tree, Reaper adds its tracked member-specific `VIEW_CHANNEL` allow and removes only its tracked `VIEW_CHANNEL` deny.
-- Outside the allowed tree, Reaper adds its tracked member-specific `VIEW_CHANNEL` deny and removes only its tracked `VIEW_CHANNEL` allow.
+- Inside the allowed channels, Reaper adds its tracked member-specific `VIEW_CHANNEL`, `SEND_MESSAGES`, and `READ_MESSAGE_HISTORY` allows and removes only its tracked `VIEW_CHANNEL` deny.
+- Outside the allowed channels, Reaper adds its tracked member-specific `VIEW_CHANNEL` deny and removes only its tracked allowed-channel bits.
 - All unrelated allow and deny bits are preserved.
-- Members that no longer match the target predicate have only Reaper-owned `VIEW_CHANNEL` bits removed.
+- Members that no longer match the target predicate have only Reaper-owned containment bits removed.
 - A member overwrite is deleted only when no manual bits remain after Reaper-owned bits are removed.
 
 Manual member-specific conflicts block apply:
 
-- A non-Reaper `VIEW_CHANNEL` allow outside the allowed tree.
-- A non-Reaper `VIEW_CHANNEL` deny inside the allowed tree.
+- A non-Reaper `VIEW_CHANNEL` allow outside the allowed channels.
+- A non-Reaper deny for `VIEW_CHANNEL`, `SEND_MESSAGES`, or `READ_MESSAGE_HISTORY` inside the allowed channels.
 
 Preview lists conflict channels so a moderator can make an intentional Discord-side decision first.
 
