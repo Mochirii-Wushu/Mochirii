@@ -110,6 +110,43 @@ export type VerificationResponse = {
   message?: string;
 };
 
+export type MemberAccessIdentity = {
+  provider?: string | null;
+  providerSubject?: string | null;
+  displayLabel?: string | null;
+  emailVerified?: boolean | null;
+  phoneVerified?: boolean | null;
+  active?: boolean | null;
+  lastObservedAt?: string | null;
+};
+
+export type MemberAccessVerification = {
+  status?: string | null;
+  method?: string | null;
+  verifiedAt?: string | null;
+  expiresAt?: string | null;
+  reviewedAt?: string | null;
+  reason?: string | null;
+};
+
+export type MemberAccessResponse = {
+  galleryEligible?: boolean;
+  method?: "discord" | "manual_review" | string | null;
+  memberStatus?: string | null;
+  discordVerified?: boolean;
+  manualApproved?: boolean;
+  identities?: MemberAccessIdentity[];
+  verification?: MemberAccessVerification | null;
+  profile?: MemberProfile | null;
+  message?: string;
+  next?: string;
+};
+
+export type MemberVerificationReviewResponse = {
+  verification?: MemberAccessVerification | null;
+  userId?: string | null;
+};
+
 export type ModerationStatus = "pending" | "approved" | "rejected" | "archived";
 
 export type GalleryModerationEvent = {

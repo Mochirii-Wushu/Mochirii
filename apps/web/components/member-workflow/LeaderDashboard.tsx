@@ -15,6 +15,7 @@ import {
   markInstagramGallerySubmissionShared,
   moderateGallerySubmission,
   publishInstagramGallerySubmission,
+  reviewMemberVerification,
 } from "@/lib/supabase/moderation";
 import { listProfileMediaQueue, moderateProfileMedia } from "@/lib/supabase/member-profiles";
 import {
@@ -23,6 +24,7 @@ import {
   type GalleryReviewSubmission,
   type InstagramPublishJob,
   type InstagramPublishQueue,
+  type MemberAccessVerification,
   type ModerationStatus,
   type ProfileMediaQueue,
   type ProfileMediaQueueItem,
@@ -53,6 +55,19 @@ const profileMediaStatuses: Array<{ id: ProfileMediaStatus | "all"; label: strin
   { id: "archived", label: "Archived", empty: "No archived profile images." },
   { id: "all", label: "All", empty: "No profile images in the queue." },
 ];
+
+const memberVerificationMethods = [
+  { id: "manual_review", label: "Manual Review" },
+  { id: "phone", label: "Phone" },
+  { id: "apple", label: "Apple" },
+  { id: "facebook", label: "Facebook" },
+  { id: "google", label: "Google" },
+  { id: "kakao", label: "Kakao" },
+  { id: "twitch", label: "Twitch" },
+  { id: "spotify", label: "Spotify" },
+];
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
 
 function normalizeStatus(value: unknown): ModerationStatus {
   const status = text(value, "pending").toLowerCase();
@@ -93,6 +108,11 @@ function moderatorName(event: NonNullable<GalleryReviewSubmission["moderationEve
 
 function profileMediaKindLabel(value: unknown) {
   return text(value, "avatar").toLowerCase() === "banner" ? "Banner" : "Avatar";
+}
+
+function memberVerificationMethodLabel(value: unknown) {
+  const method = text(value, "manual_review").toLowerCase();
+  return memberVerificationMethods.find((entry) => entry.id === method)?.label || "Manual Review";
 }
 
 function QueueSummary({ queue, shown }: { queue: GalleryReviewQueue | null; shown: number }) {
@@ -550,6 +570,38 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
   );
 }
 
+function MemberVerificationResult({
+  userId,
+  verification,
+}: {
+  userId?: string | null;
+  verification?: MemberAccessVerification | null;
+}) {
+  if (!verification) return null;
+
+  const status = text(verification.status, "pending").toLowerCase();
+  const rows = [
+    ["User", userId || "Not set"],
+    ["Status", status],
+    ["Method", memberVerificationMethodLabel(verification.method)],
+    ["Reviewed", verification.reviewedAt ? formatDate(verification.reviewedAt, "Not set") : "Not set"],
+    ["Verified", verification.verifiedAt ? formatDate(verification.verifiedAt, "Not set") : "Not set"],
+    ["Expires", verification.expiresAt ? formatDate(verification.expiresAt, "No expiry") : "No expiry"],
+    ["Note", verification.reason || "No note recorded"],
+  ];
+
+  return (
+    <dl className="review-meta" aria-label="Last member verification review">
+      {rows.map(([label, value]) => (
+        <div key={label}>
+          <dt>{label}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function LeaderDashboard() {
   const [busy, setBusy] = useState(true);
   const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
@@ -580,6 +632,17 @@ export function LeaderDashboard() {
   const [mochiAlphaError, setMochiAlphaError] = useState("");
   const [mochiAlphaUserId, setMochiAlphaUserId] = useState("");
   const [mochiAlphaNotes, setMochiAlphaNotes] = useState("");
+  const [memberVerificationUserId, setMemberVerificationUserId] = useState("");
+  const [memberVerificationMethod, setMemberVerificationMethod] = useState("manual_review");
+  const [memberVerificationReason, setMemberVerificationReason] = useState("");
+  const [memberVerificationExpiresAt, setMemberVerificationExpiresAt] = useState("");
+  const [memberVerificationBusy, setMemberVerificationBusy] = useState(false);
+  const [memberVerificationStatus, setMemberVerificationStatus] = useState("Member verification review is ready.");
+  const [memberVerificationError, setMemberVerificationError] = useState("");
+  const [memberVerificationLast, setMemberVerificationLast] = useState<{
+    userId?: string | null;
+    verification?: MemberAccessVerification | null;
+  } | null>(null);
 
   const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
     const nextStatus = normalizeStatus(status);
@@ -770,6 +833,50 @@ export function LeaderDashboard() {
     }
   }
 
+  async function reviewVerification(action: "approve" | "reject" | "revoke") {
+    const userId = memberVerificationUserId.trim();
+    const reason = memberVerificationReason.trim();
+
+    if (!UUID_RE.test(userId)) {
+      setMemberVerificationError("Enter a valid Supabase user id before reviewing member verification.");
+      return;
+    }
+
+    if ((action === "reject" || action === "revoke") && reason.length < 2) {
+      setMemberVerificationError("Add a redacted note before rejecting or revoking member verification.");
+      return;
+    }
+
+    setMemberVerificationBusy(true);
+    setMemberVerificationError("");
+    setMemberVerificationStatus(
+      action === "approve"
+        ? "Approving member verification."
+        : action === "reject"
+          ? "Rejecting member verification."
+          : "Revoking member verification.",
+    );
+
+    const result = await reviewMemberVerification({
+      userId,
+      action,
+      method: memberVerificationMethod,
+      reason,
+      expiresAt: memberVerificationExpiresAt,
+    });
+
+    if (!result.ok) {
+      setMemberVerificationError(result.message || "Member verification review could not be saved.");
+      setMemberVerificationStatus("");
+      setMemberVerificationBusy(false);
+      return;
+    }
+
+    setMemberVerificationLast(result.data || { userId, verification: null });
+    setMemberVerificationStatus(result.message || "Member verification review saved.");
+    setMemberVerificationBusy(false);
+  }
+
   async function publishInstagram(job: InstagramPublishJob) {
     const jobId = text(job.id);
     const caption = instagramCaptions[jobId] ?? text(job.caption, "Shared from the Mōchirīī guild gallery.");
@@ -945,7 +1052,7 @@ export function LeaderDashboard() {
     return (
       <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel">
         <p className="kicker">Sign In Required</p>
-        <h2 className="section-title">Login with Discord</h2>
+        <h2 className="section-title">Sign In Required</h2>
         <p className="muted">Moderator access is checked against Discord after website sign-in.</p>
         <div className="auth-actions">
           <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link>
@@ -1027,6 +1134,73 @@ export function LeaderDashboard() {
         ) : (
           <p className="muted">{config.empty}</p>
         )}
+      </div>
+    </section>
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="memberVerificationPanel">
+      <div className="auth-panel__head">
+        <div>
+          <p className="kicker">Member Verification</p>
+          <h2 className="section-title">Review Gallery Access</h2>
+        </div>
+        <span className="status-pill">Moderator only</span>
+      </div>
+
+      <div className="review-details">
+        <label className="form-field">
+          <span>Supabase user id</span>
+          <input
+            value={memberVerificationUserId}
+            onChange={(event) => setMemberVerificationUserId(event.target.value)}
+            placeholder="00000000-0000-0000-0000-000000000000"
+            disabled={memberVerificationBusy}
+          />
+        </label>
+        <label className="form-field">
+          <span>Verification method</span>
+          <select
+            value={memberVerificationMethod}
+            onChange={(event) => setMemberVerificationMethod(event.target.value)}
+            disabled={memberVerificationBusy}
+          >
+            {memberVerificationMethods.map((method) => (
+              <option value={method.id} key={method.id}>{method.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="form-field">
+          <span>Expiry</span>
+          <input
+            type="datetime-local"
+            value={memberVerificationExpiresAt}
+            onChange={(event) => setMemberVerificationExpiresAt(event.target.value)}
+            disabled={memberVerificationBusy}
+          />
+        </label>
+        <label className="form-field">
+          <span>Redacted note</span>
+          <textarea
+            maxLength={500}
+            rows={3}
+            value={memberVerificationReason}
+            onChange={(event) => setMemberVerificationReason(event.target.value.slice(0, 500))}
+            placeholder="Short approval, rejection, or revoke note. Do not paste private messages."
+            disabled={memberVerificationBusy}
+          />
+        </label>
+        <div className="auth-actions">
+          <button className="hero-cta hero-cta--primary" type="button" onClick={() => reviewVerification("approve")} disabled={memberVerificationBusy}>
+            Approve access
+          </button>
+          <button className="hero-cta" type="button" onClick={() => reviewVerification("reject")} disabled={memberVerificationBusy}>
+            Reject
+          </button>
+          <button className="hero-cta" type="button" onClick={() => reviewVerification("revoke")} disabled={memberVerificationBusy}>
+            Revoke
+          </button>
+        </div>
+        <p className="auth-status muted" role="status" aria-live="polite">{memberVerificationStatus}</p>
+        <p className="auth-error" role="alert" hidden={!memberVerificationError}>{memberVerificationError}</p>
+        <MemberVerificationResult userId={memberVerificationLast?.userId} verification={memberVerificationLast?.verification} />
       </div>
     </section>
     <section className="glass-card glass-card--primary glass-pad auth-panel" id="instagramQueuePanel">

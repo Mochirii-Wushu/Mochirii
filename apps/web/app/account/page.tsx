@@ -5,7 +5,7 @@ import { PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Account • Guild Verification",
-  description: "View Discord verification, member status, and safe profile fields for a Mōchirīī website account.",
+  description: "View member verification, linked sign-in methods, member status, and safe profile fields for a Mōchirīī website account.",
   robots: {
     index: false,
     follow: true,
@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Mōchirīī",
     title: "Mōchirīī Account • Guild Verification",
-    description: "View Discord verification, member status, and safe profile fields for a Mōchirīī website account.",
+    description: "View member verification, linked sign-in methods, member status, and safe profile fields for a Mōchirīī website account.",
     url: "https://mochirii.com/account",
     images: ["/assets/img/leaders/panel.webp"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Mōchirīī Account • Guild Verification",
-    description: "View Discord verification, member status, and safe profile fields for a Mōchirīī website account.",
+    description: "View member verification, linked sign-in methods, member status, and safe profile fields for a Mōchirīī website account.",
     images: ["/assets/img/leaders/panel.webp"],
   },
 };
@@ -41,7 +41,7 @@ export default function AccountPage() {
         kicker="Guild Account"
         title="Account"
         center={false}
-        intro={<p className="lede">Check Discord verification, review member status, and keep safe profile details current.</p>}
+        intro={<p className="lede">Check member verification, review member status, and keep safe profile details current.</p>}
       />
       <main className="page-main" id="main">
         <div className="container">

@@ -5,7 +5,7 @@ import { PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Submit Image • Gallery Upload",
-  description: "Submit a private pending gallery image for later Mōchirīī moderation after Discord role verification.",
+  description: "Submit a private pending gallery image for later Mōchirīī moderation after member verification.",
   robots: {
     index: false,
     follow: true,
@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Mōchirīī",
     title: "Mōchirīī Submit Image • Gallery Upload",
-    description: "Submit a private pending gallery image for later Mōchirīī moderation after Discord role verification.",
+    description: "Submit a private pending gallery image for later Mōchirīī moderation after member verification.",
     url: "https://mochirii.com/gallery-submit",
     images: ["/assets/img/gallery/hero.webp"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Mōchirīī Submit Image • Gallery Upload",
-    description: "Submit a private pending gallery image for later Mōchirīī moderation after Discord role verification.",
+    description: "Submit a private pending gallery image for later Mōchirīī moderation after member verification.",
     images: ["/assets/img/gallery/hero.webp"],
   },
 };

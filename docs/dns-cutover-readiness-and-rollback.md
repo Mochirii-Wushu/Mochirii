@@ -364,7 +364,7 @@ Before cutover approval, confirm:
 - Homepage and gallery lightboxes remain fixed full-viewport overlays with no page-left shift and no footer/header overlap regression.
 - Homepage Screenshot Spotlight randomization remains stable in-session and changes across hard refreshes.
 - Gallery newest, oldest, and random sort behavior remains unchanged.
-- `/auth` shows Discord login UI.
+- `/auth` shows the configured sign-in method UI.
 - `/account`, `/gallery-submit`, and `/leader-dashboard` show signed-out/access-check states without crashing.
 - Discord OAuth works on Vercel production or a fresh Preview with the same public env values.
 - `/auth` OAuth returns to `/account`.
@@ -475,7 +475,7 @@ Supabase behavior that must stay unchanged:
 OAuth test after cutover:
 
 1. Open `https://mochirii.com/auth`.
-2. Start Discord login.
+2. Start the Discord provider login flow.
 3. Confirm Supabase Auth returns to `https://mochirii.com/account`.
 4. Confirm account UI loads without `Invalid supabaseUrl`.
 5. Run Discord verification with a real account.
@@ -1040,7 +1040,7 @@ Legacy redirects:
 
 Browser/auth checks:
 
-- `/auth` renders Discord login UI.
+- `/auth` renders the configured sign-in method UI.
 - `/account` loads signed-out or authenticated account state without crashing.
 - `/gallery-submit` enforces signed-out/unverified/active-member access.
 - `/leader-dashboard` blocks signed-out and non-moderator users.

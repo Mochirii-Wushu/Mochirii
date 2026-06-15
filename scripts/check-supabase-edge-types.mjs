@@ -7,6 +7,8 @@ const root = process.cwd();
 
 const functions = [
   "verify-discord-member",
+  "verify-member-access",
+  "review-member-verification",
   "list-gallery-review-queue",
   "moderate-gallery-submission",
   "list-approved-gallery-submissions",

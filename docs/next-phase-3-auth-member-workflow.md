@@ -280,8 +280,8 @@ Also run targeted browser validation for `/auth`, `/account`, `/members`, `/memb
 
 ## 19. Browser Smoke Plan
 
-- Signed-out `/auth` shows Discord login.
-- Discord login starts OAuth and returns to `/account`.
+- Signed-out `/auth` shows the configured sign-in method UI.
+- Discord provider login starts OAuth and returns to `/account`.
 - `/account` displays profile and verification state.
 - `/members` blocks signed-out users and lists only published profiles for active verified members.
 - `/members/[slug]` blocks signed-out users and renders only an opted-in published profile.

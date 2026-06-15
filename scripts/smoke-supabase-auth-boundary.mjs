@@ -50,6 +50,22 @@ window.supabase = {
           record("auth.signInWithOAuth", { provider: options?.provider || "" });
           return { data: { url: "mock-discord-oauth-url" }, error: null };
         },
+        linkIdentity: async (options) => {
+          record("auth.linkIdentity", { provider: options?.provider || "" });
+          return { data: { url: "mock-provider-link-url" }, error: null };
+        },
+        getUserIdentities: async () => {
+          record("auth.getUserIdentities");
+          return { data: { identities: [] }, error: null };
+        },
+        signInWithOtp: async () => {
+          record("auth.signInWithOtp");
+          return { data: {}, error: null };
+        },
+        verifyOtp: async () => {
+          record("auth.verifyOtp");
+          return { data: {}, error: null };
+        },
         signOut: async () => {
           record("auth.signOut");
           return { error: null };
@@ -169,8 +185,8 @@ try {
     }));
 
     assert(state.authState === "Signed out", `auth: expected Signed out state, got ${state.authState}.`);
-    assert(state.status.includes("Use Discord to sign in"), `auth: unexpected status text: ${state.status}`);
-    assert(state.loginVisible, "auth: Discord login button should be visible.");
+    assert(state.status.includes("Choose a sign-in method"), `auth: unexpected status text: ${state.status}`);
+    assert(state.loginVisible, "auth: Discord provider button should be visible.");
     assert(state.accountHidden, "auth: Account link should be hidden.");
     assert(state.signOutHidden, "auth: Sign out button should be hidden.");
     assert(state.errorHidden, "auth: Error panel should stay hidden.");
@@ -195,7 +211,7 @@ try {
       leaderLinkHidden: document.querySelector("#leaderDashboardLink")?.hidden,
     }));
 
-    assert(state.signedOutText.includes("Login with Discord"), "account: signed-out panel should ask for Discord login.");
+    assert(state.signedOutText.includes("Choose a Sign-In Method"), "account: signed-out panel should ask for sign-in.");
     assert(state.accountHidden, "account: account panel should stay hidden while signed out.");
     assert(state.leaderLinkHidden, "account: leader dashboard link should stay hidden while signed out.");
     await assertNoMutationCalls(page, "account");
@@ -217,7 +233,7 @@ try {
     }));
 
     assert(state.gateTitle === "Login Required", `gallery-submit: expected Login Required, got ${state.gateTitle}.`);
-    assert(state.gateMessage.includes("Login with Discord"), `gallery-submit: unexpected gate message: ${state.gateMessage}`);
+    assert(state.gateMessage.includes("Choose a sign-in method"), `gallery-submit: unexpected gate message: ${state.gateMessage}`);
     assert(state.loginVisible, "gallery-submit: Login link should be visible.");
     assert(state.uploadPanelHidden, "gallery-submit: upload panel should stay hidden while signed out.");
     assert(state.refreshHidden, "gallery-submit: refresh verification button should stay hidden while signed out.");
@@ -237,7 +253,7 @@ try {
       reviewHidden: document.querySelector("#reviewPanel")?.hidden,
     }));
 
-    assert(state.signedOutText.includes("Login with Discord"), "leader-dashboard: signed-out panel should ask for Discord login.");
+    assert(state.signedOutText.includes("Sign In Required"), "leader-dashboard: signed-out panel should ask for sign-in.");
     assert(state.accessDeniedHidden, "leader-dashboard: access denied panel should not show before sign-in.");
     assert(state.reviewHidden, "leader-dashboard: review panel should stay hidden while signed out.");
     await assertNoMutationCalls(page, "leader-dashboard");

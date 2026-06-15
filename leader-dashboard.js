@@ -23,6 +23,17 @@
     { id: "all", label: "All", empty: "No Instagram publishing jobs." },
   ];
   const INSTAGRAM_STATUS_IDS = new Set(INSTAGRAM_STATUSES.map((status) => status.id));
+  const MEMBER_VERIFICATION_METHODS = [
+    { id: "manual_review", label: "Manual Review" },
+    { id: "phone", label: "Phone" },
+    { id: "apple", label: "Apple" },
+    { id: "facebook", label: "Facebook" },
+    { id: "google", label: "Google" },
+    { id: "kakao", label: "Kakao" },
+    { id: "twitch", label: "Twitch" },
+    { id: "spotify", label: "Spotify" },
+  ];
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
 
   let accessReady = false;
   let activeStatus = "pending";
@@ -57,11 +68,14 @@
     $("#instagramList")?.querySelectorAll("button, textarea, input").forEach((el) => {
       el.disabled = busy;
     });
+    $("#memberVerificationPanel")?.querySelectorAll("button, textarea, input, select").forEach((el) => {
+      el.disabled = busy;
+    });
   }
 
   function showPanel(panelId) {
     const reviewMode = panelId === "#reviewPanel";
-    ["#signedOutPanel", "#accessDeniedPanel", "#reviewPanel", "#instagramQueuePanel"].forEach((selector) => {
+    ["#signedOutPanel", "#accessDeniedPanel", "#reviewPanel", "#memberVerificationPanel", "#instagramQueuePanel"].forEach((selector) => {
       const el = $(selector);
       if (!el) return;
       if (reviewMode) {
@@ -88,6 +102,11 @@
 
   function instagramStatusConfig(status) {
     return INSTAGRAM_STATUSES.find((entry) => entry.id === status) || INSTAGRAM_STATUSES[0];
+  }
+
+  function memberVerificationMethodLabel(value) {
+    const method = U.text(value, "manual_review").toLowerCase();
+    return MEMBER_VERIFICATION_METHODS.find((entry) => entry.id === method)?.label || "Manual Review";
   }
 
   function formatDate(value) {
@@ -365,6 +384,37 @@
     `;
   }
 
+  function renderMemberVerificationResult(userId, verification) {
+    const result = $("#memberVerificationResult");
+    if (!result) return;
+    if (!verification) {
+      result.innerHTML = "";
+      return;
+    }
+
+    const status = U.text(verification.status, "pending").toLowerCase();
+    const rows = [
+      ["User", userId || "Not set"],
+      ["Status", status],
+      ["Method", memberVerificationMethodLabel(verification.method)],
+      ["Reviewed", verification.reviewedAt ? formatDate(verification.reviewedAt) : "Not set"],
+      ["Verified", verification.verifiedAt ? formatDate(verification.verifiedAt) : "Not set"],
+      ["Expires", verification.expiresAt ? formatDate(verification.expiresAt) : "No expiry"],
+      ["Note", verification.reason || "No note recorded"],
+    ];
+
+    result.innerHTML = `
+      <dl class="review-meta" aria-label="Last member verification review">
+        ${rows.map(([label, value]) => `
+          <div>
+            <dt>${U.escapeHtml(label)}</dt>
+            <dd>${U.escapeHtml(value)}</dd>
+          </div>
+        `).join("")}
+      </dl>
+    `;
+  }
+
   async function loadQueue({ status = activeStatus, successMessage = "" } = {}) {
     if (!accessReady) return;
 
@@ -525,6 +575,60 @@
     }
   }
 
+  async function reviewMemberVerification(event) {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest("[data-member-verification-action]");
+    if (!button || !accessReady) return;
+
+    const action = button.dataset.memberVerificationAction || "";
+    const userId = U.text($("#memberVerificationUserId")?.value, "");
+    const method = U.text($("#memberVerificationMethod")?.value, "manual_review");
+    const expiresAt = U.text($("#memberVerificationExpiresAt")?.value, "");
+    const reason = U.text($("#memberVerificationReason")?.value, "");
+
+    if (!UUID_RE.test(userId)) {
+      setError("#memberVerificationError", "Enter a valid Supabase user id before reviewing member verification.");
+      $("#memberVerificationUserId")?.focus();
+      return;
+    }
+
+    if ((action === "reject" || action === "revoke") && reason.length < 2) {
+      setError("#memberVerificationError", "Add a redacted note before rejecting or revoking member verification.");
+      $("#memberVerificationReason")?.focus();
+      return;
+    }
+
+    setBusy(true);
+    setError("#memberVerificationError", "");
+    setText(
+      "#memberVerificationStatus",
+      action === "approve"
+        ? "Approving member verification."
+        : action === "reject"
+          ? "Rejecting member verification."
+          : "Revoking member verification.",
+    );
+
+    const result = await S.reviewMemberVerification({
+      userId,
+      action,
+      method,
+      reason,
+      expiresAt,
+    });
+
+    if (!result.ok) {
+      setError("#memberVerificationError", result.message || "Member verification review could not be saved.");
+      setText("#memberVerificationStatus", "");
+      setBusy(false);
+      return;
+    }
+
+    renderMemberVerificationResult(result.data?.userId || userId, result.data?.verification || null);
+    setText("#memberVerificationStatus", result.message || "Member verification review saved.");
+    setBusy(false);
+  }
+
   function selectQueueStatus(event) {
     const target = event.target instanceof Element ? event.target : null;
     const button = target?.closest("[data-status]");
@@ -657,6 +761,7 @@
     $("#queueTabs")?.addEventListener("click", selectQueueStatus);
     $("#instagramQueueTabs")?.addEventListener("click", selectInstagramStatus);
     $("#reviewList")?.addEventListener("click", moderate);
+    $("#memberVerificationPanel")?.addEventListener("click", reviewMemberVerification);
     $("#instagramList")?.addEventListener("click", handleInstagramAction);
     renderQueueTabs(latestSummary);
     renderInstagramQueueTabs(latestInstagramSummary);

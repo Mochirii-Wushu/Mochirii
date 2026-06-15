@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { requireAuth, onAuthStateChange } from "@/lib/supabase/auth";
-import { getCurrentProfile, profileIsActive, verifyDiscordMembership } from "@/lib/supabase/profile";
+import { getCurrentProfile, profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions, uploadMemberGalleryImage } from "@/lib/supabase/gallery-submissions";
-import { type GallerySubmission, type MemberProfile, text } from "@/lib/supabase/types";
+import { type GallerySubmission, type MemberAccessResponse, type MemberProfile, text } from "@/lib/supabase/types";
 import { formatDateShort, uploadAccess } from "./format";
 
 function SubmissionStatus({ status }: { status?: string | null }) {
@@ -36,6 +36,7 @@ export function GallerySubmitForm() {
   const [busy, setBusy] = useState(true);
   const [mode, setMode] = useState<"signed-out" | "needs-verification" | "allowed">("signed-out");
   const [profile, setProfile] = useState<MemberProfile | null>(null);
+  const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
@@ -65,21 +66,21 @@ export function GallerySubmitForm() {
     const auth = await requireAuth();
     if (!auth.ok) {
       setProfile(null);
+      setMemberAccess(null);
       setMode("signed-out");
       setBusy(false);
       return;
     }
 
-    if (refresh) {
-      const verify = await verifyDiscordMembership();
-      if (!verify.ok) setError(verify.message || "Discord verification could not be checked.");
-    }
+    const accessResult = await verifyMemberAccess({ refreshDiscord: refresh });
+    if (!accessResult.ok) setError(accessResult.message || "Member verification could not be checked.");
+    setMemberAccess(accessResult.data || null);
 
     const profileResult = await getCurrentProfile();
-    const nextProfile = profileResult.data || null;
+    const nextProfile = accessResult.data?.profile || profileResult.data || null;
     setProfile(nextProfile);
 
-    if (!profileResult.ok || !profileIsActive(nextProfile)) {
+    if (!profileResult.ok || !profileIsActive(nextProfile, accessResult.data)) {
       setMode("needs-verification");
       setBusy(false);
       return;
@@ -126,15 +127,15 @@ export function GallerySubmitForm() {
   }
 
   const allowed = mode === "allowed";
-  const access = uploadAccess(profile);
-  const gateTitle = mode === "signed-out" ? "Login Required" : allowed ? "Upload Ready" : "Role Verification Required";
-  const gateState = mode === "signed-out" ? "Signed out" : allowed ? "Ready" : "Needs roles";
+  const access = uploadAccess(profile, memberAccess);
+  const gateTitle = mode === "signed-out" ? "Login Required" : allowed ? "Upload Ready" : "Member Verification Required";
+  const gateState = mode === "signed-out" ? "Signed out" : allowed ? "Ready" : "Needs review";
   const gateMessage =
     mode === "signed-out"
-      ? "Login with Discord before submitting images."
+      ? "Choose a sign-in method before submitting images."
       : allowed
         ? "Upload access verified."
-        : "Gallery upload access requires Discord server membership, completed onboarding, Mōchirīī - WWM, ✅Verified, active member status, and a recent verification check.";
+        : access.guidance;
 
   return (
     <>
@@ -147,13 +148,13 @@ export function GallerySubmitForm() {
             </div>
             <p className="status-pill" id="uploadGateState">{busy ? "Loading" : gateState}</p>
           </div>
-          <p className="muted" id="uploadGateMessage">{busy ? "Checking sign-in and Discord verification." : gateMessage}</p>
+          <p className="muted" id="uploadGateMessage">{busy ? "Checking sign-in and member verification." : gateMessage}</p>
           <div className="auth-actions" id="uploadGateActions">
             {mode === "signed-out" ? <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link> : null}
             {mode === "needs-verification" ? (
               <>
                 <button className="hero-cta hero-cta--primary" type="button" onClick={() => checkAccess({ refresh: true })} disabled={busy}>
-                  Check Discord verification
+                  Check member verification
                 </button>
                 <Link className="hero-cta" href="/account">Open Account</Link>
               </>
@@ -166,6 +167,7 @@ export function GallerySubmitForm() {
               <li>Completed Discord verification.</li>
               <li>Mōchirīī - WWM.</li>
               <li>✅Verified.</li>
+              <li>Or moderator-approved member verification.</li>
               <li>Active website member status.</li>
             </ul>
           </div>
