@@ -31,11 +31,11 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
       </div>
       <header className="mochi-game-status mochi-game-status--arrival">
         <div className="mochi-game-status__copy">
-          <p className="eyebrow">Closed Mochirii Playtest</p>
+          <p className="eyebrow">Mochirii World</p>
           <h1>Mochi Social</h1>
           <p id={descriptionId}>
-            A cozy Wushu RPG town where approved testers can raise Mochi Spirits, meet guild friends,
-            and try early social trading.
+            A wuxia RPG where approved testers can raise Mochi Spirits, meet guild friends,
+            and participate in social trading.
           </p>
         </div>
         <dl>
@@ -67,7 +67,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
       >
         <div>
           <p className="mochi-gate-kicker">Guild invitation</p>
-          <h2>Enter the town</h2>
+          <h2>Enter Mochi World</h2>
           <p>Use the tester password from your Mochirii playtest invite.</p>
           <span className="sr-only">Tester password required</span>
         </div>
@@ -94,10 +94,10 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <section>
           <h2>What you can test</h2>
           <ul>
-            <li>Raise Mochi Spirits and check the care loop.</li>
-            <li>Explore the first Wushu town and guild gathering spots.</li>
-            <li>Try local chat, waves, emotes, and nearby tester presence.</li>
-            <li>Open the market board and direct trade preview.</li>
+            <li>Raise Mochi Spirits and watch them evolve.</li>
+            <li>Explore the first wuxia town and guild gathering spots.</li>
+            <li>Try local chat, waves, emotes, and nearby tester interactions.</li>
+            <li>Open the market board and test peer-to-peer trading.</li>
           </ul>
         </section>
         <section>
@@ -114,11 +114,11 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           <ul>
             <li>No real money, purchases, cashout, or permanent blockchain value.</li>
             <li>Desktop is recommended for this early build.</li>
-            <li>Vercel may show a preview access screen before this gate.</li>
+            <li>Progress may reset periodically during the alpha phase.</li>
           </ul>
           <p>
-            Preview safety: Enjin Canary is visible as a configured-preview-stub. Test coins and
-            market actions are for feedback only.
+            Preview safety: Enjin Canary remains a configured-preview-stub for future asset testing. Test coins and
+            market actions are for feedback only during the alpha.
           </p>
         </section>
       </aside>
