@@ -2,14 +2,19 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { createServer } from "node:net";
 import { join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
-import { resolveMochiSocialGameNodeModuleDirs } from "./mochi-social-game-repo-path.mjs";
+import { spawn, spawnSync } from "node:child_process";
+import { resolveMochiSocialGameNodeModuleDirs, resolveMochiSocialGameRepoPath } from "./mochi-social-game-repo-path.mjs";
 
 const root = process.cwd();
-const siteUrl = normalizeBaseUrl(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_LOCAL_URL || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_BASE_URL || "http://127.0.0.1:3000");
-const gameUrl = normalizeBaseUrl(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_GAME_URL || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "http://127.0.0.1:3001");
-const testerPassword = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_TESTER_PASSWORD || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_VALUE || process.env.MOCHI_SOCIAL_TESTER_PASSWORD || "";
+const configuredSiteUrl = normalizeBaseUrl(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_LOCAL_URL || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_BASE_URL || "");
+const configuredGameUrl = normalizeBaseUrl(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_GAME_URL || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "");
+const configuredTesterPassword = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_TESTER_PASSWORD || process.env.MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_VALUE || process.env.MOCHI_SOCIAL_TESTER_PASSWORD || "";
+const shouldAutoStartLocalStack = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_AUTO_START === "true" || (!configuredSiteUrl && !configuredGameUrl && !configuredTesterPassword);
+let siteUrl = configuredSiteUrl || "http://127.0.0.1:3000";
+let gameUrl = configuredGameUrl || "http://127.0.0.1:3001";
+let testerPassword = configuredTesterPassword;
 const shouldStampReport = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_STAMP_REPORT !== "false";
 const runRoot = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_LOCAL_RUN_DIR || `.local/mochi-social-browser-gates/run-${timestampId()}`);
 const evidenceDir = join(runRoot, "browser-evidence");
@@ -25,15 +30,25 @@ const chromeExecutable = process.env.MOCHI_SOCIAL_BROWSER_EXECUTABLE || firstExi
 
 const records = [];
 const failures = [];
-
-if (!testerPassword) {
-  failures.push("A local tester password is required via MOCHI_SOCIAL_SITE_BROWSER_GATES_TESTER_PASSWORD or MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_VALUE.");
-}
+let localStack = null;
 
 await mkdir(evidenceDir, { recursive: true });
 
 let browser;
 try {
+  if (shouldAutoStartLocalStack) {
+    const sitePort = await freePort();
+    const gamePort = await freePort();
+    siteUrl = `http://127.0.0.1:${sitePort}`;
+    gameUrl = `http://127.0.0.1:${gamePort}`;
+    testerPassword = `local-mochi-preview-${randomUUID()}`;
+    localStack = await startLocalStack({ sitePort, gamePort });
+  }
+
+  if (!testerPassword) {
+    throw new Error("A local tester password is required via MOCHI_SOCIAL_SITE_BROWSER_GATES_TESTER_PASSWORD or MOCHI_SOCIAL_TESTER_PASSWORD_LOCAL_VALUE.");
+  }
+
   const { chromium, source } = await loadChromium();
   const launchOptions = { headless: true };
   if (source === "playwright-core" && chromeExecutable) launchOptions.executablePath = chromeExecutable;
@@ -43,6 +58,7 @@ try {
   failures.push(error instanceof Error ? error.message : String(error));
 } finally {
   if (browser) await browser.close();
+  if (localStack) await stopLocalStack(localStack);
 }
 
 const report = {
@@ -54,6 +70,7 @@ const report = {
   gameUrl,
   passwordMaterialStored: false,
   stampReport: shouldStampReport,
+  spawnedLocalStack: Boolean(localStack),
   evidenceDir: pathForReport(evidenceDir),
   records,
   failures,
@@ -195,6 +212,138 @@ async function loadChromium() {
   throw new Error("Playwright or playwright-core is required. Install it for this optional smoke, or set MOCHI_SOCIAL_PLAYWRIGHT_MODULE_DIR to a node_modules directory that contains it.");
 }
 
+async function startLocalStack({ sitePort, gamePort }) {
+  const gameRepoPath = resolveMochiSocialGameRepoPath(root);
+  const gameEntry = join(gameRepoPath, "apps/game/dist/server/express.js");
+  if (!existsSync(gameEntry)) {
+    throw new Error(`Built game server entry is missing at ${gameEntry}. Run npm run build in the Mochi Social game repo before this smoke, or start both local URLs explicitly.`);
+  }
+
+  const runId = timestampId();
+  const saveDir = join(gameRepoPath, ".local/site-browser-gates", runId, "saves");
+  await mkdir(saveDir, { recursive: true });
+
+  const gameProcess = spawn(process.execPath, ["apps/game/dist/server/express.js"], {
+    cwd: gameRepoPath,
+    env: localGameEnv({ gamePort, saveDir, runId }),
+    shell: false,
+    stdio: ["ignore", "ignore", "ignore"],
+    windowsHide: true,
+  });
+
+  const localStack = { gameProcess, siteProcess: null };
+
+  try {
+    await waitForHttpOk(`${gameUrl}/healthz`, "game health");
+    const siteProcess = spawn(npmCommand(), ["--prefix", "apps/web", "run", "dev", "--", "--hostname", "127.0.0.1", "--port", String(sitePort)], {
+      cwd: root,
+      env: localSiteEnv(),
+      shell: process.platform === "win32",
+      stdio: ["ignore", "ignore", "ignore"],
+      windowsHide: true,
+    });
+    localStack.siteProcess = siteProcess;
+    await waitForHttpOk(`${siteUrl}/games/mochi-social`, "site game page");
+    return localStack;
+  } catch (error) {
+    await stopLocalStack(localStack);
+    throw error;
+  }
+}
+
+async function stopLocalStack(localStack) {
+  await stopProcess(localStack.siteProcess);
+  await stopProcess(localStack.gameProcess);
+}
+
+async function stopProcess(child) {
+  if (!child || child.exitCode !== null || child.killed) return;
+  if (process.platform === "win32" && child.pid) {
+    spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { stdio: "ignore", shell: false });
+    await delay(500);
+    return;
+  }
+  child.kill();
+  await Promise.race([
+    new Promise((resolvePromise) => child.once("exit", resolvePromise)),
+    delay(5000),
+  ]);
+}
+
+async function waitForHttpOk(url, label) {
+  const deadline = Date.now() + Number(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_SERVER_TIMEOUT_MS || 90000);
+  let lastError = "";
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(url, { signal: AbortSignal.timeout(1000) });
+      await response.arrayBuffer();
+      if (response.status >= 200 && response.status < 500) return;
+      lastError = `HTTP ${response.status}`;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+    }
+    await delay(500);
+  }
+  throw new Error(`Local ${label} did not become ready at ${url}: ${lastError || "timeout"}`);
+}
+
+function localGameEnv({ gamePort, saveDir, runId }) {
+  const env = stripProviderEnv(process.env);
+  return {
+    ...env,
+    PORT: String(gamePort),
+    SUPABASE_AUTH_REQUIRED: "false",
+    MOCHI_SOCIAL_PUBLIC_ORIGIN: gameUrl,
+    MOCHI_SOCIAL_GAME_SERVER_TOKEN: `local-browser-gates-${runId}`,
+    RPG_SAVE_DIR: saveDir,
+    MOCHI_SOCIAL_ALPHA_LEDGER_PATH: join(saveDir, "alpha-ledger.jsonl"),
+  };
+}
+
+function localSiteEnv() {
+  return {
+    ...stripProviderEnv(process.env),
+    NEXT_TELEMETRY_DISABLED: "1",
+    NEXT_PUBLIC_SITE_URL: siteUrl,
+    NEXT_PUBLIC_MOCHI_SOCIAL_URL: gameUrl,
+    MOCHI_SOCIAL_ALPHA_ACCESS_MODE: "tester-password",
+    MOCHI_SOCIAL_TESTER_PASSWORD: testerPassword,
+  };
+}
+
+function stripProviderEnv(env) {
+  const next = { ...env };
+  for (const key of [
+    "MOCHI_SOCIAL_SUPABASE_FUNCTIONS_URL",
+    "SUPABASE_URL",
+    "SUPABASE_PUBLISHABLE_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "ENJIN_PLATFORM_TOKEN",
+    "ENJIN_COLLECTION_ID",
+    "ENJIN_FUEL_TANK_ID",
+    "MOCHI_SOCIAL_ENJIN_OPERATOR_ALLOW_LIVE_SMOKE",
+    "MOCHI_SOCIAL_ENJIN_OPERATOR_SMOKE_REQUEST_ID",
+    "MOCHI_SOCIAL_ENJIN_OPERATOR_SMOKE_TRANSACTION_UUID",
+  ]) {
+    delete next[key];
+  }
+  return next;
+}
+
+function freePort() {
+  return new Promise((resolvePromise, reject) => {
+    const server = createServer();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      server.close(() => {
+        if (typeof address === "object" && address?.port) resolvePromise(address.port);
+        else reject(new Error("Could not allocate a free local port."));
+      });
+    });
+  });
+}
+
 async function installMessageCapture(page) {
   await page.addInitScript(() => {
     window.__mochiBridgeMessages = [];
@@ -280,6 +429,14 @@ function firstExisting(paths) {
 
 function timestampId() {
   return new Date().toISOString().replace(/[-:]/g, "").replace(/\..+$/, "").replace("T", "-");
+}
+
+function delay(ms) {
+  return new Promise((resolvePromise) => setTimeout(resolvePromise, ms));
+}
+
+function npmCommand() {
+  return process.platform === "win32" ? "npm.cmd" : "npm";
 }
 
 function normalizeBaseUrl(value) {
