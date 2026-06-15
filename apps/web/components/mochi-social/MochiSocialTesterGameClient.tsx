@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@/lib/mochi-social/bridge";
 
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
+const testerFeedbackStorageKey = "mochiSocial.testerFeedbackDraft";
 
 export function MochiSocialTesterGameClient() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [bridgeStatus, setBridgeStatus] = useState<MochiSocialBridgeStatus>("waiting");
   const [message, setMessage] = useState("");
+  const [feedbackDraft, setFeedbackDraft] = useState("");
+  const [feedbackMessage, setFeedbackMessage] = useState("");
   const embedUrl = useMemo(() => `${gameOrigin}/embed`, []);
 
   const sendGuestStateToGame = useCallback(() => {
@@ -54,6 +57,26 @@ export function MochiSocialTesterGameClient() {
 
     return () => window.clearInterval(interval);
   }, [bridgeStatus, sendGuestStateToGame]);
+
+  const saveFeedbackDraft = useCallback((event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const text = feedbackDraft.trim();
+    if (!text) return;
+
+    const draft = {
+      category: "tester-password-alpha",
+      message: text,
+      bridgeStatus,
+      gameOrigin,
+      noRealValue: true,
+      providerSubmitted: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    window.localStorage.setItem(testerFeedbackStorageKey, JSON.stringify(draft));
+    setFeedbackDraft("");
+    setFeedbackMessage("Feedback draft saved locally for tester follow-up. No provider submission was made.");
+  }, [bridgeStatus, feedbackDraft]);
 
   return (
     <section className="mochi-game-shell mochi-game-shell--unlocked" aria-label="Mochi Social tester game">
@@ -114,6 +137,32 @@ export function MochiSocialTesterGameClient() {
           onLoad={sendGuestStateToGame}
         />
       </div>
+      <form className="mochi-feedback mochi-feedback--tester" onSubmit={saveFeedbackDraft}>
+        <label>
+          <span>Alpha feedback draft</span>
+          <textarea
+            data-mochi-tester-feedback
+            rows={3}
+            maxLength={2000}
+            value={feedbackDraft}
+            onChange={(event) => setFeedbackDraft(event.target.value)}
+            placeholder="Bug, feel, social loop, spirit care, trade preview, or anything that felt off."
+          />
+        </label>
+        <button
+          className="hero-cta"
+          type="submit"
+          data-mochi-tester-feedback-save
+          disabled={!feedbackDraft.trim()}
+        >
+          Save feedback draft
+        </button>
+        {feedbackMessage ? (
+          <p className="form-message mochi-form-message" data-mochi-tester-feedback-status role="status">
+            {feedbackMessage}
+          </p>
+        ) : null}
+      </form>
     </section>
   );
 }

@@ -161,6 +161,33 @@ async function verifyBrowserGates(chromiumBrowser) {
 
   record("canary-chain-stub", /configured-preview-stub/i.test(unlockedText) && /Canary preview stub - no real value/i.test(frameOneInitial), "Unlocked page and game iframe both show Canary configured-preview-stub/no-real-value safety copy.");
 
+  const feedbackText = `Local tester feedback draft ${randomUUID()}`;
+  await pageOne.fill("[data-mochi-tester-feedback]", feedbackText, { timeout: 30000 });
+  await pageOne.click("[data-mochi-tester-feedback-save]", { timeout: 30000 });
+  await pageOne.waitForSelector("[data-mochi-tester-feedback-status]", { timeout: 30000 });
+  const feedbackStatus = await pageOne.locator("[data-mochi-tester-feedback-status]").innerText({ timeout: 30000 });
+  const feedbackDraft = await pageOne.evaluate(() => {
+    try {
+      return JSON.parse(localStorage.getItem("mochiSocial.testerFeedbackDraft") || "null");
+    } catch {
+      return null;
+    }
+  });
+  record(
+    "tester-password-feedback-draft",
+    feedbackStatus.includes("Feedback draft saved locally") &&
+      feedbackDraft?.message === feedbackText &&
+      feedbackDraft?.providerSubmitted === false &&
+      feedbackDraft?.noRealValue === true,
+    "Tester-password path saves a local feedback draft without provider submission.",
+    {
+      status: feedbackStatus,
+      category: feedbackDraft?.category || "",
+      providerSubmitted: feedbackDraft?.providerSubmitted ?? null,
+      noRealValue: feedbackDraft?.noRealValue ?? null,
+    }
+  );
+
   const pageTwo = await context.newPage();
   await installMessageCapture(pageTwo);
   await pageTwo.goto(`${siteUrl}/games/mochi-social`, { waitUntil: "domcontentloaded", timeout: 30000 });
@@ -412,6 +439,7 @@ function stampBrowserGateReport(reportPathForNotes) {
       MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK: "true",
       MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK: "true",
       MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK: "true",
+      MOCHI_SOCIAL_SITE_BROWSER_TESTER_FEEDBACK_DRAFT_OK: "true",
     },
   });
   if (result.status !== 0) {
