@@ -31,6 +31,7 @@ const functions = [
   "moderate-member-profile-media",
   "mochi-social-alpha-session",
   "mochi-social-alpha-action",
+  "mochi-social-alpha-progress",
   "mochi-social-alpha-admin",
   "submit-mochi-social-feedback",
 ];

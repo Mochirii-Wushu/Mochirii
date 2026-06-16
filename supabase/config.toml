@@ -155,6 +155,12 @@ verify_jwt = false
 import_map = "./functions/mochi-social-alpha-action/deno.json"
 entrypoint = "./functions/mochi-social-alpha-action/index.ts"
 
+[functions.mochi-social-alpha-progress]
+enabled = true
+verify_jwt = false
+import_map = "./functions/mochi-social-alpha-progress/deno.json"
+entrypoint = "./functions/mochi-social-alpha-progress/index.ts"
+
 [functions.mochi-social-alpha-admin]
 enabled = true
 verify_jwt = true

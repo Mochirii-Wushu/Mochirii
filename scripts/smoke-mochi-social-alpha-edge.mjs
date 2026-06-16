@@ -26,7 +26,7 @@ try {
 }
 
 async function run() {
-  for (const name of ["mochi-social-alpha-session", "mochi-social-alpha-action", "mochi-social-alpha-admin", "submit-mochi-social-feedback"]) {
+  for (const name of ["mochi-social-alpha-session", "mochi-social-alpha-action", "mochi-social-alpha-progress", "mochi-social-alpha-admin", "submit-mochi-social-feedback"]) {
     await checkOptions(name);
   }
 
@@ -78,6 +78,13 @@ async function run() {
     type: "chat.send",
     playerId: "00000000-0000-4000-8000-000000000000",
     payload: { message: "smoke" },
+  }, {
+    gameServerToken: "invalid-game-server-token",
+    status: 401,
+    error: "invalid_game_server_token",
+  });
+  await expectJson("mochi-social-alpha-progress", "progress invalid game token", {
+    playerId: "00000000-0000-4000-8000-000000000000",
   }, {
     gameServerToken: "invalid-game-server-token",
     status: 401,

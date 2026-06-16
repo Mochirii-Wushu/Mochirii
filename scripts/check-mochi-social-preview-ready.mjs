@@ -352,7 +352,7 @@ function addBranchSyncRequirement(id, repoPath, label) {
   if (dirty.length) failures.push(`${label} worktree is dirty.`);
   add(id, failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : `${label} is clean and synced to upstream.`, {
     path: repoPath,
-    upstream: firstLine(upstream.stdout),
+    upstream: upstream.ok ? firstLine(upstream.stdout) : "",
     ahead,
     behind,
     dirty,
@@ -389,9 +389,9 @@ function readGitState(repoPath) {
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
   const dirty = git(["status", "--porcelain"], repoPath);
   return {
-    branch: firstLine(branch.stdout),
-    localHead: firstLine(localHead.stdout),
-    upstream: firstLine(upstream.stdout),
+    branch: branch.ok ? firstLine(branch.stdout) : "",
+    localHead: localHead.ok ? firstLine(localHead.stdout) : "",
+    upstream: upstream.ok ? firstLine(upstream.stdout) : "",
     dirty: dirty.ok ? dirty.stdout.split(/\r?\n/).filter(Boolean).map((line) => sanitize(line)) : ["git status unavailable"],
     errors: [branch, localHead, upstream, dirty]
       .filter((result) => !result.ok)

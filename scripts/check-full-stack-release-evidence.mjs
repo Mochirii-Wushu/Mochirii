@@ -530,9 +530,9 @@ function readGitState(repoPath) {
   const noUpstream = /no upstream configured/i.test(`${upstream.stderr} ${aheadBehind.stderr}`);
   const [behind = "", ahead = ""] = firstLine(aheadBehind.stdout).split(/\s+/);
   return {
-    branch: firstLine(branch.stdout),
-    head: firstLine(head.stdout).slice(0, 12),
-    upstream: firstLine(upstream.stdout),
+    branch: branch.ok ? firstLine(branch.stdout) : "",
+    head: head.ok ? firstLine(head.stdout).slice(0, 12) : "",
+    upstream: upstream.ok ? firstLine(upstream.stdout) : "",
     upstreamStatus: upstream.ok ? "configured" : noUpstream ? "none" : "unavailable",
     ahead: aheadBehind.ok ? Number(ahead) || 0 : 0,
     behind: aheadBehind.ok ? Number(behind) || 0 : 0,

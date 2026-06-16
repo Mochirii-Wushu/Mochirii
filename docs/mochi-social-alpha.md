@@ -63,10 +63,10 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 Tell testers:
 
 - This is a closed alpha preview for approved 18+ testers only.
-- Pets, currency, listings, trades, and Enjin Canary operations have no real value.
+- Mochi Spirits, currency, listings, trades, and Enjin Canary operations have no real value.
 - Use a desktop browser and enter the tester password before opening the game page.
 - In strict Supabase mode, sign in through Mochirii and acknowledge the alpha terms before the game iframe loads.
-- Try the first loop: move around town, befriend Momo, care for it, inspect the HUD, send one local chat message, use one emote, create one fixed-price listing proof, create one direct trade proof, and request the Momo Canary certificate proof.
+- Try the first loop: move around town, attune Lirabao, care for it, inspect the HUD, send one local chat message, use one emote, create one fixed-price listing proof, create one direct trade proof, and request the Lirabao Canary certificate proof.
 - Send bugs through the Mochirii feedback form. Do not send secrets, wallet seed phrases, payment information, or private recovery material in feedback.
 
 ## Preview Acceptance

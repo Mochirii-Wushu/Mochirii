@@ -28,17 +28,21 @@ create table if not exists public.mochi_social_profiles (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.mochi_social_pets (
+create table if not exists public.mochi_social_spirits (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
-  species text not null check (species in ('momo', 'yuzu', 'sora')),
-  nickname text,
+  spirit_id text not null check (spirit_id in ('lirabao', 'jintari', 'aozhen')),
+  name text,
+  affinity text,
+  temperament text,
+  habitat text not null default 'jade-lantern-court',
   bond integer not null default 1 check (bond between 0 and 5),
   growth_stage text not null default 'seed' check (growth_stage in ('seed', 'sprout', 'glow')),
   certificate_eligible boolean not null default false,
   tradeable boolean not null default false,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (owner_id, spirit_id)
 );
 
 create table if not exists public.mochi_social_inventory (
@@ -116,6 +120,16 @@ create table if not exists public.mochi_social_ledger_events (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.mochi_social_progress_snapshots (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  revision integer not null default 0 check (revision >= 0),
+  state jsonb not null default '{}'::jsonb,
+  source_request_id text,
+  last_action_type text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.mochi_social_feedback (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -128,7 +142,7 @@ create table if not exists public.mochi_social_feedback (
 alter table public.mochi_social_alpha_testers enable row level security;
 alter table public.mochi_social_terms_acknowledgements enable row level security;
 alter table public.mochi_social_profiles enable row level security;
-alter table public.mochi_social_pets enable row level security;
+alter table public.mochi_social_spirits enable row level security;
 alter table public.mochi_social_inventory enable row level security;
 alter table public.mochi_social_market_listings enable row level security;
 alter table public.mochi_social_trades enable row level security;
@@ -136,12 +150,13 @@ alter table public.mochi_social_chat_messages enable row level security;
 alter table public.mochi_social_chat_reports enable row level security;
 alter table public.mochi_social_chain_operations enable row level security;
 alter table public.mochi_social_ledger_events enable row level security;
+alter table public.mochi_social_progress_snapshots enable row level security;
 alter table public.mochi_social_feedback enable row level security;
 
 create policy "mochi_social_alpha_testers_read_own" on public.mochi_social_alpha_testers for select using (auth.uid() = user_id);
 create policy "mochi_social_terms_read_own" on public.mochi_social_terms_acknowledgements for select using (auth.uid() = user_id);
 create policy "mochi_social_profiles_manage_own" on public.mochi_social_profiles for all using (auth.uid() = id) with check (auth.uid() = id);
-create policy "mochi_social_pets_read_own" on public.mochi_social_pets for select using (auth.uid() = owner_id);
+create policy "mochi_social_spirits_read_own" on public.mochi_social_spirits for select using (auth.uid() = owner_id);
 create policy "mochi_social_inventory_read_own" on public.mochi_social_inventory for select using (auth.uid() = owner_id);
 create policy "mochi_social_market_read_active" on public.mochi_social_market_listings for select using (status = 'active' or auth.uid() = seller_id);
 create policy "mochi_social_trades_read_participant" on public.mochi_social_trades for select using (auth.uid() = requester_id or auth.uid() = recipient_id);
@@ -149,8 +164,10 @@ create policy "mochi_social_chat_read_authenticated" on public.mochi_social_chat
 create policy "mochi_social_chat_reports_insert_own" on public.mochi_social_chat_reports for insert with check (auth.uid() = reporter_id);
 create policy "mochi_social_chain_operations_read_own" on public.mochi_social_chain_operations for select using (auth.uid() = user_id);
 create policy "mochi_social_ledger_read_own" on public.mochi_social_ledger_events for select using (auth.uid() = actor_id);
+create policy "mochi_social_progress_read_own" on public.mochi_social_progress_snapshots for select using (auth.uid() = user_id);
 create policy "mochi_social_feedback_insert_own" on public.mochi_social_feedback for insert with check (auth.uid() = user_id);
 
 create index if not exists mochi_social_ledger_request_idx on public.mochi_social_ledger_events(request_id);
 create index if not exists mochi_social_chat_expires_idx on public.mochi_social_chat_messages(expires_at);
 create index if not exists mochi_social_market_status_idx on public.mochi_social_market_listings(status, created_at desc);
+create index if not exists mochi_social_progress_updated_idx on public.mochi_social_progress_snapshots(updated_at desc);

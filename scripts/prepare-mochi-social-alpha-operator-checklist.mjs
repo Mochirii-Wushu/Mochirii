@@ -356,10 +356,10 @@ function readGitState() {
   const worktree = git(["status", "--porcelain"]);
   const [behindText = "0", aheadText = "0"] = firstLine(counts.stdout).split(/\s+/);
   return {
-    branch: firstLine(branch.stdout),
-    localHead: firstLine(localHead.stdout),
-    upstream: firstLine(upstream.stdout),
-    upstreamHead: firstLine(upstreamHead.stdout),
+    branch: branch.ok ? firstLine(branch.stdout) : "",
+    localHead: localHead.ok ? firstLine(localHead.stdout) : "",
+    upstream: upstream.ok ? firstLine(upstream.stdout) : "",
+    upstreamHead: upstreamHead.ok ? firstLine(upstreamHead.stdout) : "",
     ahead: Number.parseInt(aheadText, 10) || 0,
     behind: Number.parseInt(behindText, 10) || 0,
     dirty: worktree.ok ? worktree.stdout.split(/\r?\n/).filter(Boolean).map((line) => sanitize(line)) : ["git status unavailable"],
