@@ -39,7 +39,7 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 ## Supabase Functions
 
 - `mochi-social-alpha-session`: signed-in user access, allowlist, terms acknowledgement, profile prep.
-- `mochi-social-alpha-action`: game-server action ledger using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`. The game server resolves the short-lived Supabase access token to a user id before forwarding. The function verifies allowlist and terms, then records pet, market, trade, chat, chain, and append-only ledger state.
+- `mochi-social-alpha-action`: game-server action ledger using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`. The game server resolves the short-lived Supabase access token to a user id before forwarding. The function verifies allowlist and terms, then records Mochi Spirit, market, trade, chat, chain, and append-only ledger state.
 - `mochi-social-alpha-admin`: leader/moderator grant, revoke, list, and audit controls for alpha testers.
 - `submit-mochi-social-feedback`: authenticated tester feedback.
 

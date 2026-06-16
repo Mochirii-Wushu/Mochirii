@@ -103,7 +103,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <section>
           <h2>Your playtest mission</h2>
           <ol>
-            <li>Befriend a pet and care for it.</li>
+            <li>Attune Lirabao and care for your Mochi Spirit.</li>
             <li>Wave or chat with another tester.</li>
             <li>Inspect the market board.</li>
             <li>Send feedback before you leave.</li>
