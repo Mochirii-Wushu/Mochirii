@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Noto_Serif_SC, Zhi_Mang_Xing } from "next/font/google";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -10,6 +11,18 @@ const siteUrl = "https://mochirii.com";
 const title = "Mōchirīī • Where Winds Meet Guild";
 const description =
   "Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall.";
+
+const displayFont = Zhi_Mang_Xing({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-zhi-mang",
+});
+
+const bodyFont = Noto_Serif_SC({
+  weight: ["400", "500", "600"],
+  subsets: ["latin"],
+  variable: "--font-noto-serif-sc",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -55,7 +68,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body data-page="home">
         <SiteHeader />
         <div className="bg-photo" aria-hidden="true" />

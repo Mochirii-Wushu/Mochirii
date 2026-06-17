@@ -7,6 +7,8 @@ const failures = [];
 const files = {
   packageJson: "package.json",
   checkAll: "scripts/check-all.mjs",
+  appLayout: "apps/web/app/layout.tsx",
+  appCss: "apps/web/app/mochirii.css",
   nextConfig: "apps/web/next.config.ts",
   supabaseConfig: "supabase/config.toml",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
@@ -58,6 +60,8 @@ function extractVerifyJwtFalseFunctions(config) {
 
 const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
+const appLayout = read(files.appLayout);
+const appCss = read(files.appCss);
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
@@ -99,6 +103,29 @@ function assertNoCurrentReportOnlyClaim(label, text) {
 
 assertIncludes("package.json", packageJson, '"check:security-hardening"');
 assertIncludes("check-all", checkAll, "check:security-hardening");
+
+[
+  "next/font/google",
+  "Zhi_Mang_Xing",
+  "Noto_Serif_SC",
+  "--font-zhi-mang",
+  "--font-noto-serif-sc",
+].forEach((snippet) => assertIncludes("Next font setup", appLayout, snippet));
+
+[
+  "@import url(\"https://fonts.googleapis.com",
+  "fonts.googleapis.com",
+  "fonts.gstatic.com",
+].forEach((snippet) => {
+  if (appCss.includes(snippet)) {
+    failures.push(`app CSS: external Google font loading must stay out of mochirii.css: ${snippet}`);
+  }
+});
+
+[
+  "--font-display:var(--font-zhi-mang), ui-serif, serif",
+  "--font-body:var(--font-noto-serif-sc), ui-serif, serif",
+].forEach((snippet) => assertIncludes("app CSS font variables", appCss, snippet));
 
 [
   "Content-Security-Policy",
@@ -253,6 +280,8 @@ assertMatches(
 ].forEach((snippet) => assertIncludes("list-approved-gallery-submissions", approvedFeed, snippet));
 
 [
+  "CORS_HEADERS",
+  "new Response(\"ok\", { headers: CORS_HEADERS })",
   "asArray(body.slugs)",
   ".in(\"profile_slug\", requestedSlugs)",
   ".eq(\"profile_public_enabled\", true)",
