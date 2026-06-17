@@ -5473,6 +5473,35 @@ body[data-page="gallery-submit"] .muted{
   background:rgba(120,20,20,.16);
 }
 
+.review-action-note,
+.review-action-message{
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(218,181,94,.22);
+  background:rgba(218,181,94,.10);
+}
+
+.review-action-message--error{
+  border-color:rgba(255,122,122,.34);
+  background:rgba(255,122,122,.10);
+  color:rgba(255,220,220,.96);
+}
+
+.review-action-message--success,
+.instagram-api-status--ready{
+  border-color:rgba(48,178,143,.34);
+  background:rgba(48,178,143,.10);
+}
+
+.instagram-api-status{
+  display:grid;
+  gap:12px;
+}
+
+.instagram-api-status__meta{
+  margin:0;
+}
+
 .review-storage{
   border-radius:14px;
   border:1px solid rgba(220,235,255,.10);

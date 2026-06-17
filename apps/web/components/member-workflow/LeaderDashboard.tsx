@@ -9,6 +9,7 @@ import {
   type MochiSocialAlphaTester,
 } from "@/lib/mochi-social/alpha";
 import {
+  checkInstagramApiStatus,
   checkLeaderGalleryModerationAccess,
   listGalleryReviewQueue,
   listInstagramPublishQueue,
@@ -22,6 +23,7 @@ import {
   text,
   type GalleryReviewQueue,
   type GalleryReviewSubmission,
+  type InstagramApiStatus,
   type InstagramPublishJob,
   type InstagramPublishQueue,
   type MemberAccessVerification,
@@ -69,6 +71,12 @@ const memberVerificationMethods = [
 ];
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
+
+type InstagramAction = "manual-share" | "publish";
+type InstagramJobMessage = {
+  kind: "status" | "error" | "success";
+  message: string;
+};
 
 function normalizeStatus(value: unknown): ModerationStatus {
   const status = text(value, "pending").toLowerCase();
@@ -251,14 +259,20 @@ function InstagramJobCard({
   altText,
   permalinkValue,
   moderatorNote,
+  confirmation,
+  jobMessage,
+  metaPublishAvailable,
   onCaptionChange,
   onAltTextChange,
   onPermalinkChange,
   onModeratorNoteChange,
   onCopyCaption,
   onCopyAltText,
-  onMarkShared,
-  onPublish,
+  onArmManualShare,
+  onConfirmManualShare,
+  onArmPublish,
+  onConfirmPublish,
+  onCancelAction,
 }: {
   job: InstagramPublishJob;
   busy: boolean;
@@ -266,22 +280,31 @@ function InstagramJobCard({
   altText: string;
   permalinkValue: string;
   moderatorNote: string;
+  confirmation?: InstagramAction;
+  jobMessage?: InstagramJobMessage;
+  metaPublishAvailable: boolean;
   onCaptionChange: (value: string) => void;
   onAltTextChange: (value: string) => void;
   onPermalinkChange: (value: string) => void;
   onModeratorNoteChange: (value: string) => void;
   onCopyCaption: () => void;
   onCopyAltText: () => void;
-  onMarkShared: (job: InstagramPublishJob) => void;
-  onPublish: (job: InstagramPublishJob) => void;
+  onArmManualShare: (job: InstagramPublishJob) => void;
+  onConfirmManualShare: (job: InstagramPublishJob) => void;
+  onArmPublish: (job: InstagramPublishJob) => void;
+  onConfirmPublish: (job: InstagramPublishJob) => void;
+  onCancelAction: (job: InstagramPublishJob) => void;
 }) {
   const submission = job.submission || {};
   const title = text(submission.title || submission.originalFilename, "Untitled image");
   const sourceLabel = text(submission.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";
   const status = text(job.status, "queued").toLowerCase();
-  const canPublish = status === "queued" || status === "failed";
+  const canEditPublishText = status === "queued" || status === "failed";
+  const canPublish = canEditPublishText && metaPublishAvailable;
   const canShareManually = status === "queued";
   const permalink = text(job.instagramPermalink);
+  const manualShareArmed = confirmation === "manual-share";
+  const publishArmed = confirmation === "publish";
 
   return (
     <article className={`review-item review-item--${status}`} data-instagram-job-id={job.id || ""}>
@@ -304,6 +327,11 @@ function InstagramJobCard({
         </div>
         {job.eligibilityReason ? <p className="review-decision">Eligibility: {job.eligibilityReason}</p> : null}
         {job.lastError ? <p className="review-decision">Last error: {job.lastError}</p> : null}
+        {jobMessage ? (
+          <p className={`review-action-message review-action-message--${jobMessage.kind}`} role={jobMessage.kind === "error" ? "alert" : "status"}>
+            {jobMessage.message}
+          </p>
+        ) : null}
         {permalink ? (
           <p>
             <a href={permalink} target="_blank" rel="noopener noreferrer">Open Instagram post</a>
@@ -331,7 +359,7 @@ function InstagramJobCard({
             maxLength={2200}
             rows={4}
             value={caption}
-            disabled={busy || !canPublish}
+            disabled={busy || !canEditPublishText}
             onChange={(event) => onCaptionChange(event.target.value.slice(0, 2200))}
           />
         </label>
@@ -341,7 +369,7 @@ function InstagramJobCard({
             maxLength={1000}
             rows={3}
             value={altText}
-            disabled={busy || !canPublish}
+            disabled={busy || !canEditPublishText}
             onChange={(event) => onAltTextChange(event.target.value.slice(0, 1000))}
           />
         </label>
@@ -367,6 +395,19 @@ function InstagramJobCard({
             placeholder="Optional moderator note."
           />
         </label>
+        {!canShareManually ? (
+          <p className="review-action-note">Manual sharing is available only for queued Instagram jobs.</p>
+        ) : null}
+        {manualShareArmed ? (
+          <p className="review-action-note" role="status">
+            Confirm only after this image has been posted manually from the official account.
+          </p>
+        ) : null}
+        {publishArmed ? (
+          <p className="review-action-note" role="status">
+            Confirm only with action-time approval to publish this image through the Meta API.
+          </p>
+        ) : null}
         <div className="auth-actions">
           {job.signedPreviewUrl ? (
             <a className="hero-cta" href={job.signedPreviewUrl} download target="_blank" rel="noopener noreferrer">Download image</a>
@@ -379,17 +420,22 @@ function InstagramJobCard({
             className="hero-cta hero-cta--primary"
             type="button"
             disabled={busy || !canShareManually}
-            onClick={() => onMarkShared(job)}
+            onClick={() => manualShareArmed ? onConfirmManualShare(job) : onArmManualShare(job)}
           >
-            Mark shared manually
+            {manualShareArmed ? "Confirm manual share" : "Mark shared manually"}
           </button>
+          {confirmation ? (
+            <button className="hero-cta" type="button" disabled={busy} onClick={() => onCancelAction(job)}>
+              Cancel
+            </button>
+          ) : null}
           <button
             className="hero-cta"
             type="button"
-            disabled
-            onClick={() => onPublish(job)}
+            disabled={busy || !canPublish}
+            onClick={() => publishArmed ? onConfirmPublish(job) : onArmPublish(job)}
           >
-            Meta API unavailable
+            {publishArmed ? "Confirm Meta publish" : metaPublishAvailable ? "Publish with Meta API" : "Meta API unavailable"}
           </button>
         </div>
       </div>
@@ -603,6 +649,49 @@ function MemberVerificationResult({
   );
 }
 
+function InstagramApiStatusCard({
+  status,
+  busy,
+  onRefresh,
+}: {
+  status: InstagramApiStatus | null;
+  busy: boolean;
+  onRefresh: () => void;
+}) {
+  const configured = Boolean(status?.configured);
+  const accountReachable = Boolean(status?.accountReachable);
+  const publishEnabled = Boolean(status?.publishEnabled);
+  const ready = configured && accountReachable && publishEnabled;
+  const label = ready ? "Configured" : configured ? "Needs review" : "Not configured";
+  const message = text(status?.message, "Meta API status has not been checked yet.");
+
+  return (
+    <div className={`review-decision instagram-api-status instagram-api-status--${ready ? "ready" : configured ? "review" : "missing"}`}>
+      <div>
+        <strong>Meta API Status: {label}</strong>
+        <p>{message}</p>
+      </div>
+      <dl className="review-meta instagram-api-status__meta" aria-label="Meta API diagnostic details">
+        <div>
+          <dt>Account check</dt>
+          <dd>{accountReachable ? "Passed" : "Not passed"}</dd>
+        </div>
+        <div>
+          <dt>Publishing</dt>
+          <dd>{publishEnabled ? "Available" : "Unavailable"}</dd>
+        </div>
+        <div>
+          <dt>Checked</dt>
+          <dd>{status?.checkedAt ? formatDate(status.checkedAt, "Not checked") : "Not checked"}</dd>
+        </div>
+      </dl>
+      <button className="hero-cta" type="button" onClick={onRefresh} disabled={busy}>
+        {busy ? "Checking Meta API" : "Check Meta API"}
+      </button>
+    </div>
+  );
+}
+
 export function LeaderDashboard() {
   const [busy, setBusy] = useState(true);
   const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
@@ -614,13 +703,18 @@ export function LeaderDashboard() {
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [instagramActiveStatus, setInstagramActiveStatus] = useState("queued");
   const [instagramQueue, setInstagramQueue] = useState<InstagramPublishQueue | null>(null);
+  const [instagramApiStatus, setInstagramApiStatus] = useState<InstagramApiStatus | null>(null);
   const [instagramBusy, setInstagramBusy] = useState(false);
+  const [instagramApiBusy, setInstagramApiBusy] = useState(false);
+  const [instagramBusyJobId, setInstagramBusyJobId] = useState("");
   const [instagramStatus, setInstagramStatus] = useState("Instagram queue has not loaded yet.");
   const [instagramError, setInstagramError] = useState("");
   const [instagramCaptions, setInstagramCaptions] = useState<Record<string, string>>({});
   const [instagramAltTexts, setInstagramAltTexts] = useState<Record<string, string>>({});
   const [instagramPermalinks, setInstagramPermalinks] = useState<Record<string, string>>({});
   const [instagramNotes, setInstagramNotes] = useState<Record<string, string>>({});
+  const [instagramConfirmations, setInstagramConfirmations] = useState<Record<string, InstagramAction | undefined>>({});
+  const [instagramJobMessages, setInstagramJobMessages] = useState<Record<string, InstagramJobMessage | undefined>>({});
   const [profileMediaActiveStatus, setProfileMediaActiveStatus] = useState<ProfileMediaStatus | "all">("pending");
   const [profileMediaQueue, setProfileMediaQueue] = useState<ProfileMediaQueue | null>(null);
   const [profileMediaBusy, setProfileMediaBusy] = useState(false);
@@ -715,6 +809,25 @@ export function LeaderDashboard() {
     setInstagramBusy(false);
   }, [instagramActiveStatus]);
 
+  const loadInstagramApiStatus = useCallback(async (successMessage = "") => {
+    setInstagramApiBusy(true);
+    const result = await checkInstagramApiStatus();
+    if (!result.ok) {
+      setInstagramApiStatus(null);
+      setInstagramError(result.message || "Meta API status could not be checked.");
+      setInstagramApiBusy(false);
+      return;
+    }
+
+    const data = result.data || null;
+    setInstagramApiStatus(data);
+    setInstagramError("");
+    if (successMessage || result.message || data?.message) {
+      setInstagramStatus(successMessage || result.message || data?.message || "Meta API status checked.");
+    }
+    setInstagramApiBusy(false);
+  }, []);
+
   const loadProfileMediaQueue = useCallback(async ({
     status = profileMediaActiveStatus,
     successMessage = "",
@@ -791,9 +904,10 @@ export function LeaderDashboard() {
     setPanel("review");
     await loadQueue({ status: activeStatus });
     await loadInstagramQueue({ status: instagramActiveStatus });
+    await loadInstagramApiStatus();
     await loadProfileMediaQueue({ status: profileMediaActiveStatus });
     await loadMochiAlpha();
-  }, [activeStatus, instagramActiveStatus, loadInstagramQueue, loadMochiAlpha, loadProfileMediaQueue, loadQueue, profileMediaActiveStatus]);
+  }, [activeStatus, instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadMochiAlpha, loadProfileMediaQueue, loadQueue, profileMediaActiveStatus]);
 
   useEffect(() => {
     void Promise.resolve().then(() => checkAccess());
@@ -878,19 +992,66 @@ export function LeaderDashboard() {
     setMemberVerificationBusy(false);
   }
 
+  function setInstagramJobMessage(jobId: string, message: InstagramJobMessage | undefined) {
+    setInstagramJobMessages((current) => ({
+      ...current,
+      [jobId]: message,
+    }));
+  }
+
+  function armInstagramAction(job: InstagramPublishJob, action: InstagramAction) {
+    const jobId = text(job.id);
+    if (!jobId) {
+      setInstagramError("Choose an Instagram publishing job before continuing.");
+      return;
+    }
+
+    setInstagramError("");
+    setInstagramConfirmations((current) => ({ ...current, [jobId]: action }));
+    setInstagramJobMessage(
+      jobId,
+      action === "manual-share"
+        ? {
+          kind: "status",
+          message: "Ready to confirm manual sharing after the image has been posted from the official account.",
+        }
+        : {
+          kind: "status",
+          message: "Ready to confirm Meta API publishing. Use only with action-time approval.",
+        },
+    );
+  }
+
+  function cancelInstagramAction(job: InstagramPublishJob) {
+    const jobId = text(job.id);
+    if (!jobId) return;
+    setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    setInstagramJobMessage(jobId, undefined);
+  }
+
   async function publishInstagram(job: InstagramPublishJob) {
     const jobId = text(job.id);
     const caption = instagramCaptions[jobId] ?? text(job.caption, "Shared from the Mōchirīī guild gallery.");
     const altText = instagramAltTexts[jobId] ?? text(job.altText);
-    const confirmed =
-      typeof window !== "undefined" &&
-      window.confirm("Publish this approved member image to the official Mōchirīī Instagram account?");
+    const metaApiReady = Boolean(instagramApiStatus?.configured && instagramApiStatus.accountReachable && instagramApiStatus.publishEnabled);
 
-    if (!confirmed) return;
+    if (!metaApiReady) {
+      setInstagramJobMessage(jobId, {
+        kind: "error",
+        message: "Meta API publishing is unavailable until the diagnostic passes.",
+      });
+      return;
+    }
 
-    setInstagramBusy(true);
+    if (instagramConfirmations[jobId] !== "publish") {
+      armInstagramAction(job, "publish");
+      return;
+    }
+
+    setInstagramBusyJobId(jobId);
     setInstagramError("");
     setInstagramStatus("Publishing image to Instagram.");
+    setInstagramJobMessage(jobId, { kind: "status", message: "Publishing image to Instagram through the Meta API." });
 
     const result = await publishInstagramGallerySubmission({
       jobId,
@@ -900,13 +1061,23 @@ export function LeaderDashboard() {
     });
 
     if (!result.ok) {
+      setInstagramJobMessage(jobId, {
+        kind: "error",
+        message: result.message || "Instagram publishing failed.",
+      });
       setInstagramError(result.message || "Instagram publishing failed.");
       setInstagramStatus("");
-      setInstagramBusy(false);
+      setInstagramBusyJobId("");
       await loadInstagramQueue({ status: instagramActiveStatus });
       return;
     }
 
+    setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    setInstagramJobMessage(jobId, {
+      kind: "success",
+      message: result.message || "Image published to Instagram.",
+    });
+    setInstagramBusyJobId("");
     await loadInstagramQueue({
       status: instagramActiveStatus,
       successMessage: result.message || "Image published to Instagram.",
@@ -933,15 +1104,16 @@ export function LeaderDashboard() {
     const jobId = text(job.id);
     const instagramPermalink = instagramPermalinks[jobId] ?? text(job.instagramPermalink);
     const moderatorNote = instagramNotes[jobId] ?? "";
-    const confirmed =
-      typeof window !== "undefined" &&
-      window.confirm("Mark this Instagram queue item as shared manually after posting from the official account?");
 
-    if (!confirmed) return;
+    if (instagramConfirmations[jobId] !== "manual-share") {
+      armInstagramAction(job, "manual-share");
+      return;
+    }
 
-    setInstagramBusy(true);
+    setInstagramBusyJobId(jobId);
     setInstagramError("");
     setInstagramStatus("Marking Instagram job as shared manually.");
+    setInstagramJobMessage(jobId, { kind: "status", message: "Marking this Instagram job as shared manually." });
 
     const result = await markInstagramGallerySubmissionShared({
       jobId,
@@ -951,16 +1123,26 @@ export function LeaderDashboard() {
     });
 
     if (!result.ok) {
+      setInstagramJobMessage(jobId, {
+        kind: "error",
+        message: result.message || "Instagram job could not be marked shared manually.",
+      });
       setInstagramError(result.message || "Instagram job could not be marked shared manually.");
       setInstagramStatus("");
-      setInstagramBusy(false);
+      setInstagramBusyJobId("");
       await loadInstagramQueue({ status: instagramActiveStatus });
       return;
     }
 
+    setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    setInstagramJobMessage(jobId, {
+      kind: "success",
+      message: result.message || "Instagram job marked as shared manually.",
+    });
+    setInstagramBusyJobId("");
     await loadInstagramQueue({
       status: instagramActiveStatus,
-      successMessage: result.message || "Instagram job marked as shared manually.",
+      successMessage: `${result.message || "Instagram job marked as shared manually."} It is now listed under Shared manually.`,
     });
   }
 
@@ -1234,27 +1416,40 @@ export function LeaderDashboard() {
       <WorkflowNotice hidden={!instagramStatus}>{instagramStatus}</WorkflowNotice>
       <WorkflowNotice tone="danger" role="alert" hidden={!instagramError}>{instagramError}</WorkflowNotice>
 
+      <InstagramApiStatusCard
+        status={instagramApiStatus}
+        busy={instagramApiBusy}
+        onRefresh={() => void loadInstagramApiStatus("Meta API status checked.")}
+      />
+
       <div className="review-list" aria-live="polite">
         {instagramJobs.length ? (
           instagramJobs.map((job) => {
             const id = text(job.id, "unknown");
+            const metaPublishAvailable = Boolean(instagramApiStatus?.configured && instagramApiStatus.accountReachable && instagramApiStatus.publishEnabled);
             return (
               <InstagramJobCard
                 job={job}
-                busy={instagramBusy}
+                busy={instagramBusy || instagramBusyJobId === id}
                 caption={instagramCaptions[id] ?? text(job.caption, "Shared from the Mōchirīī guild gallery.")}
                 altText={instagramAltTexts[id] ?? text(job.altText)}
                 permalinkValue={instagramPermalinks[id] ?? text(job.instagramPermalink)}
                 moderatorNote={instagramNotes[id] ?? ""}
+                confirmation={instagramConfirmations[id]}
+                jobMessage={instagramJobMessages[id]}
+                metaPublishAvailable={metaPublishAvailable}
                 key={id}
                 onCaptionChange={(value) => setInstagramCaptions((current) => ({ ...current, [id]: value }))}
                 onAltTextChange={(value) => setInstagramAltTexts((current) => ({ ...current, [id]: value }))}
                 onPermalinkChange={(value) => setInstagramPermalinks((current) => ({ ...current, [id]: value }))}
                 onModeratorNoteChange={(value) => setInstagramNotes((current) => ({ ...current, [id]: value }))}
-                onCopyCaption={() => copyInstagramText(instagramCaptions[id] ?? text(job.caption, "Shared from the MÅchirÄ«Ä« guild gallery."), "Instagram caption")}
+                onCopyCaption={() => copyInstagramText(instagramCaptions[id] ?? text(job.caption, "Shared from the Mōchirīī guild gallery."), "Instagram caption")}
                 onCopyAltText={() => copyInstagramText(instagramAltTexts[id] ?? text(job.altText), "Instagram alt text")}
-                onMarkShared={markSharedManually}
-                onPublish={publishInstagram}
+                onArmManualShare={(item) => armInstagramAction(item, "manual-share")}
+                onConfirmManualShare={markSharedManually}
+                onArmPublish={(item) => armInstagramAction(item, "publish")}
+                onConfirmPublish={publishInstagram}
+                onCancelAction={cancelInstagramAction}
               />
             );
           })

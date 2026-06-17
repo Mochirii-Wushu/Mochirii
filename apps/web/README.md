@@ -187,7 +187,7 @@ vercel build --prod --cwd apps/web
 What stays in Supabase:
 
 - Identity, Postgres, RLS, Storage, Edge Functions, Discord verification, gallery moderation authority, signed preview URLs, and audit records.
-- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, `publish-instagram-gallery-submission`, `send-member-spotlight-poll`, `publish-member-spotlight-winner`, and `get-current-spotlight-winner`.
+- `verify-discord-member`, `list-approved-gallery-submissions`, `list-gallery-review-queue`, `moderate-gallery-submission`, `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, `check-instagram-api-status`, `publish-instagram-gallery-submission`, `send-member-spotlight-poll`, `publish-member-spotlight-winner`, and `get-current-spotlight-winner`.
 
 ## Monthly Spotlight Polls
 
@@ -197,7 +197,7 @@ Reaper posts one native Discord poll each month after `send-member-spotlight-pol
 
 Website uploads include an optional Instagram opt-in checkbox. Reaper's Discord submissions send the matching `instagramOptIn` payload from the optional `share_to_instagram` command parameter.
 
-Approval for the public Gallery never posts to Instagram automatically. If an approved submission has explicit opt-in consent, Supabase creates an Instagram publishing job. The Leader Dashboard shows that separate Instagram Queue, allows moderator caption and alt-text review, provides download/copy tools for manual posting, and requires a final browser confirmation before marking the job shared manually. The direct Meta API publish function remains a future path after Meta developer access is available.
+Approval for the public Gallery never posts to Instagram automatically. If an approved submission has explicit opt-in consent, Supabase creates an Instagram publishing job. The Leader Dashboard shows that separate Instagram Queue, allows moderator caption and alt-text review, provides download/copy tools for manual posting, and requires a visible in-card confirmation before marking the job shared manually. The direct Meta API publish function remains disabled until the moderator-only Meta diagnostic passes after secure Supabase secret setup.
 
 Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase secrets only. They do not belong in Vercel env vars or any `NEXT_PUBLIC_*` value.
 

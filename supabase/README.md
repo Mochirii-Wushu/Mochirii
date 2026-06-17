@@ -266,6 +266,7 @@ supabase functions serve send-vote-reminder --env-file supabase/functions/.env.l
 supabase functions serve list-visible-profile-cards --env-file supabase/functions/.env.local
 supabase functions serve list-instagram-publish-queue --env-file supabase/functions/.env.local
 supabase functions serve mark-instagram-gallery-submission-shared --env-file supabase/functions/.env.local
+supabase functions serve check-instagram-api-status --env-file supabase/functions/.env.local
 supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
 ```
 
@@ -336,6 +337,7 @@ supabase functions deploy send-vote-reminder
 supabase functions deploy list-visible-profile-cards
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy mark-instagram-gallery-submission-shared
+supabase functions deploy check-instagram-api-status
 supabase functions deploy publish-instagram-gallery-submission
 ```
 
@@ -356,6 +358,7 @@ supabase functions deploy send-vote-reminder
 supabase functions deploy list-visible-profile-cards
 supabase functions deploy list-instagram-publish-queue
 supabase functions deploy mark-instagram-gallery-submission-shared
+supabase functions deploy check-instagram-api-status
 supabase functions deploy publish-instagram-gallery-submission
 ```
 
@@ -706,10 +709,11 @@ See [`../docs/member-profiles-and-rank-roles.md`](../docs/member-profiles-and-ra
 Instagram publishing uses three moderator-only Edge Functions:
 
 - `list-instagram-publish-queue`
+- `check-instagram-api-status`
 - `publish-instagram-gallery-submission`
 - `mark-instagram-gallery-submission-shared`
 
-All three require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. Current launch mode is manual sharing: moderators download the signed preview, copy caption and alt text, post through the official Instagram account or Meta Business Suite, optionally paste the permalink, and mark the job `shared_manually`. The API publishing function remains available for the future Meta developer path; it creates a short-lived signed URL only when sending the image URL to Meta.
+All four require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. Current launch mode is manual sharing: moderators download the signed preview, copy caption and alt text, post through the official Instagram account or Meta Business Suite, optionally paste the permalink, and mark the job `shared_manually`. The Meta API status function is diagnostic-only and must not create media containers or publish posts. The API publishing function remains available only after the diagnostic passes; it creates a short-lived signed URL only when sending the image URL to Meta.
 
 Approval behavior:
 
@@ -718,7 +722,7 @@ Approval behavior:
 - Opted-in PNG or WebP images create an `ineligible` job with a clear reason.
 - Existing submissions are not retroactively opted in.
 
-The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish or manual share. Moderators can edit caption and alt text, download the image, copy caption and alt text, enter a manual permalink/note, and mark a job shared manually. The browser must show a final confirmation before calling `mark-instagram-gallery-submission-shared` or future `publish-instagram-gallery-submission` because both record an external publishing decision.
+The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish or manual share. Moderators can edit caption and alt text, download the image, copy caption and alt text, enter a manual permalink/note, and mark a job shared manually. The dashboard must show a visible in-card confirmation before calling `mark-instagram-gallery-submission-shared` or future `publish-instagram-gallery-submission` because both record an external publishing decision.
 
 V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Any future live Meta setup, Supabase secret change, Edge Function redeployment, slash-command registration, or real Instagram post requires explicit owner approval.
 

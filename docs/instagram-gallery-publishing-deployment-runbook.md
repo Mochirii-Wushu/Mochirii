@@ -1,6 +1,6 @@
 # Instagram Gallery Publishing Deployment Runbook
 
-This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images. Current launch mode is manual sharing through the Leader Dashboard while Meta developer registration is blocked; direct API publishing remains the future path.
+This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images. Current launch mode is manual sharing through the Leader Dashboard. Direct API publishing remains diagnostic-gated until Meta credentials are present in Supabase secrets and the moderator-only Meta status check passes.
 
 Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
 
@@ -13,7 +13,7 @@ Completed:
 - PR #198 merged to `main`.
 - Vercel production deployed the Next app changes.
 - Supabase production migration `add_instagram_gallery_publishing` is applied.
-- Supabase production has active `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, and `publish-instagram-gallery-submission` functions with JWT verification enabled.
+- Supabase production has active `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, `check-instagram-api-status`, and `publish-instagram-gallery-submission` functions with JWT verification enabled.
 - The private Reaper bot source repository exists at <https://github.com/Mochirii-Wushu/Reaper>.
 - Reaper has an initial Node/TypeScript Discord command scaffold that matches the Supabase ingest contract.
 - Reaper CI is green on `main` for typecheck, tests, and build.
@@ -68,7 +68,7 @@ Current manual flow:
 4. Moderator copies the caption and alt text.
 5. Moderator posts manually from the official Instagram account or Meta Business Suite.
 6. Moderator optionally pastes the Instagram permalink and adds a private note.
-7. Moderator clicks `Mark shared manually` and confirms the browser prompt.
+7. Moderator clicks `Mark shared manually`, reviews the in-card confirmation prompt, then clicks `Confirm manual share`.
 
 ## Preconditions
 
@@ -136,6 +136,7 @@ supabase functions deploy list-gallery-review-queue --project-ref deyvmtncimmcin
 supabase functions deploy moderate-gallery-submission --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy list-instagram-publish-queue --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy mark-instagram-gallery-submission-shared --project-ref deyvmtncimmcinldjyqe
+supabase functions deploy check-instagram-api-status --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy publish-instagram-gallery-submission --project-ref deyvmtncimmcinldjyqe
 supabase functions deploy reaper-discord-interactions --project-ref deyvmtncimmcinldjyqe
 ```
@@ -170,6 +171,8 @@ INSTAGRAM_API_BASE_URL
 ```
 
 Use `INSTAGRAM_API_BASE_URL` only for a Meta-compatible mock during tests. Production should use Meta's real API base.
+
+After setting `INSTAGRAM_*` secrets, run the Leader Dashboard `Check Meta API` diagnostic before enabling or attempting direct publishing. The diagnostic checks account reachability only; it must not call Meta media creation or publish endpoints.
 
 After setting secrets, confirm only names are present:
 
@@ -292,8 +295,9 @@ Run feature checks:
 - opted-in JPEG approval creates a queued job
 - opted-in PNG/WebP approval creates an ineligible job
 - duplicate Discord message/attachment does not change stored consent
-- Meta API failure records a failed job/event without duplicate publishing
-- Leader Dashboard requires final confirmation before publishing
+- Meta API diagnostic can fail without mutating a job or creating a media container
+- Meta API publishing failure records a failed job/event without duplicate publishing
+- Leader Dashboard requires visible in-card confirmation before manual sharing or API publishing
 
 Run browser checks:
 

@@ -13,6 +13,7 @@ const files = {
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   moderation: "supabase/functions/moderate-gallery-submission/index.ts",
   listQueue: "supabase/functions/list-instagram-publish-queue/index.ts",
+  checkMeta: "supabase/functions/check-instagram-api-status/index.ts",
   publish: "supabase/functions/publish-instagram-gallery-submission/index.ts",
   markShared: "supabase/functions/mark-instagram-gallery-submission-shared/index.ts",
   envExample: "supabase/functions/.env.example",
@@ -78,6 +79,7 @@ const manualMigrationHistory = read(files.manualMigrationHistory);
 const discordIngest = read(files.discordIngest);
 const moderation = read(files.moderation);
 const listQueue = read(files.listQueue);
+const checkMeta = read(files.checkMeta);
 const publish = read(files.publish);
 const markShared = read(files.markShared);
 const envExample = read(files.envExample);
@@ -101,10 +103,12 @@ assertIncludes("check-all", checkAll, "check:instagram-gallery-publishing");
   "[functions.list-instagram-publish-queue]",
   "[functions.publish-instagram-gallery-submission]",
   "[functions.mark-instagram-gallery-submission-shared]",
+  "[functions.check-instagram-api-status]",
   'verify_jwt = true',
   'entrypoint = "./functions/list-instagram-publish-queue/index.ts"',
   'entrypoint = "./functions/publish-instagram-gallery-submission/index.ts"',
   'entrypoint = "./functions/mark-instagram-gallery-submission-shared/index.ts"',
+  'entrypoint = "./functions/check-instagram-api-status/index.ts"',
 ].forEach((snippet) => assertIncludes("supabase config", config, snippet));
 
 [
@@ -198,6 +202,23 @@ assertNotMatches(
 
 [
   "requireModeratorAccess(req)",
+  "INSTAGRAM_ACCOUNT_ID",
+  "INSTAGRAM_ACCESS_TOKEN",
+  "INSTAGRAM_API_VERSION",
+  "publishEnabled",
+  "accountReachable",
+  "Meta API publishing is not configured",
+].forEach((snippet) => assertIncludes("check-instagram-api-status", checkMeta, snippet));
+
+assertNotMatches(
+  "check-instagram-api-status",
+  checkMeta,
+  /\/media\b|\/media_publish\b|createSignedUrl|gallery_instagram_publish_jobs|gallery_instagram_publish_events/,
+  "Meta API diagnostic must not publish, create media containers, or mutate Instagram jobs.",
+);
+
+[
+  "requireModeratorAccess(req)",
   "confirmManualShare",
   "shared_manually",
   "gallery_instagram_publish_jobs",
@@ -273,17 +294,30 @@ assertNotMatches(
   "Instagram Queue",
   "publishInstagramGallerySubmission",
   "markInstagramGallerySubmissionShared",
-  "window.confirm",
   "Mark shared manually",
+  "Confirm manual share",
+  "Confirm Meta publish",
+  "Meta API Status",
+  "checkInstagramApiStatus",
+  "setInstagramJobMessages",
   "Instagram caption",
   "Instagram alt text",
 ].forEach((snippet) => assertIncludes("Next leader dashboard", nextDashboard, snippet));
 
+assertNotMatches(
+  "Next leader dashboard",
+  nextDashboard,
+  /window\.confirm\("Mark this Instagram queue item|window\.confirm\("Publish this approved member image/,
+  "Instagram manual share and Meta publish actions must use visible in-card confirmation, not browser confirm prompts.",
+);
+
 [
   "listInstagramPublishQueue",
+  "checkInstagramApiStatus",
   "publishInstagramGallerySubmission",
   "markInstagramGallerySubmissionShared",
   "list-instagram-publish-queue",
+  "check-instagram-api-status",
   "publish-instagram-gallery-submission",
   "mark-instagram-gallery-submission-shared",
 ].forEach((snippet) => assertIncludes("Next moderation helpers", nextHelpers, snippet));

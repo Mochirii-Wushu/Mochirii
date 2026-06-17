@@ -250,6 +250,18 @@ export type InstagramPublishQueue = {
   summary?: Record<string, number | string | undefined>;
 };
 
+export type InstagramApiStatus = {
+  configured?: boolean | null;
+  accountReachable?: boolean | null;
+  publishEnabled?: boolean | null;
+  provider?: string | null;
+  apiVersion?: string | null;
+  statusCode?: number | null;
+  checkedAt?: string | null;
+  message?: string | null;
+  missingSecrets?: string[];
+};
+
 export type ApprovedGallerySubmission = {
   id?: string | null;
   title?: string | null;
