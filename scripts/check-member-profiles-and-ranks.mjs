@@ -225,6 +225,8 @@ assertIncludes("css", css, ".member-directory-grid");
 ].forEach((snippet) => assertIncludes("supabase README", supabaseReadme, snippet));
 
 [
+  "CORS_HEADERS",
+  "new Response(\"ok\", { headers: CORS_HEADERS })",
   "profile_public_enabled",
   "hasFilledPublicProfile",
   "titleFromRoles",

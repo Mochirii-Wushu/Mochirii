@@ -3,6 +3,7 @@ import {
   asArray,
   asRecord,
   asStringArray,
+  CORS_HEADERS,
   createAdminClient,
   jsonResponse,
   loadRankResources,
@@ -33,7 +34,7 @@ function hasFilledPublicProfile(profile: Record<string, unknown>): boolean {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: { "Access-Control-Allow-Origin": "*" } });
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
   if (req.method !== "POST") {
     return jsonResponse({ ok: false, error: "method_not_allowed", message: "Use POST." }, 405);
   }
