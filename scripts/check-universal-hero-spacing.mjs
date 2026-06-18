@@ -22,12 +22,8 @@ assertIncludes("Shared hero frame width", ".page-hero-shell > .container{max-wid
 assertIncludes("Shared hero aspect ratio", "aspect-ratio:var(--hero-image-aspect);");
 assertIncludes("Shared hero radius", "border-radius:var(--hero-image-radius);");
 assertIncludes("Shared hero image fit", "object-fit:contain;");
+assertIncludes("Shared hero image position", "object-position:center;");
 assertIncludes("Shared hero card gap", ".hero-overlap{margin-top:var(--hero-image-to-card-gap); padding-bottom:var(--hero-stack-bottom-gap);}");
-assertIncludes("Home first-viewport hero frame", 'body[data-page="home"]{\n  --hero-frame-max-width:840px;');
-assertIncludes("Events first-viewport hero frame", 'body[data-page="events"]{\n  --hero-frame-max-width:760px;');
-assertIncludes("Gallery first-viewport hero frame", 'body[data-page="gallery"]{\n  --hero-frame-max-width:760px;');
-assertIncludes("Home first-viewport overlap", "--hero-image-to-card-gap:clamp(-420px, -39vw, -260px);");
-assertIncludes("Events first-viewport overlap", "--hero-image-to-card-gap:clamp(-72px, -5vw, -42px);");
 assertIncludes("Surface hero shell token", "--surface-hero-shell:var(--bg-1);");
 assertIncludes("Surface primary card token", "--surface-primary-card:var(--bg-0);");
 assertIncludes("Surface quiet card token", "--surface-quiet-card:var(--bg-2);");
@@ -91,6 +87,12 @@ const bannedHeroShellSpacing = new Set([
   "margin-left",
 ]);
 
+const bannedPageHeroTokens = new Set([
+  "--hero-frame-max-width",
+  "--hero-image-to-card-gap",
+  "--hero-stack-bottom-gap",
+]);
+
 function declarations(body) {
   return body
     .split(";")
@@ -107,11 +109,24 @@ function declarations(body) {
     .filter(Boolean);
 }
 
+for (const match of css.matchAll(/--hero-image-to-card-gap\s*:\s*([^;]+);/g)) {
+  const value = match[1].trim();
+  if (value.includes("-")) {
+    fail(`Negative hero image/card spacing is not allowed: --hero-image-to-card-gap:${value};`);
+  }
+}
+
 for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
   const selector = match[1].trim();
   if (!selector.includes("body[data-page=")) continue;
 
   const props = declarations(match[2]);
+
+  for (const { prop } of props) {
+    if (bannedPageHeroTokens.has(prop)) {
+      fail(`Page-scoped hero sizing/spacing token is not allowed: ${selector} sets ${prop}.`);
+    }
+  }
 
   if (selector.includes(".hero-overlap")) {
     fail(`Page-scoped hero-overlap spacing is not allowed: ${selector}`);

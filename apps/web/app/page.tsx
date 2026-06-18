@@ -292,59 +292,57 @@ export default function Home() {
         </div>
 
         <div className="container hero-overlap">
-          <div className="home-hero-row">
-            <section className="glass-card glass-card--strong glass-pad hero-intro">
-              <p className="kicker" id="homeKicker">Jianghu Guild Hall</p>
-              <h1 className="display-title" id="homeHeading">Mōchirīī</h1>
+          <section className="glass-card glass-card--strong glass-pad hero-intro">
+            <p className="kicker" id="homeKicker">Jianghu Guild Hall</p>
+            <h1 className="display-title" id="homeHeading">Mōchirīī</h1>
 
-              <div id="heroDescriptor" className="prose-stack" aria-live="polite">
-                <Descriptor lines={heroDescriptor} />
-              </div>
+            <div id="heroDescriptor" className="prose-stack" aria-live="polite">
+              <Descriptor lines={heroDescriptor} />
+            </div>
 
-              <div className="badge-row" id="heroBadges" aria-label="Guild badges">
-                {heroBadges.slice(0, 8).map((badge) => (
-                  <span key={badge}>{badge}</span>
-                ))}
-              </div>
+            <div className="badge-row" id="heroBadges" aria-label="Guild badges">
+              {heroBadges.slice(0, 8).map((badge) => (
+                <span key={badge}>{badge}</span>
+              ))}
+            </div>
 
-              <div className="hero-cta-row" aria-label="Primary actions">
-                <a
-                  className="hero-cta hero-cta--primary"
-                  href="https://discord.com/invite/dPafqMwWPK"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Join Discord
-                </a>
-                <a className="hero-cta" href="/join">
-                  How to Join
-                </a>
-              </div>
-            </section>
-
-            <aside className="home-guild-seal" aria-label="Guild seal">
-              <StaticImage
-                id="sealImage"
-                src={publicPath(homeData.seal.image, "/assets/img/brand/emblem.webp")}
-                alt={cleanLabel(homeData.seal.imageAlt || "Mōchirīī guild seal")}
-                width="1024"
-                height="1024"
-                priority
-                sizes="(max-width: 900px) 180px, 220px"
-              />
-              <h2 id="sealTitle" className="home-seal-title">
-                {homeData.seal.title}
-              </h2>
-              <p id="sealVerse" className="home-seal-verse muted">
-                <SealVerse lines={sealVerse} />
-              </p>
-            </aside>
-          </div>
+            <div className="hero-cta-row" aria-label="Primary actions">
+              <a
+                className="hero-cta hero-cta--primary"
+                href="https://discord.com/invite/dPafqMwWPK"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Join Discord
+              </a>
+              <a className="hero-cta" href="/join">
+                How to Join
+              </a>
+            </div>
+          </section>
         </div>
       </header>
 
       <main className="page-main" id="main">
         <div className="container">
+          <aside className="home-guild-seal" aria-label="Guild seal">
+            <StaticImage
+              id="sealImage"
+              src={publicPath(homeData.seal.image, "/assets/img/brand/emblem.webp")}
+              alt={cleanLabel(homeData.seal.imageAlt || "Mōchirīī guild seal")}
+              width="1024"
+              height="1024"
+              priority
+              sizes="(max-width: 900px) 180px, 220px"
+            />
+            <h2 id="sealTitle" className="home-seal-title">
+              {homeData.seal.title}
+            </h2>
+            <p id="sealVerse" className="home-seal-verse muted">
+              <SealVerse lines={sealVerse} />
+            </p>
+          </aside>
+
           <section
             className="glass-card glass-card--primary glass-pad"
             aria-label="Guild bulletin"
