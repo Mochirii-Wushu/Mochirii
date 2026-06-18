@@ -151,13 +151,6 @@
   function renderCelebrationSplash(config) {
     if (!isCelebrationSplashActive(config)) return;
 
-    const storageKey = cleanLabel(config.storageKey) || "mochirii-celebration-splash";
-    try {
-      if (window.sessionStorage.getItem(storageKey) === "dismissed") return;
-    } catch {
-      /* Storage can be blocked; the splash can still show and close. */
-    }
-
     const splash = document.createElement("div");
     splash.className = "birthday-splash";
     splash.setAttribute("role", "dialog");
@@ -176,11 +169,6 @@
     `;
 
     const dismiss = () => {
-      try {
-        window.sessionStorage.setItem(storageKey, "dismissed");
-      } catch {
-        /* no-op */
-      }
       document.removeEventListener("keydown", onKeyDown);
       splash.remove();
     };

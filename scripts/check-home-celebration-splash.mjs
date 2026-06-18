@@ -67,7 +67,6 @@ componentReferences.forEach((file) => {
 
 [
   '"use client";',
-  "sessionStorage",
   "startsAt",
   "endsAt",
   "setTimeout",
@@ -75,6 +74,10 @@ componentReferences.forEach((file) => {
   'role="dialog"',
   "aria-modal",
 ].forEach((snippet) => assertIncludes("HomeBirthdaySplash component", component, snippet));
+
+if (component.includes("sessionStorage")) {
+  fail("HomeBirthdaySplash must not persist dismissal in sessionStorage; refresh should show the splash again.");
+}
 
 [
   ".birthday-splash",
@@ -90,10 +93,13 @@ componentReferences.forEach((file) => {
 [
   "renderCelebrationSplash",
   "data?.celebrationSplash",
-  "sessionStorage",
   "birthday-splash",
   "Escape",
 ].forEach((snippet) => assertIncludes("rollback Home script", staticHome, snippet));
+
+if (staticHome.includes("sessionStorage")) {
+  fail("Rollback Home splash must not persist dismissal in sessionStorage; refresh should show the splash again.");
+}
 
 if (failures.length) {
   console.error(`Home celebration splash validation failed (${failures.length} issue${failures.length === 1 ? "" : "s"}).`);
