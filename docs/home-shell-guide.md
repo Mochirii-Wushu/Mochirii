@@ -181,7 +181,7 @@ Image expectations:
 Next app shared hero presentation:
 
 - Shared `PageHero` routes and Home use the same stable `3 / 2` hero image frame inside the tokenized `--hero-frame-max-width` container.
-- The hero image frame renders first, the intro card renders below it with positive spacing, and main page content follows below the hero header.
+- The hero image frame renders first, then Home may place the intro card and guild seal together in a slim row below it with positive spacing. Main page content follows below the hero header.
 - Hero images should render with `object-fit: contain` and `object-position: center`, with no crop, scrim, tint, CSS filter, transform, or overlay covering the image.
 - Do not use negative `--hero-image-to-card-gap` values, page-scoped hero geometry tokens, one-off hero margins, or page-local hero aspect/size overrides.
 - Surface tiers should remain explicit: hero shell, primary content card, quiet card, tool panel, and admin/member panel.

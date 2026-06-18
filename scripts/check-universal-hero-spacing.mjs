@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 
 const cssPath = "apps/web/app/mochirii.css";
 const css = readFileSync(cssPath, "utf8").replace(/\r\n/g, "\n");
+const homePagePath = "apps/web/app/page.tsx";
+const homePage = readFileSync(homePagePath, "utf8").replace(/\r\n/g, "\n");
 
 function fail(message) {
   console.error(message);
@@ -24,6 +26,9 @@ assertIncludes("Shared hero radius", "border-radius:var(--hero-image-radius);");
 assertIncludes("Shared hero image fit", "object-fit:contain;");
 assertIncludes("Shared hero image position", "object-position:center;");
 assertIncludes("Shared hero card gap", ".hero-overlap{margin-top:var(--hero-image-to-card-gap); padding-bottom:var(--hero-stack-bottom-gap);}");
+assertIncludes("Home intro and seal row", ".home-hero-row{");
+assertIncludes("Home slim seal column", "grid-template-columns:minmax(0, 1fr) clamp(220px, 24vw, 320px);");
+assertIncludes("Home mobile/tablet seal stack", "@media (max-width:820px){\n  .home-hero-row{");
 assertIncludes("Surface hero shell token", "--surface-hero-shell:var(--bg-1);");
 assertIncludes("Surface primary card token", "--surface-primary-card:var(--bg-0);");
 assertIncludes("Surface quiet card token", "--surface-quiet-card:var(--bg-2);");
@@ -113,6 +118,21 @@ for (const match of css.matchAll(/--hero-image-to-card-gap\s*:\s*([^;]+);/g)) {
   const value = match[1].trim();
   if (value.includes("-")) {
     fail(`Negative hero image/card spacing is not allowed: --hero-image-to-card-gap:${value};`);
+  }
+}
+
+if (!/<div className="container hero-overlap">\s*<div className="home-hero-row">/.test(homePage)) {
+  fail(`Home guild seal row must live directly inside the hero-overlap container in ${homePagePath}.`);
+}
+
+const homeHeroStart = homePage.indexOf('<section className="page-hero');
+const homeOverlapStart = homePage.indexOf('<div className="container hero-overlap">');
+if (homeHeroStart === -1 || homeOverlapStart === -1 || homeOverlapStart < homeHeroStart) {
+  fail(`Home hero image section must appear before the hero-overlap row in ${homePagePath}.`);
+} else {
+  const homeImageFrame = homePage.slice(homeHeroStart, homeOverlapStart);
+  if (homeImageFrame.includes("home-guild-seal")) {
+    fail(`Home guild seal must not be inside the page-hero image frame in ${homePagePath}.`);
   }
 }
 
