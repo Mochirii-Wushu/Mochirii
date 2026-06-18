@@ -73,11 +73,15 @@ assertAudioHasNoVisibleControls("Next custom audio player", player);
   "recruitment-audio-progress",
   "recruitment-audio-time",
   "recruitment-audio-volume",
+  "grid-column:2 / -1",
+  "overflow:hidden",
   "@media (max-width:520px)",
 ].forEach((snippet) => {
   assertIncludes("Next Recruitment CSS", appCss, snippet);
   assertIncludes("rollback Recruitment CSS", staticCss, snippet);
 });
+assert(!appCss.includes("max-content 42px"), "Next Recruitment CSS must not use the overlapping five-column audio layout.");
+assert(!staticCss.includes("max-content 42px"), "rollback Recruitment CSS must not use the overlapping five-column audio layout.");
 
 [
   'id="recruitmentAudioPlayer"',
