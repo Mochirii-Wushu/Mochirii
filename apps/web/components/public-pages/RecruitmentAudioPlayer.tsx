@@ -194,34 +194,36 @@ export function RecruitmentAudioPlayer({ sources }: RecruitmentAudioPlayerProps)
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
 
-        <button
-          className="recruitment-audio-button recruitment-audio-button--mute"
-          type="button"
-          onClick={toggleMute}
-          disabled={!hasAudio}
-          data-audio-mute
-          aria-label={isMuted ? "Unmute recruitment audio" : "Mute recruitment audio"}
-          data-muted={isMuted ? "true" : "false"}
-        >
-          Vol
-        </button>
-
-        <label className="recruitment-audio-volume-wrap">
-          <span className="sr-only">Recruitment audio volume</span>
-          <input
-            className="recruitment-audio-volume"
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value={volume}
-            onChange={(event) => updateVolume(Number(event.currentTarget.value))}
+        <div className="recruitment-audio-volume-row">
+          <button
+            className="recruitment-audio-button recruitment-audio-button--mute"
+            type="button"
+            onClick={toggleMute}
             disabled={!hasAudio}
-            data-audio-volume
-            aria-label="Recruitment audio volume"
-            aria-valuetext={`${volumeProgress}%`}
-          />
-        </label>
+            data-audio-mute
+            aria-label={isMuted ? "Unmute recruitment audio" : "Mute recruitment audio"}
+            data-muted={isMuted ? "true" : "false"}
+          >
+            Vol
+          </button>
+
+          <label className="recruitment-audio-volume-wrap">
+            <span className="sr-only">Recruitment audio volume</span>
+            <input
+              className="recruitment-audio-volume"
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={volume}
+              onChange={(event) => updateVolume(Number(event.currentTarget.value))}
+              disabled={!hasAudio}
+              data-audio-volume
+              aria-label="Recruitment audio volume"
+              aria-valuetext={`${volumeProgress}%`}
+            />
+          </label>
+        </div>
 
         <p className="sr-only" role="status" aria-live="polite">
           {status}

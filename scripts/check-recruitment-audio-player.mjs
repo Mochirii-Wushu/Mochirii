@@ -72,8 +72,10 @@ assertAudioHasNoVisibleControls("Next custom audio player", player);
   "recruitment-audio-button",
   "recruitment-audio-progress",
   "recruitment-audio-time",
+  "recruitment-audio-volume-row",
   "recruitment-audio-volume",
   "grid-column:2 / -1",
+  "inline-size:min(184px, 76%)",
   "overflow:hidden",
   "@media (max-width:520px)",
 ].forEach((snippet) => {
@@ -91,6 +93,7 @@ assert(!staticCss.includes("max-content 42px"), "rollback Recruitment CSS must n
   "data-audio-time",
   "data-audio-mute",
   "data-audio-volume",
+  "recruitment-audio-volume-row",
 ].forEach((snippet) => assertIncludes("rollback Recruitment markup", staticHtml, snippet));
 assertAudioHasNoVisibleControls("rollback Recruitment markup", staticHtml);
 

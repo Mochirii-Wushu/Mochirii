@@ -136,30 +136,32 @@
 
                 <span class="recruitment-audio-time" data-audio-time aria-live="off">0:00 / 0:00</span>
 
-                <button
-                  class="recruitment-audio-button recruitment-audio-button--mute"
-                  type="button"
-                  data-audio-mute
-                  data-muted="false"
-                  aria-label="Mute recruitment audio"
-                >
-                  Vol
-                </button>
+                <div class="recruitment-audio-volume-row">
+                  <button
+                    class="recruitment-audio-button recruitment-audio-button--mute"
+                    type="button"
+                    data-audio-mute
+                    data-muted="false"
+                    aria-label="Mute recruitment audio"
+                  >
+                    Vol
+                  </button>
 
-                <label class="recruitment-audio-volume-wrap">
-                  <span class="sr-only">Recruitment audio volume</span>
-                  <input
-                    class="recruitment-audio-volume"
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value="1"
-                    data-audio-volume
-                    aria-label="Recruitment audio volume"
-                    aria-valuetext="100%"
-                  />
-                </label>
+                  <label class="recruitment-audio-volume-wrap">
+                    <span class="sr-only">Recruitment audio volume</span>
+                    <input
+                      class="recruitment-audio-volume"
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value="1"
+                      data-audio-volume
+                      aria-label="Recruitment audio volume"
+                      aria-valuetext="100%"
+                    />
+                  </label>
+                </div>
 
                 <p class="sr-only" role="status" aria-live="polite" data-audio-status></p>
               </div>

@@ -2602,6 +2602,17 @@ body[data-page="recruitment"] .recruitment-audio-volume-wrap{
   padding-inline:3px;
 }
 
+body[data-page="recruitment"] .recruitment-audio-volume-row{
+  display:grid;
+  grid-column:1 / -1;
+  grid-template-columns:40px minmax(0, 128px);
+  align-items:center;
+  justify-content:center;
+  justify-self:center;
+  gap:10px;
+  inline-size:min(184px, 76%);
+}
+
 body[data-page="recruitment"] .recruitment-audio-progress,
 body[data-page="recruitment"] .recruitment-audio-volume{
   display:block;
