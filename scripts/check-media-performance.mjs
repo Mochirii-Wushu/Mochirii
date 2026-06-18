@@ -71,9 +71,11 @@ const galleryTypes = read("apps/web/lib/supabase/types.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
 const homePage = read("apps/web/app/page.tsx");
 const sharedPublicComponents = read("apps/web/components/public-pages/common.tsx");
+const spotifyBrowser = read("apps/web/components/public-pages/SpotifyBrowser.tsx");
 const staticGallery = read("gallery.js");
 const staticGalleryHtml = read("gallery.html");
 const staticStyles = read("styles.css");
+const sidePagesGuide = read("docs/side-pages-guide.md");
 
 [
   "const galleryRenderBatchSize = 24;",
@@ -120,6 +122,26 @@ assert(homePriorityCount === 1, `Home page should have exactly one priority imag
 
 assertIncludes("shared PageHero", sharedPublicComponents, "className=\"page-hero__img\"");
 assertIncludes("shared PageHero", sharedPublicComponents, "priority");
+
+[
+  "function SpotifyEmbed",
+  "IntersectionObserver",
+  'data-deferred-spotify-embed="true"',
+  'rootMargin: "640px 0px"',
+  'loading="lazy"',
+  "title={`Spotify embed: ${title}`}",
+  'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"',
+  'url.hostname !== "open.spotify.com"',
+  "const allowedKinds = new Set",
+  "<SpotifyEmbed",
+].forEach((snippet) => assertIncludes("Spotify deferred embed contract", spotifyBrowser, snippet));
+
+[
+  "Spotify iframe embeds are deferred",
+  "IntersectionObserver",
+  "loading=\"lazy\"",
+  "open.spotify.com",
+].forEach((snippet) => assertIncludes("Spotify performance docs", sidePagesGuide, snippet));
 
 [
   "const GALLERY_RENDER_BATCH_SIZE = 24;",

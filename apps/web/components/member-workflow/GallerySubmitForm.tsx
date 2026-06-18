@@ -7,6 +7,7 @@ import { getCurrentProfile, profileIsActive, verifyMemberAccess } from "@/lib/su
 import { listMyGallerySubmissions, uploadMemberGalleryImage } from "@/lib/supabase/gallery-submissions";
 import { type GallerySubmission, type MemberAccessResponse, type MemberProfile, text } from "@/lib/supabase/types";
 import { formatDateShort, uploadAccess } from "./format";
+import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
 function SubmissionStatus({ status }: { status?: string | null }) {
   const value = text(status, "pending").toLowerCase();
@@ -140,7 +141,7 @@ export function GallerySubmitForm() {
   return (
     <>
       {!allowed ? (
-        <section className="glass-card glass-card--primary glass-pad auth-panel" id="uploadGate">
+        <section className="glass-card glass-card--primary glass-pad auth-panel" id="uploadGate" aria-busy={busy}>
           <div className="auth-panel__head">
             <div>
               <p className="kicker">Access Check</p>
@@ -148,7 +149,9 @@ export function GallerySubmitForm() {
             </div>
             <p className="status-pill" id="uploadGateState">{busy ? "Loading" : gateState}</p>
           </div>
-          <p className="muted" id="uploadGateMessage">{busy ? "Checking sign-in and member verification." : gateMessage}</p>
+          <WorkflowNotice id="uploadGateMessage">
+            {busy ? "Checking sign-in and member verification." : gateMessage}
+          </WorkflowNotice>
           <div className="auth-actions" id="uploadGateActions">
             {mode === "signed-out" ? <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link> : null}
             {mode === "needs-verification" ? (
@@ -171,18 +174,18 @@ export function GallerySubmitForm() {
               <li>Active website member status.</li>
             </ul>
           </div>
-          <p className="auth-error" role="alert" hidden={!error}>{error}</p>
+          <WorkflowNotice tone="danger" role="alert" hidden={!error}>{error}</WorkflowNotice>
         </section>
       ) : null}
 
       {allowed ? (
-        <div className="grid-12 grid-gap" id="uploadPanel">
+        <div className="grid-12 grid-gap" id="uploadPanel" aria-busy={busy}>
           <section className="col-8">
             <form className="glass-card glass-card--primary glass-pad auth-form upload-form" id="uploadForm" onSubmit={submitImage}>
               <p className="kicker">Pending Moderation</p>
               <h2 className="section-title">Upload Image</h2>
               <p className="muted">Accepted file types are JPEG, PNG & WebP. The browser limit is 50 MB.</p>
-              <p className="auth-status muted" role="status" aria-live="polite">{access.guidance}</p>
+              <WorkflowNotice tone={access.ok ? "success" : "warning"}>{access.guidance}</WorkflowNotice>
 
               <label className="form-field">
                 <span>Image file</span>
@@ -235,8 +238,8 @@ export function GallerySubmitForm() {
                 <button className="hero-cta hero-cta--primary" type="submit" disabled={busy}>Submit for Review</button>
               </div>
 
-              <p className="auth-status muted" id="uploadStatus" role="status" aria-live="polite">{status}</p>
-              <p className="auth-error" id="uploadError" role="alert" hidden={!error}>{error}</p>
+              <WorkflowNotice id="uploadStatus" hidden={!status}>{status}</WorkflowNotice>
+              <WorkflowNotice id="uploadError" tone="danger" role="alert" hidden={!error}>{error}</WorkflowNotice>
             </form>
           </section>
 
@@ -249,9 +252,13 @@ export function GallerySubmitForm() {
                 </div>
               </div>
               <div className="submission-list" id="submissionsList" aria-live="polite">
-                {submissions.length ? submissions.map((item) => <SubmissionItem item={item} key={item.id} />) : <p className="muted">No submissions yet.</p>}
+                {submissions.length ? submissions.map((item) => <SubmissionItem item={item} key={item.id} />) : (
+                  <WorkflowEmptyState title={busy ? "Loading submissions" : "No submissions yet"}>
+                    {busy ? "Checking your member gallery submissions." : "Submitted images will appear here after you send them for review."}
+                  </WorkflowEmptyState>
+                )}
               </div>
-              <p className="auth-error" id="submissionsError" role="alert" hidden={!submissionsError}>{submissionsError}</p>
+              <WorkflowNotice id="submissionsError" tone="danger" role="alert" hidden={!submissionsError}>{submissionsError}</WorkflowNotice>
             </section>
           </aside>
           <div className="col-divider" aria-hidden="true" />
