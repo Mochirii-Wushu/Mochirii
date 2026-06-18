@@ -2360,6 +2360,7 @@ body[data-page="home"] .birthday-splash__message{
 
 body[data-page="home"] .birthday-splash__close{
   position:absolute;
+  z-index:4;
   top:16px;
   right:16px;
   min-inline-size:44px;

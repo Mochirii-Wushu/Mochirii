@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type CelebrationSplashConfig = {
   enabled?: boolean;
@@ -8,11 +8,9 @@ type CelebrationSplashConfig = {
   endsAt?: string;
   title?: string;
   message?: string;
-  storageKey?: string;
 };
 
 const DISPLAY_MS = 5200;
-const FALLBACK_STORAGE_KEY = "mochirii-celebration-splash";
 
 function cleanText(value: unknown) {
   return String(value ?? "").trim();
@@ -44,30 +42,18 @@ export function HomeBirthdaySplash({ config }: { config?: CelebrationSplashConfi
   const closeRef = useRef<HTMLButtonElement>(null);
   const title = cleanText(config?.title);
   const message = cleanText(config?.message);
-  const storageKey = useMemo(() => cleanText(config?.storageKey) || FALLBACK_STORAGE_KEY, [config?.storageKey]);
 
   const dismiss = useCallback(() => {
-    try {
-      window.sessionStorage.setItem(storageKey, "dismissed");
-    } catch {
-      // Some privacy modes block storage. Dismissing visually is still enough.
-    }
     setVisible(false);
-  }, [storageKey]);
+  }, []);
 
   useEffect(() => {
     if (!isSplashActive(config)) return undefined;
 
-    try {
-      if (window.sessionStorage.getItem(storageKey) === "dismissed") return undefined;
-    } catch {
-      // Storage can be unavailable; keep the splash functional without persistence.
-    }
-
     const showTimer = window.setTimeout(() => setVisible(true), 0);
 
     return () => window.clearTimeout(showTimer);
-  }, [config, storageKey]);
+  }, [config]);
 
   useEffect(() => {
     if (!visible) return undefined;
