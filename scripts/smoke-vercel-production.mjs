@@ -21,6 +21,7 @@ const cleanRoutes = [
   "/members/twills",
   "/gallery-submit",
   "/leader-dashboard",
+  "/games/mochi-social",
 ];
 
 const legacyRedirects = new Map([
@@ -50,6 +51,7 @@ const bodyChecks = new Map([
   ["/members/twills", /M[oō]chir[iī][iī] Member Profile|Sign In Required|Access Denied/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
+  ["/games/mochi-social", /Mochi Social|Closed alpha|tester password/i],
 ]);
 
 const requestHeaders = {

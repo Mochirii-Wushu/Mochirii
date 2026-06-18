@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-06-13T00:39:27.825Z
+Generated: 2026-06-18T06:15:31.551Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
@@ -12,7 +12,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 - Report-only CSP in Next config: no
 - Unsafe-inline directives: script-src, style-src
 - Unsafe-eval directives: none
-- Scanned source files: 61
+- Scanned source files: 63
 
 ## Directives
 
@@ -51,7 +51,6 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 | Origin | Allowed by CSP | Files |
 | --- | --- | --- |
 | https://discord.com | frame-src, connect-src | apps/web/app/page.tsx<br>apps/web/components/SiteFooter.tsx<br>apps/web/components/SiteHeader.tsx<br>apps/web/components/member-workflow/AccountPanel.tsx<br>apps/web/components/public-pages/EventsBoard.tsx<br>apps/web/components/public-pages/pages.tsx |
-| https://fonts.googleapis.com | none | apps/web/app/mochirii.css |
 | https://mochi-social-game.fly.dev | frame-src, connect-src | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx<br>apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx |
 | https://mochirii.com | default-src, base-uri, form-action, script-src, style-src, img-src, font-src, media-src, frame-src, connect-src, worker-src | apps/web/app/account/page.tsx<br>apps/web/app/auth/page.tsx<br>apps/web/app/gallery-submit/page.tsx<br>apps/web/app/layout.tsx<br>apps/web/app/leader-dashboard/page.tsx<br>apps/web/components/public-pages/metadata.ts |
 | https://www.instagram.com | none | apps/web/components/member-workflow/LeaderDashboard.tsx |
@@ -98,11 +97,11 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 - Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.
 - Keep Spotify and Mochi Social iframe routes in the browser route sweep.
 - Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.
+- Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.
 - Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions.
 
 ## Warnings
 
-- https://fonts.googleapis.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.
 - https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.
 
 ## Failures
