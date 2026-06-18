@@ -5,6 +5,14 @@
     "spotlightIntro": "A warm shoutout for a members whose pretty presence keeps the guild bright, cozy & full of frosting charm.",
     "galleryIntro": "Screenshots from baddie smashing, pretty roads, lantern-lit detours & small moments that become guild memory."
   },
+  "celebrationSplash": {
+    "enabled": true,
+    "startsAt": "",
+    "endsAt": "",
+    "title": "Happy Birthday Sinbell!!",
+    "message": "Mochi spirits love you!!",
+    "storageKey": "sinbell-birthday-2026"
+  },
   "hero": {
     "image": "./assets/img/hero/hero.webp",
     "atmosphereImage": "",

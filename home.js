@@ -125,6 +125,78 @@
     }
   }
 
+  const CELEBRATION_SPLASH_DISPLAY_MS = 5200;
+
+  function parseOptionalSplashDate(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw) return null;
+    const timestamp = Date.parse(raw);
+    return Number.isFinite(timestamp) ? timestamp : Number.NaN;
+  }
+
+  function isCelebrationSplashActive(config) {
+    if (!config?.enabled) return false;
+
+    const now = Date.now();
+    const startsAt = parseOptionalSplashDate(config.startsAt);
+    const endsAt = parseOptionalSplashDate(config.endsAt);
+
+    if (Number.isNaN(startsAt) || Number.isNaN(endsAt)) return false;
+    if (startsAt !== null && now < startsAt) return false;
+    if (endsAt !== null && now > endsAt) return false;
+
+    return Boolean(cleanLabel(config.title) && cleanLabel(config.message));
+  }
+
+  function renderCelebrationSplash(config) {
+    if (!isCelebrationSplashActive(config)) return;
+
+    const storageKey = cleanLabel(config.storageKey) || "mochirii-celebration-splash";
+    try {
+      if (window.sessionStorage.getItem(storageKey) === "dismissed") return;
+    } catch {
+      /* Storage can be blocked; the splash can still show and close. */
+    }
+
+    const splash = document.createElement("div");
+    splash.className = "birthday-splash";
+    splash.setAttribute("role", "dialog");
+    splash.setAttribute("aria-modal", "true");
+    splash.setAttribute("aria-labelledby", "birthdaySplashTitle");
+    splash.innerHTML = `
+      <div class="birthday-splash__firework birthday-splash__firework--one" aria-hidden="true"></div>
+      <div class="birthday-splash__firework birthday-splash__firework--two" aria-hidden="true"></div>
+      <div class="birthday-splash__firework birthday-splash__firework--three" aria-hidden="true"></div>
+      <section class="birthday-splash__panel" aria-describedby="birthdaySplashMessage">
+        <button class="birthday-splash__close" type="button" aria-label="Close birthday splash">Close</button>
+        <p class="birthday-splash__kicker">A lantern-bright wish</p>
+        <h2 id="birthdaySplashTitle" class="birthday-splash__title">${esc(config.title)}</h2>
+        <p id="birthdaySplashMessage" class="birthday-splash__message">${esc(config.message)}</p>
+      </section>
+    `;
+
+    const dismiss = () => {
+      try {
+        window.sessionStorage.setItem(storageKey, "dismissed");
+      } catch {
+        /* no-op */
+      }
+      document.removeEventListener("keydown", onKeyDown);
+      splash.remove();
+    };
+
+    function onKeyDown(event) {
+      if (event.key === "Escape") dismiss();
+    }
+
+    document.body.appendChild(splash);
+    const closeButton = $(".birthday-splash__close", splash);
+    closeButton?.addEventListener("click", dismiss);
+    document.addEventListener("keydown", onKeyDown);
+    window.setTimeout(() => closeButton?.focus(), 80);
+    window.setTimeout(dismiss, CELEBRATION_SPLASH_DISPLAY_MS);
+  }
+
   /* Bulletin */
   function renderFeaturedBulletin(item) {
     const a = $("#featuredBulletin");
@@ -421,6 +493,7 @@
 
       renderHero(data?.hero);
       renderSeal(data?.seal);
+      renderCelebrationSplash(data?.celebrationSplash);
 
       const featured = pickFeatured(data?.bulletins);
       if (featured) {
