@@ -180,9 +180,11 @@ Image expectations:
 
 Next app shared hero presentation:
 
-- Shared `PageHero` routes use a stable `3 / 2` hero frame.
-- Hero images should render with `object-fit: contain`, no crop, no scrim, no tint, no CSS filter, and no card overlap.
-- The intro card belongs below the hero image with positive spacing so the image can be appreciated first.
+- Shared `PageHero` routes use a stable `3 / 2` hero frame inside a tokenized `--hero-frame-max-width` container.
+- Home, Events, and Gallery intentionally use narrower first-viewport hero frame tokens and scoped hero-overlap offsets so the intro card, primary actions, or first content context appears sooner on common desktop heights.
+- Hero images should render with `object-fit: contain`, no crop, no scrim, no tint, and no CSS filter.
+- Use hero overlap only through page-scoped `--hero-image-to-card-gap` tokens; avoid one-off margins or page-local hero geometry.
+- Surface tiers should remain explicit: hero shell, primary content card, quiet card, tool panel, and admin/member panel.
 - Keep page-specific palette, border, and glass styling scoped by `body[data-page="..."]`; do not change text, alt text, image paths, or route data for visual-only passes.
 - Validate Home plus each shared `PageHero` route at `360px`, `390px`, `768px`, `1024px`, and `1440px` before release.
 

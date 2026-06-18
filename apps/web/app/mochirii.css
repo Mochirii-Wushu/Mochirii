@@ -25,6 +25,11 @@
   --surface-hairline:rgba(255,255,255,.075);
   --surface-shine:rgba(255,255,255,.06);
   --surface-depth:rgba(0,0,0,.24);
+  --surface-hero-shell:var(--bg-1);
+  --surface-primary-card:var(--bg-0);
+  --surface-quiet-card:var(--bg-2);
+  --surface-tool-panel:rgba(7,10,13,.74);
+  --surface-admin-panel:rgba(7,10,13,.86);
   --rim-jade:rgba(48,178,143,.42);
   --rim-lantern:rgba(218,181,94,.38);
   --rim-moon:rgba(220,235,245,.24);
@@ -43,6 +48,7 @@
   --card-pad:clamp(18px, 2.5vw, 26px);
   --hero-shell-pad-top:clamp(10px, 2.5vw, 26px);
   --hero-image-aspect:3 / 2;
+  --hero-frame-max-width:var(--container);
   --hero-image-radius:clamp(24px, 4vw, 42px);
   --hero-image-to-card-gap:clamp(18px, 3vw, 34px);
   --hero-stack-bottom-gap:clamp(10px, 2vw, 22px);
@@ -185,6 +191,7 @@ img{max-width:100%;display:block;}
    HERO — Hero image shell + overlap card positioning
    ========================================================= */
 .page-hero-shell{position:relative; z-index:10; padding-top:var(--hero-shell-pad-top);}
+.page-hero-shell > .container{max-width:var(--hero-frame-max-width);}
 .page-hero{
   position:relative;
   box-sizing:border-box;
@@ -250,9 +257,9 @@ img{max-width:100%;display:block;}
     linear-gradient(180deg, rgba(255,255,255,.045), transparent 38%) top / 100% 42% no-repeat,
     linear-gradient(90deg, transparent, rgba(255,255,255,.045), transparent) top / 100% 1px no-repeat;
 }
-.glass-card--strong{background:var(--bg-1);}
-.glass-card--primary{background:var(--bg-0);}
-.glass-card--soft{background:var(--bg-2);}
+.glass-card--strong{background:var(--surface-hero-shell);}
+.glass-card--primary{background:var(--surface-primary-card);}
+.glass-card--soft{background:var(--surface-quiet-card);}
 
 .glass-pad{padding:var(--card-pad);}
 @media (max-width:640px){ .glass-pad{padding:18px;} }
@@ -927,6 +934,9 @@ body[data-page="join"] .join-checklist__link:focus-visible{
    EVENTS — Visual schedule pilot
    ========================================================= */
 body[data-page="events"]{
+  --hero-frame-max-width:760px;
+  --hero-image-to-card-gap:clamp(-72px, -5vw, -42px);
+  --hero-stack-bottom-gap:clamp(6px, 1.2vw, 12px);
   --events-lantern:rgba(218,181,94,.66);
   --events-lantern-soft:rgba(218,181,94,.16);
   --events-ember:rgba(205,103,61,.44);
@@ -1338,6 +1348,7 @@ body[data-page="raffles"]{
 }
 
 body[data-page="spotify"]{
+  --hero-frame-max-width:980px;
   --side-rim-a:rgba(220,235,255,.54);
   --side-rim-b:rgba(210,147,188,.34);
   --side-glow:rgba(134,185,210,.13);
@@ -2207,6 +2218,9 @@ body[data-page="spotlight"] .col-4 .glass-card{
    HOME — Visual system pilot (page-scoped ornament)
    ========================================================= */
 body[data-page="home"]{
+  --hero-frame-max-width:840px;
+  --hero-image-to-card-gap:clamp(-420px, -39vw, -260px);
+  --hero-stack-bottom-gap:clamp(4px, .9vw, 10px);
   --home-jade:rgba(48,178,143,.62);
   --home-jade-soft:rgba(31,122,99,.24);
   --home-lantern:rgba(218,181,94,.66);
@@ -2318,7 +2332,7 @@ body[data-page="home"] .home-seal-verse{
 }
 
 body[data-page="home"] .page-main{
-  margin-top:clamp(4px, 2vw, 18px);
+  margin-top:clamp(0px, 1.4vw, 12px);
 }
 
 body[data-page="home"] .page-main > .container{
@@ -2658,6 +2672,11 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 @media (max-width:900px){
+  body[data-page="home"]{
+    --hero-image-to-card-gap:clamp(-180px, -20vw, -74px);
+    --hero-stack-bottom-gap:12px;
+  }
+
   body[data-page="home"] .home-hero-row{
     grid-template-columns:1fr;
     align-items:stretch;
@@ -3639,6 +3658,9 @@ body[data-page="leaders"] #leadersGrid article .badge-row > span{
    GALLERY — Responsive thumbnail grid
    ========================================================= */
 body[data-page="gallery"]{
+  --hero-frame-max-width:760px;
+  --hero-image-to-card-gap:clamp(-72px, -5vw, -42px);
+  --hero-stack-bottom-gap:clamp(6px, 1.2vw, 12px);
   --gallery-moon:rgba(220,235,255,.72);
   --gallery-frost:rgba(134,185,210,.46);
   --gallery-frost-soft:rgba(134,185,210,.16);
@@ -3711,6 +3733,15 @@ body[data-page="gallery"] .gallery-toolbar{
     radial-gradient(circle at 50% 0%, rgba(134,185,210,.11), transparent 62%),
     rgba(0,0,0,.16);
   box-shadow:0 12px 34px rgba(0,0,0,.24) inset;
+}
+
+body[data-page="gallery"] .gallery-toolbar,
+body[data-page="events"] .events-toolbar,
+body[data-page="spotify"] .spotify-toolbar{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(220,235,255,.10), transparent 56%),
+    linear-gradient(145deg, rgba(255,255,255,.045), rgba(0,0,0,.20)),
+    var(--surface-tool-panel);
 }
 
 body[data-page="gallery"] .gallery-controls{
@@ -4084,6 +4115,7 @@ body[data-page="account"],
 body[data-page="members"],
 body[data-page="leader-dashboard"],
 body[data-page="gallery-submit"]{
+  --hero-frame-max-width:980px;
   --auth-moon:rgba(220,235,255,.58);
   --auth-jade:rgba(48,178,143,.48);
   --auth-lantern:rgba(218,181,94,.44);
@@ -4490,6 +4522,21 @@ body[data-page="gallery-submit"] .muted{
   border:1px solid rgba(220,235,255,.11);
   background:rgba(0,0,0,.15);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.account-action-card,
+.account-summary-card,
+.profile-media-item,
+.review-item,
+.review-meta > div,
+.review-history,
+.moderation-summary__card,
+.member-card{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), transparent 46%),
+    radial-gradient(circle at 16% 0%, rgba(48,178,143,.09), transparent 42%),
+    var(--surface-admin-panel);
+  border-color:rgba(220,235,255,.14);
 }
 
 .account-summary-card span{
@@ -5083,6 +5130,12 @@ body[data-page="gallery-submit"] .muted{
   grid-template-columns:112px minmax(0, 1fr);
   gap:16px;
   align-items:start;
+  padding:14px;
+  border:1px solid rgba(220,235,255,.14);
+  border-radius:22px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 16px 38px rgba(0,0,0,.24);
 }
 
 .member-card__avatar{
@@ -5487,6 +5540,11 @@ body[data-page="gallery-submit"] .muted{
   pointer-events:none;
 }
 
+.cta,
+.footer-cta{
+  contain:paint;
+}
+
 .burger{
   width:44px;
   height:44px;
@@ -5711,6 +5769,7 @@ body[data-page="gallery-submit"] .muted{
 .site-footer{
   position:relative;
   z-index:10;
+  overflow:hidden;
   margin-top:64px;
   padding:44px 16px 34px;
   border-top:1px solid rgba(221,239,255,.14);
@@ -5915,6 +5974,12 @@ body[data-page="gallery-submit"] .muted{
 
   /* Bottom line stacks cleanly */
   .footer-bottom{flex-direction:column; align-items:flex-start;}
+
+  .cta-glint,
+  .footer-cta-glint{
+    inset:-24%;
+    opacity:.72;
+  }
 }
 
 /* =========================================================
