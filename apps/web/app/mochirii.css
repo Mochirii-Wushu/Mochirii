@@ -213,6 +213,7 @@ img{max-width:100%;display:block;}
   height:100%;
   min-height:0;
   object-fit:contain;
+  object-position:center;
   transform:none;
   filter:none;
   background:rgba(4,7,7,.84);
@@ -934,9 +935,6 @@ body[data-page="join"] .join-checklist__link:focus-visible{
    EVENTS — Visual schedule pilot
    ========================================================= */
 body[data-page="events"]{
-  --hero-frame-max-width:760px;
-  --hero-image-to-card-gap:clamp(-72px, -5vw, -42px);
-  --hero-stack-bottom-gap:clamp(6px, 1.2vw, 12px);
   --events-lantern:rgba(218,181,94,.66);
   --events-lantern-soft:rgba(218,181,94,.16);
   --events-ember:rgba(205,103,61,.44);
@@ -1348,7 +1346,6 @@ body[data-page="raffles"]{
 }
 
 body[data-page="spotify"]{
-  --hero-frame-max-width:980px;
   --side-rim-a:rgba(220,235,255,.54);
   --side-rim-b:rgba(210,147,188,.34);
   --side-glow:rgba(134,185,210,.13);
@@ -1838,13 +1835,6 @@ body[data-page="spotlight"] .col-4 .glass-card{
   max-width:32ch;
 }
 
-.home-hero-row{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  align-items:stretch;
-  gap:18px;
-}
-
 .home-seal-title{
   margin:0;
   font-family:var(--font-display);
@@ -1853,12 +1843,6 @@ body[data-page="spotlight"] .col-4 .glass-card{
   text-transform:none;
   color:var(--ink-0);
   text-align:center;
-}
-
-@media (max-width: 760px){
-  .home-hero-row{
-    grid-template-columns: 1fr;
-  }
 }
 
 /* =========================================================
@@ -2218,9 +2202,6 @@ body[data-page="spotlight"] .col-4 .glass-card{
    HOME — Visual system pilot (page-scoped ornament)
    ========================================================= */
 body[data-page="home"]{
-  --hero-frame-max-width:840px;
-  --hero-image-to-card-gap:clamp(-420px, -39vw, -260px);
-  --hero-stack-bottom-gap:clamp(4px, .9vw, 10px);
   --home-jade:rgba(48,178,143,.62);
   --home-jade-soft:rgba(31,122,99,.24);
   --home-lantern:rgba(218,181,94,.66);
@@ -2249,12 +2230,6 @@ body[data-page="home"] .page-hero{
 body[data-page="home"] .page-hero::before,
 body[data-page="home"] .page-hero::after{
   display:none;
-}
-
-body[data-page="home"] .home-hero-row{
-  grid-template-columns:minmax(0, 1.1fr) minmax(260px, .48fr);
-  gap:clamp(16px, 2.6vw, 30px);
-  align-items:end;
 }
 
 body[data-page="home"] .hero-intro,
@@ -2306,7 +2281,8 @@ body[data-page="home"] .hero-intro .prose-stack{
 body[data-page="home"] .home-guild-seal{
   --home-rim-a:var(--home-lotus);
   --home-rim-b:var(--home-moon);
-  align-self:stretch;
+  width:min(100%, 760px);
+  justify-self:center;
   justify-content:center;
   padding:clamp(20px, 3vw, 34px);
   gap:clamp(12px, 2vw, 18px);
@@ -2672,16 +2648,6 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 @media (max-width:900px){
-  body[data-page="home"]{
-    --hero-image-to-card-gap:clamp(-180px, -20vw, -74px);
-    --hero-stack-bottom-gap:12px;
-  }
-
-  body[data-page="home"] .home-hero-row{
-    grid-template-columns:1fr;
-    align-items:stretch;
-  }
-
   body[data-page="home"] .home-featured__plate .home-title{
     white-space:normal;
     font-size:inherit;
@@ -3658,9 +3624,6 @@ body[data-page="leaders"] #leadersGrid article .badge-row > span{
    GALLERY — Responsive thumbnail grid
    ========================================================= */
 body[data-page="gallery"]{
-  --hero-frame-max-width:760px;
-  --hero-image-to-card-gap:clamp(-72px, -5vw, -42px);
-  --hero-stack-bottom-gap:clamp(6px, 1.2vw, 12px);
   --gallery-moon:rgba(220,235,255,.72);
   --gallery-frost:rgba(134,185,210,.46);
   --gallery-frost-soft:rgba(134,185,210,.16);
@@ -4115,7 +4078,6 @@ body[data-page="account"],
 body[data-page="members"],
 body[data-page="leader-dashboard"],
 body[data-page="gallery-submit"]{
-  --hero-frame-max-width:980px;
   --auth-moon:rgba(220,235,255,.58);
   --auth-jade:rgba(48,178,143,.48);
   --auth-lantern:rgba(218,181,94,.44);
