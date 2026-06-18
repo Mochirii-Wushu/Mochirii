@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import {
   CORS_HEADERS,
@@ -24,7 +25,9 @@ function buildInstagramAltText(submission: JsonRecord): string {
   return `Mōchirīī guild gallery submission: ${title}`.slice(0, 1000);
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
   }
@@ -214,4 +217,4 @@ Deno.serve(async (req: Request) => {
     },
     message: action === "approved" ? "Submission approved for a future publishing step." : "Submission declined.",
   });
-});
+}

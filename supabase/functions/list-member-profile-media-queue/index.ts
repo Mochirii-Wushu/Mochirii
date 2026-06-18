@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { requireModeratorAccess, readOptionalJsonBody, jsonResponse, asRecord, asStringArray } from "../_shared/gallery-moderation.ts";
 import { PROFILE_MEDIA_BUCKET, PROFILE_MEDIA_SIGNED_URL_SECONDS, safeString } from "../_shared/member-profiles.ts";
@@ -7,7 +8,9 @@ function statusFilter(value: unknown): string {
   return ["pending", "approved", "rejected", "archived", "all"].includes(status) ? status : "pending";
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: jsonResponse({}).headers });
   if (req.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
 
@@ -100,4 +103,4 @@ Deno.serve(async (req: Request) => {
       moderatorRoles: asStringArray(access.roleIds),
     },
   });
-});
+}

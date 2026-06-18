@@ -39,8 +39,8 @@ This is the short source-of-truth index for the current Mochirii production post
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
 - Supabase function list was verified on 2026-06-17 for project `deyvmtncimmcinldjyqe`; expected website, Reaper, Instagram, vote, spotlight, profile, and Mochi Social alpha functions are active.
-- Supabase CLI is currently `2.105.0`; `2.107.0` was available during the 2026-06-17 check and should be handled in the Supabase hardening packet before database work.
-- Supabase advisor snapshot still includes future hardening items: leaked-password protection, intentional service-only RLS/no-policy documentation, high-value foreign-key indexes, and deferred Mochi Social RLS performance warnings.
+- Supabase CLI was updated to `2.107.0` for the Supabase hardening packet.
+- Supabase advisor snapshot still includes leaked-password protection as a provider configuration follow-up, intentional service-only RLS/no-policy findings documented in `supabase/README.md`, informational unused-index findings, and deferred Mochi Social RLS/index performance warnings.
 
 ## Discord And Reaper
 

@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { requireModeratorAccess, readRequiredJsonBody, jsonResponse, asRecord } from "../_shared/gallery-moderation.ts";
 import { profileImageKind, safeString } from "../_shared/member-profiles.ts";
@@ -7,7 +8,9 @@ function actionValue(value: unknown): "approved" | "rejected" | null {
   return action === "approved" || action === "rejected" ? action : null;
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: jsonResponse({}).headers });
   if (req.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
 
@@ -85,4 +88,4 @@ Deno.serve(async (req: Request) => {
     message: action === "approved" ? "Profile image approved." : "Profile image declined.",
     data: { media: updatedMedia },
   });
-});
+}

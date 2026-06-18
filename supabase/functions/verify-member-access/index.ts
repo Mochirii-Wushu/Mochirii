@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
@@ -479,7 +480,9 @@ async function updateDiscordProfile(
   return { ok: true, message: "Discord roles were found, but this website account is not active. Please contact leadership." };
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
   if (req.method !== "POST") return jsonResponse({ ok: false, message: "Method not allowed." }, 405);
 
@@ -654,4 +657,4 @@ Deno.serve(async (req: Request) => {
     },
     message,
   });
-});
+}

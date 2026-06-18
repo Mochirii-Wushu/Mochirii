@@ -41,6 +41,7 @@ const checks = [
   ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],
   ["check:accessibility-route-matrix", ["node", "scripts/check-accessibility-route-matrix.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
+  ["check:supabase-security-performance", ["node", "scripts/check-supabase-security-performance.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
