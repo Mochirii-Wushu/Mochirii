@@ -80,7 +80,7 @@
     "smoke:supabase-auth-boundary": "node scripts/smoke-supabase-auth-boundary.mjs",
     "smoke:supabase-edge-functions": "node scripts/smoke-supabase-edge-functions.mjs",
     "sync:next-public": "node scripts/sync-next-public.mjs",
-    "test:spotlight-poll": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
+    "test:spotlight-poll": "deno test --allow-env --node-modules-dir=auto --import-map=deno-spotlight-poll.import_map.json --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
     "test:modmail-audit": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/modmail-audit_test.ts",
     "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"
   },
