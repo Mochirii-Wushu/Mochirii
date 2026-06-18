@@ -10,7 +10,7 @@ const topLevelManifest = {
   "events.json": ["meta", "featured", "upcoming", "recurring", "participation"],
   "gallery.json": ["meta", "categories", "albums"],
   "guild-schedule.json": ["timezone", "discordCoverVersion", "monthly", "spotlight", "weekly"],
-  "home.json": ["copy", "hero", "seal", "bulletins", "tiles", "spotlight", "gallery"],
+  "home.json": ["copy", "celebrationSplash", "hero", "seal", "bulletins", "tiles", "spotlight", "gallery"],
   "join.json": ["hero", "steps", "quickStart", "checklist", "culture", "notes"],
   "leaders.json": ["hero", "panel", "council", "leaders", "responsibilities"],
   "raffles.json": ["meta", "how", "rules", "thisMonth", "links", "note"],
@@ -270,6 +270,22 @@ function validateGallery(data) {
 }
 
 function validateHome(data) {
+  const splash = data?.celebrationSplash;
+  if (!splash || typeof splash !== "object" || Array.isArray(splash)) {
+    addFailure("data/home.json.celebrationSplash: expected object.");
+  } else {
+    if (typeof splash.enabled !== "boolean") addFailure("data/home.json.celebrationSplash.enabled: expected boolean.");
+    if (splash.title !== "Happy Birthday Sinbell!!") addFailure("data/home.json.celebrationSplash.title: expected approved birthday title.");
+    if (splash.message !== "Mochi spirits love you!!") addFailure("data/home.json.celebrationSplash.message: expected approved birthday message.");
+    if (!isNonEmptyString(splash.storageKey)) addFailure("data/home.json.celebrationSplash.storageKey: expected non-empty storage key.");
+    ["startsAt", "endsAt"].forEach((key) => {
+      if (typeof splash[key] !== "string") addFailure(`data/home.json.celebrationSplash.${key}: expected string.`);
+      if (typeof splash[key] === "string" && splash[key].trim() && Number.isNaN(Date.parse(splash[key]))) {
+        addFailure(`data/home.json.celebrationSplash.${key}: expected a parseable date or empty string.`);
+      }
+    });
+  }
+
   const items = Array.isArray(data.gallery) ? data.gallery : [];
   if (items.length !== 4) addFailure(`data/home.json.gallery: expected 4 fallback Gallery items, got ${items.length}.`);
   items.forEach((item, index) => {

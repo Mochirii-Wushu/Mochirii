@@ -23,6 +23,7 @@
     "check:media-performance": "node scripts/check-media-performance.mjs",
     "check:full-stack-release-evidence": "node scripts/check-full-stack-release-evidence.mjs",
     "check:guild-schedule": "node scripts/check-guild-schedule.mjs",
+    "check:home-celebration-splash": "node scripts/check-home-celebration-splash.mjs",
     "check:events-page-schedule-sync": "node scripts/check-events-page-schedule-sync.mjs",
     "check:instagram-gallery-publishing": "node scripts/check-instagram-gallery-publishing.mjs",
     "check:js": "node scripts/check-js.mjs",
