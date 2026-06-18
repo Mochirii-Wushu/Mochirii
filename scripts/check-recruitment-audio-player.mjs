@@ -75,7 +75,11 @@ assertAudioHasNoVisibleControls("Next custom audio player", player);
   "recruitment-audio-volume-row",
   "recruitment-audio-volume",
   "grid-column:2 / -1",
-  "inline-size:min(184px, 76%)",
+  "grid-template-columns:36px minmax(0, 1fr) max-content",
+  "inline-size:min(100%, 360px)",
+  "grid-template-columns:34px minmax(0, 112px)",
+  "inline-size:min(156px, 58%)",
+  "block-size:4px",
   "overflow:hidden",
   "@media (max-width:520px)",
 ].forEach((snippet) => {

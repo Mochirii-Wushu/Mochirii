@@ -2498,13 +2498,14 @@ body[data-page="recruitment"] .recruitment-audio-player{
   --audio-progress:0%;
   --audio-volume:100%;
   display:grid;
-  grid-template-columns:44px minmax(0, 1fr) max-content;
+  grid-template-columns:36px minmax(0, 1fr) max-content;
   align-items:center;
-  column-gap:10px;
-  row-gap:12px;
-  inline-size:100%;
+  column-gap:8px;
+  row-gap:7px;
+  inline-size:min(100%, 360px);
+  justify-self:center;
   min-block-size:58px;
-  padding:8px 10px;
+  padding:7px 9px;
   border:1px solid rgba(218,181,94,.26);
   border-radius:999px;
   background:
@@ -2521,8 +2522,8 @@ body[data-page="recruitment"] .recruitment-audio-player{
 body[data-page="recruitment"] .recruitment-audio-button{
   display:inline-grid;
   place-items:center;
-  min-inline-size:40px;
-  min-block-size:40px;
+  min-inline-size:36px;
+  min-block-size:36px;
   border:1px solid rgba(218,181,94,.42);
   border-radius:999px;
   background:
@@ -2605,12 +2606,12 @@ body[data-page="recruitment"] .recruitment-audio-volume-wrap{
 body[data-page="recruitment"] .recruitment-audio-volume-row{
   display:grid;
   grid-column:1 / -1;
-  grid-template-columns:40px minmax(0, 128px);
+  grid-template-columns:34px minmax(0, 112px);
   align-items:center;
   justify-content:center;
   justify-self:center;
-  gap:10px;
-  inline-size:min(184px, 76%);
+  gap:8px;
+  inline-size:min(156px, 58%);
 }
 
 body[data-page="recruitment"] .recruitment-audio-progress,
@@ -2635,7 +2636,7 @@ body[data-page="recruitment"] .recruitment-audio-volume{
 body[data-page="recruitment"] .recruitment-audio-progress,
 body[data-page="recruitment"] .recruitment-audio-volume{
   appearance:none;
-  block-size:5px;
+  block-size:4px;
   border-radius:999px;
   cursor:pointer;
   box-shadow:0 0 18px rgba(48,178,143,.10);
@@ -2650,16 +2651,6 @@ body[data-page="recruitment"] .recruitment-audio-volume:disabled{
 body[data-page="recruitment"] .recruitment-audio-progress::-webkit-slider-thumb,
 body[data-page="recruitment"] .recruitment-audio-volume::-webkit-slider-thumb{
   appearance:none;
-  inline-size:16px;
-  block-size:16px;
-  border:2px solid rgba(255,246,232,.92);
-  border-radius:50%;
-  background:linear-gradient(145deg, rgba(218,181,94,.98), rgba(48,178,143,.76));
-  box-shadow:0 5px 12px rgba(0,0,0,.35);
-}
-
-body[data-page="recruitment"] .recruitment-audio-progress::-moz-range-thumb,
-body[data-page="recruitment"] .recruitment-audio-volume::-moz-range-thumb{
   inline-size:14px;
   block-size:14px;
   border:2px solid rgba(255,246,232,.92);
@@ -2668,17 +2659,28 @@ body[data-page="recruitment"] .recruitment-audio-volume::-moz-range-thumb{
   box-shadow:0 5px 12px rgba(0,0,0,.35);
 }
 
+body[data-page="recruitment"] .recruitment-audio-progress::-moz-range-thumb,
+body[data-page="recruitment"] .recruitment-audio-volume::-moz-range-thumb{
+  inline-size:13px;
+  block-size:13px;
+  border:2px solid rgba(255,246,232,.92);
+  border-radius:50%;
+  background:linear-gradient(145deg, rgba(218,181,94,.98), rgba(48,178,143,.76));
+  box-shadow:0 5px 12px rgba(0,0,0,.35);
+}
+
 body[data-page="recruitment"] .recruitment-audio-time{
   color:rgba(255,246,232,.86);
-  font-size:.84rem;
+  font-size:.8rem;
   font-variant-numeric:tabular-nums;
   white-space:nowrap;
 }
 
 body[data-page="recruitment"] .recruitment-audio-button--mute{
   grid-column:1 / 2;
-  min-inline-size:38px;
-  font-size:.72rem;
+  min-inline-size:34px;
+  min-block-size:34px;
+  font-size:.68rem;
   font-weight:800;
   letter-spacing:.04em;
   text-transform:uppercase;
@@ -2691,7 +2693,7 @@ body[data-page="recruitment"] .recruitment-audio-button--mute[data-muted="true"]
 
 @media (max-width:520px){
   body[data-page="recruitment"] .recruitment-audio-player{
-    grid-template-columns:44px minmax(0, 1fr) max-content;
+    grid-template-columns:36px minmax(0, 1fr) max-content;
     border-radius:24px;
   }
 }
