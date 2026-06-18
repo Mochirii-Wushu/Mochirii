@@ -20,6 +20,9 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - The grid uses thumbnails for page speed.
 - The lightbox opens full images.
 - Never let the lightbox open `/thumbs/` images.
+- The Next and rollback static Gallery surfaces render static items in bounded batches of 24; keep the `Show more images` control as the only expansion action unless a later scoped performance pass replaces the pattern.
+- Approved member and Discord submissions may render with time-limited Supabase signed URLs only. Do not expose raw storage buckets, storage paths, service-role keys, or private media references to browser code.
+- Home Gallery Spotlight must keep using thumbnail paths and must not switch to full-size Gallery images.
 
 ## 4. Categories
 
@@ -114,6 +117,7 @@ git diff --check
 node scripts/check-json.mjs
 node scripts/check-refs.mjs
 node scripts/check-assets.mjs
+npm run check:media-performance
 npm run smoke:gallery
 npm run check:production
 ```
@@ -137,8 +141,17 @@ npm run check:production
 - Confirm the lightbox opens full images, not `/thumbs/`.
 - Confirm Escape closes the lightbox.
 - Confirm no horizontal overflow.
+- Confirm the initial Gallery render is capped at 24 images and `Show more images` expands the next batch.
+- Confirm approved runtime submissions use signed URLs and do not display raw Supabase storage references.
 
-## 13. Protected Content
+## 13. Media Performance
+
+- Only the true page hero or route LCP image should use a priority preload.
+- Supporting cards, seals, gallery thumbnails, event board images, and repeated list images should stay lazy.
+- Keep explicit image `width`, `height`, and `sizes` values on high-impact media so Next can reserve stable layout space.
+- Do not compress, re-encode, replace, delete, externalize, or otherwise optimize `assets/audio/mochiriiiiii.mp3` without explicit approval.
+
+## 14. Protected Content
 
 Gallery work must not alter:
 

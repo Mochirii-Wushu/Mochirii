@@ -3128,6 +3128,41 @@ body[data-page="gallery"] .gallery-grid{
   margin-top:22px;
 }
 
+body[data-page="gallery"] .gallery-load-more-row{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  margin-top:clamp(18px, 3vw, 28px);
+}
+
+body[data-page="gallery"] .gallery-load-more-row[hidden]{
+  display:none;
+}
+
+body[data-page="gallery"] .gallery-load-more{
+  min-height:44px;
+  border:1px solid rgba(218,181,94,.34);
+  border-radius:999px;
+  padding:10px 18px;
+  color:var(--ink-0);
+  background:
+    linear-gradient(135deg, rgba(218,181,94,.20), rgba(134,185,210,.12)),
+    rgba(13,17,18,.70);
+  box-shadow:0 12px 30px rgba(0,0,0,.28);
+  cursor:pointer;
+}
+
+body[data-page="gallery"] .gallery-load-more:hover,
+body[data-page="gallery"] .gallery-load-more:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(218,181,94,.58);
+}
+
+body[data-page="gallery"] .gallery-load-more:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
 .gallery-grid{
   width:100%;
   display:grid;
