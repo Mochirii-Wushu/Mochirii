@@ -24,6 +24,7 @@
   const MEMBER_CATEGORY = "member-submissions";
   const DEFAULT_SORT = "random";
   const SORT_MODES = new Set([DEFAULT_SORT, "newest", "oldest"]);
+  const GALLERY_RENDER_BATCH_SIZE = 24;
 
   const toTitle = (slug) =>
     String(slug || "")
@@ -279,10 +280,12 @@
     });
   }
 
-  function formatCount(count, total, categoryLabel) {
-    const noun = count === 1 ? "image" : "images";
-    if (!categoryLabel || categoryLabel === "All") return `Showing ${count} of ${total} ${total === 1 ? "image" : "images"}.`;
-    return `Showing ${count} ${noun} in ${categoryLabel}.`;
+  function formatCount(renderedCount, visibleTotal, allTotal, categoryLabel) {
+    if (!categoryLabel || categoryLabel === "All") {
+      return `Showing ${renderedCount} of ${allTotal} ${allTotal === 1 ? "image" : "images"}.`;
+    }
+
+    return `Showing ${renderedCount} of ${visibleTotal} ${visibleTotal === 1 ? "image" : "images"} in ${categoryLabel}.`;
   }
 
   function flattenItems(data) {
@@ -389,27 +392,41 @@
       const sortSelect = $("#gallerySort");
       const count = $("#galleryCount");
       const empty = $("#galleryEmpty");
+      const loadMoreRow = $("#galleryLoadMoreRow");
+      const loadMore = $("#galleryLoadMore");
       const copyLink = $("#galleryCopyLink");
       const shareStatus = $("#galleryShareStatus");
       const categories = buildCategories(data, items);
       const initialState = readGalleryStateFromUrl(categories);
       let activeCategory = initialState.category;
       let activeSort = initialState.sort;
+      let renderLimit = GALLERY_RENDER_BATCH_SIZE;
+      let visibleItems = [];
+
+      const renderVisibleItems = () => {
+        const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
+        const renderedItems = visibleItems.slice(0, renderLimit);
+        const hasMore = renderedItems.length < visibleItems.length;
+
+        renderGrid(grid, renderedItems);
+        updateFilterState(filters, activeCategory);
+        updateSortState(sortSelect, activeSort);
+
+        if (count) setText(count, formatCount(renderedItems.length, visibleItems.length, items.length, activeLabel));
+        if (empty) empty.hidden = visibleItems.length > 0;
+        grid.hidden = visibleItems.length === 0;
+        if (loadMoreRow) loadMoreRow.hidden = !hasMore;
+        if (loadMore) loadMore.disabled = !hasMore;
+        if (shareStatus) shareStatus.textContent = "";
+      };
 
       const applyGalleryState = (category, sort, { updateUrl = false, replaceUrl = false } = {}) => {
         activeCategory = normalizeCategory(categories, category);
         activeSort = normalizeSort(sort);
-        const visibleItems = orderGalleryItems(filterItems(items, activeCategory), activeSort);
-        const activeLabel = categories.find((entry) => entry.slug === activeCategory)?.label || "All";
+        renderLimit = GALLERY_RENDER_BATCH_SIZE;
+        visibleItems = orderGalleryItems(filterItems(items, activeCategory), activeSort);
 
-        renderGrid(grid, visibleItems);
-        updateFilterState(filters, activeCategory);
-        updateSortState(sortSelect, activeSort);
-
-        if (count) setText(count, formatCount(visibleItems.length, items.length, activeLabel));
-        if (empty) empty.hidden = visibleItems.length > 0;
-        grid.hidden = visibleItems.length === 0;
-        if (shareStatus) shareStatus.textContent = "";
+        renderVisibleItems();
 
         if (updateUrl || replaceUrl) {
           updateGalleryUrl(activeCategory, activeSort, { replace: replaceUrl });
@@ -421,6 +438,10 @@
       });
       sortSelect?.addEventListener("change", () => {
         applyGalleryState(activeCategory, sortSelect.value, { updateUrl: true });
+      });
+      loadMore?.addEventListener("click", () => {
+        renderLimit = Math.min(renderLimit + GALLERY_RENDER_BATCH_SIZE, visibleItems.length);
+        renderVisibleItems();
       });
       applyGalleryState(activeCategory, activeSort, { replaceUrl: initialState.hasParam && !initialState.valid });
 

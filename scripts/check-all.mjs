@@ -33,6 +33,7 @@ const checks = [
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
   ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
+  ["check:media-performance", ["node", "scripts/check-media-performance.mjs"]],
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],

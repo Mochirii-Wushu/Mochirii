@@ -329,7 +329,6 @@ export default function Home() {
                 alt={cleanLabel(homeData.seal.imageAlt || "Mōchirīī guild seal")}
                 width="1024"
                 height="1024"
-                priority
                 sizes="(max-width: 900px) 180px, 220px"
               />
               <h2 id="sealTitle" className="home-seal-title">
