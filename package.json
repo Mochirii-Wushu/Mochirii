@@ -49,6 +49,7 @@
     "check:next-public-sync": "node scripts/check-next-public-sync.mjs",
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
+    "check:recruitment-audio-player": "node scripts/check-recruitment-audio-player.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:security-hardening": "node scripts/check-security-hardening.mjs",
     "check:shop-brand": "node scripts/check-shop-brand-guardrails.mjs",

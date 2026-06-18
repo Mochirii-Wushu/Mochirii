@@ -46,6 +46,145 @@ function fmtMonth(iso) {
   return U.formatDateUTC(iso, { locale: "en-US", year: "numeric", month: "long" });
 }
 
+  function formatAudioTime(value) {
+    if (!Number.isFinite(value) || value <= 0) return "0:00";
+    const totalSeconds = Math.floor(value);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
+
+  function configureAudioPlayer(audio, hasAudio) {
+    const player = $("#recruitmentAudioPlayer");
+    if (!audio || !player) return;
+
+    const playButton = $("[data-audio-play]", player);
+    const playIcon = $(".recruitment-audio-button__icon", playButton);
+    const seekInput = $("[data-audio-seek]", player);
+    const timeEl = $("[data-audio-time]", player);
+    const muteButton = $("[data-audio-mute]", player);
+    const volumeInput = $("[data-audio-volume]", player);
+    const statusEl = $("[data-audio-status]", player);
+
+    const setStatus = (message) => setText(statusEl, message || "");
+
+    function setRangeFill() {
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      const currentTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+      const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+      const volume = Math.round((Number.isFinite(audio.volume) ? audio.volume : 1) * 100);
+      player.style.setProperty("--audio-progress", `${progress}%`);
+      player.style.setProperty("--audio-volume", `${volume}%`);
+    }
+
+    function syncPlayback() {
+      const playing = !audio.paused && !audio.ended;
+      player.dataset.state = playing ? "playing" : "paused";
+      if (playIcon) playIcon.dataset.icon = playing ? "pause" : "play";
+      playButton?.setAttribute("aria-label", playing ? "Pause recruitment audio" : "Play recruitment audio");
+    }
+
+    function syncMetadata() {
+      const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+      const currentTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+      if (seekInput) {
+        seekInput.max = String(duration || 0);
+        seekInput.value = String(duration > 0 ? currentTime : 0);
+        seekInput.disabled = !hasAudio || duration <= 0;
+        seekInput.setAttribute("aria-valuetext", `${formatAudioTime(currentTime)} of ${formatAudioTime(duration)}`);
+      }
+      setText(timeEl, `${formatAudioTime(currentTime)} / ${formatAudioTime(duration)}`);
+      setRangeFill();
+    }
+
+    function syncVolume() {
+      const volume = Number.isFinite(audio.volume) ? audio.volume : 1;
+      const muted = audio.muted || volume === 0;
+      if (volumeInput) {
+        volumeInput.value = String(volume);
+        volumeInput.disabled = !hasAudio;
+        volumeInput.setAttribute("aria-valuetext", `${Math.round(volume * 100)}%`);
+      }
+      muteButton?.setAttribute("aria-label", muted ? "Unmute recruitment audio" : "Mute recruitment audio");
+      muteButton?.setAttribute("data-muted", muted ? "true" : "false");
+      setRangeFill();
+    }
+
+    [playButton, muteButton, volumeInput].forEach((control) => {
+      if (control) control.disabled = !hasAudio;
+    });
+    if (seekInput) seekInput.disabled = true;
+    player.dataset.state = hasAudio ? "paused" : "unavailable";
+
+    if (player.dataset.audioPlayerBound === "true") {
+      syncPlayback();
+      syncMetadata();
+      syncVolume();
+      return;
+    }
+    player.dataset.audioPlayerBound = "true";
+
+    player.addEventListener("contextmenu", (event) => event.preventDefault());
+
+    playButton?.addEventListener("click", async () => {
+      if (!hasAudio) return;
+      if (!audio.paused && !audio.ended) {
+        audio.pause();
+        return;
+      }
+      try {
+        if (audio.networkState === audio.NETWORK_EMPTY) {
+          audio.load();
+        }
+        await audio.play();
+      } catch {
+        setStatus("Unable to start audio playback.");
+      }
+    });
+
+    seekInput?.addEventListener("input", () => {
+      const nextTime = Number(seekInput.value);
+      if (!Number.isFinite(nextTime)) return;
+      audio.currentTime = nextTime;
+      syncMetadata();
+    });
+
+    muteButton?.addEventListener("click", () => {
+      audio.muted = !(audio.muted || audio.volume === 0);
+      syncVolume();
+    });
+
+    volumeInput?.addEventListener("input", () => {
+      const nextVolume = Math.min(1, Math.max(0, Number(volumeInput.value)));
+      audio.volume = Number.isFinite(nextVolume) ? nextVolume : 1;
+      audio.muted = audio.volume === 0;
+      syncVolume();
+    });
+
+    audio.addEventListener("loadedmetadata", syncMetadata);
+    audio.addEventListener("durationchange", syncMetadata);
+    audio.addEventListener("timeupdate", syncMetadata);
+    audio.addEventListener("play", () => {
+      setStatus("");
+      syncPlayback();
+    });
+    audio.addEventListener("pause", syncPlayback);
+    audio.addEventListener("ended", () => {
+      audio.currentTime = 0;
+      syncPlayback();
+      syncMetadata();
+    });
+    audio.addEventListener("volumechange", syncVolume);
+    audio.addEventListener("error", () => {
+      setStatus("Unable to load the audio note.");
+      syncPlayback();
+    });
+
+    syncPlayback();
+    syncMetadata();
+    syncVolume();
+  }
+
   function setHeroImages(data) {
     const hero = $("#recruitmentHeroImage");
     const atmos = $("#recruitmentAtmosphere");
@@ -78,28 +217,24 @@ function fmtMonth(iso) {
 
     if (!audio) return;
 
-audio.innerHTML = "";
+    audio.textContent = "Your browser does not support the audio element.";
+    audio.removeAttribute("src");
+    audio.removeAttribute("controls");
+    audio.setAttribute("controlsList", "nodownload");
+    if (audio.controlsList?.add) audio.controlsList.add("nodownload");
 
-if (!sources.length) {
-  audio.removeAttribute("controls");
-  setText(descEl, audioDesc || "Audio unavailable.");
-  addBadgeRow(badgesEl, []);
-  return;
-}
+    if (!sources.length) {
+      setText(descEl, audioDesc || "Audio unavailable.");
+      addBadgeRow(badgesEl, []);
+      configureAudioPlayer(audio, false);
+      return;
+    }
 
-audio.setAttribute("controls", "controls");
+    // Bind the approved asset path directly for reliable custom-control playback.
+    audio.src = String(sources[0]?.src || "").trim();
 
-// Rebuild sources safely.
-sources.forEach((srcObj) => {
-  const src = srcObj?.src;
-  const type = srcObj?.type;
-  if (!src) return;
-
-  const s = document.createElement("source");
-  s.setAttribute("src", src);
-  if (type) s.setAttribute("type", type);
-  audio.appendChild(s);
-});
+    audio.load();
+    configureAudioPlayer(audio, true);
 
     // Friendly badges like “mp3”, “ogg”
     const formats = sources

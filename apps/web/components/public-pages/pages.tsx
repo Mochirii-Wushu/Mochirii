@@ -18,6 +18,7 @@ import { EventsBoard } from "./EventsBoard";
 import { GalleryBrowser } from "./GalleryBrowser";
 import { LeaderProfileButton } from "./ProfileCardLinks";
 import { ProfileDisplay } from "./ProfileDisplay";
+import { RecruitmentAudioPlayer } from "./RecruitmentAudioPlayer";
 import { SpotlightWinnerTitle } from "./SpotlightWinnerTitle";
 import { SpotifyBrowser } from "./SpotifyBrowser";
 import {
@@ -1138,6 +1139,10 @@ export function RecruitmentPage() {
   const audio = record(data.audio);
   const content = record(data.content);
   const sources = records(audio.sources);
+  const audioSources = sources.map((source) => ({
+    src: publicPath(source.src),
+    type: text(source.type),
+  }));
 
   return (
     <>
@@ -1161,7 +1166,7 @@ export function RecruitmentPage() {
       <main className="page-main" id="main">
         <div className="container">
           <div className="grid-12 grid-gap">
-            <section className="col-4">
+            <section className="col-4" aria-describedby="recruitmentAudioDesc">
               <div className="glass-card glass-card--soft glass-pad center-stack">
                 <h2 className="section-title section-title--sm" id="recruitmentAudioTitle">
                   {text(audio.title, "A Note")}
@@ -1169,21 +1174,7 @@ export function RecruitmentPage() {
                 <p className="muted" id="recruitmentAudioDesc">
                   {text(audio.description)}
                 </p>
-                <div className="u-full-width u-mt-12">
-                  <audio
-                    id="recruitmentAudio"
-                    controls={sources.length > 0}
-                    preload="none"
-                    className="u-full-width"
-                    aria-labelledby="recruitmentAudioTitle"
-                    aria-describedby="recruitmentAudioDesc"
-                  >
-                    {sources.map((source) => (
-                      <source src={publicPath(source.src)} type={text(source.type)} key={`${text(source.src)}-${text(source.type)}`} />
-                    ))}
-                    Your browser does not support the audio element.
-                  </audio>
-                </div>
+                <RecruitmentAudioPlayer sources={audioSources} />
                 <BadgeRow
                   id="recruitmentAudioBadges"
                   items={sources.map((source) => {

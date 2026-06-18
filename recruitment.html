@@ -83,23 +83,86 @@
       <div class="grid-12 grid-gap">
 
         <!-- Audio note -->
-        <section class="col-4">
+        <section class="col-4" aria-describedby="recruitmentAudioDesc">
           <div class="glass-card glass-card--soft glass-pad center-stack">
             <h2 class="section-title section-title--sm" id="recruitmentAudioTitle">A Note</h2>
             <p class="muted" id="recruitmentAudioDesc">Loading…</p>
 
-            <div style="width:100%; margin-top:12px;">
+            <div class="recruitment-audio-shell u-full-width u-mt-12">
               <audio
                 id="recruitmentAudio"
-                controls
                 preload="none"
-                style="width:100%;"
+                class="recruitment-audio-native"
                 aria-labelledby="recruitmentAudioTitle"
                 aria-describedby="recruitmentAudioDesc"
+                controlslist="nodownload"
               >
                 <!-- sources inserted by recruitment.js -->
                 Your browser does not support the audio element.
               </audio>
+
+              <div
+                id="recruitmentAudioPlayer"
+                class="recruitment-audio-player"
+                data-custom-recruitment-audio-player="true"
+                data-state="paused"
+                aria-describedby="recruitmentAudioDesc"
+                style="--audio-progress:0%; --audio-volume:100%;"
+              >
+                <button
+                  class="recruitment-audio-button recruitment-audio-button--play"
+                  type="button"
+                  data-audio-play
+                  aria-label="Play recruitment audio"
+                >
+                  <span class="recruitment-audio-button__icon" data-icon="play" aria-hidden="true"></span>
+                </button>
+
+                <label class="recruitment-audio-progress-wrap">
+                  <span class="sr-only">Seek recruitment audio</span>
+                  <input
+                    class="recruitment-audio-progress"
+                    type="range"
+                    min="0"
+                    max="0"
+                    step="0.1"
+                    value="0"
+                    data-audio-seek
+                    aria-label="Seek recruitment audio"
+                    aria-valuetext="0:00 of 0:00"
+                    disabled
+                  />
+                </label>
+
+                <span class="recruitment-audio-time" data-audio-time aria-live="off">0:00 / 0:00</span>
+
+                <button
+                  class="recruitment-audio-button recruitment-audio-button--mute"
+                  type="button"
+                  data-audio-mute
+                  data-muted="false"
+                  aria-label="Mute recruitment audio"
+                >
+                  Vol
+                </button>
+
+                <label class="recruitment-audio-volume-wrap">
+                  <span class="sr-only">Recruitment audio volume</span>
+                  <input
+                    class="recruitment-audio-volume"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="1"
+                    data-audio-volume
+                    aria-label="Recruitment audio volume"
+                    aria-valuetext="100%"
+                  />
+                </label>
+
+                <p class="sr-only" role="status" aria-live="polite" data-audio-status></p>
+              </div>
             </div>
 
             <div class="badge-row" id="recruitmentAudioBadges" aria-label="Audio formats"></div>
