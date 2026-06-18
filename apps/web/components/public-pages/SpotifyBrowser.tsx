@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type SpotifyItem = {
   title?: string;
@@ -43,6 +43,65 @@ function toSpotifyEmbedSrc(value: unknown) {
   } catch {
     return "";
   }
+}
+
+function SpotifyEmbed({
+  title,
+  src,
+  height,
+}: {
+  title: string;
+  src: string;
+  height: number;
+}) {
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (shouldLoad) return;
+
+    const shell = shellRef.current;
+    if (!shell || typeof window === "undefined" || !("IntersectionObserver" in window)) {
+      setShouldLoad(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "640px 0px" },
+    );
+
+    observer.observe(shell);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+
+  return (
+    <div
+      className="spotify-embed u-mt-12"
+      ref={shellRef}
+      style={{ minHeight: `${height}px` }}
+      data-deferred-spotify-embed="true"
+      aria-label={`Spotify player shell: ${title}`}
+    >
+      {shouldLoad ? (
+        <iframe
+          src={src}
+          width="100%"
+          height={height}
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          title={`Spotify embed: ${title}`}
+        />
+      ) : (
+        <div className="spotify-embed__placeholder" aria-hidden="true" />
+      )}
+    </div>
+  );
 }
 
 export function SpotifyBrowser({
@@ -135,16 +194,7 @@ export function SpotifyBrowser({
                 {item.description ? <p className="muted u-mt-10">{item.description}</p> : null}
               </div>
             </div>
-            <div className="spotify-embed u-mt-12">
-              <iframe
-                src={item.src}
-                width="100%"
-                height={item.height}
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-                title={`Spotify embed: ${item.title}`}
-              />
-            </div>
+            <SpotifyEmbed title={item.title} src={item.src} height={item.height} />
           </article>
         ))}
       </div>

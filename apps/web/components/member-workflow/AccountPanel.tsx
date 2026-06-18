@@ -25,6 +25,7 @@ import {
   submissionStatuses,
   uploadAccess,
 } from "./format";
+import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
 type FormState = Record<(typeof editableProfileFields)[number], string>;
 
@@ -302,10 +303,10 @@ export function AccountPanel() {
 
   if (!user) {
     return (
-      <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel">
+      <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel" aria-busy={busy}>
         <p className="kicker">Sign In Required</p>
         <h2 className="section-title">Choose a Sign-In Method</h2>
-        <p className="muted">A website account is required before member verification and gallery access can be checked.</p>
+        <WorkflowNotice>A website account is required before member verification and gallery access can be checked.</WorkflowNotice>
         <div className="auth-actions">
           <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link>
         </div>
@@ -328,7 +329,7 @@ export function AccountPanel() {
   const bioLength = formState.bio.length;
 
   return (
-    <div className="grid-12 grid-gap" id="accountPanel">
+    <div className="grid-12 grid-gap" id="accountPanel" aria-busy={busy}>
       <section className="col-8 account-main">
         <div className="glass-card glass-card--primary glass-pad auth-panel account-overview-card">
           <div className="auth-panel__head">
@@ -374,7 +375,7 @@ export function AccountPanel() {
             </div>
           </dl>
 
-          <p className="auth-status muted" role="status" aria-live="polite">{access.guidance}</p>
+          <WorkflowNotice tone={access.ok ? "success" : "warning"}>{access.guidance}</WorkflowNotice>
         </div>
 
         <div className="glass-card glass-card--primary glass-pad auth-panel">
@@ -450,8 +451,8 @@ export function AccountPanel() {
             </ul>
           </div>
 
-          <p className="auth-status muted" id="verifyStatus" role="status" aria-live="polite">{verifyStatus}</p>
-          <p className="auth-error" id="verifyError" role="alert" hidden={!verifyError}>{verifyError}</p>
+          <WorkflowNotice id="verifyStatus" hidden={!verifyStatus}>{verifyStatus}</WorkflowNotice>
+          <WorkflowNotice id="verifyError" tone="danger" role="alert" hidden={!verifyError}>{verifyError}</WorkflowNotice>
         </div>
 
         <section className="glass-card glass-card--primary glass-pad auth-panel" aria-labelledby="linkedMethodsTitle">
@@ -472,7 +473,11 @@ export function AccountPanel() {
                 </div>
                 <small>{identity.emailVerified || identity.phoneVerified ? "Verified by provider" : "Provider identity evidence"}</small>
               </article>
-            )) : <p className="muted">Linked methods appear after the next member verification check.</p>}
+            )) : (
+              <WorkflowEmptyState title="No linked methods shown">
+                Linked methods appear after the next member verification check.
+              </WorkflowEmptyState>
+            )}
           </div>
 
           {availableLinkProviders.length ? (
@@ -509,9 +514,13 @@ export function AccountPanel() {
           </div>
 
           <div className="submission-list" id="accountSubmissionsList" aria-live="polite">
-            {submissions.length ? submissions.slice(0, 5).map((item) => <SubmissionItem item={item} key={item.id} />) : <p className="muted">No gallery submissions yet.</p>}
+            {submissions.length ? submissions.slice(0, 5).map((item) => <SubmissionItem item={item} key={item.id} />) : (
+              <WorkflowEmptyState title={busy ? "Loading submissions" : "No gallery submissions yet"}>
+                {busy ? "Checking your submitted gallery images." : "Your latest member gallery submissions will appear here."}
+              </WorkflowEmptyState>
+            )}
           </div>
-          <p className="auth-error" id="accountSubmissionsError" role="alert" hidden={!submissionsError}>{submissionsError}</p>
+          <WorkflowNotice id="accountSubmissionsError" tone="danger" role="alert" hidden={!submissionsError}>{submissionsError}</WorkflowNotice>
         </section>
       </section>
 
@@ -522,9 +531,9 @@ export function AccountPanel() {
           <progress className="profile-progress" value={completion.percent} max={100} aria-hidden="true">
             {completion.percent}%
           </progress>
-          <p className="auth-status muted">
+          <WorkflowNotice>
             {completion.complete} / {completion.total} core fields complete. Optional fields complete: {completion.optionalComplete} / {optionalProfileFields.length}.
-          </p>
+          </WorkflowNotice>
           <ul className="list-stack account-missing-list">
             {completion.missing.length ? completion.missing.map((label) => <li key={label}>{label} recommended.</li>) : <li>Core profile fields are complete.</li>}
           </ul>
@@ -539,9 +548,9 @@ export function AccountPanel() {
             <StatusPill tone={profileIsPublished ? "active" : "muted"}>{profileIsPublished ? "Published" : "Hidden"}</StatusPill>
           </div>
 
-          <p className="auth-status muted">
+          <WorkflowNotice>
             Published profiles are visible only to active verified members. Avatar and banner images appear after moderator approval.
-          </p>
+          </WorkflowNotice>
 
           <div className="auth-actions">
             <button className="hero-cta hero-cta--primary" type="button" onClick={toggleProfileVisibility} disabled={busy || !access.ok}>
@@ -571,11 +580,15 @@ export function AccountPanel() {
           <div className="profile-media-list" aria-live="polite">
             {(["avatar", "banner"] as const).map((kind) => {
               const item = latestMedia(kind);
-              return item ? <ProfileMediaStatus item={item} key={kind} /> : <p className="muted" key={kind}>No {kind} image submitted yet.</p>;
+              return item ? <ProfileMediaStatus item={item} key={kind} /> : (
+                <WorkflowEmptyState title={`No ${kind} image`} key={kind}>
+                  No {kind} image submitted yet.
+                </WorkflowEmptyState>
+              );
             })}
           </div>
 
-          <p className="auth-error" role="alert" hidden={!profileMediaError}>{profileMediaError}</p>
+          <WorkflowNotice tone="danger" role="alert" hidden={!profileMediaError}>{profileMediaError}</WorkflowNotice>
         </section>
 
         <form className="glass-card glass-card--soft glass-pad auth-form" id="profileForm" onSubmit={saveProfile}>
@@ -629,8 +642,8 @@ export function AccountPanel() {
             <button className="hero-cta hero-cta--primary" type="submit" disabled={busy}>Save profile</button>
           </div>
 
-          <p className="auth-status muted" id="profileStatus" role="status" aria-live="polite">{profileStatus}</p>
-          <p className="auth-error" id="profileError" role="alert" hidden={!profileError}>{profileError}</p>
+          <WorkflowNotice id="profileStatus" hidden={!profileStatus}>{profileStatus}</WorkflowNotice>
+          <WorkflowNotice id="profileError" tone="danger" role="alert" hidden={!profileError}>{profileError}</WorkflowNotice>
         </form>
       </aside>
 

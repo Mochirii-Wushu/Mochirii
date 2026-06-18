@@ -22,9 +22,11 @@ const galleryGuide = read("docs/gallery-guide.md");
 const supabaseReadme = read("supabase/README.md");
 const supabaseConfig = read("supabase/config.toml");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
+const workflowState = read("apps/web/components/member-workflow/WorkflowState.tsx");
 const memberWorkflowFormat = read("apps/web/components/member-workflow/format.ts");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
+const memberDirectory = read("apps/web/components/member-workflow/MemberDirectory.tsx");
 const memberProfilesClient = read("apps/web/lib/supabase/member-profiles.ts");
 const profileClient = read("apps/web/lib/supabase/profile.ts");
 const memberProfileShared = read("supabase/functions/_shared/member-profiles.ts");
@@ -101,6 +103,26 @@ assertRegex(
 assertRegex("AccountPanel", accountPanel, /id="bio"[\s\S]*?maxLength=\{1000\}[\s\S]*?\{bioLength\} \/ 1000 characters/, "Bio must stay capped at 1,000 characters with visible counter.");
 assertIncludes("AccountPanel", accountPanel, "Published profiles are visible only to active verified members. Avatar and banner images appear after moderator approval.");
 assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
+
+[
+  "export function WorkflowNotice",
+  "export function WorkflowEmptyState",
+  'role = "status"',
+  'role?: "status" | "alert";',
+  'aria-live={role === "alert" ? "assertive" : "polite"}',
+  'className="workflow-empty-state"',
+].forEach((snippet) => assertIncludes("WorkflowState", workflowState, snippet));
+
+[
+  ["AccountPanel", accountPanel],
+  ["GallerySubmitForm", gallerySubmit],
+  ["MemberDirectory", memberDirectory],
+  ["LeaderDashboard", leaderDashboard],
+].forEach(([label, source]) => {
+  assertIncludes(label, source, "WorkflowNotice");
+  assertIncludes(label, source, "WorkflowEmptyState");
+  assertIncludes(label, source, "aria-busy=");
+});
 
 [
   'const gateTitle = mode === "signed-out" ? "Login Required" : allowed ? "Upload Ready" : "Member Verification Required";',

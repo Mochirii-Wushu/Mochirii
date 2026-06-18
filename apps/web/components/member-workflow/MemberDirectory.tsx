@@ -6,6 +6,7 @@ import { onAuthStateChange, requireAuth } from "@/lib/supabase/auth";
 import { getPublishedMemberProfile, listPublishedMemberProfiles } from "@/lib/supabase/member-profiles";
 import { text, type PublicMemberProfile } from "@/lib/supabase/types";
 import { ProfileDisplay } from "@/components/public-pages/ProfileDisplay";
+import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
 const fallbackAvatar = "/assets/img/leaders/leader-silhouette.webp";
 const fallbackBanner = "/assets/img/leaders/panel.webp";
@@ -96,7 +97,7 @@ export function MembersDirectory() {
   }
 
   return (
-    <section className="glass-card glass-card--primary glass-pad auth-panel">
+    <section className="glass-card glass-card--primary glass-pad auth-panel" aria-busy={busy} aria-live="polite">
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Members</p>
@@ -104,10 +105,15 @@ export function MembersDirectory() {
         </div>
         <button className="hero-cta" type="button" onClick={load} disabled={busy}>Refresh</button>
       </div>
-      <p className="auth-status muted" role="status" aria-live="polite">{message}</p>
+      <WorkflowNotice tone={profiles.length ? "success" : "info"}>{message}</WorkflowNotice>
       <div className="member-directory-grid">
         {profiles.map((profile) => <MemberCard profile={profile} key={text(profile.slug, text(profile.id))} />)}
       </div>
+      {!profiles.length ? (
+        <WorkflowEmptyState title={busy ? "Loading profiles" : "No profiles shown"}>
+          {busy ? "Checking your session and member profile access." : message}
+        </WorkflowEmptyState>
+      ) : null}
     </section>
   );
 }
@@ -157,10 +163,10 @@ export function MemberProfileView({ slug }: { slug: string }) {
           {!signedIn && !busy ? (
             <GateMessage title="Sign In Required" message={message} />
           ) : (
-            <section className="glass-card glass-card--primary glass-pad auth-panel">
+            <section className="glass-card glass-card--primary glass-pad auth-panel" aria-busy={busy}>
               <p className="kicker">Member Profile</p>
               <h1 className="section-title">{busy ? "Loading" : "Profile unavailable"}</h1>
-              <p className="muted">{message}</p>
+              <WorkflowNotice tone={busy ? "info" : "warning"}>{message}</WorkflowNotice>
               <div className="auth-actions">
                 <Link className="hero-cta" href="/members">Back to members</Link>
               </div>

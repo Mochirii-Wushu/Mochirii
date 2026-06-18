@@ -31,6 +31,7 @@ import {
   type ProfileMediaStatus,
 } from "@/lib/supabase/types";
 import { formatBytes, formatDate } from "./format";
+import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
 const statuses: Array<{ id: ModerationStatus; label: string; empty: string }> = [
   { id: "pending", label: "Pending", empty: "No pending gallery submissions." },
@@ -1050,10 +1051,10 @@ export function LeaderDashboard() {
 
   if (panel === "signed-out") {
     return (
-      <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel">
+      <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel" aria-busy={busy}>
         <p className="kicker">Sign In Required</p>
         <h2 className="section-title">Sign In Required</h2>
-        <p className="muted">Moderator access is checked against Discord after website sign-in.</p>
+        <WorkflowNotice>Moderator access is checked against Discord after website sign-in.</WorkflowNotice>
         <div className="auth-actions">
           <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link>
           <Link className="hero-cta" href="/account">Account</Link>
@@ -1064,10 +1065,10 @@ export function LeaderDashboard() {
 
   if (panel === "denied") {
     return (
-      <section className="glass-card glass-card--primary glass-pad auth-panel" id="accessDeniedPanel">
+      <section className="glass-card glass-card--primary glass-pad auth-panel" id="accessDeniedPanel" aria-busy={busy}>
         <p className="kicker">Access Denied</p>
         <h2 className="section-title">Moderator Role Required</h2>
-        <p className="muted" id="accessDeniedMessage">{accessDeniedMessage}</p>
+        <WorkflowNotice id="accessDeniedMessage" tone="warning">{accessDeniedMessage}</WorkflowNotice>
         <div className="auth-actions">
           <Link className="hero-cta hero-cta--primary" href="/account">Open Account</Link>
         </div>
@@ -1085,7 +1086,7 @@ export function LeaderDashboard() {
 
   return (
     <>
-    <section className="glass-card glass-card--primary glass-pad auth-panel" id="reviewPanel">
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="reviewPanel" aria-busy={busy}>
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Moderation Queue</p>
@@ -1112,8 +1113,8 @@ export function LeaderDashboard() {
 
       <QueueSummary queue={queue} shown={submissions.length} />
 
-      <p className="auth-status muted" id="reviewStatus" role="status" aria-live="polite">{reviewStatus}</p>
-      <p className="auth-error" id="reviewError" role="alert" hidden={!reviewError}>{reviewError}</p>
+      <WorkflowNotice id="reviewStatus" hidden={!reviewStatus}>{reviewStatus}</WorkflowNotice>
+      <WorkflowNotice id="reviewError" tone="danger" role="alert" hidden={!reviewError}>{reviewError}</WorkflowNotice>
 
       <div className="review-list" id="reviewList" aria-live="polite">
         {submissions.length ? (
@@ -1132,11 +1133,13 @@ export function LeaderDashboard() {
             );
           })
         ) : (
-          <p className="muted">{config.empty}</p>
+          <WorkflowEmptyState title={busy ? "Loading submissions" : "No submissions shown"}>
+            {busy ? "Checking the moderation queue." : config.empty}
+          </WorkflowEmptyState>
         )}
       </div>
     </section>
-    <section className="glass-card glass-card--primary glass-pad auth-panel" id="memberVerificationPanel">
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="memberVerificationPanel" aria-busy={memberVerificationBusy}>
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Member Verification</p>
@@ -1198,12 +1201,12 @@ export function LeaderDashboard() {
             Revoke
           </button>
         </div>
-        <p className="auth-status muted" role="status" aria-live="polite">{memberVerificationStatus}</p>
-        <p className="auth-error" role="alert" hidden={!memberVerificationError}>{memberVerificationError}</p>
+        <WorkflowNotice hidden={!memberVerificationStatus}>{memberVerificationStatus}</WorkflowNotice>
+        <WorkflowNotice tone="danger" role="alert" hidden={!memberVerificationError}>{memberVerificationError}</WorkflowNotice>
         <MemberVerificationResult userId={memberVerificationLast?.userId} verification={memberVerificationLast?.verification} />
       </div>
     </section>
-    <section className="glass-card glass-card--primary glass-pad auth-panel" id="instagramQueuePanel">
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="instagramQueuePanel" aria-busy={instagramBusy}>
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Instagram Queue</p>
@@ -1228,8 +1231,8 @@ export function LeaderDashboard() {
         ))}
       </div>
 
-      <p className="auth-status muted" role="status" aria-live="polite">{instagramStatus}</p>
-      <p className="auth-error" role="alert" hidden={!instagramError}>{instagramError}</p>
+      <WorkflowNotice hidden={!instagramStatus}>{instagramStatus}</WorkflowNotice>
+      <WorkflowNotice tone="danger" role="alert" hidden={!instagramError}>{instagramError}</WorkflowNotice>
 
       <div className="review-list" aria-live="polite">
         {instagramJobs.length ? (
@@ -1256,11 +1259,13 @@ export function LeaderDashboard() {
             );
           })
         ) : (
-          <p className="muted">{instagramConfig.empty}</p>
+          <WorkflowEmptyState title={instagramBusy ? "Loading Instagram jobs" : "No Instagram jobs shown"}>
+            {instagramBusy ? "Checking the Instagram publishing queue." : instagramConfig.empty}
+          </WorkflowEmptyState>
         )}
       </div>
     </section>
-    <section className="glass-card glass-card--primary glass-pad auth-panel" id="profileMediaQueuePanel">
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="profileMediaQueuePanel" aria-busy={profileMediaBusy}>
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Profile Media</p>
@@ -1285,8 +1290,8 @@ export function LeaderDashboard() {
         ))}
       </div>
 
-      <p className="auth-status muted" role="status" aria-live="polite">{profileMediaStatus}</p>
-      <p className="auth-error" role="alert" hidden={!profileMediaError}>{profileMediaError}</p>
+      <WorkflowNotice hidden={!profileMediaStatus}>{profileMediaStatus}</WorkflowNotice>
+      <WorkflowNotice tone="danger" role="alert" hidden={!profileMediaError}>{profileMediaError}</WorkflowNotice>
 
       <div className="review-list" aria-live="polite">
         {profileMediaItems.length ? (
@@ -1304,11 +1309,13 @@ export function LeaderDashboard() {
             );
           })
         ) : (
-          <p className="muted">{profileMediaConfig.empty}</p>
+          <WorkflowEmptyState title={profileMediaBusy ? "Loading profile images" : "No profile images shown"}>
+            {profileMediaBusy ? "Checking avatar and banner review items." : profileMediaConfig.empty}
+          </WorkflowEmptyState>
         )}
       </div>
     </section>
-    <section className="glass-card glass-card--primary glass-pad auth-panel" id="mochiSocialAlphaPanel">
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="mochiSocialAlphaPanel" aria-busy={mochiAlphaBusy}>
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Mochi Social Alpha</p>
@@ -1347,8 +1354,8 @@ export function LeaderDashboard() {
 
       <AlphaAuditPanel data={mochiAlpha} />
 
-      <p className="auth-status muted" role="status" aria-live="polite">{mochiAlphaStatus}</p>
-      <p className="auth-error" role="alert" hidden={!mochiAlphaError}>{mochiAlphaError}</p>
+      <WorkflowNotice hidden={!mochiAlphaStatus}>{mochiAlphaStatus}</WorkflowNotice>
+      <WorkflowNotice tone="danger" role="alert" hidden={!mochiAlphaError}>{mochiAlphaError}</WorkflowNotice>
 
       <div className="review-list" aria-live="polite">
         {mochiAlphaTesters.length ? (
@@ -1361,7 +1368,9 @@ export function LeaderDashboard() {
             />
           ))
         ) : (
-          <p className="muted">No Mochi Social alpha testers yet.</p>
+          <WorkflowEmptyState title={mochiAlphaBusy ? "Loading alpha testers" : "No alpha testers shown"}>
+            {mochiAlphaBusy ? "Checking Mochi Social alpha access." : "No Mochi Social alpha testers yet."}
+          </WorkflowEmptyState>
         )}
       </div>
     </section>

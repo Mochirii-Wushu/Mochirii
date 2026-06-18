@@ -172,6 +172,8 @@ Valid Spotify URL expectations:
 
 Current iframe behavior:
 
+- Spotify iframe embeds are deferred by a player shell and mount only when the card nears the viewport.
+- The deferred shell uses `IntersectionObserver`; when that browser API is unavailable, the player loads safely instead of leaving an empty card.
 - Iframes use `width="100%"`.
 - Height comes from `items[].height` when positive, otherwise the default is `352`.
 - Iframes include `loading="lazy"`.
