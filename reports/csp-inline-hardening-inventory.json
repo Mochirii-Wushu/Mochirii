@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-06-13T00:39:27.825Z",
+  "checkedAt": "2026-06-18T06:15:31.551Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
@@ -170,7 +170,7 @@
     ]
   },
   "sourceInventory": {
-    "scannedFiles": 61,
+    "scannedFiles": 63,
     "scannedRoots": [
       "apps/web/app",
       "apps/web/components",
@@ -287,13 +287,6 @@
           "apps/web/components/member-workflow/AccountPanel.tsx",
           "apps/web/components/public-pages/EventsBoard.tsx",
           "apps/web/components/public-pages/pages.tsx"
-        ]
-      },
-      {
-        "origin": "https://fonts.googleapis.com",
-        "allowedBy": [],
-        "files": [
-          "apps/web/app/mochirii.css"
         ]
       },
       {
@@ -600,10 +593,10 @@
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
     "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
     "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
+    "Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.",
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions."
   ],
   "warnings": [
-    "https://fonts.googleapis.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",
     "https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening."
   ],
   "failures": []

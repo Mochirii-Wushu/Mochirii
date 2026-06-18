@@ -30,7 +30,12 @@ const protectedRoutes = [
   { route: "/members/twills", file: "apps/web/app/members/[slug]/page.tsx", expectedFollow: false },
 ];
 
-const allSmokeRoutes = [...publicRoutes.map((item) => item.route), ...protectedRoutes.map((item) => item.route)];
+const noindexRoutes = [
+  ...protectedRoutes,
+  { route: "/games/mochi-social", file: "apps/web/app/games/mochi-social/page.tsx", expectedFollow: false },
+];
+
+const allSmokeRoutes = [...publicRoutes.map((item) => item.route), ...noindexRoutes.map((item) => item.route)];
 
 function read(relativePath) {
   return readFileSync(path.join(root, relativePath), "utf8");
@@ -87,7 +92,7 @@ function checkPublicMetadata() {
 }
 
 function checkProtectedNoindex() {
-  for (const item of protectedRoutes) {
+  for (const item of noindexRoutes) {
     const source = read(item.file);
     assertIncludes(item.file, source, "robots:");
     assertIncludes(item.file, source, "index: false");
@@ -108,7 +113,7 @@ function checkDiscoveryFiles() {
     assertIncludes("sitemap", sitemap, `<loc>${loc}</loc>`);
   }
 
-  for (const item of protectedRoutes) {
+  for (const item of noindexRoutes) {
     assert(!sitemap.includes(`https://mochirii.com${item.route}`), `sitemap: protected route must stay excluded: ${item.route}`);
   }
 
@@ -122,7 +127,7 @@ function checkProductionSmokeCoverage() {
     assertRouteListed("production route smoke", smoke, route);
   }
 
-  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/members", "/members/twills"]) {
+  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/members", "/members/twills", "/games/mochi-social"]) {
     assert(smoke.includes(`["${route}",`) || smoke.includes(`['${route}',`), `production body smoke: expected content check for ${route}`);
   }
 }
@@ -155,7 +160,8 @@ async function checkLiveIfRequested() {
   ];
 
   for (const route of allSmokeRoutes) {
-    const response = await fetch(new URL(route, baseUrl), {
+    const url = new URL(route, baseUrl);
+    const response = await fetch(url, {
       headers: { "user-agent": "MochiriiObservabilityMetadataSmoke/1.0" },
       signal: AbortSignal.timeout(30000),
     });
@@ -167,10 +173,88 @@ async function checkLiveIfRequested() {
       assert(response.headers.get(header), `live ${route}: expected ${header}`);
     }
 
-    if (protectedRoutes.some((item) => item.route === route)) {
+    if (publicRoutes.some((item) => item.route === route)) {
+      await checkLivePublicMetadata({ route, url, html, baseUrl });
+    }
+
+    if (noindexRoutes.some((item) => item.route === route)) {
       assert(/<meta name="robots" content="noindex,\s*no(?:follow|archive)|<meta name="robots" content="noindex,\s*follow/i.test(html), `live ${route}: expected noindex robots meta`);
     }
   }
+}
+
+async function checkLivePublicMetadata({ route, url, html, baseUrl }) {
+  const canonical = extractLink(html, "canonical");
+  const expectedCanonical = route === "/" ? `${baseUrl}/` : `${baseUrl}${route}`;
+  assert(normalizeUrl(canonical) === normalizeUrl(expectedCanonical), `live ${route}: expected canonical ${expectedCanonical}, got ${canonical || "missing"}`);
+
+  const requiredMeta = [
+    ["og:title", "property"],
+    ["og:description", "property"],
+    ["og:url", "property"],
+    ["og:image", "property"],
+    ["twitter:card", "name"],
+    ["twitter:title", "name"],
+    ["twitter:description", "name"],
+    ["twitter:image", "name"],
+  ];
+
+  for (const [name, attribute] of requiredMeta) {
+    const value = extractMeta(html, attribute, name);
+    assert(value, `live ${route}: expected ${name} metadata`);
+  }
+
+  const ogUrl = extractMeta(html, "property", "og:url");
+  assert(normalizeUrl(ogUrl) === normalizeUrl(expectedCanonical), `live ${route}: expected og:url ${expectedCanonical}, got ${ogUrl || "missing"}`);
+  assert(extractMeta(html, "name", "twitter:card") === "summary_large_image", `live ${route}: expected twitter summary_large_image card`);
+
+  const imageValues = [
+    extractMeta(html, "property", "og:image"),
+    extractMeta(html, "name", "twitter:image"),
+  ].filter(Boolean);
+  for (const imageValue of [...new Set(imageValues)]) {
+    await checkReachableImage(new URL(imageValue, url), route);
+  }
+}
+
+async function checkReachableImage(url, route) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { "user-agent": "MochiriiObservabilityMetadataSmoke/1.0" },
+    signal: AbortSignal.timeout(30000),
+  });
+  assert(response.status === 200, `live ${route}: social image ${url.href} expected 200, got ${response.status}`);
+  assert(/^image\//i.test(response.headers.get("content-type") || ""), `live ${route}: social image ${url.href} should return image content`);
+  await response.body?.cancel?.();
+}
+
+function extractLink(html, rel) {
+  const pattern = new RegExp(`<link\\b[^>]*\\brel=["']${escapeRegExp(rel)}["'][^>]*>`, "i");
+  const tag = html.match(pattern)?.[0] || "";
+  return extractAttribute(tag, "href");
+}
+
+function extractMeta(html, attribute, value) {
+  const pattern = new RegExp(`<meta\\b[^>]*\\b${attribute}=["']${escapeRegExp(value)}["'][^>]*>`, "i");
+  const tag = html.match(pattern)?.[0] || "";
+  return extractAttribute(tag, "content");
+}
+
+function extractAttribute(tag, attribute) {
+  const pattern = new RegExp(`\\b${attribute}=["']([^"']+)["']`, "i");
+  return tag.match(pattern)?.[1] || "";
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeUrl(value) {
+  if (!value) return "";
+  const url = new URL(value);
+  if (url.pathname === "/") url.pathname = "";
+  url.hash = "";
+  return url.href.replace(/\/$/, "");
 }
 
 await checkLiveIfRequested();
@@ -191,4 +275,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Observability/metadata smoke validation OK (${publicRoutes.length} public routes, ${protectedRoutes.length} protected routes).`);
+console.log(`Observability/metadata smoke validation OK (${publicRoutes.length} public routes, ${noindexRoutes.length} noindex routes).`);

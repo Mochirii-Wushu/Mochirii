@@ -61,7 +61,7 @@ Do not commit `.vercel/`.
 
 `next.config.ts` owns app-level security headers for the Vercel surface. Keep Cloudflare DNS-only for Vercel web records; use Vercel's platform firewall/DDoS layer as the active edge protection.
 
-Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, member, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
+Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, member, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch. Keep nonce-based CSP tightening in a dedicated compatibility PR because Next.js nonce middleware makes pages dynamically rendered instead of static/prerendered.
 
 The RFC 9116 security contact file is served from `public/.well-known/security.txt` and should match the rollback copy at the repository root.
 

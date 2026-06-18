@@ -79,6 +79,7 @@ const report = {
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
     "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
     "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
+    "Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.",
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions.",
   ],
   warnings,
