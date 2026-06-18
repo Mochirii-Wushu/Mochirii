@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-06-10.
+Last checked for this index: 2026-06-17.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -13,6 +13,8 @@ This is the short source-of-truth index for the current Mochirii production post
 - `https://www.mochirii.com` redirects to the apex domain.
 - Root static files and GitHub Pages remain rollback/reference material until a later stabilization task retires them.
 - Deployment source of truth: `docs/deployment.md`.
+- Current production commit verified from `origin/main`: `5103ba4fb11709240ffe38d560e0b322f20b2320` (`Resolve web audit advisories`).
+- Live route smoke on 2026-06-17 returned `200` for `/`, `/join`, `/events`, `/gallery`, `/ranks`, `/leaders`, `/codex`, `/announcements`, `/raffles`, `/spotify`, `/spotlight`, `/twills`, `/auth`, `/account`, `/members`, `/gallery-submit`, and `/leader-dashboard`.
 
 ## Data And Assets
 
@@ -28,6 +30,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - CSP was promoted after a clean browser pass recorded in `reports/csp-enforcement-verification-2026-06-08.md`.
 - Cloudflare remains DNS-only for Vercel web records; Vercel is the active edge/security layer.
 - The public RFC 9116 security contact file is served from `https://mochirii.com/.well-known/security.txt` after the security scan remediation release.
+- Live header check on 2026-06-17 confirmed `Server: Vercel`, enforced CSP, `Access-Control-Allow-Origin: https://mochirii.com`, `Strict-Transport-Security`, and the expected security headers.
 
 ## Supabase
 
@@ -35,6 +38,9 @@ This is the short source-of-truth index for the current Mochirii production post
 - Browser code uses only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
+- Supabase function list was verified on 2026-06-17 for project `deyvmtncimmcinldjyqe`; expected website, Reaper, Instagram, vote, spotlight, profile, and Mochi Social alpha functions are active.
+- Supabase CLI is currently `2.105.0`; `2.107.0` was available during the 2026-06-17 check and should be handled in the Supabase hardening packet before database work.
+- Supabase advisor snapshot still includes future hardening items: leaked-password protection, intentional service-only RLS/no-policy documentation, high-value foreign-key indexes, and deferred Mochi Social RLS performance warnings.
 
 ## Discord And Reaper
 
@@ -47,9 +53,12 @@ This is the short source-of-truth index for the current Mochirii production post
 ## GitHub And Release Flow
 
 - `main` is protected by required checks including static validation, Next validation, CodeQL, Vercel, and Supabase Preview.
+- The active `Primary Rules` ruleset requires `validate`, `validate-next`, `CodeQL`, `Vercel`, and `Supabase Preview`.
+- The active `Pull Request Review Gate` ruleset requires one approval and resolved review threads.
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
+- Open PR queue on 2026-06-17 contains stale or behind work packets and Dependabot branches; do not merge them as a batch. Treat each as a separate refresh, close, or release decision.
 
 ## Vercel Observability
 
@@ -60,6 +69,8 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Current Improvement Queue
 
+- Packet 1 evidence for the six-packet polish/security/performance roadmap is recorded in `reports/release-hygiene-live-state-2026-06-17.md`.
+- Current broad roadmap order: release hygiene, first-viewport visual polish, gallery/media performance, Supabase security/database performance, headers/metadata/observability, then Discord/Reaper/member-admin/dependency maintenance.
 - Continue CSP tightening only after browser passes; React inline style props are guarded at zero by `npm run check:csp-inline-hardening`, while `unsafe-inline` removal remains a future Vercel Preview nonce/SRI decision.
 - Keep Cloudflare Security Insights findings reconciled against current DNS/Vercel evidence before changing healthy DNS records.
 - Gallery image loading now uses a bounded render window on `/gallery`; see `reports/gallery-image-performance-2026-06-10.md`.
