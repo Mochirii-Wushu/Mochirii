@@ -9,7 +9,7 @@ Project ref: `deyvmtncimmcinldjyqe`
 ## Baseline
 
 - Supabase CLI 2.107.0 was installed and verified.
-- `supabase projects list` showed project `Mōchirīī` as `ACTIVE_HEALTHY`.
+- `supabase projects list` showed the Mochirii project as `ACTIVE_HEALTHY`.
 - `supabase db advisors --linked --type all --level info --fail-on none --output-format json` completed from the linked implementation worktree.
 - `supabase db push --dry-run --linked`, `supabase migration list --linked`, and `supabase functions list --project-ref deyvmtncimmcinldjyqe` did not return usable diagnostics in the non-interactive shell. Production database mutation and function deploy verification should wait for a healthy linked CLI path or use the Supabase Dashboard with the same reviewed migration after owner approval.
 
@@ -35,6 +35,7 @@ Project ref: `deyvmtncimmcinldjyqe`
 
 ## Production Notes
 
-- Production database mutation still requires Supabase Preview, `supabase db push --dry-run --project-ref deyvmtncimmcinldjyqe`, and owner-approved `supabase db push`.
+- PR #315 Supabase Preview is currently blocked by the project preview-branch limit. Active preview branches are tied to open PR #301 (`codex/auth-provider-state-cleanup`) and draft PR #305 (`codex/mochi-social-live-copy`). Free a preview slot or raise the branch limit before treating this packet as release-ready.
+- Production database mutation still requires a passing Supabase Preview, `supabase db push --dry-run --linked`, and owner-approved `supabase db push`.
 - Deploy only changed Edge Functions after merge.
 - Do not change Discord, Cloudflare, Vercel, Meta, or Mochi Social provider settings as part of this packet.
