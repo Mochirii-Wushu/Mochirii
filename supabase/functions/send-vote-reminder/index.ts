@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 import { discordFetch } from "../_shared/discord-api.ts";
@@ -116,7 +117,9 @@ async function updateSend(
   }
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (!["GET", "POST"].includes(req.method)) {
     return jsonResponse({ ok: false, message: "Method not allowed." }, 405);
   }
@@ -251,4 +254,4 @@ Deno.serve(async (req: Request) => {
     });
     return jsonResponse({ ok: false, voteDate, message: "Vote reminder failed." }, 500);
   }
-});
+}

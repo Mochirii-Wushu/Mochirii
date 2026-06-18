@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import {
   CORS_HEADERS,
@@ -42,7 +43,9 @@ function publicVerification(row: JsonRecord | null): JsonRecord | null {
   };
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
   if (req.method !== "POST") return jsonResponse({ ok: false, message: "Method not allowed." }, 405);
 
@@ -167,4 +170,4 @@ Deno.serve(async (req: Request) => {
     },
     message: action === "approve" ? "Member verification approved." : action === "reject" ? "Member verification rejected." : "Member verification revoked.",
   });
-});
+}

@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import {
   jsonResponse,
@@ -6,7 +7,9 @@ import {
   requireActiveMember,
 } from "../_shared/member-profiles.ts";
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: jsonResponse({}).headers });
   if (req.method !== "POST") return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
 
@@ -41,4 +44,4 @@ Deno.serve(async (req: Request) => {
       signedUrlSeconds: 600,
     },
   });
-});
+}

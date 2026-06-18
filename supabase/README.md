@@ -517,6 +517,26 @@ No public read access is granted.
 - service_role can manage rows from trusted Edge Functions after moderator verification.
 - Rows store only owned permission bitfields and Discord IDs for Reaper-managed overwrites.
 
+## Advisor-Acknowledged Service-Only Tables
+
+Supabase advisors intentionally report `RLS Enabled No Policy` for the following tables because they are service-role-only audit, sync, moderation, or poll internals. Do not add anon or authenticated browser policies to these tables unless a future task explicitly redesigns their public data contract.
+
+- `discord_managed_permission_overwrites`
+- `discord_resources`
+- `discord_sync_log`
+- `gallery_instagram_publish_events`
+- `gallery_instagram_publish_jobs`
+- `gallery_moderation_events`
+- `member_auth_identities`
+- `member_verifications`
+- `spotlight_poll_candidates`
+- `spotlight_poll_cycles`
+- `spotlight_poll_results`
+- `vote_confirmations`
+- `vote_reminder_sends`
+
+These tables should keep RLS enabled, direct browser grants revoked, and `service_role` writes constrained to trusted Edge Functions, Reaper workflows, or scheduled jobs. If a user-facing view is ever needed, expose a narrow Edge Function DTO instead of direct table access.
+
 Storage `member-gallery`:
 
 - authenticated active verified members can upload only into their own first path segment.

@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 
@@ -187,7 +188,9 @@ async function readJsonBody(req: Request): Promise<JsonRecord | null> {
   }
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
   }
@@ -563,4 +566,4 @@ Deno.serve(async (req: Request) => {
     },
     message: "Image submitted to the pending gallery queue for moderator approval.",
   });
-});
+}

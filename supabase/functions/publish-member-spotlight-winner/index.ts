@@ -1,3 +1,4 @@
+import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { discordFetch } from "../_shared/discord-api.ts";
 import {
@@ -99,7 +100,9 @@ async function upsertResult(
   if (error) throw error;
 }
 
-Deno.serve(async (req: Request) => {
+Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+
+async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return jsonResponse({ ok: true });
   if (!["GET", "POST"].includes(req.method)) {
     return jsonResponse({ ok: false, message: "Method not allowed." }, 405);
@@ -263,4 +266,4 @@ Deno.serve(async (req: Request) => {
     });
     return jsonResponse({ ok: false, message: "Spotlight poll winner could not be published." }, 500);
   }
-});
+}
