@@ -7,6 +7,14 @@ export type MochiSocialAlphaSession = {
   hasAccess: boolean;
   termsAccepted: boolean;
   termsVersion: string;
+  progress?: {
+    authority: "mochirii-edge";
+    userId: string;
+    revision: number;
+    sourceRequestId?: string | null;
+    lastActionType?: string | null;
+    updatedAt: string;
+  } | null;
   alpha: {
     noRealValue: boolean;
     chainNetwork: "CANARY";
