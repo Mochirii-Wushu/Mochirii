@@ -101,6 +101,12 @@ verify_jwt = true
 import_map = "./functions/mark-instagram-gallery-submission-shared/deno.json"
 entrypoint = "./functions/mark-instagram-gallery-submission-shared/index.ts"
 
+[functions.check-instagram-api-status]
+enabled = true
+verify_jwt = true
+import_map = "./functions/check-instagram-api-status/deno.json"
+entrypoint = "./functions/check-instagram-api-status/index.ts"
+
 [functions.list-member-profiles]
 enabled = true
 verify_jwt = true

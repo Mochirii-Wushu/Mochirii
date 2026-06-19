@@ -129,9 +129,9 @@ Current launch mode is manual sharing:
 - post manually from the official Instagram account or Meta Business Suite
 - paste the Instagram permalink if available
 - click `Mark shared manually`
-- use the browser final confirmation
+- review the in-card confirmation prompt and click `Confirm manual share`
 
-Future Meta API publishing should remain disabled until Meta developer registration is available and `INSTAGRAM_*` Supabase secrets are set.
+Meta API publishing should remain disabled until Meta developer registration is complete, `INSTAGRAM_*` Supabase secrets are set, and the moderator-only `Check Meta API` diagnostic passes. The diagnostic does not create media containers or publish posts.
 
 Do not publish test images, live images, or retry failed jobs unless the owner has approved the live Instagram action. Do not paste signed preview URLs into Discord, GitHub, public docs, screenshots, or Meta setup notes.
 

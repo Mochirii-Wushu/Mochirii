@@ -22,6 +22,7 @@ const functions = [
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
   "mark-instagram-gallery-submission-shared",
+  "check-instagram-api-status",
   "list-member-profiles",
   "list-visible-profile-cards",
   "get-member-profile",

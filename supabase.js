@@ -807,6 +807,10 @@
     });
   }
 
+  async function checkInstagramApiStatus() {
+    return invokeEdgeFunction("check-instagram-api-status", {});
+  }
+
   async function publishInstagramGallerySubmission(options = {}) {
     return invokeEdgeFunction("publish-instagram-gallery-submission", {
       job_id: String(options.jobId || options.job_id || "").trim(),
@@ -1088,6 +1092,7 @@
     moderateGallerySubmission,
     reviewMemberVerification,
     listInstagramPublishQueue,
+    checkInstagramApiStatus,
     publishInstagramGallerySubmission,
     markInstagramGallerySubmissionShared,
     listApprovedGallerySubmissions,

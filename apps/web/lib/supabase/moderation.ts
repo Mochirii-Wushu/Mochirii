@@ -2,6 +2,7 @@ import { invokeEdgeFunction } from "./client";
 import {
   failedResult,
   type GalleryReviewQueue,
+  type InstagramApiStatus,
   type InstagramPublishQueue,
   type InstagramPublishJob,
   type MemberVerificationReviewResponse,
@@ -68,6 +69,10 @@ export async function reviewMemberVerification({
 export async function listInstagramPublishQueue(options: { status?: string } = {}) {
   const status = String(options.status || "queued").trim().toLowerCase() || "queued";
   return invokeEdgeFunction<InstagramPublishQueue>("list-instagram-publish-queue", { status });
+}
+
+export async function checkInstagramApiStatus() {
+  return invokeEdgeFunction<InstagramApiStatus>("check-instagram-api-status", {});
 }
 
 export async function publishInstagramGallerySubmission({
