@@ -38,7 +38,7 @@ Renderer notes:
 - `meta.updated` renders as month and year through `MochiriiUtils.formatDateUTC`.
 - Text renders with `textContent`; inline HTML and Markdown are not supported.
 - Badges render as plain spans, not links.
-- Audio sources render as native `<source>` elements under `#recruitmentAudio`.
+- Audio sources render as native `<source>` elements under a hidden `#recruitmentAudio`, while visitors use the custom themed audio player.
 - There is no data-driven CTA or link renderer.
 
 ## 3. Protected Long-Form Body and Conclusion
@@ -97,7 +97,9 @@ Current link/audio/media behavior:
 - Shared header/footer links come from `site.js`.
 - The current audio source is `./assets/audio/mochiriiiiii.mp3` with type `audio/mpeg`.
 - Audio format badges are derived from source MIME types.
-- If `audio.sources` is empty, `recruitment.js` removes audio controls and reports audio as unavailable through the description text.
+- The Recruitment page uses a custom themed audio player instead of visible native browser controls. It must not render native browser controls, a three-dot menu, a download option, or a playback-speed option.
+- The MP3 remains public because public playback is required. The custom player removes page-level download affordances, but a public MP3 can still be fetched by determined users through network tools.
+- If `audio.sources` is empty, `recruitment.js` disables the custom player and reports audio as unavailable through the description text.
 - The current hero image is `./assets/img/recruitment/hero.webp`.
 - The current atmosphere image is `./assets/img/recruitment/atmosphere.webp`, but it remains hidden and `aria-hidden`.
 
@@ -107,6 +109,7 @@ Maintenance rules:
 - External links must follow existing safe-link conventions.
 - Audio paths must resolve if audio is used.
 - Audio labels/descriptions should remain clear.
+- Custom audio player controls must remain keyboard-operable and visibly focused.
 - Unsupported link/audio/media fields should not be added without renderer changes.
 
 ## 7. Accessibility
@@ -114,7 +117,7 @@ Maintenance rules:
 - Preserve a sensible heading order: one Recruitment `h1`, then section `h2` headings.
 - Keep long-form paragraphs readable in `#recruitmentBody` and `#recruitmentConclusion`.
 - Keep line length, paragraph spacing, and mobile readability clear.
-- Keep native audio controls usable when audio sources are present.
+- Keep custom audio player controls usable when audio sources are present.
 - Keep audio labels and descriptions clear.
 - Focus states must remain visible if links or buttons are added in a future scoped task.
 - Touch targets must be usable if interactive elements are added.
