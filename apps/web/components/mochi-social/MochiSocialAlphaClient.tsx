@@ -162,6 +162,7 @@ export function MochiSocialAlphaClient() {
         <span>Chain mode: configured-preview-stub</span>
         <span>Economy: test soft currency</span>
         <span>Market: fixed price only</span>
+        <span>Progress: {session?.progress ? `account sync r${session.progress.revision}` : "account sync ready"}</span>
         <span data-mochi-bridge-state>Bridge: {bridgeStatus}</span>
       </div>
 
@@ -212,6 +213,9 @@ export function MochiSocialAlphaClient() {
             referrerPolicy="strict-origin-when-cross-origin"
             onLoad={() => sendAuthToGame(accessToken)}
           />
+          <p className="mochi-game-note">
+            Signed-in alpha progress saves to your Mochirii account through the game bridge. Tester-password preview remains guest-only.
+          </p>
           <form className="mochi-feedback" onSubmit={submitFeedback}>
             <label>
               <span>Alpha feedback</span>
