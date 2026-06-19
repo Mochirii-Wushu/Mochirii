@@ -12,6 +12,14 @@ export const CORS_HEADERS = {
 
 export type AccessFailure = { ok: false; response: Response };
 export type UserAccess = { ok: true; adminClient: SupabaseClient; user: User; userId: string };
+export type AlphaProgressSnapshot = {
+  user_id: string;
+  revision: number;
+  state: JsonRecord;
+  source_request_id?: string | null;
+  last_action_type?: string | null;
+  updated_at: string;
+};
 
 export function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -22,6 +30,10 @@ export function jsonResponse(body: JsonRecord, status = 200): Response {
 
 export function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? value as JsonRecord : {};
+}
+
+export function isJsonRecord(value: unknown): value is JsonRecord {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
 export function safeString(value: unknown, maxLength: number): string | null {
@@ -177,4 +189,66 @@ export async function recordLedgerEvent(
   });
 
   return error;
+}
+
+export async function loadAlphaProgressSnapshot(adminClient: SupabaseClient, userId: string) {
+  return await adminClient
+    .from("mochi_social_progress_snapshots")
+    .select("user_id,revision,state,source_request_id,last_action_type,updated_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+}
+
+export function normalizeAlphaProgressSnapshot(row: AlphaProgressSnapshot | null | undefined) {
+  if (!row) return null;
+  return {
+    authority: "mochirii-edge",
+    userId: row.user_id,
+    revision: Number(row.revision || 0),
+    state: isJsonRecord(row.state) ? row.state : {},
+    sourceRequestId: row.source_request_id || null,
+    lastActionType: row.last_action_type || null,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function upsertAlphaProgressSnapshot(
+  adminClient: SupabaseClient,
+  input: { userId: string; state: unknown; sourceRequestId?: string | null; actionType?: string | null },
+) {
+  if (!isJsonRecord(input.state)) {
+    return { ok: false as const, error: "invalid_progress_state", message: "Progress state must be a JSON object." };
+  }
+
+  if (JSON.stringify(input.state).length > 220_000) {
+    return { ok: false as const, error: "progress_state_too_large", message: "Progress state is too large for alpha account sync." };
+  }
+
+  const { data: existing, error: existingError } = await loadAlphaProgressSnapshot(adminClient, input.userId);
+  if (existingError) {
+    return { ok: false as const, error: "progress_lookup_failed", message: "Account progress could not be loaded." };
+  }
+
+  const nextRevision = Number((existing as AlphaProgressSnapshot | null)?.revision || 0) + 1;
+  const { data, error } = await adminClient
+    .from("mochi_social_progress_snapshots")
+    .upsert(
+      {
+        user_id: input.userId,
+        revision: nextRevision,
+        state: input.state,
+        source_request_id: input.sourceRequestId || null,
+        last_action_type: input.actionType || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    )
+    .select("user_id,revision,state,source_request_id,last_action_type,updated_at")
+    .single();
+
+  if (error) {
+    return { ok: false as const, error: "progress_snapshot_failed", message: "Account progress snapshot could not be saved." };
+  }
+
+  return { ok: true as const, snapshot: normalizeAlphaProgressSnapshot(data as AlphaProgressSnapshot) };
 }

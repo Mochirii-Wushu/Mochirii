@@ -220,7 +220,7 @@ export function MochiSocialAlphaClient() {
                 maxLength={2000}
                 value={feedback}
                 onChange={(event) => setFeedback(event.target.value)}
-                placeholder="Bug, feel, trade flow, pet loop, or anything that felt off."
+                placeholder="Bug, feel, trade flow, spirit loop, or anything that felt off."
               />
             </label>
             <button className="hero-cta" type="submit" disabled={busy || !feedback.trim()}>Send feedback</button>

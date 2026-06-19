@@ -150,9 +150,9 @@ function readGitState(repoPath) {
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
   const dirty = git(["status", "--porcelain"], repoPath);
   return {
-    branch: firstLine(branch.stdout),
-    localHead: firstLine(localHead.stdout),
-    upstream: firstLine(upstream.stdout),
+    branch: branch.ok ? firstLine(branch.stdout) : "",
+    localHead: localHead.ok ? firstLine(localHead.stdout) : "",
+    upstream: upstream.ok ? firstLine(upstream.stdout) : "",
     dirty: dirty.ok ? dirty.stdout.split(/\r?\n/).filter(Boolean) : ["git status unavailable"],
     errors: [branch, localHead, upstream, dirty].filter((result) => !result.ok).map((result) => result.stderr || result.error || "git command failed"),
   };

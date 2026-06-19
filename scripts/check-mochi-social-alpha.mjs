@@ -111,7 +111,7 @@ const checks = [
   },
   {
     file: 'supabase/config.toml',
-    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
+    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-progress', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
   },
   {
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
@@ -119,12 +119,26 @@ const checks = [
       'alphaAccess(adminClient, playerId)',
       'mochi_social_market_listings',
       'mochi_social_trades',
-      'mochi_social_pets',
-      'CERTIFICATE_ELIGIBLE_SPECIES.has(species)',
+      'mochi_social_spirits',
+      'CERTIFICATE_ELIGIBLE_SPIRITS.has(spiritId)',
+      'upsertAlphaProgressSnapshot(adminClient',
+      'progress: progressResult?.snapshot ?? null',
       'chain.operation_update',
       'chain_request_missing',
       'nextStatus === "finalized"',
       'location: "hot"'
+    ]
+  },
+  {
+    file: 'supabase/functions/mochi-social-alpha-progress/index.ts',
+    includes: [
+      'requireGameServer(req)',
+      'alphaAccess(adminClient, playerId)',
+      'loadAlphaProgressSnapshot(adminClient, playerId)',
+      'normalizeAlphaProgressSnapshot(data)',
+      'fallback: "guest-local"',
+      'noRealValue: true',
+      'chainNetwork: "CANARY"'
     ]
   },
   {
@@ -133,7 +147,7 @@ const checks = [
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',
-    includes: ['mochi_social_alpha_testers', 'mochi_social_ledger_events', "network = 'CANARY'", 'expires_at']
+    includes: ['mochi_social_alpha_testers', 'mochi_social_spirits', 'mochi_social_progress_snapshots', 'mochi_social_ledger_events', "network = 'CANARY'", 'expires_at']
   },
   {
     file: 'apps/web/next.config.ts',
@@ -213,11 +227,10 @@ for (const check of checks) {
 }
 
 const actionFunction = readFileSync('supabase/functions/mochi-social-alpha-action/index.ts', 'utf8');
-if (/certificate_eligible:\s*species\s*===\s*["']sora["']/.test(actionFunction)) {
-  throw new Error('Mochi Social certificate eligibility must stay aligned to Momo, not Sora.');
+if (/certificate_eligible:\s*spiritId\s*===\s*["']aozhen["']/.test(actionFunction)) {
+  throw new Error('Mochi Social certificate eligibility must stay aligned to Lirabao, not Aozhen.');
 }
-if (!/CERTIFICATE_ELIGIBLE_SPECIES\s*=\s*new Set\(\[["']momo["']\]\)/.test(actionFunction)) {
-  throw new Error('Mochi Social certificate eligibility must explicitly name Momo as the alpha certificate species.');
+if (!/CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\[["']lirabao["']\]\)/.test(actionFunction)) {
+  throw new Error('Mochi Social certificate eligibility must explicitly name Lirabao as the alpha certificate spirit.');
 }
-
 console.log('Mochi Social alpha static checks passed.');
