@@ -25,6 +25,13 @@ import {
   type PendingContainmentMode,
   type PendingContainmentPlan,
 } from "../_shared/pending-verification-containment.ts";
+import {
+  buildModmailAudit,
+  formatModmailAuditMessage,
+  MODMAIL_BOT_USER_ID,
+  MODMAIL_LOG_CHANNEL_ID,
+  MODMAIL_MODERATOR_ROLE_ID,
+} from "../_shared/modmail-audit.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -41,24 +48,19 @@ const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
 const EXPECTED_MODERATOR_ROLE_IDS = ["1078630751165222984"];
+const EXPECTED_MODMAIL_BOT_USER_ID = MODMAIL_BOT_USER_ID;
+const EXPECTED_MODMAIL_LOG_CHANNEL_ID = MODMAIL_LOG_CHANNEL_ID;
+const EXPECTED_MODMAIL_MODERATOR_ROLE_ID = MODMAIL_MODERATOR_ROLE_ID;
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
-const PENDING_BASE_ROLE_ID = "1468659807736299520";
-const VERIFIED_ROLE_ID = "1078630751077142615";
-const PENDING_ALLOWED_CATEGORY_ID = "1468658801388290048";
 const GUILD_SCHEDULE_URL = "https://mochirii.com/data/guild-schedule.json";
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const VIEW_CHANNEL_PERMISSION = 1n << 10n;
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const MANAGE_EVENTS_PERMISSION = 1n << 33n;
 const CREATE_EVENTS_PERMISSION = 1n << 44n;
-const GUILD_CATEGORY_CHANNEL_TYPE = 4;
 const DISCORD_MEMBER_OVERWRITE_TYPE = 1;
 const MAX_PENDING_VERIFICATION_MUTATIONS = 500;
 const DISCORD_API_MAX_RETRIES = 2;
 const DISCORD_FUNCTION_RETRY_BUDGET_MS = 45_000;
-const DISCORD_WRITE_BATCH_SIZE = 10;
-const DISCORD_WRITE_BATCH_PAUSE_MS = 250;
-const PENDING_VERIFICATION_MANAGED_BY = "reaper-pending-verification";
 const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment";
 const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
 const EPHEMERAL_FLAG = 1 << 6;
@@ -538,6 +540,20 @@ async function fetchGuildRoles(): Promise<JsonRecord[]> {
   return asArray(response.data).map(asRecord).filter((role) => Boolean(snowflake(role.id)));
 }
 
+async function fetchGuildMember(userId: string): Promise<JsonRecord | null> {
+  const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/members/${encodeURIComponent(userId)}`, {
+    headers: discordApiHeaders(),
+  });
+
+  if (response.status === 404) return null;
+
+  if (!response.ok) {
+    throw new Error(`Guild member ${userId} fetch failed with Discord API ${response.status}.`);
+  }
+
+  return asRecord(response.data);
+}
+
 async function fetchGuildChannels(): Promise<JsonRecord[]> {
   const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/channels`, {
     headers: discordApiHeaders(),
@@ -673,6 +689,44 @@ async function processPendingVerificationSync(
       applicationId,
       interactionToken,
       `Reaper pending verification containment could not be completed.${partialMessage} Rerun preview and check configuration.`,
+    );
+  }
+}
+
+async function processModmailAudit(interactionToken: string, applicationId: string): Promise<void> {
+  try {
+    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
+      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper ModMail audit is missing the Discord bot token.");
+      return;
+    }
+
+    const [roles, channels, members, modmailMember] = await Promise.all([
+      fetchGuildRoles(),
+      fetchGuildChannels(),
+      fetchGuildMembers(),
+      fetchGuildMember(EXPECTED_MODMAIL_BOT_USER_ID),
+    ]);
+
+    const result = buildModmailAudit({
+      guildId: EXPECTED_DISCORD_GUILD_ID,
+      botUserId: EXPECTED_MODMAIL_BOT_USER_ID,
+      logChannelId: EXPECTED_MODMAIL_LOG_CHANNEL_ID,
+      moderatorRoleId: EXPECTED_MODMAIL_MODERATOR_ROLE_ID,
+      roles,
+      channels,
+      members,
+      modmailMember,
+    });
+
+    await editOriginalInteractionResponse(applicationId, interactionToken, formatModmailAuditMessage(result));
+  } catch (error) {
+    console.error("reaper-discord-interactions ModMail audit failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    await editOriginalInteractionResponse(
+      applicationId,
+      interactionToken,
+      "Reaper ModMail audit could not be completed. Check bot token, guild access, and Discord API permissions.",
     );
   }
 }
@@ -1595,6 +1649,7 @@ Deno.serve(async (req: Request) => {
     "sync-ranks",
     "sync-events",
     "sync-pending-verification",
+    "audit-modmail",
     "vote-status",
     "vote-leaderboard",
     "vote-reminder-preview",
@@ -1667,6 +1722,30 @@ Deno.serve(async (req: Request) => {
       });
       return interactionMessage("Vote reminder preview could not be built.");
     }
+  }
+
+  if (commandName === "audit-modmail") {
+    const hasModeratorRole = EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
+
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+      console.error("reaper-discord-interactions missing or mismatched ModMail audit configuration", {
+        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+        moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
+        configuredModeratorRoleCount: configuredModeratorRoleIds.length,
+      });
+      return interactionMessage("Reaper ModMail audit is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
+      return interactionMessage("Use this command in the Mochirii Discord server.");
+    }
+
+    if (!discordUserId || !hasModeratorRole) {
+      return interactionMessage("ModMail audit requires the Moderator role.");
+    }
+
+    EdgeRuntime.waitUntil(processModmailAudit(interactionToken, applicationId));
+    return deferredEphemeralResponse();
   }
 
   if (commandName === "sync-pending-verification") {

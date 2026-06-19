@@ -6,10 +6,13 @@ import {
   alphaAccess,
   createAdminClient,
   jsonResponse,
+  loadAlphaProgressSnapshot,
+  normalizeAlphaProgressSnapshot,
   readJsonBody,
   recordLedgerEvent,
   requireGameServer,
   safeString,
+  upsertAlphaProgressSnapshot,
 } from "../_shared/mochi-social-alpha.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
@@ -20,10 +23,74 @@ const VALID_CHAIN_STATUSES = new Set(["pending", "broadcast", "finalized", "fail
 const VALID_ACTIONS = new Set([
   "chat.send",
   "emote.send",
+  "spirit.starter_vow",
+  "spirit.capture",
+  "spirit.capture_rite",
+  "spirit.route_invite",
+  "world.route_mastery",
+  "world.route_patrol",
+  "spirit.habitat_bond",
+  "spirit.sanctuary_rite",
+  "spirit.research",
+  "spirit.compendium_complete",
+  "spirit.roster_archive",
+  "spirit.care_cycle",
+  "spirit.temperament_concord",
+  "spirit.field_almanac",
+  "world.route_ecology",
+  "world.encounter_atlas",
+  "item.craft_writ",
+  "world.route_waystone",
+  "spirit.nurture_rite",
+  "spirit.recovery_tea",
+  "spirit.kinship_album",
+  "spirit.nursery_grove",
+  "spirit.bloom_ascendance",
+  "spirit.lineage_register",
+  "item.provision_satchel",
+  "guild.commission_complete",
+  "guild.social_rally",
+  "guild.wayfarer_chronicle",
+  "guild.ascension_trial",
+  "spirit.attune",
+  "spirit.bond",
+  "spirit.care",
+  "spirit.journal",
+  "world.expedition",
+  "spirit.technique",
+  "spirit.technique_loadout",
+  "battle.technique_codex",
+  "spirit.trait_attune",
+  "spirit.relic_attune",
+  "battle.tactic_scroll",
+  "guild.rank_trial",
+  "spirit.growth_rite",
+  "party.set",
+  "party.harmony_form",
+  "battle.harmony_trial",
+  "battle.team_spar_match",
+  "battle.mentor_challenge",
+  "battle.dojo_ladder",
+  "battle.sifu_council",
+  "battle.summit_circuit",
+  "battle.tournament_bracket",
+  "battle.rival_circle",
+  "story.chapter_complete",
+  "guild.insignia_case",
+  "battle.condition_weave",
+  "battle.affinity_trial",
+  "battle.affinity_matrix",
+  "battle.spar_ladder",
+  "spirit.train",
+  "spirit.raise",
+  "quest.accept",
+  "quest.progress",
   "pet.befriend",
   "pet.care",
   "market.fixed_list",
+  "market.guild_receipt",
   "trade.direct_offer",
+  "trade.exchange_accord",
   "chain.withdraw_request",
   "chain.deposit_request",
   "chain.operation_update",
@@ -73,9 +140,11 @@ Deno.serve(async (req: Request) => {
   }
 
   if (existingLedger) {
+    const { data: snapshot } = await loadAlphaProgressSnapshot(adminClient, playerId);
     return jsonResponse({
       ok: true,
       data: { requestId, type, duplicate: true, noRealValue: true, chainNetwork: "CANARY" },
+      progress: normalizeAlphaProgressSnapshot(snapshot),
       message: "Alpha action already recorded.",
     });
   }
@@ -127,9 +196,20 @@ Deno.serve(async (req: Request) => {
 
   if (ledgerError) return jsonResponse({ ok: false, error: "ledger_insert_failed", message: "Alpha ledger event could not be recorded." }, 500);
 
+  const state = asRecord(payload.state);
+  const progressResult = Object.keys(state).length > 0
+    ? await upsertAlphaProgressSnapshot(adminClient, { userId: playerId, state, sourceRequestId: requestId, actionType: type })
+    : null;
+
+  if (progressResult && !progressResult.ok) {
+    const status = progressResult.error === "invalid_progress_state" || progressResult.error === "progress_state_too_large" ? 400 : 500;
+    return jsonResponse({ ok: false, error: progressResult.error, message: progressResult.message }, status);
+  }
+
   return jsonResponse({
     ok: true,
     data: { requestId, type, noRealValue: true, chainNetwork: "CANARY" },
+    progress: progressResult?.snapshot ?? null,
   });
 });
 

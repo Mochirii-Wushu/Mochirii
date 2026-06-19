@@ -68,7 +68,7 @@ The `reaper-discord-interactions` function validates Discord request signatures 
 
 The same Interactions endpoint handles the manual Discord vote reminder contract: `Done voting` button clicks, `/vote-status`, `/vote-leaderboard`, and moderator-only `/vote-reminder-preview`. The scheduled sender is the separate `send-vote-reminder` Edge Function. It posts link buttons only; it never automates third-party upvotes, vote submissions, CAPTCHA bypasses, browser clicks, vote-site sessions, or vote-site result checks.
 
-The Interactions endpoint also supports moderator-only pending-verification containment with `/sync-pending-verification mode:<preview|apply> confirm:<true|false>`. It is preview-first and only manages tracked member-specific `VIEW_CHANNEL` overwrites for WWM-only, unverified Discord members. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md).
+The Interactions endpoint also supports moderator-only pending-verification containment with `/sync-pending-verification mode:<preview|apply> confirm:<true|false>`. It is preview-first and only manages tracked member-specific containment overwrites for WWM-only, unverified Discord members. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md).
 
 Script order on pages with Auth or upload behavior is:
 
@@ -161,7 +161,7 @@ Discord remains the live community layer: chat, voice, forum conversations, sche
 
 `discord_sync_log` records future sync attempts and bridge jobs: scheduled-event imports, forum/thread index updates, webhook notifications, slash-command entry points, role checks, manual tests, and skipped or failed attempts. Log details must stay operational and redacted; never store tokens, webhook URLs, private conversations, or unrestricted message content.
 
-`discord_managed_permission_overwrites` records only Reaper-owned Discord permission overwrite bits by guild, channel, Discord user, and managing service. It is service-role-only and currently backs pending-verification containment for member-specific `VIEW_CHANNEL` allows/denies. Browser code receives no grants and must not read or write this table.
+`discord_managed_permission_overwrites` records only Reaper-owned Discord permission overwrite bits by guild, channel, Discord user, and managing service. It is service-role-only and currently backs pending-verification containment for member-specific view, send, and read-history allows in approved channels plus view denies elsewhere. Browser code receives no grants and must not read or write this table.
 
 Known foundation resources:
 
@@ -374,7 +374,8 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 7. Register the guild-scoped `/submit` command with optional boolean `share_to_instagram`.
 8. Register the guild-scoped `/sync-events` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`.
 9. Register the guild-scoped `/sync-pending-verification` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`. Use `npm run register:reaper-pending-verification-command` for dry run first; approved apply uses `npm run register:reaper-pending-verification-command -- --apply`.
-10. Register the guild-scoped `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview` commands. `/vote-reminder-preview` is enforced by the configured Moderator role.
+10. Register the guild-scoped `/audit-modmail` command. Use `npm run register:reaper-modmail-audit-command` for dry run first; approved apply uses `npm run register:reaper-modmail-audit-command -- --apply`.
+11. Register the guild-scoped `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview` commands. `/vote-reminder-preview` is enforced by the configured Moderator role.
 11. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
 
 ```text
@@ -554,13 +555,16 @@ The same Reaper Interactions endpoint also supports:
 ```text
 /sync-events mode:<preview|apply> confirm:<true|false>
 /sync-pending-verification mode:<preview|apply> confirm:<true|false>
+/audit-modmail
 ```
 
 `/sync-events` reads the mirrored schedule JSON at `https://mochirii.com/data/guild-schedule.json` by default, computes the next UTC+8 monthly and weekly website events, and creates or updates only external Discord Scheduled Events managed by Reaper. Preview returns the plan without changing Discord. Apply requires `confirm:true`, the configured Moderator role, and Discord Create Events plus Manage Events permissions. Created or updated event IDs are recorded in `discord_resources` with `managedBy: "reaper-event-sync"` and a stable website event key. Schedule items may include `discordCoverImage`, `discordLocation`, `discordEventId`, `discordDuplicateEventIds`, and `discordRecurrenceRule`; the monthly raffle uses these fields to adopt the canonical recurring event, upload the approved cover image, set the Discord location to `Guild Base Pool`, and retire only the explicit duplicate one-off raffle ID listed in the schedule.
 
-`/sync-pending-verification` targets only Discord members whose roles array is exactly `["1468659807736299520"]` and who do not have `1078630751077142615`. Preview fetches the current guild channels and members, builds the allowed tree from category `1468658801388290048`, detects manual member-specific `VIEW_CHANNEL` conflicts, and writes a redacted `discord_sync_log` row. Apply requires `confirm:true`, the configured Moderator role, and Discord Manage Roles permission. It writes only tracked member-specific `VIEW_CHANNEL` permission overwrites and records Reaper-owned bits in `discord_managed_permission_overwrites`.
+`/sync-pending-verification` targets only Discord members whose roles array is exactly `["1468659807736299520"]` and who do not have `1078630751077142615`. Preview fetches the current guild channels and members, allows only channels `1468658915594997760` and `1480143854014300335`, detects manual member-specific containment conflicts, and writes a redacted `discord_sync_log` row. Apply requires `confirm:true`, the configured Moderator role, and Discord Manage Roles permission. It writes only tracked member-specific containment permission overwrites and records Reaper-owned bits in `discord_managed_permission_overwrites`.
 
 `reaper-discord-member-sync` is the second-release Gateway automation endpoint. It has `verify_jwt = false` and requires `x-mochirii-reaper-member-sync-secret`; the private Gateway worker posts `guildMemberAdd` and role-changing `guildMemberUpdate` events, and the function fetches the current Discord member before planning or mutating. It uses the same shared pending-verification containment policy as `/sync-pending-verification`, blocks manual conflicts, enforces the same max-mutation guard, and logs redacted `role_check` counts. The Gateway worker must not mutate roles or channel permissions directly and must not store Supabase service-role keys.
+
+`/audit-modmail` is a moderator-only read-only audit for native ModMail. It checks that ModMail bot `575252669443211264`, Moderator role `1078630751165222984`, and log channel `1165567735871311914` are present and permissioned for metadata-only staff tickets/logging. It does not read ticket message content, send native ModMail commands, enable `=loggingplus`, or replace the third-party ModMail bot. Register it with `npm run register:reaper-modmail-audit-command` first, then approved apply with `npm run register:reaper-modmail-audit-command -- --apply`. See [`../docs/reaper-modmail-audit.md`](../docs/reaper-modmail-audit.md).
 
 ## Discord Vote Reminder
 
@@ -627,7 +631,7 @@ Pending-verification containment is a moderator-only Discord repair path for mem
 /sync-pending-verification mode:<preview|apply> confirm:<true|false>
 ```
 
-Reaper computes the allowed channel tree as category `1468658801388290048` plus its current child channels. It then plans member-specific `VIEW_CHANNEL` allows inside that tree and member-specific `VIEW_CHANNEL` denies outside that tree. It preserves unrelated overwrite bits and removes only Reaper-owned bits when a member no longer matches the target predicate. Manual member-specific `VIEW_CHANNEL` allows outside the allowed tree or denies inside the allowed tree block apply.
+Reaper allows WWM-only, non-Verified members to see and chat only in channels `1468658915594997760` and `1480143854014300335`. It plans member-specific `VIEW_CHANNEL`, `SEND_MESSAGES`, and `READ_MESSAGE_HISTORY` allows inside those channels, and member-specific `VIEW_CHANNEL` denies outside those channels. It preserves unrelated overwrite bits and removes only Reaper-owned bits when a member no longer matches the target predicate. Manual member-specific `VIEW_CHANNEL` allows outside the allowed channels or denies for the managed allow bits inside the allowed channels block apply.
 
 Preview is the safe first command. Apply requires `confirm:true`, Moderator role `1078630751165222984`, and Discord Manage Roles permission. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md) for the conflict policy and [`../docs/reaper-pending-verification-activation-packet.md`](../docs/reaper-pending-verification-activation-packet.md) for live activation, Gateway release, and rollback steps.
 

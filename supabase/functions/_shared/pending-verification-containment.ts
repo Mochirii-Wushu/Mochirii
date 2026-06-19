@@ -62,7 +62,7 @@ export type PendingContainmentConfig = {
   pendingBaseRoleId: string;
   verifiedRoleId: string;
   moderatorRoleIds: string[];
-  allowedCategoryId: string;
+  allowedChannelIds: string[];
   managedBy: string;
   maxMutationCount: number;
   discordWriteBatchSize: number;
@@ -83,10 +83,13 @@ export class PendingContainmentApplyError extends Error {
 
 export const PENDING_BASE_ROLE_ID = "1468659807736299520";
 export const VERIFIED_ROLE_ID = "1078630751077142615";
-export const PENDING_ALLOWED_CATEGORY_ID = "1468658801388290048";
+export const PENDING_ALLOWED_CHANNEL_IDS = ["1468658915594997760", "1480143854014300335"];
 export const ADMINISTRATOR_PERMISSION = 1n << 3n;
 export const VIEW_CHANNEL_PERMISSION = 1n << 10n;
-export const GUILD_CATEGORY_CHANNEL_TYPE = 4;
+export const SEND_MESSAGES_PERMISSION = 1n << 11n;
+export const READ_MESSAGE_HISTORY_PERMISSION = 1n << 16n;
+export const PENDING_ALLOWED_CHANNEL_ALLOW_PERMISSIONS =
+  VIEW_CHANNEL_PERMISSION | SEND_MESSAGES_PERMISSION | READ_MESSAGE_HISTORY_PERMISSION;
 export const DISCORD_MEMBER_OVERWRITE_TYPE = 1;
 export const MAX_PENDING_VERIFICATION_MUTATIONS = 500;
 export const DISCORD_WRITE_BATCH_SIZE = 10;
@@ -97,7 +100,7 @@ export const DEFAULT_PENDING_CONTAINMENT_CONFIG: PendingContainmentConfig = {
   pendingBaseRoleId: PENDING_BASE_ROLE_ID,
   verifiedRoleId: VERIFIED_ROLE_ID,
   moderatorRoleIds: ["1078630751165222984"],
-  allowedCategoryId: PENDING_ALLOWED_CATEGORY_ID,
+  allowedChannelIds: PENDING_ALLOWED_CHANNEL_IDS,
   managedBy: PENDING_VERIFICATION_MANAGED_BY,
   maxMutationCount: MAX_PENDING_VERIFICATION_MUTATIONS,
   discordWriteBatchSize: DISCORD_WRITE_BATCH_SIZE,
@@ -260,10 +263,14 @@ export function memberCanViewChannel(
   return hasPermissionBit(permissions, ADMINISTRATOR_PERMISSION) || hasPermissionBit(permissions, VIEW_CHANNEL_PERMISSION);
 }
 
-export function activeManagedOwned(record: PendingManagedOverwrite | null, side: "allow" | "deny"): boolean {
+export function activeManagedOwned(
+  record: PendingManagedOverwrite | null,
+  side: "allow" | "deny",
+  mask = VIEW_CHANNEL_PERMISSION,
+): boolean {
   if (!record) return false;
   const value = side === "allow" ? record.ownedAllow : record.ownedDeny;
-  return (value & VIEW_CHANNEL_PERMISSION) === VIEW_CHANNEL_PERMISSION;
+  return (value & mask) !== 0n;
 }
 
 export function desiredPendingChange(
@@ -278,20 +285,23 @@ export function desiredPendingChange(
   const overwrite = memberOverwrite(channel, userId);
   const currentAllow = permissionBits(overwrite.allow);
   const currentDeny = permissionBits(overwrite.deny);
-  const ownedAllow = activeManagedOwned(managedRecord, "allow");
-  const ownedDeny = activeManagedOwned(managedRecord, "deny");
-  const manualAllow = hasPermissionBit(currentAllow, VIEW_CHANNEL_PERMISSION) && !ownedAllow;
-  const manualDeny = hasPermissionBit(currentDeny, VIEW_CHANNEL_PERMISSION) && !ownedDeny;
+  const ownedAllowBits = managedRecord ? managedRecord.ownedAllow : 0n;
+  const ownedDenyBits = managedRecord ? managedRecord.ownedDeny : 0n;
+  const ownedAllowedBits = ownedAllowBits & PENDING_ALLOWED_CHANNEL_ALLOW_PERMISSIONS;
+  const ownedViewDeny = ownedDenyBits & VIEW_CHANNEL_PERMISSION;
+  const manualAllow = hasPermissionBit(currentAllow, VIEW_CHANNEL_PERMISSION) &&
+    (ownedAllowedBits & VIEW_CHANNEL_PERMISSION) === 0n;
+  const allowedManualDeny = (currentDeny & PENDING_ALLOWED_CHANNEL_ALLOW_PERMISSIONS) & ~ownedDenyBits;
   const channelName = pendingChannelName(channel);
 
-  if (action === "allow" && manualDeny) {
+  if (action === "allow" && allowedManualDeny !== 0n) {
     return {
       change: null,
       conflict: {
         channelId,
         channelName,
         userId,
-        detail: "manual member deny inside allowed tree",
+        detail: "manual member deny inside allowed channels",
       },
     };
   }
@@ -303,7 +313,7 @@ export function desiredPendingChange(
         channelId,
         channelName,
         userId,
-        detail: "manual member allow outside allowed tree",
+        detail: "manual member allow outside allowed channels",
       },
     };
   }
@@ -314,24 +324,20 @@ export function desiredPendingChange(
   let nextOwnedDeny = 0n;
 
   if (action === "allow") {
-    if (!hasPermissionBit(currentAllow, VIEW_CHANNEL_PERMISSION)) {
-      nextAllow = withPermissionBit(nextAllow, VIEW_CHANNEL_PERMISSION);
-      nextOwnedAllow = VIEW_CHANNEL_PERMISSION;
-    } else if (ownedAllow) {
-      nextOwnedAllow = VIEW_CHANNEL_PERMISSION;
-    }
-    if (ownedDeny) nextDeny = withoutPermissionBit(nextDeny, VIEW_CHANNEL_PERMISSION);
+    nextAllow |= PENDING_ALLOWED_CHANNEL_ALLOW_PERMISSIONS;
+    nextOwnedAllow = PENDING_ALLOWED_CHANNEL_ALLOW_PERMISSIONS;
+    if (ownedViewDeny) nextDeny = withoutPermissionBit(nextDeny, VIEW_CHANNEL_PERMISSION);
   } else if (action === "deny") {
     if (!hasPermissionBit(currentDeny, VIEW_CHANNEL_PERMISSION)) {
       nextDeny = withPermissionBit(nextDeny, VIEW_CHANNEL_PERMISSION);
       nextOwnedDeny = VIEW_CHANNEL_PERMISSION;
-    } else if (ownedDeny) {
+    } else if (ownedViewDeny) {
       nextOwnedDeny = VIEW_CHANNEL_PERMISSION;
     }
-    if (ownedAllow) nextAllow = withoutPermissionBit(nextAllow, VIEW_CHANNEL_PERMISSION);
+    if (ownedAllowedBits) nextAllow &= ~ownedAllowedBits;
   } else {
-    if (ownedAllow) nextAllow = withoutPermissionBit(nextAllow, VIEW_CHANNEL_PERMISSION);
-    if (ownedDeny) nextDeny = withoutPermissionBit(nextDeny, VIEW_CHANNEL_PERMISSION);
+    if (ownedAllowBits) nextAllow &= ~ownedAllowBits;
+    if (ownedDenyBits) nextDeny &= ~ownedDenyBits;
   }
 
   const discordWrite = currentAllow !== nextAllow || currentDeny !== nextDeny;
@@ -370,22 +376,18 @@ export function pendingAllowedChannelIds(
   channels: JsonRecord[],
   config: PendingContainmentConfig = DEFAULT_PENDING_CONTAINMENT_CONFIG,
 ): Set<string> {
-  const category = channels.find((channel) =>
-    pendingChannelId(channel) === config.allowedCategoryId &&
-    Number(channel.type) === GUILD_CATEGORY_CHANNEL_TYPE
-  );
+  const availableChannelIds = new Set(channels.map(pendingChannelId).filter((id): id is string => Boolean(id)));
+  const allowed = new Set(config.allowedChannelIds.filter((channelId) => Boolean(snowflake(channelId))));
+  const missing = [...allowed].filter((channelId) => !availableChannelIds.has(channelId));
 
-  if (!category) {
-    throw new Error(`Allowed pending-verification category ${config.allowedCategoryId} was not found.`);
+  if (!allowed.size) {
+    throw new Error("No allowed pending-verification channels are configured.");
   }
 
-  const allowed = new Set<string>([config.allowedCategoryId]);
-  for (const channel of channels) {
-    const channelId = pendingChannelId(channel);
-    if (channelId && safeString(channel.parent_id, 24) === config.allowedCategoryId) {
-      allowed.add(channelId);
-    }
+  if (missing.length) {
+    throw new Error(`Allowed pending-verification channels were not found: ${missing.join(", ")}.`);
   }
+
   return allowed;
 }
 
@@ -459,7 +461,8 @@ function buildPlanFromRecords(
       if (result.conflict) conflicts.push(result.conflict);
       const currentlyVisible = memberCanViewChannel(channel, member, roles, config);
       const visibilityNeedsChange = action === "allow" ? !currentlyVisible : currentlyVisible;
-      const hasManagedViewBit = activeManagedOwned(managedRecord, "allow") || activeManagedOwned(managedRecord, "deny");
+      const hasManagedViewBit = activeManagedOwned(managedRecord, "allow", PENDING_ALLOWED_CHANNEL_ALLOW_PERMISSIONS) ||
+        activeManagedOwned(managedRecord, "deny");
       if (result.change && (visibilityNeedsChange || hasManagedViewBit)) changes.set(key, result.change);
     }
   }
@@ -648,7 +651,7 @@ export function pendingPlanMessage(
     mode === "apply"
       ? "Pending verification containment finished."
       : "Pending verification containment preview. No Discord permissions were changed.",
-    `Targets: ${plan.targetUserIds.length}. Channels checked: ${plan.channelsChecked}. Allowed tree channels: ${plan.allowedChannelIds.length}.`,
+    `Targets: ${plan.targetUserIds.length}. Channels checked: ${plan.channelsChecked}. Allowed channels: ${plan.allowedChannelIds.length}.`,
     `Planned Discord writes: ${discordWriteCount}. Planned registry writes: ${dbWriteCount}.`,
   ];
 

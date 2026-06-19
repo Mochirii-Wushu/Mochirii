@@ -55,6 +55,10 @@ async function run() {
   assert(manifest.market?.auctions === false, "Manifest must keep auctions disabled.");
   assert(manifest.market?.cashout === false, "Manifest must keep cashout disabled.");
   assert(manifest.ugc === "curated", "Manifest UGC mode must stay curated.");
+  assert(manifest.progress?.authority === "mochirii-edge", "Manifest must identify Mochirii Edge as account-progress authority.");
+  assert(manifest.progress?.linkedAccount === true, "Manifest must expose linked account progress support.");
+  assert(manifest.progress?.guestFallback === true, "Manifest must keep guest progress fallback.");
+  assert(manifest.progress?.snapshotEndpoint === "/integration/alpha/progress", "Manifest must expose the account progress snapshot endpoint.");
 
   if (siteOrigin) {
     const allowedOrigin = manifestResult.headers.get("access-control-allow-origin");
@@ -76,6 +80,7 @@ async function run() {
   assert(alphaStatus.ugc === "curated", "Alpha status UGC mode must stay curated.");
   assert(alphaStatus.edgeFunctions?.session === "mochi-social-alpha-session", "Alpha status must expose the session Edge Function.");
   assert(alphaStatus.edgeFunctions?.action === "mochi-social-alpha-action", "Alpha status must expose the action Edge Function.");
+  assert(alphaStatus.edgeFunctions?.progress === "mochi-social-alpha-progress", "Alpha status must expose the progress Edge Function.");
   assert(alphaStatus.edgeFunctions?.admin === "mochi-social-alpha-admin", "Alpha status must expose the admin Edge Function.");
   assert(alphaStatus.edgeFunctions?.feedback === "submit-mochi-social-feedback", "Alpha status must expose the feedback Edge Function.");
   assert(alphaStatus.chainRuntime?.provider === "enjin", "Alpha chain runtime provider must stay Enjin.");

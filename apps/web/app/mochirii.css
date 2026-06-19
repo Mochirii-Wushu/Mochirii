@@ -6221,6 +6221,16 @@ body[data-page="gallery-submit"] .muted{
   background:#10252a;
 }
 
+.mochi-game-note{
+  margin:0;
+  padding:12px 14px;
+  border:1px solid rgba(218,181,94,.18);
+  border-radius:16px;
+  background:rgba(218,181,94,.09);
+  color:var(--ink-1);
+  line-height:1.45;
+}
+
 .mochi-feedback{
   display:grid;
   gap:10px;

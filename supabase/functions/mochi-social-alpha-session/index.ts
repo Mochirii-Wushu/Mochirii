@@ -1,5 +1,15 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { CORS_HEADERS, alphaAccess, ensureAlphaProfile, jsonResponse, readJsonBody, requireUser, safeString } from "../_shared/mochi-social-alpha.ts";
+import {
+  CORS_HEADERS,
+  alphaAccess,
+  ensureAlphaProfile,
+  jsonResponse,
+  loadAlphaProgressSnapshot,
+  normalizeAlphaProgressSnapshot,
+  readJsonBody,
+  requireUser,
+  safeString,
+} from "../_shared/mochi-social-alpha.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -45,6 +55,11 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+  const progressResult = refreshed.ok && refreshed.hasAccess && refreshed.termsAccepted
+    ? await loadAlphaProgressSnapshot(access.adminClient, access.userId)
+    : null;
+  const progress = progressResult && !progressResult.error ? normalizeAlphaProgressSnapshot(progressResult.data) : null;
+
   return jsonResponse({
     ok: true,
     data: {
@@ -52,6 +67,16 @@ Deno.serve(async (req: Request) => {
       hasAccess: refreshed.ok ? refreshed.hasAccess : false,
       termsAccepted: refreshed.ok ? refreshed.termsAccepted : false,
       termsVersion: refreshed.ok ? refreshed.termsVersion : state.termsVersion,
+      progress: progress
+        ? {
+          authority: progress.authority,
+          userId: progress.userId,
+          revision: progress.revision,
+          sourceRequestId: progress.sourceRequestId,
+          lastActionType: progress.lastActionType,
+          updatedAt: progress.updatedAt,
+        }
+        : null,
       alpha: {
         noRealValue: true,
         chainNetwork: "CANARY",

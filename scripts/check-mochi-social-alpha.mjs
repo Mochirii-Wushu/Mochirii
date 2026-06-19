@@ -99,7 +99,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'Progress:', 'account sync', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
@@ -107,16 +107,17 @@ const checks = [
   },
   {
     file: 'apps/web/lib/mochi-social/alpha.ts',
-    includes: ['MochiSocialAlphaAdmin', 'manageMochiSocialAlphaAdmin', 'mochi-social-alpha-admin']
+    includes: ['MochiSocialAlphaAdmin', 'manageMochiSocialAlphaAdmin', 'mochi-social-alpha-admin', 'progress?:', 'authority: "mochirii-edge"']
   },
   {
     file: 'supabase/config.toml',
-    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
+    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-progress', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
   },
   {
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
     includes: [
       'alphaAccess(adminClient, playerId)',
+      'upsertAlphaProgressSnapshot(adminClient',
       'mochi_social_market_listings',
       'mochi_social_trades',
       'mochi_social_pets',
@@ -128,12 +129,20 @@ const checks = [
     ]
   },
   {
+    file: 'supabase/functions/mochi-social-alpha-progress/index.ts',
+    includes: ['requireGameServer(req)', 'alphaAccess(adminClient, playerId)', 'loadAlphaProgressSnapshot(adminClient, playerId)', 'normalizeAlphaProgressSnapshot(data)', 'guest-local']
+  },
+  {
     file: 'supabase/functions/mochi-social-alpha-admin/index.ts',
     includes: ['loadAlphaAudit', 'recentLedger', 'pendingChainOps', 'mochi_social_feedback']
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',
     includes: ['mochi_social_alpha_testers', 'mochi_social_ledger_events', "network = 'CANARY'", 'expires_at']
+  },
+  {
+    file: 'supabase/migrations/20260615044446_add_mochi_social_account_progress.sql',
+    includes: ['mochi_social_progress_snapshots', 'revision integer not null default 0', "state jsonb not null default '{}'::jsonb", 'mochi_social_progress_read_own']
   },
   {
     file: 'apps/web/next.config.ts',

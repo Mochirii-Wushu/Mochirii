@@ -2,7 +2,6 @@ const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const CONFIRM_GUILD_ARG = "--confirm-guild=1078630751077142608";
 const PENDING_VERIFICATION_MANAGED_BY = "reaper-pending-verification";
-const VIEW_CHANNEL_PERMISSION = 1n << 10n;
 const DISCORD_MEMBER_OVERWRITE_TYPE = 1;
 const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment rollback";
 const args = new Set(process.argv.slice(2));
@@ -152,8 +151,8 @@ function planRollback(row, channel) {
   const rowId = String(row.id || "").trim();
   const channelId = snowflake(row.channel_id);
   const userId = snowflake(row.discord_user_id);
-  const ownedAllow = bits(row.owned_allow) & VIEW_CHANNEL_PERMISSION;
-  const ownedDeny = bits(row.owned_deny) & VIEW_CHANNEL_PERMISSION;
+  const ownedAllow = bits(row.owned_allow);
+  const ownedDeny = bits(row.owned_deny);
 
   if (!rowId || !channelId || !userId) {
     return { row, channelId, userId, discordWrite: false, dbWrite: false, missingChannel: false, invalid: true };

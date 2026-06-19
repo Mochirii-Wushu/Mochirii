@@ -82,7 +82,7 @@ The registration script must use `default_member_permissions: "268435456"` for D
 
 Before live apply, confirm:
 
-- Category `1468658801388290048` contains clear verification, rules, and help channels.
+- Channels `1468658915594997760` and `1480143854014300335` are the only intended chat surfaces for WWM-only, non-Verified members.
 - Rules Screening and Community Onboarding are intentionally configured.
 - AutoMod mention-spam controls and Raid Protection alerts are configured.
 - Verification level and role hierarchy match current moderator expectations.
@@ -109,7 +109,8 @@ Do not publicly announce contained users. Slash-command responses stay ephemeral
 
 4. Verify:
 
-- A WWM-only unverified test member can see only category `1468658801388290048` and its children.
+- A WWM-only unverified test member can see and chat only in channels `1468658915594997760` and `1480143854014300335`.
+- The same test member cannot see WWM gallery, events, guides, announcements, spotlight, voice, supporter, admin, or other private channels.
 - A verified member or extra-role member has Reaper-owned overwrites removed.
 - `discord_sync_log` contains redacted `role_check` entries.
 - Discord audit log entries include `Reaper pending verification containment`.
@@ -135,7 +136,7 @@ Endpoint contract:
 }
 ```
 
-The endpoint has `verify_jwt = false` and requires header `x-mochirii-reaper-member-sync-secret`. It fetches the current Discord member before mutating, uses the shared containment policy, blocks manual conflicts, enforces the same max-mutation guard, logs redacted counts, and writes only tracked member-specific `VIEW_CHANNEL` overwrites.
+The endpoint has `verify_jwt = false` and requires header `x-mochirii-reaper-member-sync-secret`. It fetches the current Discord member before mutating, uses the shared containment policy, blocks manual conflicts, enforces the same max-mutation guard, logs redacted counts, and writes only tracked member-specific containment overwrites.
 
 Gateway requirements:
 
@@ -175,7 +176,7 @@ After approval:
 npm run rollback:reaper-pending-verification -- --apply --confirm-guild=1078630751077142608
 ```
 
-The rollback script removes only Reaper-owned `VIEW_CHANNEL` bits tracked in `discord_managed_permission_overwrites`. It preserves manual bits and marks cleared registry rows inactive. Database table removal is not required for emergency stop.
+The rollback script removes only Reaper-owned containment bits tracked in `discord_managed_permission_overwrites`. It preserves manual bits and marks cleared registry rows inactive. Database table removal is not required for emergency stop.
 
 ## Evidence Fields
 
