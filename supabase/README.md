@@ -94,7 +94,9 @@ The Account page does not expose private Storage URLs. It shows submission text 
 
 ## Multi-Provider Auth Setup
 
-Discord, Phone, Apple, Facebook, Google, Kakao, Twitch, and Spotify sign-in through Supabase Auth prove account control only. They do not automatically prove guild membership, role ownership, alpha access, game access, or Enjin readiness. Discord remains the only automatic member verification path because guild membership and role checks happen server-side through `verify-discord-member` and `verify-member-access`.
+The current live sign-in set is Discord, Google, and Twitch. Apple is the only documented future provider lane. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
+
+Social or phone sign-in through Supabase Auth proves account control only. It does not automatically prove guild membership, role ownership, alpha access, game access, or Enjin readiness. Discord remains the only automatic member verification path because guild membership and role checks happen server-side through `verify-discord-member` and `verify-member-access`.
 
 Non-Discord identities are synced as redacted evidence in `member_auth_identities` and become gallery-eligible only after moderator approval in `member_verifications`. See `docs/multi-provider-login-and-verification.md` for the setup packet.
 
@@ -116,12 +118,20 @@ https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
 The browser/provider allowlist is controlled separately with public-safe env only:
 
 ```text
-NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch
 NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
 ```
 
-Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured.
+Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider lanes are intentionally reopened.
+
+Preview-only member verification smoke:
+
+```sh
+ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true npm run smoke:member-verification-preview
+```
+
+That script refuses project `deyvmtncimmcinldjyqe`, creates and cleans up preview fixtures only, and proves approve/revoke/expired/locked-state behavior without touching production member-verification rows.
 
 Recommended redirect URLs:
 
