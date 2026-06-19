@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-06-18.
+Last checked for this index: 2026-06-19.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -13,8 +13,9 @@ This is the short source-of-truth index for the current Mochirii production post
 - `https://www.mochirii.com` redirects to the apex domain.
 - Root static files and GitHub Pages remain rollback/reference material until a later stabilization task retires them.
 - Deployment source of truth: `docs/deployment.md`.
-- Current production commit verified from `origin/main`: `3a3ba46c9170fec21e910db17ba6e812f69b05ab` (`Improve gallery media performance guardrails`).
-- Live route smoke on 2026-06-18 returned `200` for `/`, `/join`, `/events`, `/gallery`, `/ranks`, `/leaders`, `/codex`, `/announcements`, `/raffles`, `/spotify`, `/spotlight`, `/twills`, `/auth`, `/account`, `/members`, `/gallery-submit`, `/leader-dashboard`, and `/games/mochi-social`.
+- Current production commit verified from `origin/main`: `22c88035c74b5dc4c697e09a0e363dbf2842416f` (`Merge pull request #322 from Mochirii-Wushu/codex/birthday-splash-refresh`).
+- Vercel production readback on 2026-06-19 returned `Ready` for deployment `mochirii-gywsxob6w-mochirii.vercel.app`, with aliases `https://mochirii.com`, `https://www.mochirii.com`, and `https://mochirii.vercel.app`.
+- Latest full route smoke before the unified release ledger was recorded on 2026-06-18. Run a fresh route matrix after each merged release packet.
 
 ## Data And Assets
 
@@ -39,6 +40,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
 - Supabase function list was verified on 2026-06-17 for project `deyvmtncimmcinldjyqe`; expected website, Reaper, Instagram, vote, spotlight, profile, and Mochi Social alpha functions are active.
+- Supabase CLI function-list readback timed out during the 2026-06-19 unified release ledger pass. Treat this as a read-only CLI evidence blocker, not a product failure; use Supabase Dashboard readback or retry once later before any Supabase deploy.
 - Supabase CLI was updated to `2.107.0` for the Supabase hardening packet.
 - Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Social-specific advisor findings.
 - Supabase advisor snapshot still includes leaked-password protection as a provider configuration follow-up, intentional service-only RLS/no-policy findings documented in `supabase/README.md`, informational unused-index findings, and deferred Mochi Social RLS/index performance warnings.
@@ -59,7 +61,15 @@ This is the short source-of-truth index for the current Mochirii production post
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
-- Open PR queue on 2026-06-17 contains stale or behind work packets and Dependabot branches; do not merge them as a batch. Treat each as a separate refresh, close, or release decision.
+- Open PR queue on 2026-06-19 contains 26 Mochirii PRs, most behind current `main`; do not merge them as a batch. Treat each as a separate refresh, close, or release decision using `reports/unified-release-ledger-2026-06-19.md`.
+
+## Shopify Storefront
+
+- Shopify theme work lives in the nested repository `C:\Users\xtyty\Documents\Shopify Store\Velesari-Holdings`.
+- The deployable Shopify base branch is `shopify-theme`, not the outer launch-ops folder.
+- Active Shopify release packet: `Anthyphera/Velesari-Holdings` PR #44, `codex/product-label-artwork-system` into `shopify-theme`, currently draft and clean as of the 2026-06-19 ledger pass.
+- Shopify storefront must remain password-gated until a separate launch approval.
+- Product/source work must preserve Selfnamed source data, the 2.2x markup rule, lightweight placeholder imagery, and the existing launch guardrails documented in the Shopify theme repo.
 
 ## Vercel Observability
 
