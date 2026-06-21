@@ -7,7 +7,7 @@ import { hasMochiSocialTesterSession } from "@/lib/mochi-social/tester-password"
 
 export const metadata: Metadata = {
   title: "Mochi Social Alpha",
-  description: "Closed, no-real-value Mochi Social alpha preview for approved testers.",
+  description: "Closed Mochi Social playtest for approved guild members to enter a shared room and care for Lirabao together.",
   robots: {
     index: false,
     follow: false,

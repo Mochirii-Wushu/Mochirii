@@ -59,7 +59,7 @@ const checks = [
       "NEXT_PUBLIC_MOCHI_SOCIAL_URL",
       "MOCHI_SOCIAL_SIGN_OUT",
       "resolveMochiSocialBridgeMessage(event.data)",
-      "configured-preview-stub",
+      "All playtest progress has no real value.",
       "title=\"Mochi Social\"",
     ],
   },
@@ -95,6 +95,19 @@ const forbidden = [
   },
 ];
 
+const publicCopyForbidden = [
+  /\bconfigured-preview-stub\b/i,
+  /\bEnjin\b/i,
+  /\bCanary\b/i,
+  /\bmarket\b/i,
+  /\btrad(?:e|es|ing)\b/i,
+  /\bfunded-chain\b/i,
+  /\boperator\b/i,
+  /\bledger\b/i,
+  /\b(?:Distributed Authority|Cloud Save|Edge Function|Unity Custom ID)\b/i,
+  /\b(?:Codex|AI|LLM|agent|OpenAI|tooling)\b/i,
+];
+
 for (const check of checks) {
   if (!existsSync(check.file)) throw new Error(`${check.file}: missing required file.`);
   const text = readFileSync(check.file, "utf8");
@@ -105,6 +118,12 @@ for (const check of checks) {
 
   for (const { label, pattern } of forbidden) {
     if (pattern.test(text)) throw new Error(`${check.file}: appears to contain ${label}.`);
+  }
+
+  if (check.file.includes("apps/web/components/mochi-social/") || check.file.includes("apps/web/app/games/mochi-social/")) {
+    for (const pattern of publicCopyForbidden) {
+      if (pattern.test(text)) throw new Error(`${check.file}: public tester copy contains internal wording matching ${pattern}.`);
+    }
   }
 }
 

@@ -114,12 +114,9 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           <ul>
             <li>No real money, purchases, cashout, or permanent blockchain value.</li>
             <li>Desktop is recommended for this early build.</li>
-            <li>Guest password preview does not save member progress; signed-in Supabase alpha mode is required for persistence.</li>
+            <li>The tester password opens the room preview; sign in with your Mochirii account for saved character and Lirabao progress.</li>
+            <li>Avatar uploads, multiple rooms, and public release features are not part of this closed playtest.</li>
           </ul>
-          <p>
-            Preview safety: Enjin Canary remains a configured-preview-stub for future asset testing. Market, trade,
-            avatar uploads, funded-chain gates, and multiple rooms are out of scope for this alpha.
-          </p>
         </section>
       </aside>
     </section>

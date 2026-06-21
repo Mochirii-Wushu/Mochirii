@@ -145,11 +145,12 @@ export function MochiSocialAlphaClient() {
         <div>
           <p className="eyebrow">Closed Alpha</p>
           <h1>Mochi Social</h1>
+          <p>Create your character, enter the shared guild room, and care for Lirabao with other approved members.</p>
         </div>
         <dl>
           <div>
-            <dt>Engine</dt>
-            <dd>Unity WebGL</dd>
+            <dt>Playtest</dt>
+            <dd>Closed alpha</dd>
           </div>
           <div>
             <dt>Room</dt>
@@ -162,14 +163,12 @@ export function MochiSocialAlphaClient() {
         </dl>
       </header>
       <div className="mochi-game-preview-contract" aria-label="Mochi Social preview contract">
-        <span>Engine: Unity WebGL</span>
-        <span>Room: {session?.unity?.roomKey || "jade-lantern-room-alpha"}</span>
-        <span>Mode: single shared room</span>
+        <span>Shared guild room</span>
         <span>Capacity: {session?.unity?.roomCapacity || 25} testers</span>
         <span>Pet: shared Lirabao</span>
         <span>Value: No real value</span>
-        <span>Progress: {session?.progress ? `account sync r${session.progress.revision}` : "account sync ready"}</span>
-        <span data-mochi-bridge-state>Bridge: {bridgeStatus}</span>
+        <span>Progress: {session?.progress ? "saved for this member" : "ready to save"}</span>
+        <span data-mochi-bridge-state>Room connection: {bridgeStatus}</span>
       </div>
 
       {message ? <p className="form-message">{message}</p> : null}
@@ -193,7 +192,7 @@ export function MochiSocialAlphaClient() {
       {state === "terms" ? (
         <div className="mochi-game-panel">
           <h2>Alpha acknowledgement</h2>
-          <p>Alpha characters and the shared Lirabao state are test-only, have no real value, chat is logged for moderation, and the build may reset before release.</p>
+          <p>Alpha characters and shared Lirabao progress are for testing only, have no real value, chat may be reviewed for safety, and the build may reset before release.</p>
           <button className="hero-cta hero-cta--primary" type="button" onClick={() => refresh(true)} disabled={busy}>
             I understand and enter alpha
           </button>
@@ -220,7 +219,7 @@ export function MochiSocialAlphaClient() {
             onLoad={() => sendAuthToGame(accessToken)}
           />
           <p className="mochi-game-note">
-            Signed-in alpha play uses Supabase membership plus Unity Custom ID for account persistence. Tester-password preview remains guest-only. Enjin Canary configured-preview-stub stays future-only and no-real-value.
+            Signed-in play saves your character and shared Lirabao progress. The tester-password preview alone is only for opening the room.
           </p>
           <form className="mochi-feedback" onSubmit={submitFeedback}>
             <label>

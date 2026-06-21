@@ -47,8 +47,8 @@ export function MochiSocialTesterGameClient() {
           <p className="eyebrow">Mochi Social unlocked</p>
           <h1>Mochi Social</h1>
           <p>
-            Welcome in. This password-unlocked preview can smoke-test the Unity room load and bridge,
-            but saved character and shared Lirabao state require signed-in Supabase alpha access.
+            Welcome in. This password-unlocked preview can open the shared room,
+            but saved character and shared Lirabao progress require your Mochirii member sign-in.
           </p>
         </div>
         <dl>
@@ -79,9 +79,8 @@ export function MochiSocialTesterGameClient() {
       </div>
       <div className="mochi-live-toolbar">
         <p>
-          This guest path is for loading and bridge checks only; it does not claim account persistence.
-          Blockchain features remain future-only and no-real-value.
-          <span className="mochi-preview-safety-inline"> Enjin Canary configured-preview-stub.</span>
+          This guest path is for checking that the room opens. It does not save member progress.
+          All playtest progress has no real value.
         </p>
         <form className="mochi-lock-form" method="post" action="/games/mochi-social/tester-logout">
           <button className="hero-cta" type="submit">Lock game page</button>

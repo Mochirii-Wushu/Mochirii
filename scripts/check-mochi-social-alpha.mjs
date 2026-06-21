@@ -99,7 +99,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Unity WebGL', 'single shared room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'Progress:', 'account sync', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
@@ -223,6 +223,27 @@ const forbiddenPatterns = [
   { label: 'Enjin Platform token assignment', pattern: /\bENJIN_PLATFORM_TOKEN\s*=\s*["']?(?!\.\.\.|<|your-|YOUR_|REPLACE_|example\b)[^\s"']{8,}/i }
 ];
 
+const publicMochiSocialFiles = [
+  'docs/mochi-social-playtest-guide.md',
+  'apps/web/app/games/mochi-social/page.tsx',
+  'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
+  'apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx',
+  'apps/web/components/mochi-social/MochiSocialTesterPasswordGate.tsx'
+];
+
+const publicCopyForbiddenPatterns = [
+  { label: 'configured preview stub wording', pattern: /\bconfigured-preview-stub\b/i },
+  { label: 'Enjin wording', pattern: /\bEnjin\b/i },
+  { label: 'Canary wording', pattern: /\bCanary\b/i },
+  { label: 'market wording', pattern: /\bmarket\b/i },
+  { label: 'trade wording', pattern: /\btrad(?:e|es|ing)\b/i },
+  { label: 'funded-chain wording', pattern: /\bfunded-chain\b/i },
+  { label: 'operator wording', pattern: /\boperator\b/i },
+  { label: 'ledger wording', pattern: /\bledger\b/i },
+  { label: 'systems wording', pattern: /\b(?:Distributed Authority|Cloud Save|Edge Function|Unity Custom ID|configured-preview-stub)\b/i },
+  { label: 'AI/tooling wording', pattern: /\b(?:Codex|AI|LLM|agent|OpenAI|tooling)\b/i }
+];
+
 for (const check of checks) {
   const text = readFileSync(check.file, 'utf8');
   for (const needle of check.includes) {
@@ -243,5 +264,14 @@ if (/certificate_eligible:\s*spiritId\s*===\s*["']aozhen["']/.test(actionFunctio
 }
 if (!/CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\[["']lirabao["']\]\)/.test(actionFunction)) {
   throw new Error('Mochi Social certificate eligibility must explicitly name Lirabao as the alpha certificate spirit.');
+}
+
+for (const file of publicMochiSocialFiles) {
+  const text = readFileSync(file, 'utf8');
+  for (const { label, pattern } of publicCopyForbiddenPatterns) {
+    if (pattern.test(text)) {
+      throw new Error(`${file} contains public ${label}.`);
+    }
+  }
 }
 console.log('Mochi Social alpha static checks passed.');

@@ -23,7 +23,7 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 - Provide a calm, welcoming entry point for new members
 - Keep expectations, culture, and coordination transparent
 - Allow non-technical contributors to update content safely via JSON
-- Avoid unnecessary frameworks, build steps, or tooling complexity
+- Avoid unnecessary frameworks, build steps, or process complexity
 - Keep the current Vercel/Next production app and root static rollback surface easy to validate
 
 ---
@@ -238,6 +238,8 @@ For Recruitment protected body/conclusion, audio, tone, accessibility, and smoke
 For Announcements, Raffles, Spotify, and Spotlight data, embed, link, tone, accessibility, and smoke-test conventions, see [`docs/side-pages-guide.md`](docs/side-pages-guide.md).
 
 For Gallery image, category, tag, caption, URL state, cache-query, and smoke-test conventions, see [`docs/gallery-guide.md`](docs/gallery-guide.md).
+
+For the Mochi Social closed playtest, shared room, Lirabao care, tester access, and no-real-value boundaries, see [`docs/mochi-social-playtest-guide.md`](docs/mochi-social-playtest-guide.md).
 
 For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/roadmap.md).
 
