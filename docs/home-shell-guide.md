@@ -27,6 +27,7 @@ Home should route visitors onward without duplicating:
 Current Home data shape:
 
 - `copy`: `bulletinIntro`, `doorsIntro`, `spotlightIntro`, `galleryIntro`
+- `celebrationSplash`: `enabled`, `startsAt`, `endsAt`, `title`, `message`, `storageKey`
 - `hero`: `image`, `atmosphereImage`, `descriptor`, `badges`
 - `seal`: `title`, `image`, `imageAlt`, `verse`
 - `bulletins[]`: `pinned`, `type`, `title`, `date`, `image`, `imageAlt`, `href`, optional `summary`
@@ -169,6 +170,14 @@ Home image behavior:
 - Seal image: `./assets/img/brand/emblem.webp`
 - Bulletin, door, spotlight, and Home gallery images render from `data/home.json`.
 - Home gallery thumbnails should use thumbnail paths where intended, and `full` should point to the full image used by the lightbox.
+
+Birthday splash toggle:
+
+- Deactivate the Home birthday splash by setting `data/home.json` `celebrationSplash.enabled` to `false`.
+- Activate it by setting `celebrationSplash.enabled` to `true`.
+- Optional `startsAt` and `endsAt` values may use ISO-compatible date/time strings to limit the active window; leave them empty for no date window.
+- Keep the root source and the Next production copy synchronized: update `data/home.json`, then run `npm run sync:next-public` or make the matching change in `apps/web/public/data/home.json`.
+- After changing the toggle or copy, run `npm run check:home-celebration-splash` and `npm run check:next-public-sync`.
 
 Image expectations:
 
