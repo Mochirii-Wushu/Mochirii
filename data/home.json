@@ -6,7 +6,7 @@
     "galleryIntro": "Screenshots from baddie smashing, pretty roads, lantern-lit detours & small moments that become guild memory."
   },
   "celebrationSplash": {
-    "enabled": true,
+    "enabled": false,
     "startsAt": "",
     "endsAt": "",
     "title": "Happy Birthday Sinbell!!",
