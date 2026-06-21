@@ -4,26 +4,26 @@ Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Moch
 
 Codex external operations for this website surface are defined in [`docs/mochi-social-alpha-codex-ops.md`](mochi-social-alpha-codex-ops.md). Use it for source hierarchy, tool choice, preview env ownership, Supabase authority, Discord boundaries, preview verification, and secret-entry rules.
 
-Visual work uses the same Cozy Wushu world direction as the game, but ownership remains split: Mochirii owns the tester-password gate, strict Supabase/Discord access screens, and unlocked iframe shell; the Mochi Social game repo owns RPGJS maps, sprites, HUD, manifests, and asset ledger. Vercel Deployment Protection, the tester-password gate, and Supabase/Discord allowlist are separate access layers and should not be treated as interchangeable.
+Visual work uses the same Cozy Wushu world direction as the game, but ownership remains split: Mochirii owns the tester-password gate, strict Supabase/Discord access screens, and unlocked iframe shell; the Mochi Social game repo owns the Unity WebGL runtime, one shared room scene, 3D assets, HUD, manifests, and asset ledger. Vercel Deployment Protection, the tester-password gate, and Supabase/Discord allowlist are separate access layers and should not be treated as interchangeable.
 
 ## Alpha Posture
 
 - Closed preview only.
 - First live target is Alpha Preview Ready on Vercel Preview, not production.
-- Enjin Canary only.
+- Unity WebGL shared-room alpha first; Enjin Canary remains future-only preview context.
 - No real-money value, no cashout, no paid assets, no mainnet.
-- Curated assets only; no open creator uploads.
-- Tester-password preview access for the first live website pass; signed-in allowlisted testers remain the stricter Supabase mode for Alpha RC.
+- Curated character presets only; no avatar uploads or open creator uploads.
+- Tester-password preview access may smoke-test loading/bridge behavior only; signed-in allowlisted Supabase mode is required for member-persistent characters and shared room state.
 - Chat/action logs are retained for alpha moderation and audit workflows.
 
 ## Alpha Preview Ready
 
 Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Preview can embed the Fly game while Enjin remains visible as `configured-preview-stub`.
 
-- `preview-live-gates`: Vercel Preview route, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, tester-password access, no-real-value labels, and approved hosted contract checks. Supabase allowlist, terms, feedback, and short-lived `MOCHI_SOCIAL_AUTH` stay available in strict `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=supabase`.
+- `preview-live-gates`: Vercel Preview route, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, tester-password guest smoke, no-real-value labels, Unity WebGL shared-room contract, and approved hosted contract checks. Supabase allowlist, terms, feedback, Unity Custom ID broker, and short-lived `MOCHI_SOCIAL_AUTH` stay available in strict `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=supabase`.
 - `funded-chain-gates`: cENJ, real Enjin collection ID, real Fuel Tank ID, Wallet Daemon signing, and finalized proof smoke.
 - `funded-chain-gates` are expected red until later approval. Do not set dummy `ENJIN_COLLECTION_ID`, dummy `ENJIN_FUEL_TANK_ID`, or fake readiness flags to clear them.
-- Chain request rows may be audit-only preview records while the game reports `configured-preview-stub`; they must not credit inventory, settle trades, settle listings, or imply real player value.
+- Chain request rows may be audit-only preview records while the game reports `configured-preview-stub`; they must not credit inventory, settle trades, settle listings, or imply real player value. Market, trade, funded-chain gates, avatar uploads, multiple rooms, and sharding are out of scope for the Unity shared-room alpha.
 - Alpha RC Ready comes later, after Alpha Preview Ready plus funded Canary collection, Fuel Tank, Wallet Daemon signing, and finality evidence.
 
 ## Website Route
@@ -33,13 +33,24 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 - Default live preview mode is `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password`. The route shows a password-unlocked preview screen, verifies the tester password through a server-only route, sets an HttpOnly cookie scoped to `/games/mochi-social`, then embeds `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
 - Server-only password config is `MOCHI_SOCIAL_TESTER_PASSWORD`. The app derives comparison keys with `scrypt`; do not use a `NEXT_PUBLIC_*` password value and do not commit the password.
 - Strict Supabase mode is still available with `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=supabase`. In that mode the route checks Supabase session state, calls `mochi-social-alpha-session`, requires an active allowlist row, requires terms acknowledgement, then embeds `${NEXT_PUBLIC_MOCHI_SOCIAL_URL}/embed`.
-- Supabase mode forwards only a short-lived Supabase access token through the existing `MOCHI_SOCIAL_AUTH` postMessage bridge, listens for `MOCHI_SOCIAL_READY`, `MOCHI_SOCIAL_AUTH_STATE`, and `MOCHI_SOCIAL_ERROR` from the configured game origin, and shows only non-secret bridge status. Password mode sends a sign-out/guest bridge message only.
+- Supabase mode forwards only a short-lived Supabase access token plus the public Supabase Functions base URL through the existing `MOCHI_SOCIAL_AUTH` postMessage bridge, listens for `MOCHI_SOCIAL_READY`, `MOCHI_SOCIAL_AUTH_STATE`, and `MOCHI_SOCIAL_ERROR` from the configured game origin, and shows only non-secret bridge status. The Unity WebGL runtime uses that Supabase token to call `mochi-social-unity-auth`; password mode sends a sign-out/guest bridge message only and must not claim account persistence.
 - The Supabase preview project must have Discord OAuth enabled before signed-in browser gates can pass. The Discord Developer Portal must allow the Supabase preview callback URL, for example `https://dnxumaiooljdnbjvzbdc.supabase.co/auth/v1/callback`, and the website redirects back to the preview `/account` route.
+
+## Unity Shared Room Runtime
+
+- Game runtime target: Unity 6 LTS WebGL in the separate `xartaiusx/mochi-social` repo.
+- V1 scope: one Cozy Wushu 3D room, `jade-lantern-room-alpha`, 10-25 desktop browser testers, curated character presets, movement/emotes, and one universal shared starter pet, Lirabao.
+- Live session authority: Unity Gaming Services Distributed Authority.
+- Durable runtime saves: UGS Cloud Save/Cloud Code for `character.v1` player data and `room:jade-lantern-room/sharedPet.v1` game data.
+- Supabase remains member authority: login, allowlist, terms, admin audit, no-real-value ledger, feedback, Unity player mapping, and latest shared-pet audit mirror.
+- Supabase stores `mochi_social_unity_players` and `mochi_social_shared_pet_snapshots` as mirrors/audit support, not as the primary Unity runtime save.
+- The game repo must keep `/embed`, `/healthz`, `/integration/game-manifest.json`, and `/integration/alpha/status`, and the manifest/status must report `engine: "unity-webgl"`, `room.mode: "single-shared-room"`, `room.capacity: 25`, `room.sharedPetKey: "lirabao"`, `runtime.realtimeAuthority: "ugs-distributed-authority"`, and `runtime.stateAuthority: "ugs-cloud-save"`.
 
 ## Supabase Functions
 
 - `mochi-social-alpha-session`: signed-in user access, allowlist, terms acknowledgement, profile prep.
-- `mochi-social-alpha-action`: game-server action ledger using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`. The game server resolves the short-lived Supabase access token to a user id before forwarding. The function verifies allowlist and terms, then records Mochi Spirit, market, trade, chat, chain, and append-only ledger state.
+- `mochi-social-unity-auth`: signed-in user Unity token broker. It verifies Supabase auth, allowlist, and terms; maps `auth.users.id` to UGS Custom ID `mochirii:<user_id>`; calls Unity token exchange plus server-side Custom ID sign-in; stores `mochi_social_unity_players`; and returns only player-scoped Unity access/session tokens.
+- `mochi-social-alpha-action`: game-server action ledger using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`. The game server resolves the short-lived Supabase access token to a user id before forwarding. The function verifies allowlist and terms, then records chat, legacy preview events, Unity character/room/pet events, and append-only ledger state. `unity.pet.state_saved` updates the Supabase audit mirror for shared Lirabao state.
 - `mochi-social-alpha-progress`: game-server account progress snapshot loader using `x-mochi-social-server-token`; `verify_jwt=false` is intentional and covered by `check:security-hardening`. The game server validates the short-lived Supabase access token first, forwards only the verified `user.id`, and the function verifies allowlist plus accepted terms before returning no-real-value alpha progress.
 - `mochi-social-alpha-admin`: leader/moderator grant, revoke, list, and audit controls for alpha testers.
 - `submit-mochi-social-feedback`: authenticated tester feedback.
@@ -56,7 +67,7 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 
 - Open `/leader-dashboard` with a Discord Moderator account.
 - Use the `Mochi Social Alpha` panel to grant or revoke closed-alpha access by Supabase user id.
-- Use the same panel to inspect active testers, revoked testers, ledger event count, active fixed-price listings, offered direct trades, pending Enjin Canary operations, feedback count, chat count, and recent ledger/chain/feedback rows.
+- Use the same panel to inspect active testers, revoked testers, ledger event count, Unity player mappings, shared Lirabao mirror count, legacy preview listings/trades, pending Enjin Canary operations, feedback count, chat count, and recent ledger/chain/shared-pet/feedback rows.
 - Keep all rows no-real-value and Canary-only until a later production/mainnet review plan is approved.
 
 ## Tester Guide
@@ -64,20 +75,20 @@ Alpha Preview Ready is the first tester-entry stop point. The Mochirii Vercel Pr
 Tell testers:
 
 - This is a closed alpha preview for approved 18+ testers only.
-- Mochi Spirits, currency, listings, trades, and Enjin Canary operations have no real value.
-- Use a desktop browser and enter the tester password before opening the game page.
-- In strict Supabase mode, sign in through Mochirii and acknowledge the alpha terms before the game iframe loads.
-- Try the first loop: move around town, attune Lirabao, care for it, inspect the HUD, send one local chat message, use one emote, create one fixed-price listing proof, create one direct trade proof, and request the Lirabao Canary certificate proof.
+- Characters, shared Lirabao state, preview ledger rows, and Enjin Canary operations have no real value.
+- Use a desktop browser. The tester password can open a guest/loading smoke path; signed-in Supabase alpha access is required for saved member play.
+- In strict Supabase mode, sign in through Mochirii, acknowledge the alpha terms, create a curated character preset, enter the Jade Lantern room, interact with Lirabao, wave/chat/emote with another tester, reload, and confirm saved character/shared pet behavior.
+- Market, trade, avatar uploads, multiple rooms, mobile support, and funded-chain actions are not part of this alpha test.
 - Send bugs through the Mochirii feedback form. Do not send secrets, wallet seed phrases, payment information, or private recovery material in feedback.
 
 ## Preview Acceptance
 
 Before inviting testers:
 
-- The game repo `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
+- The game repo Unity PlayMode tests, WebGL `/embed` smoke, two-session shared-room proof, and any retained `npm run smoke`, `npm run alpha:local-acceptance`, and `npm run alpha:load-smoke` checks have passed against the intended game URL.
 - The Mochirii preview uses `NEXT_PUBLIC_MOCHI_SOCIAL_URL` for the Fly game URL.
 - The Mochirii preview has `MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password` plus a server-only tester password configured before testers are invited.
-- The password-unlocked preview renders the iframe and keeps the game no-real-value/`configured-preview-stub`.
+- The password-unlocked preview renders the iframe as guest-only smoke and keeps the game no-real-value/`configured-preview-stub`.
 - `npm run check:mochi-social-edge-authority` passes locally, proving server-token authority, append-only/idempotent ledger expectations, Canary/no-real-value stamping, and finalized-only chain inventory movement.
 - `npm run check:mochi-social-preview-ready` includes `site.bridge-state`, `site.auth-bridge`, `site.preview-key-loader`, `site.discord-oauth-detector`, and `site.edge-authority` before hosted Supabase Edge smoke, so hosted checks never stand in for local bridge, publishable-key loading, Discord detector, authority, or finality invariants.
 - `npm run check:mochi-social-bridge-state` passes locally, proving the parent bridge resolver ignores malformed messages, answers `MOCHI_SOCIAL_READY` with an auth resend, records `MOCHI_SOCIAL_AUTH_STATE` as non-secret status, and reports `MOCHI_SOCIAL_ERROR` with generic copy only.
@@ -88,6 +99,7 @@ Before inviting testers:
 - Users without the tester password are blocked from `/games/mochi-social`.
 - In strict Supabase mode, non-testers are blocked, allowlisted testers are blocked until terms are acknowledged, the iframe receives only the short-lived Supabase access token through `MOCHI_SOCIAL_AUTH`, and feedback submissions appear in the leader audit panel.
 - For Alpha Preview Ready, Enjin Canary request rows may stay audit-only with `configured-preview-stub`; transaction UUID, optional listing id, status, and finality evidence are required only for Alpha RC Ready.
+- Strict Supabase acceptance includes signed-out users blocked, non-testers blocked, terms required, valid tester creates a curated character, reload preserves character through UGS, two testers share the same Lirabao state, logout/login preserves state, invalid preset IDs are rejected, and avatar uploads are absent.
 - The 10-25 tester load-smoke report is attached to the PR or release checklist.
 
 ## Manual Browser Gate Evidence
@@ -180,6 +192,7 @@ Required secrets/config stay out of Git:
 - `MOCHI_SOCIAL_TESTER_PASSWORD` in Vercel server env for the password-unlocked preview.
 - `MOCHI_SOCIAL_GAME_SERVER_TOKEN` in Supabase Edge Function secrets and matching Fly game secrets.
 - `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` when the acknowledgement copy changes.
+- `UNITY_SERVICES_PROJECT_ID`, `UNITY_SERVICES_ENVIRONMENT_ID`, `UNITY_SERVICES_ENVIRONMENT_NAME`, `UNITY_SERVICES_SERVICE_ACCOUNT_KEY_ID`, and `UNITY_SERVICES_SERVICE_ACCOUNT_SECRET` in Supabase Edge Function secrets for `mochi-social-unity-auth`.
 
 Use Chrome for logged-in Vercel, Supabase, GitHub, Discord, Fly, and Enjin dashboards. Use CLI for reproducible checks. Use Computer Use only when CLI and Chrome cannot reach a required UI.
 

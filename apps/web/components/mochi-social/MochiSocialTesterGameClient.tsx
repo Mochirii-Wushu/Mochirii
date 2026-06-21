@@ -47,18 +47,18 @@ export function MochiSocialTesterGameClient() {
           <p className="eyebrow">Mochi Social unlocked</p>
           <h1>Mochi Social</h1>
           <p>
-            Welcome in. Explore the town, raise your active spirit, and test social play with
-            no purchases or permanent blockchain value.
+            Welcome in. This password-unlocked preview can smoke-test the Unity room load and bridge,
+            but saved character and shared Lirabao state require signed-in Supabase alpha access.
           </p>
         </div>
         <dl>
           <div>
             <dt>Mode</dt>
-            <dd>Closed alpha</dd>
+            <dd>Guest smoke</dd>
           </div>
           <div>
-            <dt>Value</dt>
-            <dd>No purchases</dd>
+            <dt>Room</dt>
+            <dd>Jade Lantern</dd>
           </div>
           <div>
             <dt>Access</dt>
@@ -71,16 +71,16 @@ export function MochiSocialTesterGameClient() {
         </dl>
       </header>
       <div className="mochi-game-preview-contract mochi-game-preview-contract--live" aria-label="Mochi Social preview contract">
-        <span>Local town</span>
-        <span>Mochi Spirit care</span>
-        <span>Test coins only</span>
-        <span>Market board preview</span>
+        <span>Unity WebGL</span>
+        <span>Single shared room</span>
+        <span>Shared Lirabao</span>
+        <span>Guest only</span>
         <span>No real value</span>
       </div>
       <div className="mochi-live-toolbar">
         <p>
-          Blockchain features are in preview safety mode. Canary requests are test records only;
-          nothing is permanent unless a later finalized chain proof is approved.
+          This guest path is for loading and bridge checks only; it does not claim account persistence.
+          Blockchain features remain future-only and no-real-value.
           <span className="mochi-preview-safety-inline"> Enjin Canary configured-preview-stub.</span>
         </p>
         <form className="mochi-lock-form" method="post" action="/games/mochi-social/tester-logout">

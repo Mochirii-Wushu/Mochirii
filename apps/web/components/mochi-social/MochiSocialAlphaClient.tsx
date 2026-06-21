@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
+import { SUPABASE_URL } from "@/lib/supabase/config";
 import { getMochiSocialAlphaSession, submitMochiSocialFeedback, type MochiSocialAlphaSession } from "@/lib/mochi-social/alpha";
 import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@/lib/mochi-social/bridge";
 
 type LoadState = "loading" | "signed-out" | "blocked" | "terms" | "ready" | "error";
 
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
+const supabaseFunctionsUrl = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : "";
 
 export function MochiSocialAlphaClient() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -31,6 +33,7 @@ export function MochiSocialAlphaClient() {
           type: "MOCHI_SOCIAL_AUTH",
           protocolVersion: 1,
           payload: { accessToken: token },
+          functionsUrl: supabaseFunctionsUrl || undefined,
         },
         gameOrigin,
       );
@@ -145,23 +148,26 @@ export function MochiSocialAlphaClient() {
         </div>
         <dl>
           <div>
-            <dt>Network</dt>
-            <dd>Enjin Canary</dd>
+            <dt>Engine</dt>
+            <dd>Unity WebGL</dd>
           </div>
           <div>
-            <dt>Value</dt>
-            <dd>No real value</dd>
+            <dt>Room</dt>
+            <dd>Shared alpha</dd>
           </div>
           <div>
-            <dt>Access</dt>
-            <dd>Allowlist</dd>
+            <dt>Pet</dt>
+            <dd>Lirabao</dd>
           </div>
         </dl>
       </header>
       <div className="mochi-game-preview-contract" aria-label="Mochi Social preview contract">
-        <span>Chain mode: configured-preview-stub</span>
-        <span>Economy: test soft currency</span>
-        <span>Market: fixed price only</span>
+        <span>Engine: Unity WebGL</span>
+        <span>Room: {session?.unity?.roomKey || "jade-lantern-room-alpha"}</span>
+        <span>Mode: single shared room</span>
+        <span>Capacity: {session?.unity?.roomCapacity || 25} testers</span>
+        <span>Pet: shared Lirabao</span>
+        <span>Value: No real value</span>
         <span>Progress: {session?.progress ? `account sync r${session.progress.revision}` : "account sync ready"}</span>
         <span data-mochi-bridge-state>Bridge: {bridgeStatus}</span>
       </div>
@@ -187,7 +193,7 @@ export function MochiSocialAlphaClient() {
       {state === "terms" ? (
         <div className="mochi-game-panel">
           <h2>Alpha acknowledgement</h2>
-          <p>Mochi Social alpha assets are test-only, Enjin Canary assets have no real value, chat is logged for moderation, and the build may reset before release.</p>
+          <p>Alpha characters and the shared Lirabao state are test-only, have no real value, chat is logged for moderation, and the build may reset before release.</p>
           <button className="hero-cta hero-cta--primary" type="button" onClick={() => refresh(true)} disabled={busy}>
             I understand and enter alpha
           </button>
@@ -214,7 +220,7 @@ export function MochiSocialAlphaClient() {
             onLoad={() => sendAuthToGame(accessToken)}
           />
           <p className="mochi-game-note">
-            Signed-in alpha progress saves to your Mochirii account through the game bridge. Tester-password preview remains guest-only.
+            Signed-in alpha play uses Supabase membership plus Unity Custom ID for account persistence. Tester-password preview remains guest-only. Enjin Canary configured-preview-stub stays future-only and no-real-value.
           </p>
           <form className="mochi-feedback" onSubmit={submitFeedback}>
             <label>
@@ -224,7 +230,7 @@ export function MochiSocialAlphaClient() {
                 maxLength={2000}
                 value={feedback}
                 onChange={(event) => setFeedback(event.target.value)}
-                placeholder="Bug, feel, trade flow, spirit loop, or anything that felt off."
+                placeholder="Bug, feel, character preset, room join, Lirabao interaction, or anything that felt off."
               />
             </label>
             <button className="hero-cta" type="submit" disabled={busy || !feedback.trim()}>Send feedback</button>

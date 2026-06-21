@@ -11,7 +11,7 @@ This website-side runbook keeps Codex aligned while operating the Mochirii previ
 - Enjin Docs: Canary, cENJ, Fuel Tanks, and Wallet Daemon: https://docs.enjin.io/getting-started/quick-start-guide, https://docs.enjin.io/guides/platform/managing-users/using-fuel-tanks, and https://docs.enjin.io/getting-started/using-wallet-daemon.
 - Discord Docs: OAuth2, `state`, scopes, bot tokens, and permissions: https://docs.discord.com/developers/topics/oauth2.
 - OWASP: secrets management, least privilege, rotation, and incident response: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html.
-- Mochi Social game repo docs: Fly, Enjin Canary, Fuel Tank, Wallet Daemon, WebSocket presence, and game-runtime acceptance.
+- Mochi Social game repo docs: Unity WebGL, UGS Distributed Authority, UGS Cloud Save/Cloud Code, Fly/Vercel embed hosting, Enjin Canary preview posture, and game-runtime acceptance.
 
 ## Source Hierarchy
 
@@ -28,19 +28,19 @@ Do not use memory as current truth for secrets, deployment URLs, payment/billing
 
 Use Alpha Preview Ready as the first live-site target. It is not the same as Alpha RC Ready.
 
-- `preview-live-gates`: Mochirii Vercel Preview `/games/mochi-social`, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, Supabase allowlist, terms, feedback, short-lived iframe auth, no-real-value labels, Fly game contract, and approved hosted preview checks.
+- `preview-live-gates`: Mochirii Vercel Preview `/games/mochi-social`, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, Supabase allowlist, terms, feedback, short-lived iframe auth, Unity Custom ID broker, no-real-value labels, Unity WebGL shared-room contract, and approved hosted preview checks.
 - `funded-chain-gates`: Enjin collection ID, Fuel Tank ID, cENJ funding, Wallet Daemon signing, live operator smoke, and finalized chain proof.
 
 Codex should optimize for `preview-live-gates` before funded-chain work. `funded-chain-gates` are expected red until the user explicitly approves cENJ, Fuel Tank, signing, and chain transaction work. Do not set dummy `ENJIN_COLLECTION_ID`, dummy `ENJIN_FUEL_TANK_ID`, or fake readiness flags to make Alpha RC pass.
 
-For Alpha Preview Ready, the website may embed the game while the game reports `chainRuntime.mode="configured-preview-stub"`. Chain requests are audit-only preview rows until real Enjin finality exists; never credit inventory, settle listings, settle trades, or imply real player value from a stubbed chain request.
+For Alpha Preview Ready, the website may embed the game while the game reports `chainRuntime.mode="configured-preview-stub"`. Chain requests are audit-only preview rows until real Enjin finality exists; never credit inventory, settle listings, settle trades, or imply real player value from a stubbed chain request. The Unity v1 runtime is one shared room with curated character presets and shared Lirabao; market, trade, avatar uploads, multiple rooms, and sharding are out of scope.
 
 ## Visual Polish Lane
 
 Use visual polish to improve Alpha Preview Ready clarity without changing the external-ops lane.
 
 - Theme: Cozy Wushu arrival gate into Mochi Social.
-- Art relationship: Mochirii gate art and Mochi Social game art should share one Cozy Wushu world, but the website owns only the tester doorway and unlocked shell. RPGJS runtime sprites, maps, HUD, manifests, and the game asset ledger remain in the separate Mochi Social game repo.
+- Art relationship: Mochirii gate art and Mochi Social game art should share one Cozy Wushu world, but the website owns only the tester doorway and unlocked shell. Unity 3D room assets, HUD, manifests, and the game asset ledger remain in the separate Mochi Social game repo.
 - Website scope: `/games/mochi-social`, `/games/mochi-social/tester-login`, and `/games/mochi-social/tester-logout` presentation only.
 - Locked state: an arrival gate with tester-password form, inline error, missing-config state, no iframe, and visible no-real-value labels.
 - Unlocked state: a live game shell with bridge status, no-real-value contract labels, lock action, and the Fly iframe.
@@ -84,12 +84,14 @@ Use Mochirii for website, Supabase, allowlist, terms, feedback, and admin change
 | Website branch | `Mochirii-Wushu/Mochirii` | `codex/mochi-social-alpha-rc` |
 | Game branch | `xartaiusx/mochi-social` | `codex/mochi-social-alpha-rc` |
 | Website preview route | Vercel | `/games/mochi-social` |
-| Game URL | Fly | `NEXT_PUBLIC_MOCHI_SOCIAL_URL` |
+| Game URL | Unity WebGL host | `NEXT_PUBLIC_MOCHI_SOCIAL_URL` |
 | Supabase public browser config | Vercel Preview | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
 | Supabase preview OAuth | Supabase Auth and Discord Developer Portal | Discord provider enabled, Discord OAuth callback set to the Supabase preview `/auth/v1/callback`, site redirect allowed back to `/account` |
 | Site URL | Vercel Preview | `NEXT_PUBLIC_SITE_URL` |
 | Supabase privileged writes | Supabase Edge Functions | service-role stays server-side |
 | Game server trust | Supabase Edge and Fly | shared `MOCHI_SOCIAL_GAME_SERVER_TOKEN` secret name only |
+| Unity runtime auth | Supabase Edge and UGS | `mochi-social-unity-auth` maps Supabase users to `mochirii:<user_id>` Custom IDs |
+| Shared room state | UGS primary, Supabase mirror | `jade-lantern-room-alpha`, shared Lirabao audit mirror only |
 | Enjin preview state | Game runtime | Canary-only `configured-preview-stub` until funded-chain approval |
 
 Branch-specific Vercel preview env should override only the Mochi Social values needed for the alpha PR. Production env must not be changed for Alpha RC unless a later production plan is approved.
@@ -114,14 +116,17 @@ Each approval request must name the exact account/provider, command or dashboard
 | --- | --- |
 | Session refresh | Next.js browser client |
 | Game iframe auth | short-lived Supabase access token via `MOCHI_SOCIAL_AUTH` |
+| Unity player token broker | `mochi-social-unity-auth` after Supabase allowlist and terms |
 | Alpha allowlist | `mochi_social_alpha_testers` |
 | Terms acknowledgement | Supabase Edge session/action functions |
 | Game action writes | `mochi-social-alpha-action` with scoped server token |
 | Admin grant/revoke/audit | `mochi-social-alpha-admin` |
 | Feedback | `submit-mochi-social-feedback` |
+| Character save | UGS Player Data `character.v1`; Supabase audit only |
+| Shared pet save | UGS Game Data `room:jade-lantern-room/sharedPet.v1`; Supabase mirror only |
 | Chain ledger | Supabase tables and append-only ledger rows |
 
-Browser code must never receive service-role keys, Discord bot tokens, Enjin tokens, Wallet Daemon secrets, or refresh tokens from the parent page.
+Browser code must never receive service-role keys, Unity service account credentials, Discord bot tokens, Enjin tokens, Wallet Daemon secrets, or refresh tokens from the parent page.
 
 ## Discord Boundary
 
@@ -140,7 +145,7 @@ Before inviting testers:
 - `npm run check:mochi-social-edge-authority` passes locally before hosted Edge smoke, so the game action function stays server-token-authorized, Canary/no-real-value-stamped, ledger-backed, and finalized-only for chain inventory movement.
 - `npm run check:mochi-social-bridge-state` passes locally before manual browser gates, so the parent bridge resolver handles `MOCHI_SOCIAL_READY`, `MOCHI_SOCIAL_AUTH_STATE`, and `MOCHI_SOCIAL_ERROR` without exposing refresh tokens, provider secrets, or arbitrary game-provided status text.
 - `npm run check:mochi-social-preview-ready` reports `site.bridge-state`, `site.auth-bridge`, `site.preview-key-loader`, `site.discord-oauth-detector`, and `site.edge-authority` separately from hosted `site.edge-smoke`; do not treat a hosted smoke response as proof that the parent bridge, publishable-key loader, Discord detector, authority, or finality invariants are still wired locally.
-- `MOCHI_SOCIAL_GAME_CONTRACT_URL=<fly-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, and optional allowed-origin CORS contract.
+- `MOCHI_SOCIAL_GAME_CONTRACT_URL=<unity-webgl-game-url> npm run check:mochi-social-game-contract` proves the game manifest, alpha status, embed route, Unity shared-room contract, and optional allowed-origin CORS contract.
 - `MOCHI_SOCIAL_ALPHA_EDGE_URL=<preview-functions-url> npm run smoke:mochi-social-alpha-edge` proves the alpha Supabase Edge Functions fail closed for missing user auth, missing game-server trust, and invalid alpha action requests.
 - `npm run check:mochi-social-discord-oauth` proves the local `site.discord-oauth` detector can distinguish a Discord redirect from Supabase's unsupported-provider response before any hosted check is approved.
 - `npm run check:mochi-social-preview-ready` is the site-side tester-entry audit. It writes no-secret ignored reports, requires game Preview Ready evidence, branch sync, hosted game contract proof, Supabase Edge smoke, Discord OAuth provider readiness, and explicit manual browser gate confirmation, but it does not require funded-chain gates.
@@ -150,7 +155,7 @@ Before inviting testers:
 - Feedback appears in the leader audit panel.
 - For Alpha Preview Ready, chain request rows may be audit-only preview records while the game reports `configured-preview-stub`.
 - For Alpha RC Ready, chain operation rows record request id, transaction UUID, optional listing ID, state, and finality evidence.
-- Two-tab game presence is verified separately in the game runtime.
+- Two browser sessions must verify the same Unity shared room, distinct avatars, and shared Lirabao state separately in the game runtime.
 
 ## Manual Browser Evidence Protocol
 
@@ -158,11 +163,11 @@ Hosted browser gates need explicit approval before Codex opens Chrome against Ve
 
 - reviewer, browser/version, preview URL, timestamp, and pass/fail notes;
 - whether the active access mode is `tester-password` or `supabase`;
-- for `tester-password`: locked page, iframe absent while locked, invalid-password error, iframe after unlock, guest bridge, configured-preview-stub, and hosted two-tab presence;
-- for `supabase`: signed-out, non-tester, terms, iframe, feedback, admin, auth bridge, and configured-preview-stub gates;
+- for `tester-password`: locked page, iframe absent while locked, invalid-password error, iframe after unlock, guest bridge, configured-preview-stub, Unity room load smoke, and no persistence claim;
+- for `supabase`: signed-out, non-tester, terms, iframe, feedback, admin, auth bridge, Unity Custom ID broker, shared room, shared Lirabao, and configured-preview-stub gates;
 - any non-secret error codes or route names needed for debugging.
 
-Never capture, paste, screenshot, or commit Supabase access tokens, refresh tokens, cookies, request authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, or personal payment/account details.
+Never capture, paste, screenshot, or commit Supabase access tokens, Unity player tokens, Unity service account credentials, refresh tokens, cookies, request authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, or personal payment/account details.
 
 For the iframe auth gate, verify the shape rather than the value: the parent page sends `MOCHI_SOCIAL_AUTH` with an access-token field, and it does not send refresh tokens or provider secrets. If DevTools exposes raw token text, treat it as private screen-only evidence and do not transcribe it.
 
@@ -225,4 +230,4 @@ The Preview Ready audit loads the standard preview key file only after `MOCHI_SO
 - Codex verifies secret names, status, digests, timestamps, health checks, or successful route behavior only.
 - Repo scripts may write no-secret operator checklists into `C:\Users\xtyty\Desktop\Creds`; those files must contain placeholders, secret names, statuses, and commands only.
 - Never paste secret values into docs, logs, PR comments, screenshots, browser-visible UI, or chat.
-- Rotate `MOCHI_SOCIAL_GAME_SERVER_TOKEN`, Discord secrets, Enjin tokens, and provider keys if exposed.
+- Rotate `MOCHI_SOCIAL_GAME_SERVER_TOKEN`, Unity service account credentials, Discord secrets, Enjin tokens, and provider keys if exposed.

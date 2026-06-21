@@ -3,10 +3,12 @@ import { readFileSync } from "node:fs";
 const actionPath = "supabase/functions/mochi-social-alpha-action/index.ts";
 const sharedPath = "supabase/functions/_shared/mochi-social-alpha.ts";
 const migrationPath = "supabase/migrations/20260610090000_add_mochi_social_alpha.sql";
+const unityMigrationPath = "supabase/migrations/20260621120000_add_mochi_social_unity_room.sql";
 
 const action = readFileSync(actionPath, "utf8");
 const shared = readFileSync(sharedPath, "utf8");
 const migration = readFileSync(migrationPath, "utf8");
+const unityMigration = readFileSync(unityMigrationPath, "utf8");
 
 const expectedActions = [
   "chat.send",
@@ -94,6 +96,12 @@ const expectedActions = [
   "chain.withdraw_request",
   "chain.deposit_request",
   "chain.operation_update",
+  "unity.character.created",
+  "unity.character.updated",
+  "unity.pet.interaction",
+  "unity.pet.state_saved",
+  "unity.room.joined",
+  "unity.room.left",
 ];
 
 for (const actionType of expectedActions) {
@@ -104,6 +112,12 @@ assertIncludes(sharedPath, shared, 'Deno.env.get("MOCHI_SOCIAL_GAME_SERVER_TOKEN
 assertIncludes(sharedPath, shared, 'req.headers.get("x-mochi-social-server-token")');
 assertIncludes(sharedPath, shared, "expected && provided && expected === provided");
 assertIncludes(sharedPath, shared, "invalid_game_server_token");
+assertIncludes(sharedPath, shared, 'UNITY_ROOM_KEY = "jade-lantern-room-alpha"');
+assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_KEY = "lirabao"');
+assertIncludes(sharedPath, shared, 'UNITY_CUSTOM_ID_PREFIX = "mochirii:"');
+assertIncludes(sharedPath, shared, "upsertSharedPetSnapshot");
+assertIncludes(sharedPath, shared, "upsertUnityPlayerLink");
+assertIncludes(sharedPath, shared, 'if (petKey !== UNITY_SHARED_PET_KEY || roomKey !== UNITY_ROOM_KEY)');
 
 assertBefore(actionPath, action, "const serverAccess = requireGameServer(req);", "const adminClient = createAdminClient();");
 assertBefore(actionPath, action, "if (!serverAccess.ok) return serverAccess.response;", "const bodyResult = await readJsonBody(req);");
@@ -114,6 +128,9 @@ assertBefore(actionPath, action, 'if (type === "chain.operation_update")', "cons
 assertRegex(actionPath, action, /data:\s*{\s*requestId,\s*type,\s*duplicate:\s*true,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY"\s*}/s);
 assertIncludes(actionPath, action, "progress: normalizeAlphaProgressSnapshot(snapshot)");
 assertIncludes(actionPath, action, "upsertAlphaProgressSnapshot(adminClient");
+assertIncludes(actionPath, action, "upsertSharedPetSnapshot(adminClient");
+assertIncludes(actionPath, action, 'type === "unity.pet.state_saved"');
+assertIncludes(actionPath, action, "sharedPet: sharedPetResult?.snapshot ?? null");
 assertRegex(actionPath, action, /delta:\s*{\s*\.\.\.payload,\s*noRealValue:\s*true,\s*chainNetwork:\s*"CANARY"\s*}/s);
 assertRegex(actionPath, action, /VALID_CHAIN_STATUSES\s*=\s*new Set\(\[\s*"pending",\s*"broadcast",\s*"finalized",\s*"failed",\s*"abandoned",\s*"timeout"\s*\]\)/s);
 assertRegex(actionPath, action, /CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\["lirabao"\]\)/);
@@ -169,6 +186,26 @@ for (const needle of [
   "finalized_at timestamptz",
 ]) {
   assertIncludes(migrationPath, migration, needle);
+}
+
+for (const needle of [
+  "mochi_social_unity_players",
+  "mochi_social_shared_pet_snapshots",
+  "user_id uuid primary key references auth.users(id) on delete cascade",
+  "unity_player_id text not null unique",
+  "custom_id text not null unique",
+  "room_key text not null default 'jade-lantern-room-alpha'",
+  "check (pet_key = 'lirabao')",
+  "alter table public.mochi_social_unity_players enable row level security",
+  "alter table public.mochi_social_shared_pet_snapshots enable row level security",
+  "grant select on public.mochi_social_unity_players to authenticated",
+  "grant select on public.mochi_social_shared_pet_snapshots to authenticated",
+  "grant select, insert, update, delete on public.mochi_social_unity_players to service_role",
+  "grant select, insert, update, delete on public.mochi_social_shared_pet_snapshots to service_role",
+  "mochi_social_unity_players_read_own",
+  "mochi_social_shared_pet_read_authenticated",
+]) {
+  assertIncludes(unityMigrationPath, unityMigration, needle);
 }
 
 for (const forbidden of [/MAINNET/i, /cashout/i, /price_usd/i, /priceUsd/i, /fiat/i, /wallet_seed/i, /service_role/i]) {

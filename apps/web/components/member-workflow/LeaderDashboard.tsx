@@ -572,13 +572,16 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
   const recentLedger = Array.isArray(audit.recentLedger) ? audit.recentLedger : [];
   const recentChain = Array.isArray(audit.recentChain) ? audit.recentChain : [];
   const recentFeedback = Array.isArray(audit.recentFeedback) ? audit.recentFeedback : [];
+  const recentSharedPets = Array.isArray(audit.recentSharedPets) ? audit.recentSharedPets : [];
   const cards = [
     ["Active testers", summary.activeTesters],
     ["Revoked testers", summary.revokedTesters],
     ["Ledger events", summary.ledgerEvents],
-    ["Active listings", summary.activeListings],
-    ["Offered trades", summary.offeredTrades],
-    ["Pending chain ops", summary.pendingChainOps],
+    ["Unity players", summary.unityPlayers],
+    ["Shared pet mirrors", summary.sharedPetSnapshots],
+    ["Legacy listings", summary.activeListings],
+    ["Legacy trades", summary.offeredTrades],
+    ["Canary ops", summary.pendingChainOps],
     ["Feedback", summary.feedbackCount],
     ["Chat messages", summary.chatMessages],
   ];
@@ -605,6 +608,12 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
           {recentChain.length ? recentChain.map((operation) => (
             <code key={operation.request_id || operation.created_at || "chain"}>{operation.operation_type || "chain"} - {operation.status || "pending"} - {operation.network || "CANARY"}</code>
           )) : <p className="muted">No Canary chain operations yet.</p>}
+        </details>
+        <details className="review-storage">
+          <summary>Recent shared Lirabao mirrors</summary>
+          {recentSharedPets.length ? recentSharedPets.map((snapshot) => (
+            <code key={`${snapshot.pet_key || "lirabao"}-${snapshot.revision || 0}`}>{snapshot.pet_key || "lirabao"} - r{snapshot.revision || 0} - {snapshot.room_key || "jade-lantern-room-alpha"}</code>
+          )) : <p className="muted">No shared pet mirror rows yet.</p>}
         </details>
         <details className="review-storage">
           <summary>Recent alpha feedback</summary>

@@ -2,16 +2,21 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   CORS_HEADERS,
+  UNITY_ROOM_KEY,
+  UNITY_SHARED_PET_KEY,
   asRecord,
   alphaAccess,
   createAdminClient,
   jsonResponse,
+  loadSharedPetSnapshot,
   loadAlphaProgressSnapshot,
+  normalizeSharedPetSnapshot,
   normalizeAlphaProgressSnapshot,
   readJsonBody,
   recordLedgerEvent,
   requireGameServer,
   safeString,
+  upsertSharedPetSnapshot,
   upsertAlphaProgressSnapshot,
 } from "../_shared/mochi-social-alpha.ts";
 
@@ -106,6 +111,12 @@ const VALID_ACTIONS = new Set([
   "chain.withdraw_request",
   "chain.deposit_request",
   "chain.operation_update",
+  "unity.character.created",
+  "unity.character.updated",
+  "unity.pet.interaction",
+  "unity.pet.state_saved",
+  "unity.room.joined",
+  "unity.room.left",
 ]);
 
 Deno.serve(async (req: Request) => {
@@ -153,10 +164,12 @@ Deno.serve(async (req: Request) => {
 
   if (existingLedger) {
     const { data: snapshot } = await loadAlphaProgressSnapshot(adminClient, playerId);
+    const { data: sharedPet } = await loadSharedPetSnapshot(adminClient);
     return jsonResponse({
       ok: true,
       data: { requestId, type, duplicate: true, noRealValue: true, chainNetwork: "CANARY" },
       progress: normalizeAlphaProgressSnapshot(snapshot),
+      sharedPet: normalizeSharedPetSnapshot(sharedPet),
       message: "Alpha action already recorded.",
     });
   }
@@ -166,7 +179,7 @@ Deno.serve(async (req: Request) => {
     if (message) {
       const { error } = await adminClient.from("mochi_social_chat_messages").insert({
         user_id: playerId || null,
-        room: safeString(payload.room, 80) || "town",
+        room: safeString(payload.room, 80) || UNITY_ROOM_KEY,
         message,
       });
 
@@ -197,6 +210,11 @@ Deno.serve(async (req: Request) => {
     if (!result.ok) return result.response;
   }
 
+  const sharedPetResult = type === "unity.pet.state_saved"
+    ? await recordSharedPetState(adminClient, requestId, playerId, payload)
+    : null;
+  if (sharedPetResult && !sharedPetResult.ok) return sharedPetResult.response;
+
   const ledgerError = await recordLedgerEvent(adminClient, {
     requestId,
     actorId: playerId,
@@ -222,8 +240,38 @@ Deno.serve(async (req: Request) => {
     ok: true,
     data: { requestId, type, noRealValue: true, chainNetwork: "CANARY" },
     progress: progressResult?.snapshot ?? null,
+    sharedPet: sharedPetResult?.snapshot ?? null,
   });
 });
+
+async function recordSharedPetState(adminClient: SupabaseClient, requestId: string, playerId: string, payload: Record<string, unknown>) {
+  const state = asRecord(payload.state);
+  const petKey = safeString(payload.petKey, 40) || UNITY_SHARED_PET_KEY;
+  const roomKey = safeString(payload.roomKey, 80) || UNITY_ROOM_KEY;
+  if (!Object.keys(state).length) {
+    return {
+      ok: false as const,
+      response: jsonResponse({ ok: false, error: "invalid_shared_pet_state", message: "Shared Lirabao state is required." }, 400),
+    };
+  }
+
+  const result = await upsertSharedPetSnapshot(adminClient, {
+    petKey,
+    roomKey,
+    state,
+    sourceRequestId: requestId,
+    lastActorId: playerId,
+  });
+
+  if (!result.ok) {
+    const status = result.error === "invalid_unity_room_pet" || result.error === "invalid_shared_pet_state" || result.error === "shared_pet_state_too_large"
+      ? 400
+      : 500;
+    return { ok: false as const, response: jsonResponse({ ok: false, error: result.error, message: result.message }, status) };
+  }
+
+  return { ok: true as const, snapshot: result.snapshot };
+}
 
 function spiritFromPayload(payload: Record<string, unknown>) {
   const state = asRecord(payload.state);

@@ -30,6 +30,7 @@ const functions = [
   "list-member-profile-media-queue",
   "moderate-member-profile-media",
   "mochi-social-alpha-session",
+  "mochi-social-unity-auth",
   "mochi-social-alpha-action",
   "mochi-social-alpha-progress",
   "mochi-social-alpha-admin",

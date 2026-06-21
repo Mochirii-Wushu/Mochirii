@@ -1,6 +1,6 @@
 # Mochi Social Visual Polish
 
-This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It is limited to the website doorway and unlocked game shell. The game runtime, town art, HUD, runtime manifest, and game asset ledger remain in the separate Mochi Social game repo.
+This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It is limited to the website doorway and unlocked game shell. The Unity runtime, shared room art, HUD, runtime manifest, and game asset ledger remain in the separate Mochi Social game repo.
 
 ## Source Basis
 
@@ -20,9 +20,9 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Stop point: Alpha Preview Ready visual polish, not production launch.
 - Primary state: tester-password mode.
 - Secondary state: strict Supabase/Discord allowlist mode remains supported.
-- Chain state: Enjin Canary `configured-preview-stub`, no real value, fixed-price only. Keep this visible as preview safety context, not as the page's main story.
-- Art relationship: the website gate image and the game runtime art should feel like the same Mochirii world, but they remain separate asset surfaces. The website may use high-fidelity decorative WebP art; the game repo owns RPGJS runtime sprites, maps, HUD, and its own asset ledger.
-- Game-art style reference: high-fidelity Cozy Wushu painterly/pixel hybrid, dusk lantern lighting, jade/red timber palette, readable silhouettes, and strong interaction cues. Do not make website docs the source of truth for game runtime dimensions or Tiled/RPGJS contracts.
+- Runtime state: Unity WebGL single shared room, shared Lirabao, curated character presets, and no real value. Keep Enjin Canary `configured-preview-stub` visible as future preview safety context, not as the page's main story.
+- Art relationship: the website gate image and the game runtime art should feel like the same Mochirii world, but they remain separate asset surfaces. The website may use high-fidelity decorative WebP art; the game repo owns Unity 3D room assets, HUD, runtime manifests, and its own asset ledger.
+- Game-art style reference: high-fidelity Cozy Wushu painterly/pixel hybrid, dusk lantern lighting, jade/red timber palette, readable silhouettes, and strong interaction cues. Do not make website docs the source of truth for Unity room dimensions, asset budgets, or runtime manifests.
 
 ## Locked Page
 
@@ -30,8 +30,8 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Use the tester-facing copy:
   - Eyebrow: `Closed Mochirii Playtest`
   - Headline: `Mochi Social`
-  - Lead: `A cozy Wushu RPG town where approved testers can raise Mochi Spirits, meet guild friends, and try early social trading.`
-  - Form heading: `Enter the town`
+  - Lead: `A cozy 3D room where approved testers create a curated character, gather with guild friends, and meet the shared starter pet Lirabao.`
+  - Form heading: `Enter Mochi World`
   - Button: `Unlock playtest`
   - Invalid password: `That password did not work. Check the tester invite and try again.`
   - Missing config: `This playtest gate is not ready yet. Please check back after the next tester notice.`
@@ -40,11 +40,11 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Keep the HttpOnly, route-scoped cookie behavior in the route handlers.
 - Use a password input with `id="current-password"`, `name="testerPassword"`, and `autocomplete="current-password"`.
 - Place invalid-password and missing-config errors near the field with `role="alert"`.
-- Lead with player-facing badges: closed alpha, no purchases, test coins only, and progress may reset.
+- Lead with player-facing badges: Unity WebGL, single shared room, shared Lirabao, guest preview, and no real value.
 - Replace `Preview boundaries` with tester sections:
-  - `What you can test`: raise Mochi Spirits, explore the town, try local chat/emotes, and test market board/direct trade.
-  - `Your playtest mission`: attune Lirabao, care for a Mochi Spirit, wave/chat, inspect the market board, and send feedback.
-  - `Good to know`: no real money, no permanent blockchain value, desktop recommended, and Vercel may show a preview access screen first.
+  - `What you can test`: create a curated character preset, enter the Jade Lantern room, try local chat/emotes, and interact with shared Lirabao.
+  - `Your playtest mission`: create a character, wave/chat, care for Lirabao, confirm shared state, and send feedback.
+  - `Good to know`: no real money, no permanent blockchain value, desktop recommended, guest preview does not save member progress, and Vercel may show a preview access screen first.
 - Keep Enjin Canary, `configured-preview-stub`, and Vercel protection language in a small preview-safety note.
 
 ## Gate Image
@@ -57,7 +57,7 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Prompt:
 
 ```text
-High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same composition as the current tester gate template: symmetrical red timber roof, two warm paper lanterns, golden stone path leading toward a cozy hidden town, bamboo and misty mountain background, refined guild sanctuary atmosphere, warm jade and lantern palette, no text, no logos, no people, no UI, vertical card composition.
+High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same composition as the current tester gate template: symmetrical red timber roof, two warm paper lanterns, golden stone path leading toward a cozy lantern room, bamboo and misty mountain background, refined guild sanctuary atmosphere, warm jade and lantern palette, no text, no logos, no people, no UI, vertical card composition.
 ```
 
 ## Unlocked Page
@@ -65,7 +65,7 @@ High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same compos
 - Preserve the iframe embed and postMessage bridge contract.
 - Keep a visible bridge status pill.
 - Keep no-real-value and configured-preview-stub language visible as small preview safety copy while the game is loaded.
-- Use player-facing badges for the main unlocked shell: local town, Mochi Spirit care, test coins only, market board preview, and no real value.
+- Use player-facing badges for the main unlocked shell: Unity WebGL, single shared room, shared Lirabao, guest-only for password mode, and no real value.
 - Preserve the lock-page form and route.
 - Do not expose access tokens, refresh tokens, cookies, password hashes, or provider secrets in the client.
 
@@ -73,7 +73,7 @@ High fidelity hyper realistic cinematic Wushu mountain gate at dusk, same compos
 
 - Text must remain readable over decorative art.
 - Focus states must be visible for fields, links, and buttons.
-- Error, auth, chain, market, and bridge states must not rely on color alone.
+- Error, auth, chain, room, pet, and bridge states must not rely on color alone.
 - Layout must not overlap at common laptop widths or mobile fallback widths.
 
 ## Access Boundaries

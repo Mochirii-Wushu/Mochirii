@@ -22,6 +22,43 @@ export type MochiSocialAlphaSession = {
     termsRequired: boolean;
     ugc: "curated";
   };
+  unity?: {
+    engine: "unity-webgl";
+    roomKey: "jade-lantern-room-alpha";
+    roomMode: "single-shared-room";
+    roomCapacity: 25;
+    sharedPetKey: "lirabao";
+    realtimeAuthority: "ugs-distributed-authority";
+    stateAuthority: "ugs-cloud-save";
+  };
+};
+
+export type MochiSocialUnityAuth = {
+  userId: string;
+  unity: {
+    provider: "ugs-custom-id";
+    projectId: string;
+    environmentName: string;
+    playerId: string;
+    unityPlayerId?: string;
+    customId: string;
+    accessToken: string;
+    idToken?: string;
+    sessionToken: string;
+    expiresIn: number;
+    roomKey: "jade-lantern-room-alpha";
+    roomMode: "single-shared-room";
+    roomCapacity: 25;
+    sharedPetKey: "lirabao";
+    realtimeAuthority: "ugs-distributed-authority";
+    stateAuthority: "ugs-cloud-save";
+  };
+  alpha: {
+    noRealValue: boolean;
+    allowlistRequired: boolean;
+    termsRequired: boolean;
+    ugc: "curated";
+  };
 };
 
 export type MochiSocialAlphaTester = {
@@ -63,6 +100,14 @@ export type MochiSocialAlphaAudit = {
     session_id?: string | null;
     created_at?: string | null;
   }>;
+  recentSharedPets?: Array<{
+    pet_key?: string | null;
+    room_key?: string | null;
+    revision?: number | null;
+    source_request_id?: string | null;
+    last_actor_id?: string | null;
+    updated_at?: string | null;
+  }>;
 };
 
 export type MochiSocialAlphaAdmin = {
@@ -72,6 +117,10 @@ export type MochiSocialAlphaAdmin = {
 
 export async function getMochiSocialAlphaSession(options: { acknowledgeTerms?: boolean } = {}) {
   return invokeEdgeFunction<MochiSocialAlphaSession>("mochi-social-alpha-session", options);
+}
+
+export async function getMochiSocialUnityAuth() {
+  return invokeEdgeFunction<MochiSocialUnityAuth>("mochi-social-unity-auth", {});
 }
 
 export async function submitMochiSocialFeedback(body: { category: string; message: string; session_id?: string }) {

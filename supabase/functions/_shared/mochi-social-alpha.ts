@@ -3,6 +3,9 @@ import { createClient, type SupabaseClient, type User } from "@supabase/supabase
 export type JsonRecord = Record<string, unknown>;
 
 export const ALPHA_TERMS_VERSION = "alpha-rc-2026-06-10";
+export const UNITY_ROOM_KEY = "jade-lantern-room-alpha";
+export const UNITY_SHARED_PET_KEY = "lirabao";
+export const UNITY_CUSTOM_ID_PREFIX = "mochirii:";
 
 export const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +21,23 @@ export type AlphaProgressSnapshot = {
   state: JsonRecord;
   source_request_id?: string | null;
   last_action_type?: string | null;
+  updated_at: string;
+};
+export type UnityPlayerLink = {
+  user_id: string;
+  unity_player_id: string;
+  custom_id: string;
+  room_key: string;
+  created_at?: string;
+  updated_at?: string;
+};
+export type SharedPetSnapshot = {
+  pet_key: string;
+  room_key: string;
+  revision: number;
+  state: JsonRecord;
+  source_request_id?: string | null;
+  last_actor_id?: string | null;
   updated_at: string;
 };
 
@@ -40,6 +60,10 @@ export function safeString(value: unknown, maxLength: number): string | null {
   const text = String(value ?? "").trim();
   if (!text) return null;
   return text.slice(0, maxLength);
+}
+
+export function unityCustomId(userId: string): string {
+  return `${UNITY_CUSTOM_ID_PREFIX}${userId}`;
 }
 
 export function getServiceRoleKey(): string {
@@ -251,4 +275,100 @@ export async function upsertAlphaProgressSnapshot(
   }
 
   return { ok: true as const, snapshot: normalizeAlphaProgressSnapshot(data as AlphaProgressSnapshot) };
+}
+
+export async function upsertUnityPlayerLink(
+  adminClient: SupabaseClient,
+  input: { userId: string; unityPlayerId: string; customId: string; roomKey?: string | null },
+) {
+  const { data, error } = await adminClient
+    .from("mochi_social_unity_players")
+    .upsert(
+      {
+        user_id: input.userId,
+        unity_player_id: input.unityPlayerId,
+        custom_id: input.customId,
+        room_key: input.roomKey || UNITY_ROOM_KEY,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    )
+    .select("user_id,unity_player_id,custom_id,room_key,created_at,updated_at")
+    .single();
+
+  if (error) {
+    return { ok: false as const, error: "unity_player_link_failed", message: "Unity player mapping could not be saved." };
+  }
+
+  return { ok: true as const, link: data as UnityPlayerLink };
+}
+
+export async function loadSharedPetSnapshot(adminClient: SupabaseClient, petKey = UNITY_SHARED_PET_KEY) {
+  return await adminClient
+    .from("mochi_social_shared_pet_snapshots")
+    .select("pet_key,room_key,revision,state,source_request_id,last_actor_id,updated_at")
+    .eq("pet_key", petKey)
+    .maybeSingle();
+}
+
+export function normalizeSharedPetSnapshot(row: SharedPetSnapshot | null | undefined) {
+  if (!row) return null;
+  return {
+    authority: "ugs-cloud-save-audit-mirror",
+    petKey: row.pet_key,
+    roomKey: row.room_key,
+    revision: Number(row.revision || 0),
+    state: isJsonRecord(row.state) ? row.state : {},
+    sourceRequestId: row.source_request_id || null,
+    lastActorId: row.last_actor_id || null,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function upsertSharedPetSnapshot(
+  adminClient: SupabaseClient,
+  input: { petKey?: string | null; roomKey?: string | null; state: unknown; sourceRequestId?: string | null; lastActorId?: string | null },
+) {
+  const petKey = input.petKey || UNITY_SHARED_PET_KEY;
+  const roomKey = input.roomKey || UNITY_ROOM_KEY;
+  if (petKey !== UNITY_SHARED_PET_KEY || roomKey !== UNITY_ROOM_KEY) {
+    return { ok: false as const, error: "invalid_unity_room_pet", message: "Only shared Lirabao in the Jade Lantern room may be mirrored." };
+  }
+
+  if (!isJsonRecord(input.state)) {
+    return { ok: false as const, error: "invalid_shared_pet_state", message: "Shared pet state must be a JSON object." };
+  }
+
+  if (JSON.stringify(input.state).length > 64_000) {
+    return { ok: false as const, error: "shared_pet_state_too_large", message: "Shared pet state is too large for the audit mirror." };
+  }
+
+  const { data: existing, error: existingError } = await loadSharedPetSnapshot(adminClient, petKey);
+  if (existingError) {
+    return { ok: false as const, error: "shared_pet_lookup_failed", message: "Shared pet audit mirror could not be loaded." };
+  }
+
+  const nextRevision = Number((existing as SharedPetSnapshot | null)?.revision || 0) + 1;
+  const { data, error } = await adminClient
+    .from("mochi_social_shared_pet_snapshots")
+    .upsert(
+      {
+        pet_key: petKey,
+        room_key: roomKey,
+        revision: nextRevision,
+        state: input.state,
+        source_request_id: input.sourceRequestId || null,
+        last_actor_id: input.lastActorId || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "pet_key" },
+    )
+    .select("pet_key,room_key,revision,state,source_request_id,last_actor_id,updated_at")
+    .single();
+
+  if (error) {
+    return { ok: false as const, error: "shared_pet_snapshot_failed", message: "Shared pet audit mirror could not be saved." };
+  }
+
+  return { ok: true as const, snapshot: normalizeSharedPetSnapshot(data as SharedPetSnapshot) };
 }

@@ -35,11 +35,11 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
-    includes: ['MOCHI_SOCIAL_GAME_CONTRACT_URL', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', '/integration/game-manifest.json', '/integration/alpha/status', 'MOCHI_SOCIAL_AUTH', 'configured-preview-stub']
+    includes: ['MOCHI_SOCIAL_GAME_CONTRACT_URL', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', '/integration/game-manifest.json', '/integration/alpha/status', 'MOCHI_SOCIAL_AUTH', 'engine === "unity-webgl"', 'single-shared-room', 'ugs-distributed-authority', 'mochi-social-unity-auth', 'configured-preview-stub']
   },
   {
     file: 'scripts/smoke-mochi-social-alpha-edge.mjs',
-    includes: ['MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'selectPublishableKey', 'mochi-social-alpha-session', 'mochi-social-alpha-action', 'invalid_game_server_token', 'invalid_alpha_action']
+    includes: ['MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'selectPublishableKey', 'mochi-social-alpha-session', 'mochi-social-unity-auth', 'mochi-social-alpha-action', 'invalid_game_server_token', 'invalid_alpha_action']
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
@@ -99,7 +99,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'test soft currency', 'fixed price only', 'Progress:', 'account sync', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Unity WebGL', 'single shared room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'configured-preview-stub', 'Progress:', 'account sync', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
@@ -107,11 +107,15 @@ const checks = [
   },
   {
     file: 'apps/web/lib/mochi-social/alpha.ts',
-    includes: ['MochiSocialAlphaAdmin', 'manageMochiSocialAlphaAdmin', 'mochi-social-alpha-admin', 'progress?:', 'authority: "mochirii-edge"']
+    includes: ['MochiSocialAlphaAdmin', 'MochiSocialUnityAuth', 'getMochiSocialUnityAuth', 'mochi-social-unity-auth', 'manageMochiSocialAlphaAdmin', 'mochi-social-alpha-admin', 'progress?:', 'authority: "mochirii-edge"', 'engine: "unity-webgl"', 'roomMode: "single-shared-room"']
   },
   {
     file: 'supabase/config.toml',
-    includes: ['mochi-social-alpha-session', 'mochi-social-alpha-action', 'mochi-social-alpha-progress', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
+    includes: ['mochi-social-alpha-session', 'mochi-social-unity-auth', 'mochi-social-alpha-action', 'mochi-social-alpha-progress', 'mochi-social-alpha-admin', 'submit-mochi-social-feedback']
+  },
+  {
+    file: 'supabase/functions/mochi-social-unity-auth/index.ts',
+    includes: ['UNITY_SERVICES_PROJECT_ID', 'UNITY_SERVICES_ENVIRONMENT_ID', 'UNITY_SERVICES_ENVIRONMENT_NAME', 'UNITY_SERVICES_SERVICE_ACCOUNT_KEY_ID', 'UNITY_SERVICES_SERVICE_ACCOUNT_SECRET', 'unityCustomId(access.userId)', 'upsertUnityPlayerLink', 'ugs-distributed-authority', 'ugs-cloud-save', 'single-shared-room']
   },
   {
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
@@ -122,7 +126,10 @@ const checks = [
       'mochi_social_spirits',
       'CERTIFICATE_ELIGIBLE_SPIRITS.has(spiritId)',
       'upsertAlphaProgressSnapshot(adminClient',
+      'upsertSharedPetSnapshot(adminClient',
       'progress: progressResult?.snapshot ?? null',
+      'sharedPet: sharedPetResult?.snapshot ?? null',
+      'unity.pet.state_saved',
       'chain.operation_update',
       'chain_request_missing',
       'nextStatus === "finalized"',
@@ -143,11 +150,15 @@ const checks = [
   },
   {
     file: 'supabase/functions/mochi-social-alpha-admin/index.ts',
-    includes: ['loadAlphaAudit', 'recentLedger', 'pendingChainOps', 'mochi_social_feedback']
+    includes: ['loadAlphaAudit', 'recentLedger', 'pendingChainOps', 'mochi_social_feedback', 'mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', 'recentSharedPets']
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',
     includes: ['mochi_social_alpha_testers', 'mochi_social_spirits', 'mochi_social_progress_snapshots', 'mochi_social_ledger_events', "network = 'CANARY'", 'expires_at']
+  },
+  {
+    file: 'supabase/migrations/20260621120000_add_mochi_social_unity_room.sql',
+    includes: ['mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', "room_key text not null default 'jade-lantern-room-alpha'", "check (pet_key = 'lirabao')", 'enable row level security', 'grant select on public.mochi_social_unity_players to authenticated', 'grant select, insert, update, delete on public.mochi_social_shared_pet_snapshots to service_role']
   },
   {
     file: 'apps/web/next.config.ts',
