@@ -8,7 +8,7 @@ const reportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_JSO
 const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_MD || "reports/mochi-social-browser-gates.md");
 const handoffPath = resolve(credsDir, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_HANDOFF || "mochirii-mochi-social-browser-gates.md");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED === "true" || process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
-const accessMode = normalizeBrowserGateMode(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE || "supabase");
+const accessMode = normalizeBrowserGateMode(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE || "tester-password");
 const requiredGateEnv = browserGateEnvForMode(accessMode);
 
 const confirmed = process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED === "true";
@@ -81,7 +81,7 @@ function renderMarkdown(reportData) {
     `- Reviewer: ${reportData.reviewer || "not recorded"}`,
     `- Browser: ${reportData.browser || "not recorded"}`,
     `- URL: ${reportData.url || "not recorded"}`,
-    `- Access mode: ${reportData.accessMode || "supabase"}`,
+    `- Access mode: ${reportData.accessMode || "tester-password"}`,
     `- Hosted approval flag: ${reportData.hostedChecksAllowed ? "true" : "false"}`,
     `- Git branch: ${reportData.git.branch || "unknown"}`,
     `- Git HEAD: ${reportData.git.localHead || "unknown"}`,
@@ -136,7 +136,7 @@ function sanitize(value) {
 }
 
 function normalizeBrowserGateMode(value) {
-  return value === "tester-password" ? "tester-password" : "supabase";
+  return value === "supabase" ? "supabase" : "tester-password";
 }
 
 function browserGateEnvForMode(mode) {
@@ -145,10 +145,15 @@ function browserGateEnvForMode(mode) {
       ["MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK", "tester-password locked page visible"],
       ["MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK", "iframe absent before tester-password unlock"],
       ["MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK", "invalid tester password shows accessible inline error"],
-      ["MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK", "iframe loads after tester-password unlock"],
-      ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "guest bridge sends sign-out/no access token only"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK", "signed-out users see the member sign-in prompt after unlock"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK", "signed-in non-testers are blocked after unlock"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK", "allowlisted testers must accept terms before saved play"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK", "iframe loads after tester-password unlock and member access"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "MOCHI_SOCIAL_AUTH sends access token only after member access"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK", "feedback appears in admin/audit"],
       ["MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK", "no-real-value alpha copy is visible"],
       ["MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK", "two hosted game tabs show nearby tester presence"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK", "admin grant/revoke works and intended tester state is restored"],
     ];
   }
 

@@ -98,7 +98,7 @@ Record pass/fail metadata only: reviewer, browser/version, URL, access mode, and
 short no-secret notes. Do not capture tokens, cookies, account emails, request
 headers, dashboard screenshots, or private provider values.
 
-Tester-password evidence:
+Tester-password production evidence:
 
 ```powershell
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="tester-password"
@@ -109,14 +109,19 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_URL="https://<site>/games/mochi-social"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 npm run prepare:mochi-social-browser-gates
 ```
 
-Strict member-persistent evidence:
+Direct strict member-persistent evidence without password-wall checks:
 
 ```powershell
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE="supabase"

@@ -22,10 +22,15 @@ const testerPasswordGateEnv = {
   MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK: "true",
   MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK: "true",
   MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK: "true",
   MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK: "true",
   MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK: "true",
   MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK: "true",
   MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK: "true",
+  MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK: "true",
 };
 
 function cleanBrowserGateEnv(extra = {}) {
@@ -65,7 +70,7 @@ function assertPartialConfirmationListsMissingGate() {
     MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
-    ...requiredGateEnv,
+    ...testerPasswordGateEnv,
   };
   delete env.MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK;
 
@@ -83,7 +88,7 @@ function assertHostedBrowserUrlRequiresHostedApproval() {
     MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "https://preview.example/games/mochi-social",
-    ...requiredGateEnv,
+    ...testerPasswordGateEnv,
   }, (gate) => {
     assert(gate.status === "fail", "Hosted browser evidence should fail without hosted-check approval.");
     assert(gate.message.includes("hosted browser gate confirmation requires"), "Manual gate should require hosted approval for hosted browser evidence.");
@@ -93,6 +98,7 @@ function assertHostedBrowserUrlRequiresHostedApproval() {
 
 function assertLocalhostBrowserEvidenceCanPassManualGateOnly() {
   runAndAssertManualGate("localhost-confirmed", {
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE: "supabase",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
     MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
@@ -138,7 +144,7 @@ function assertStoredBrowserGateReportCanPassManualGateOnly() {
       MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
       MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
       MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES: `No-secret note with ${fakeToken} to verify redaction.`,
-      ...requiredGateEnv,
+      ...testerPasswordGateEnv,
     }),
   });
   assert(writer.status === 0, `stored report writer should pass: ${writer.stderr || writer.stdout}`);
