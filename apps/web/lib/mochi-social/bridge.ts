@@ -28,10 +28,10 @@ export function resolveMochiSocialBridgeMessage(value: unknown): MochiSocialBrid
   }
 
   if (data.type === "MOCHI_SOCIAL_AUTH_STATE") {
-    const nextState = data.payload?.state;
+    const nextState = normalizeAuthState(data.payload?.state);
     return {
       action: "set-status",
-      status: nextState === "linked" || nextState === "guest" || nextState === "error" ? nextState : "ready",
+      status: nextState,
     };
   }
 
@@ -44,4 +44,11 @@ export function resolveMochiSocialBridgeMessage(value: unknown): MochiSocialBrid
   }
 
   return { action: "ignore" };
+}
+
+function normalizeAuthState(value: unknown): "ready" | "linked" | "guest" | "error" {
+  if (value === "linked" || value === "signed-in") return "linked";
+  if (value === "guest" || value === "signed-out") return "guest";
+  if (value === "error") return "error";
+  return "ready";
 }
