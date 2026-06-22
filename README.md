@@ -28,6 +28,16 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 
 ---
 
+## Mochi Social Closed Playtest
+
+Mochi Social is a closed Mochirii playtest for approved guild members. Members enter one shared 3D guild room, create a curated character, meet Lirabao, and care for the guild pet together.
+
+The live page stays behind the tester password wall. The password opens the page, and Mochirii member sign-in is required for saved play. All playtest progress has no real value.
+
+Player-facing playtest wording lives in [`docs/mochi-social-playtest-guide.md`](docs/mochi-social-playtest-guide.md).
+
+---
+
 ## Tech Stack
 
 - **HTML5** — semantic, accessible markup
