@@ -17,7 +17,7 @@ const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HO
 const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
 const browserGateMode = normalizeBrowserGateMode(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE || "supabase");
 const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev");
-const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
+const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "https://mochirii.com");
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
 const authUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
 const supabaseProjectRef = inferSupabaseProjectRef(functionsUrl);
