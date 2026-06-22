@@ -95,7 +95,7 @@ const checks = [
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
-    includes: ['MochiSocialAlphaClient', 'MochiSocialTesterPasswordGate', 'MochiSocialTesterGameClient', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'robots', 'index: false', 'getMochiSocialGameRuntimeStatus', '/healthz', 'activeRuntime === "unity-webgl"', 'unityWebglBuild?.present === true', 'legacyFallback?.active !== true', 'gamePausedMessage']
+    includes: ['MochiSocialAlphaClient', 'MochiSocialTesterPasswordGate', 'alphaShellUnlocked', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'robots', 'index: false', 'getMochiSocialGameRuntimeStatus', '/healthz', 'activeRuntime === "unity-webgl"', 'unityWebglBuild?.present === true', 'legacyFallback?.active !== true', 'gamePausedMessage']
   },
   {
     file: 'scripts/check-mochi-social-tester-password-gate.mjs',
@@ -218,7 +218,6 @@ const publicMochiSocialFiles = [
   'docs/mochi-social-playtest-guide.md',
   'apps/web/app/games/mochi-social/page.tsx',
   'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-  'apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx',
   'apps/web/components/mochi-social/MochiSocialTesterPasswordGate.tsx'
 ];
 

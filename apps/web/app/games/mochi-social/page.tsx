@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { MochiSocialAlphaClient } from "@/components/mochi-social/MochiSocialAlphaClient";
-import { MochiSocialTesterGameClient } from "@/components/mochi-social/MochiSocialTesterGameClient";
 import { MochiSocialTesterPasswordGate } from "@/components/mochi-social/MochiSocialTesterPasswordGate";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { hasMochiSocialTesterSession } from "@/lib/mochi-social/tester-password";
@@ -73,7 +72,8 @@ export default async function MochiSocialPage({ searchParams }: { searchParams: 
   const params = await searchParams;
   const accessMode = process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE === "supabase" ? "supabase" : "tester-password";
   const testerSessionReady = accessMode === "tester-password" ? await hasMochiSocialTesterSession() : false;
-  const gameRuntime = accessMode === "supabase" || testerSessionReady
+  const alphaShellUnlocked = accessMode === "supabase" || testerSessionReady;
+  const gameRuntime = alphaShellUnlocked
     ? await getMochiSocialGameRuntimeStatus()
     : { available: true, message: "" };
 
@@ -82,10 +82,8 @@ export default async function MochiSocialPage({ searchParams }: { searchParams: 
       <BodyPageMarker page="games-mochi-social" />
       <main className="page-main mochi-game-page" id="main">
         <div className="container">
-          {accessMode === "supabase" ? (
+          {alphaShellUnlocked ? (
             <MochiSocialAlphaClient gameAvailable={gameRuntime.available} gamePausedMessage={gameRuntime.message} />
-          ) : testerSessionReady ? (
-            <MochiSocialTesterGameClient gameAvailable={gameRuntime.available} gamePausedMessage={gameRuntime.message} />
           ) : (
             <MochiSocialTesterPasswordGate error={testerGateError(params.tester_error)} />
           )}

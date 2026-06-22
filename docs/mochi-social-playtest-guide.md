@@ -7,7 +7,7 @@ Mochi Social is a closed Mochirii playtest for approved guild members. The first
 - The tester password opens the playtest page.
 - Mochirii member sign-in is required for saved play.
 - Approved testers can enter the shared room after signing in and accepting the playtest terms.
-- Guests may only check that the room opens; guest play does not save character or pet progress.
+- The password alone does not save progress. Sign in before creating a character or caring for Lirabao.
 
 ## What You Can Try
 

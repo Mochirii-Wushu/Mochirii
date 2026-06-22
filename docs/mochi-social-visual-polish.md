@@ -38,11 +38,11 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 - Keep the HttpOnly, route-scoped cookie behavior in the route handlers.
 - Use a password input with `id="current-password"`, `name="testerPassword"`, and `autocomplete="current-password"`.
 - Place invalid-password and missing-config errors near the field with `role="alert"`.
-- Lead with player-facing badges: shared guild room, Lirabao, member-saved play, guest preview, and no real value.
+- Lead with player-facing badges: shared guild room, Lirabao, member-saved play, tester password, and no real value.
 - Replace `Preview boundaries` with tester sections:
   - `What you can test`: create a curated character preset, enter the Jade Lantern room, try local chat/emotes, and interact with shared Lirabao.
   - `Your playtest mission`: create a character, wave/chat, care for Lirabao, confirm shared state, and send feedback.
-  - `Good to know`: no real money, no permanent item value, desktop recommended, guest preview does not save member progress, and a hosting access screen may appear first.
+  - `Good to know`: no real money, no permanent item value, desktop recommended, member sign-in required for saved progress, and a hosting access screen may appear first.
 - Keep preview-safety copy player-facing and brief.
 
 ## Gate Image
