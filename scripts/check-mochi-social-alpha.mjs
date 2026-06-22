@@ -167,7 +167,7 @@ const checks = [
   {
     file: 'docs/mochi-social-alpha.md',
     includes: [
-      'mochi-social-alpha-codex-ops.md',
+      'mochi-social-alpha-maintainer-ops.md',
       'Tester Guide',
       'Preview Acceptance',
       'Rollback',
@@ -181,7 +181,6 @@ const checks = [
       'check:mochi-social-report-hygiene',
       'check:mochi-social-preview-ready',
       'Do not roll back by switching to production',
-      'Computer Use',
       'Alpha Preview Ready',
       'configured-preview-stub',
       'preview-live-gates',
@@ -190,11 +189,11 @@ const checks = [
     ]
   },
   {
-    file: 'docs/mochi-social-alpha-codex-ops.md',
+    file: 'docs/mochi-social-alpha-maintainer-ops.md',
     includes: [
       'Source Hierarchy',
       'Source Basis',
-      'Tool Choice',
+      'Verification Choice',
       'Website Preview Environment Matrix',
       'Supabase Authority Matrix',
       'Discord Boundary',

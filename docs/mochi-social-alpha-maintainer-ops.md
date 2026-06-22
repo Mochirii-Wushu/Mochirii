@@ -1,10 +1,9 @@
-# Mochi Social Alpha Codex Ops
+# Mochi Social Alpha Maintainer Ops
 
-This website-side runbook keeps Codex aligned while operating the Mochirii preview, Supabase authority, Discord boundaries, and admin tester workflow for Mochi Social Alpha RC.
+This website-side runbook keeps maintainer work aligned while operating the Mochirii preview, Supabase authority, Discord boundaries, and admin tester workflow for Mochi Social Alpha RC.
 
 ## Source Basis
 
-- OpenAI Codex manual: `AGENTS.md`, skills, MCP, Chrome, Computer Use, hooks, and https://developers.openai.com/codex/codex-manual.md.
 - GitHub Docs: Actions billing, budgets, branch protection, required checks, and PR checks: https://docs.github.com/en/billing/concepts/product-billing/github-actions and https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule.
 - Vercel Docs: preview environments, environment variables, and WebSocket limits: https://vercel.com/docs/deployments/environments, https://vercel.com/docs/environment-variables, and https://vercel.com/kb/guide/do-vercel-serverless-functions-support-websocket-connections.
 - Supabase Docs: Edge Function secrets and authenticated user/session handling: https://supabase.com/docs/guides/functions/secrets and https://supabase.com/docs/reference/javascript/auth-getuser.
@@ -31,7 +30,7 @@ Use Alpha Preview Ready as the first live-site target. It is not the same as Alp
 - `preview-live-gates`: Mochirii Vercel Preview `/games/mochi-social`, `NEXT_PUBLIC_MOCHI_SOCIAL_URL`, Supabase allowlist, terms, feedback, short-lived iframe auth, Unity Custom ID broker, no-real-value labels, Unity WebGL shared-room contract, and approved hosted preview checks.
 - `funded-chain-gates`: Enjin collection ID, Fuel Tank ID, cENJ funding, Wallet Daemon signing, live operator smoke, and finalized chain proof.
 
-Codex should optimize for `preview-live-gates` before funded-chain work. `funded-chain-gates` are expected red until the user explicitly approves cENJ, Fuel Tank, signing, and chain transaction work. Do not set dummy `ENJIN_COLLECTION_ID`, dummy `ENJIN_FUEL_TANK_ID`, or fake readiness flags to make Alpha RC pass.
+Maintainer work should optimize for `preview-live-gates` before funded-chain work. `funded-chain-gates` are expected red until the user explicitly approves cENJ, Fuel Tank, signing, and chain transaction work. Do not set dummy `ENJIN_COLLECTION_ID`, dummy `ENJIN_FUEL_TANK_ID`, or fake readiness flags to make Alpha RC pass.
 
 For Alpha Preview Ready, the website may embed the game while the game reports `chainRuntime.mode="configured-preview-stub"`. Chain requests are audit-only preview rows until real Enjin finality exists; never credit inventory, settle listings, settle trades, or imply real player value from a stubbed chain request. The Unity v1 runtime is one shared room with curated character presets and shared Lirabao; market, trade, avatar uploads, multiple rooms, and sharding are out of scope.
 
@@ -70,19 +69,18 @@ Do not clear funded-chain gates unless cENJ, collection, Fuel Tank, and Wallet D
 Use Mochirii for website, Supabase, allowlist, terms, feedback, and admin changes; use Mochi Social for runtime/game changes.
 ```
 
-## Tool Choice
+## Verification Choice
 
 - Use CLI for reproducible checks: `gh`, `npm`, Supabase CLI, and PR status.
 - Use Chrome for Vercel, Supabase, GitHub billing, Discord Developer Portal, Fly, and Enjin dashboards.
-- Use Computer Use only when CLI and Chrome cannot reach a required UI.
 - Use dashboard-only flow for payment details, OAuth client secrets, bot tokens, MFA, seed/passphrase handling, and private account confirmations.
 
 ## Website Preview Environment Matrix
 
 | Surface | Owner | Notes |
 | --- | --- | --- |
-| Website branch | `Mochirii-Wushu/Mochirii` | `codex/mochi-social-alpha-rc` |
-| Game branch | `xartaiusx/mochi-social` | `codex/mochi-social-alpha-rc` |
+| Website branch | `Mochirii-Wushu/Mochirii` | scoped Mochi Social alpha branch |
+| Game branch | `xartaiusx/mochi-social` | scoped Mochi Social alpha branch |
 | Website preview route | Vercel | `/games/mochi-social` |
 | Game URL | Unity WebGL host | `NEXT_PUBLIC_MOCHI_SOCIAL_URL` |
 | Supabase public browser config | Vercel Preview | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
@@ -100,7 +98,7 @@ Use `npm run prepare:mochi-social-alpha-operator-checklist` to refresh the no-se
 
 ## Action Approval Rules
 
-Local code, docs, static checks, no-secret reports, and localhost-only verification may proceed without a new approval. The following actions need fresh action-specific approval before Codex runs them:
+Local code, docs, static checks, no-secret reports, and localhost-only verification may proceed without a new approval. The following actions need fresh action-specific approval before they run:
 
 - Push a branch, rerun GitHub Actions, create or update required checks, or enable branch protection.
 - Deploy, redeploy, promote, restart, mutate, or run hosted smoke/load checks against Vercel, Fly, Supabase, GitHub, Discord, Enjin, or any public preview URL.
@@ -159,7 +157,7 @@ Before inviting testers:
 
 ## Manual Browser Evidence Protocol
 
-Hosted browser gates need explicit approval before Codex opens Chrome against Vercel, Supabase, or the Fly game URL. During that pass, capture only no-secret evidence:
+Hosted browser gates need explicit approval before Chrome opens against Vercel, Supabase, or the Fly game URL. During that pass, capture only no-secret evidence:
 
 - reviewer, browser/version, preview URL, timestamp, and pass/fail notes;
 - whether the active access mode is `tester-password` or `supabase`;
@@ -227,7 +225,7 @@ The Preview Ready audit loads the standard preview key file only after `MOCHI_SO
 ## Secret Entry Protocol
 
 - The user types secrets privately.
-- Codex verifies secret names, status, digests, timestamps, health checks, or successful route behavior only.
+- Maintainers verify secret names, status, digests, timestamps, health checks, or successful route behavior only.
 - Repo scripts may write no-secret operator checklists into `C:\Users\xtyty\Desktop\Creds`; those files must contain placeholders, secret names, statuses, and commands only.
 - Never paste secret values into docs, logs, PR comments, screenshots, browser-visible UI, or chat.
 - Rotate `MOCHI_SOCIAL_GAME_SERVER_TOKEN`, Unity service account credentials, Discord secrets, Enjin tokens, and provider keys if exposed.

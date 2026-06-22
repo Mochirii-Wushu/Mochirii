@@ -54,10 +54,10 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         </dl>
       </header>
       <div className="mochi-game-preview-contract mochi-game-preview-contract--locked" aria-label="Mochi Social preview contract">
-        <span>Unity WebGL</span>
-        <span>Single shared room</span>
+        <span>Shared 3D room</span>
+        <span>One room together</span>
         <span>Shared Lirabao</span>
-        <span>Guest preview</span>
+        <span>Room preview</span>
       </div>
       <form
         className="mochi-game-panel mochi-tester-login"
@@ -95,7 +95,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           <h2>What you can test</h2>
           <ul>
             <li>Create a character from curated alpha presets.</li>
-            <li>Enter the Jade Lantern room and check the Unity WebGL load.</li>
+            <li>Enter the Jade Lantern room and make sure the room opens smoothly.</li>
             <li>Try local chat, waves, emotes, and nearby tester presence.</li>
             <li>Interact with the shared Lirabao pet state.</li>
           </ul>
@@ -112,10 +112,10 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <section className="mochi-preview-safety">
           <h2>Good to know</h2>
           <ul>
-            <li>No real money, purchases, cashout, or permanent blockchain value.</li>
+            <li>No real money, purchases, rewards, or permanent item value.</li>
             <li>Desktop is recommended for this early build.</li>
             <li>The tester password opens the room preview; sign in with your Mochirii account for saved character and Lirabao progress.</li>
-            <li>Avatar uploads, multiple rooms, and public release features are not part of this closed playtest.</li>
+            <li>Avatar uploads, multiple rooms, and wider release features are not part of this closed playtest.</li>
           </ul>
         </section>
       </aside>

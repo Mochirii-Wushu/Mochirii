@@ -2,7 +2,7 @@
 
 Mochi Social stays in the separate `xartaiusx/mochi-social` game repo. This Mochirii repo owns the website doorway, Supabase schema, Edge Functions, alpha access controls, terms acknowledgement, and tester feedback.
 
-Codex external operations for this website surface are defined in [`docs/mochi-social-alpha-codex-ops.md`](mochi-social-alpha-codex-ops.md). Use it for source hierarchy, tool choice, preview env ownership, Supabase authority, Discord boundaries, preview verification, and secret-entry rules.
+Private maintainer operations for this website surface are defined in [`docs/mochi-social-alpha-maintainer-ops.md`](mochi-social-alpha-maintainer-ops.md). Use it for source hierarchy, preview env ownership, Supabase authority, Discord boundaries, preview verification, and secret-entry rules.
 
 Visual work uses the same Cozy Wushu world direction as the game, but ownership remains split: Mochirii owns the tester-password gate, strict Supabase/Discord access screens, and unlocked iframe shell; the Mochi Social game repo owns the Unity WebGL runtime, one shared room scene, 3D assets, HUD, manifests, and asset ledger. Vercel Deployment Protection, the tester-password gate, and Supabase/Discord allowlist are separate access layers and should not be treated as interchangeable.
 
@@ -194,7 +194,7 @@ Required secrets/config stay out of Git:
 - `MOCHI_SOCIAL_ALPHA_TERMS_VERSION` when the acknowledgement copy changes.
 - `UNITY_SERVICES_PROJECT_ID`, `UNITY_SERVICES_ENVIRONMENT_ID`, `UNITY_SERVICES_ENVIRONMENT_NAME`, `UNITY_SERVICES_SERVICE_ACCOUNT_KEY_ID`, and `UNITY_SERVICES_SERVICE_ACCOUNT_SECRET` in Supabase Edge Function secrets for `mochi-social-unity-auth`.
 
-Use Chrome for logged-in Vercel, Supabase, GitHub, Discord, Fly, and Enjin dashboards. Use CLI for reproducible checks. Use Computer Use only when CLI and Chrome cannot reach a required UI.
+Use Chrome for logged-in Vercel, Supabase, GitHub, Discord, Fly, and Enjin dashboards. Use CLI for reproducible checks.
 
 Refresh the local no-secret website-side operator checklist:
 

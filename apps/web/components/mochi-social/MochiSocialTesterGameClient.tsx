@@ -54,7 +54,7 @@ export function MochiSocialTesterGameClient() {
         <dl>
           <div>
             <dt>Mode</dt>
-            <dd>Guest smoke</dd>
+            <dd>Room check</dd>
           </div>
           <div>
             <dt>Room</dt>
@@ -71,8 +71,8 @@ export function MochiSocialTesterGameClient() {
         </dl>
       </header>
       <div className="mochi-game-preview-contract mochi-game-preview-contract--live" aria-label="Mochi Social preview contract">
-        <span>Unity WebGL</span>
-        <span>Single shared room</span>
+        <span>Shared 3D room</span>
+        <span>One room together</span>
         <span>Shared Lirabao</span>
         <span>Guest only</span>
         <span>No real value</span>
