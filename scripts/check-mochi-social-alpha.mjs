@@ -46,7 +46,7 @@ const checks = [
   },
   {
     file: 'supabase/functions/_shared/mochi-social-alpha_test.ts',
-    includes: ['alphaAccess', 'requireUser', 'requireGameServer', 'upsertUnityPlayerLink', 'upsertSharedPetSnapshot', 'missing_auth', 'invalid_unity_room_pet', 'invalid_shared_pet_state']
+    includes: ['alphaAccess', 'requireUser', 'requireGameServer', 'upsertUnityPlayerLink', 'upsertSharedPetSnapshot', 'missing_auth', 'invalid_unity_custom_id', 'invalid_unity_room', 'invalid_unity_room_pet', 'invalid_shared_pet_state', 'wrongRoom', 'onConflict === "pet_key"']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',

@@ -153,6 +153,26 @@ Deno.test("Mochi Social Unity player links use Mochirii Custom ID", async () => 
   const client = new MockSupabaseClient();
   const customId = unityCustomId(userId);
 
+  const wrongCustomId = await upsertUnityPlayerLink(client as never, {
+    userId,
+    unityPlayerId: "unity-player-1",
+    customId: `guest:${userId}`,
+    roomKey: UNITY_ROOM_KEY,
+  });
+  assert(wrongCustomId.ok === false, "non-Mochirii Custom ID should be rejected");
+  assert(wrongCustomId.error === "invalid_unity_custom_id", `unexpected error ${wrongCustomId.error}`);
+  assert(client.upserts.length === 0, "invalid Unity Custom ID must not write a player link");
+
+  const wrongRoom = await upsertUnityPlayerLink(client as never, {
+    userId,
+    unityPlayerId: "unity-player-1",
+    customId,
+    roomKey: "other-room",
+  });
+  assert(wrongRoom.ok === false, "wrong Unity room should be rejected");
+  assert(wrongRoom.error === "invalid_unity_room", `unexpected error ${wrongRoom.error}`);
+  assert(client.upserts.length === 0, "invalid Unity room must not write a player link");
+
   const result = await upsertUnityPlayerLink(client as never, {
     userId,
     unityPlayerId: "unity-player-1",
@@ -188,6 +208,14 @@ Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", as
   assert(wrongPet.ok === false, "non-Lirabao pet mirror should be rejected");
   assert(wrongPet.error === "invalid_unity_room_pet", `unexpected error ${wrongPet.error}`);
 
+  const wrongRoom = await upsertSharedPetSnapshot(client as never, {
+    petKey: UNITY_SHARED_PET_KEY,
+    roomKey: "other-room",
+    state: validState,
+  });
+  assert(wrongRoom.ok === false, "wrong room mirror should be rejected");
+  assert(wrongRoom.error === "invalid_unity_room_pet", `unexpected error ${wrongRoom.error}`);
+
   const invalidState = await upsertSharedPetSnapshot(client as never, {
     petKey: UNITY_SHARED_PET_KEY,
     roomKey: UNITY_ROOM_KEY,
@@ -209,6 +237,13 @@ Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", as
   assert(saved.snapshot.petKey === UNITY_SHARED_PET_KEY, "snapshot should use Lirabao key");
   assert(saved.snapshot.roomKey === UNITY_ROOM_KEY, "snapshot should use Jade Lantern room");
   assert(saved.snapshot.lastActorId === "tester-a", "snapshot should preserve last actor");
+  const petUpsert = client.upserts.find((entry) => entry.table === "mochi_social_shared_pet_snapshots");
+  assert(petUpsert !== undefined, "expected shared pet mirror upsert");
+  assert(petUpsert.row.pet_key === UNITY_SHARED_PET_KEY, "shared pet mirror must use Lirabao key");
+  assert(petUpsert.row.room_key === UNITY_ROOM_KEY, "shared pet mirror must use Jade Lantern room");
+  assert(petUpsert.row.source_request_id === "request-1", "shared pet mirror should preserve source request");
+  assert(petUpsert.row.last_actor_id === "tester-a", "shared pet mirror should preserve last actor row");
+  assert(petUpsert.options?.onConflict === "pet_key", "shared pet mirror must be idempotent by pet");
 
   client.existingSharedPet = {
     pet_key: UNITY_SHARED_PET_KEY,

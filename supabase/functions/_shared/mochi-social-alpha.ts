@@ -282,14 +282,28 @@ export async function upsertUnityPlayerLink(
   adminClient: SupabaseClient,
   input: { userId: string; unityPlayerId: string; customId: string; roomKey?: string | null },
 ) {
+  const customId = input.customId;
+  const roomKey = input.roomKey || UNITY_ROOM_KEY;
+  if (customId !== unityCustomId(input.userId)) {
+    return {
+      ok: false as const,
+      error: "invalid_unity_custom_id",
+      message: "Unity Custom ID must match the signed-in Mochirii member.",
+    };
+  }
+
+  if (roomKey !== UNITY_ROOM_KEY) {
+    return { ok: false as const, error: "invalid_unity_room", message: "Unity player mapping must stay in the Jade Lantern room." };
+  }
+
   const { data, error } = await adminClient
     .from("mochi_social_unity_players")
     .upsert(
       {
         user_id: input.userId,
         unity_player_id: input.unityPlayerId,
-        custom_id: input.customId,
-        room_key: input.roomKey || UNITY_ROOM_KEY,
+        custom_id: customId,
+        room_key: roomKey,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" },
