@@ -35,7 +35,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
-    includes: ['MOCHI_SOCIAL_GAME_CONTRACT_URL', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', '/integration/game-manifest.json', '/integration/alpha/status', 'MOCHI_SOCIAL_AUTH', 'engine === "unity-webgl"', 'single-shared-room', 'ugs-distributed-authority', 'mochi-social-unity-auth', 'configured-preview-stub']
+    includes: ['MOCHI_SOCIAL_GAME_CONTRACT_URL', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', '/integration/game-manifest.json', '/integration/alpha/status', 'MOCHI_SOCIAL_AUTH', 'engine === "unity-webgl"', 'single-shared-room', 'ugs-distributed-authority', 'mochi-social-unity-auth', 'must not expose future asset runtime state']
   },
   {
     file: 'scripts/smoke-mochi-social-alpha-edge.mjs',

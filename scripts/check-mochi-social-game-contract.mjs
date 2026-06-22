@@ -85,12 +85,8 @@ async function run() {
   assert(alphaStatus.edgeFunctions?.action === "mochi-social-alpha-action", "Alpha status must expose the action Edge Function.");
   assert(alphaStatus.edgeFunctions?.admin === "mochi-social-alpha-admin", "Alpha status must expose the admin Edge Function.");
   assert(alphaStatus.edgeFunctions?.feedback === "submit-mochi-social-feedback", "Alpha status must expose the feedback Edge Function.");
-  assert(alphaStatus.chainRuntime?.provider === "enjin", "Alpha chain runtime provider must stay Enjin.");
-  assert(alphaStatus.chainRuntime?.network === "CANARY", "Alpha chain runtime network must stay CANARY.");
-  assert(["configured", "configured-preview-stub"].includes(alphaStatus.chainRuntime?.mode), "Alpha chain runtime mode must be configured or configured-preview-stub.");
-  if (alphaStatus.enjinCanaryConfigured === false) {
-    assert(alphaStatus.chainRuntime?.mode === "configured-preview-stub", "Unconfigured Enjin runtime must expose configured-preview-stub.");
-  }
+  assert(!("chainRuntime" in alphaStatus), "Alpha status must not expose future asset runtime state.");
+  assert(!("enjinCanaryConfigured" in alphaStatus), "Alpha status must not expose future asset provider state.");
 
   const embed = await request("/embed", "embed");
   assert((embed.headers.get("content-type") || "").includes("text/html"), "/embed must return HTML for the iframe.");
