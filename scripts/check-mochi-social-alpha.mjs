@@ -163,23 +163,18 @@ const checks = [
   {
     file: 'docs/mochi-social-alpha.md',
     includes: [
-      'mochi-social-alpha-maintainer-ops.md',
-      'Tester Guide',
-      'Preview Acceptance',
-      'Rollback',
-      'npm run alpha:load-smoke',
-      'NEXT_PUBLIC_MOCHI_SOCIAL_URL',
-      'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE',
-      'MOCHI_SOCIAL_AUTH',
-      'Manual Browser Gate Evidence',
-      ...browserGateEnvNames,
-      'check:mochi-social-report-hygiene',
-      'check:mochi-social-preview-ready',
-      'Do not roll back by switching to the legacy runtime',
-      'Alpha Preview Ready',
+      'Mochi Social Alpha',
+      'closed Mochirii playtest',
       'shared guild room',
+      'curated character',
       'care for Lirabao together',
-      'No real value'
+      'tester password',
+      'Mochirii member sign-in',
+      'What Members Can Try',
+      'Playtest Boundaries',
+      'no real value',
+      'Ready To Invite Testers',
+      'playtest-paused message'
     ]
   },
   {
@@ -215,6 +210,7 @@ const forbiddenPatterns = [
 ];
 
 const publicMochiSocialFiles = [
+  'docs/mochi-social-alpha.md',
   'docs/mochi-social-playtest-guide.md',
   'apps/web/app/games/mochi-social/page.tsx',
   'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',

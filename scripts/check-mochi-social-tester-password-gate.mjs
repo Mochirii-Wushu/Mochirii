@@ -74,8 +74,8 @@ const checks = [
     file: "docs/mochi-social-alpha.md",
     includes: [
       "tester-password",
-      "MOCHI_SOCIAL_TESTER_PASSWORD",
-      "tester password unlocks the page shell",
+      "password opens the playtest page",
+      "Saved play requires Mochirii member sign-in",
     ],
   },
 ];
