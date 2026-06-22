@@ -55,7 +55,7 @@ async function run() {
   assert(manifest.alpha?.allowlistRequired === true, "Manifest must require alpha allowlist.");
   assert(manifest.alpha?.termsRequired === true, "Manifest must require alpha terms.");
   assert(manifest.alpha?.noRealValue === true, "Manifest must keep no-real-value alpha posture.");
-  assert(!manifest.market || manifest.market.enabled === false, "Manifest market/trade systems must be disabled for the Unity shared-room alpha.");
+  assertNoFutureSystemKeys(manifest, "Manifest");
   assert(manifest.avatarUploads === false, "Manifest avatar uploads must stay disabled for curated character presets.");
   assert(manifest.ugc === "curated", "Manifest UGC mode must stay curated.");
 
@@ -77,7 +77,7 @@ async function run() {
   const alphaRuntime = alphaStatus.runtime || alphaStatus.unity || {};
   assert(alphaRuntime.realtimeAuthority === "ugs-distributed-authority", "Alpha status runtime must use UGS Distributed Authority.");
   assert(alphaRuntime.stateAuthority === "ugs-cloud-save", "Alpha status runtime must use UGS Cloud Save.");
-  assert(!alphaStatus.market || alphaStatus.market.enabled === false, "Alpha status market/trade systems must be disabled.");
+  assertNoFutureSystemKeys(alphaStatus, "Alpha status");
   assert(alphaStatus.avatarUploads === false, "Alpha status avatar uploads must stay disabled.");
   assert(alphaStatus.ugc === "curated", "Alpha status UGC mode must stay curated.");
   assert(alphaStatus.edgeFunctions?.session === "mochi-social-alpha-session", "Alpha status must expose the session Edge Function.");
@@ -129,6 +129,11 @@ function normalizeOrigin(value, label) {
 
 function assertIncludes(value, expected, message) {
   assert(Array.isArray(value) && value.includes(expected), message);
+}
+
+function assertNoFutureSystemKeys(payload, label) {
+  const text = JSON.stringify(payload);
+  assert(!/\b(?:market|trade|cashout)\b/i.test(text), `${label} must not publish future economy keys for the Unity shared-room alpha.`);
 }
 
 function assert(condition, message) {
