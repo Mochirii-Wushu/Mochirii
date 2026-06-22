@@ -23,6 +23,9 @@ async function run() {
   const health = await getJson("/healthz", "health");
   assert(health.ok === true, "/healthz must return ok=true.");
   assert(health.name === "Mochi Social", "/healthz must identify Mochi Social.");
+  assert(health.activeRuntime === "unity-webgl", "/healthz must report Unity WebGL as the active runtime.");
+  assert(health.unityWebglBuild?.present === true, "/healthz must report the Unity WebGL build as present.");
+  assert(health.legacyFallback?.active === false, "/healthz must report legacy fallback inactive.");
 
   const manifestResult = await request("/integration/game-manifest.json", "manifest", {
     headers: siteOrigin ? { Origin: siteOrigin } : undefined,
@@ -35,6 +38,9 @@ async function run() {
   assert(manifest.embedUrl === `${manifest.origin}/embed`, "Manifest embedUrl must point to /embed.");
   assert(manifest.healthUrl === `${manifest.origin}/healthz`, "Manifest healthUrl must point to /healthz.");
   assert(manifest.engine === "unity-webgl", 'Manifest engine must be "unity-webgl".');
+  assert(manifest.activeRuntime === "unity-webgl", 'Manifest activeRuntime must be "unity-webgl".');
+  assert(manifest.unityWebglBuild?.present === true, "Manifest must report the Unity WebGL build as present.");
+  assert(manifest.legacyFallback?.active === false, "Manifest must report legacy fallback inactive.");
   assert(manifest.room?.key === "jade-lantern-room-alpha", "Manifest room key must be jade-lantern-room-alpha.");
   assert(manifest.room?.mode === "single-shared-room", "Manifest room mode must be single-shared-room.");
   assert(manifest.room?.capacity === 25, "Manifest room capacity must be 25.");
@@ -70,6 +76,9 @@ async function run() {
   assert(alphaStatus.alpha?.termsRequired === true, "Alpha status must require terms.");
   assert(alphaStatus.alpha?.noRealValue === true, "Alpha status must keep no-real-value posture.");
   assert(alphaStatus.engine === "unity-webgl", 'Alpha status engine must be "unity-webgl".');
+  assert(alphaStatus.activeRuntime === "unity-webgl", 'Alpha status activeRuntime must be "unity-webgl".');
+  assert(alphaStatus.unityWebglBuild?.present === true, "Alpha status must report the Unity WebGL build as present.");
+  assert(alphaStatus.legacyFallback?.active === false, "Alpha status must report legacy fallback inactive.");
   assert(alphaStatus.room?.key === "jade-lantern-room-alpha", "Alpha status room key must be jade-lantern-room-alpha.");
   assert(alphaStatus.room?.mode === "single-shared-room", "Alpha status room mode must be single-shared-room.");
   assert(alphaStatus.room?.capacity === 25, "Alpha status room capacity must be 25.");
