@@ -118,7 +118,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
-    includes: ['mochiSocialAlphaPanel', 'Grant alpha access', 'AlphaAuditPanel', 'manageMochiSocialAlphaAdmin']
+    includes: ['mochiSocialAlphaPanel', 'Grant alpha access', 'AlphaAuditPanel', 'manageMochiSocialAlphaAdmin', '[89ab][0-9a-f]{3}-[0-9a-f]{12}']
   },
   {
     file: 'apps/web/lib/mochi-social/alpha.ts',
@@ -135,6 +135,7 @@ const checks = [
   {
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
     includes: [
+      '[89ab][0-9a-f]{3}-[0-9a-f]{12}',
       'alphaAccess(adminClient, playerId)',
       'upsertAlphaProgressSnapshot(adminClient',
       'upsertSharedPetSnapshot(adminClient',
@@ -151,6 +152,7 @@ const checks = [
   {
     file: 'supabase/functions/mochi-social-alpha-progress/index.ts',
     includes: [
+      '[89ab][0-9a-f]{3}-[0-9a-f]{12}',
       'requireGameServer(req)',
       'alphaAccess(adminClient, playerId)',
       'loadAlphaProgressSnapshot(adminClient, playerId)',
@@ -161,7 +163,7 @@ const checks = [
   },
   {
     file: 'supabase/functions/mochi-social-alpha-admin/index.ts',
-    includes: ['loadAlphaAudit', 'recentLedger', 'mochi_social_feedback', 'mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', 'recentSharedPets']
+    includes: ['[89ab][0-9a-f]{3}-[0-9a-f]{12}', 'loadAlphaAudit', 'recentLedger', 'mochi_social_feedback', 'mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', 'recentSharedPets']
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',
