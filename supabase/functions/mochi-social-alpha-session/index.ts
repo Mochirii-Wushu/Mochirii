@@ -81,7 +81,6 @@ Deno.serve(async (req: Request) => {
         : null,
       alpha: {
         noRealValue: true,
-        chainNetwork: "CANARY",
         allowlistRequired: true,
         termsRequired: true,
         ugc: "curated",

@@ -75,7 +75,7 @@ const checks = [
     includes: [
       "tester-password",
       "MOCHI_SOCIAL_TESTER_PASSWORD",
-      "password-unlocked preview",
+      "tester password unlocks the page shell",
     ],
   },
 ];

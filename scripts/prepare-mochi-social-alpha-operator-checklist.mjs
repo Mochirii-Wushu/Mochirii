@@ -102,7 +102,7 @@ function renderChecklist() {
 
 Generated: ${generatedAt}
 
-This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, and preview acceptance steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into Codex chat, Git, PR comments, screenshots, or reports.
+This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, and preview acceptance steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into chat, Git, PR comments, screenshots, or reports.
 
 ## Local Credential Files
 
@@ -135,10 +135,10 @@ ${externalFailures}
 
 ## Alpha Preview Ready Lane
 
-- Alpha Preview Ready: Vercel Preview route, Fly game iframe, Supabase allowlist, terms, feedback, short-lived MOCHI_SOCIAL_AUTH, no-real-value labels, and Enjin visible as configured-preview-stub.
-- Funded-chain gates: real cENJ, Enjin collection ID, Fuel Tank ID, Wallet Daemon signing, and finalized proof smoke.
-- Do not set dummy ENJIN_COLLECTION_ID, dummy ENJIN_FUEL_TANK_ID, or fake readiness flags to make funded-chain gates pass.
-- For Preview Ready, chain request rows may be audit-only preview rows and must not credit inventory, settle trades, or settle listings.
+- Alpha Preview Ready: live tester-password route, Unity game iframe, Supabase allowlist, terms, feedback, short-lived MOCHI_SOCIAL_AUTH, no-real-value labels, one shared room, and shared Lirabao.
+- Future chain or paid-resource work stays out of this alpha unless the user approves it separately at action time.
+- Do not set dummy ENJIN_COLLECTION_ID, dummy ENJIN_FUEL_TANK_ID, or fake readiness flags to make future gates pass.
+- For Preview Ready, market, trade, funded-chain, cashout, and paid-asset behavior must remain inactive.
 
 ## Vercel Preview Gate
 
@@ -212,8 +212,8 @@ Before inviting testers, verify in the Vercel preview:
 5. The parent page sends MOCHI_SOCIAL_AUTH with a short-lived Supabase access token only.
 6. Feedback submission writes to Supabase and appears in the leader audit panel.
 7. Leader dashboard can grant and revoke alpha access by Supabase user id.
-8. For Alpha Preview Ready, chain request rows show Canary, no-real-value status, request id, and configured-preview-stub/audit-only state.
-9. For Alpha RC Ready only, funded-chain rows show transaction UUID, optional listing id, and finality state.
+8. No-real-value alpha messaging is visible on the tester page.
+9. Market, trade, funded-chain, cashout, and paid-asset UI are absent.
 
 ### Manual Browser Evidence Protocol
 
@@ -238,7 +238,7 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
 npm run prepare:mochi-social-browser-gates
 \`\`\`
@@ -259,7 +259,7 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 npm run prepare:mochi-social-browser-gates
 \`\`\`
@@ -281,7 +281,7 @@ npm run lint
 npm run build
 \`\`\`
 
-Stop at Alpha Preview Ready before inviting closed testers, then stop again at Alpha RC Ready after funded-chain evidence exists. Do not switch this checklist to production, Enjin mainnet, paid assets, cashout, public UGC, or service-role keys in browser/game code.
+Stop at Alpha Preview Ready before inviting closed testers. Do not switch this checklist to paid assets, cashout, public UGC, or service-role keys in browser/game code.
 `;
 }
 

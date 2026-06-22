@@ -17,7 +17,6 @@ export type MochiSocialAlphaSession = {
   } | null;
   alpha: {
     noRealValue: boolean;
-    chainNetwork: "CANARY";
     allowlistRequired: boolean;
     termsRequired: boolean;
     ugc: "curated";
@@ -80,17 +79,6 @@ export type MochiSocialAlphaAudit = {
     entity_type?: string | null;
     entity_id?: string | null;
     created_at?: string | null;
-  }>;
-  recentChain?: Array<{
-    request_id?: string | null;
-    user_id?: string | null;
-    operation_type?: string | null;
-    network?: string | null;
-    status?: string | null;
-    enjin_transaction_uuid?: string | null;
-    enjin_listing_id?: string | null;
-    created_at?: string | null;
-    finalized_at?: string | null;
   }>;
   recentFeedback?: Array<{
     id?: string | null;

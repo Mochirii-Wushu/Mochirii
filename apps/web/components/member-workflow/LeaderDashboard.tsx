@@ -570,7 +570,6 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
   const audit = data?.audit || {};
   const summary = audit.summary || {};
   const recentLedger = Array.isArray(audit.recentLedger) ? audit.recentLedger : [];
-  const recentChain = Array.isArray(audit.recentChain) ? audit.recentChain : [];
   const recentFeedback = Array.isArray(audit.recentFeedback) ? audit.recentFeedback : [];
   const recentSharedPets = Array.isArray(audit.recentSharedPets) ? audit.recentSharedPets : [];
   const cards = [
@@ -579,9 +578,6 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
     ["Ledger events", summary.ledgerEvents],
     ["Unity players", summary.unityPlayers],
     ["Shared pet mirrors", summary.sharedPetSnapshots],
-    ["Legacy listings", summary.activeListings],
-    ["Legacy trades", summary.offeredTrades],
-    ["Canary ops", summary.pendingChainOps],
     ["Feedback", summary.feedbackCount],
     ["Chat messages", summary.chatMessages],
   ];
@@ -602,12 +598,6 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
           {recentLedger.length ? recentLedger.map((event) => (
             <code key={`${event.id}-${event.request_id}`}>{event.event_type || "event"} - {event.actor_id || "unknown"} - {formatDate(event.created_at, "Not set")}</code>
           )) : <p className="muted">No alpha ledger events yet.</p>}
-        </details>
-        <details className="review-storage">
-          <summary>Recent Enjin Canary operations</summary>
-          {recentChain.length ? recentChain.map((operation) => (
-            <code key={operation.request_id || operation.created_at || "chain"}>{operation.operation_type || "chain"} - {operation.status || "pending"} - {operation.network || "CANARY"}</code>
-          )) : <p className="muted">No Canary chain operations yet.</p>}
         </details>
         <details className="review-storage">
           <summary>Recent shared Lirabao mirrors</summary>

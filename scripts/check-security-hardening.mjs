@@ -194,7 +194,6 @@ for (const name of verifyJwtFalseFunctions) {
 
 [
   "requireGameServer(req)",
-  "network: \"CANARY\"",
   "noRealValue: true",
 ].forEach((snippet) => assertIncludes("mochi-social-alpha-action", mochiSocialAlphaAction, snippet));
 
@@ -202,7 +201,6 @@ for (const name of verifyJwtFalseFunctions) {
   "requireGameServer(req)",
   "loadAlphaProgressSnapshot(adminClient, playerId)",
   "normalizeAlphaProgressSnapshot(data)",
-  "chainNetwork: \"CANARY\"",
   "noRealValue: true",
 ].forEach((snippet) => assertIncludes("mochi-social-alpha-progress", mochiSocialAlphaProgress, snippet));
 

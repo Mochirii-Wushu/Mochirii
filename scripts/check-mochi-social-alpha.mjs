@@ -15,7 +15,7 @@ const browserGateEnvNames = [
   'MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK',
-  'MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK',
+  'MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK',
   'MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK'
 ];
@@ -27,7 +27,7 @@ const checks = [
   },
   {
     file: 'AGENTS.md',
-    includes: ['Alpha Preview Ready', 'configured-preview-stub', 'funded-chain-gates', 'dummy Enjin IDs']
+    includes: ['Alpha Preview Ready', 'dummy Enjin IDs']
   },
   {
     file: 'scripts/check-all.mjs',
@@ -43,7 +43,7 @@ const checks = [
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
-    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'readPreviewEnvFile', 'Local no-secret preview URL file', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'configured-preview-stub', 'funded-chain gates', 'Do not set dummy', 'Local Branch Sync', 'Public-repo pushes are allowed', 'Push C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii', ...browserGateEnvNames]
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'readPreviewEnvFile', 'Local no-secret preview URL file', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'one shared room', 'shared Lirabao', 'Do not set dummy', 'Local Branch Sync', 'Public-repo pushes are allowed', 'Push C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii', ...browserGateEnvNames]
   },
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',
@@ -87,7 +87,7 @@ const checks = [
   },
   {
     file: 'scripts/check-mochi-social-edge-authority.mjs',
-    includes: ['MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'x-mochi-social-server-token', 'mochi_social_ledger_events', 'noRealValue: true', 'chainNetwork: "CANARY"', 'finalityRequired: true', 'applyFinalizedChainInventory', 'Mochi Social Edge authority check passed']
+    includes: ['MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'x-mochi-social-server-token', 'mochi_social_ledger_events', 'noRealValue: true', 'must not accept', 'isValidSharedPetState', 'Mochi Social Edge authority check passed']
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
@@ -121,19 +121,16 @@ const checks = [
     file: 'supabase/functions/mochi-social-alpha-action/index.ts',
     includes: [
       'alphaAccess(adminClient, playerId)',
-      'mochi_social_market_listings',
-      'mochi_social_trades',
-      'mochi_social_spirits',
-      'CERTIFICATE_ELIGIBLE_SPIRITS.has(spiritId)',
       'upsertAlphaProgressSnapshot(adminClient',
       'upsertSharedPetSnapshot(adminClient',
       'progress: progressResult?.snapshot ?? null',
       'sharedPet: sharedPetResult?.snapshot ?? null',
+      'unity.character.created',
+      'unity.character.updated',
+      'unity.pet.interaction',
       'unity.pet.state_saved',
-      'chain.operation_update',
-      'chain_request_missing',
-      'nextStatus === "finalized"',
-      'location: "hot"'
+      'unity.room.joined',
+      'unity.room.left'
     ]
   },
   {
@@ -144,17 +141,16 @@ const checks = [
       'loadAlphaProgressSnapshot(adminClient, playerId)',
       'normalizeAlphaProgressSnapshot(data)',
       'fallback: "guest-local"',
-      'noRealValue: true',
-      'chainNetwork: "CANARY"'
+      'noRealValue: true'
     ]
   },
   {
     file: 'supabase/functions/mochi-social-alpha-admin/index.ts',
-    includes: ['loadAlphaAudit', 'recentLedger', 'pendingChainOps', 'mochi_social_feedback', 'mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', 'recentSharedPets']
+    includes: ['loadAlphaAudit', 'recentLedger', 'mochi_social_feedback', 'mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', 'recentSharedPets']
   },
   {
     file: 'supabase/migrations/20260610090000_add_mochi_social_alpha.sql',
-    includes: ['mochi_social_alpha_testers', 'mochi_social_spirits', 'mochi_social_progress_snapshots', 'mochi_social_ledger_events', "network = 'CANARY'", 'expires_at']
+    includes: ['mochi_social_alpha_testers', 'mochi_social_progress_snapshots', 'mochi_social_ledger_events', 'expires_at']
   },
   {
     file: 'supabase/migrations/20260621120000_add_mochi_social_unity_room.sql',
@@ -177,15 +173,13 @@ const checks = [
       'MOCHI_SOCIAL_AUTH',
       'Manual Browser Gate Evidence',
       ...browserGateEnvNames,
-      'prepare:mochi-social-alpha-operator-checklist',
       'check:mochi-social-report-hygiene',
       'check:mochi-social-preview-ready',
-      'Do not roll back by switching to production',
+      'Do not roll back by switching to the legacy runtime',
       'Alpha Preview Ready',
-      'configured-preview-stub',
-      'preview-live-gates',
-      'funded-chain-gates',
-      'Do not set dummy'
+      'shared guild room',
+      'care for Lirabao together',
+      'No real value'
     ]
   },
   {
@@ -194,7 +188,7 @@ const checks = [
       'Source Hierarchy',
       'Source Basis',
       'Verification Choice',
-      'Website Preview Environment Matrix',
+      'Website Production Environment Matrix',
       'Supabase Authority Matrix',
       'Discord Boundary',
       'Preview Verification',
@@ -205,9 +199,7 @@ const checks = [
       ...browserGateEnvNames,
       'short-lived access token',
       'Alpha Preview Ready Lane',
-      'configured-preview-stub',
-      'preview-live-gates',
-      'funded-chain-gates',
+      'no market, no trade, no paid assets',
       'Do not set dummy'
     ]
   }
@@ -258,11 +250,23 @@ for (const check of checks) {
 }
 
 const actionFunction = readFileSync('supabase/functions/mochi-social-alpha-action/index.ts', 'utf8');
-if (/certificate_eligible:\s*spiritId\s*===\s*["']aozhen["']/.test(actionFunction)) {
-  throw new Error('Mochi Social certificate eligibility must stay aligned to Lirabao, not Aozhen.');
+for (const forbiddenAction of [
+  'market.fixed_list',
+  'market.guild_receipt',
+  'trade.direct_offer',
+  'trade.exchange_accord',
+  'chain.withdraw_request',
+  'chain.deposit_request',
+  'chain.operation_update',
+]) {
+  if (actionFunction.includes(`"${forbiddenAction}"`)) {
+    throw new Error(`Mochi Social shared-room alpha action function must not accept ${forbiddenAction}.`);
+  }
 }
-if (!/CERTIFICATE_ELIGIBLE_SPIRITS\s*=\s*new Set\(\[["']lirabao["']\]\)/.test(actionFunction)) {
-  throw new Error('Mochi Social certificate eligibility must explicitly name Lirabao as the alpha certificate spirit.');
+for (const forbiddenSnippet of ['chainNetwork', 'applyFinalizedChainInventory', 'CERTIFICATE_ELIGIBLE_SPIRITS', 'VALID_CHAIN_STATUSES']) {
+  if (actionFunction.includes(forbiddenSnippet)) {
+    throw new Error(`Mochi Social shared-room alpha action function contains inactive system authority: ${forbiddenSnippet}.`);
+  }
 }
 
 for (const file of publicMochiSocialFiles) {

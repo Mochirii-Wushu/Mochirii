@@ -6,6 +6,7 @@ export const ALPHA_TERMS_VERSION = "alpha-rc-2026-06-10";
 export const UNITY_ROOM_KEY = "jade-lantern-room-alpha";
 export const UNITY_SHARED_PET_KEY = "lirabao";
 export const UNITY_CUSTOM_ID_PREFIX = "mochirii:";
+const UNITY_SHARED_PET_STATES = new Set(["idle", "approach", "happy", "care_received", "stale_revision_reload", "unavailable"]);
 
 export const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -338,6 +339,9 @@ export async function upsertSharedPetSnapshot(
   if (!isJsonRecord(input.state)) {
     return { ok: false as const, error: "invalid_shared_pet_state", message: "Shared pet state must be a JSON object." };
   }
+  if (!isValidSharedPetState(input.state)) {
+    return { ok: false as const, error: "invalid_shared_pet_state", message: "Shared Lirabao state is not valid for this room." };
+  }
 
   if (JSON.stringify(input.state).length > 64_000) {
     return { ok: false as const, error: "shared_pet_state_too_large", message: "Shared pet state is too large for the audit mirror." };
@@ -371,4 +375,19 @@ export async function upsertSharedPetSnapshot(
   }
 
   return { ok: true as const, snapshot: normalizeSharedPetSnapshot(data as SharedPetSnapshot) };
+}
+
+function isValidSharedPetState(state: JsonRecord): boolean {
+  return state.version === 1 &&
+    state.petId === UNITY_SHARED_PET_KEY &&
+    typeof state.displayName === "string" &&
+    UNITY_SHARED_PET_STATES.has(String(state.state || "")) &&
+    Number.isInteger(state.careMeter) &&
+    Number(state.careMeter) >= 0 &&
+    Number(state.careMeter) <= 100 &&
+    Number.isInteger(state.bondTier) &&
+    Number(state.bondTier) >= 1 &&
+    Number(state.bondTier) <= 5 &&
+    Number.isInteger(state.revision) &&
+    Number(state.revision) >= 0;
 }

@@ -49,7 +49,6 @@ Deno.serve(async (req: Request) => {
       progress: normalizeAlphaProgressSnapshot(data),
       fallback: "guest-local",
       noRealValue: true,
-      chainNetwork: "CANARY",
     },
   });
 });
