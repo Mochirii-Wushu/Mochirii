@@ -23,7 +23,7 @@ const browserGateEnvNames = [
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'test:mochi-social-alpha']
   },
   {
     file: 'AGENTS.md',
@@ -31,7 +31,11 @@ const checks = [
   },
   {
     file: 'scripts/check-all.mjs',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'test:mochi-social-alpha', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-tester-password-gate', 'check:mochi-social-report-hygiene']
+  },
+  {
+    file: 'supabase/functions/_shared/mochi-social-alpha_test.ts',
+    includes: ['alphaAccess', 'requireUser', 'requireGameServer', 'upsertUnityPlayerLink', 'upsertSharedPetSnapshot', 'missing_auth', 'invalid_unity_room_pet', 'invalid_shared_pet_state']
   },
   {
     file: 'scripts/check-mochi-social-game-contract.mjs',
