@@ -264,6 +264,24 @@ const publicCopyForbiddenPatterns = [
   { label: 'internal tool wording', pattern: blockedToolReferencePattern }
 ];
 
+const publicMochiSocialSections = [
+  {
+    file: 'README.md',
+    heading: '## Mochi Social Closed Playtest',
+    includes: [
+      'closed Mochirii playtest',
+      'shared 3D guild room',
+      'create a curated character',
+      'meet Lirabao',
+      'care for the guild pet together',
+      'tester password wall',
+      'member sign-in is required for saved play',
+      'no real value',
+      'docs/mochi-social-playtest-guide.md'
+    ]
+  }
+];
+
 for (const check of checks) {
   const text = readFileSync(check.file, 'utf8');
   for (const needle of check.includes) {
@@ -306,4 +324,30 @@ for (const file of publicMochiSocialFiles) {
     }
   }
 }
+
+for (const sectionCheck of publicMochiSocialSections) {
+  const text = readFileSync(sectionCheck.file, 'utf8');
+  const section = markdownSection(text, sectionCheck.heading);
+  if (!section) throw new Error(`${sectionCheck.file} is missing ${sectionCheck.heading}.`);
+  for (const needle of sectionCheck.includes) {
+    if (!section.includes(needle)) {
+      throw new Error(`${sectionCheck.file} ${sectionCheck.heading} is missing ${needle}.`);
+    }
+  }
+  for (const { label, pattern } of publicCopyForbiddenPatterns) {
+    pattern.lastIndex = 0;
+    if (pattern.test(section)) {
+      throw new Error(`${sectionCheck.file} ${sectionCheck.heading} contains public ${label}.`);
+    }
+  }
+}
 console.log('Mochi Social alpha static checks passed.');
+
+function markdownSection(text, heading) {
+  const start = text.indexOf(heading);
+  if (start === -1) return '';
+  const next = text.slice(start + heading.length).search(/\n##\s+/);
+  return next === -1
+    ? text.slice(start)
+    : text.slice(start, start + heading.length + next);
+}

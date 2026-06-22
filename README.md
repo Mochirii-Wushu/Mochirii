@@ -233,8 +233,6 @@ For Home data, shared header/footer/nav behavior, script order, protected seal p
 
 For Join onboarding, checklist, link, tone, accessibility, and smoke-test conventions, see [`docs/join-guide.md`](docs/join-guide.md).
 
-For Codex data, conduct, tone, protected-content, accessibility, and smoke-test conventions, see [`docs/codex-guide.md`](docs/codex-guide.md).
-
 For Events data, date, filter, accessibility, and smoke-test conventions, see [`docs/events-guide.md`](docs/events-guide.md).
 
 For Ranks data, hierarchy, image, tone, accessibility, and smoke-test conventions, see [`docs/ranks-guide.md`](docs/ranks-guide.md).
