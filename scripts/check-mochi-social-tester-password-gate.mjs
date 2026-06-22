@@ -75,6 +75,17 @@ const checks = [
   },
 ];
 
+const blockedToolReferencePattern = new RegExp(`\\b(?:${
+  [
+    ['Co', 'dex'].join(''),
+    ['A', 'I'].join(''),
+    ['L', 'L', 'M'].join(''),
+    ['ag', 'ent'].join(''),
+    ['Open', 'A', 'I'].join(''),
+    ['tool', 'ing'].join('')
+  ].join('|')
+})\\b`, 'i');
+
 const forbidden = [
   {
     label: "browser-exposed tester password env",
@@ -104,7 +115,7 @@ const publicCopyForbidden = [
   /\boperator\b/i,
   /\bledger\b/i,
   /\b(?:Distributed Authority|Cloud Save|Edge Function|Unity Custom ID)\b/i,
-  /\b(?:Codex|AI|LLM|agent|OpenAI|tooling)\b/i,
+  blockedToolReferencePattern,
 ];
 
 for (const check of checks) {

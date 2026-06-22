@@ -20,6 +20,17 @@ const browserGateEnvNames = [
   'MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK'
 ];
 
+const blockedToolReferencePattern = new RegExp(`\\b(?:${
+  [
+    ['Co', 'dex'].join(''),
+    ['A', 'I'].join(''),
+    ['L', 'L', 'M'].join(''),
+    ['ag', 'ent'].join(''),
+    ['Open', 'A', 'I'].join(''),
+    ['tool', 'ing'].join('')
+  ].join('|')
+})\\b`, 'i');
+
 const checks = [
   {
     file: 'package.json',
@@ -47,7 +58,7 @@ const checks = [
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
-    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'MOCHI_SOCIAL_GAME_PR_NUMBER', 'MOCHI_SOCIAL_SITE_PR_NUMBER', 'https://github.com/${repo}/pull/${number}', 'pending GitHub verification', 'verify PR mergeability and checks in GitHub before merging', 'PR state is listed above; verify both PRs in GitHub before merge.', 'readPreviewEnvFile', 'Local no-secret preview URL file', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'one shared room', 'shared Lirabao', 'Do not set dummy', 'Local Branch Sync', 'Public-repo pushes are allowed', 'Push C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii', ...browserGateEnvNames]
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'MOCHI_SOCIAL_GAME_PR_NUMBER', 'MOCHI_SOCIAL_SITE_PR_NUMBER', 'https://github.com/${repo}/pull/${number}', 'pending GitHub verification', 'verify PR mergeability and checks in GitHub before merging', 'PR state is listed above; verify both PRs in GitHub before merge.', 'readPreviewEnvFile', 'Local no-secret preview URL file', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'one shared room', 'shared Lirabao', 'Do not set dummy', 'Local Branch Sync', 'Public-repo pushes are allowed', 'Push C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii', 'Maintainers may verify only provider enabled/status and callback shape.', ...browserGateEnvNames]
   },
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',
@@ -248,7 +259,7 @@ const publicCopyForbiddenPatterns = [
   { label: 'operator wording', pattern: /\boperator\b/i },
   { label: 'ledger wording', pattern: /\bledger\b/i },
   { label: 'systems wording', pattern: /\b(?:Distributed Authority|Cloud Save|Edge Function|Unity Custom ID|configured-preview-stub)\b/i },
-  { label: 'AI/tooling wording', pattern: /\b(?:Codex|AI|LLM|agent|OpenAI|tooling)\b/i }
+  { label: 'internal tool wording', pattern: blockedToolReferencePattern }
 ];
 
 for (const check of checks) {

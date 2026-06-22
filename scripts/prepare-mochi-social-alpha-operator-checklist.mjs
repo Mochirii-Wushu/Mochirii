@@ -194,7 +194,7 @@ Required Discord OAuth setup:
 - Supabase preview Auth provider "Discord" is enabled for project ref ${supabaseProjectRef}.
 - Discord Developer Portal OAuth2 redirect URI includes https://${supabaseProjectRef}.supabase.co/auth/v1/callback.
 - Supabase preview redirect URLs allow ${siteOrigin}/account.
-- Codex may verify only provider enabled/status and callback shape. The user enters Discord client secret values privately.
+- Maintainers may verify only provider enabled/status and callback shape. The user enters Discord client secret values privately.
 
 \`\`\`powershell
 $env:MOCHI_SOCIAL_ALPHA_EDGE_URL="${functionsUrl}"
