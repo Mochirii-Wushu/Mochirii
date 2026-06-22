@@ -47,7 +47,7 @@ const checks = [
   },
   {
     file: 'scripts/prepare-mochi-social-alpha-operator-checklist.mjs',
-    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'readPreviewEnvFile', 'Local no-secret preview URL file', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'one shared room', 'shared Lirabao', 'Do not set dummy', 'Local Branch Sync', 'Public-repo pushes are allowed', 'Push C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii', ...browserGateEnvNames]
+    includes: ['Desktop', 'Creds', 'mochirii-mochi-social-alpha-operator-next-steps.md', 'This file is intentionally no-secret', 'MOCHI_SOCIAL_PREVIEW_ENV_FILE', 'MOCHI_SOCIAL_GAME_PR_NUMBER', 'MOCHI_SOCIAL_SITE_PR_NUMBER', 'readPreviewEnvFile', 'Local no-secret preview URL file', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_URL', 'MOCHI_SOCIAL_ALPHA_AUTH_URL', 'MOCHI_SOCIAL_ALPHA_EDGE_PUBLISHABLE_KEY_FILE', 'MOCHI_SOCIAL_GAME_SERVER_TOKEN', 'Discord OAuth setup', 'site.discord-oauth', 'Alpha Preview Ready', 'one shared room', 'shared Lirabao', 'Do not set dummy', 'Local Branch Sync', 'Public-repo pushes are allowed', 'Push C:\\\\Users\\\\xtyty\\\\Documents\\\\Mochirii', ...browserGateEnvNames]
   },
   {
     file: 'scripts/check-mochi-social-preview-ready.mjs',

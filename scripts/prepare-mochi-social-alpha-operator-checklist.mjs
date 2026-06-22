@@ -13,11 +13,13 @@ const supabaseProjectRef = process.env.MOCHI_SOCIAL_SUPABASE_PROJECT_REF || "dnx
 const functionsUrl = process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || `https://${supabaseProjectRef}.supabase.co/functions/v1`;
 const gameUrl = process.env.MOCHI_SOCIAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev";
 const sitePreviewUrl = process.env.MOCHI_SOCIAL_SITE_PREVIEW_URL || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "<vercel-preview-host>";
+const gamePrNumber = process.env.MOCHI_SOCIAL_GAME_PR_NUMBER || "5";
+const sitePrNumber = process.env.MOCHI_SOCIAL_SITE_PR_NUMBER || "333";
 const generatedAt = new Date().toISOString();
 
 const externalGateReport = readJson(resolve(gameRepoPath, "reports/alpha-external-gates.json"));
-const gamePr = readPr("xartaiusx/mochi-social", "1");
-const sitePr = readPr("Mochirii-Wushu/Mochirii", "258");
+const gamePr = readPr("xartaiusx/mochi-social", gamePrNumber);
+const sitePr = readPr("Mochirii-Wushu/Mochirii", sitePrNumber);
 const credentialFiles = listCredentialFiles();
 const gitState = readGitState();
 
