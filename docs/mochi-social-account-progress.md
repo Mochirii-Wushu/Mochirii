@@ -1,6 +1,14 @@
-# Mochi Social Account And Shared Room Authority
+# Internal Mochi Social Account Progress Notes
 
-Mochirii owns Supabase membership, allowlist, terms, audit, feedback, and Unity player mapping. The game repo owns Unity runtime behavior and UGS saves; account-linked character and shared-pet persistence are brokered from here but stored primarily in Unity Gaming Services.
+This is a private implementation note for maintainers. It is not player-facing copy.
+Player-facing wording belongs in `docs/mochi-social-playtest-guide.md`
+and should stay focused on the shared guild room, Lirabao care, closed alpha
+access, and no real value.
+
+Mochirii owns Supabase membership, allowlist, terms, audit, feedback, and Unity
+player mapping. The game repo owns Unity runtime behavior and UGS saves;
+account-linked character and shared-pet persistence are brokered from here but
+stored primarily in Unity Gaming Services.
 
 ## Authority Contract
 

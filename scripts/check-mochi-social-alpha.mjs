@@ -182,6 +182,19 @@ const checks = [
     ]
   },
   {
+    file: 'docs/mochi-social-account-progress.md',
+    includes: [
+      'Internal Mochi Social Account Progress Notes',
+      'private implementation note for maintainers',
+      'not player-facing copy',
+      'docs/mochi-social-playtest-guide.md',
+      'shared guild room',
+      'Lirabao care',
+      'closed alpha',
+      'no real value'
+    ]
+  },
+  {
     file: 'docs/mochi-social-alpha-maintainer-ops.md',
     includes: [
       'Source Hierarchy',
