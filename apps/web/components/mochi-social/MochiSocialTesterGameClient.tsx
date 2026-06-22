@@ -5,11 +5,20 @@ import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@
 
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 
-export function MochiSocialTesterGameClient() {
+type MochiSocialTesterGameClientProps = {
+  gameAvailable?: boolean;
+  gamePausedMessage?: string;
+};
+
+export function MochiSocialTesterGameClient({
+  gameAvailable = true,
+  gamePausedMessage = "The Mochi Social room is temporarily paused. The tester page is still open, and saved play will resume when the room is ready.",
+}: MochiSocialTesterGameClientProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [bridgeStatus, setBridgeStatus] = useState<MochiSocialBridgeStatus>("waiting");
   const [message, setMessage] = useState("");
   const embedUrl = useMemo(() => `${gameOrigin}/embed`, []);
+  const visibleBridgeStatus: MochiSocialBridgeStatus = gameAvailable ? bridgeStatus : "error";
 
   const sendGuestStateToGame = useCallback(() => {
     iframeRef.current?.contentWindow?.postMessage({ type: "MOCHI_SOCIAL_SIGN_OUT", protocolVersion: 1 }, gameOrigin);
@@ -66,7 +75,7 @@ export function MochiSocialTesterGameClient() {
           </div>
           <div>
             <dt>Bridge</dt>
-            <dd data-mochi-bridge-state>{bridgeStatus}</dd>
+            <dd data-mochi-bridge-state>{visibleBridgeStatus}</dd>
           </div>
         </dl>
       </header>
@@ -87,17 +96,24 @@ export function MochiSocialTesterGameClient() {
         </form>
       </div>
       {message ? <p className="form-message mochi-form-message">{message}</p> : null}
-      <div className="mochi-game-frame-shell" aria-label="Mochi Social embedded game">
-        <iframe
-          ref={iframeRef}
-          className="mochi-game-frame"
-          title="Mochi Social"
-          src={embedUrl}
-          allow="fullscreen"
-          referrerPolicy="strict-origin-when-cross-origin"
-          onLoad={sendGuestStateToGame}
-        />
-      </div>
+      {gameAvailable ? (
+        <div className="mochi-game-frame-shell" aria-label="Mochi Social embedded game">
+          <iframe
+            ref={iframeRef}
+            className="mochi-game-frame"
+            title="Mochi Social"
+            src={embedUrl}
+            allow="fullscreen"
+            referrerPolicy="strict-origin-when-cross-origin"
+            onLoad={sendGuestStateToGame}
+          />
+        </div>
+      ) : (
+        <div className="mochi-game-panel" role="status" aria-live="polite">
+          <h2>Playtest temporarily paused</h2>
+          <p>{gamePausedMessage}</p>
+        </div>
+      )}
     </section>
   );
 }

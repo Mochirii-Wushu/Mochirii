@@ -21,15 +21,61 @@ export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ tester_error?: string }>;
 
+type MochiSocialGameRuntimeStatus = {
+  available: boolean;
+  message: string;
+};
+
 function testerGateError(value: string | undefined) {
   if (value === "invalid" || value === "missing-config") return value;
   return null;
+}
+
+async function getMochiSocialGameRuntimeStatus(): Promise<MochiSocialGameRuntimeStatus> {
+  const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
+  const paused = {
+    available: false,
+    message: "The Mochi Social room is temporarily paused. The tester page is still open, and saved play will resume when the room is ready.",
+  };
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1500);
+
+  try {
+    const response = await fetch(`${gameOrigin}/healthz`, {
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!response.ok) return paused;
+    const health = await response.json().catch(() => null) as {
+      ok?: unknown;
+      activeRuntime?: unknown;
+      unityWebglBuild?: { present?: unknown };
+      legacyFallback?: { active?: unknown };
+    } | null;
+
+    const unityReady = health?.ok === true
+      && health.activeRuntime === "unity-webgl"
+      && health.unityWebglBuild?.present === true
+      && health.legacyFallback?.active !== true;
+
+    return unityReady
+      ? { available: true, message: "" }
+      : paused;
+  } catch {
+    return paused;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export default async function MochiSocialPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const accessMode = process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE === "supabase" ? "supabase" : "tester-password";
   const testerSessionReady = accessMode === "tester-password" ? await hasMochiSocialTesterSession() : false;
+  const gameRuntime = accessMode === "supabase" || testerSessionReady
+    ? await getMochiSocialGameRuntimeStatus()
+    : { available: true, message: "" };
 
   return (
     <>
@@ -37,9 +83,9 @@ export default async function MochiSocialPage({ searchParams }: { searchParams: 
       <main className="page-main mochi-game-page" id="main">
         <div className="container">
           {accessMode === "supabase" ? (
-            <MochiSocialAlphaClient />
+            <MochiSocialAlphaClient gameAvailable={gameRuntime.available} gamePausedMessage={gameRuntime.message} />
           ) : testerSessionReady ? (
-            <MochiSocialTesterGameClient />
+            <MochiSocialTesterGameClient gameAvailable={gameRuntime.available} gamePausedMessage={gameRuntime.message} />
           ) : (
             <MochiSocialTesterPasswordGate error={testerGateError(params.tester_error)} />
           )}

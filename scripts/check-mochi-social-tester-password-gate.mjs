@@ -42,6 +42,11 @@ const checks = [
       "MochiSocialTesterPasswordGate",
       "MochiSocialTesterGameClient",
       "MochiSocialAlphaClient",
+      "getMochiSocialGameRuntimeStatus",
+      "/healthz",
+      "activeRuntime === \"unity-webgl\"",
+      "legacyFallback?.active !== true",
+      "gamePausedMessage",
     ],
   },
   {
@@ -61,6 +66,11 @@ const checks = [
       "resolveMochiSocialBridgeMessage(event.data)",
       "All playtest progress has no real value.",
       "title=\"Mochi Social\"",
+      "gameAvailable",
+      "visibleBridgeStatus",
+      "Playtest temporarily paused",
+      "role=\"status\"",
+      "aria-live=\"polite\"",
     ],
   },
   {

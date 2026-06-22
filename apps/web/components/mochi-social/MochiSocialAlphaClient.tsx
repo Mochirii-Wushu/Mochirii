@@ -12,7 +12,15 @@ type LoadState = "loading" | "signed-out" | "blocked" | "terms" | "ready" | "err
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
 const supabaseFunctionsUrl = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : "";
 
-export function MochiSocialAlphaClient() {
+type MochiSocialAlphaClientProps = {
+  gameAvailable?: boolean;
+  gamePausedMessage?: string;
+};
+
+export function MochiSocialAlphaClient({
+  gameAvailable = true,
+  gamePausedMessage = "The Mochi Social room is temporarily paused. The tester page is still open, and saved play will resume when the room is ready.",
+}: MochiSocialAlphaClientProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [session, setSession] = useState<MochiSocialAlphaSession | null>(null);
@@ -22,6 +30,7 @@ export function MochiSocialAlphaClient() {
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
   const embedUrl = useMemo(() => `${gameOrigin}/embed`, []);
+  const visibleBridgeStatus: MochiSocialBridgeStatus = gameAvailable ? bridgeStatus : "error";
 
   const sendAuthToGame = useCallback((token: string | null) => {
     const frame = iframeRef.current?.contentWindow;
@@ -168,7 +177,7 @@ export function MochiSocialAlphaClient() {
         <span>Pet: shared Lirabao</span>
         <span>Value: No real value</span>
         <span>Progress: {session?.progress ? "saved for this member" : "ready to save"}</span>
-        <span data-mochi-bridge-state>Room connection: {bridgeStatus}</span>
+        <span data-mochi-bridge-state>Room connection: {visibleBridgeStatus}</span>
       </div>
 
       {message ? <p className="form-message">{message}</p> : null}
@@ -208,33 +217,40 @@ export function MochiSocialAlphaClient() {
       ) : null}
 
       {state === "ready" ? (
-        <>
-          <iframe
-            ref={iframeRef}
-            className="mochi-game-frame"
-            title="Mochi Social"
-            src={embedUrl}
-            allow="fullscreen"
-            referrerPolicy="strict-origin-when-cross-origin"
-            onLoad={() => sendAuthToGame(accessToken)}
-          />
-          <p className="mochi-game-note">
-            Signed-in play saves your character and shared Lirabao progress. The tester-password preview alone is only for opening the room.
-          </p>
-          <form className="mochi-feedback" onSubmit={submitFeedback}>
-            <label>
-              <span>Alpha feedback</span>
-              <textarea
-                rows={3}
-                maxLength={2000}
-                value={feedback}
-                onChange={(event) => setFeedback(event.target.value)}
-                placeholder="Bug, feel, character preset, room join, Lirabao interaction, or anything that felt off."
-              />
-            </label>
-            <button className="hero-cta" type="submit" disabled={busy || !feedback.trim()}>Send feedback</button>
-          </form>
-        </>
+        gameAvailable ? (
+          <>
+            <iframe
+              ref={iframeRef}
+              className="mochi-game-frame"
+              title="Mochi Social"
+              src={embedUrl}
+              allow="fullscreen"
+              referrerPolicy="strict-origin-when-cross-origin"
+              onLoad={() => sendAuthToGame(accessToken)}
+            />
+            <p className="mochi-game-note">
+              Signed-in play saves your character and shared Lirabao progress. The tester-password preview alone is only for opening the room.
+            </p>
+            <form className="mochi-feedback" onSubmit={submitFeedback}>
+              <label>
+                <span>Alpha feedback</span>
+                <textarea
+                  rows={3}
+                  maxLength={2000}
+                  value={feedback}
+                  onChange={(event) => setFeedback(event.target.value)}
+                  placeholder="Bug, feel, character preset, room join, Lirabao interaction, or anything that felt off."
+                />
+              </label>
+              <button className="hero-cta" type="submit" disabled={busy || !feedback.trim()}>Send feedback</button>
+            </form>
+          </>
+        ) : (
+          <div className="mochi-game-panel" role="status" aria-live="polite">
+            <h2>Playtest temporarily paused</h2>
+            <p>{gamePausedMessage}</p>
+          </div>
+        )
       ) : null}
     </section>
   );

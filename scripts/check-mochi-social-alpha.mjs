@@ -91,7 +91,7 @@ const checks = [
   },
   {
     file: 'apps/web/app/games/mochi-social/page.tsx',
-    includes: ['MochiSocialAlphaClient', 'MochiSocialTesterPasswordGate', 'MochiSocialTesterGameClient', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'robots', 'index: false']
+    includes: ['MochiSocialAlphaClient', 'MochiSocialTesterPasswordGate', 'MochiSocialTesterGameClient', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'robots', 'index: false', 'getMochiSocialGameRuntimeStatus', '/healthz', 'activeRuntime === "unity-webgl"', 'unityWebglBuild?.present === true', 'legacyFallback?.active !== true', 'gamePausedMessage']
   },
   {
     file: 'scripts/check-mochi-social-tester-password-gate.mjs',
@@ -99,7 +99,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
