@@ -62,7 +62,8 @@ function readPr(repo, number) {
       repo,
       number,
       ok: false,
-      message: sanitize(result.stderr || result.error?.message || "GitHub PR state could not be read."),
+      url: `https://github.com/${repo}/pull/${number}`,
+      message: "GitHub CLI is unavailable locally; verify PR mergeability and checks in GitHub before merging.",
     };
   }
   try {
@@ -93,10 +94,12 @@ function renderChecklist() {
     ? credentialFiles.map((file) => `- ${file}`).join("\n")
     : "- No matching local credential checklist files were found.";
   const externalFailures = externalGateReport.ok && Array.isArray(externalGateReport.data.checks)
-    ? externalGateReport.data.checks
-      .filter((check) => check.status === "fail")
-      .map((check) => `- ${check.name}: ${check.message}`)
-      .join("\n") || "- No failing game external gates were recorded."
+    ? [
+      "- PR state is listed above; verify both PRs in GitHub before merge.",
+      ...externalGateReport.data.checks
+        .filter((check) => check.status === "fail" && !["game PR", "site PR"].includes(check.name))
+        .map((check) => `- ${check.name}: ${check.message}`)
+    ].join("\n") || "- No failing game external gates were recorded."
     : `- Game external gate report ${externalGateReport.message}: ${externalGateReport.path}`;
   const siteOrigin = normalizePreviewOrigin(sitePreviewUrl);
 
@@ -350,7 +353,10 @@ function pathForReport(absolutePath) {
 }
 
 function formatPr(pr) {
-  if (!pr.ok) return `${pr.repo}#${pr.number} not verified (${pr.message || "unknown"})`;
+  if (!pr.ok) {
+    const url = pr.url || `https://github.com/${pr.repo}/pull/${pr.number}`;
+    return `${url} pending GitHub verification (${pr.message || "unknown"})`;
+  }
   return `${pr.url} ${pr.isDraft ? "draft" : "ready"} ${pr.mergeStateStatus} ${pr.headRefOid} checks=${pr.checks.join(", ") || "none"}`;
 }
 
