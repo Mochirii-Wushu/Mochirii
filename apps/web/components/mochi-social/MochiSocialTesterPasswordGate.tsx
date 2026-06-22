@@ -115,7 +115,7 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
             <li>No real money, purchases, rewards, or permanent item value.</li>
             <li>Desktop is recommended for this early build.</li>
             <li>The tester password opens the room preview; sign in with your Mochirii account for saved character and Lirabao progress.</li>
-            <li>Avatar uploads, multiple rooms, and wider release features are not part of this closed playtest.</li>
+            <li>This closed playtest stays focused on one shared guild room and Lirabao care.</li>
           </ul>
         </section>
       </aside>

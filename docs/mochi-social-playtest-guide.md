@@ -20,7 +20,7 @@ Mochi Social is a closed Mochirii playtest for approved guild members. The first
 ## Playtest Boundaries
 
 - All playtest progress has no real value.
-- There is no buying, selling, paid item value, or wider release in this playtest.
+- Alpha progress is only for testing and cannot be redeemed, transferred, or promised outside this closed playtest.
 - Avatar uploads, multiple rooms, and mobile-specific play are not part of this first test.
 - Share bugs and feedback through the Mochirii feedback form. Do not send passwords, recovery phrases, payment details, private account codes, or other sensitive information.
 

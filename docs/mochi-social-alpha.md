@@ -24,8 +24,8 @@ Approved testers care for Lirabao together in the same shared room.
 
 - The live page stays behind the tester-password wall during alpha.
 - All alpha progress has no real value.
-- There is no buying, selling, paid item value, cashout, or public launch in
-  this playtest.
+- Alpha progress is only for testing and cannot be redeemed, transferred, or
+  promised outside this closed playtest.
 - Avatar uploads, multiple rooms, and mobile-specific play are not part of this
   first test.
 - The room may pause or reset while the alpha is being improved.
