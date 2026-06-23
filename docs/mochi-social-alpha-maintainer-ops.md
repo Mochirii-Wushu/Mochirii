@@ -39,6 +39,31 @@ player-facing copy.
 
 Do not set dummy IDs or fake readiness flags to clear future gates.
 
+## Live Production Password Gate
+
+Live production for this alpha means
+`https://mochirii.com/games/mochi-social` remains closed behind the tester
+password wall. It is not a public launch. The tester password opens the page
+shell only; saved play still requires Mochirii member sign-in, tester approval,
+accepted terms, and valid Unity auth.
+
+Before changing production env, merging, deploying, or running hosted checks,
+get explicit approval for the exact action. Confirm that the action reuses
+existing provider projects and does not create new Fly apps, machines, volumes,
+IPs, databases, paid resources, Enjin funding, Fuel Tanks, Wallet Daemon
+signing, or chain transactions.
+
+After an approved production deploy, hosted verification must prove:
+
+- `/games/mochi-social` is still password-gated and noindexed.
+- The unlocked shell blocks signed-out users until member sign-in.
+- Non-testers and terms-missing testers are blocked.
+- Valid testers enter the Unity WebGL room.
+- Two testers see distinct characters and shared Lirabao state.
+- Character and Lirabao progress survive reload, logout, and login.
+- Public copy keeps no-real-value boundaries and omits market, trade,
+  funded-chain, cashout, and public-launch language.
+
 ## Website Production Environment Matrix
 
 | Name | Boundary |

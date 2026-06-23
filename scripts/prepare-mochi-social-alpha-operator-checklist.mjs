@@ -13,6 +13,7 @@ const supabaseProjectRef = process.env.MOCHI_SOCIAL_SUPABASE_PROJECT_REF || "dnx
 const functionsUrl = process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || `https://${supabaseProjectRef}.supabase.co/functions/v1`;
 const gameUrl = process.env.MOCHI_SOCIAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev";
 const sitePreviewUrl = process.env.MOCHI_SOCIAL_SITE_PREVIEW_URL || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "<vercel-preview-host>";
+const liveSiteUrl = process.env.MOCHI_SOCIAL_SITE_PRODUCTION_URL || process.env.MOCHI_SOCIAL_LIVE_SITE_URL || "https://mochirii.com";
 const gamePrNumber = process.env.MOCHI_SOCIAL_GAME_PR_NUMBER || "5";
 const sitePrNumber = process.env.MOCHI_SOCIAL_SITE_PR_NUMBER || "333";
 const generatedAt = new Date().toISOString();
@@ -107,7 +108,7 @@ function renderChecklist() {
 
 Generated: ${generatedAt}
 
-This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, and preview acceptance steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into chat, Git, PR comments, screenshots, or reports.
+This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, live password-wall launch, and optional preview rehearsal steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into chat, Git, PR comments, screenshots, or reports.
 
 ## Local Credential Files
 
@@ -145,9 +146,36 @@ ${externalFailures}
 - Do not set dummy ENJIN_COLLECTION_ID, dummy ENJIN_FUEL_TANK_ID, or fake readiness flags to make future gates pass.
 - For Preview Ready, market, trade, funded-chain, cashout, and paid-asset behavior must remain inactive.
 
+## Live Production Password Gate
+
+Target URL: ${normalizePreviewOrigin(liveSiteUrl)}/games/mochi-social
+
+Live production means the public URL stays behind the tester password wall; it is not a public launch. Password unlock opens the page shell only. Mochirii member sign-in, tester approval, and accepted terms are still required for saved play and Unity auth.
+
+Production website env names:
+
+- MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password
+- MOCHI_SOCIAL_TESTER_PASSWORD=<server-only tester password>
+- NEXT_PUBLIC_MOCHI_SOCIAL_URL=${gameUrl}
+- NEXT_PUBLIC_SUPABASE_URL=<production-supabase-url>
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<browser-safe production publishable key>
+- NEXT_PUBLIC_SITE_URL=${normalizePreviewOrigin(liveSiteUrl)}
+
+Before changing production env, merging, deploying, or running hosted checks, get explicit approval for the exact action and confirm it reuses existing provider projects without creating new Fly apps, machines, volumes, IPs, databases, paid resources, Enjin funding, Fuel Tanks, Wallet Daemon signing, or chain transactions.
+
+After an approved production deploy, run hosted verification against the live URL:
+
+\`\`\`powershell
+$env:MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_GAME_CONTRACT_URL="${gameUrl}"
+$env:MOCHI_SOCIAL_SITE_ORIGIN="${normalizePreviewOrigin(liveSiteUrl)}"
+npm run check:mochi-social-game-contract
+npm run check:mochi-social-preview-ready
+\`\`\`
+
 ## Vercel Preview Gate
 
-Required preview env names:
+Optional rehearsal env names:
 
 - NEXT_PUBLIC_MOCHI_SOCIAL_URL=${gameUrl}
 - NEXT_PUBLIC_SUPABASE_URL=<preview-supabase-url>
@@ -162,7 +190,7 @@ Local no-secret preview URL file:
 - Site preview URL: ${previewEnv.sitePreviewUrl || "not recorded"}
 - URL fields read: ${previewEnv.urlFieldsRead.length ? previewEnv.urlFieldsRead.join(", ") : "none"}
 
-Use the Vercel dashboard or CLI for the Mochirii preview branch only. Do not change production env for Alpha RC unless a later production plan approves it.
+Use the Vercel dashboard or CLI for the Mochirii preview branch only when you want a rehearsal before the live password-wall deployment. Production remains the active target for this goal and still requires exact action-time approval.
 
 After the Fly game URL exists, run from this repo:
 
@@ -208,7 +236,7 @@ npm run check:mochi-social-preview-ready # Verifies site.discord-oauth after hos
 
 ## Manual Website Gates
 
-Before inviting testers, verify in the Vercel preview:
+Before inviting testers, verify on the approved target URL, usually ${normalizePreviewOrigin(liveSiteUrl)}/games/mochi-social after production deployment or the Vercel preview URL during rehearsal:
 
 1. Signed-out users are sent to sign in before entering /games/mochi-social.
 2. Signed-in non-testers see the alpha allowlist block.
@@ -222,7 +250,7 @@ Before inviting testers, verify in the Vercel preview:
 
 ### Manual Browser Evidence Protocol
 
-Use Chrome only after hosted browser verification is explicitly approved. Record reviewer, browser/version, preview URL, timestamp, and pass/fail notes only.
+Use Chrome only after hosted browser verification is explicitly approved. Record reviewer, browser/version, target URL, timestamp, and pass/fail notes only.
 
 - Do not copy or screenshot Supabase access tokens, refresh tokens, cookies, Authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, payment details, or private account details.
 - For the MOCHI_SOCIAL_AUTH gate, verify the shape of the bridge message only: the parent sends MOCHI_SOCIAL_AUTH with a short-lived access-token field and does not send refresh tokens or provider secrets.

@@ -493,6 +493,10 @@ This file is intentionally no-secret. It verifies the website tester-entry lane 
 - Publishable key present: ${summaryReport.publishableKeyPresent ? "yes" : "no"}
 - Publishable key source: ${summaryReport.publishableKeySource}
 
+## Live Production Password-Wall Target
+
+The active production target is \`${summaryReport.siteOrigin}/games/mochi-social\`, still behind the tester password wall. This is not a public launch. Tester password unlocks the page shell only; saved play still requires Mochirii member sign-in, tester approval, accepted terms, and valid Unity auth.
+
 ## Local Preview URL File
 
 - File: ${summaryReport.previewEnv.path}
@@ -509,11 +513,17 @@ This file is no-secret and may only contain preview URLs. Hosted Fly/Vercel/Supa
 | --- | --- | --- |
 ${rows}
 
-## Remaining Site Preview Work
+## Remaining Hosted Or Manual Work
 
 ${failures}
 
-## Approval Prompt
+## Production Approval Prompt
+
+\`\`\`text
+I approve the Mochirii hosted production verification using MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured live game URL, https://mochirii.com origin, and Supabase production/approved Edge URL. I understand this may hit Fly/Vercel/Supabase hosted resources and add usage.
+\`\`\`
+
+## Preview Rehearsal Approval Prompt
 
 \`\`\`text
 I approve the Mochirii hosted Preview Ready verification using MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured Fly game URL, Vercel Preview origin, and Supabase Preview Edge URL. I understand this may hit Fly/Vercel/Supabase preview resources and add usage.
