@@ -224,6 +224,22 @@ Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", as
   assert(invalidState.ok === false, "invalid pet state should be rejected");
   assert(invalidState.error === "invalid_shared_pet_state", `unexpected error ${invalidState.error}`);
 
+  const renamedPet = await upsertSharedPetSnapshot(client as never, {
+    petKey: UNITY_SHARED_PET_KEY,
+    roomKey: UNITY_ROOM_KEY,
+    state: { ...validState, displayName: "Other pet" },
+  });
+  assert(renamedPet.ok === false, "impostor shared pet display names should be rejected");
+  assert(renamedPet.error === "invalid_shared_pet_state", `unexpected error ${renamedPet.error}`);
+
+  const invalidMood = await upsertSharedPetSnapshot(client as never, {
+    petKey: UNITY_SHARED_PET_KEY,
+    roomKey: UNITY_ROOM_KEY,
+    state: { ...validState, mood: "market-ready" },
+  });
+  assert(invalidMood.ok === false, "non-curated shared pet moods should be rejected");
+  assert(invalidMood.error === "invalid_shared_pet_state", `unexpected error ${invalidMood.error}`);
+
   const saved = await upsertSharedPetSnapshot(client as never, {
     petKey: UNITY_SHARED_PET_KEY,
     roomKey: UNITY_ROOM_KEY,

@@ -5,8 +5,10 @@ export type JsonRecord = Record<string, unknown>;
 export const ALPHA_TERMS_VERSION = "alpha-rc-2026-06-10";
 export const UNITY_ROOM_KEY = "jade-lantern-room-alpha";
 export const UNITY_SHARED_PET_KEY = "lirabao";
+export const UNITY_SHARED_PET_DISPLAY_NAME = "Lirabao";
 export const UNITY_CUSTOM_ID_PREFIX = "mochirii:";
 const UNITY_SHARED_PET_STATES = new Set(["idle", "approach", "happy", "care_received", "stale_revision_reload", "unavailable"]);
+const UNITY_SHARED_PET_MOODS = new Set(["curious", "resting", "reloading", "comforted", "playful"]);
 
 export const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -394,7 +396,8 @@ export async function upsertSharedPetSnapshot(
 function isValidSharedPetState(state: JsonRecord): boolean {
   return state.version === 1 &&
     state.petId === UNITY_SHARED_PET_KEY &&
-    typeof state.displayName === "string" &&
+    state.displayName === UNITY_SHARED_PET_DISPLAY_NAME &&
+    UNITY_SHARED_PET_MOODS.has(String(state.mood || "")) &&
     UNITY_SHARED_PET_STATES.has(String(state.state || "")) &&
     Number.isInteger(state.careMeter) &&
     Number(state.careMeter) >= 0 &&

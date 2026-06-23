@@ -49,6 +49,7 @@ assertIncludes(sharedPath, shared, "expected && provided && expected === provide
 assertIncludes(sharedPath, shared, "invalid_game_server_token");
 assertIncludes(sharedPath, shared, 'UNITY_ROOM_KEY = "jade-lantern-room-alpha"');
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_KEY = "lirabao"');
+assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_DISPLAY_NAME = "Lirabao"');
 assertIncludes(sharedPath, shared, 'UNITY_CUSTOM_ID_PREFIX = "mochirii:"');
 assertIncludes(sharedPath, shared, "upsertSharedPetSnapshot");
 assertIncludes(sharedPath, shared, "upsertUnityPlayerLink");
@@ -58,7 +59,10 @@ assertIncludes(sharedPath, shared, "roomKey !== UNITY_ROOM_KEY");
 assertIncludes(sharedPath, shared, "invalid_unity_room");
 assertIncludes(sharedPath, shared, 'if (petKey !== UNITY_SHARED_PET_KEY || roomKey !== UNITY_ROOM_KEY)');
 assertIncludes(sharedPath, shared, "UNITY_SHARED_PET_STATES");
+assertIncludes(sharedPath, shared, "UNITY_SHARED_PET_MOODS");
 assertIncludes(sharedPath, shared, "isValidSharedPetState");
+assertIncludes(sharedPath, shared, "state.displayName === UNITY_SHARED_PET_DISPLAY_NAME");
+assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_MOODS.has(String(state.mood || ""))');
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_STATES.has(String(state.state || ""))');
 
 assertBefore(actionPath, action, "const serverAccess = requireGameServer(req);", "const adminClient = createAdminClient();");
