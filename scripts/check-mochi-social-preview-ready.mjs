@@ -13,6 +13,7 @@ const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_M
 const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
 const browserGateReportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON || "reports/mochi-social-browser-gates.json");
 const reportHygienePath = resolve(root, process.env.MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON || "reports/mochi-social-report-hygiene.json");
+const productionDoorwayReportPath = resolve(root, process.env.MOCHI_SOCIAL_PRODUCTION_DOORWAY_JSON || "reports/mochi-social-production-doorway.json");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
 const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
 const browserGateMode = normalizeBrowserGateMode(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE || "tester-password");
@@ -37,6 +38,7 @@ if (!skipNestedSelfTestCommands) {
 addBranchSyncRequirement("site.branch-sync", root, "Local Mochirii site branch");
 addOperatorChecklistRequirement();
 addReportHygieneRequirement();
+addProductionDoorwayRequirement();
 addGamePreviewReadyRequirement();
 addGameContractRequirement();
 addEdgeSmokeRequirement();
@@ -120,6 +122,38 @@ function addReportHygieneRequirement() {
   add("site.report-hygiene", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Site no-secret report hygiene is current and green.", {
     path: reportHygienePath,
     scanned: Array.isArray(report.data?.scanned) ? report.data.scanned.length : 0,
+  });
+}
+
+function addProductionDoorwayRequirement() {
+  const report = readJson(productionDoorwayReportPath);
+  if (!report.ok) {
+    add("site.production-doorway-smoke", "fail", `Mochi Social production doorway smoke report is missing or invalid: ${report.message}. Run npm run smoke:mochi-social-production-doorway after building apps/web.`, {
+      path: productionDoorwayReportPath,
+    });
+    return;
+  }
+
+  const data = report.data;
+  const failures = currentGitStateFailures(data?.git, root, "production doorway smoke report");
+  const cases = Array.isArray(data?.cases) ? data.cases : [];
+  const requiredCases = [
+    "locked-page",
+    "invalid-password-redirect",
+    "invalid-password-copy",
+    "valid-password-cookie",
+    "unlocked-member-gate",
+    "tester-logout",
+  ];
+  const missingCases = requiredCases.filter((id) => !cases.some((entry) => entry.id === id && entry.status === "pass"));
+  if (data?.ok !== true) failures.push("production doorway smoke report is not ok");
+  if (data?.route !== "/games/mochi-social") failures.push("production doorway smoke report must cover /games/mochi-social");
+  if (data?.accessMode !== "tester-password") failures.push("production doorway smoke report must use tester-password access mode");
+  if (data?.providerActions !== "none") failures.push("production doorway smoke report must not include provider actions");
+  if (missingCases.length) failures.push(`production doorway smoke report is missing cases: ${missingCases.join(", ")}`);
+  add("site.production-doorway-smoke", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Production doorway smoke is current and green.", {
+    path: productionDoorwayReportPath,
+    cases: cases.length,
   });
 }
 

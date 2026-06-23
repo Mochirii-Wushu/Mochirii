@@ -10,6 +10,8 @@ const markdownPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_REPORT_HYGIENE_
 const checkedAt = new Date().toISOString();
 
 const targets = [
+  { label: "production-doorway-json", path: resolve(root, "reports/mochi-social-production-doorway.json"), required: false },
+  { label: "production-doorway-md", path: resolve(root, "reports/mochi-social-production-doorway.md"), required: false },
   { label: "preview-ready-json", path: resolve(root, "reports/mochi-social-preview-ready.json"), required: false },
   { label: "preview-ready-md", path: resolve(root, "reports/mochi-social-preview-ready.md"), required: false },
   { label: "browser-gates-json", path: resolve(root, "reports/mochi-social-browser-gates.json"), required: false },
