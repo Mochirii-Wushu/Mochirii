@@ -6,6 +6,7 @@ const sessionPath = "supabase/functions/mochi-social-alpha-session/index.ts";
 const progressPath = "supabase/functions/mochi-social-alpha-progress/index.ts";
 const migrationPath = "supabase/migrations/20260610090000_add_mochi_social_alpha.sql";
 const unityMigrationPath = "supabase/migrations/20260621120000_add_mochi_social_unity_room.sql";
+const explicitGrantsPath = "supabase/migrations/20260622204823_add_mochi_social_alpha_explicit_grants.sql";
 
 const action = readFileSync(actionPath, "utf8");
 const shared = readFileSync(sharedPath, "utf8");
@@ -13,6 +14,7 @@ const session = readFileSync(sessionPath, "utf8");
 const progress = readFileSync(progressPath, "utf8");
 const migration = readFileSync(migrationPath, "utf8");
 const unityMigration = readFileSync(unityMigrationPath, "utf8");
+const explicitGrants = readFileSync(explicitGrantsPath, "utf8");
 
 const expectedActions = [
   "chat.send",
@@ -119,6 +121,15 @@ for (const needle of [
   "mochi_social_shared_pet_read_authenticated",
 ]) {
   assertIncludes(unityMigrationPath, unityMigration, needle);
+}
+
+for (const needle of [
+  "grant select on table public.mochi_social_unity_players to authenticated",
+  "grant select on table public.mochi_social_shared_pet_snapshots to authenticated",
+  "grant select, insert, update, delete on table public.mochi_social_unity_players to service_role",
+  "grant select, insert, update, delete on table public.mochi_social_shared_pet_snapshots to service_role",
+]) {
+  assertIncludes(explicitGrantsPath, explicitGrants, needle);
 }
 
 for (const forbidden of [/MAINNET/i, /cashout/i, /price_usd/i, /priceUsd/i, /fiat/i, /wallet_seed/i, /service_role/i]) {
