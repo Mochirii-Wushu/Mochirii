@@ -170,6 +170,7 @@ function addGamePreviewReadyRequirement() {
     return;
   }
   const failures = currentGitStateFailures(gameReport.data?.git, gameRepoPath, "game preview-ready report");
+  failures.push(...currentGitStateFailures(gameReport.data?.siteGit, root, "game preview-ready site snapshot"));
   if (gameReport.data?.ok !== true) {
     const failing = (gameReport.data?.requirements || [])
       .filter((item) => item.status !== "pass")
