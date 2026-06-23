@@ -154,7 +154,7 @@ export function MochiSocialAlphaClient({
         <div>
           <p className="eyebrow">Closed Alpha</p>
           <h1>Mochi Social</h1>
-          <p>Create your character, enter the shared guild room, and care for Lirabao with other approved members.</p>
+          <p>Create your character, enter the shared guild room, and care for Lirabao with other approved members. Mochirii member sign-in is required for saved play.</p>
         </div>
         <dl>
           <div>

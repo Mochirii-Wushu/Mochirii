@@ -114,11 +114,11 @@ const checks = [
   },
   {
     file: 'scripts/smoke-mochi-social-production-doorway.mjs',
-    includes: ['Mochi Social production doorway smoke passed', 'Mochi Social Production Doorway Smoke', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_PRODUCTION_DOORWAY_JSON', 'reports/mochi-social-production-doorway.json', 'Tester password', 'Unlock playtest', 'Checking alpha access', 'assertRobotsNoindex', 'assertNoIframe', 'assertPublicCopySafe', 'writeReport', 'readGitState(root)']
+    includes: ['Mochi Social production doorway smoke passed', 'Mochi Social Production Doorway Smoke', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_PRODUCTION_DOORWAY_JSON', 'reports/mochi-social-production-doorway.json', 'Tester password', 'Unlock playtest', 'Mochirii member sign-in is required for saved play', 'Checking alpha access', 'assertRobotsNoindex', 'assertNoIframe', 'assertPublicCopySafe', 'writeReport', 'readGitState(root)']
   },
   {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
+    includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Mochirii member sign-in is required for saved play', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
   },
   {
     file: 'apps/web/components/SiteHeader.tsx',

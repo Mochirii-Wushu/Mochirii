@@ -32,6 +32,7 @@ try {
   assertIncludes(locked.text, "Tester password", "locked page should show tester password field");
   assertIncludes(locked.text, "Unlock playtest", "locked page should show unlock button");
   assertIncludes(locked.text, "Closed Mochirii playtest", "locked page should describe the closed alpha");
+  assertIncludes(locked.text, "Mochirii member sign-in is required for saved play", "locked page should explain saved play needs member sign-in");
   assertNoIframe(locked.text, "locked page");
   assertRobotsNoindex(locked.text, "locked page");
   assertPublicCopySafe(locked.text, "locked page");
@@ -62,6 +63,7 @@ try {
   const unlocked = await fetchText(`${baseUrl}${route}`, { headers: { cookie } });
   assert.equal(unlocked.status, 200, "unlocked shell should render");
   assertIncludes(unlocked.text, "Checking alpha access", "unlocked shell should require member access before saved play");
+  assertIncludes(unlocked.text, "Mochirii member sign-in is required for saved play", "unlocked shell should explain saved play needs member sign-in");
   assert(!unlocked.text.includes("Unlock playtest"), "unlocked shell should not show tester-password form");
   assertNoIframe(unlocked.text, "unlocked shell before member access");
   assertRobotsNoindex(unlocked.text, "unlocked shell");
