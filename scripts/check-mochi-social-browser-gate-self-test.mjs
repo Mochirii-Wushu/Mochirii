@@ -51,6 +51,7 @@ try {
   assertTesterPasswordBrowserEvidenceCanPassManualGateOnly();
   assertStoredBrowserGateReportCanPassManualGateOnly();
   assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly();
+  assertStoredSupabaseReportCannotSatisfyTesterPasswordMode();
   console.log("Mochi Social browser gate self-test OK.");
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
@@ -231,6 +232,52 @@ function assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly() {
   assert(gate.evidence.accessMode === "tester-password", "Stored tester-password report should preserve access mode.");
   assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "Stored tester-password report should preserve every required browser gate as true.");
   assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
+}
+
+function assertStoredSupabaseReportCannotSatisfyTesterPasswordMode() {
+  const storedJson = join(tempDir, "stored-supabase-browser-gates.json");
+  const storedMd = join(tempDir, "stored-supabase-browser-gates.md");
+  const writer = spawnSync(process.execPath, ["scripts/write-mochi-social-browser-gates.mjs"], {
+    cwd: root,
+    encoding: "utf8",
+    env: cleanBrowserGateEnv({
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_MD: storedMd,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_HANDOFF: "stored-supabase-browser-gates-handoff.md",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE: "supabase",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
+      ...requiredGateEnv,
+    }),
+  });
+  assert(writer.status === 0, `stored Supabase report writer should pass: ${writer.stderr || writer.stdout}`);
+  const storedReport = JSON.parse(readFileSync(storedJson, "utf8"));
+  assert(storedReport.accessMode === "supabase", "Stored Supabase report should record Supabase access mode.");
+  assertReviewContext(storedReport.reviewContext, { testerPassword: false, hosted: false, hostedAllowed: false });
+
+  const result = spawnSync(process.execPath, [checker], {
+    cwd: root,
+    encoding: "utf8",
+    env: cleanBrowserGateEnv({
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-supabase-report-tester-password-target"),
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_MD: reportMdPath("stored-supabase-report-tester-password-target"),
+      MOCHI_SOCIAL_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
+      MOCHI_SOCIAL_GAME_CONTRACT_URL: "https://mochi-social-game.fly.dev",
+      MOCHI_SOCIAL_SITE_ORIGIN: "https://mochirii-git-mochi-social-alpha-preview-mochirii.vercel.app",
+      MOCHI_SOCIAL_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
+    }),
+  });
+  assert(result.status !== 0, "Stored Supabase report should keep Preview Ready red for a tester-password target.");
+  const report = readReport("stored-supabase-report-tester-password-target");
+  const gate = report.requirements.find((entry) => entry.id === "site.manual-browser-gates");
+  assert(gate, "Stored Supabase report mismatch case did not include site.manual-browser-gates.");
+  assert(gate.status === "fail", "Stored Supabase report should fail the tester-password manual browser gate.");
+  assert(gate.message.includes("access mode supabase does not match current browser gate mode tester-password"), "Mismatch failure should name both access modes.");
 }
 
 function runAndAssertManualGate(label, env, assertGate) {

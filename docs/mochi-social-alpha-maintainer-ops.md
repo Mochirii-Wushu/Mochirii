@@ -128,6 +128,8 @@ screenshots, copied environment variables, the legacy runtime, dummy data, or a
 hosted page that has not been approved for hosted verification. The review must
 directly observe the member sign-in path, allowlist/terms blocks, Unity iframe
 auth bridge, feedback/audit path, no-real-value copy, and shared game presence.
+The stored browser evidence access mode must match the current page mode; a
+strict member-only review cannot replace the live tester-password wall review.
 
 Tester-password production evidence:
 

@@ -325,6 +325,9 @@ function addStoredManualBrowserGateRequirement() {
   const storedAccessMode = normalizeBrowserGateMode(data.accessMode || browserGateMode);
   const expectedGateChecks = browserGateEnvForMode(storedAccessMode);
   const failures = currentGitStateFailures(data.git, root, "stored browser gate report");
+  if (storedAccessMode !== browserGateMode) {
+    failures.push(`stored browser gate report access mode ${storedAccessMode} does not match current browser gate mode ${browserGateMode}`);
+  }
   const gateResults = Array.isArray(data.requiredGates) ? data.requiredGates : [];
   failures.push(...browserGateReviewContextFailures(data.reviewContext, storedAccessMode));
   const missingNames = expectedGateChecks
