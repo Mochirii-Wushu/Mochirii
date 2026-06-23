@@ -99,6 +99,10 @@ function addOperatorChecklistRequirement() {
     "NEXT_PUBLIC_MOCHI_SOCIAL_URL",
     "MOCHI_SOCIAL_ALPHA_EDGE_URL",
     gitState.localHead,
+    `- Upstream HEAD: ${gitState.upstreamHead || "unknown"}`,
+    `- Ahead: ${gitState.ahead}`,
+    `- Behind: ${gitState.behind}`,
+    `- Dirty tracked files: ${gitState.dirty.length}`,
   ]) {
     if (!snippet || !text.includes(snippet)) failures.push(`operator checklist missing ${snippet || "<current head>"}`);
   }
@@ -421,13 +425,19 @@ function readGitState(repoPath) {
   const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], repoPath);
   const localHead = git(["rev-parse", "HEAD"], repoPath);
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
+  const upstreamHead = upstream.ok ? git(["rev-parse", firstLine(upstream.stdout)], repoPath) : { ok: false, stdout: "", stderr: upstream.stderr };
+  const counts = upstream.ok ? git(["rev-list", "--left-right", "--count", `${firstLine(upstream.stdout)}...HEAD`], repoPath) : { ok: false, stdout: "", stderr: upstream.stderr };
   const dirty = git(["status", "--porcelain"], repoPath);
+  const [behindText = "0", aheadText = "0"] = counts.ok ? firstLine(counts.stdout).split(/\s+/) : ["0", "0"];
   return {
     branch: branch.ok ? firstLine(branch.stdout) : "",
     localHead: localHead.ok ? firstLine(localHead.stdout) : "",
     upstream: upstream.ok ? firstLine(upstream.stdout) : "",
+    upstreamHead: upstreamHead.ok ? firstLine(upstreamHead.stdout) : "",
+    ahead: Number.parseInt(aheadText, 10) || 0,
+    behind: Number.parseInt(behindText, 10) || 0,
     dirty: dirty.ok ? dirty.stdout.split(/\r?\n/).filter(Boolean).map((line) => sanitize(line)) : ["git status unavailable"],
-    errors: [branch, localHead, upstream, dirty]
+    errors: [branch, localHead, upstream, upstreamHead, counts, dirty]
       .filter((result) => !result.ok)
       .map((result) => sanitize(result.stderr || result.error || "git command failed")),
   };
