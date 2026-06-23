@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type FooterLink = {
   href: string;
@@ -69,6 +72,11 @@ function FooterColumn({
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
+  const pathname = usePathname();
+  const hideToolingLanguage = (pathname || "").replace(/\/+$/, "") === "/games/mochi-social";
+  const visibleCultureLinks = hideToolingLanguage
+    ? cultureLinks.filter((link) => link.href !== "/codex")
+    : cultureLinks;
 
   return (
     <footer className="site-footer" role="contentinfo">
@@ -117,7 +125,7 @@ export function SiteFooter() {
 
           <div className="footer-cols" aria-label="Footer navigation">
             <FooterColumn title="Guild" links={guildLinks} />
-            <FooterColumn title="Culture" links={cultureLinks} />
+            <FooterColumn title="Culture" links={visibleCultureLinks} />
             <FooterColumn title="Updates" links={updateLinks} />
           </div>
         </div>

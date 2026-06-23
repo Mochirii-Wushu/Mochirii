@@ -101,6 +101,11 @@ function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMemb
   return false;
 }
 
+function navItemVisibleForPath(item: NavItem, activeKey: string) {
+  if (activeKey === "games/mochi-social" && item.nav === "codex") return false;
+  return true;
+}
+
 function InternalNavLink({
   item,
   activeKey,
@@ -345,7 +350,7 @@ export function SiteHeader() {
                   hidden={!isOpen}
                   data-dropdown-menu
                 >
-                  {group.items.map((item) => (
+                  {group.items.filter((item) => navItemVisibleForPath(item, activeKey)).map((item) => (
                     <InternalNavLink
                       className="nav-item"
                       item={item}
@@ -459,7 +464,7 @@ export function SiteHeader() {
             {navGroups.map((group) => (
               <div className="mobile-group" key={group.id}>
                 <div className="mobile-group-title">{group.label}</div>
-                {group.items.map((item) => (
+                {group.items.filter((item) => navItemVisibleForPath(item, activeKey)).map((item) => (
                   <InternalNavLink
                     className="mobile-link"
                     item={item}

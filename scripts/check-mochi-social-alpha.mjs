@@ -34,7 +34,7 @@ const blockedToolReferencePattern = new RegExp(`\\b(?:${
 const checks = [
   {
     file: 'package.json',
-    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'test:mochi-social-alpha']
+    includes: ['check:mochi-social-alpha', 'check:mochi-social-auth-bridge', 'check:mochi-social-bridge-state', 'check:mochi-social-browser-gates', 'check:mochi-social-discord-oauth', 'check:mochi-social-edge-authority', 'check:mochi-social-game-contract', 'check:mochi-social-preview-key-loader', 'check:mochi-social-preview-url', 'check:mochi-social-preview-ready', 'check:mochi-social-report-hygiene', 'check:mochi-social-tester-password-gate', 'prepare:mochi-social-alpha-operator-checklist', 'prepare:mochi-social-browser-gates', 'smoke:mochi-social-production-doorway', 'test:mochi-social-alpha']
   },
   {
     file: 'AGENTS.md',
@@ -113,8 +113,20 @@ const checks = [
     includes: ['Mochi Social tester password gate check passed', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'scryptSync', 'httpOnly: true', 'NEXT_PUBLIC_MOCHI_SOCIAL_(?:TESTER_)?PASSWORD']
   },
   {
+    file: 'scripts/smoke-mochi-social-production-doorway.mjs',
+    includes: ['Mochi Social production doorway smoke passed', 'MOCHI_SOCIAL_ALPHA_ACCESS_MODE', 'MOCHI_SOCIAL_TESTER_PASSWORD', 'NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'Tester password', 'Unlock playtest', 'Checking alpha access', 'assertRobotsNoindex', 'assertNoIframe', 'assertPublicCopySafe']
+  },
+  {
     file: 'apps/web/components/mochi-social/MochiSocialAlphaClient.tsx',
     includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'MOCHI_SOCIAL_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiSocialFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiSocialBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
+  },
+  {
+    file: 'apps/web/components/SiteHeader.tsx',
+    includes: ['navItemVisibleForPath', 'activeKey === "games/mochi-social" && item.nav === "codex"']
+  },
+  {
+    file: 'apps/web/components/SiteFooter.tsx',
+    includes: ['usePathname', 'hideToolingLanguage', 'pathname || ""', 'link.href !== "/codex"']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',
