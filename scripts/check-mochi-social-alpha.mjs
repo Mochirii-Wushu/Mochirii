@@ -186,6 +186,10 @@ const checks = [
     includes: ['mochi_social_unity_players', 'mochi_social_shared_pet_snapshots', "room_key text not null default 'jade-lantern-room-alpha'", "check (pet_key = 'lirabao')", 'enable row level security', 'grant select on public.mochi_social_unity_players to authenticated', 'grant select, insert, update, delete on public.mochi_social_shared_pet_snapshots to service_role']
   },
   {
+    file: 'supabase/migrations/20260622204823_add_mochi_social_alpha_explicit_grants.sql',
+    includes: ['grant select on table public.mochi_social_alpha_testers to authenticated', 'grant select on table public.mochi_social_progress_snapshots to authenticated', 'grant insert on table public.mochi_social_feedback to authenticated', 'grant select, insert, update, delete on table public.mochi_social_ledger_events to service_role']
+  },
+  {
     file: 'apps/web/next.config.ts',
     includes: ['NEXT_PUBLIC_MOCHI_SOCIAL_URL', 'frame-src', 'connect-src']
   },
