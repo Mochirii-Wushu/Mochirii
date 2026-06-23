@@ -123,6 +123,12 @@ Record pass/fail metadata only: reviewer, browser/version, URL, access mode, and
 short no-secret notes. Do not capture tokens, cookies, account emails, request
 headers, dashboard screenshots, or private provider values.
 
+Do not mark these gates complete from the tester password wall alone, static
+screenshots, copied environment variables, the legacy runtime, dummy data, or a
+hosted page that has not been approved for hosted verification. The review must
+directly observe the member sign-in path, allowlist/terms blocks, Unity iframe
+auth bridge, feedback/audit path, no-real-value copy, and shared game presence.
+
 Tester-password production evidence:
 
 ```powershell

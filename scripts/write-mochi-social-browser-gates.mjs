@@ -21,6 +21,7 @@ const requiredGates = requiredGateEnv.map(([envName, label]) => ({
   label,
   ok: process.env[envName] === "true",
 }));
+const reviewContext = buildReviewContext(accessMode, reviewUrl, hostedChecksAllowed);
 
 const failures = [];
 if (!confirmed) failures.push("manual browser gates have not been confirmed");
@@ -45,6 +46,7 @@ const report = {
   browser: browser || null,
   url: reviewUrl || null,
   notes: notes || null,
+  reviewContext,
   requiredGates,
   failures,
   git: readGitState(root),
@@ -71,6 +73,8 @@ console.log(`Mochi Social browser gate evidence passed. Report: ${reportPath}`);
 console.log(`Markdown: ${reportMdPath}`);
 
 function renderMarkdown(reportData) {
+  const preconditions = reportData.reviewContext.completionPreconditions.map((item) => `- ${item}`);
+  const insufficient = reportData.reviewContext.cannotBeCompletedBy.map((item) => `- ${item}`);
   const lines = [
     "# Mochi Social Browser Gate Evidence",
     "",
@@ -85,6 +89,24 @@ function renderMarkdown(reportData) {
     `- Hosted approval flag: ${reportData.hostedChecksAllowed ? "true" : "false"}`,
     `- Git branch: ${reportData.git.branch || "unknown"}`,
     `- Git HEAD: ${reportData.git.localHead || "unknown"}`,
+    "",
+    "## Review Context",
+    "",
+    `- Review kind: ${reportData.reviewContext.reviewKind}`,
+    `- Requires tester password wall: ${reportData.reviewContext.requiresTesterPasswordWall ? "yes" : "no"}`,
+    `- Requires Mochirii member sign-in: ${reportData.reviewContext.requiresMemberSignIn ? "yes" : "no"}`,
+    `- Requires allowlist, terms, feedback, and audit path: ${reportData.reviewContext.requiresMemberAuthorityPath ? "yes" : "no"}`,
+    `- Requires Unity iframe/auth bridge path: ${reportData.reviewContext.requiresUnityBridgePath ? "yes" : "no"}`,
+    `- Password wall alone is enough: ${reportData.reviewContext.passwordOnlyIsInsufficient ? "no" : "yes"}`,
+    `- Hosted URL: ${reportData.reviewContext.hostedUrl ? "yes" : "no"}`,
+    "",
+    "Completion preconditions:",
+    "",
+    ...preconditions,
+    "",
+    "This review cannot be completed by:",
+    "",
+    ...insufficient,
     "",
     "## Required Gates",
     "",
@@ -167,6 +189,39 @@ function browserGateEnvForMode(mode) {
     ["MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK", "no-real-value alpha copy is visible"],
     ["MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK", "admin grant/revoke works and intended tester state is restored"],
   ];
+}
+
+function buildReviewContext(mode, url, hostedAllowed) {
+  const hosted = isHostedUrl(url);
+  const testerPasswordMode = mode === "tester-password";
+  return {
+    reviewKind: hosted ? "approved-hosted-member-browser-review" : "local-member-browser-review",
+    requiresTesterPasswordWall: testerPasswordMode,
+    requiresMemberSignIn: true,
+    requiresMemberAuthorityPath: true,
+    requiresUnityBridgePath: true,
+    passwordOnlyIsInsufficient: testerPasswordMode,
+    hostedUrl: hosted,
+    hostedAllowed,
+    completionPreconditions: [
+      testerPasswordMode
+        ? "Confirm the tester password wall blocks the game iframe before unlock."
+        : "Confirm the signed-out member gate blocks saved play before sign-in.",
+      "Authenticate through the Mochirii member path for the tested account state.",
+      "Confirm signed-out, non-tester, and terms-required states are blocked before saved play.",
+      "Confirm a valid tester can load the Unity iframe and the parent sends MOCHI_SOCIAL_AUTH only after member access.",
+      "Confirm feedback/admin audit and no-real-value copy are visible in the approved review path.",
+      "Only set completion env vars after every required browser gate is directly observed."
+    ],
+    cannotBeCompletedBy: [
+      "the tester password wall alone",
+      "static screenshots alone",
+      "environment variables without a browser review",
+      "the legacy runtime",
+      "a hosted URL without explicit hosted-preview approval",
+      "dummy tester, Discord, Supabase, or Enjin data"
+    ],
+  };
 }
 
 function assertNoForbiddenMaterial(text, label) {
