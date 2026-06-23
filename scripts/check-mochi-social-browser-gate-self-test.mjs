@@ -61,6 +61,7 @@ function assertNoConfirmationFails() {
     assert(gate.status === "fail", "Manual gate should fail when no browser confirmation env is set.");
     assert(gate.message.includes("manual browser gates have not been confirmed"), "Manual gate should explain missing confirmation.");
     assert(gate.evidence.requiredGates.every((entry) => entry.ok === false), "No required gate should be marked ok by default.");
+    assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
   });
 }
 
@@ -79,6 +80,7 @@ function assertPartialConfirmationListsMissingGate() {
     assert(gate.message.includes("MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK"), "Manual gate should name the missing browser gate env var.");
     const feedbackGate = gate.evidence.requiredGates.find((entry) => entry.envName === "MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK");
     assert(feedbackGate?.ok === false, "Missing feedback audit gate should be recorded as false.");
+    assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
   });
 }
 
@@ -93,6 +95,7 @@ function assertHostedBrowserUrlRequiresHostedApproval() {
     assert(gate.status === "fail", "Hosted browser evidence should fail without hosted-check approval.");
     assert(gate.message.includes("hosted browser gate confirmation requires"), "Manual gate should require hosted approval for hosted browser evidence.");
     assert(gate.evidence.hostedChecksAllowed === false, "Hosted checks should be false in this self-test case.");
+    assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: true, hostedAllowed: false });
   });
 }
 
@@ -107,6 +110,7 @@ function assertLocalhostBrowserEvidenceCanPassManualGateOnly() {
   }, (gate, report) => {
     assert(gate.status === "pass", "Localhost browser evidence should satisfy only the manual browser gate.");
     assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "All required browser gates should be recorded as true.");
+    assertReviewContext(gate.evidence.reviewContext, { testerPassword: false, hosted: false, hostedAllowed: false });
     assert(report.ok === false, "Preview Ready should still remain red in this self-test because branch/hosted gates are not proven.");
   });
 }
@@ -123,6 +127,7 @@ function assertTesterPasswordBrowserEvidenceCanPassManualGateOnly() {
     assert(gate.status === "pass", "Tester-password browser evidence should satisfy the manual browser gate.");
     assert(gate.evidence.accessMode === "tester-password", "Tester-password gate should record its access mode.");
     assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "All tester-password required browser gates should be recorded as true.");
+    assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
     assert(report.ok === false, "Preview Ready should still remain red in this self-test because branch/hosted gates are not proven.");
   });
 }
@@ -150,8 +155,12 @@ function assertStoredBrowserGateReportCanPassManualGateOnly() {
   assert(writer.status === 0, `stored report writer should pass: ${writer.stderr || writer.stdout}`);
   const storedReportText = readFileSync(storedJson, "utf8");
   const storedMarkdown = readFileSync(storedMd, "utf8");
+  const storedReport = JSON.parse(storedReportText);
   assert(!storedReportText.includes(fakeToken), "Stored browser gate report must redact fake tokens.");
   assert(!storedMarkdown.includes(fakeToken), "Stored browser gate Markdown must redact fake tokens.");
+  assertReviewContext(storedReport.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
+  assert(storedMarkdown.includes("## Review Context"), "Stored browser gate Markdown should include review context.");
+  assert(storedMarkdown.includes("This review cannot be completed by:"), "Stored browser gate Markdown should explain insufficient evidence.");
 
   const result = spawnSync(process.execPath, [checker], {
     cwd: root,
@@ -174,6 +183,7 @@ function assertStoredBrowserGateReportCanPassManualGateOnly() {
   assert(gate.status === "pass", "Stored report should satisfy the manual browser gate.");
   assert(gate.evidence.source === storedJson, "Manual gate evidence should point at the stored browser gate report.");
   assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "Stored report should preserve every required browser gate as true.");
+  assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
 }
 
 function assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly() {
@@ -196,6 +206,8 @@ function assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly() {
     }),
   });
   assert(writer.status === 0, `stored tester-password report writer should pass: ${writer.stderr || writer.stdout}`);
+  const storedReport = JSON.parse(readFileSync(storedJson, "utf8"));
+  assertReviewContext(storedReport.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
 
   const result = spawnSync(process.execPath, [checker], {
     cwd: root,
@@ -218,6 +230,7 @@ function assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly() {
   assert(gate.status === "pass", "Stored tester-password report should satisfy the manual browser gate.");
   assert(gate.evidence.accessMode === "tester-password", "Stored tester-password report should preserve access mode.");
   assert(gate.evidence.requiredGates.every((entry) => entry.ok === true), "Stored tester-password report should preserve every required browser gate as true.");
+  assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: false, hostedAllowed: false });
 }
 
 function runAndAssertManualGate(label, env, assertGate) {
@@ -265,6 +278,31 @@ function assertPassingCommandGate(label, report, id, command) {
   assert(gate, `${label} report did not include ${id}.`);
   assert(gate.status === "pass", `${label} ${id} should pass before hosted/manual gates.`);
   assert(gate.evidence?.command === command, `${label} ${id} should be backed by ${command}.`);
+}
+
+function assertReviewContext(context, { testerPassword, hosted, hostedAllowed }) {
+  assert(context && typeof context === "object", "Browser gate evidence should include review context.");
+  assert(context.requiresTesterPasswordWall === testerPassword, "Review context should record whether tester password wall review is required.");
+  assert(context.requiresMemberSignIn === true, "Review context should require Mochirii member sign-in.");
+  assert(context.requiresMemberAuthorityPath === true, "Review context should require member authority gates.");
+  assert(context.requiresUnityBridgePath === true, "Review context should require Unity iframe/auth bridge review.");
+  assert(context.passwordOnlyIsInsufficient === testerPassword, "Review context should mark password-only access insufficient in tester-password mode.");
+  assert(context.hostedUrl === hosted, "Review context should record whether the reviewed URL is hosted.");
+  assert(context.hostedAllowed === hostedAllowed, "Review context should record hosted approval state.");
+
+  const preconditions = Array.isArray(context.completionPreconditions) ? context.completionPreconditions.join("\n") : "";
+  assert(preconditions.includes("Mochirii member path"), "Review context should require member-path authentication.");
+  assert(preconditions.includes("signed-out, non-tester, and terms-required"), "Review context should require blocked-state review.");
+  assert(preconditions.includes("MOCHI_SOCIAL_AUTH"), "Review context should require auth bridge review.");
+  assert(preconditions.includes("feedback/admin audit"), "Review context should require feedback/admin audit review.");
+
+  const insufficient = Array.isArray(context.cannotBeCompletedBy) ? context.cannotBeCompletedBy.join("\n") : "";
+  assert(insufficient.includes("tester password wall alone"), "Review context should reject password-wall-only evidence.");
+  assert(insufficient.includes("static screenshots alone"), "Review context should reject screenshot-only evidence.");
+  assert(insufficient.includes("environment variables without a browser review"), "Review context should reject env-only evidence.");
+  assert(insufficient.includes("legacy runtime"), "Review context should reject legacy runtime evidence.");
+  assert(insufficient.includes("hosted URL without explicit hosted-preview approval"), "Review context should reject unapproved hosted evidence.");
+  assert(insufficient.includes("dummy tester"), "Review context should reject dummy account/provider data.");
 }
 
 function readReport(label) {

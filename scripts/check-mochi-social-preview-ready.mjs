@@ -282,6 +282,7 @@ function addManualBrowserGateRequirement() {
   const reviewer = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER || "");
   const browser = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER || "");
   const reviewUrl = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_URL || "");
+  const reviewContext = buildReviewContext(browserGateMode, reviewUrl, hostedChecksAllowed);
   const gateResults = manualBrowserGateChecks.map(([envName, label]) => ({
     envName,
     label,
@@ -306,6 +307,7 @@ function addManualBrowserGateRequirement() {
     browser: browser || null,
     url: reviewUrl || null,
     hostedChecksAllowed,
+    reviewContext,
     requiredGates: gateResults,
   });
 }
@@ -324,6 +326,7 @@ function addStoredManualBrowserGateRequirement() {
   const expectedGateChecks = browserGateEnvForMode(storedAccessMode);
   const failures = currentGitStateFailures(data.git, root, "stored browser gate report");
   const gateResults = Array.isArray(data.requiredGates) ? data.requiredGates : [];
+  failures.push(...browserGateReviewContextFailures(data.reviewContext, storedAccessMode));
   const missingNames = expectedGateChecks
     .filter(([envName]) => !gateResults.some((gate) => gate.envName === envName && gate.ok === true))
     .map(([envName]) => envName);
@@ -348,6 +351,7 @@ function addStoredManualBrowserGateRequirement() {
     url: reviewUrl || null,
     storedHostedChecksAllowed: data.hostedChecksAllowed === true,
     hostedChecksAllowed,
+    reviewContext: reportReviewContext(data.reviewContext),
     requiredGates: gateResults.map((gate) => ({
       envName: gate.envName,
       label: gate.label,
@@ -476,6 +480,97 @@ function browserGateEnvForMode(mode) {
     ["MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK", "no-real-value alpha copy is visible"],
     ["MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK", "admin grant/revoke works and intended tester state is restored"],
   ];
+}
+
+function buildReviewContext(mode, url, hostedAllowed) {
+  const hosted = isHostedUrl(url);
+  const testerPasswordMode = mode === "tester-password";
+  return {
+    reviewKind: hosted ? "approved-hosted-member-browser-review" : "local-member-browser-review",
+    requiresTesterPasswordWall: testerPasswordMode,
+    requiresMemberSignIn: true,
+    requiresMemberAuthorityPath: true,
+    requiresUnityBridgePath: true,
+    passwordOnlyIsInsufficient: testerPasswordMode,
+    hostedUrl: hosted,
+    hostedAllowed,
+    completionPreconditions: [
+      testerPasswordMode
+        ? "Confirm the tester password wall blocks the game iframe before unlock."
+        : "Confirm the signed-out member gate blocks saved play before sign-in.",
+      "Authenticate through the Mochirii member path for the tested account state.",
+      "Confirm signed-out, non-tester, and terms-required states are blocked before saved play.",
+      "Confirm a valid tester can load the Unity iframe and the parent sends MOCHI_SOCIAL_AUTH only after member access.",
+      "Confirm feedback/admin audit and no-real-value copy are visible in the approved review path.",
+      "Only set completion env vars after every required browser gate is directly observed.",
+    ],
+    cannotBeCompletedBy: [
+      "the tester password wall alone",
+      "static screenshots alone",
+      "environment variables without a browser review",
+      "the legacy runtime",
+      "a hosted URL without explicit hosted-preview approval",
+      "dummy tester, Discord, Supabase, or Enjin data",
+    ],
+  };
+}
+
+function browserGateReviewContextFailures(context, mode) {
+  const failures = [];
+  if (!context || typeof context !== "object") {
+    return ["stored browser gate report must include review context"];
+  }
+  if (mode === "tester-password" && context.requiresTesterPasswordWall !== true) {
+    failures.push("stored browser gate report must prove tester password wall review context");
+  }
+  if (context.requiresMemberSignIn !== true) failures.push("stored browser gate report must require Mochirii member sign-in");
+  if (context.requiresMemberAuthorityPath !== true) failures.push("stored browser gate report must require allowlist, terms, feedback, and audit review");
+  if (context.requiresUnityBridgePath !== true) failures.push("stored browser gate report must require Unity iframe/auth bridge review");
+  if (mode === "tester-password" && context.passwordOnlyIsInsufficient !== true) {
+    failures.push("stored browser gate report must mark password-only access insufficient");
+  }
+
+  const preconditions = Array.isArray(context.completionPreconditions) ? context.completionPreconditions.join("\n") : "";
+  const insufficient = Array.isArray(context.cannotBeCompletedBy) ? context.cannotBeCompletedBy.join("\n") : "";
+  for (const snippet of [
+    "member path",
+    "signed-out, non-tester, and terms-required",
+    "MOCHI_SOCIAL_AUTH",
+    "feedback/admin audit",
+  ]) {
+    if (!preconditions.includes(snippet)) failures.push(`stored browser gate report review context missing precondition: ${snippet}`);
+  }
+  for (const snippet of [
+    "tester password wall alone",
+    "static screenshots alone",
+    "environment variables without a browser review",
+    "legacy runtime",
+    "hosted URL without explicit hosted-preview approval",
+    "dummy tester",
+  ]) {
+    if (!insufficient.includes(snippet)) failures.push(`stored browser gate report review context missing insufficiency: ${snippet}`);
+  }
+  return failures;
+}
+
+function reportReviewContext(context) {
+  if (!context || typeof context !== "object") return null;
+  return {
+    reviewKind: sanitize(context.reviewKind || ""),
+    requiresTesterPasswordWall: context.requiresTesterPasswordWall === true,
+    requiresMemberSignIn: context.requiresMemberSignIn === true,
+    requiresMemberAuthorityPath: context.requiresMemberAuthorityPath === true,
+    requiresUnityBridgePath: context.requiresUnityBridgePath === true,
+    passwordOnlyIsInsufficient: context.passwordOnlyIsInsufficient === true,
+    hostedUrl: context.hostedUrl === true,
+    hostedAllowed: context.hostedAllowed === true,
+    completionPreconditions: sanitizeStringArray(context.completionPreconditions),
+    cannotBeCompletedBy: sanitizeStringArray(context.cannotBeCompletedBy),
+  };
+}
+
+function sanitizeStringArray(values) {
+  return Array.isArray(values) ? values.map((value) => sanitize(value)).filter(Boolean).slice(0, 12) : [];
 }
 
 function readJson(file) {
