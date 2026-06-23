@@ -294,6 +294,8 @@ function addManualBrowserGateRequirement() {
   if (confirmed && !reviewer) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER is required");
   if (confirmed && !browser) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER is required");
   if (confirmed && !reviewUrl) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_URL is required");
+  const routeFailure = reviewUrl ? browserGateRouteFailure(reviewUrl, "manual browser gate URL") : "";
+  if (confirmed && routeFailure) failures.push(routeFailure);
   if (confirmed && missingGates.length) {
     failures.push(`manual browser gates missing confirmations: ${missingGates.map((gate) => gate.envName).join(", ")}`);
   }
@@ -339,6 +341,8 @@ function addStoredManualBrowserGateRequirement() {
   if (!data.reviewer) failures.push("stored browser gate report reviewer is required");
   if (!data.browser) failures.push("stored browser gate report browser is required");
   if (!reviewUrl) failures.push("stored browser gate report URL is required");
+  const routeFailure = reviewUrl ? browserGateRouteFailure(reviewUrl, "stored browser gate report URL") : "";
+  if (routeFailure) failures.push(routeFailure);
   if (reviewUrl && isHostedUrl(reviewUrl) && !hostedChecksAllowed) {
     failures.push("stored hosted browser gate evidence requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
   }
@@ -808,6 +812,18 @@ function safeUrlHost(value) {
     return new URL(value).host;
   } catch {
     return sanitize(value);
+  }
+}
+
+function browserGateRouteFailure(value, label) {
+  try {
+    const parsed = new URL(value);
+    if (!["http:", "https:"].includes(parsed.protocol)) return `${label} must be an http(s) URL for /games/mochi-social`;
+    const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    if (pathname !== "/games/mochi-social") return `${label} must target /games/mochi-social`;
+    return "";
+  } catch {
+    return `${label} must be an absolute http(s) URL for /games/mochi-social`;
   }
 }
 

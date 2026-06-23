@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -47,11 +47,13 @@ try {
   assertNoConfirmationFails();
   assertPartialConfirmationListsMissingGate();
   assertHostedBrowserUrlRequiresHostedApproval();
+  assertWrongBrowserGateUrlPathFails();
   assertLocalhostBrowserEvidenceCanPassManualGateOnly();
   assertTesterPasswordBrowserEvidenceCanPassManualGateOnly();
   assertStoredBrowserGateReportCanPassManualGateOnly();
   assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly();
   assertStoredSupabaseReportCannotSatisfyTesterPasswordMode();
+  assertStoredWrongUrlPathCannotSatisfyManualGate();
   console.log("Mochi Social browser gate self-test OK.");
 } finally {
   rmSync(tempDir, { recursive: true, force: true });
@@ -97,6 +99,19 @@ function assertHostedBrowserUrlRequiresHostedApproval() {
     assert(gate.message.includes("hosted browser gate confirmation requires"), "Manual gate should require hosted approval for hosted browser evidence.");
     assert(gate.evidence.hostedChecksAllowed === false, "Hosted checks should be false in this self-test case.");
     assertReviewContext(gate.evidence.reviewContext, { testerPassword: true, hosted: true, hostedAllowed: false });
+  });
+}
+
+function assertWrongBrowserGateUrlPathFails() {
+  runAndAssertManualGate("wrong-url-path", {
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
+    MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/account",
+    ...testerPasswordGateEnv,
+  }, (gate) => {
+    assert(gate.status === "fail", "Manual browser evidence should fail when the URL path is not /games/mochi-social.");
+    assert(gate.message.includes("manual browser gate URL must target /games/mochi-social"), "Manual gate should name the required review route.");
   });
 }
 
@@ -278,6 +293,52 @@ function assertStoredSupabaseReportCannotSatisfyTesterPasswordMode() {
   assert(gate, "Stored Supabase report mismatch case did not include site.manual-browser-gates.");
   assert(gate.status === "fail", "Stored Supabase report should fail the tester-password manual browser gate.");
   assert(gate.message.includes("access mode supabase does not match current browser gate mode tester-password"), "Mismatch failure should name both access modes.");
+}
+
+function assertStoredWrongUrlPathCannotSatisfyManualGate() {
+  const storedJson = join(tempDir, "stored-wrong-path-browser-gates.json");
+  const storedMd = join(tempDir, "stored-wrong-path-browser-gates.md");
+  const writer = spawnSync(process.execPath, ["scripts/write-mochi-social-browser-gates.mjs"], {
+    cwd: root,
+    encoding: "utf8",
+    env: cleanBrowserGateEnv({
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_MD: storedMd,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_HANDOFF: "stored-wrong-path-browser-gates-handoff.md",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE: "tester-password",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_CONFIRMED: "true",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER: "self-test",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER: "local-test-browser",
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_URL: "http://localhost:3000/games/mochi-social",
+      ...testerPasswordGateEnv,
+    }),
+  });
+  assert(writer.status === 0, `stored wrong-path setup writer should pass: ${writer.stderr || writer.stdout}`);
+  const storedReport = JSON.parse(readFileSync(storedJson, "utf8"));
+  storedReport.url = "http://localhost:3000/account";
+  writeFileSync(storedJson, `${JSON.stringify(storedReport, null, 2)}\n`, "utf8");
+
+  const result = spawnSync(process.execPath, [checker], {
+    cwd: root,
+    encoding: "utf8",
+    env: cleanBrowserGateEnv({
+      MOCHI_SOCIAL_CREDS_DIR: tempDir,
+      MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON: storedJson,
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-wrong-path-report"),
+      MOCHI_SOCIAL_SITE_PREVIEW_READY_MD: reportMdPath("stored-wrong-path-report"),
+      MOCHI_SOCIAL_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
+      MOCHI_SOCIAL_GAME_CONTRACT_URL: "https://mochi-social-game.fly.dev",
+      MOCHI_SOCIAL_SITE_ORIGIN: "https://mochirii-git-mochi-social-alpha-preview-mochirii.vercel.app",
+      MOCHI_SOCIAL_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
+    }),
+  });
+  assert(result.status !== 0, "Stored wrong-path report should keep Preview Ready red.");
+  const report = readReport("stored-wrong-path-report");
+  const gate = report.requirements.find((entry) => entry.id === "site.manual-browser-gates");
+  assert(gate, "Stored wrong-path report case did not include site.manual-browser-gates.");
+  assert(gate.status === "fail", "Stored wrong-path report should fail the manual browser gate.");
+  assert(gate.message.includes("stored browser gate report URL must target /games/mochi-social"), "Stored wrong-path failure should name the required review route.");
 }
 
 function runAndAssertManualGate(label, env, assertGate) {

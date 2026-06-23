@@ -130,6 +130,8 @@ directly observe the member sign-in path, allowlist/terms blocks, Unity iframe
 auth bridge, feedback/audit path, no-real-value copy, and shared game presence.
 The stored browser evidence access mode must match the current page mode; a
 strict member-only review cannot replace the live tester-password wall review.
+The recorded review URL must be the Mochi Social page route,
+`/games/mochi-social`, not a nearby account, admin, or generic preview page.
 
 Tester-password production evidence:
 
