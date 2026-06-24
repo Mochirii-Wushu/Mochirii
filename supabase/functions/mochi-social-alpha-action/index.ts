@@ -155,7 +155,10 @@ async function recordSharedPetState(adminClient: SupabaseClient, requestId: stri
   });
 
   if (!result.ok) {
-    const status = result.error === "invalid_unity_room_pet" || result.error === "invalid_shared_pet_state" || result.error === "shared_pet_state_too_large"
+    const status = result.error === "invalid_unity_room_pet" ||
+        result.error === "invalid_shared_pet_state" ||
+        result.error === "invalid_shared_pet_actor" ||
+        result.error === "shared_pet_state_too_large"
       ? 400
       : 500;
     return { ok: false as const, response: jsonResponse({ ok: false, error: result.error, message: result.message }, status) };

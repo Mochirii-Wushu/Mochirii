@@ -189,6 +189,7 @@ Deno.test("Mochi Social Unity player links use Mochirii Custom ID", async () => 
 
 Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", async () => {
   const client = new MockSupabaseClient();
+  const actorId = "00000000-0000-4000-8000-000000000004";
   const validState = {
     version: 1,
     petId: UNITY_SHARED_PET_KEY,
@@ -197,7 +198,10 @@ Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", as
     state: "care_received",
     careMeter: 66,
     bondTier: 3,
+    lastInteractionUnixSeconds: 1790000000,
+    lastInteractionBy: actorId,
     revision: 4,
+    writeLock: "4:1790000000",
   };
 
   const wrongPet = await upsertSharedPetSnapshot(client as never, {
@@ -240,25 +244,51 @@ Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", as
   assert(invalidMood.ok === false, "non-curated shared pet moods should be rejected");
   assert(invalidMood.error === "invalid_shared_pet_state", `unexpected error ${invalidMood.error}`);
 
+  const missingMetadata = await upsertSharedPetSnapshot(client as never, {
+    petKey: UNITY_SHARED_PET_KEY,
+    roomKey: UNITY_ROOM_KEY,
+    state: { ...validState, writeLock: "" },
+    lastActorId: actorId,
+  });
+  assert(missingMetadata.ok === false, "shared pet mirror must require write-lock metadata");
+  assert(missingMetadata.error === "invalid_shared_pet_state", `unexpected error ${missingMetadata.error}`);
+
+  const actorMismatch = await upsertSharedPetSnapshot(client as never, {
+    petKey: UNITY_SHARED_PET_KEY,
+    roomKey: UNITY_ROOM_KEY,
+    state: { ...validState, lastInteractionBy: "00000000-0000-4000-8000-000000000099" },
+    lastActorId: actorId,
+  });
+  assert(actorMismatch.ok === false, "shared pet state actor must match the verified player id");
+  assert(actorMismatch.error === "invalid_shared_pet_actor", `unexpected error ${actorMismatch.error}`);
+
+  const missingActor = await upsertSharedPetSnapshot(client as never, {
+    petKey: UNITY_SHARED_PET_KEY,
+    roomKey: UNITY_ROOM_KEY,
+    state: validState,
+  });
+  assert(missingActor.ok === false, "shared pet mirror must require a verified member actor");
+  assert(missingActor.error === "invalid_shared_pet_actor", `unexpected error ${missingActor.error}`);
+
   const saved = await upsertSharedPetSnapshot(client as never, {
     petKey: UNITY_SHARED_PET_KEY,
     roomKey: UNITY_ROOM_KEY,
     state: validState,
     sourceRequestId: "request-1",
-    lastActorId: "tester-a",
+    lastActorId: actorId.toUpperCase(),
   });
   assert(saved.ok === true, saved.ok ? "" : saved.error);
   assert(saved.snapshot !== null, "saved shared pet snapshot should be present");
   assert(saved.snapshot.revision === 1, `expected first mirror revision 1, got ${saved.snapshot.revision}`);
   assert(saved.snapshot.petKey === UNITY_SHARED_PET_KEY, "snapshot should use Lirabao key");
   assert(saved.snapshot.roomKey === UNITY_ROOM_KEY, "snapshot should use Jade Lantern room");
-  assert(saved.snapshot.lastActorId === "tester-a", "snapshot should preserve last actor");
+  assert(saved.snapshot.lastActorId === actorId, "snapshot should preserve normalized last actor");
   const petUpsert = client.upserts.find((entry) => entry.table === "mochi_social_shared_pet_snapshots");
   assert(petUpsert !== undefined, "expected shared pet mirror upsert");
   assert(petUpsert.row.pet_key === UNITY_SHARED_PET_KEY, "shared pet mirror must use Lirabao key");
   assert(petUpsert.row.room_key === UNITY_ROOM_KEY, "shared pet mirror must use Jade Lantern room");
   assert(petUpsert.row.source_request_id === "request-1", "shared pet mirror should preserve source request");
-  assert(petUpsert.row.last_actor_id === "tester-a", "shared pet mirror should preserve last actor row");
+  assert(petUpsert.row.last_actor_id === actorId, "shared pet mirror should preserve normalized last actor row");
   assert(petUpsert.options?.onConflict === "pet_key", "shared pet mirror must be idempotent by pet");
 
   client.existingSharedPet = {
@@ -270,6 +300,7 @@ Deno.test("Mochi Social shared pet mirror accepts only shared Lirabao state", as
   };
   const updated = await upsertSharedPetSnapshot(client as never, {
     state: { ...validState, state: "happy", mood: "playful", revision: 5 },
+    lastActorId: actorId,
   });
   assert(updated.ok === true, updated.ok ? "" : updated.error);
   assert(updated.snapshot !== null, "updated shared pet snapshot should be present");

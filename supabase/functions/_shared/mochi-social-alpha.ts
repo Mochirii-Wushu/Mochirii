@@ -7,6 +7,7 @@ export const UNITY_ROOM_KEY = "jade-lantern-room-alpha";
 export const UNITY_SHARED_PET_KEY = "lirabao";
 export const UNITY_SHARED_PET_DISPLAY_NAME = "Lirabao";
 export const UNITY_CUSTOM_ID_PREFIX = "mochirii:";
+const MEMBER_USER_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const UNITY_SHARED_PET_STATES = new Set(["idle", "approach", "happy", "care_received", "stale_revision_reload", "unavailable"]);
 const UNITY_SHARED_PET_MOODS = new Set(["curious", "resting", "reloading", "comforted", "playful"]);
 
@@ -67,6 +68,11 @@ export function safeString(value: unknown, maxLength: number): string | null {
 
 export function unityCustomId(userId: string): string {
   return `${UNITY_CUSTOM_ID_PREFIX}${userId}`;
+}
+
+export function normalizeMemberUserId(userId: unknown): string | null {
+  const text = safeString(userId, 80)?.toLowerCase() || "";
+  return MEMBER_USER_ID_RE.test(text) ? text : null;
 }
 
 export function getServiceRoleKey(): string {
@@ -359,6 +365,12 @@ export async function upsertSharedPetSnapshot(
     return { ok: false as const, error: "invalid_shared_pet_state", message: "Shared Lirabao state is not valid for this room." };
   }
 
+  const lastActorId = normalizeMemberUserId(input.lastActorId);
+  const stateActorId = normalizeMemberUserId(input.state.lastInteractionBy);
+  if (!lastActorId || !stateActorId || lastActorId !== stateActorId) {
+    return { ok: false as const, error: "invalid_shared_pet_actor", message: "Shared Lirabao state must match the verified member actor." };
+  }
+
   if (JSON.stringify(input.state).length > 64_000) {
     return { ok: false as const, error: "shared_pet_state_too_large", message: "Shared pet state is too large for the audit mirror." };
   }
@@ -378,7 +390,7 @@ export async function upsertSharedPetSnapshot(
         revision: nextRevision,
         state: input.state,
         source_request_id: input.sourceRequestId || null,
-        last_actor_id: input.lastActorId || null,
+        last_actor_id: lastActorId,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "pet_key" },
@@ -405,6 +417,11 @@ function isValidSharedPetState(state: JsonRecord): boolean {
     Number.isInteger(state.bondTier) &&
     Number(state.bondTier) >= 1 &&
     Number(state.bondTier) <= 5 &&
+    Number.isInteger(state.lastInteractionUnixSeconds) &&
+    Number(state.lastInteractionUnixSeconds) >= 0 &&
+    typeof state.writeLock === "string" &&
+    state.writeLock.length > 0 &&
+    state.writeLock.length <= 120 &&
     Number.isInteger(state.revision) &&
     Number(state.revision) >= 0;
 }

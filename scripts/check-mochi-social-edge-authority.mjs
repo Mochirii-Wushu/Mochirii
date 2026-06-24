@@ -51,6 +51,7 @@ assertIncludes(sharedPath, shared, 'UNITY_ROOM_KEY = "jade-lantern-room-alpha"')
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_KEY = "lirabao"');
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_DISPLAY_NAME = "Lirabao"');
 assertIncludes(sharedPath, shared, 'UNITY_CUSTOM_ID_PREFIX = "mochirii:"');
+assertIncludes(sharedPath, shared, "normalizeMemberUserId");
 assertIncludes(sharedPath, shared, "upsertSharedPetSnapshot");
 assertIncludes(sharedPath, shared, "upsertUnityPlayerLink");
 assertIncludes(sharedPath, shared, "customId !== unityCustomId(input.userId)");
@@ -64,6 +65,10 @@ assertIncludes(sharedPath, shared, "isValidSharedPetState");
 assertIncludes(sharedPath, shared, "state.displayName === UNITY_SHARED_PET_DISPLAY_NAME");
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_MOODS.has(String(state.mood || ""))');
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_STATES.has(String(state.state || ""))');
+assertIncludes(sharedPath, shared, "invalid_shared_pet_actor");
+assertIncludes(sharedPath, shared, "state.lastInteractionBy");
+assertIncludes(sharedPath, shared, "state.writeLock");
+assertIncludes(sharedPath, shared, "state.lastInteractionUnixSeconds");
 
 assertBefore(actionPath, action, "const serverAccess = requireGameServer(req);", "const adminClient = createAdminClient();");
 assertBefore(actionPath, action, "if (!serverAccess.ok) return serverAccess.response;", "const bodyResult = await readJsonBody(req);");
