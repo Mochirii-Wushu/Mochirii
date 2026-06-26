@@ -133,10 +133,10 @@ for (const needle of [
 }
 
 for (const needle of [
-  "grant select on table public.mochi_social_unity_players to authenticated",
-  "grant select on table public.mochi_social_shared_pet_snapshots to authenticated",
-  "grant select, insert, update, delete on table public.mochi_social_unity_players to service_role",
-  "grant select, insert, update, delete on table public.mochi_social_shared_pet_snapshots to service_role",
+  "('mochi_social_unity_players', 'select', 'authenticated')",
+  "('mochi_social_shared_pet_snapshots', 'select', 'authenticated')",
+  "('mochi_social_unity_players', 'select, insert, update, delete', 'service_role')",
+  "('mochi_social_shared_pet_snapshots', 'select, insert, update, delete', 'service_role')",
 ]) {
   assertIncludes(explicitGrantsPath, explicitGrants, needle);
 }
