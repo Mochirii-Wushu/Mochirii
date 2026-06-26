@@ -9,6 +9,8 @@ const failures = [];
 
 requireSnippet("NEXT_PUBLIC_MOCHI_SOCIAL_URL", "game origin must come from the public Mochi Social URL env.");
 requireSnippet("payload: { accessToken: token }", "MOCHI_SOCIAL_AUTH payload must contain only the short-lived access token field.");
+requireSnippet("functionsUrl: supabaseFunctionsUrl || undefined", "MOCHI_SOCIAL_AUTH must include the public Supabase Functions URL for Unity token exchange.");
+requireSnippet('`${SUPABASE_URL}/functions/v1`', "Supabase Functions URL must be derived from the public Supabase URL.");
 requireSnippet("auth.data?.session?.access_token || null", "initial session read must use Supabase access_token only.");
 requireSnippet("nextSession?.access_token || null", "auth-state updates must use Supabase access_token only.");
 requireSnippet("onLoad={() => sendAuthToGame(accessToken)}", "iframe load must resend the current access-token-only auth message.");
@@ -32,6 +34,7 @@ if (authIndex === -1) {
   if (!authBlock.includes("frame.postMessage(")) failures.push("MOCHI_SOCIAL_AUTH must be sent through frame.postMessage.");
   if (!authBlock.includes("gameOrigin")) failures.push("MOCHI_SOCIAL_AUTH postMessage must target gameOrigin.");
   if (!authBlock.includes("payload: { accessToken: token }")) failures.push("MOCHI_SOCIAL_AUTH payload must stay access-token-only.");
+  if (!authBlock.includes("functionsUrl: supabaseFunctionsUrl || undefined")) failures.push("MOCHI_SOCIAL_AUTH must include the public functionsUrl helper.");
   assertNoForbiddenBridgeMaterial("MOCHI_SOCIAL_AUTH block", authBlock);
 }
 

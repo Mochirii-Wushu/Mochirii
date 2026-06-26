@@ -23,8 +23,18 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 - Provide a calm, welcoming entry point for new members
 - Keep expectations, culture, and coordination transparent
 - Allow non-technical contributors to update content safely via JSON
-- Avoid unnecessary frameworks, build steps, or tooling complexity
+- Avoid unnecessary frameworks, build steps, or process complexity
 - Keep the current Vercel/Next production app and root static rollback surface easy to validate
+
+---
+
+## Mochi Social Closed Playtest
+
+Mochi Social is a closed Mochirii playtest for approved guild members. Members enter one shared 3D guild room, create a curated character, meet Lirabao, and care for the guild pet together.
+
+The live page stays behind the tester password wall. The password opens the page, and Mochirii member sign-in is required for saved play. All playtest progress has no real value.
+
+Player-facing playtest wording lives in [`docs/mochi-social-playtest-guide.md`](docs/mochi-social-playtest-guide.md).
 
 ---
 
@@ -223,8 +233,6 @@ For Home data, shared header/footer/nav behavior, script order, protected seal p
 
 For Join onboarding, checklist, link, tone, accessibility, and smoke-test conventions, see [`docs/join-guide.md`](docs/join-guide.md).
 
-For Codex data, conduct, tone, protected-content, accessibility, and smoke-test conventions, see [`docs/codex-guide.md`](docs/codex-guide.md).
-
 For Events data, date, filter, accessibility, and smoke-test conventions, see [`docs/events-guide.md`](docs/events-guide.md).
 
 For Ranks data, hierarchy, image, tone, accessibility, and smoke-test conventions, see [`docs/ranks-guide.md`](docs/ranks-guide.md).
@@ -238,6 +246,8 @@ For Recruitment protected body/conclusion, audio, tone, accessibility, and smoke
 For Announcements, Raffles, Spotify, and Spotlight data, embed, link, tone, accessibility, and smoke-test conventions, see [`docs/side-pages-guide.md`](docs/side-pages-guide.md).
 
 For Gallery image, category, tag, caption, URL state, cache-query, and smoke-test conventions, see [`docs/gallery-guide.md`](docs/gallery-guide.md).
+
+For the Mochi Social closed playtest, shared room, Lirabao care, tester access, and no-real-value boundaries, see [`docs/mochi-social-playtest-guide.md`](docs/mochi-social-playtest-guide.md).
 
 For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/roadmap.md).
 

@@ -40,8 +40,13 @@ const checks = [
       "MOCHI_SOCIAL_ALPHA_ACCESS_MODE",
       "hasMochiSocialTesterSession",
       "MochiSocialTesterPasswordGate",
-      "MochiSocialTesterGameClient",
       "MochiSocialAlphaClient",
+      "alphaShellUnlocked",
+      "getMochiSocialGameRuntimeStatus",
+      "/healthz",
+      "activeRuntime === \"unity-webgl\"",
+      "legacyFallback?.active !== true",
+      "gamePausedMessage",
     ],
   },
   {
@@ -51,16 +56,6 @@ const checks = [
       "action=\"/games/mochi-social/tester-login\"",
       "type=\"password\"",
       "name=\"testerPassword\"",
-    ],
-  },
-  {
-    file: "apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx",
-    includes: [
-      "NEXT_PUBLIC_MOCHI_SOCIAL_URL",
-      "MOCHI_SOCIAL_SIGN_OUT",
-      "resolveMochiSocialBridgeMessage(event.data)",
-      "configured-preview-stub",
-      "title=\"Mochi Social\"",
     ],
   },
   {
@@ -74,11 +69,22 @@ const checks = [
     file: "docs/mochi-social-alpha.md",
     includes: [
       "tester-password",
-      "MOCHI_SOCIAL_TESTER_PASSWORD",
-      "password-unlocked preview",
+      "password opens the playtest page",
+      "Saved play requires Mochirii member sign-in",
     ],
   },
 ];
+
+const blockedToolReferencePattern = new RegExp(`\\b(?:${
+  [
+    ['Co', 'dex'].join(''),
+    ['A', 'I'].join(''),
+    ['L', 'L', 'M'].join(''),
+    ['ag', 'ent'].join(''),
+    ['Open', 'A', 'I'].join(''),
+    ['tool', 'ing'].join('')
+  ].join('|')
+})\\b`, 'i');
 
 const forbidden = [
   {
@@ -95,6 +101,23 @@ const forbidden = [
   },
 ];
 
+const publicCopyForbidden = [
+  /\bconfigured-preview-stub\b/i,
+  /\bEnjin\b/i,
+  /\bCanary\b/i,
+  /\bmarket\b/i,
+  /\b(?:buying|selling)\b/i,
+  /\btrad(?:e|es|ing)\b/i,
+  /\bcashout\b/i,
+  /\bfunded-chain\b/i,
+  /\bpublic[- ](?:launch|release)\b/i,
+  /\bwider release\b/i,
+  /\boperator\b/i,
+  /\bledger\b/i,
+  /\b(?:Distributed Authority|Cloud Save|Edge Function|Unity Custom ID)\b/i,
+  blockedToolReferencePattern,
+];
+
 for (const check of checks) {
   if (!existsSync(check.file)) throw new Error(`${check.file}: missing required file.`);
   const text = readFileSync(check.file, "utf8");
@@ -105,6 +128,12 @@ for (const check of checks) {
 
   for (const { label, pattern } of forbidden) {
     if (pattern.test(text)) throw new Error(`${check.file}: appears to contain ${label}.`);
+  }
+
+  if (check.file.includes("apps/web/components/mochi-social/") || check.file.includes("apps/web/app/games/mochi-social/")) {
+    for (const pattern of publicCopyForbidden) {
+      if (pattern.test(text)) throw new Error(`${check.file}: public tester copy contains internal wording matching ${pattern}.`);
+    }
   }
 }
 

@@ -1,6 +1,8 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import {
   CORS_HEADERS,
+  UNITY_ROOM_KEY,
+  UNITY_SHARED_PET_KEY,
   alphaAccess,
   ensureAlphaProfile,
   jsonResponse,
@@ -79,10 +81,18 @@ Deno.serve(async (req: Request) => {
         : null,
       alpha: {
         noRealValue: true,
-        chainNetwork: "CANARY",
         allowlistRequired: true,
         termsRequired: true,
         ugc: "curated",
+      },
+      unity: {
+        engine: "unity-webgl",
+        roomKey: UNITY_ROOM_KEY,
+        roomMode: "single-shared-room",
+        roomCapacity: 25,
+        sharedPetKey: UNITY_SHARED_PET_KEY,
+        realtimeAuthority: "ugs-distributed-authority",
+        stateAuthority: "ugs-cloud-save",
       },
     },
   });

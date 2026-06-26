@@ -23,6 +23,9 @@ async function run() {
   const health = await getJson("/healthz", "health");
   assert(health.ok === true, "/healthz must return ok=true.");
   assert(health.name === "Mochi Social", "/healthz must identify Mochi Social.");
+  assert(health.activeRuntime === "unity-webgl", "/healthz must report Unity WebGL as the active runtime.");
+  assert(health.unityWebglBuild?.present === true, "/healthz must report the Unity WebGL build as present.");
+  assert(health.legacyFallback?.active === false, "/healthz must report legacy fallback inactive.");
 
   const manifestResult = await request("/integration/game-manifest.json", "manifest", {
     headers: siteOrigin ? { Origin: siteOrigin } : undefined,
@@ -34,6 +37,17 @@ async function run() {
   assert(manifest.playUrl === `${manifest.origin}/play`, "Manifest playUrl must point to /play.");
   assert(manifest.embedUrl === `${manifest.origin}/embed`, "Manifest embedUrl must point to /embed.");
   assert(manifest.healthUrl === `${manifest.origin}/healthz`, "Manifest healthUrl must point to /healthz.");
+  assert(manifest.engine === "unity-webgl", 'Manifest engine must be "unity-webgl".');
+  assert(manifest.activeRuntime === "unity-webgl", 'Manifest activeRuntime must be "unity-webgl".');
+  assert(manifest.unityWebglBuild?.present === true, "Manifest must report the Unity WebGL build as present.");
+  assert(manifest.legacyFallback?.active === false, "Manifest must report legacy fallback inactive.");
+  assert(manifest.room?.key === "jade-lantern-room-alpha", "Manifest room key must be jade-lantern-room-alpha.");
+  assert(manifest.room?.mode === "single-shared-room", "Manifest room mode must be single-shared-room.");
+  assert(manifest.room?.capacity === 25, "Manifest room capacity must be 25.");
+  assert(manifest.room?.sharedPetKey === "lirabao", "Manifest shared starter pet must be Lirabao.");
+  const manifestRuntime = manifest.runtime || manifest.unity || {};
+  assert(manifestRuntime.realtimeAuthority === "ugs-distributed-authority", "Manifest runtime must use UGS Distributed Authority.");
+  assert(manifestRuntime.stateAuthority === "ugs-cloud-save", "Manifest runtime must use UGS Cloud Save.");
   assert(manifest.bridge?.protocolVersion === 1, "Manifest bridge protocol version must stay 1.");
   assert(manifest.bridge?.namespace === "MOCHI_SOCIAL", "Manifest bridge namespace must stay MOCHI_SOCIAL.");
   assertIncludes(manifest.bridge?.parentToGame, "MOCHI_SOCIAL_AUTH", "Manifest parent-to-game bridge must accept MOCHI_SOCIAL_AUTH.");
@@ -47,13 +61,8 @@ async function run() {
   assert(manifest.alpha?.allowlistRequired === true, "Manifest must require alpha allowlist.");
   assert(manifest.alpha?.termsRequired === true, "Manifest must require alpha terms.");
   assert(manifest.alpha?.noRealValue === true, "Manifest must keep no-real-value alpha posture.");
-  assert(manifest.economy?.mode === "test-soft-currency", "Manifest economy must stay test-soft-currency.");
-  assert(manifest.chain?.provider === "enjin", "Manifest chain provider must stay Enjin.");
-  assert(manifest.chain?.network === "CANARY", "Manifest chain network must stay CANARY.");
-  assert(manifest.market?.fixedPrice === true, "Manifest must keep fixed-price market enabled.");
-  assert(manifest.market?.directTrade === true, "Manifest must keep direct trade enabled.");
-  assert(manifest.market?.auctions === false, "Manifest must keep auctions disabled.");
-  assert(manifest.market?.cashout === false, "Manifest must keep cashout disabled.");
+  assertNoFutureSystemKeys(manifest, "Manifest");
+  assert(manifest.avatarUploads === false, "Manifest avatar uploads must stay disabled for curated character presets.");
   assert(manifest.ugc === "curated", "Manifest UGC mode must stay curated.");
 
   if (siteOrigin) {
@@ -66,24 +75,27 @@ async function run() {
   assert(alphaStatus.alpha?.allowlistRequired === true, "Alpha status must require allowlist.");
   assert(alphaStatus.alpha?.termsRequired === true, "Alpha status must require terms.");
   assert(alphaStatus.alpha?.noRealValue === true, "Alpha status must keep no-real-value posture.");
-  assert(alphaStatus.economy?.mode === "test-soft-currency", "Alpha status economy must stay test-soft-currency.");
-  assert(alphaStatus.chain?.provider === "enjin", "Alpha status chain provider must stay Enjin.");
-  assert(alphaStatus.chain?.network === "CANARY", "Alpha status chain network must stay CANARY.");
-  assert(alphaStatus.market?.fixedPrice === true, "Alpha status must keep fixed-price enabled.");
-  assert(alphaStatus.market?.directTrade === true, "Alpha status must keep direct trade enabled.");
-  assert(alphaStatus.market?.auctions === false, "Alpha status must keep auctions disabled.");
-  assert(alphaStatus.market?.cashout === false, "Alpha status must keep cashout disabled.");
+  assert(alphaStatus.engine === "unity-webgl", 'Alpha status engine must be "unity-webgl".');
+  assert(alphaStatus.activeRuntime === "unity-webgl", 'Alpha status activeRuntime must be "unity-webgl".');
+  assert(alphaStatus.unityWebglBuild?.present === true, "Alpha status must report the Unity WebGL build as present.");
+  assert(alphaStatus.legacyFallback?.active === false, "Alpha status must report legacy fallback inactive.");
+  assert(alphaStatus.room?.key === "jade-lantern-room-alpha", "Alpha status room key must be jade-lantern-room-alpha.");
+  assert(alphaStatus.room?.mode === "single-shared-room", "Alpha status room mode must be single-shared-room.");
+  assert(alphaStatus.room?.capacity === 25, "Alpha status room capacity must be 25.");
+  assert(alphaStatus.room?.sharedPetKey === "lirabao", "Alpha status shared starter pet must be Lirabao.");
+  const alphaRuntime = alphaStatus.runtime || alphaStatus.unity || {};
+  assert(alphaRuntime.realtimeAuthority === "ugs-distributed-authority", "Alpha status runtime must use UGS Distributed Authority.");
+  assert(alphaRuntime.stateAuthority === "ugs-cloud-save", "Alpha status runtime must use UGS Cloud Save.");
+  assertNoFutureSystemKeys(alphaStatus, "Alpha status");
+  assert(alphaStatus.avatarUploads === false, "Alpha status avatar uploads must stay disabled.");
   assert(alphaStatus.ugc === "curated", "Alpha status UGC mode must stay curated.");
   assert(alphaStatus.edgeFunctions?.session === "mochi-social-alpha-session", "Alpha status must expose the session Edge Function.");
+  assert(alphaStatus.edgeFunctions?.unityAuth === "mochi-social-unity-auth", "Alpha status must expose the Unity auth Edge Function.");
   assert(alphaStatus.edgeFunctions?.action === "mochi-social-alpha-action", "Alpha status must expose the action Edge Function.");
   assert(alphaStatus.edgeFunctions?.admin === "mochi-social-alpha-admin", "Alpha status must expose the admin Edge Function.");
   assert(alphaStatus.edgeFunctions?.feedback === "submit-mochi-social-feedback", "Alpha status must expose the feedback Edge Function.");
-  assert(alphaStatus.chainRuntime?.provider === "enjin", "Alpha chain runtime provider must stay Enjin.");
-  assert(alphaStatus.chainRuntime?.network === "CANARY", "Alpha chain runtime network must stay CANARY.");
-  assert(["configured", "configured-preview-stub"].includes(alphaStatus.chainRuntime?.mode), "Alpha chain runtime mode must be configured or configured-preview-stub.");
-  if (alphaStatus.enjinCanaryConfigured === false) {
-    assert(alphaStatus.chainRuntime?.mode === "configured-preview-stub", "Unconfigured Enjin runtime must expose configured-preview-stub.");
-  }
+  assert(!("chainRuntime" in alphaStatus), "Alpha status must not expose future asset runtime state.");
+  assert(!("enjinCanaryConfigured" in alphaStatus), "Alpha status must not expose future asset provider state.");
 
   const embed = await request("/embed", "embed");
   assert((embed.headers.get("content-type") || "").includes("text/html"), "/embed must return HTML for the iframe.");
@@ -126,6 +138,11 @@ function normalizeOrigin(value, label) {
 
 function assertIncludes(value, expected, message) {
   assert(Array.isArray(value) && value.includes(expected), message);
+}
+
+function assertNoFutureSystemKeys(payload, label) {
+  const text = JSON.stringify(payload);
+  assert(!/\b(?:market|trade|cashout)\b/i.test(text), `${label} must not publish future economy keys for the Unity shared-room alpha.`);
 }
 
 function assert(condition, message) {

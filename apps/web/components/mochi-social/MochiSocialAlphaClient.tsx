@@ -3,14 +3,24 @@
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
+import { SUPABASE_URL } from "@/lib/supabase/config";
 import { getMochiSocialAlphaSession, submitMochiSocialFeedback, type MochiSocialAlphaSession } from "@/lib/mochi-social/alpha";
 import { resolveMochiSocialBridgeMessage, type MochiSocialBridgeStatus } from "@/lib/mochi-social/bridge";
 
 type LoadState = "loading" | "signed-out" | "blocked" | "terms" | "ready" | "error";
 
 const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || "https://mochi-social-game.fly.dev").replace(/\/+$/, "");
+const supabaseFunctionsUrl = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : "";
 
-export function MochiSocialAlphaClient() {
+type MochiSocialAlphaClientProps = {
+  gameAvailable?: boolean;
+  gamePausedMessage?: string;
+};
+
+export function MochiSocialAlphaClient({
+  gameAvailable = true,
+  gamePausedMessage = "The Mochi Social room is temporarily paused. The tester page is still open, and saved play will resume when the room is ready.",
+}: MochiSocialAlphaClientProps) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [session, setSession] = useState<MochiSocialAlphaSession | null>(null);
@@ -20,6 +30,7 @@ export function MochiSocialAlphaClient() {
   const [feedback, setFeedback] = useState("");
   const [busy, setBusy] = useState(false);
   const embedUrl = useMemo(() => `${gameOrigin}/embed`, []);
+  const visibleBridgeStatus: MochiSocialBridgeStatus = gameAvailable ? bridgeStatus : "error";
 
   const sendAuthToGame = useCallback((token: string | null) => {
     const frame = iframeRef.current?.contentWindow;
@@ -31,6 +42,7 @@ export function MochiSocialAlphaClient() {
           type: "MOCHI_SOCIAL_AUTH",
           protocolVersion: 1,
           payload: { accessToken: token },
+          functionsUrl: supabaseFunctionsUrl || undefined,
         },
         gameOrigin,
       );
@@ -142,28 +154,30 @@ export function MochiSocialAlphaClient() {
         <div>
           <p className="eyebrow">Closed Alpha</p>
           <h1>Mochi Social</h1>
+          <p>Create your character, enter the shared guild room, and care for Lirabao with other approved members. Mochirii member sign-in is required for saved play.</p>
         </div>
         <dl>
           <div>
-            <dt>Network</dt>
-            <dd>Enjin Canary</dd>
+            <dt>Playtest</dt>
+            <dd>Closed alpha</dd>
           </div>
           <div>
-            <dt>Value</dt>
-            <dd>No real value</dd>
+            <dt>Room</dt>
+            <dd>Shared alpha</dd>
           </div>
           <div>
-            <dt>Access</dt>
-            <dd>Allowlist</dd>
+            <dt>Pet</dt>
+            <dd>Lirabao</dd>
           </div>
         </dl>
       </header>
       <div className="mochi-game-preview-contract" aria-label="Mochi Social preview contract">
-        <span>Chain mode: configured-preview-stub</span>
-        <span>Economy: test soft currency</span>
-        <span>Market: fixed price only</span>
-        <span>Progress: {session?.progress ? `account sync r${session.progress.revision}` : "account sync ready"}</span>
-        <span data-mochi-bridge-state>Bridge: {bridgeStatus}</span>
+        <span>Shared guild room</span>
+        <span>Capacity: {session?.unity?.roomCapacity || 25} testers</span>
+        <span>Pet: shared Lirabao</span>
+        <span>Value: No real value</span>
+        <span>Progress: {session?.progress ? "saved for this member" : "ready to save"}</span>
+        <span data-mochi-bridge-state>Room connection: {visibleBridgeStatus}</span>
       </div>
 
       {message ? <p className="form-message">{message}</p> : null}
@@ -187,7 +201,7 @@ export function MochiSocialAlphaClient() {
       {state === "terms" ? (
         <div className="mochi-game-panel">
           <h2>Alpha acknowledgement</h2>
-          <p>Mochi Social alpha assets are test-only, Enjin Canary assets have no real value, chat is logged for moderation, and the build may reset before release.</p>
+          <p>Alpha characters and shared Lirabao progress are for testing only, have no real value, chat may be reviewed for safety, and the build may reset before release.</p>
           <button className="hero-cta hero-cta--primary" type="button" onClick={() => refresh(true)} disabled={busy}>
             I understand and enter alpha
           </button>
@@ -203,33 +217,40 @@ export function MochiSocialAlphaClient() {
       ) : null}
 
       {state === "ready" ? (
-        <>
-          <iframe
-            ref={iframeRef}
-            className="mochi-game-frame"
-            title="Mochi Social"
-            src={embedUrl}
-            allow="fullscreen"
-            referrerPolicy="strict-origin-when-cross-origin"
-            onLoad={() => sendAuthToGame(accessToken)}
-          />
-          <p className="mochi-game-note">
-            Signed-in alpha progress saves to your Mochirii account through the game bridge. Tester-password preview remains guest-only.
-          </p>
-          <form className="mochi-feedback" onSubmit={submitFeedback}>
-            <label>
-              <span>Alpha feedback</span>
-              <textarea
-                rows={3}
-                maxLength={2000}
-                value={feedback}
-                onChange={(event) => setFeedback(event.target.value)}
-                placeholder="Bug, feel, trade flow, spirit loop, or anything that felt off."
-              />
-            </label>
-            <button className="hero-cta" type="submit" disabled={busy || !feedback.trim()}>Send feedback</button>
-          </form>
-        </>
+        gameAvailable ? (
+          <>
+            <iframe
+              ref={iframeRef}
+              className="mochi-game-frame"
+              title="Mochi Social"
+              src={embedUrl}
+              allow="fullscreen"
+              referrerPolicy="strict-origin-when-cross-origin"
+              onLoad={() => sendAuthToGame(accessToken)}
+            />
+            <p className="mochi-game-note">
+              Signed-in play saves your character and shared Lirabao progress. The tester-password preview alone is only for opening the room.
+            </p>
+            <form className="mochi-feedback" onSubmit={submitFeedback}>
+              <label>
+                <span>Alpha feedback</span>
+                <textarea
+                  rows={3}
+                  maxLength={2000}
+                  value={feedback}
+                  onChange={(event) => setFeedback(event.target.value)}
+                  placeholder="Bug, feel, character preset, room join, Lirabao interaction, or anything that felt off."
+                />
+              </label>
+              <button className="hero-cta" type="submit" disabled={busy || !feedback.trim()}>Send feedback</button>
+            </form>
+          </>
+        ) : (
+          <div className="mochi-game-panel" role="status" aria-live="polite">
+            <h2>Playtest temporarily paused</h2>
+            <p>{gamePausedMessage}</p>
+          </div>
+        )
       ) : null}
     </section>
   );

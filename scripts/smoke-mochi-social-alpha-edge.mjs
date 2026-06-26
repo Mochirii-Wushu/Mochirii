@@ -26,7 +26,7 @@ try {
 }
 
 async function run() {
-  for (const name of ["mochi-social-alpha-session", "mochi-social-alpha-action", "mochi-social-alpha-progress", "mochi-social-alpha-admin", "submit-mochi-social-feedback"]) {
+  for (const name of ["mochi-social-alpha-session", "mochi-social-unity-auth", "mochi-social-alpha-action", "mochi-social-alpha-progress", "mochi-social-alpha-admin", "submit-mochi-social-feedback"]) {
     await checkOptions(name);
   }
 
@@ -36,6 +36,18 @@ async function run() {
     allowGatewayAuthError: true,
   });
   await expectJson("mochi-social-alpha-session", "session malformed auth", {}, {
+    authorization: "Bearer malformed.jwt.token",
+    status: 401,
+    error: "invalid_auth",
+    allowGatewayAuthError: true,
+  });
+
+  await expectJson("mochi-social-unity-auth", "unity auth without auth", {}, {
+    status: 401,
+    error: "missing_auth",
+    allowGatewayAuthError: true,
+  });
+  await expectJson("mochi-social-unity-auth", "unity auth malformed auth", {}, {
     authorization: "Bearer malformed.jwt.token",
     status: 401,
     error: "invalid_auth",

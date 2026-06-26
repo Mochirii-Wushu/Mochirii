@@ -18,8 +18,11 @@ const cases = [
   { input: { type: "OTHER_EVENT", protocolVersion: 1 }, expected: { action: "ignore" }, message: "Unknown event type should be ignored." },
   { input: { type: "MOCHI_SOCIAL_READY", protocolVersion: 1 }, expected: { action: "send-auth", status: "ready" }, message: "READY should request an access-token-only auth resend." },
   { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "linked" } }, expected: { action: "set-status", status: "linked" }, message: "AUTH_STATE linked should be reflected as a non-secret bridge status." },
+  { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "signed-in" } }, expected: { action: "set-status", status: "linked" }, message: "Unity signed-in state should be reflected as linked." },
   { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "guest" } }, expected: { action: "set-status", status: "guest" }, message: "AUTH_STATE guest should be reflected as a non-secret bridge status." },
+  { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "signed-out" } }, expected: { action: "set-status", status: "guest" }, message: "Unity signed-out state should be reflected as guest." },
   { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "error" } }, expected: { action: "set-status", status: "error" }, message: "AUTH_STATE error should be reflected as a non-secret bridge status." },
+  { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "creating-character" } }, expected: { action: "set-status", status: "ready" }, message: "Unity character creation state should stay non-secret and ready." },
   { input: { type: "MOCHI_SOCIAL_AUTH_STATE", protocolVersion: 1, payload: { state: "unexpected" } }, expected: { action: "set-status", status: "ready" }, message: "Unknown AUTH_STATE payloads should fall back to ready instead of exposing arbitrary state." },
   { input: { type: "MOCHI_SOCIAL_ERROR", protocolVersion: 1 }, expected: null, message: "Game error messages should move the bridge into error state." },
 ];

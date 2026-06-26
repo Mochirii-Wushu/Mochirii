@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { join, resolve } from "node:path";
 
 const root = process.cwd();
-const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
+const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../mochi-social");
 const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
 const previewEnvPath = resolve(credsDir, process.env.MOCHI_SOCIAL_PREVIEW_ENV_FILE || "mochi-social-alpha-vercel-preview.local.txt");
 const previewEnv = readPreviewEnvFile(previewEnvPath);
@@ -13,11 +13,14 @@ const supabaseProjectRef = process.env.MOCHI_SOCIAL_SUPABASE_PROJECT_REF || "dnx
 const functionsUrl = process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || `https://${supabaseProjectRef}.supabase.co/functions/v1`;
 const gameUrl = process.env.MOCHI_SOCIAL_GAME_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev";
 const sitePreviewUrl = process.env.MOCHI_SOCIAL_SITE_PREVIEW_URL || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "<vercel-preview-host>";
+const liveSiteUrl = process.env.MOCHI_SOCIAL_SITE_PRODUCTION_URL || process.env.MOCHI_SOCIAL_LIVE_SITE_URL || "https://mochirii.com";
+const gamePrNumber = process.env.MOCHI_SOCIAL_GAME_PR_NUMBER || "5";
+const sitePrNumber = process.env.MOCHI_SOCIAL_SITE_PR_NUMBER || "333";
 const generatedAt = new Date().toISOString();
 
 const externalGateReport = readJson(resolve(gameRepoPath, "reports/alpha-external-gates.json"));
-const gamePr = readPr("xartaiusx/mochi-social", "1");
-const sitePr = readPr("Mochirii-Wushu/Mochirii", "258");
+const gamePr = readPr("xartaiusx/mochi-social", gamePrNumber);
+const sitePr = readPr("Mochirii-Wushu/Mochirii", sitePrNumber);
 const credentialFiles = listCredentialFiles();
 const gitState = readGitState();
 
@@ -60,7 +63,8 @@ function readPr(repo, number) {
       repo,
       number,
       ok: false,
-      message: sanitize(result.stderr || result.error?.message || "GitHub PR state could not be read."),
+      url: `https://github.com/${repo}/pull/${number}`,
+      message: "GitHub CLI is unavailable locally; verify PR mergeability and checks in GitHub before merging.",
     };
   }
   try {
@@ -91,10 +95,12 @@ function renderChecklist() {
     ? credentialFiles.map((file) => `- ${file}`).join("\n")
     : "- No matching local credential checklist files were found.";
   const externalFailures = externalGateReport.ok && Array.isArray(externalGateReport.data.checks)
-    ? externalGateReport.data.checks
-      .filter((check) => check.status === "fail")
-      .map((check) => `- ${check.name}: ${check.message}`)
-      .join("\n") || "- No failing game external gates were recorded."
+    ? [
+      "- PR state is listed above; verify both PRs in GitHub before merge.",
+      ...externalGateReport.data.checks
+        .filter((check) => check.status === "fail" && !["game PR", "site PR"].includes(check.name))
+        .map((check) => `- ${check.name}: ${check.message}`)
+    ].join("\n") || "- No failing game external gates were recorded."
     : `- Game external gate report ${externalGateReport.message}: ${externalGateReport.path}`;
   const siteOrigin = normalizePreviewOrigin(sitePreviewUrl);
 
@@ -102,7 +108,7 @@ function renderChecklist() {
 
 Generated: ${generatedAt}
 
-This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, and preview acceptance steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into Codex chat, Git, PR comments, screenshots, or reports.
+This file is intentionally no-secret. It is for website-side Vercel, Supabase, allowlist, terms, live password-wall launch, and optional preview rehearsal steps. Do not paste API tokens, service-role keys, Discord secrets, Enjin tokens, wallet seed material, payment details, or one-time codes into chat, Git, PR comments, screenshots, or reports.
 
 ## Local Credential Files
 
@@ -135,14 +141,41 @@ ${externalFailures}
 
 ## Alpha Preview Ready Lane
 
-- Alpha Preview Ready: Vercel Preview route, Fly game iframe, Supabase allowlist, terms, feedback, short-lived MOCHI_SOCIAL_AUTH, no-real-value labels, and Enjin visible as configured-preview-stub.
-- Funded-chain gates: real cENJ, Enjin collection ID, Fuel Tank ID, Wallet Daemon signing, and finalized proof smoke.
-- Do not set dummy ENJIN_COLLECTION_ID, dummy ENJIN_FUEL_TANK_ID, or fake readiness flags to make funded-chain gates pass.
-- For Preview Ready, chain request rows may be audit-only preview rows and must not credit inventory, settle trades, or settle listings.
+- Alpha Preview Ready: live tester-password route, Unity game iframe, Supabase allowlist, terms, feedback, short-lived MOCHI_SOCIAL_AUTH, no-real-value labels, one shared room, and shared Lirabao.
+- Future chain or paid-resource work stays out of this alpha unless the user approves it separately at action time.
+- Do not set dummy ENJIN_COLLECTION_ID, dummy ENJIN_FUEL_TANK_ID, or fake readiness flags to make future gates pass.
+- For Preview Ready, market, trade, funded-chain, cashout, and paid-asset behavior must remain inactive.
+
+## Live Production Password Gate
+
+Target URL: ${normalizePreviewOrigin(liveSiteUrl)}/games/mochi-social
+
+Live production means the public URL stays behind the tester password wall; it is not a public launch. Password unlock opens the page shell only. Mochirii member sign-in, tester approval, and accepted terms are still required for saved play and Unity auth.
+
+Production website env names:
+
+- MOCHI_SOCIAL_ALPHA_ACCESS_MODE=tester-password
+- MOCHI_SOCIAL_TESTER_PASSWORD=<server-only tester password>
+- NEXT_PUBLIC_MOCHI_SOCIAL_URL=${gameUrl}
+- NEXT_PUBLIC_SUPABASE_URL=<production-supabase-url>
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<browser-safe production publishable key>
+- NEXT_PUBLIC_SITE_URL=${normalizePreviewOrigin(liveSiteUrl)}
+
+Before changing production env, merging, deploying, or running hosted checks, get explicit approval for the exact action and confirm it reuses existing provider projects without creating new Fly apps, machines, volumes, IPs, databases, paid resources, Enjin funding, Fuel Tanks, Wallet Daemon signing, or chain transactions.
+
+After an approved production deploy, run hosted verification against the live URL:
+
+\`\`\`powershell
+$env:MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED="true"
+$env:MOCHI_SOCIAL_GAME_CONTRACT_URL="${gameUrl}"
+$env:MOCHI_SOCIAL_SITE_ORIGIN="${normalizePreviewOrigin(liveSiteUrl)}"
+npm run check:mochi-social-game-contract
+npm run check:mochi-social-preview-ready
+\`\`\`
 
 ## Vercel Preview Gate
 
-Required preview env names:
+Optional rehearsal env names:
 
 - NEXT_PUBLIC_MOCHI_SOCIAL_URL=${gameUrl}
 - NEXT_PUBLIC_SUPABASE_URL=<preview-supabase-url>
@@ -157,7 +190,7 @@ Local no-secret preview URL file:
 - Site preview URL: ${previewEnv.sitePreviewUrl || "not recorded"}
 - URL fields read: ${previewEnv.urlFieldsRead.length ? previewEnv.urlFieldsRead.join(", ") : "none"}
 
-Use the Vercel dashboard or CLI for the Mochirii preview branch only. Do not change production env for Alpha RC unless a later production plan approves it.
+Use the Vercel dashboard or CLI for the Mochirii preview branch only when you want a rehearsal before the live password-wall deployment. Production remains the active target for this goal and still requires exact action-time approval.
 
 After the Fly game URL exists, run from this repo:
 
@@ -189,7 +222,7 @@ Required Discord OAuth setup:
 - Supabase preview Auth provider "Discord" is enabled for project ref ${supabaseProjectRef}.
 - Discord Developer Portal OAuth2 redirect URI includes https://${supabaseProjectRef}.supabase.co/auth/v1/callback.
 - Supabase preview redirect URLs allow ${siteOrigin}/account.
-- Codex may verify only provider enabled/status and callback shape. The user enters Discord client secret values privately.
+- Maintainers may verify only provider enabled/status and callback shape. The user enters Discord client secret values privately.
 
 \`\`\`powershell
 $env:MOCHI_SOCIAL_ALPHA_EDGE_URL="${functionsUrl}"
@@ -203,7 +236,7 @@ npm run check:mochi-social-preview-ready # Verifies site.discord-oauth after hos
 
 ## Manual Website Gates
 
-Before inviting testers, verify in the Vercel preview:
+Before inviting testers, verify on the approved target URL, usually ${normalizePreviewOrigin(liveSiteUrl)}/games/mochi-social after production deployment or the Vercel preview URL during rehearsal:
 
 1. Signed-out users are sent to sign in before entering /games/mochi-social.
 2. Signed-in non-testers see the alpha allowlist block.
@@ -212,18 +245,18 @@ Before inviting testers, verify in the Vercel preview:
 5. The parent page sends MOCHI_SOCIAL_AUTH with a short-lived Supabase access token only.
 6. Feedback submission writes to Supabase and appears in the leader audit panel.
 7. Leader dashboard can grant and revoke alpha access by Supabase user id.
-8. For Alpha Preview Ready, chain request rows show Canary, no-real-value status, request id, and configured-preview-stub/audit-only state.
-9. For Alpha RC Ready only, funded-chain rows show transaction UUID, optional listing id, and finality state.
+8. No-real-value alpha messaging is visible on the tester page.
+9. Market, trade, funded-chain, cashout, and paid-asset UI are absent.
 
 ### Manual Browser Evidence Protocol
 
-Use Chrome only after hosted browser verification is explicitly approved. Record reviewer, browser/version, preview URL, timestamp, and pass/fail notes only.
+Use Chrome only after hosted browser verification is explicitly approved. Record reviewer, browser/version, target URL, timestamp, and pass/fail notes only.
 
 - Do not copy or screenshot Supabase access tokens, refresh tokens, cookies, Authorization headers, service-role keys, Discord OAuth client secrets, Discord bot tokens, Enjin tokens, wallet seeds, Wallet Daemon passphrases, MFA codes, payment details, or private account details.
 - For the MOCHI_SOCIAL_AUTH gate, verify the shape of the bridge message only: the parent sends MOCHI_SOCIAL_AUTH with a short-lived access-token field and does not send refresh tokens or provider secrets.
 - Feedback/admin evidence should use counts, row ids, route names, and non-secret status notes. Avoid account emails or private user data in reports.
 
-After the browser pass, stamp durable site browser evidence with no-secret metadata only. Default Preview Ready uses the tester-password lane:
+After the browser pass, stamp durable site browser evidence with no-secret metadata only. Default Preview Ready uses the live tester-password lane, including member saved-play checks after the password unlock:
 
 \`\`\`powershell
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
@@ -236,14 +269,19 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_NOTES="<no-secret status notes>"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 npm run prepare:mochi-social-browser-gates
 \`\`\`
 
-For a later strict Supabase/Discord allowlist pass, stamp only after the strict gates are actually verified:
+For a direct strict member-persistent pass without the password-wall checks, stamp only after the strict gates are actually verified:
 
 \`\`\`powershell
 $env:MOCHI_SOCIAL_SITE_BROWSER_GATES_ALLOW_HOSTED="true"
@@ -259,7 +297,7 @@ $env:MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK="true"
-$env:MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK="true"
+$env:MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK="true"
 $env:MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK="true"
 npm run prepare:mochi-social-browser-gates
 \`\`\`
@@ -281,7 +319,7 @@ npm run lint
 npm run build
 \`\`\`
 
-Stop at Alpha Preview Ready before inviting closed testers, then stop again at Alpha RC Ready after funded-chain evidence exists. Do not switch this checklist to production, Enjin mainnet, paid assets, cashout, public UGC, or service-role keys in browser/game code.
+Stop at Alpha Preview Ready before inviting closed testers. Do not switch this checklist to paid assets, cashout, public UGC, or service-role keys in browser/game code.
 `;
 }
 
@@ -343,7 +381,10 @@ function pathForReport(absolutePath) {
 }
 
 function formatPr(pr) {
-  if (!pr.ok) return `${pr.repo}#${pr.number} not verified (${pr.message || "unknown"})`;
+  if (!pr.ok) {
+    const url = pr.url || `https://github.com/${pr.repo}/pull/${pr.number}`;
+    return `${url} pending GitHub verification (${pr.message || "unknown"})`;
+  }
   return `${pr.url} ${pr.isDraft ? "draft" : "ready"} ${pr.mergeStateStatus} ${pr.headRefOid} checks=${pr.checks.join(", ") || "none"}`;
 }
 

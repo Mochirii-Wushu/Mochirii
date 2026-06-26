@@ -4,7 +4,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
-const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../Local RPG");
+const gameRepoPath = resolve(root, process.env.MOCHI_SOCIAL_GAME_REPO_PATH || "../mochi-social");
 const credsDir = resolve(process.env.MOCHI_SOCIAL_CREDS_DIR || defaultCredsDir());
 const previewEnvPath = resolve(credsDir, process.env.MOCHI_SOCIAL_PREVIEW_ENV_FILE || "mochi-social-alpha-vercel-preview.local.txt");
 const previewEnv = readPreviewEnvFile(previewEnvPath);
@@ -13,11 +13,12 @@ const reportMdPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_M
 const handoffPath = resolve(credsDir, "mochirii-mochi-social-preview-ready.md");
 const browserGateReportPath = resolve(root, process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_JSON || "reports/mochi-social-browser-gates.json");
 const reportHygienePath = resolve(root, process.env.MOCHI_SOCIAL_SITE_REPORT_HYGIENE_JSON || "reports/mochi-social-report-hygiene.json");
+const productionDoorwayReportPath = resolve(root, process.env.MOCHI_SOCIAL_PRODUCTION_DOORWAY_JSON || "reports/mochi-social-production-doorway.json");
 const hostedChecksAllowed = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
 const skipNestedSelfTestCommands = process.env.MOCHI_SOCIAL_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
-const browserGateMode = normalizeBrowserGateMode(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE || "supabase");
+const browserGateMode = normalizeBrowserGateMode(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_SOCIAL_ALPHA_ACCESS_MODE || "tester-password");
 const gameUrl = normalizeUrl(process.env.MOCHI_SOCIAL_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_SOCIAL_URL || previewEnv.gameUrl || "https://mochi-social-game.fly.dev");
-const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "https://mochirii-git-codex-mochi-social-alpha-rc-mochirii.vercel.app");
+const siteOrigin = normalizeOrigin(process.env.MOCHI_SOCIAL_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "https://mochirii.com");
 const functionsUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
 const authUrl = normalizeUrl(process.env.MOCHI_SOCIAL_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
 const supabaseProjectRef = inferSupabaseProjectRef(functionsUrl);
@@ -37,6 +38,7 @@ if (!skipNestedSelfTestCommands) {
 addBranchSyncRequirement("site.branch-sync", root, "Local Mochirii site branch");
 addOperatorChecklistRequirement();
 addReportHygieneRequirement();
+addProductionDoorwayRequirement();
 addGamePreviewReadyRequirement();
 addGameContractRequirement();
 addEdgeSmokeRequirement();
@@ -97,6 +99,10 @@ function addOperatorChecklistRequirement() {
     "NEXT_PUBLIC_MOCHI_SOCIAL_URL",
     "MOCHI_SOCIAL_ALPHA_EDGE_URL",
     gitState.localHead,
+    `- Upstream HEAD: ${gitState.upstreamHead || "unknown"}`,
+    `- Ahead: ${gitState.ahead}`,
+    `- Behind: ${gitState.behind}`,
+    `- Dirty tracked files: ${gitState.dirty.length}`,
   ]) {
     if (!snippet || !text.includes(snippet)) failures.push(`operator checklist missing ${snippet || "<current head>"}`);
   }
@@ -123,6 +129,38 @@ function addReportHygieneRequirement() {
   });
 }
 
+function addProductionDoorwayRequirement() {
+  const report = readJson(productionDoorwayReportPath);
+  if (!report.ok) {
+    add("site.production-doorway-smoke", "fail", `Mochi Social production doorway smoke report is missing or invalid: ${report.message}. Run npm run smoke:mochi-social-production-doorway after building apps/web.`, {
+      path: productionDoorwayReportPath,
+    });
+    return;
+  }
+
+  const data = report.data;
+  const failures = currentGitStateFailures(data?.git, root, "production doorway smoke report");
+  const cases = Array.isArray(data?.cases) ? data.cases : [];
+  const requiredCases = [
+    "locked-page",
+    "invalid-password-redirect",
+    "invalid-password-copy",
+    "valid-password-cookie",
+    "unlocked-member-gate",
+    "tester-logout",
+  ];
+  const missingCases = requiredCases.filter((id) => !cases.some((entry) => entry.id === id && entry.status === "pass"));
+  if (data?.ok !== true) failures.push("production doorway smoke report is not ok");
+  if (data?.route !== "/games/mochi-social") failures.push("production doorway smoke report must cover /games/mochi-social");
+  if (data?.accessMode !== "tester-password") failures.push("production doorway smoke report must use tester-password access mode");
+  if (data?.providerActions !== "none") failures.push("production doorway smoke report must not include provider actions");
+  if (missingCases.length) failures.push(`production doorway smoke report is missing cases: ${missingCases.join(", ")}`);
+  add("site.production-doorway-smoke", failures.length ? "fail" : "pass", failures.length ? failures.join("; ") : "Production doorway smoke is current and green.", {
+    path: productionDoorwayReportPath,
+    cases: cases.length,
+  });
+}
+
 function addGamePreviewReadyRequirement() {
   const gameReport = readJson(resolve(gameRepoPath, "reports/alpha-preview-ready.json"));
   if (!gameReport.ok) {
@@ -132,6 +170,7 @@ function addGamePreviewReadyRequirement() {
     return;
   }
   const failures = currentGitStateFailures(gameReport.data?.git, gameRepoPath, "game preview-ready report");
+  failures.push(...currentGitStateFailures(gameReport.data?.siteGit, root, "game preview-ready site snapshot"));
   if (gameReport.data?.ok !== true) {
     const failing = (gameReport.data?.requirements || [])
       .filter((item) => item.status !== "pass")
@@ -243,6 +282,7 @@ function addManualBrowserGateRequirement() {
   const reviewer = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER || "");
   const browser = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER || "");
   const reviewUrl = sanitize(process.env.MOCHI_SOCIAL_SITE_BROWSER_GATES_URL || "");
+  const reviewContext = buildReviewContext(browserGateMode, reviewUrl, hostedChecksAllowed);
   const gateResults = manualBrowserGateChecks.map(([envName, label]) => ({
     envName,
     label,
@@ -254,6 +294,8 @@ function addManualBrowserGateRequirement() {
   if (confirmed && !reviewer) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_REVIEWER is required");
   if (confirmed && !browser) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_BROWSER is required");
   if (confirmed && !reviewUrl) failures.push("MOCHI_SOCIAL_SITE_BROWSER_GATES_URL is required");
+  const routeFailure = reviewUrl ? browserGateRouteFailure(reviewUrl, "manual browser gate URL") : "";
+  if (confirmed && routeFailure) failures.push(routeFailure);
   if (confirmed && missingGates.length) {
     failures.push(`manual browser gates missing confirmations: ${missingGates.map((gate) => gate.envName).join(", ")}`);
   }
@@ -267,6 +309,7 @@ function addManualBrowserGateRequirement() {
     browser: browser || null,
     url: reviewUrl || null,
     hostedChecksAllowed,
+    reviewContext,
     requiredGates: gateResults,
   });
 }
@@ -284,7 +327,11 @@ function addStoredManualBrowserGateRequirement() {
   const storedAccessMode = normalizeBrowserGateMode(data.accessMode || browserGateMode);
   const expectedGateChecks = browserGateEnvForMode(storedAccessMode);
   const failures = currentGitStateFailures(data.git, root, "stored browser gate report");
+  if (storedAccessMode !== browserGateMode) {
+    failures.push(`stored browser gate report access mode ${storedAccessMode} does not match current browser gate mode ${browserGateMode}`);
+  }
   const gateResults = Array.isArray(data.requiredGates) ? data.requiredGates : [];
+  failures.push(...browserGateReviewContextFailures(data.reviewContext, storedAccessMode));
   const missingNames = expectedGateChecks
     .filter(([envName]) => !gateResults.some((gate) => gate.envName === envName && gate.ok === true))
     .map(([envName]) => envName);
@@ -294,6 +341,8 @@ function addStoredManualBrowserGateRequirement() {
   if (!data.reviewer) failures.push("stored browser gate report reviewer is required");
   if (!data.browser) failures.push("stored browser gate report browser is required");
   if (!reviewUrl) failures.push("stored browser gate report URL is required");
+  const routeFailure = reviewUrl ? browserGateRouteFailure(reviewUrl, "stored browser gate report URL") : "";
+  if (routeFailure) failures.push(routeFailure);
   if (reviewUrl && isHostedUrl(reviewUrl) && !hostedChecksAllowed) {
     failures.push("stored hosted browser gate evidence requires MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true after explicit approval");
   }
@@ -309,6 +358,7 @@ function addStoredManualBrowserGateRequirement() {
     url: reviewUrl || null,
     storedHostedChecksAllowed: data.hostedChecksAllowed === true,
     hostedChecksAllowed,
+    reviewContext: reportReviewContext(data.reviewContext),
     requiredGates: gateResults.map((gate) => ({
       envName: gate.envName,
       label: gate.label,
@@ -387,20 +437,26 @@ function readGitState(repoPath) {
   const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], repoPath);
   const localHead = git(["rev-parse", "HEAD"], repoPath);
   const upstream = git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], repoPath);
+  const upstreamHead = upstream.ok ? git(["rev-parse", firstLine(upstream.stdout)], repoPath) : { ok: false, stdout: "", stderr: upstream.stderr };
+  const counts = upstream.ok ? git(["rev-list", "--left-right", "--count", `${firstLine(upstream.stdout)}...HEAD`], repoPath) : { ok: false, stdout: "", stderr: upstream.stderr };
   const dirty = git(["status", "--porcelain"], repoPath);
+  const [behindText = "0", aheadText = "0"] = counts.ok ? firstLine(counts.stdout).split(/\s+/) : ["0", "0"];
   return {
     branch: branch.ok ? firstLine(branch.stdout) : "",
     localHead: localHead.ok ? firstLine(localHead.stdout) : "",
     upstream: upstream.ok ? firstLine(upstream.stdout) : "",
+    upstreamHead: upstreamHead.ok ? firstLine(upstreamHead.stdout) : "",
+    ahead: Number.parseInt(aheadText, 10) || 0,
+    behind: Number.parseInt(behindText, 10) || 0,
     dirty: dirty.ok ? dirty.stdout.split(/\r?\n/).filter(Boolean).map((line) => sanitize(line)) : ["git status unavailable"],
-    errors: [branch, localHead, upstream, dirty]
+    errors: [branch, localHead, upstream, upstreamHead, counts, dirty]
       .filter((result) => !result.ok)
       .map((result) => sanitize(result.stderr || result.error || "git command failed")),
   };
 }
 
 function normalizeBrowserGateMode(value) {
-  return value === "tester-password" ? "tester-password" : "supabase";
+  return value === "supabase" ? "supabase" : "tester-password";
 }
 
 function browserGateEnvForMode(mode) {
@@ -409,10 +465,15 @@ function browserGateEnvForMode(mode) {
       ["MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_LOCKED_OK", "tester-password locked page visible"],
       ["MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_IFRAME_ABSENT_OK", "iframe absent before tester-password unlock"],
       ["MOCHI_SOCIAL_SITE_BROWSER_PASSWORD_INVALID_ERROR_OK", "invalid tester password shows accessible inline error"],
-      ["MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK", "iframe loads after tester-password unlock"],
-      ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "guest bridge sends sign-out/no access token only"],
-      ["MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK", "chain request remains configured-preview-stub/no-real-value"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_SIGNED_OUT_BLOCKED_OK", "signed-out users see the member sign-in prompt after unlock"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_NON_TESTER_BLOCKED_OK", "signed-in non-testers are blocked after unlock"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_TERMS_GATE_OK", "allowlisted testers must accept terms before saved play"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK", "iframe loads after tester-password unlock and member access"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "MOCHI_SOCIAL_AUTH sends access token only after member access"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK", "feedback appears in admin/audit"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK", "no-real-value alpha copy is visible"],
       ["MOCHI_SOCIAL_SITE_BROWSER_GAME_PRESENCE_OK", "two hosted game tabs show nearby tester presence"],
+      ["MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK", "admin grant/revoke works and intended tester state is restored"],
     ];
   }
 
@@ -423,9 +484,100 @@ function browserGateEnvForMode(mode) {
     ["MOCHI_SOCIAL_SITE_BROWSER_IFRAME_LOADS_OK", "iframe loads after acknowledgement"],
     ["MOCHI_SOCIAL_SITE_BROWSER_AUTH_BRIDGE_OK", "MOCHI_SOCIAL_AUTH sends access token only"],
     ["MOCHI_SOCIAL_SITE_BROWSER_FEEDBACK_AUDIT_OK", "feedback appears in admin/audit"],
-    ["MOCHI_SOCIAL_SITE_BROWSER_CHAIN_STUB_OK", "chain request remains configured-preview-stub/no-real-value"],
+    ["MOCHI_SOCIAL_SITE_BROWSER_NO_REAL_VALUE_OK", "no-real-value alpha copy is visible"],
     ["MOCHI_SOCIAL_SITE_BROWSER_ADMIN_GRANT_REVOKE_OK", "admin grant/revoke works and intended tester state is restored"],
   ];
+}
+
+function buildReviewContext(mode, url, hostedAllowed) {
+  const hosted = isHostedUrl(url);
+  const testerPasswordMode = mode === "tester-password";
+  return {
+    reviewKind: hosted ? "approved-hosted-member-browser-review" : "local-member-browser-review",
+    requiresTesterPasswordWall: testerPasswordMode,
+    requiresMemberSignIn: true,
+    requiresMemberAuthorityPath: true,
+    requiresUnityBridgePath: true,
+    passwordOnlyIsInsufficient: testerPasswordMode,
+    hostedUrl: hosted,
+    hostedAllowed,
+    completionPreconditions: [
+      testerPasswordMode
+        ? "Confirm the tester password wall blocks the game iframe before unlock."
+        : "Confirm the signed-out member gate blocks saved play before sign-in.",
+      "Authenticate through the Mochirii member path for the tested account state.",
+      "Confirm signed-out, non-tester, and terms-required states are blocked before saved play.",
+      "Confirm a valid tester can load the Unity iframe and the parent sends MOCHI_SOCIAL_AUTH only after member access.",
+      "Confirm feedback/admin audit and no-real-value copy are visible in the approved review path.",
+      "Only set completion env vars after every required browser gate is directly observed.",
+    ],
+    cannotBeCompletedBy: [
+      "the tester password wall alone",
+      "static screenshots alone",
+      "environment variables without a browser review",
+      "the legacy runtime",
+      "a hosted URL without explicit hosted-preview approval",
+      "dummy tester, Discord, Supabase, or Enjin data",
+    ],
+  };
+}
+
+function browserGateReviewContextFailures(context, mode) {
+  const failures = [];
+  if (!context || typeof context !== "object") {
+    return ["stored browser gate report must include review context"];
+  }
+  if (mode === "tester-password" && context.requiresTesterPasswordWall !== true) {
+    failures.push("stored browser gate report must prove tester password wall review context");
+  }
+  if (context.requiresMemberSignIn !== true) failures.push("stored browser gate report must require Mochirii member sign-in");
+  if (context.requiresMemberAuthorityPath !== true) failures.push("stored browser gate report must require allowlist, terms, feedback, and audit review");
+  if (context.requiresUnityBridgePath !== true) failures.push("stored browser gate report must require Unity iframe/auth bridge review");
+  if (mode === "tester-password" && context.passwordOnlyIsInsufficient !== true) {
+    failures.push("stored browser gate report must mark password-only access insufficient");
+  }
+
+  const preconditions = Array.isArray(context.completionPreconditions) ? context.completionPreconditions.join("\n") : "";
+  const insufficient = Array.isArray(context.cannotBeCompletedBy) ? context.cannotBeCompletedBy.join("\n") : "";
+  for (const snippet of [
+    "member path",
+    "signed-out, non-tester, and terms-required",
+    "MOCHI_SOCIAL_AUTH",
+    "feedback/admin audit",
+  ]) {
+    if (!preconditions.includes(snippet)) failures.push(`stored browser gate report review context missing precondition: ${snippet}`);
+  }
+  for (const snippet of [
+    "tester password wall alone",
+    "static screenshots alone",
+    "environment variables without a browser review",
+    "legacy runtime",
+    "hosted URL without explicit hosted-preview approval",
+    "dummy tester",
+  ]) {
+    if (!insufficient.includes(snippet)) failures.push(`stored browser gate report review context missing insufficiency: ${snippet}`);
+  }
+  return failures;
+}
+
+function reportReviewContext(context) {
+  if (!context || typeof context !== "object") return null;
+  return {
+    reviewKind: sanitize(context.reviewKind || ""),
+    requiresTesterPasswordWall: context.requiresTesterPasswordWall === true,
+    requiresMemberSignIn: context.requiresMemberSignIn === true,
+    requiresMemberAuthorityPath: context.requiresMemberAuthorityPath === true,
+    requiresUnityBridgePath: context.requiresUnityBridgePath === true,
+    passwordOnlyIsInsufficient: context.passwordOnlyIsInsufficient === true,
+    hostedUrl: context.hostedUrl === true,
+    hostedAllowed: context.hostedAllowed === true,
+    completionPreconditions: sanitizeStringArray(context.completionPreconditions),
+    cannotBeCompletedBy: sanitizeStringArray(context.cannotBeCompletedBy),
+  };
+}
+
+function sanitizeStringArray(values) {
+  return Array.isArray(values) ? values.map((value) => sanitize(value)).filter(Boolean).slice(0, 12) : [];
 }
 
 function readJson(file) {
@@ -488,6 +640,10 @@ This file is intentionally no-secret. It verifies the website tester-entry lane 
 - Publishable key present: ${summaryReport.publishableKeyPresent ? "yes" : "no"}
 - Publishable key source: ${summaryReport.publishableKeySource}
 
+## Live Production Password-Wall Target
+
+The active production target is \`${summaryReport.siteOrigin}/games/mochi-social\`, still behind the tester password wall. This is not a public launch. Tester password unlocks the page shell only; saved play still requires Mochirii member sign-in, tester approval, accepted terms, and valid Unity auth.
+
 ## Local Preview URL File
 
 - File: ${summaryReport.previewEnv.path}
@@ -504,11 +660,17 @@ This file is no-secret and may only contain preview URLs. Hosted Fly/Vercel/Supa
 | --- | --- | --- |
 ${rows}
 
-## Remaining Site Preview Work
+## Remaining Hosted Or Manual Work
 
 ${failures}
 
-## Approval Prompt
+## Production Approval Prompt
+
+\`\`\`text
+I approve the Mochirii hosted production verification using MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured live game URL, https://mochirii.com origin, and Supabase production/approved Edge URL. I understand this may hit Fly/Vercel/Supabase hosted resources and add usage.
+\`\`\`
+
+## Preview Rehearsal Approval Prompt
 
 \`\`\`text
 I approve the Mochirii hosted Preview Ready verification using MOCHI_SOCIAL_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured Fly game URL, Vercel Preview origin, and Supabase Preview Edge URL. I understand this may hit Fly/Vercel/Supabase preview resources and add usage.
@@ -650,6 +812,18 @@ function safeUrlHost(value) {
     return new URL(value).host;
   } catch {
     return sanitize(value);
+  }
+}
+
+function browserGateRouteFailure(value, label) {
+  try {
+    const parsed = new URL(value);
+    if (!["http:", "https:"].includes(parsed.protocol)) return `${label} must be an http(s) URL for /games/mochi-social`;
+    const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    if (pathname !== "/games/mochi-social") return `${label} must target /games/mochi-social`;
+    return "";
+  } catch {
+    return `${label} must be an absolute http(s) URL for /games/mochi-social`;
   }
 }
 

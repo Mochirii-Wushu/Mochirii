@@ -34,8 +34,8 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           <p className="eyebrow">Mochirii World</p>
           <h1>Mochi Social</h1>
           <p id={descriptionId}>
-            A wuxia RPG where approved testers can raise Mochi Spirits, meet guild friends,
-            and participate in social trading.
+            A cozy 3D room where approved testers create a curated character, gather with guild friends,
+            and meet the shared starter pet Lirabao.
           </p>
         </div>
         <dl>
@@ -54,10 +54,10 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         </dl>
       </header>
       <div className="mochi-game-preview-contract mochi-game-preview-contract--locked" aria-label="Mochi Social preview contract">
-        <span>Closed alpha</span>
-        <span>No purchases</span>
-        <span>Test coins only</span>
-        <span>Progress may reset</span>
+        <span>Shared 3D room</span>
+        <span>One room together</span>
+        <span>Shared Lirabao</span>
+        <span>Room preview</span>
       </div>
       <form
         className="mochi-game-panel mochi-tester-login"
@@ -94,32 +94,29 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
         <section>
           <h2>What you can test</h2>
           <ul>
-            <li>Raise Mochi Spirits and watch them evolve.</li>
-            <li>Explore the first wuxia town and guild gathering spots.</li>
-            <li>Try local chat, waves, emotes, and nearby tester interactions.</li>
-            <li>Open the market board and test peer-to-peer trading.</li>
+            <li>Create a character from curated alpha presets.</li>
+            <li>Enter the Jade Lantern room and make sure the room opens smoothly.</li>
+            <li>Try local chat, waves, emotes, and nearby tester presence.</li>
+            <li>Interact with the shared Lirabao pet state.</li>
           </ul>
         </section>
         <section>
           <h2>Your playtest mission</h2>
           <ol>
-            <li>Attune Lirabao and care for your Mochi Spirit.</li>
+            <li>Create a character preset.</li>
             <li>Wave or chat with another tester.</li>
-            <li>Inspect the market board.</li>
+            <li>Care for Lirabao and confirm the shared pet state updates.</li>
             <li>Send feedback before you leave.</li>
           </ol>
         </section>
         <section className="mochi-preview-safety">
           <h2>Good to know</h2>
           <ul>
-            <li>No real money, purchases, cashout, or permanent blockchain value.</li>
+            <li>No real money, purchases, rewards, or permanent item value.</li>
             <li>Desktop is recommended for this early build.</li>
-            <li>Progress may reset periodically during the alpha phase.</li>
+            <li>The tester password opens this playtest page. Mochirii member sign-in is required for saved play.</li>
+            <li>This closed playtest stays focused on one shared guild room and Lirabao care.</li>
           </ul>
-          <p>
-            Preview safety: Enjin Canary remains a configured-preview-stub for future asset testing. Test coins and
-            market actions are for feedback only during the alpha.
-          </p>
         </section>
       </aside>
     </section>

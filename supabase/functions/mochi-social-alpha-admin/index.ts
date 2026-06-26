@@ -2,7 +2,7 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CORS_HEADERS, jsonResponse, readRequiredJsonBody, requireModeratorAccess, safeString } from "../_shared/gallery-moderation.ts";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -66,33 +66,31 @@ async function loadAlphaAudit(adminClient: SupabaseClient) {
     activeTesters,
     revokedTesters,
     ledgerEvents,
-    activeListings,
-    offeredTrades,
-    pendingChainOps,
     feedbackCount,
     chatMessages,
+    unityPlayers,
+    sharedPetSnapshots,
     recentLedger,
-    recentChain,
+    recentSharedPets,
     recentFeedback,
   ] = await Promise.all([
     safeCount(adminClient, "mochi_social_alpha_testers", "status", "active"),
     safeCount(adminClient, "mochi_social_alpha_testers", "status", "revoked"),
     safeCount(adminClient, "mochi_social_ledger_events"),
-    safeCount(adminClient, "mochi_social_market_listings", "status", "active"),
-    safeCount(adminClient, "mochi_social_trades", "status", "offered"),
-    safeCount(adminClient, "mochi_social_chain_operations", "status", "pending"),
     safeCount(adminClient, "mochi_social_feedback"),
     safeCount(adminClient, "mochi_social_chat_messages"),
+    safeCount(adminClient, "mochi_social_unity_players"),
+    safeCount(adminClient, "mochi_social_shared_pet_snapshots"),
     adminClient
       .from("mochi_social_ledger_events")
       .select("id,request_id,actor_id,event_type,entity_type,entity_id,created_at")
       .order("created_at", { ascending: false })
       .limit(12),
     adminClient
-      .from("mochi_social_chain_operations")
-      .select("request_id,user_id,operation_type,network,status,enjin_transaction_uuid,enjin_listing_id,created_at,finalized_at")
-      .order("created_at", { ascending: false })
-      .limit(8),
+      .from("mochi_social_shared_pet_snapshots")
+      .select("pet_key,room_key,revision,source_request_id,last_actor_id,updated_at")
+      .order("updated_at", { ascending: false })
+      .limit(4),
     adminClient
       .from("mochi_social_feedback")
       .select("id,user_id,category,message,session_id,created_at")
@@ -105,14 +103,13 @@ async function loadAlphaAudit(adminClient: SupabaseClient) {
       activeTesters,
       revokedTesters,
       ledgerEvents,
-      activeListings,
-      offeredTrades,
-      pendingChainOps,
       feedbackCount,
       chatMessages,
+      unityPlayers,
+      sharedPetSnapshots,
     },
     recentLedger: recentLedger.error ? [] : recentLedger.data || [],
-    recentChain: recentChain.error ? [] : recentChain.data || [],
+    recentSharedPets: recentSharedPets.error ? [] : recentSharedPets.data || [],
     recentFeedback: recentFeedback.error ? [] : recentFeedback.data || [],
   };
 }

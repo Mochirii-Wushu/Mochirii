@@ -149,6 +149,12 @@ verify_jwt = true
 import_map = "./functions/mochi-social-alpha-session/deno.json"
 entrypoint = "./functions/mochi-social-alpha-session/index.ts"
 
+[functions.mochi-social-unity-auth]
+enabled = true
+verify_jwt = true
+import_map = "./functions/mochi-social-unity-auth/deno.json"
+entrypoint = "./functions/mochi-social-unity-auth/index.ts"
+
 [functions.mochi-social-alpha-action]
 enabled = true
 verify_jwt = false

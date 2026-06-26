@@ -1,6 +1,8 @@
 reports/lighthouse/
 reports/mochi-social-browser-gates.json
 reports/mochi-social-browser-gates.md
+reports/mochi-social-production-doorway.json
+reports/mochi-social-production-doorway.md
 reports/mochi-social-preview-ready.json
 reports/mochi-social-preview-ready.md
 reports/mochi-social-report-hygiene.json
