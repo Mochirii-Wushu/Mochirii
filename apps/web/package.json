@@ -2,14 +2,22 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@10.9.8",
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10 <11"
+  },
   "scripts": {
     "dev": "next dev",
-    "clean": "rm -rf .next .vercel/output",
+    "clean": "node scripts/clean.mjs",
     "build:clean": "npm run clean && next build",
     "build": "next build",
     "vercel:build:local": "npm run clean && cd ../.. && vercel build --prod --cwd apps/web",
+    "vercel:version": "vercel --version",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "toolchain:check": "node scripts/check-local-toolchain.mjs",
+    "verify:local": "npm run toolchain:check && npm run lint && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",
@@ -21,8 +29,37 @@
   },
   "overrides": {
     "@babel/core": "7.29.7",
+    "@tootallnate/once": "2.0.1",
     "js-yaml": "4.2.0",
-    "postcss": "8.5.15"
+    "minimatch": "10.2.5",
+    "postcss": "8.5.15",
+    "smol-toml": "1.7.0",
+    "tar": "7.5.19",
+    "@vercel/backends": {
+      "path-to-regexp": "8.4.2"
+    },
+    "@vercel/express": {
+      "path-to-regexp": "8.4.2"
+    },
+    "@vercel/fun": {
+      "path-to-regexp": "8.4.2"
+    },
+    "@vercel/hono": {
+      "path-to-regexp": "8.4.2"
+    },
+    "@vercel/node": {
+      "path-to-regexp": "6.3.0",
+      "undici": "6.27.0"
+    },
+    "@vercel/remix-builder": {
+      "path-to-regexp": "6.3.0"
+    },
+    "@vercel/static-config": {
+      "ajv": "8.20.0"
+    },
+    "vercel": {
+      "undici": "6.27.0"
+    }
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
@@ -30,6 +67,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "54.18.1"
   }
 }
