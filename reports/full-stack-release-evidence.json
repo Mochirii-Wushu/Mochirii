@@ -1,16 +1,16 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-02T03:44:27.434Z",
+  "checkedAt": "2026-07-02T06:07:04.307Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
   "providerReadsEnabled": true,
   "strictProviders": true,
   "git": {
-    "branch": "codex/full-stack-dev-tooling",
-    "head": "7f6eecc2e7b7",
-    "upstream": "origin/codex/full-stack-dev-tooling",
+    "branch": "main",
+    "head": "3077c445bc51",
+    "upstream": "origin/main",
     "upstreamStatus": "configured",
-    "ahead": 3,
+    "ahead": 0,
     "behind": 0,
     "dirty": [],
     "errors": []
@@ -42,7 +42,7 @@
       "name": "mochirii",
       "target": "production",
       "readyState": "READY",
-      "url": "https://mochirii-pjx58u8ef-mochirii.vercel.app",
+      "url": "https://mochirii-48d0oin16-mochirii.vercel.app",
       "aliases": [
         "mochirii.com",
         "mochirii.vercel.app",
@@ -50,7 +50,7 @@
         "mochirii-mochirii.vercel.app",
         "mochirii-git-main-mochirii.vercel.app"
       ],
-      "createdAt": 1782450963202
+      "createdAt": 1782972153422
     },
     "environmentNames": {
       "production": {
@@ -102,7 +102,7 @@
     },
     "projectRef": "deyvmtncimmcinldjyqe",
     "localMigrations": {
-      "total": 20,
+      "total": 21,
       "versions": [
         "20260513081523",
         "20260513193110",
@@ -123,7 +123,8 @@
         "20260615041842",
         "20260618041559",
         "20260621120000",
-        "20260622204823"
+        "20260622204823",
+        "20260702043644"
       ],
       "files": [
         "20260513081523_create_discord_role_gated_gallery_uploads.sql",
@@ -145,7 +146,8 @@
         "20260615041842_add_multi_provider_member_verification.sql",
         "20260618041559_add_active_workflow_fk_indexes.sql",
         "20260621120000_add_mochi_social_unity_room.sql",
-        "20260622204823_add_mochi_social_alpha_explicit_grants.sql"
+        "20260622204823_add_mochi_social_alpha_explicit_grants.sql",
+        "20260702043644_harden_mochi_social_advisor_findings.sql"
       ]
     },
     "localFunctions": {
@@ -214,7 +216,7 @@
       }
     },
     "remoteMigrations": {
-      "totalRows": 20,
+      "totalRows": 21,
       "versions": [
         "20260513081523",
         "20260513193110",
@@ -235,7 +237,8 @@
         "20260615041842",
         "20260618041559",
         "20260621120000",
-        "20260622204823"
+        "20260622204823",
+        "20260702043644"
       ],
       "rows": [
         {
@@ -317,6 +320,10 @@
         {
           "local": "20260622204823",
           "remote": "20260622204823"
+        },
+        {
+          "local": "20260702043644",
+          "remote": ""
         }
       ],
       "mismatch": {
