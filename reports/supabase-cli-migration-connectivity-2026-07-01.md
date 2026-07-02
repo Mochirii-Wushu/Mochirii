@@ -30,6 +30,17 @@ it is a schema-drift assumption in migration
 - Local rollback transaction with a temporary `public.mochi_social_pets(owner_id)` table before rerunning the migration
 - Linked push attempt exposed the same drift pattern for missing `public.mochi_social_progress_snapshots`; the policy rewrite is now table-aware too
 
+
+## Post-Approval Push Result
+
+After PR #347 merged, the approved `supabase db push --linked --yes` retry
+reported the remote database was up to date. `supabase migration list --linked`
+then showed `20260702043644` present on both local and remote. Read-only linked
+SQL confirmed the linked lineage still has `public.mochi_social_pets` and not
+`public.mochi_social_spirits` or `public.mochi_social_progress_snapshots`, and
+that `public.mochi_social_pets_owner_id_idx` exists. Linked advisors completed
+with only the previously accepted leaked-password-protection warning.
+
 ## Notes
 
 Do not use `supabase status --output json` in shared reports or logs for this
