@@ -302,13 +302,13 @@ export function AccountPanel() {
   async function toggleSocialVisibility(account: SocialAccount) {
     setBusy(true);
     setSocialError("");
-    setSocialStatus(account.profile_link_visible ? "Hiding Pixelfed profile link." : "Showing Pixelfed profile link.");
+    setSocialStatus(account.profile_link_visible ? "Hiding guild social profile link." : "Showing guild social profile link.");
     const result = await updateSocialAccountVisibility(text(account.id), account.profile_link_visible !== true);
     if (!result.ok) {
-      setSocialError(result.message || "Pixelfed profile visibility could not be updated.");
+      setSocialError(result.message || "Guild social profile visibility could not be updated.");
       setSocialStatus("");
     } else {
-      setSocialStatus(result.message || "Pixelfed profile visibility updated.");
+      setSocialStatus(result.message || "Guild social profile visibility updated.");
       await loadSocialAccounts();
     }
     setBusy(false);
@@ -631,16 +631,16 @@ export function AccountPanel() {
           <div className="auth-panel__head">
             <div>
               <p className="kicker">Guild Social</p>
-              <h2 className="section-title section-title--sm" id="socialProfileTitle">Pixelfed</h2>
+              <h2 className="section-title section-title--sm" id="socialProfileTitle">Mochirii Social</h2>
             </div>
             <StatusPill tone={pixelfedReady ? "active" : "muted"}>{pixelfedReady ? "Linked" : "Pending"}</StatusPill>
           </div>
 
           {pixelfedAccount ? (
-            <div className="identity-list" aria-label="Pixelfed account status">
+            <div className="identity-list" aria-label="Guild social account status">
               <article className="identity-item">
                 <div>
-                  <strong>{text(pixelfedAccount.username, "Pixelfed account")}</strong>
+                  <strong>{text(pixelfedAccount.username, "Guild social account")}</strong>
                   <span>{text(pixelfedAccount.profile_url, "Profile URL pending")}</span>
                 </div>
                 <small>{pixelfedAccount.profile_link_visible ? "Shown on profile" : "Hidden from profile"}</small>
@@ -648,7 +648,7 @@ export function AccountPanel() {
             </div>
           ) : (
             <WorkflowEmptyState title="Not linked yet">
-              Pixelfed account creation starts after the SSO compatibility gate passes.
+              Mochirii Social account creation starts after the SSO compatibility gate passes.
             </WorkflowEmptyState>
           )}
 

@@ -93,7 +93,7 @@ export function SocialHubPanel() {
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Guild Social</p>
-          <h2 className="section-title">Pixelfed Doorway</h2>
+          <h2 className="section-title">Mochirii Social Doorway</h2>
         </div>
         <p className={`status-pill status-pill--${activeAccount ? "active" : activeMember ? "pending" : "warning"}`}>
           {activeAccount ? "Linked" : activeMember ? "Pending SSO" : "Locked"}
@@ -107,7 +107,7 @@ export function SocialHubPanel() {
           <strong>{activeMember ? "Active" : "Required"}</strong>
         </div>
         <div className="account-summary-card">
-          <span>Pixelfed</span>
+          <span>Mochirii Social</span>
           <strong>{account ? prettyStatus(account.status) : "Not linked"}</strong>
         </div>
         <div className="account-summary-card">
@@ -120,22 +120,22 @@ export function SocialHubPanel() {
         <div className="identity-list" aria-label="Linked guild social account">
           <article className="identity-item">
             <div>
-              <strong>{text(account.username, "Pixelfed account")}</strong>
+              <strong>{text(account.username, "Guild social account")}</strong>
               <span>{text(account.profile_url, "Profile URL pending")}</span>
             </div>
             <small>{account.federation_enabled ? "Federation enabled" : "Federation gated"}</small>
           </article>
         </div>
       ) : (
-        <WorkflowEmptyState title="No Pixelfed account yet">
-          The SSO compatibility gate must pass before production Pixelfed accounts are created.
+        <WorkflowEmptyState title="No social account yet">
+          The SSO compatibility gate must pass before production guild social accounts are created.
         </WorkflowEmptyState>
       )}
 
       <div className="auth-actions">
         {activeAccount ? (
           <a className="hero-cta hero-cta--primary" href={text(account?.profile_url)} target="_blank" rel="noopener noreferrer">
-            Open Pixelfed
+            Open Mochirii Social
           </a>
         ) : null}
         <Link className="hero-cta" href="/account">Account</Link>

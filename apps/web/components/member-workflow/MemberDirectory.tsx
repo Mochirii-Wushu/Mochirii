@@ -195,7 +195,7 @@ export function MemberProfileView({ slug }: { slug: string }) {
       details={[
         { label: "Title", value: title },
         { label: "Discord handle", value: profile.discordHandle },
-        { label: "Pixelfed", value: profile.socialProfileUrl },
+        { label: "Mochirii Social", value: profile.socialProfileUrl },
         { label: "Game UID", value: profile.gameUid },
         { label: "Region", value: profile.region },
         { label: "Timezone", value: profile.timezone },
