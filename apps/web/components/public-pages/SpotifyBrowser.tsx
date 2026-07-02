@@ -14,6 +14,8 @@ type SpotifyItem = {
 };
 
 const allowedKinds = new Set(["album", "artist", "episode", "playlist", "show", "track"]);
+const compactEmbedHeight = 152;
+const standardEmbedHeight = 352;
 
 function text(value: unknown, fallback = "") {
   const clean = String(value ?? "").trim();
@@ -45,6 +47,11 @@ function toSpotifyEmbedSrc(value: unknown) {
   }
 }
 
+function spotifyEmbedHeight(value: unknown) {
+  const height = Number(value);
+  return height > 0 && height <= compactEmbedHeight ? compactEmbedHeight : standardEmbedHeight;
+}
+
 function SpotifyEmbed({
   title,
   src,
@@ -56,6 +63,7 @@ function SpotifyEmbed({
 }) {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
+  const heightClass = height === compactEmbedHeight ? "spotify-embed--compact" : "spotify-embed--standard";
 
   useEffect(() => {
     if (shouldLoad) return;
@@ -82,9 +90,8 @@ function SpotifyEmbed({
 
   return (
     <div
-      className="spotify-embed u-mt-12"
+      className={`spotify-embed ${heightClass} u-mt-12`}
       ref={shellRef}
-      style={{ minHeight: `${height}px` }}
       data-deferred-spotify-embed="true"
       aria-label={`Spotify player shell: ${title}`}
     >
@@ -124,7 +131,7 @@ export function SpotifyBrowser({
           type: text(item.type, "playlist"),
           tags: normalizeTags(item.tags),
           src: toSpotifyEmbedSrc(item.embed || item.url),
-          height: Number(item.height) > 0 ? Number(item.height) : 352,
+          height: spotifyEmbedHeight(item.height),
         }))
         .filter((item) => item.src),
     [items],
