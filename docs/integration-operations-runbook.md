@@ -41,6 +41,7 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Rollback/reference surface: root static files, root `assets/`, root `data/`, and GitHub Pages material remain until a separate retirement plan.
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
 - Vercel project: production-serving `mochirii/mochirii` with root directory `apps/web`.
+- Pixelfed guild social: planned as a separate `social.mochirii.com` runtime. The website repo owns only the member doorway, Supabase OAuth consent surface, `social_accounts` mapping, and no-secret runbooks; do not add Pixelfed application code, host secrets, media credentials, or infrastructure state to this repo. See `docs/pixelfed-guild-social-adr.md`.
 - Supabase Preview: acceptable as skipped on PRs without `supabase/` changes; schema/function PRs must either produce green Supabase Preview evidence or document the integration blocker.
 - GitHub security alerts: code scanning, Dependabot, and secret scanning should remain at zero before release-sensitive merges.
 - Audio: `assets/audio/mochiriiiiii.mp3` remains an accepted large-asset warning unless the owner explicitly approves optimization.

@@ -10,7 +10,8 @@ import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
 import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
 import { listMyProfileMedia, updateProfileVisibility, uploadProfileMedia } from "@/lib/supabase/member-profiles";
 import { onAuthStateChange, requireAuth, signOut } from "@/lib/supabase/auth";
-import { type EditableProfilePayload, type GallerySubmission, type MemberAccessIdentity, type MemberAccessResponse, type MemberProfile, type MemberProfileMedia, type ProfileMediaKind, text } from "@/lib/supabase/types";
+import { listMySocialAccounts, updateSocialAccountVisibility } from "@/lib/supabase/social";
+import { type EditableProfilePayload, type GallerySubmission, type MemberAccessIdentity, type MemberAccessResponse, type MemberProfile, type MemberProfileMedia, type ProfileMediaKind, type SocialAccount, text } from "@/lib/supabase/types";
 import type { User } from "@supabase/supabase-js";
 import {
   coreProfileFields,
@@ -97,11 +98,14 @@ export function AccountPanel() {
   const [formState, setFormState] = useState<FormState>(emptyFormState);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
   const [profileMedia, setProfileMedia] = useState<MemberProfileMedia[]>([]);
+  const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [moderatorAvailable, setModeratorAvailable] = useState(false);
   const [verifyStatus, setVerifyStatus] = useState("");
   const [verifyError, setVerifyError] = useState("");
   const [profileStatus, setProfileStatus] = useState("");
   const [profileError, setProfileError] = useState("");
+  const [socialStatus, setSocialStatus] = useState("");
+  const [socialError, setSocialError] = useState("");
   const [submissionsError, setSubmissionsError] = useState("");
   const [profileMediaError, setProfileMediaError] = useState("");
 
@@ -125,6 +129,17 @@ export function AccountPanel() {
       return;
     }
     setProfileMedia(Array.isArray(result.data) ? result.data : []);
+  }, []);
+
+  const loadSocialAccounts = useCallback(async () => {
+    setSocialError("");
+    const result = await listMySocialAccounts();
+    if (!result.ok) {
+      setSocialAccounts([]);
+      setSocialError(result.message || "Guild social status could not be loaded.");
+      return;
+    }
+    setSocialAccounts(Array.isArray(result.data) ? result.data : []);
   }, []);
 
   const refreshMemberAccess = useCallback(async (options: { refreshDiscord?: boolean } = {}) => {
@@ -162,7 +177,9 @@ export function AccountPanel() {
     setProfileError("");
     setSubmissionsError("");
     setProfileMediaError("");
+    setSocialError("");
     setProfileStatus("");
+    setSocialStatus("");
 
     const auth = await requireAuth();
     if (!auth.ok || !auth.data?.user) {
@@ -172,6 +189,7 @@ export function AccountPanel() {
       setLinkedIdentities([]);
       setSubmissions([]);
       setProfileMedia([]);
+      setSocialAccounts([]);
       setModeratorAvailable(false);
       setBusy(false);
       return;
@@ -194,11 +212,12 @@ export function AccountPanel() {
     if (!accessResult.ok) setVerifyError(accessResult.message || "Member verification state could not be loaded.");
     await loadSubmissions();
     await loadProfileMedia();
+    await loadSocialAccounts();
 
     const moderation = await checkLeaderGalleryModerationAccess();
     setModeratorAvailable(moderation.ok === true);
     setBusy(false);
-  }, [loadProfileMedia, loadSubmissions, refreshMemberAccess]);
+  }, [loadProfileMedia, loadSocialAccounts, loadSubmissions, refreshMemberAccess]);
 
   useEffect(() => {
     void Promise.resolve().then(() => loadAccount());
@@ -280,6 +299,21 @@ export function AccountPanel() {
     setBusy(false);
   }
 
+  async function toggleSocialVisibility(account: SocialAccount) {
+    setBusy(true);
+    setSocialError("");
+    setSocialStatus(account.profile_link_visible ? "Hiding Pixelfed profile link." : "Showing Pixelfed profile link.");
+    const result = await updateSocialAccountVisibility(text(account.id), account.profile_link_visible !== true);
+    if (!result.ok) {
+      setSocialError(result.message || "Pixelfed profile visibility could not be updated.");
+      setSocialStatus("");
+    } else {
+      setSocialStatus(result.message || "Pixelfed profile visibility updated.");
+      await loadSocialAccounts();
+    }
+    setBusy(false);
+  }
+
   async function submitProfileMedia(kind: ProfileMediaKind, file: File | null) {
     setBusy(true);
     setProfileMediaError("");
@@ -327,6 +361,8 @@ export function AccountPanel() {
   const latestMedia = (kind: ProfileMediaKind) => profileMedia.find((item) => text(item.media_kind).toLowerCase() === kind);
   const discordHandle = text(profile?.discord_handle || profile?.discord_username || profile?.discord_global_name, signedInName(user, profile));
   const bioLength = formState.bio.length;
+  const pixelfedAccount = socialAccounts.find((account) => text(account.provider).toLowerCase() === "pixelfed") || null;
+  const pixelfedReady = pixelfedAccount?.status === "active" && Boolean(pixelfedAccount.profile_url);
 
   return (
     <div className="grid-12 grid-gap" id="accountPanel" aria-busy={busy}>
@@ -589,6 +625,44 @@ export function AccountPanel() {
           </div>
 
           <WorkflowNotice tone="danger" role="alert" hidden={!profileMediaError}>{profileMediaError}</WorkflowNotice>
+        </section>
+
+        <section className="glass-card glass-card--soft glass-pad auth-panel" aria-labelledby="socialProfileTitle">
+          <div className="auth-panel__head">
+            <div>
+              <p className="kicker">Guild Social</p>
+              <h2 className="section-title section-title--sm" id="socialProfileTitle">Pixelfed</h2>
+            </div>
+            <StatusPill tone={pixelfedReady ? "active" : "muted"}>{pixelfedReady ? "Linked" : "Pending"}</StatusPill>
+          </div>
+
+          {pixelfedAccount ? (
+            <div className="identity-list" aria-label="Pixelfed account status">
+              <article className="identity-item">
+                <div>
+                  <strong>{text(pixelfedAccount.username, "Pixelfed account")}</strong>
+                  <span>{text(pixelfedAccount.profile_url, "Profile URL pending")}</span>
+                </div>
+                <small>{pixelfedAccount.profile_link_visible ? "Shown on profile" : "Hidden from profile"}</small>
+              </article>
+            </div>
+          ) : (
+            <WorkflowEmptyState title="Not linked yet">
+              Pixelfed account creation starts after the SSO compatibility gate passes.
+            </WorkflowEmptyState>
+          )}
+
+          <div className="auth-actions">
+            {pixelfedReady && pixelfedAccount ? (
+              <button className="hero-cta" type="button" onClick={() => void toggleSocialVisibility(pixelfedAccount)} disabled={busy}>
+                {pixelfedAccount.profile_link_visible ? "Hide link" : "Show link"}
+              </button>
+            ) : null}
+            <Link className="hero-cta" href="/social">Social</Link>
+          </div>
+
+          <WorkflowNotice hidden={!socialStatus}>{socialStatus}</WorkflowNotice>
+          <WorkflowNotice tone="danger" role="alert" hidden={!socialError}>{socialError}</WorkflowNotice>
         </section>
 
         <form className="glass-card glass-card--soft glass-pad auth-form" id="profileForm" onSubmit={saveProfile}>

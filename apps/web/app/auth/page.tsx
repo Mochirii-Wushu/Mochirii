@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AuthPanel } from "@/components/member-workflow/AuthPanel";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { BadgeRow, PageHero } from "@/components/public-pages/common";
@@ -50,7 +51,9 @@ export default function AuthPage() {
       />
       <main className="page-main" id="main">
         <div className="container">
-          <AuthPanel />
+          <Suspense fallback={<section className="glass-card glass-card--primary glass-pad auth-panel" aria-busy="true" />}>
+            <AuthPanel />
+          </Suspense>
         </div>
       </main>
     </>

@@ -57,6 +57,27 @@ export type MemberProfile = {
   updated_at?: string | null;
 };
 
+export type SocialAccountStatus = "pending_sso" | "active" | "revoked" | "suspended" | "archived";
+
+export type SocialAccount = {
+  id: string;
+  user_id?: string | null;
+  member_profile_id?: string | null;
+  provider?: "pixelfed" | string | null;
+  provider_subject?: string | null;
+  provider_user_id?: string | null;
+  username?: string | null;
+  profile_url?: string | null;
+  status?: SocialAccountStatus | string | null;
+  profile_link_visible?: boolean | null;
+  federation_enabled?: boolean | null;
+  last_login_at?: string | null;
+  last_synced_at?: string | null;
+  revoked_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 export type EditableProfilePayload = {
   display_name?: string | null;
   game_uid?: string | null;
@@ -296,6 +317,9 @@ export type PublicMemberProfile = {
   avatarUrl?: string | null;
   bannerUrl?: string | null;
   profilePublishedAt?: string | null;
+  socialProvider?: string | null;
+  socialUsername?: string | null;
+  socialProfileUrl?: string | null;
   updatedAt?: string | null;
 };
 

@@ -283,6 +283,30 @@ export async function signedMediaUrl(adminClient: SupabaseClient, media: JsonRec
   return data?.signedUrl || null;
 }
 
+export async function visibleSocialAccount(adminClient: SupabaseClient, userId: unknown): Promise<JsonRecord | null> {
+  const cleanUserId = safeString(userId, 80);
+  if (!cleanUserId) return null;
+
+  const { data, error } = await adminClient
+    .from("social_accounts")
+    .select("provider,username,profile_url,status,profile_link_visible")
+    .eq("user_id", cleanUserId)
+    .eq("provider", "pixelfed")
+    .eq("status", "active")
+    .eq("profile_link_visible", true)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("member profile social account lookup failed", {
+      code: error.code,
+      message: error.message,
+    });
+    return null;
+  }
+
+  return data ? asRecord(data) : null;
+}
+
 export async function mediaByIds(adminClient: SupabaseClient, ids: string[]): Promise<Map<string, JsonRecord>> {
   const cleanIds = ids.filter(Boolean);
   if (!cleanIds.length) return new Map();
@@ -321,6 +345,7 @@ export async function publicProfileDto(
     profile.member_status === "active" &&
     profile.has_required_discord_roles === true &&
     recentVerification(profile.discord_verified_at);
+  const social = await visibleSocialAccount(adminClient, profile.id);
 
   return {
     id: safeString(profile.id, 80),
@@ -335,6 +360,9 @@ export async function publicProfileDto(
     avatarUrl: await signedMediaUrl(adminClient, avatar),
     bannerUrl: await signedMediaUrl(adminClient, banner),
     profilePublishedAt: safeString(profile.profile_published_at, 40),
+    socialProvider: safeString(social?.provider, 40),
+    socialUsername: safeString(social?.username, 80),
+    socialProfileUrl: safeString(social?.profile_url, 300),
     updatedAt: safeString(profile.updated_at, 40),
   };
 }

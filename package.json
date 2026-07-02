@@ -56,6 +56,7 @@
     "check:mochi-social-tester-password-gate": "node scripts/check-mochi-social-tester-password-gate.mjs",
     "check:next-public-sync": "node scripts/check-next-public-sync.mjs",
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",
+    "check:pixelfed-first-login-readiness": "node scripts/check-pixelfed-first-login-readiness.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:recruitment-audio-player": "node scripts/check-recruitment-audio-player.mjs",
     "check:refs": "node scripts/check-refs.mjs",

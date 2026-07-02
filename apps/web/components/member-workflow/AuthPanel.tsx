@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
 import { enabledAuthProviders, enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
@@ -9,6 +10,7 @@ import { signedInName } from "@/lib/supabase/profile";
 import type { User } from "@supabase/supabase-js";
 
 export function AuthPanel() {
+  const searchParams = useSearchParams();
   const [busy, setBusy] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [status, setStatus] = useState("Checking your current session.");
@@ -19,6 +21,11 @@ export function AuthPanel() {
   const providers = useMemo(() => enabledAuthProviders(), []);
   const oauthProviders = useMemo(() => enabledOAuthProviders(), []);
   const phoneProvider = providers.find((provider) => provider.id === "phone");
+  const redirectTo = useMemo(() => {
+    const raw = String(searchParams.get("redirect") || "").trim();
+    if (!raw.startsWith("/") || raw.startsWith("//")) return "/account";
+    return raw;
+  }, [searchParams]);
 
   async function load() {
     setBusy(true);
@@ -49,7 +56,7 @@ export function AuthPanel() {
     setError("");
     const provider = providers.find((item) => item.id === providerId);
     setStatus(`Opening ${provider?.label || "provider"} sign-in.`);
-    const result = await signInWithProvider(providerId, { redirectTo: "/account" });
+    const result = await signInWithProvider(providerId, { redirectTo });
     if (!result.ok) {
       setError(result.message || "Sign-in could not start.");
       setStatus("");

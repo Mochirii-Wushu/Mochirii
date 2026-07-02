@@ -20,6 +20,14 @@ This repository serves the live Vercel/Next.js production app from `apps/web`; t
 - Do not deploy Edge Functions unless a future task explicitly approves deployment.
 - Protected page text must not be changed for auth/gallery-upload work.
 
+## Pixelfed Guild Social Mapping
+
+Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow.
+
+`social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`, which controls whether an active Pixelfed profile URL can appear on members-only profile pages.
+
+The table intentionally does not grant direct insert/delete access to `authenticated`. Production SSO, DNS, Pixelfed runtime provisioning, client registration, federation enablement, and any account-sync worker remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md).
+
 ## Browser Helper
 
 `supabase.js` attaches `window.MochiriiSupabase` before `site.js` and page scripts run. It preserves:

@@ -64,6 +64,22 @@ const serviceOnlyTables = [
   "vote_reminder_sends",
 ];
 
+const socialAccountSnippets = [
+  "create table if not exists public.social_accounts",
+  "constraint social_accounts_visible_requires_active_check",
+  "create unique index if not exists social_accounts_user_provider_key",
+  "create unique index if not exists social_accounts_provider_subject_key",
+  "create index if not exists social_accounts_visible_profile_idx",
+  "grant select on table public.social_accounts to authenticated",
+  "grant update (profile_link_visible) on table public.social_accounts to authenticated",
+  "grant all on table public.social_accounts to service_role",
+  "create policy \"Members can read their own social accounts\"",
+  "create policy \"Members can update social account visibility\"",
+  "on public.social_accounts",
+  "using ((select auth.uid()) = user_id)",
+  "with check ((select auth.uid()) = user_id)",
+];
+
 const protectedFunctions = [
   "verify-discord-member",
   "verify-member-access",
@@ -138,6 +154,12 @@ for (const snippet of mochiSocialCompatibilitySnippets) {
 for (const table of serviceOnlyTables) {
   assertIncludes("Supabase README service-only table allowlist", readme, `\`${table}\``);
 }
+
+for (const snippet of socialAccountSnippets) {
+  assertIncludes("Pixelfed social account mapping migration", migrationText, snippet);
+}
+
+assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_accounts` maps a signed-in website member");
 
 [
   "https://mochirii.com",
