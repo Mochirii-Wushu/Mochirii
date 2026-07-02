@@ -6,6 +6,11 @@ This runbook prepares the first Pixelfed login test without committing Pixelfed
 runtime code, host secrets, OAuth client secrets, database URLs, cookies, access
 tokens, or media credentials to this website repo.
 
+Phase 2 OIDC compatibility work is tracked in
+[`docs/pixelfed-oidc-spike.md`](pixelfed-oidc-spike.md). Run
+`npm run check:pixelfed-oidc-spike` before enabling or retesting provider
+OAuth settings.
+
 ## Current Repo Gate
 
 First login testing may start only after these website and database-facing

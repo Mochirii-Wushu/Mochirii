@@ -44,6 +44,7 @@ const checks = [
   ["check:full-stack-release-evidence", ["node", "scripts/check-full-stack-release-evidence.mjs"]],
   ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],
   ["check:accessibility-route-matrix", ["node", "scripts/check-accessibility-route-matrix.mjs"]],
+  ["check:pixelfed-oidc-spike", ["node", "scripts/check-pixelfed-oidc-spike.mjs"]],
   ["check:pixelfed-first-login-readiness", ["node", "scripts/check-pixelfed-first-login-readiness.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
   ["check:supabase-security-performance", ["node", "scripts/check-supabase-security-performance.mjs"]],
