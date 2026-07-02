@@ -278,6 +278,7 @@ export function StaticImage({
   loading = "lazy",
   sizes,
   style,
+  fetchPriority,
 }: {
   id?: string;
   src: unknown;
@@ -289,9 +290,13 @@ export function StaticImage({
   loading?: "eager" | "lazy";
   sizes?: string;
   style?: CSSProperties;
+  fetchPriority?: "high" | "low" | "auto";
 }) {
   const imageSrc = publicPath(src);
   if (!imageSrc) return null;
+
+  const resolvedLoading = priority ? "eager" : loading;
+  const resolvedFetchPriority = fetchPriority ?? (priority ? "high" : undefined);
 
   return (
     <Image
@@ -303,7 +308,8 @@ export function StaticImage({
       height={Number(height)}
       sizes={sizes}
       style={style}
-      {...(priority ? { priority: true } : { loading })}
+      loading={resolvedLoading}
+      fetchPriority={resolvedFetchPriority}
     />
   );
 }
