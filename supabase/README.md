@@ -22,11 +22,11 @@ This repository serves the live Vercel/Next.js production app from `apps/web`; t
 
 ## Pixelfed Guild Social Mapping
 
-Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow.
+Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow. The staging runtime exists outside Vercel; first authenticated testing is admin-only until the source-control, OIDC, media, backup, and moderation gates pass.
 
 `social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`, which controls whether an active Pixelfed profile URL can appear on members-only profile pages.
 
-The table intentionally does not grant direct insert/delete access to `authenticated`. Production SSO, DNS, Pixelfed runtime provisioning, client registration, federation enablement, and any account-sync worker remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md).
+The table intentionally does not grant direct insert/delete access to `authenticated`. Production SSO, federation enablement, broad member uploads, account-sync workers, media migration, and any remote database/Auth setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
 
 ## Browser Helper
 

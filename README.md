@@ -14,6 +14,7 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 - `https://www.mochirii.com` redirects to `https://mochirii.com`.
 - `https://mochirii.vercel.app` remains a Vercel fallback/debug URL for the same app.
 - The root static GitHub Pages files and tracked `CNAME` remain rollback/reference material, not the current production surface.
+- GitHub Pages is a legacy rollback/reference surface only; as of 2026-07-02 its deploy job can time out while Vercel production remains healthy, so do not treat Pages as the live host without a separate approved retirement or rollback task.
 - See [`docs/deployment.md`](docs/deployment.md) for the authoritative deployment, Vercel dashboard, rollback, and public asset/data sync rules.
 
 ---
@@ -38,6 +39,16 @@ Player-facing playtest wording lives in [`docs/mochi-social-playtest-guide.md`](
 
 ---
 
+## Mochirii Social Staging
+
+`social.mochirii.com` is the approved staging target for the guild social platform. It is hosted outside Vercel because the social runtime needs a persistent PHP/Laravel app, database, Redis, queue worker, scheduler, media storage, backups, and monitoring.
+
+The website repo owns only the member doorway, Supabase OAuth consent flow, `social_accounts` schema, and no-secret documentation. The staged social runtime remains admin-first, closed-registration, SSO-only, and federation-disabled until the separate first-login and moderation gates pass. Runtime source changes must move into a Mochirii-owned private fork or ops repo before further host edits.
+
+See [`docs/pixelfed-guild-social-adr.md`](docs/pixelfed-guild-social-adr.md), [`docs/pixelfed-oidc-spike.md`](docs/pixelfed-oidc-spike.md), [`docs/pixelfed-first-login-testing.md`](docs/pixelfed-first-login-testing.md), and [`docs/pixelfed-staging-ops.md`](docs/pixelfed-staging-ops.md).
+
+---
+
 ## Tech Stack
 
 - **HTML5** — semantic, accessible markup
@@ -47,6 +58,8 @@ Player-facing playtest wording lives in [`docs/mochi-social-playtest-guide.md`](
 - **Next.js / React** — production app under `apps/web`
 - **Vercel** — production hosting for `mochirii.com`
 - **GitHub Pages** — retained rollback/reference surface
+- **Supabase** — auth, membership, OAuth consent, database, storage, and Edge Functions
+- **DigitalOcean Droplet / Spaces** — staging social runtime and planned object media boundary
 
 The root static site stays dependency-light. The production app builds from `apps/web`.
 
