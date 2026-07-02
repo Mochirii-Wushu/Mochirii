@@ -18,6 +18,7 @@ const legacyHtmlRedirects = [
   ["/recruitment.html", "/recruitment"],
   ["/auth.html", "/auth"],
   ["/account.html", "/account"],
+  ["/social.html", "/social"],
   ["/gallery-submit.html", "/gallery-submit"],
   ["/spotify.html", "/spotify"],
   ["/spotlight.html", "/spotlight"],

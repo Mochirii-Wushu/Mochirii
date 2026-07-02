@@ -1,0 +1,81 @@
+# Pixelfed Guild Social ADR
+
+Date: 2026-07-02
+
+Status: Phase 0 local implementation; provider mutations and production runtime are approval-gated.
+
+## Decision
+
+Mochirii will treat Pixelfed as a separate guild social runtime at `social.mochirii.com`. The Vercel/Next.js site in `apps/web` remains the member doorway, Supabase remains the identity and guild membership authority, Discord remains the guild verification source, and GitHub protected PR checks remain the release gate.
+
+Pixelfed code, infrastructure secrets, media storage credentials, DB passwords, queue/runtime configs, and host-specific state must not be committed to this website repo. A future private ops workspace may hold redacted templates and host automation after the host is chosen.
+
+## Source Anchors
+
+- Pixelfed installation expects a PHP/Laravel application with supporting services, and the current beta install docs use the `dev` branch for deployable code: <https://pixelfed.github.io/docs-next/running-pixelfed/installation.html>
+- Vercel remains the Next.js host; Pixelfed media, queues, scheduler, and long-running service work must stay off the Vercel website runtime: <https://vercel.com/docs/limits>
+- Supabase OAuth 2.1 Server supports OIDC, authorization code flow with PKCE, custom consent UI, and exact redirect clients: <https://supabase.com/docs/guides/auth/oauth-server>
+- Supabase OAuth setup requires enabling the server, configuring the Authorization Path, building the consent UI, and registering clients: <https://supabase.com/docs/guides/auth/oauth-server/getting-started>
+- ActivityPub is federated server-to-server social networking; remote copies can exist outside Mochirii control: <https://www.w3.org/TR/activitypub/>
+- Discord OAuth scopes and `state` handling remain relevant for existing Discord identity and guild membership verification: <https://discord.com/developers/docs/topics/oauth2>
+- Upload safety follows allowlisted types, server validation, generated names, size limits, authorized uploads, private/object storage, and malware scanning where available: <https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html>
+
+## Architecture Boundaries
+
+- Website repo: `/social`, `/oauth/consent`, `/api/oauth/decision`, account social status, member profile social link display, Supabase migration files, and no-secret docs.
+- Supabase project `deyvmtncimmcinldjyqe`: Auth, OAuth consent handoff, member access, `social_accounts`, RLS, and future server-side Pixelfed account sync.
+- Discord: guild membership and role verification only; it is not the Pixelfed identity authority.
+- Pixelfed runtime: separate host with HTTPS, PHP, queue worker, scheduler, database, Redis, media storage, backups, monitoring, and pinned Pixelfed release or commit.
+
+## SSO Gate
+
+Do not provision production Pixelfed until staging proves Supabase OAuth 2.1 and Pixelfed OIDC compatibility:
+
+1. Supabase OAuth Server is enabled for an approved non-production or production-staging path.
+2. Authorization Path is `/oauth/consent`.
+3. A Pixelfed OAuth client is registered with exact redirect URI `https://social.mochirii.com/auth/oidc/callback`.
+4. Pixelfed receives OIDC-compatible `sub`, `email`, and deterministic username data from Supabase.
+5. PKCE succeeds end to end.
+6. Invalid `state`, missing sessions, non-members, suspended members, duplicate username/email, and callback retry paths fail safely.
+
+If PKCE or required claims fail, pause and prepare a decision packet for a minimal Pixelfed patch/fork, an identity broker, or native Pixelfed accounts mapped back to Supabase. Do not force a brittle production workaround.
+
+## Federation And Moderation Gate
+
+Default launch posture is guild-only, closed registration, SSO-only, moderator-visible, and federation disabled until approval. Before enabling federation:
+
+- Publish server rules, report/takedown process, moderator roles, escalation contacts, and defederation/blocklist policy.
+- Add member-facing copy explaining that federated posts may be copied or cached by remote servers and deletion cannot guarantee remote removal.
+- Verify local-only posting, image upload, reports, blocks, account suspension, backup restore, and queue health.
+- Then run ActivityPub smoke tests for WebFinger/NodeInfo, local-to-remote follows, remote-to-local follows, outgoing posts, incoming replies, deletion behavior, and defederation.
+
+## Approval Prompts
+
+Use exact prompts before provider mutations:
+
+- `Approve enabling Supabase OAuth 2.1 Server for project deyvmtncimmcinldjyqe and setting Authorization Path /oauth/consent.`
+- `Approve registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback.`
+- `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
+- `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
+- `Approve enabling ActivityPub federation for social.mochirii.com after the moderation gate passes.`
+
+## Rollback
+
+Rollback the website by reverting the website PR. Rollback the database by leaving `social_accounts` inert unless a future migration explicitly removes it. Rollback Pixelfed by disabling DNS or SSO client access and suspending account sync; do not delete media or accounts until backup and retention decisions are approved.
+
+## Verification
+
+Local website changes must pass:
+
+- `npm run toolchain:check`
+- `npm run check`
+- `git diff --check`
+- `cd apps/web && npm run toolchain:check && npm run lint && npm run build`
+
+Supabase-changing PRs must also pass:
+
+- `npm run check:supabase-security-performance`
+- `npm run check:supabase-edge-types`
+- Supabase Preview evidence after PR creation
+
+Provider reads may be performed with credentials from `C:\Users\xtyty\Documents\Creds`; provider writes require the approval prompts above.
