@@ -32,6 +32,7 @@ Use these exact approval prompts before mutating provider state:
 - `Approve Supabase db push for project deyvmtncimmcinldjyqe migration 20260702080720.`
 - `Approve enabling Supabase OAuth 2.1 Server for project deyvmtncimmcinldjyqe and setting Authorization Path /oauth/consent.`
 - `Approve registering the Pixelfed OAuth client for the approved staging Pixelfed URL with its exact OIDC callback URI.`
+- `Approve updating or re-registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback and token endpoint auth method client_secret_post.`
 - `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
 - `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
 
@@ -64,6 +65,10 @@ Supabase OAuth Server must be configured according to the current Supabase OAuth
 - Site URL resolves to the website surface that serves `/oauth/consent`.
 - OIDC discovery and UserInfo endpoints are reachable.
 - The approved Pixelfed staging client uses an exact redirect URI.
+- The approved Pixelfed staging client uses the token endpoint auth method
+  expected by the staged Pixelfed runtime. Current unpatched Pixelfed OIDC uses
+  The PHP League `GenericProvider`, so use `client_secret_post` unless a
+  private Pixelfed patch or custom provider is explicitly approved and tested.
 - Requested scopes include `openid profile email`.
 - Approval calls are allowed only for active guild members through
   `/api/oauth/decision`.
@@ -122,16 +127,21 @@ $env:PIXELFED_FIRST_LOGIN_STAGING_READY = '1'
 $env:PIXELFED_STAGING_BASE_URL = 'https://social.mochirii.com'
 $env:PIXELFED_OIDC_CALLBACK_URI = 'https://social.mochirii.com/auth/oidc/callback'
 $env:PIXELFED_OAUTH_CLIENT_REGISTERED = '1'
+$env:PIXELFED_OAUTH_CLIENT_CREDENTIAL_READY = '1'
+$env:PIXELFED_OAUTH_TOKEN_AUTH_METHOD = 'client_secret_post'
 $env:PIXELFED_STAGING_RUNTIME_READY = '1'
 $env:PIXELFED_STAGING_SECURITY_READY = '1'
 npm run check:pixelfed-first-login-readiness
 ```
 
 Set the marker variables only after the private host checklist confirms the
-matching OAuth client, closed registration, disabled federation, upload limits,
-queue worker, scheduler, backups, monitoring, and moderation/report flow. When
-both provider and staging assertions pass, first admin account creation is the
-next manual prompt before browser login smoke testing.
+matching OAuth client, token endpoint auth method, closed registration, disabled
+federation, upload limits, queue worker, scheduler, backups, monitoring, and
+moderation/report flow. Inject `PIXELFED_OAUTH_CLIENT_ID` and
+`PIXELFED_OAUTH_CLIENT_SECRET` only into the child-process environment from
+local credential files; do not paste them into docs, reports, PRs, or shell
+history. When both provider and staging assertions pass, first admin account
+creation is the next manual prompt before browser login smoke testing.
 
 Clear the variables from the shell after the check if the session will remain
 open.
