@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -84,14 +85,13 @@ export function SiteFooter() {
         <div className="footer-top">
           <div className="footer-brand">
             <Link className="footer-brand-link" href="/" aria-label="Mōchirīī Home">
-              <img
+              <Image
                 className="footer-emblem"
                 src="/assets/img/brand/emblem.webp"
                 alt=""
-                width="56"
-                height="56"
-                loading="lazy"
-                decoding="async"
+                width={56}
+                height={56}
+                sizes="56px"
               />
               <span className="brand-text">
                 <span className="footer-title">Mōchirīī</span>

@@ -21,7 +21,8 @@ export function MochiSocialTesterPasswordGate({ error }: { error: TesterGateErro
           alt=""
           aria-hidden="true"
           fill
-          priority
+          loading="eager"
+          fetchPriority="high"
           sizes="(max-width: 980px) calc(100vw - 48px), 38vw"
         />
         <div className="mochi-arrival-scene__caption">

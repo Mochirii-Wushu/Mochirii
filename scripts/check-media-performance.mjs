@@ -71,6 +71,8 @@ const galleryTypes = read("apps/web/lib/supabase/types.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
 const homePage = read("apps/web/app/page.tsx");
 const sharedPublicComponents = read("apps/web/components/public-pages/common.tsx");
+const siteHeader = read("apps/web/components/SiteHeader.tsx");
+const siteFooter = read("apps/web/components/SiteFooter.tsx");
 const spotifyBrowser = read("apps/web/components/public-pages/SpotifyBrowser.tsx");
 const staticGallery = read("gallery.js");
 const staticGalleryHtml = read("gallery.html");
@@ -122,6 +124,21 @@ assert(homePriorityCount === 1, `Home page should have exactly one priority imag
 
 assertIncludes("shared PageHero", sharedPublicComponents, "className=\"page-hero__img\"");
 assertIncludes("shared PageHero", sharedPublicComponents, "priority");
+assertIncludes("shared image LCP hint", sharedPublicComponents, "resolvedFetchPriority");
+assertIncludes("shared image LCP hint", sharedPublicComponents, "fetchPriority={resolvedFetchPriority}");
+
+[
+  'import Image from "next/image";',
+  'src="/assets/img/brand/emblem.webp"',
+  'sizes="56px"',
+  'fetchPriority="low"',
+].forEach((snippet) => assertIncludes("optimized header emblem", siteHeader, snippet));
+
+[
+  'import Image from "next/image";',
+  'src="/assets/img/brand/emblem.webp"',
+  'sizes="56px"',
+].forEach((snippet) => assertIncludes("optimized footer emblem", siteFooter, snippet));
 
 [
   "function SpotifyEmbed",

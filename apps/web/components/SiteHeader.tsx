@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getCurrentUser, onAuthStateChange } from "@/lib/supabase/auth";
@@ -290,14 +291,15 @@ export function SiteHeader() {
       <div className="header-wrap">
         <Link className="brand" href="/" aria-label="Mōchirīī Home">
           <span className="brand-mark" aria-hidden="true">
-            <img
+            <Image
               className="brand-emblem"
               src="/assets/img/brand/emblem.webp"
               alt=""
-              width="56"
-              height="56"
+              width={56}
+              height={56}
+              sizes="56px"
               loading="eager"
-              decoding="async"
+              fetchPriority="low"
             />
           </span>
           <span className="brand-text">
@@ -433,13 +435,13 @@ export function SiteHeader() {
               onClick={() => closeMobile()}
             >
               <span className="brand-mark" aria-hidden="true">
-                <img
+                <Image
                   className="brand-emblem"
                   src="/assets/img/brand/emblem.webp"
                   alt=""
-                  width="44"
-                  height="44"
-                  decoding="async"
+                  width={44}
+                  height={44}
+                  sizes="44px"
                 />
               </span>
               <span className="brand-text">
