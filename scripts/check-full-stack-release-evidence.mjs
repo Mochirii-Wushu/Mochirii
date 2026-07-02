@@ -17,6 +17,10 @@ const supabaseProjectRef =
   process.env.FULL_STACK_RELEASE_EVIDENCE_SUPABASE_PROJECT_REF || "deyvmtncimmcinldjyqe";
 const jsonReportPath = resolve(root, "reports/full-stack-release-evidence.json");
 const markdownReportPath = resolve(root, "reports/full-stack-release-evidence.md");
+const isWindows = process.platform === "win32";
+const binName = (name) => (isWindows ? `${name}.cmd` : name);
+const vercelCommand = resolve(root, "apps/web/node_modules/.bin", binName("vercel"));
+const supabaseCommand = resolve(root, "node_modules/.bin", binName("supabase"));
 
 const failures = [];
 const warnings = [];
@@ -146,7 +150,7 @@ function inspectLocalReleaseSurface() {
 function inspectVercel() {
   const section = {
     status: "skipped",
-    cli: commandVersion("vercel"),
+    cli: commandVersion(providerCommand("vercel")),
     production: null,
     environmentNames: {
       production: null,
@@ -158,9 +162,13 @@ function inspectVercel() {
     return skipProvider(section, "vercel CLI unavailable");
   }
 
-  const inspect = run("vercel", ["inspect", productionUrl, "--format=json", "--timeout", "3m"], {
-    timeout: 180000,
-  });
+  const inspect = run(
+    providerCommand("vercel"),
+    ["inspect", productionUrl, "--format=json", "--timeout", "3m", "--cwd", "apps/web"],
+    {
+      timeout: 180000,
+    },
+  );
   if (!inspect.ok) return skipProvider(section, "vercel inspect failed", inspect);
 
   const deployment = parseJson(inspect.stdout);
@@ -195,7 +203,7 @@ function inspectVercel() {
 function inspectSupabase() {
   const section = {
     status: "skipped",
-    cli: commandVersion("supabase"),
+    cli: commandVersion(providerCommand("supabase")),
     projectRef: supabaseProjectRef,
     localMigrations: readLocalMigrations(),
     localFunctions: readLocalFunctionConfig(),
@@ -208,7 +216,7 @@ function inspectSupabase() {
     return skipProvider(section, "supabase CLI unavailable");
   }
 
-  const migrations = run("supabase", ["migration", "list", "--linked"], { timeout: 120000 });
+  const migrations = run(providerCommand("supabase"), ["migration", "list", "--linked"], { timeout: 120000 });
   if (!migrations.ok) {
     if (strictProviders) failures.push("Supabase linked migration list failed.");
     return skipProvider(section, "supabase linked migration list failed", migrations);
@@ -225,7 +233,7 @@ function inspectSupabase() {
   }
 
   const functions = run(
-    "supabase",
+    providerCommand("supabase"),
     ["functions", "list", "--project-ref", supabaseProjectRef, "--output-format", "json"],
     { timeout: 120000 },
   );
@@ -236,7 +244,11 @@ function inspectSupabase() {
   }
 
   const parsedFunctions = parseJson(functions.stdout);
-  const remoteFunctions = Array.isArray(parsedFunctions) ? parsedFunctions : [];
+  const remoteFunctions = Array.isArray(parsedFunctions)
+    ? parsedFunctions
+    : Array.isArray(parsedFunctions?.functions)
+      ? parsedFunctions.functions
+      : [];
   const safeFunctions = remoteFunctions
     .map((entry) => ({
       name: entry.slug || entry.name || entry.id || "",
@@ -270,7 +282,7 @@ function inspectSupabaseLocalOnly() {
   return {
     status: "local-only",
     projectRef: supabaseProjectRef,
-    cli: { available: false, version: "not checked" },
+    cli: commandVersion(providerCommand("supabase")),
     localMigrations: readLocalMigrations(),
     localFunctions: readLocalFunctionConfig(),
     remoteMigrations: null,
@@ -383,7 +395,9 @@ function inspectCodexAgents() {
 }
 
 function readVercelEnvNames(target) {
-  const result = run("vercel", ["env", "ls", target, "--format=json"], { timeout: 60000 });
+  const result = run(providerCommand("vercel"), ["env", "ls", target, "--format=json", "--cwd", "apps/web"], {
+    timeout: 60000,
+  });
   if (!result.ok) return skippedSection(`vercel env ls ${target} failed`);
   const parsed = parseJson(result.stdout);
   const envs = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.envs) ? parsed.envs : [];
@@ -496,10 +510,19 @@ function commandVersion(command) {
   };
 }
 
+function providerCommand(command) {
+  if (command === "vercel" && existsSync(vercelCommand)) return vercelCommand;
+  if (command === "supabase" && existsSync(supabaseCommand)) return supabaseCommand;
+  return command;
+}
+
 function run(command, commandArgs, options = {}) {
   const commandToRun = commandName(command);
   const useShell = process.platform === "win32" && /\.cmd$/i.test(commandToRun);
-  const result = spawnSync(commandToRun, commandArgs, {
+  const shellCommand = useShell
+    ? [commandToRun, ...commandArgs].map((part) => `"${String(part).replaceAll('"', '""')}"`).join(" ")
+    : commandToRun;
+  const result = spawnSync(shellCommand, useShell ? [] : commandArgs, {
     cwd: root,
     encoding: "utf8",
     shell: useShell,
