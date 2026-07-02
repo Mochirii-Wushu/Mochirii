@@ -69,6 +69,7 @@ Local website changes must pass:
 
 - `npm run toolchain:check`
 - `npm run check`
+- `npm run check:pixelfed-first-login-readiness`
 - `git diff --check`
 - `cd apps/web && npm run toolchain:check && npm run lint && npm run build`
 
