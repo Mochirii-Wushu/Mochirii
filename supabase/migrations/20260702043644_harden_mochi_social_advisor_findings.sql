@@ -32,9 +32,6 @@ on public.mochi_social_market_listings(inventory_id);
 create index if not exists mochi_social_market_listings_seller_id_idx
 on public.mochi_social_market_listings(seller_id);
 
-create index if not exists mochi_social_spirits_owner_id_idx
-on public.mochi_social_spirits(owner_id);
-
 create index if not exists mochi_social_shared_pet_snapshots_last_actor_id_idx
 on public.mochi_social_shared_pet_snapshots(last_actor_id);
 
@@ -44,12 +41,31 @@ on public.mochi_social_trades(recipient_id);
 create index if not exists mochi_social_trades_requester_id_idx
 on public.mochi_social_trades(requester_id);
 
--- The current local migration contract uses mochi_social_spirits. Current linked
--- advisor output also reports mochi_social_pets on production, so keep this
--- block guarded to support remote drift without breaking local/preview resets.
+-- The local migration contract historically used mochi_social_spirits while
+-- the linked project currently has mochi_social_pets. Keep both branches
+-- table/column-aware so production, preview, and local rebuilds can apply this
+-- migration against either lineage without changing runtime access.
 do $$
 begin
-  if to_regclass('public.mochi_social_pets') is not null then
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'mochi_social_spirits'
+      and column_name = 'owner_id'
+  ) then
+    execute 'create index if not exists mochi_social_spirits_owner_id_idx on public.mochi_social_spirits(owner_id)';
+    execute 'drop policy if exists "mochi_social_spirits_read_own" on public.mochi_social_spirits';
+    execute 'create policy "mochi_social_spirits_read_own" on public.mochi_social_spirits for select to authenticated using ((select auth.uid()) = owner_id)';
+  end if;
+
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'mochi_social_pets'
+      and column_name = 'owner_id'
+  ) then
     execute 'create index if not exists mochi_social_pets_owner_id_idx on public.mochi_social_pets(owner_id)';
     execute 'drop policy if exists "mochi_social_pets_read_own" on public.mochi_social_pets';
     execute 'create policy "mochi_social_pets_read_own" on public.mochi_social_pets for select to authenticated using ((select auth.uid()) = owner_id)';
@@ -77,13 +93,6 @@ for all
 to authenticated
 using ((select auth.uid()) = id)
 with check ((select auth.uid()) = id);
-
-drop policy if exists "mochi_social_spirits_read_own" on public.mochi_social_spirits;
-create policy "mochi_social_spirits_read_own"
-on public.mochi_social_spirits
-for select
-to authenticated
-using ((select auth.uid()) = owner_id);
 
 drop policy if exists "mochi_social_inventory_read_own" on public.mochi_social_inventory;
 create policy "mochi_social_inventory_read_own"
