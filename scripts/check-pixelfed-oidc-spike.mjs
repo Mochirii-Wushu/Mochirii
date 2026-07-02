@@ -122,7 +122,7 @@ async function checkLiveDiscovery() {
   const expected = {
     authorization_endpoint: `https://${projectRef}.supabase.co/auth/v1/oauth/authorize`,
     token_endpoint: `https://${projectRef}.supabase.co/auth/v1/oauth/token`,
-    userinfo_endpoint: `https://${projectRef}.supabase.co/auth/v1/userinfo`,
+    userinfo_endpoint: `https://${projectRef}.supabase.co/auth/v1/oauth/userinfo`,
     jwks_uri: `https://${projectRef}.supabase.co/auth/v1/.well-known/jwks.json`,
   };
 

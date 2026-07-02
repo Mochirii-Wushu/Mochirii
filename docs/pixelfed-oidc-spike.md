@@ -55,7 +55,7 @@ Supabase OAuth and OIDC endpoints:
 - Token endpoint:
   `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/oauth/token`
 - UserInfo endpoint:
-  `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/userinfo`
+  `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/oauth/userinfo`
 - JWKS endpoint:
   `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/.well-known/jwks.json`
 - OIDC discovery:
@@ -101,7 +101,7 @@ store, not this repo.
 - `PF_OIDC_AUTHORIZE_URL=https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/oauth/authorize`
 - `PF_OIDC_TOKEN_URL`: Supabase Token endpoint
   `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/oauth/token`
-- `PF_OIDC_PROFILE_URL=https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/userinfo`
+- `PF_OIDC_PROFILE_URL=https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/oauth/userinfo`
 - `PF_OIDC_USERNAME_FIELD=preferred_username`
 - `PF_OIDC_FIELD_ID=sub`
 
