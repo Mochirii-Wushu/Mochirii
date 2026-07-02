@@ -13,14 +13,16 @@ Read-only advisors were refreshed against linked project `deyvmtncimmcinldjyqe` 
 
 - Added FK indexes for Mochi Social alpha, chat, feedback, inventory, ledger, market, shared-pet, trade, and chain-operation relationships.
 - Rewrote affected Mochi Social RLS policies to wrap `auth.uid()` and `auth.role()` calls in `select` expressions, preserving the same role and ownership predicates.
-- Kept the local `mochi_social_spirits` table contract intact while adding a guarded compatibility block for the linked advisor's `mochi_social_pets` finding.
-- Extended `npm run check:supabase-security-performance` so the new FK index and optimized-RLS snippets remain guarded.
+- Kept the local `mochi_social_spirits` table contract intact while making both the `mochi_social_spirits` and linked `mochi_social_pets` advisor branches table/column-aware.
+- Extended `npm run check:supabase-security-performance` so the new FK index, optimized-RLS, and table-aware compatibility snippets remain guarded.
 
 ## Validation
 
 - Supabase CLI 2.108.0.
 - `npx supabase start --ignore-health-check` applied all migrations through this migration on the local stack.
 - `npx supabase db reset --local --no-seed --yes` completed successfully and reapplied the full migration chain.
+- A local rollback transaction that dropped `public.mochi_social_spirits` before rerunning this migration completed without the previous relation-missing error.
+- A local rollback transaction with a temporary `public.mochi_social_pets(owner_id)` table exercised the linked-project compatibility branch successfully.
 - `npx supabase db advisors --local --type all --level warn --fail-on none --output-format json` reported no local issues after reset.
 - `npm run check:supabase-security-performance`, `npm run check:supabase-edge-types`, and `npm run test:mochi-social-alpha` passed.
 

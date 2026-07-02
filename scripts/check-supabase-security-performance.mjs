@@ -36,6 +36,16 @@ const requiredIndexSnippets = [
   "mochi_social_trades_requester_id_idx",
 ];
 
+const mochiSocialCompatibilitySnippets = [
+  "table_name = 'mochi_social_spirits'",
+  "table_name = 'mochi_social_pets'",
+  "column_name = 'owner_id'",
+  "create index if not exists mochi_social_spirits_owner_id_idx on public.mochi_social_spirits(owner_id)",
+  "create index if not exists mochi_social_pets_owner_id_idx on public.mochi_social_pets(owner_id)",
+  "create policy \"mochi_social_spirits_read_own\" on public.mochi_social_spirits",
+  "create policy \"mochi_social_pets_read_own\" on public.mochi_social_pets",
+];
+
 const serviceOnlyTables = [
   "discord_managed_permission_overwrites",
   "discord_resources",
@@ -110,6 +120,10 @@ assertIncludes("check-all", checkAll, "check:supabase-security-performance");
 
 for (const snippet of requiredIndexSnippets) {
   assertIncludes("Supabase FK index migrations", migrationText, snippet);
+}
+
+for (const snippet of mochiSocialCompatibilitySnippets) {
+  assertIncludes("Mochi Social table-aware compatibility migration", migrationText, snippet);
 }
 
 [
