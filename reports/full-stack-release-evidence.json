@@ -1,23 +1,18 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-02T03:08:37.002Z",
+  "checkedAt": "2026-07-02T03:44:27.434Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
   "providerReadsEnabled": true,
   "strictProviders": true,
   "git": {
     "branch": "codex/full-stack-dev-tooling",
-    "head": "900ab77ecd09",
+    "head": "7f6eecc2e7b7",
     "upstream": "origin/codex/full-stack-dev-tooling",
     "upstreamStatus": "configured",
-    "ahead": 0,
+    "ahead": 3,
     "behind": 0,
-    "dirty": [
-      " M reports/full-stack-release-evidence.json",
-      " M reports/full-stack-release-evidence.md",
-      " M scripts/check-full-stack-release-evidence.mjs",
-      "?? reports/website-recovery-parity-audit-2026-07-01.md"
-    ],
+    "dirty": [],
     "errors": []
   },
   "local": {
