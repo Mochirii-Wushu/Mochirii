@@ -2,7 +2,7 @@
   "hero": {
     "kicker": "Tome",
     "title": "The Tome",
-    "image": "./assets/img/codex/hero.webp",
+    "image": "./assets/img/tome/hero.webp",
     "introBody": [
       "The Tome is about how Mōchirīī speaks, gathers & looks after each other.",
       "Read it once, revisit it often & use it to remind yourself to be nice."
@@ -13,7 +13,7 @@
   "intro": {
     "badge": "Values & Rhythm",
     "title": "A shared standard",
-    "image": "./assets/img/codex/values.webp",
+    "image": "./assets/img/tome/values.webp",
     "body": [
       "The Tome keeps culture rooted across time zones & playstyles.",
       "It sets expectations, explains how disputes get handled & describes how we keep guild life active & enjoyable for everyone."
@@ -23,7 +23,7 @@
   "tenets": {
     "title": "Tenets",
     "description": "These tenets shape our tone in parties, chat & guild spaces so every member feels welcomed.",
-    "image": "./assets/img/codex/tenets.webp",
+    "image": "./assets/img/tome/tenets.webp",
     "captionTitle": "Values made practical",
     "caption": "A shared standard turns good intent into grounded conduct when disputes happen.",
     "pills": ["Tone", "Trust", "Growth"],
@@ -60,7 +60,7 @@
     "badge": "How we treat each other",
     "title": "Etiquette",
     "description": "Etiquette protects trust during fast play: chat tone, mentoring habits & how we settle disputes.",
-    "image": "./assets/img/codex/etiquette.webp",
+    "image": "./assets/img/tome/etiquette.webp",
     "blocks": [
       {
         "title": "Chat",
@@ -102,7 +102,7 @@
   "rhythm": {
     "title": "Rhythm",
     "description": "Rhythm is our pace: enough structure to meet & grow, enough ease to keep play restful.",
-    "image": "./assets/img/codex/rituals.webp",
+    "image": "./assets/img/tome/rituals.webp",
     "captionTitle": "A gentle pace",
     "caption": "Mōchirīī favors patient participation & leaves room for real life.",
     "pills": ["Gather", "Practice", "Rest"],
@@ -130,7 +130,7 @@
   "recognition": {
     "title": "Recognition",
     "description": "Recognition is how we say “we see you,” marking effort, care & consistency that helps others feel known.",
-    "image": "./assets/img/codex/recognition.webp",
+    "image": "./assets/img/tome/recognition.webp",
     "items": [
       {
         "title": "Follow-through",

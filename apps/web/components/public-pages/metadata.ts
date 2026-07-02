@@ -4,7 +4,7 @@ type PageKey =
   | "join"
   | "ranks"
   | "leaders"
-  | "codex"
+  | "tome"
   | "events"
   | "announcements"
   | "raffles"
@@ -46,12 +46,12 @@ const pageMeta: Record<
     path: "/leaders",
     image: "/assets/img/leaders/hero.webp",
   },
-  codex: {
+  tome: {
     title: "Mōchirīī Tome • Where Winds Meet Guild",
     description:
       "The Mōchirīī Tome: values, etiquette, event rhythm, and plain guild care for Where Winds Meet members.",
     path: "/tome",
-    image: "/assets/img/codex/hero.webp",
+    image: "/assets/img/tome/hero.webp",
   },
   events: {
     title: "Mōchirīī Events • Where Winds Meet Guild",

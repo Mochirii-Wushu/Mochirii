@@ -2,7 +2,7 @@
 "use strict";
 
 (() => {
-  if (document.body?.dataset?.page !== "codex") return;
+  if (document.body?.dataset?.page !== "tome") return;
 
   const DATA_URL = "./data/tome.json";
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -30,7 +30,7 @@
     if (typeof alt === "string") el.alt = alt;
   }
   function showError(msg) {
-    const el = $("#codexError");
+    const el = $("#tomeError");
     if (!el) return;
     el.classList.remove("sr-only");
     el.textContent = msg;
@@ -150,11 +150,11 @@ function listBlock(title, items) {
       const data = await loadData();
 
       // Hero
-      setText("#codexKicker", data?.hero?.kicker, "Tome");
-      setText("#codexHeading", data?.hero?.title, "The Tome");
-      setImg("#codexHeroImage", data?.hero?.image, "The Tome banner artwork");
-      paragraphs($("#codexIntro"), data?.hero?.introBody, text(data?.hero?.description, "—"));
-      pills($("#codexHeroPills"), data?.hero?.pills);
+      setText("#tomeKicker", data?.hero?.kicker, "Tome");
+      setText("#tomeHeading", data?.hero?.title, "The Tome");
+      setImg("#tomeHeroImage", data?.hero?.image, "The Tome banner artwork");
+      paragraphs($("#tomeIntro"), data?.hero?.introBody, text(data?.hero?.description, "—"));
+      pills($("#tomeHeroPills"), data?.hero?.pills);
 
       // Intro
       setText("#introBadge", data?.intro?.badge, "Values & Rhythm");
