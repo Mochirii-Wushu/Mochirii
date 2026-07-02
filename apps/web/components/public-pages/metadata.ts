@@ -47,9 +47,9 @@ const pageMeta: Record<
     image: "/assets/img/leaders/hero.webp",
   },
   codex: {
-    title: "Mōchirīī Codex • Where Winds Meet Guild",
+    title: "Mōchirīī Tome • Where Winds Meet Guild",
     description:
-      "The Mōchirīī Codex: values, etiquette, event rhythm, and plain guild care for Where Winds Meet members.",
+      "The Mōchirīī Tome: values, etiquette, event rhythm, and plain guild care for Where Winds Meet members.",
     path: "/codex",
     image: "/assets/img/codex/hero.webp",
   },

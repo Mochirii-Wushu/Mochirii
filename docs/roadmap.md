@@ -55,7 +55,7 @@ Goal: Improve spotlight layout and content structure if more member stories are 
 
 Branch: `feature/join-checklist`
 
-Goal: Give new visitors a concise pre-join checklist with Discord, in-game name, time zone, Codex, and first event steps.
+Goal: Give new visitors a concise pre-join checklist with Discord, in-game name, time zone, Tome, and first event steps.
 
 ### Seasonal Homepage Atmosphere
 
@@ -63,7 +63,7 @@ Branch: `feature/seasonal-home-atmosphere`
 
 Goal: Allow seasonal hero/copy variations while preserving page speed and the current design identity.
 
-### Guild Codex Expansion
+### Guild Tome Expansion
 
 Branch: `content/guild-codex-expansion`
 

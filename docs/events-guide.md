@@ -8,7 +8,7 @@ Events should not duplicate:
 
 - Join onboarding
 - Recruitment philosophy
-- Codex rules
+- Tome rules
 - Announcements
 - Gallery memories
 
@@ -115,7 +115,7 @@ Avoid duplicating:
 
 - Recruitment philosophy
 - Join checklist
-- Codex rules
+- Tome rules
 - Gallery memory language
 
 ## 7. Links and RSVP
