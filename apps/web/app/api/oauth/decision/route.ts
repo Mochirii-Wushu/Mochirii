@@ -49,7 +49,7 @@ function memberAccessIsActive(access: MemberAccessPayload) {
 
 export async function POST(request: Request) {
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    return NextResponse.json({ error: "Supabase public configuration is missing." }, { status: 500 });
+    return NextResponse.json({ error: "Website public configuration is missing." }, { status: 500 });
   }
 
   const token = bearerToken(request);
