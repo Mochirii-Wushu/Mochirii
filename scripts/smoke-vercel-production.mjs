@@ -45,7 +45,7 @@ const legacyRedirects = new Map([
 ]);
 
 const bodyChecks = new Map([
-  ["/auth", /Choose a sign-in method|Website Sign-In/i],
+  ["/auth", /M[oō]chir[iī][iī] Login|Sign-in connects your website account|Website Sign-In/i],
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/members", /Published profiles|Member Profiles|Sign In Required/i],
   ["/members/twills", /M[oō]chir[iī][iī] Member Profile|Sign In Required|Access Denied/i],
