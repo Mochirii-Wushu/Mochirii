@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { requireBrowserSupabaseClient } from "@/lib/supabase/client";
-import { memberAccessIsApproved, verifyMemberAccess } from "@/lib/supabase/profile";
+import { profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
 import { text, type MemberAccessResponse } from "@/lib/supabase/types";
 import { WorkflowNotice } from "./WorkflowState";
 
@@ -84,9 +84,15 @@ export function OAuthConsentPanel() {
     }
 
     const access = await verifyMemberAccess();
-    setMemberAccess(access.data || null);
+    const nextAccess = access.data || null;
+    const nextActiveMember = profileIsActive(nextAccess?.profile, nextAccess);
+    setMemberAccess(nextAccess);
     setDetails(nextDetails);
-    setStatus(access.ok ? "Authorization request ready." : access.message || "Member verification is required.");
+    setStatus(
+      nextActiveMember
+        ? "Authorization request ready."
+        : access.message || "Active guild membership is required before authorizing guild social access.",
+    );
     setBusy(false);
   }, [authorizationId]);
 
@@ -133,7 +139,7 @@ export function OAuthConsentPanel() {
 
   const scopes = scopeList(details?.scope);
   const clientName = text(details?.client?.name || details?.client?.client_name, "Guild social client");
-  const activeMember = memberAccessIsApproved(memberAccess) && memberAccess?.profile?.member_status === "active";
+  const activeMember = profileIsActive(memberAccess?.profile, memberAccess);
 
   return (
     <section className="glass-card glass-card--primary glass-pad auth-panel" aria-busy={busy} aria-live="polite">
