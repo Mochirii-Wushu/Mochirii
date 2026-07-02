@@ -92,7 +92,7 @@
     {
       "label": "Tome",
       "title": "Read the values, etiquette, event rhythm & community standards we share.",
-      "image": "./assets/img/tiles/codex.webp",
+      "image": "./assets/img/tiles/tome.webp",
       "alt": "Guild tome & values tile artwork",
       "href": "./tome.html"
     }

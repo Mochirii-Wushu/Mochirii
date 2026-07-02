@@ -560,12 +560,12 @@ export function TomePage() {
       <PageHero
         page="tome"
         ariaLabel="Tome hero"
-        image={text(hero.image, "./assets/img/codex/hero.webp")}
+        image={text(hero.image, "./assets/img/tome/hero.webp")}
         imageAlt="The Tome banner artwork"
         kicker={text(hero.kicker, "Tome")}
         title={text(hero.title, "The Tome")}
-        intro={<ProseStack id="codexIntro" lines={hero.introBody} />}
-        badges={<BadgeRow id="codexHeroPills" items={strings(hero.pills, 12)} label="Tome summary pills" />}
+        intro={<ProseStack id="tomeIntro" lines={hero.introBody} />}
+        badges={<BadgeRow id="tomeHeroPills" items={strings(hero.pills, 12)} label="Tome summary pills" />}
       />
       <main className="page-main" id="main">
         <div className="container">
