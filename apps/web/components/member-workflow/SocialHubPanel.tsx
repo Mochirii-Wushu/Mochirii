@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { onAuthStateChange, requireAuth } from "@/lib/supabase/auth";
-import { memberAccessIsApproved, verifyMemberAccess } from "@/lib/supabase/profile";
+import { profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMySocialAccounts } from "@/lib/supabase/social";
 import { text, type MemberAccessResponse, type SocialAccount } from "@/lib/supabase/types";
 import { prettyStatus } from "./format";
@@ -51,7 +51,7 @@ export function SocialHubPanel() {
 
     const access = await verifyMemberAccess();
     setMemberAccess(access.data || null);
-    if (!access.ok || !memberAccessIsApproved(access.data) || access.data?.profile?.member_status !== "active") {
+    if (!access.ok || !profileIsActive(access.data?.profile, access.data)) {
       setAccounts([]);
       setMessage(access.message || "Active guild membership is required before opening the social doorway.");
       setBusy(false);
@@ -85,7 +85,7 @@ export function SocialHubPanel() {
   }
 
   const account = pixelfedAccount(accounts);
-  const activeMember = memberAccessIsApproved(memberAccess) && memberAccess?.profile?.member_status === "active";
+  const activeMember = profileIsActive(memberAccess?.profile, memberAccess);
   const activeAccount = account?.status === "active" && Boolean(account.profile_url);
 
   return (

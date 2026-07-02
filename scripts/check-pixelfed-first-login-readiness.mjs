@@ -58,7 +58,7 @@ const snippetChecks = [
       "getAuthorizationDetails",
       "authorization_id",
       "verifyMemberAccess",
-      "memberAccessIsApproved",
+      "profileIsActive",
       "activeMember",
       "/api/oauth/decision",
     ],
@@ -81,7 +81,7 @@ const snippetChecks = [
     snippets: [
       "requireAuth",
       "verifyMemberAccess",
-      "memberAccessIsApproved",
+      "profileIsActive",
       "listMySocialAccounts",
       "Open Pixelfed",
     ],

@@ -11,11 +11,16 @@ type MemberAccessPayload = {
   ok?: boolean;
   data?: MemberAccessPayload;
   galleryEligible?: boolean;
+  discordVerified?: boolean;
   profile?: {
     member_status?: string | null;
+    has_required_discord_roles?: boolean | null;
+    discord_verified_at?: string | null;
   } | null;
   message?: string | null;
 };
+
+const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 
 function bearerToken(request: Request) {
   return (request.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
@@ -25,6 +30,21 @@ function memberAccessPayload(value: unknown): MemberAccessPayload {
   if (!value || typeof value !== "object") return {};
   const payload = value as MemberAccessPayload;
   return payload.data && typeof payload.data === "object" ? payload.data : payload;
+}
+
+function hasRecentDiscordVerification(profile?: MemberAccessPayload["profile"]) {
+  const timestamp = new Date(profile?.discord_verified_at || 0).getTime();
+  return Number.isFinite(timestamp) && Date.now() - timestamp <= RECENT_VERIFICATION_MS;
+}
+
+function memberAccessIsActive(access: MemberAccessPayload) {
+  const profile = access.profile || null;
+  return Boolean(
+    profile?.member_status === "active" &&
+      (access.galleryEligible === true ||
+        access.discordVerified === true ||
+        (profile.has_required_discord_roles === true && hasRecentDiscordVerification(profile))),
+  );
 }
 
 export async function POST(request: Request) {
@@ -67,7 +87,7 @@ export async function POST(request: Request) {
       body: { refreshDiscord: false },
     });
     const access = memberAccessPayload(accessResult.data);
-    const activeMember = access.galleryEligible === true && access.profile?.member_status === "active";
+    const activeMember = memberAccessIsActive(access);
 
     if (accessResult.error || !activeMember) {
       return NextResponse.json(
