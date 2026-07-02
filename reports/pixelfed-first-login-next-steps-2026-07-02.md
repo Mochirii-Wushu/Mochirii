@@ -30,6 +30,9 @@ installation, and Pixelfed OAuth token-auth compatibility.
   reset is a separate recovery path:
   <https://docs.digitalocean.com/products/droplets/how-to/rebuild/>
   <https://docs.digitalocean.com/products/droplets/how-to/recovery/recovery-console/>
+- DigitalOcean user data/cloud-init is provided only during Droplet creation and
+  cannot be modified after a Droplet is created:
+  <https://docs.digitalocean.com/products/droplets/how-to/provide-user-data/>
 - Media-upload controls should follow OWASP guidance for allowlisted types,
   server-side validation, generated names, size limits, authorized uploads, and
   malware scanning where available:
@@ -67,14 +70,15 @@ installation, and Pixelfed OAuth token-auth compatibility.
 
 ## Recommended Next Steps
 
-1. Recover DigitalOcean host access before installing Pixelfed. Because the
-   Droplet is still empty, the least complex path is to rebuild or recreate it
-   with the reviewed cloud-init script and the approved SSH key. Recovery-console
-   root-password reset is a fallback, but it is more manual and introduces a
-   temporary password path.
+1. Recover DigitalOcean host access before installing Pixelfed. Because user
+   data/cloud-init cannot be modified after creation and the Droplet is still
+   empty, the cleanest path is to create a replacement Droplet with the reviewed
+   cloud-init script and approved SSH key, verify SSH, then destroy the
+   inaccessible empty Droplet. Recovery-console root-password reset is a
+   fallback, but it is more manual and introduces a temporary password path.
 
    Required approval:
-   `Approve rebuilding or recreating the empty DigitalOcean Pixelfed staging Droplet with the approved SSH key, non-root cloud-init user, SSH hardening, automated backups, and SGP1 staging project settings.`
+   `Approve creating a replacement DigitalOcean Pixelfed staging Droplet in project Mochirii Social with SGP1, Ubuntu 24.04, the same plan, automated backups, the approved SSH key, and the non-root cloud-init hardening script, then destroying the inaccessible empty Droplet after SSH to the replacement is verified.`
 
 2. Update or re-register the Pixelfed OAuth client for the final callback URI
    using `client_secret_post` unless a Pixelfed patch/custom provider is
