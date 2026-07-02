@@ -19,6 +19,21 @@ const requiredIndexSnippets = [
   "spotlight_poll_cycles_winner_profile_id_idx",
   "spotlight_poll_candidates_member_profile_id_idx",
   "spotlight_poll_results_member_profile_id_idx",
+  "mochi_social_alpha_testers_invited_by_idx",
+  "mochi_social_chain_operations_user_id_idx",
+  "mochi_social_chat_messages_user_id_idx",
+  "mochi_social_chat_reports_message_id_idx",
+  "mochi_social_chat_reports_reporter_id_idx",
+  "mochi_social_feedback_user_id_idx",
+  "mochi_social_inventory_owner_id_idx",
+  "mochi_social_ledger_events_actor_id_idx",
+  "mochi_social_market_listings_inventory_id_idx",
+  "mochi_social_market_listings_seller_id_idx",
+  "mochi_social_spirits_owner_id_idx",
+  "mochi_social_pets_owner_id_idx",
+  "mochi_social_shared_pet_snapshots_last_actor_id_idx",
+  "mochi_social_trades_recipient_id_idx",
+  "mochi_social_trades_requester_id_idx",
 ];
 
 const serviceOnlyTables = [
@@ -96,6 +111,13 @@ assertIncludes("check-all", checkAll, "check:supabase-security-performance");
 for (const snippet of requiredIndexSnippets) {
   assertIncludes("Supabase FK index migrations", migrationText, snippet);
 }
+
+[
+  "using ((select auth.uid()) = user_id)",
+  "using ((select auth.uid()) = owner_id)",
+  "with check ((select auth.uid()) = reporter_id)",
+  "using ((select auth.role()) = 'authenticated' and expires_at > now())",
+].forEach((snippet) => assertIncludes("Supabase optimized RLS migrations", migrationText, snippet));
 
 for (const table of serviceOnlyTables) {
   assertIncludes("Supabase README service-only table allowlist", readme, `\`${table}\``);
