@@ -1,6 +1,6 @@
 # Accessibility Route Matrix
 
-Generated: 2026-06-13T00:10:39.020Z
+Generated: 2026-07-02T03:23:05.520Z
 
 This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibility coverage for Mochirii route workflows and names the browser checks that still require manual or Playwright evidence.
 
@@ -9,9 +9,9 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 - OK: yes
 - Routes: 20
 - Protected/noindex routes: 7
-- Routes with live regions: 10
+- Routes with live regions: 11
 - Routes with alerts: 5
-- Routes with forms: 3
+- Routes with forms: 4
 - Routes with iframes: 3
 
 ## Shell Foundations
@@ -48,13 +48,13 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 | /spotify | public | embedded playlists | 0 | 0 | 0 | 1/1 | n/a |
 | /spotlight | public | member spotlight | 0 | 0 | 0 | 0/0 | n/a |
 | /twills | public | profile reference | 0 | 0 | 0 | 0/0 | n/a |
-| /auth | protected-entry | Discord OAuth | 1 | 1 | 0 | 0/0 | yes |
-| /account | member | profile and verification | 5 | 4 | 1 | 0/0 | yes |
-| /gallery-submit | member | member upload | 3 | 3 | 1 | 0/0 | yes |
-| /leader-dashboard | moderator | moderation queues | 8 | 4 | 0 | 0/0 | yes |
+| /auth | protected-entry | Discord OAuth | 1 | 1 | 2 | 0/0 | yes |
+| /account | member | profile and verification | 3 | 4 | 1 | 0/0 | yes |
+| /gallery-submit | member | member upload | 1 | 3 | 1 | 0/0 | yes |
+| /leader-dashboard | moderator | moderation queues | 4 | 5 | 0 | 0/0 | yes |
 | /members | member | member directory | 1 | 0 | 0 | 0/0 | yes |
 | /members/[slug] | member | member profile | 0 | 0 | 0 | 0/0 | yes |
-| /games/mochi-social | alpha | tester game doorway | 0 | 1 | 3 | 2/2 | yes |
+| /games/mochi-social | alpha | tester game doorway | 1 | 1 | 2 | 1/1 | yes |
 
 ## Manual Browser Matrix
 
@@ -75,7 +75,6 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 - /spotify: no route-specific live region found; confirm static-only page status remains intentional.
 - /spotlight: no route-specific live region found; confirm static-only page status remains intentional.
 - /twills: no route-specific live region found; confirm static-only page status remains intentional.
-- /games/mochi-social: no route-specific live region found; confirm static-only page status remains intentional.
 
 ## Failures
 

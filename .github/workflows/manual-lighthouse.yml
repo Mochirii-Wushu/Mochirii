@@ -18,23 +18,27 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Lighthouse audits
         run: |
           set -euo pipefail
           mkdir -p reports/lighthouse
 
-          npx --yes lighthouse "https://mochirii.com/" \
+          npx lighthouse "https://mochirii.com/" \
             --output=html --output=json \
             --output-path=reports/lighthouse/home \
             --chrome-flags="--headless --no-sandbox"
 
-          npx --yes lighthouse "https://mochirii.com/recruitment" \
+          npx lighthouse "https://mochirii.com/recruitment" \
             --output=html --output=json \
             --output-path=reports/lighthouse/recruitment \
             --chrome-flags="--headless --no-sandbox"
 
-          npx --yes lighthouse "https://mochirii.com/gallery" \
+          npx lighthouse "https://mochirii.com/gallery" \
             --output=html --output=json \
             --output-path=reports/lighthouse/gallery \
             --chrome-flags="--headless --no-sandbox"
