@@ -17,8 +17,8 @@ it is a schema-drift assumption in migration
 | Linked CLI auth | Linked reads work when `SUPABASE_ACCESS_TOKEN` is provided from `C:\Users\xtyty\Documents\Creds\Supabase Key.txt` as a child-process environment variable. |
 | Linked migrations | `20260702043644` exists locally and was not applied remotely at the time of the read. |
 | Linked table check | Read-only linked SQL returned `public.mochi_social_spirits = NULL` and `public.mochi_social_pets = mochi_social_pets`. |
-| Root cause | The migration directly referenced `public.mochi_social_spirits` for an index and policy even though the linked project currently has `public.mochi_social_pets`. |
-| Fix | The migration now checks `information_schema.columns` for each table's `owner_id` column before creating the matching index and policy. |
+| Root cause | The migration directly referenced `public.mochi_social_spirits` for an index/policy and `public.mochi_social_progress_snapshots` for a policy even though those tables are absent in the linked project lineage. |
+| Fix | The migration now checks `information_schema.columns` before creating compatibility indexes or policies for drift-prone Mochi Social tables. |
 
 ## Validation
 
@@ -28,6 +28,7 @@ it is a schema-drift assumption in migration
 - `npx supabase db advisors --local --type all --level warn --fail-on none --output-format json`
 - Local rollback transaction with `public.mochi_social_spirits` dropped before rerunning the migration
 - Local rollback transaction with a temporary `public.mochi_social_pets(owner_id)` table before rerunning the migration
+- Linked push attempt exposed the same drift pattern for missing `public.mochi_social_progress_snapshots`; the policy rewrite is now table-aware too
 
 ## Notes
 
@@ -35,5 +36,8 @@ Do not use `supabase status --output json` in shared reports or logs for this
 project. It prints local development keys and connection strings. Prefer
 specific read-only CLI commands and redact or summarize outputs.
 
-No remote schema, function, secret, Auth, dashboard, or production deploy mutation
-was performed while preparing this fix.
+An approved linked `supabase db push` was attempted for migration `20260702043644`.
+The first attempt did not mark the migration as remote-applied because the CLI
+stopped at the missing `public.mochi_social_progress_snapshots` policy rewrite.
+No remote function, secret, Auth, dashboard, Vercel, or production deploy mutation
+was performed while preparing this follow-up fix.

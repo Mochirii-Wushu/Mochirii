@@ -143,12 +143,22 @@ for select
 to authenticated
 using ((select auth.uid()) = actor_id);
 
-drop policy if exists "mochi_social_progress_read_own" on public.mochi_social_progress_snapshots;
-create policy "mochi_social_progress_read_own"
-on public.mochi_social_progress_snapshots
-for select
-to authenticated
-using ((select auth.uid()) = user_id);
+-- The linked project lineage does not currently include
+-- mochi_social_progress_snapshots, so keep this policy rewrite table-aware
+-- while preserving the local migration contract when the table exists.
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'mochi_social_progress_snapshots'
+      and column_name = 'user_id'
+  ) then
+    execute 'drop policy if exists "mochi_social_progress_read_own" on public.mochi_social_progress_snapshots';
+    execute 'create policy "mochi_social_progress_read_own" on public.mochi_social_progress_snapshots for select to authenticated using ((select auth.uid()) = user_id)';
+  end if;
+end $$;
 
 drop policy if exists "mochi_social_feedback_insert_own" on public.mochi_social_feedback;
 create policy "mochi_social_feedback_insert_own"

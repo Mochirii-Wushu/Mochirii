@@ -44,6 +44,8 @@ const mochiSocialCompatibilitySnippets = [
   "create index if not exists mochi_social_pets_owner_id_idx on public.mochi_social_pets(owner_id)",
   "create policy \"mochi_social_spirits_read_own\" on public.mochi_social_spirits",
   "create policy \"mochi_social_pets_read_own\" on public.mochi_social_pets",
+  "table_name = 'mochi_social_progress_snapshots'",
+  "create policy \"mochi_social_progress_read_own\" on public.mochi_social_progress_snapshots",
 ];
 
 const serviceOnlyTables = [
