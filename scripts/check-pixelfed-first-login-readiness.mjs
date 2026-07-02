@@ -83,7 +83,7 @@ const snippetChecks = [
       "verifyMemberAccess",
       "profileIsActive",
       "listMySocialAccounts",
-      "Open Pixelfed",
+      "Open Mochirii Social",
     ],
   },
   {
