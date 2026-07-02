@@ -2981,7 +2981,7 @@ body[data-page="leaders"] .leaders-council-intro .muted{
 /* =========================================================
    CODEX / RANKS / LEADERS — Ceremonial visual pilot
    ========================================================= */
-body[data-page="codex"],
+body[data-page="tome"],
 body[data-page="ranks"],
 body[data-page="leaders"]{
   --ceremony-panel:rgba(8,10,12,.82);
@@ -2995,7 +2995,7 @@ body[data-page="leaders"]{
   --ceremony-warm:rgba(218,181,94,.16);
 }
 
-body[data-page="codex"]{
+body[data-page="tome"]{
   --ceremony-rim-a:rgba(48,178,143,.58);
   --ceremony-rim-b:rgba(218,181,94,.54);
   --ceremony-glow:rgba(48,178,143,.14);
@@ -3016,7 +3016,7 @@ body[data-page="leaders"]{
   --ceremony-warm:rgba(48,178,143,.11);
 }
 
-body[data-page="codex"] .page-hero,
+body[data-page="tome"] .page-hero,
 body[data-page="ranks"] .page-hero,
 body[data-page="leaders"] .page-hero{
   border:1px solid transparent;
@@ -3029,10 +3029,10 @@ body[data-page="leaders"] .page-hero{
     0 0 44px var(--ceremony-glow);
 }
 
-body[data-page="codex"] .hero-intro,
+body[data-page="tome"] .hero-intro,
 body[data-page="ranks"] .hero-intro,
 body[data-page="leaders"] .hero-intro,
-body[data-page="codex"] .page-main .glass-card,
+body[data-page="tome"] .page-main .glass-card,
 body[data-page="ranks"] .page-main .glass-card,
 body[data-page="leaders"] .page-main .glass-card{
   position:relative;
@@ -3051,10 +3051,10 @@ body[data-page="leaders"] .page-main .glass-card{
     inset 0 1px 0 rgba(255,255,255,.08);
 }
 
-body[data-page="codex"] .hero-intro::before,
+body[data-page="tome"] .hero-intro::before,
 body[data-page="ranks"] .hero-intro::before,
 body[data-page="leaders"] .hero-intro::before,
-body[data-page="codex"] .page-main .glass-card::before,
+body[data-page="tome"] .page-main .glass-card::before,
 body[data-page="ranks"] .page-main .glass-card::before,
 body[data-page="leaders"] .page-main .glass-card::before{
   content:"";
@@ -3068,21 +3068,21 @@ body[data-page="leaders"] .page-main .glass-card::before{
     linear-gradient(180deg, rgba(255,255,255,.035), transparent 48%);
 }
 
-body[data-page="codex"] .page-main .grid-gap,
+body[data-page="tome"] .page-main .grid-gap,
 body[data-page="ranks"] .page-main .grid-gap,
 body[data-page="leaders"] .page-main .grid-gap{
   gap:clamp(22px, 3vw, 34px);
 }
 
-body[data-page="codex"] .glass-pad,
+body[data-page="tome"] .glass-pad,
 body[data-page="ranks"] .glass-pad,
 body[data-page="leaders"] .glass-pad{
   padding:clamp(20px, 2.8vw, 30px);
 }
 
-body[data-page="codex"] .kicker,
-body[data-page="codex"] .meta-text,
-body[data-page="codex"] .muted,
+body[data-page="tome"] .kicker,
+body[data-page="tome"] .meta-text,
+body[data-page="tome"] .muted,
 body[data-page="ranks"] .kicker,
 body[data-page="ranks"] .meta-text,
 body[data-page="ranks"] .muted,
@@ -3092,8 +3092,8 @@ body[data-page="leaders"] .muted{
   color:var(--ceremony-muted);
 }
 
-body[data-page="codex"] .display-title,
-body[data-page="codex"] .section-title,
+body[data-page="tome"] .display-title,
+body[data-page="tome"] .section-title,
 body[data-page="ranks"] .display-title,
 body[data-page="ranks"] .section-title,
 body[data-page="leaders"] .display-title,
@@ -3101,7 +3101,7 @@ body[data-page="leaders"] .section-title{
   text-shadow:0 10px 28px var(--ceremony-glow);
 }
 
-body[data-page="codex"] .badge-row > span,
+body[data-page="tome"] .badge-row > span,
 body[data-page="ranks"] .badge-row > span,
 body[data-page="leaders"] .badge-row > span{
   animation:none;
@@ -3114,7 +3114,7 @@ body[data-page="leaders"] .badge-row > span{
     0 8px 20px rgba(0,0,0,.24);
 }
 
-body[data-page="codex"] .footer-link,
+body[data-page="tome"] .footer-link,
 body[data-page="ranks"] .footer-link,
 body[data-page="leaders"] .footer-link{
   border-color:color-mix(in srgb, var(--ceremony-rim-a) 35%, rgba(255,255,255,.12));
@@ -3123,7 +3123,7 @@ body[data-page="leaders"] .footer-link{
   transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
 }
 
-body[data-page="codex"] .footer-link:hover,
+body[data-page="tome"] .footer-link:hover,
 body[data-page="ranks"] .footer-link:hover,
 body[data-page="leaders"] .footer-link:hover{
   transform:translateY(-1px);
@@ -3132,7 +3132,7 @@ body[data-page="leaders"] .footer-link:hover{
     linear-gradient(135deg, color-mix(in srgb, var(--ceremony-rim-a) 20%, rgba(0,0,0,.28)), rgba(255,255,255,.055));
 }
 
-body[data-page="codex"] .footer-link:focus-visible,
+body[data-page="tome"] .footer-link:focus-visible,
 body[data-page="ranks"] .footer-link:focus-visible,
 body[data-page="leaders"] .footer-link:focus-visible{
   outline:2px solid color-mix(in srgb, var(--ceremony-rim-b) 72%, #fff);
@@ -3142,11 +3142,11 @@ body[data-page="leaders"] .footer-link:focus-visible{
     0 0 0 5px color-mix(in srgb, var(--ceremony-rim-b) 20%, transparent);
 }
 
-body[data-page="codex"] #introImage,
-body[data-page="codex"] #tenetsImage,
-body[data-page="codex"] #etiquetteImage,
-body[data-page="codex"] #rhythmImage,
-body[data-page="codex"] #recImage,
+body[data-page="tome"] #introImage,
+body[data-page="tome"] #tenetsImage,
+body[data-page="tome"] #etiquetteImage,
+body[data-page="tome"] #rhythmImage,
+body[data-page="tome"] #recImage,
 body[data-page="ranks"] #ranksHeroImage,
 body[data-page="ranks"] #seniorImage,
 body[data-page="ranks"] #middleImage,
@@ -3161,30 +3161,30 @@ body[data-page="leaders"] #leadersPanelImage{
     0 0 26px var(--ceremony-glow);
 }
 
-body[data-page="codex"] #tenetsGrid .glass-card,
-body[data-page="codex"] #rhythmGrid .glass-card,
-body[data-page="codex"] #recGrid .glass-card{
+body[data-page="tome"] #tenetsGrid .glass-card,
+body[data-page="tome"] #rhythmGrid .glass-card,
+body[data-page="tome"] #recGrid .glass-card{
   background:
     radial-gradient(circle at 0% 0%, rgba(48,178,143,.13), transparent 42%),
     linear-gradient(160deg, rgba(10,15,13,.90), rgba(6,8,8,.78)) padding-box,
     linear-gradient(135deg, rgba(48,178,143,.44), rgba(255,255,255,.06) 48%, rgba(218,181,94,.24)) border-box;
 }
 
-body[data-page="codex"] #etiquetteBlocks .glass-card{
+body[data-page="tome"] #etiquetteBlocks .glass-card{
   background:
     radial-gradient(circle at 100% 0%, rgba(218,181,94,.14), transparent 42%),
     linear-gradient(160deg, rgba(13,14,10,.90), rgba(7,8,7,.80)) padding-box,
     linear-gradient(135deg, rgba(218,181,94,.42), rgba(255,255,255,.06) 48%, rgba(48,178,143,.24)) border-box;
 }
 
-body[data-page="codex"] #etiquetteBlocks ul{
+body[data-page="tome"] #etiquetteBlocks ul{
   margin:14px 0 0;
   padding-left:1.15rem;
   color:var(--ceremony-muted);
   line-height:1.68;
 }
 
-body[data-page="codex"] #etiquetteBlocks li + li{
+body[data-page="tome"] #etiquetteBlocks li + li{
   margin-top:8px;
 }
 
@@ -3274,20 +3274,20 @@ body[data-page="leaders"] #leadersGrid article .badge-row > span{
 }
 
 @media (max-width:640px){
-  body[data-page="codex"] .hero-intro,
+  body[data-page="tome"] .hero-intro,
   body[data-page="ranks"] .hero-intro,
   body[data-page="leaders"] .hero-intro{
     text-align:left;
     align-items:flex-start;
   }
 
-  body[data-page="codex"] .hero-intro .badge-row,
+  body[data-page="tome"] .hero-intro .badge-row,
   body[data-page="ranks"] .hero-intro .badge-row,
   body[data-page="leaders"] .hero-intro .badge-row{
     justify-content:flex-start;
   }
 
-  body[data-page="codex"] #etiquetteBlocks ul{
+  body[data-page="tome"] #etiquetteBlocks ul{
     padding-left:1rem;
   }
 }

@@ -118,7 +118,7 @@ Checked pages:
 - `gallery.html`
 - `ranks.html`
 - `leaders.html`
-- `codex.html`
+- `tome.html`
 - `recruitment.html`
 - `announcements.html`
 - `raffles.html`

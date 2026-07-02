@@ -15,7 +15,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Read-only GitHub Pages API on 2026-07-02 reported legacy root deployment for `mochirii.com` with status `errored`; the latest deploy built successfully but timed out in `deployment_queued`. Vercel production remained healthy, so treat this as a rollback-surface/settings cleanup item, not a live-site outage.
 - Deployment source of truth: `docs/deployment.md`.
 - Current production commit verified from `origin/main`: `1f6b5c11b2423f03c8dc243815365d899001b4f2` (`Rebrand public guild culture page to Tome (#357)`).
-- Production `/codex` readback on 2026-07-02 showed Tome labels and no targeted public Codex guild-label residue.
+- Production `/tome` is the canonical Tome route after the route refresh; `/codex` and `codex.html` are not retained as redirects.
 - Latest full route smoke before the unified release ledger was recorded on 2026-06-18. Run a fresh route matrix after each merged release packet.
 
 ## Data And Assets

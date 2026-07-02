@@ -108,7 +108,7 @@ The Next/Vercel app currently implements these clean public routes:
 - `/join`
 - `/ranks`
 - `/leaders`
-- `/codex`
+- `/tome`
 - `/events`
 - `/announcements`
 - `/raffles`
@@ -131,7 +131,7 @@ Legacy `.html` redirects are configured in `apps/web/next.config.ts`:
 - `/join.html` -> `/join`
 - `/ranks.html` -> `/ranks`
 - `/leaders.html` -> `/leaders`
-- `/codex.html` -> `/codex`
+- `/tome.html`
 - `/events.html` -> `/events`
 - `/announcements.html` -> `/announcements`
 - `/raffles.html` -> `/raffles`
@@ -1004,7 +1004,7 @@ HTTP clean routes:
 - `/join`
 - `/ranks`
 - `/leaders`
-- `/codex`
+- `/tome`
 - `/events`
 - `/announcements`
 - `/raffles`
@@ -1024,7 +1024,7 @@ Legacy redirects:
 - `/join.html` -> `/join`
 - `/ranks.html` -> `/ranks`
 - `/leaders.html` -> `/leaders`
-- `/codex.html` -> `/codex`
+- `/tome.html`
 - `/events.html` -> `/events`
 - `/announcements.html` -> `/announcements`
 - `/raffles.html` -> `/raffles`

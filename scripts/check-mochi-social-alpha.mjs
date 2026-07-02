@@ -122,11 +122,11 @@ const checks = [
   },
   {
     file: 'apps/web/components/SiteHeader.tsx',
-    includes: ['navItemVisibleForPath', 'activeKey === "games/mochi-social" && item.nav === "codex"']
+    includes: ['navItemVisibleForPath', 'activeKey === "games/mochi-social" && item.nav === "tome"']
   },
   {
     file: 'apps/web/components/SiteFooter.tsx',
-    includes: ['usePathname', 'hideToolingLanguage', 'pathname || ""', 'link.href !== "/codex"']
+    includes: ['usePathname', 'hideToolingLanguage', 'pathname || ""', 'link.href !== "/tome"']
   },
   {
     file: 'apps/web/components/member-workflow/LeaderDashboard.tsx',

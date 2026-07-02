@@ -17,10 +17,10 @@ Keep this page focused on rule, custom, conduct, balance, respect, practice, and
 
 ## 2. Data Source
 
-- Tome data lives in `data/codex.json`.
+- Tome data lives in `data/tome.json`.
 - Keep JSON valid.
-- Preserve the current schema unless `codex.js` changes in the same scoped task.
-- Add only fields that `codex.js` actually supports.
+- Preserve the current schema unless `tome.js` changes in the same scoped task.
+- Add only fields that `tome.js` actually supports.
 - Keep values and rules concise.
 - Use page-specific Tome vocabulary: rule, custom, conduct, balance, respect, practice, and line.
 
@@ -86,7 +86,7 @@ Safe editing rules:
 - Keep etiquette list items direct and readable.
 - Avoid duplicate rules.
 - Avoid contradictions with Join, Recruitment, Events, or Leaders pages.
-- Preserve the current array/object shapes unless `codex.js` is updated in the same scoped task.
+- Preserve the current array/object shapes unless `tome.js` is updated in the same scoped task.
 - Keep serious conduct language plain before adding tone.
 
 ## 6. Links and Unsupported Fields
@@ -95,7 +95,7 @@ Current link behavior:
 
 - `recognition.ranksHref` controls the `View Ranks` link destination.
 - If `recognition.ranksHref` is missing, the link falls back to `./ranks.html`.
-- `Return to Home` is a static link in `codex.html`.
+- `Return to Home` is a static link in `tome.html`.
 - The visible label for the recognition link is not data-driven; it remains `View Ranks`.
 
 Unsupported fields:
@@ -104,7 +104,7 @@ Unsupported fields:
 - External Tome data links are not currently supported.
 - Data-driven link labels are not currently supported.
 - Categories, tags, filters, buttons, and URL state are not currently supported.
-- `hero.atmosphere` is not currently supported by `codex.js`, even though `codex.html` includes a static atmosphere image placeholder.
+- `hero.atmosphere` is not currently supported by `tome.js`, even though `tome.html` includes a static atmosphere image placeholder.
 
 Internal links must resolve. External links, if support is added later, should follow existing safe-link conventions with `target="_blank"` and `rel="noopener noreferrer"`.
 
@@ -139,7 +139,7 @@ Use `npm run smoke:gallery` as a general regression check when relevant to the r
 
 ## 9. Manual Tome Smoke Checklist
 
-- Open `/codex.html`.
+- Open `/tome.html`.
 - Confirm heading structure is sensible.
 - Confirm hero, intro, tenets, etiquette, rhythm, and recognition content render.
 - Confirm no missing content.

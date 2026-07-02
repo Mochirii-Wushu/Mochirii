@@ -24,7 +24,7 @@ const cultureLinks = [
   { href: "/join", label: "Join" },
   { href: "/ranks", label: "Ranks" },
   { href: "/leaders", label: "Leaders" },
-  { href: "/codex", label: "Tome" },
+  { href: "/tome", label: "Tome" },
   { href: "/spotify", label: "Playlists" },
   { href: "/auth", label: "Login", auth: "signed-out" },
   { href: "/account", label: "Account", hidden: true, auth: "signed-in" },
@@ -77,7 +77,7 @@ export function SiteFooter() {
   const pathname = usePathname();
   const hideToolingLanguage = (pathname || "").replace(/\/+$/, "") === "/games/mochi-social";
   const visibleCultureLinks = hideToolingLanguage
-    ? cultureLinks.filter((link) => link.href !== "/codex")
+    ? cultureLinks.filter((link) => link.href !== "/tome")
     : cultureLinks;
 
   return (

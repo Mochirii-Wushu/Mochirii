@@ -128,7 +128,6 @@ const expectedLegacyRedirects = new Map([
   ["/join.html", "/join"],
   ["/ranks.html", "/ranks"],
   ["/leaders.html", "/leaders"],
-  ["/codex.html", "/codex"],
   ["/events.html", "/events"],
   ["/announcements.html", "/announcements"],
   ["/raffles.html", "/raffles"],
