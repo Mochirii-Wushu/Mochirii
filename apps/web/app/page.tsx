@@ -25,7 +25,7 @@ const htmlRouteMap = new Map<string, string>([
   ["gallery.html", "/gallery"],
   ["leaders.html", "/leaders"],
   ["ranks.html", "/ranks"],
-  ["codex.html", "/codex"],
+  ["tome.html", "/tome"],
   ["events.html", "/events"],
   ["announcements.html", "/announcements"],
   ["raffles.html", "/raffles"],

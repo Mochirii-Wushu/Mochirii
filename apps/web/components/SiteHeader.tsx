@@ -46,7 +46,7 @@ const navGroups: NavGroup[] = [
       { href: "/join", label: "Join", nav: "join" },
       { href: "/ranks", label: "Ranks", nav: "ranks" },
       { href: "/leaders", label: "Leaders", nav: "leaders" },
-      { href: "/codex", label: "Tome", nav: "codex" },
+      { href: "/tome", label: "Tome", nav: "tome" },
       { href: "/spotify", label: "Playlists", nav: "spotify" },
     ],
   },
@@ -105,7 +105,7 @@ function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMemb
 }
 
 function navItemVisibleForPath(item: NavItem, activeKey: string) {
-  if (activeKey === "games/mochi-social" && item.nav === "codex") return false;
+  if (activeKey === "games/mochi-social" && item.nav === "tome") return false;
   return true;
 }
 

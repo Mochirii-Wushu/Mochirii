@@ -6,7 +6,7 @@ const dataDir = path.join(root, "data");
 
 const topLevelManifest = {
   "announcements.json": ["meta", "items"],
-  "codex.json": ["hero", "intro", "tenets", "etiquette", "rhythm", "recognition"],
+  "tome.json": ["hero", "intro", "tenets", "etiquette", "rhythm", "recognition"],
   "events.json": ["meta", "featured", "upcoming", "recurring", "participation"],
   "gallery.json": ["meta", "categories", "albums"],
   "guild-schedule.json": ["timezone", "discordCoverVersion", "monthly", "spotlight", "weekly"],

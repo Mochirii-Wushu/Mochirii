@@ -21,7 +21,7 @@ Implemented in `apps/web/app`:
 - `/join`
 - `/ranks`
 - `/leaders`
-- `/codex`
+- `/tome`
 - `/events`
 - `/announcements`
 - `/raffles`
@@ -47,7 +47,7 @@ Root HTML files still present:
 - `/gallery.html`
 - `/leaders.html`
 - `/ranks.html`
-- `/codex.html`
+- `/tome.html`
 - `/events.html`
 - `/announcements.html`
 - `/raffles.html`
@@ -78,7 +78,7 @@ Phase 2 migrated public/static routes:
 - `/join`
 - `/ranks`
 - `/leaders`
-- `/codex`
+- `/tome`
 - `/events`
 - `/announcements`
 - `/raffles`
@@ -200,7 +200,7 @@ Final validation was completed on this branch after the pre-Phase-3 cleanup upda
 - `apps/web` validation: `npm run lint` and `npm run build` passed.
 - Local Vercel production build: `vercel build --prod --cwd apps/web` passed; Vercel root mismatch result is `FIXED` because `turbopack.root` now matches the effective `apps/web` tracing root. Root-level `vercel link --repo` still needs operator approval if retried later, but it is not required for this local build path.
 - Env-name verification: Production and Preview include `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`; Development includes `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SITE_URL` but is missing `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which is intentionally skipped.
-- Route smoke: `/`, `/gallery`, `/join`, `/ranks`, `/leaders`, `/codex`, `/events`, `/announcements`, `/raffles`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills` returned 200 locally.
+- Route smoke: `/`, `/gallery`, `/join`, `/ranks`, `/leaders`, `/tome`, `/events`, `/announcements`, `/raffles`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills` returned 200 locally.
 - Redirect smoke: `/index.html` redirected to `/`; `/gallery.html` redirected to `/gallery`.
 - Gallery smoke: Newest started `shot-73`, `shot-72`, `shot-71`; Oldest started `shot-01`, `shot-02`, `shot-03`; Random changed after hard refresh and stayed stable during one category-toggle session; lightbox opened the correct full image.
 - Empty image source warning: no empty `img src` nodes or empty-src console warnings were seen in local browser smoke for `/`, `/gallery`, and `/spotlight`.

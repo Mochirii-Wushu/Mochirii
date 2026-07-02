@@ -17,7 +17,7 @@ const routes = [
   { route: "/gallery", label: "Gallery", file: "apps/web/app/gallery/page.tsx", type: "public", workflow: "media browsing", componentFiles: ["apps/web/components/public-pages/GalleryBrowser.tsx"], expectsLiveRegion: true },
   { route: "/ranks", label: "Ranks", file: "apps/web/app/ranks/page.tsx", type: "public", workflow: "progression reference" },
   { route: "/leaders", label: "Leaders", file: "apps/web/app/leaders/page.tsx", type: "public", workflow: "stewardship reference" },
-  { route: "/codex", label: "Tome", file: "apps/web/app/codex/page.tsx", type: "public", workflow: "conduct reference" },
+  { route: "/tome", label: "Tome", file: "apps/web/app/tome/page.tsx", type: "public", workflow: "conduct reference" },
   { route: "/recruitment", label: "Recruitment", file: "apps/web/app/recruitment/page.tsx", type: "public", workflow: "recruiting copy", expectsDescribedBy: true },
   { route: "/announcements", label: "Announcements", file: "apps/web/app/announcements/page.tsx", type: "public", workflow: "updates" },
   { route: "/raffles", label: "Raffles", file: "apps/web/app/raffles/page.tsx", type: "public", workflow: "giveaway reference" },

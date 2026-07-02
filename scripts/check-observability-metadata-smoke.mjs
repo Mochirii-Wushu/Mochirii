@@ -12,7 +12,7 @@ const publicRoutes = [
   { route: "/gallery", key: "gallery", file: "apps/web/app/gallery/page.tsx" },
   { route: "/ranks", key: "ranks", file: "apps/web/app/ranks/page.tsx" },
   { route: "/leaders", key: "leaders", file: "apps/web/app/leaders/page.tsx" },
-  { route: "/codex", key: "codex", file: "apps/web/app/codex/page.tsx" },
+  { route: "/tome", key: "codex", file: "apps/web/app/tome/page.tsx" },
   { route: "/recruitment", key: "recruitment", file: "apps/web/app/recruitment/page.tsx" },
   { route: "/announcements", key: "announcements", file: "apps/web/app/announcements/page.tsx" },
   { route: "/raffles", key: "raffles", file: "apps/web/app/raffles/page.tsx" },

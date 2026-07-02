@@ -1,10 +1,10 @@
-/* codex.js */
+/* tome.js */
 "use strict";
 
 (() => {
   if (document.body?.dataset?.page !== "codex") return;
 
-  const DATA_URL = "./data/codex.json";
+  const DATA_URL = "./data/tome.json";
   const $ = (sel, root = document) => root.querySelector(sel);
   const U = window.MochiriiUtils;
 

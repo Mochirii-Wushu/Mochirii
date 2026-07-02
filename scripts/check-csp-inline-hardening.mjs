@@ -26,7 +26,7 @@ const routeMatrix = [
   { route: "/spotify", surface: "Spotify", features: ["Spotify iframe embeds"] },
   { route: "/spotlight", surface: "spotlight", features: ["Supabase public spotlight endpoint"] },
   { route: "/games/mochi-social", surface: "Mochi Social", features: ["Fly iframe", "postMessage bridge"] },
-  { route: "/codex", surface: "Tome", features: ["static conduct content"] },
+  { route: "/tome", surface: "Tome", features: ["static conduct content"] },
 ];
 
 const nextConfigPath = resolve(root, "apps/web/next.config.ts");

@@ -14,7 +14,7 @@
 - Keep Mōchirīī copy clear, xianxia-inspired, noun/verb led, lightly rhythmic, and human. Use Cupcake warmth sparingly, keep functional labels plain, and avoid generic AI-like phrasing, adjective padding, forced rhyme, copied poem/article phrasing, or named-author imitation.
 - Keep exact game-name usage out of regular visible body copy outside header/footer; titles, metadata, SEO, JSON-LD, validation scripts, docs, internal code, header, and footer may retain it.
 - For Join work, follow `docs/join-guide.md`; preserve onboarding clarity, checklist behavior, Discord/Tome/Events links, shared helper safety, accessible CTAs, and mobile readability.
-- For Tome work, follow `docs/codex-guide.md`; keep the `/codex` route and existing file/data keys unless explicitly scoped, preserve protected verse boundaries, keep rules direct, avoid duplicated Join/Recruitment/Events content, and keep Tome conduct readable.
+- For Tome work, follow `docs/codex-guide.md`; keep `/tome` as the public route, keep `tome.html` as the root static rollback page, and preserve existing internal data/asset keys unless explicitly scoped. Preserve protected verse boundaries, keep rules direct, avoid duplicated Join/Recruitment/Events content, and keep Tome conduct readable.
 - For Events work, follow `docs/events-guide.md`; preserve UTC-safe dates, Upcoming/Past/All filters, sorting, accessible filter buttons, and empty-state behavior.
 - For Ranks work, follow `docs/ranks-guide.md`. Preserve rank order, group hierarchy, emblem/image conventions, concise duty copy, and mobile readability.
 - For Leaders work, follow `docs/leaders-guide.md`. Preserve leader order, role/group conventions, image conventions, concise stewardship copy, and mobile readability.

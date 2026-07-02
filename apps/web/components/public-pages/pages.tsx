@@ -1,7 +1,7 @@
 import joinData from "@/public/data/join.json";
 import ranksData from "@/public/data/ranks.json";
 import leadersData from "@/public/data/leaders.json";
-import codexData from "@/public/data/codex.json";
+import tomeData from "@/public/data/tome.json";
 import eventsData from "@/public/data/events.json";
 import announcementsData from "@/public/data/announcements.json";
 import rafflesData from "@/public/data/raffles.json";
@@ -545,8 +545,8 @@ export function LeadersPage() {
   );
 }
 
-export function CodexPage() {
-  const data = record(codexData);
+export function TomePage() {
+  const data = record(tomeData);
   const hero = record(data.hero);
   const intro = record(data.intro);
   const tenets = record(data.tenets);
@@ -556,9 +556,9 @@ export function CodexPage() {
 
   return (
     <>
-      <BodyPageMarker page="codex" />
+      <BodyPageMarker page="tome" />
       <PageHero
-        page="codex"
+        page="tome"
         ariaLabel="Tome hero"
         image={text(hero.image, "./assets/img/codex/hero.webp")}
         imageAlt="The Tome banner artwork"
