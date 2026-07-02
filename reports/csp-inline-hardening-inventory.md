@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-06-18T06:15:31.551Z
+Generated: 2026-07-02T03:36:57.153Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
@@ -12,7 +12,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 - Report-only CSP in Next config: no
 - Unsafe-inline directives: script-src, style-src
 - Unsafe-eval directives: none
-- Scanned source files: 63
+- Scanned source files: 65
 
 ## Directives
 
@@ -37,8 +37,8 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 | Pattern | Severity | Count | Files |
 | --- | --- | ---: | --- |
-| inlineStyleProp | inventory | 0 | none |
-| iframeElement | inventory | 4 | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx (1)<br>apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx (1)<br>apps/web/components/public-pages/pages.tsx (1)<br>apps/web/components/public-pages/SpotifyBrowser.tsx (1) |
+| inlineStyleProp | inventory | 1 | apps/web/components/public-pages/SpotifyBrowser.tsx (1) |
+| iframeElement | inventory | 3 | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx (1)<br>apps/web/components/public-pages/pages.tsx (1)<br>apps/web/components/public-pages/SpotifyBrowser.tsx (1) |
 | scriptElement | review | 0 | none |
 | nextScriptImport | review | 0 | none |
 | dangerouslySetInnerHTML | block | 0 | none |
@@ -51,7 +51,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 | Origin | Allowed by CSP | Files |
 | --- | --- | --- |
 | https://discord.com | frame-src, connect-src | apps/web/app/page.tsx<br>apps/web/components/SiteFooter.tsx<br>apps/web/components/SiteHeader.tsx<br>apps/web/components/member-workflow/AccountPanel.tsx<br>apps/web/components/public-pages/EventsBoard.tsx<br>apps/web/components/public-pages/pages.tsx |
-| https://mochi-social-game.fly.dev | frame-src, connect-src | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx<br>apps/web/components/mochi-social/MochiSocialTesterGameClient.tsx |
+| https://mochi-social-game.fly.dev | frame-src, connect-src | apps/web/app/games/mochi-social/page.tsx<br>apps/web/components/mochi-social/MochiSocialAlphaClient.tsx |
 | https://mochirii.com | default-src, base-uri, form-action, script-src, style-src, img-src, font-src, media-src, frame-src, connect-src, worker-src | apps/web/app/account/page.tsx<br>apps/web/app/auth/page.tsx<br>apps/web/app/gallery-submit/page.tsx<br>apps/web/app/layout.tsx<br>apps/web/app/leader-dashboard/page.tsx<br>apps/web/components/public-pages/metadata.ts |
 | https://www.instagram.com | none | apps/web/components/member-workflow/LeaderDashboard.tsx |
 
