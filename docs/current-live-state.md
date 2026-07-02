@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-06-19.
+Last checked for this index: 2026-07-02.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -12,9 +12,10 @@ This is the short source-of-truth index for the current Mochirii production post
 - Vercel fallback/debug URL: `https://mochirii.vercel.app`.
 - `https://www.mochirii.com` redirects to the apex domain.
 - Root static files and GitHub Pages remain rollback/reference material until a later stabilization task retires them.
+- Read-only GitHub Pages API on 2026-07-02 reported legacy root deployment for `mochirii.com` with status `errored`; the latest deploy built successfully but timed out in `deployment_queued`. Vercel production remained healthy, so treat this as a rollback-surface/settings cleanup item, not a live-site outage.
 - Deployment source of truth: `docs/deployment.md`.
-- Current production commit verified from `origin/main`: `22c88035c74b5dc4c697e09a0e363dbf2842416f` (`Merge pull request #322 from Mochirii-Wushu/codex/birthday-splash-refresh`).
-- Vercel production readback on 2026-06-19 returned `Ready` for deployment `mochirii-gywsxob6w-mochirii.vercel.app`, with aliases `https://mochirii.com`, `https://www.mochirii.com`, and `https://mochirii.vercel.app`.
+- Current production commit verified from `origin/main`: `1f6b5c11b2423f03c8dc243815365d899001b4f2` (`Rebrand public guild culture page to Tome (#357)`).
+- Production `/codex` readback on 2026-07-02 showed Tome labels and no targeted public Codex guild-label residue.
 - Latest full route smoke before the unified release ledger was recorded on 2026-06-18. Run a fresh route matrix after each merged release packet.
 
 ## Data And Assets
@@ -44,6 +45,16 @@ This is the short source-of-truth index for the current Mochirii production post
 - Supabase CLI was updated to `2.107.0` for the Supabase hardening packet.
 - Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Social-specific advisor findings.
 - Supabase advisor snapshot still includes leaked-password protection as a provider configuration follow-up, intentional service-only RLS/no-policy findings documented in `supabase/README.md`, informational unused-index findings, and deferred Mochi Social RLS/index performance warnings.
+
+## Mochirii Social / Pixelfed
+
+- Staging target: `https://social.mochirii.com`.
+- Hosting boundary: DigitalOcean staging runtime outside Vercel; Vercel remains the website host only.
+- Identity boundary: Supabase OAuth Server and `/oauth/consent` remain the website consent doorway; Discord remains guild verification, not the social identity authority.
+- Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
+- Source-control gap: the staging host has a Mochirii branding commit, but durable runtime source must still move into a Mochirii-owned private fork or ops repo before further runtime edits.
+- Media gap: broad member upload testing waits for object storage policy, least-privilege keys, exact-origin CORS, backup/restore notes, and moderation gates.
+- Runbooks: `docs/pixelfed-guild-social-adr.md`, `docs/pixelfed-oidc-spike.md`, `docs/pixelfed-first-login-testing.md`, and `docs/pixelfed-staging-ops.md`.
 
 ## Discord And Reaper
 

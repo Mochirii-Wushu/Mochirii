@@ -2,13 +2,13 @@
 
 Date: 2026-07-02
 
-Status: Phase 0 local implementation; provider mutations and production runtime are approval-gated.
+Status: staging integration in progress; provider mutations and production runtime are approval-gated.
 
 ## Decision
 
 Mochirii will treat Pixelfed as a separate guild social runtime at `social.mochirii.com`. The Vercel/Next.js site in `apps/web` remains the member doorway, Supabase remains the identity and guild membership authority, Discord remains the guild verification source, and GitHub protected PR checks remain the release gate.
 
-Pixelfed code, infrastructure secrets, media storage credentials, DB passwords, queue/runtime configs, and host-specific state must not be committed to this website repo. A future private ops workspace may hold redacted templates and host automation after the host is chosen.
+Pixelfed code, infrastructure secrets, media storage credentials, DB passwords, queue/runtime configs, and host-specific state must not be committed to this website repo. The staging host now contains a Mochirii branding commit that must be moved into a Mochirii-owned private fork or ops repo before additional runtime edits.
 
 ## Source Anchors
 
@@ -25,7 +25,8 @@ Pixelfed code, infrastructure secrets, media storage credentials, DB passwords, 
 - Website repo: `/social`, `/oauth/consent`, `/api/oauth/decision`, account social status, member profile social link display, Supabase migration files, and no-secret docs.
 - Supabase project `deyvmtncimmcinldjyqe`: Auth, OAuth consent handoff, member access, `social_accounts`, RLS, and future server-side Pixelfed account sync.
 - Discord: guild membership and role verification only; it is not the Pixelfed identity authority.
-- Pixelfed runtime: separate host with HTTPS, PHP, queue worker, scheduler, database, Redis, media storage, backups, monitoring, and pinned Pixelfed release or commit.
+- Pixelfed runtime: separate DigitalOcean staging host with HTTPS, PHP, queue worker, scheduler, database, Redis, media storage, backups, monitoring, and pinned Pixelfed release or commit.
+- Durable runtime source: a Mochirii-owned private fork or ops repo; never the public website repo.
 
 ## SSO Gate
 
@@ -57,6 +58,7 @@ Use exact prompts before provider mutations:
 - `Approve registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback.`
 - `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
 - `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
+- `Approve creating a private GitHub repository under Mochirii-Wushu named mochirii-pixelfed-ops for the Mochirii-controlled Pixelfed staging source and no-secret ops docs, then pushing the existing Droplet-local branding branch to it. No secrets, .env files, DB files, Redis data, media, backups, cache files, or host-private notes will be committed.`
 - `Approve enabling ActivityPub federation for social.mochirii.com after the moderation gate passes.`
 
 ## Rollback
@@ -80,3 +82,6 @@ Supabase-changing PRs must also pass:
 - Supabase Preview evidence after PR creation
 
 Provider reads may be performed with credentials from `C:\Users\xtyty\Documents\Creds`; provider writes require the approval prompts above.
+
+See [`pixelfed-staging-ops.md`](pixelfed-staging-ops.md) for the no-secret
+staging deploy, cache, health, rollback, backup, and source-control runbook.

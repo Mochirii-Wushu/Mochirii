@@ -19,7 +19,8 @@ Provider reads are allowed when credentials are scoped to child-process environm
 - GitHub: require approval before changing branch protection, rulesets, required checks, repository security settings, Actions secrets, Pages settings, or repository permissions. PR creation, PR body updates, commit pushes, and normal merge/check verification are allowed when the task explicitly asks for GitHub publication.
 - Supabase: require approval before changing dashboard Auth settings, Data API exposure, project integrations, secrets, Edge Function deployments, remote database state, branch settings, or production data. Migrations may be committed locally through PRs, but do not run `supabase db push` unless the task explicitly approves remote mutation.
 - Vercel: require approval before changing project settings, domains, DNS, env vars, deployment protection, analytics settings, production deployment aliases, or integration settings. Read-only `inspect`, `env ls`, and preview/status reads are allowed with redacted reporting.
-- Discord/Meta/Enjin/Fly: require approval before changing portals, secrets, roles, webhooks, funded-chain state, hosted runtimes, or quota/cost-bearing operations.
+- DigitalOcean/Spaces/Cloudflare: require approval before changing Droplets, firewalls, backups, monitoring, Spaces buckets/keys/CORS/CDN/lifecycle, DNS records, TLS mode, HSTS, cache rules, or origin protection.
+- Discord/Meta/Enjin/Fly/Pixelfed: require approval before changing portals, secrets, roles, webhooks, funded-chain state, hosted runtimes, federation settings, or quota/cost-bearing operations.
 
 Use exact approval wording in task updates, for example: `Approve enabling Supabase Auth leaked-password protection for project deyvmtncimmcinldjyqe now.`
 
@@ -42,6 +43,8 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
 - Vercel project: production-serving `mochirii/mochirii` with root directory `apps/web`.
 - Pixelfed guild social: planned as a separate `social.mochirii.com` runtime. The website repo owns only the member doorway, Supabase OAuth consent surface, `social_accounts` mapping, and no-secret runbooks; do not add Pixelfed application code, host secrets, media credentials, or infrastructure state to this repo. See `docs/pixelfed-guild-social-adr.md`.
+- Pixelfed staging: `social.mochirii.com` exists as an admin-first staging target outside Vercel. Runtime source changes must be moved into a Mochirii-owned private fork or ops repo before further host edits. Federation and broad member upload testing remain disabled until separate gates pass.
+- GitHub Pages: retained as legacy rollback/reference material only. As of 2026-07-02, Pages API reports legacy root deployment for `mochirii.com` and recent deploys can time out in `deployment_queued` while Vercel production remains healthy. Changing Pages settings or retiring the root static rollback surface requires explicit approval.
 - Supabase Preview: acceptable as skipped on PRs without `supabase/` changes; schema/function PRs must either produce green Supabase Preview evidence or document the integration blocker.
 - GitHub security alerts: code scanning, Dependabot, and secret scanning should remain at zero before release-sensitive merges.
 - Audio: `assets/audio/mochiriiiiii.mp3` remains an accepted large-asset warning unless the owner explicitly approves optimization.

@@ -1,6 +1,6 @@
 # Pixelfed First Login Testing Runbook
 
-Status: repo-side readiness packet. Provider mutations remain approval-gated.
+Status: admin-first staging readiness packet. Provider mutations remain approval-gated.
 
 This runbook prepares the first Pixelfed login test without committing Pixelfed
 runtime code, host secrets, OAuth client secrets, database URLs, cookies, access
@@ -24,6 +24,9 @@ pieces are live through the protected branch flow:
   pass on the merged commit.
 - Supabase Preview is green for the migration before production database
   mutation.
+- The staged Pixelfed branding/source commit has been pushed to a
+  Mochirii-owned private fork or ops repo, or the missing source-control step is
+  explicitly recorded as the blocker before first login.
 
 ## Provider Approval Gates
 
@@ -35,6 +38,7 @@ Use these exact approval prompts before mutating provider state:
 - `Approve updating or re-registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback and token endpoint auth method client_secret_post.`
 - `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
 - `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
+- `Approve creating a private GitHub repository under Mochirii-Wushu named mochirii-pixelfed-ops for the Mochirii-controlled Pixelfed staging source and no-secret ops docs, then pushing the existing Droplet-local branding branch to it. No secrets, .env files, DB files, Redis data, media, backups, cache files, or host-private notes will be committed.`
 
 Do not combine these approvals. If the callback URL changes, stop and request a
 new approval naming the exact redirect URI.
@@ -101,6 +105,10 @@ federation. Pixelfed must be hosted outside Vercel with PHP/Laravel runtime
 support, DB, Redis, queue worker, scheduler, HTTPS, private media configuration,
 backups, and monitoring.
 
+Current staging target: `https://social.mochirii.com`. Treat it as admin-first
+testing only; do not invite regular members or enable federation until the
+first-login smoke, media policy, backup/restore, and moderation gates pass.
+
 Minimum staging posture:
 
 - Closed registration.
@@ -110,6 +118,7 @@ Minimum staging posture:
 - Media upload type and size limits configured.
 - Moderator/report flow configured.
 - Runtime commit or release pinned and documented privately.
+- Staged source changes stored in a Mochirii-owned private fork or ops repo.
 
 Pixelfed OIDC configuration must map Supabase claims without using Discord
 display names as authority. Prefer deterministic website member profile slugs

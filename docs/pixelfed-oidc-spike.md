@@ -1,6 +1,6 @@
 # Pixelfed OIDC Spike Packet
 
-Status: Phase 2 repo-side packet. Provider mutations remain approval-gated.
+Status: staging OIDC packet. Provider mutations remain approval-gated.
 
 This packet defines the smallest credible staging proof before Mochirii commits
 to production Pixelfed infrastructure. It does not contain Pixelfed code, OAuth
@@ -82,7 +82,8 @@ The remaining provider/runtime gates before first login testing are an approved
 Pixelfed OAuth client with the exact staging callback URI and compatible token
 endpoint auth method, a reachable staging Pixelfed runtime, and private
 confirmation of closed registration, disabled federation, media limits,
-queue/scheduler health, backups, monitoring, and moderation flow.
+queue/scheduler health, backups, monitoring, moderation flow, and durable
+Mochirii-owned runtime source control.
 
 ## Approval Gates
 
@@ -93,6 +94,7 @@ Use these exact approvals separately. Do not combine them.
 - `Approve updating or re-registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback and token endpoint auth method client_secret_post.`
 - `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
 - `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
+- `Approve creating a private GitHub repository under Mochirii-Wushu named mochirii-pixelfed-ops for the Mochirii-controlled Pixelfed staging source and no-secret ops docs, then pushing the existing Droplet-local branding branch to it. No secrets, .env files, DB files, Redis data, media, backups, cache files, or host-private notes will be committed.`
 
 If the callback URI changes, stop and request a new approval naming the exact
 redirect URI.
@@ -145,13 +147,15 @@ use `client_secret_post` for unpatched Pixelfed.
 5. After explicit approval, register the staging Pixelfed OAuth client with the
    exact callback URI and a compatible token endpoint auth method.
 6. Configure staging Pixelfed OIDC environment variables in the host secret store.
-7. Run the login flow in a browser and inspect only no-secret network facts:
+7. Confirm the staged Pixelfed branding/source patch is durable in the approved
+   private fork or ops repo.
+8. Run the login flow in a browser and inspect only no-secret network facts:
    `state`, requested scopes, redirect URI, and whether a PKCE `code_challenge`
    using `S256` is present.
-8. Sign in as an active guild member and approve from `/oauth/consent`.
-9. Confirm Pixelfed receives UserInfo fields for `sub`, `email`, and
+9. Sign in as an active guild member and approve from `/oauth/consent`.
+10. Confirm Pixelfed receives UserInfo fields for `sub`, `email`, and
    `preferred_username`.
-10. Confirm Pixelfed creates or links the user and does not accept non-member or
+11. Confirm Pixelfed creates or links the user and does not accept non-member or
     suspended-member approvals.
 
 ## Pass Criteria
