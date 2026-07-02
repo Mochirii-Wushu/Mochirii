@@ -71,6 +71,24 @@ Supabase OAuth Server must be configured according to the current Supabase OAuth
 If ID token generation fails because JWT signing keys are still symmetric,
 pause and prepare a JWT signing-key decision packet before continuing.
 
+### Live Provider Assertion
+
+After the OAuth Server approval is applied, assert the live Supabase provider
+state without printing token values:
+
+```powershell
+$tokenFromCreds = (Get-Content -LiteralPath 'C:\Users\xtyty\Documents\Creds\Supabase Key.txt' -Raw).Trim()
+[Environment]::SetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', $tokenFromCreds, 'Process')
+$env:PIXELFED_FIRST_LOGIN_PROVIDER_READY = '1'
+npm run check:pixelfed-first-login-readiness
+Remove-Item Env:\SUPABASE_ACCESS_TOKEN
+Remove-Item Env:\PIXELFED_FIRST_LOGIN_PROVIDER_READY
+```
+
+This verifies the Management API auth config, OAuth discovery, OIDC discovery,
+Site URL, Authorization Path, and PKCE `S256` support. It does not prove that
+the Pixelfed client or staging runtime exists.
+
 ## Pixelfed Staging Gate
 
 The first login test targets a staging Pixelfed runtime, not production
@@ -92,6 +110,31 @@ Pixelfed OIDC configuration must map Supabase claims without using Discord
 display names as authority. Prefer deterministic website member profile slugs
 for usernames. If Supabase cannot emit the required claim directly, stop and
 prepare a claim bridge or Pixelfed patch decision packet.
+
+### Staging Assertion
+
+After the separate approvals for OAuth client registration and staging runtime
+provisioning are complete, assert the staging boundary with explicit no-secret
+operator markers:
+
+```powershell
+$env:PIXELFED_FIRST_LOGIN_STAGING_READY = '1'
+$env:PIXELFED_STAGING_BASE_URL = 'https://social.mochirii.com'
+$env:PIXELFED_OIDC_CALLBACK_URI = 'https://social.mochirii.com/auth/oidc/callback'
+$env:PIXELFED_OAUTH_CLIENT_REGISTERED = '1'
+$env:PIXELFED_STAGING_RUNTIME_READY = '1'
+$env:PIXELFED_STAGING_SECURITY_READY = '1'
+npm run check:pixelfed-first-login-readiness
+```
+
+Set the marker variables only after the private host checklist confirms the
+matching OAuth client, closed registration, disabled federation, upload limits,
+queue worker, scheduler, backups, monitoring, and moderation/report flow. When
+both provider and staging assertions pass, first admin account creation is the
+next manual prompt before browser login smoke testing.
+
+Clear the variables from the shell after the check if the session will remain
+open.
 
 ## First Login Smoke
 

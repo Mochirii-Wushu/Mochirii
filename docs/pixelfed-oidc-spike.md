@@ -63,6 +63,23 @@ Supabase OAuth and OIDC endpoints:
 
 The authorization UI path must be `/oauth/consent` on the website Site URL.
 
+## Current Provider State
+
+As of the latest read-only Management API check on 2026-07-02:
+
+- Supabase OAuth Server is enabled for project `deyvmtncimmcinldjyqe`.
+- Authorization Path is `/oauth/consent`.
+- Site URL is `https://mochirii.com`.
+- Dynamic OAuth client registration is disabled.
+- OIDC discovery advertises Authorization, Token, UserInfo, JWKS, `openid`,
+  `profile`, `email`, and PKCE `S256` support.
+
+The remaining provider/runtime gates before first login testing are an approved
+Pixelfed OAuth client with the exact staging callback URI, a reachable staging
+Pixelfed runtime, and private confirmation of closed registration, disabled
+federation, media limits, queue/scheduler health, backups, monitoring, and
+moderation flow.
+
 ## Approval Gates
 
 Use these exact approvals separately. Do not combine them.
