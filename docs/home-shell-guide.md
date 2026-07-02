@@ -2,13 +2,13 @@
 
 ## 1. Purpose
 
-Home/Shell covers the site's first impression, guild identity, entry paths to Join, Events, Gallery, Codex, Recruitment, Ranks, Leaders, and Twills/Profile, plus the shared header/footer/nav behavior, shared script load order, and public site foundation.
+Home/Shell covers the site's first impression, guild identity, entry paths to Join, Events, Gallery, Tome, Recruitment, Ranks, Leaders, and Twills/Profile, plus the shared header/footer/nav behavior, shared script load order, and public site foundation.
 
 Home should route visitors onward without duplicating:
 
 - Join onboarding in full.
 - Recruitment long-form philosophy.
-- Codex rules in full.
+- Tome rules in full.
 - Events schedule details.
 - Gallery memory archive.
 - Ranks hierarchy.
@@ -62,7 +62,7 @@ Header behavior comes from `header.html` and `site.js`.
 Current desktop navigation:
 
 - Guild: Home, Spotlight, Gallery.
-- Culture: Join, Ranks, Leaders, Codex, Playlists.
+- Culture: Join, Ranks, Leaders, Tome, Playlists.
 - Updates: Announcements, Events, Raffles.
 - Recruitment as a top-level link.
 

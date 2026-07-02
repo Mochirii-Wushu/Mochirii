@@ -46,7 +46,7 @@ const navGroups: NavGroup[] = [
       { href: "/join", label: "Join", nav: "join" },
       { href: "/ranks", label: "Ranks", nav: "ranks" },
       { href: "/leaders", label: "Leaders", nav: "leaders" },
-      { href: "/codex", label: "Codex", nav: "codex" },
+      { href: "/codex", label: "Tome", nav: "codex" },
       { href: "/spotify", label: "Playlists", nav: "spotify" },
     ],
   },

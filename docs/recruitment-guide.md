@@ -7,7 +7,7 @@ The Recruitment page is for recruitment philosophy, guild growth, member partici
 Recruitment should not duplicate:
 
 - Join onboarding/checklist
-- Codex rules in full
+- Tome rules in full
 - Events schedule details
 - Gallery memories
 - Leaders contact structure

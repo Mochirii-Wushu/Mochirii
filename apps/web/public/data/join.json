@@ -28,8 +28,8 @@
       },
       {
         "number": "2",
-        "title": "Read the Codex & Ranks",
-        "description": "Skim the Codex & Ranks pages so you know our tone, etiquette, leadership path & support flow before you settle in."
+        "title": "Read the Tome & Ranks",
+        "description": "Skim the Tome & Ranks pages so you know our tone, etiquette, leadership path & support flow before you settle in."
       },
       {
         "number": "3",
@@ -56,7 +56,7 @@
     ],
     "links": [
       { "label": "Events", "href": "./events.html" },
-      { "label": "Guild Codex", "href": "./codex.html" },
+      { "label": "Guild Tome", "href": "./codex.html" },
       { "label": "Ranks", "href": "./ranks.html" }
     ]
   },
@@ -76,10 +76,10 @@
         "text": "Let us know your IGN so we can find you quickly & welcome you by name."
       },
       {
-        "title": "Read the Codex",
+        "title": "Read the Tome",
         "text": "Review the guild's conduct, values & expectations before you settle in.",
         "href": "./codex.html",
-        "label": "Read the Codex"
+        "label": "Read the Tome"
       },
       {
         "title": "Check event expectations",

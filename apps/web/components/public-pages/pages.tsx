@@ -559,20 +559,20 @@ export function CodexPage() {
       <BodyPageMarker page="codex" />
       <PageHero
         page="codex"
-        ariaLabel="Codex hero"
+        ariaLabel="Tome hero"
         image={text(hero.image, "./assets/img/codex/hero.webp")}
-        imageAlt="The Codex banner artwork"
-        kicker={text(hero.kicker, "Codex")}
-        title={text(hero.title, "The Codex")}
+        imageAlt="The Tome banner artwork"
+        kicker={text(hero.kicker, "Tome")}
+        title={text(hero.title, "The Tome")}
         intro={<ProseStack id="codexIntro" lines={hero.introBody} />}
-        badges={<BadgeRow id="codexHeroPills" items={strings(hero.pills, 12)} label="Codex summary pills" />}
+        badges={<BadgeRow id="codexHeroPills" items={strings(hero.pills, 12)} label="Tome summary pills" />}
       />
       <main className="page-main" id="main">
         <div className="container">
           <section>
             <div className="grid-12 grid-gap">
               <aside className="col-4">
-                <ImagePanel id="introImage" src={text(intro.image)} alt="Codex artwork" title={text(intro.badge, "Values & Rhythm")} />
+                <ImagePanel id="introImage" src={text(intro.image)} alt="Tome artwork" title={text(intro.badge, "Values & Rhythm")} />
               </aside>
               <section className="col-8">
                 <div className="glass-card glass-card--primary glass-pad">

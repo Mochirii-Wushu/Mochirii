@@ -2,12 +2,12 @@
 
 ## 1. Purpose
 
-The Join page is for onboarding: first steps, the Discord path, in-game name or UID readiness, Codex and Events readiness, and the newcomer checklist.
+The Join page is for onboarding: first steps, the Discord path, in-game name or UID readiness, Tome and Events readiness, and the newcomer checklist.
 
 Join should not duplicate:
 
 - Recruitment philosophy
-- Codex rules in full
+- Tome rules in full
 - Events schedule details
 - Gallery memories
 - Leaders page contact structure beyond what the Join flow needs
@@ -71,9 +71,9 @@ Current checklist item shape:
 - optional `href`
 - optional `label`
 
-Each item should describe one concrete preparation step. Current checklist topics cover Discord, in-game name or UID readiness, Codex review, Events expectations, and saying hello.
+Each item should describe one concrete preparation step. Current checklist topics cover Discord, in-game name or UID readiness, Tome review, Events expectations, and saying hello.
 
-Checklist links render only when both `href` and `label` are present. Current checklist links point to Discord, Codex, and Events.
+Checklist links render only when both `href` and `label` are present. Current checklist links point to Discord, Tome, and Events.
 
 Checklist copy should remain clear, not overly poetic. Do not add interactive completion behavior, checkbox state, local storage, or unsupported fields without updating `join.js` in a separate scoped task.
 
@@ -85,7 +85,7 @@ Checklist copy should remain clear, not overly poetic. Do not add interactive co
 - Avoid forced rhyme.
 - Avoid generic AI-like language.
 - Avoid "Where Winds Meet" in visible Join body copy.
-- Keep labels plain: Join Discord, Read the Codex, View Events, Ranks, Home.
+- Keep labels plain: Join Discord, Read the Tome, View Events, Ranks, Home.
 
 ## 6. Links and CTAs
 
@@ -95,7 +95,7 @@ Current link behavior:
 - `checklist.items` render an item link only when both `href` and `label` are present.
 - `notes.links` render as badge-row links.
 - Discord links are external and open in a new tab with `rel="noopener noreferrer"`.
-- Internal links currently point to Events, Codex, Ranks, Leaders, and Home.
+- Internal links currently point to Events, Tome, Ranks, Leaders, and Home.
 - Shared header/footer links are mounted by `site.js`, not `join.js`.
 
 Link rules:
@@ -145,7 +145,7 @@ Use `npm run smoke:gallery` as a general regression check when relevant to the r
 - Confirm quick-start links render.
 - Confirm newcomer checklist renders.
 - Confirm Discord link works.
-- Confirm Codex link works.
+- Confirm Tome link works.
 - Confirm Events link works.
 - Confirm Ranks, Leaders, and Home links work where present.
 - Check mobile widths at 360px, 390px, and 768px for horizontal overflow.
@@ -162,4 +162,3 @@ Join work must not alter:
 - `data/recruitment.json` `content.paragraphs`
 - `data/recruitment.json` `content.conclusion`
 - `data/home.json` `seal.verse`
-

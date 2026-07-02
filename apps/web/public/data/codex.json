@@ -1,10 +1,10 @@
 {
   "hero": {
-    "kicker": "Codex",
-    "title": "The Codex",
+    "kicker": "Tome",
+    "title": "The Tome",
     "image": "./assets/img/codex/hero.webp",
     "introBody": [
-      "The Codex is about how Mōchirīī speaks, gathers & looks after each other.",
+      "The Tome is about how Mōchirīī speaks, gathers & looks after each other.",
       "Read it once, revisit it often & use it to remind yourself to be nice."
     ],
     "pills": ["Values in practice", "Etiquette with dignity", "Consistency with ease"]
@@ -15,7 +15,7 @@
     "title": "A shared standard",
     "image": "./assets/img/codex/values.webp",
     "body": [
-      "The Codex keeps culture rooted across time zones & playstyles.",
+      "The Tome keeps culture rooted across time zones & playstyles.",
       "It sets expectations, explains how disputes get handled & describes how we keep guild life active & enjoyable for everyone."
     ]
   },

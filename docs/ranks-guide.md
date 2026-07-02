@@ -8,7 +8,7 @@ Ranks should not duplicate:
 
 - Join onboarding
 - Recruitment philosophy
-- Codex rules in full
+- Tome rules in full
 - Leaders contact details
 - Events schedule details
 - Gallery memories
@@ -145,7 +145,7 @@ Current link behavior:
 - The only page-local content link is the static `Return to Home` link in `ranks.html`.
 - Header and footer links are mounted by `site.js`, not `ranks.js`.
 - Shared header and footer navigation include links to `./ranks.html`.
-- Home, Join, and Codex currently link to `./ranks.html` from other page data or markup.
+- Home, Join, and Tome currently link to `./ranks.html` from other page data or markup.
 
 Link rules:
 

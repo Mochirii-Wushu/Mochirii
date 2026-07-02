@@ -150,16 +150,16 @@ function listBlock(title, items) {
       const data = await loadData();
 
       // Hero
-      setText("#codexKicker", data?.hero?.kicker, "Codex");
-      setText("#codexHeading", data?.hero?.title, "The Codex");
-      setImg("#codexHeroImage", data?.hero?.image, "The Codex banner artwork");
+      setText("#codexKicker", data?.hero?.kicker, "Tome");
+      setText("#codexHeading", data?.hero?.title, "The Tome");
+      setImg("#codexHeroImage", data?.hero?.image, "The Tome banner artwork");
       paragraphs($("#codexIntro"), data?.hero?.introBody, text(data?.hero?.description, "—"));
       pills($("#codexHeroPills"), data?.hero?.pills);
 
       // Intro
       setText("#introBadge", data?.intro?.badge, "Values & Rhythm");
       setText("#introTitle", data?.intro?.title, "A living guide");
-      setImg("#introImage", data?.intro?.image, "Codex artwork");
+      setImg("#introImage", data?.intro?.image, "Tome artwork");
       paragraphs($("#introBody"), data?.intro?.body);
 
       // Tenets
@@ -199,7 +199,7 @@ function listBlock(title, items) {
       if (recLink) recLink.href = text(data?.recognition?.ranksHref, "./ranks.html");
     } catch (err) {
       console.error(err);
-      showError(`Codex content failed to load: ${String(err?.message || err)}`);
+      showError(`Tome content failed to load: ${String(err?.message || err)}`);
     }
   })();
 })();

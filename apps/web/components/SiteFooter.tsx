@@ -24,7 +24,7 @@ const cultureLinks = [
   { href: "/join", label: "Join" },
   { href: "/ranks", label: "Ranks" },
   { href: "/leaders", label: "Leaders" },
-  { href: "/codex", label: "Codex" },
+  { href: "/codex", label: "Tome" },
   { href: "/spotify", label: "Playlists" },
   { href: "/auth", label: "Login", auth: "signed-out" },
   { href: "/account", label: "Account", hidden: true, auth: "signed-in" },

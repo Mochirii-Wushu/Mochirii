@@ -9,7 +9,7 @@ Leaders should not duplicate:
 - Ranks hierarchy in full
 - Join onboarding
 - Recruitment philosophy
-- Codex rules in full
+- Tome rules in full
 - Events schedule details
 - Gallery memories
 

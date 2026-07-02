@@ -90,10 +90,10 @@
       "href": "./leaders.html"
     },
     {
-      "label": "Codex",
+      "label": "Tome",
       "title": "Read the values, etiquette, event rhythm & community standards we share.",
       "image": "./assets/img/tiles/codex.webp",
-      "alt": "Guild codex & values tile artwork",
+      "alt": "Guild tome & values tile artwork",
       "href": "./codex.html"
     }
   ],

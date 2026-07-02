@@ -9,7 +9,7 @@ Twills should not duplicate:
 - Leaders stewardship/contact structure in full
 - Join onboarding
 - Recruitment philosophy
-- Codex rules
+- Tome rules
 - Events schedule details
 - Gallery memories
 - Ranks hierarchy

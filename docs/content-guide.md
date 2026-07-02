@@ -67,7 +67,7 @@ The restoration source of truth is [`reports/audio-original-restore.md`](../repo
 ## 7. Tone and Copy
 
 - For Join-specific onboarding, checklist, link, and accessibility conventions, see [`docs/join-guide.md`](join-guide.md).
-- For Codex-specific conduct, values, and protected-content conventions, see [`docs/codex-guide.md`](codex-guide.md).
+- For Tome-specific conduct, values, and protected-content conventions, see [`docs/codex-guide.md`](codex-guide.md).
 - For Ranks-specific progression, hierarchy, image, tone, and accessibility conventions, see [`docs/ranks-guide.md`](ranks-guide.md).
 - For Leaders-specific roster, profile-link, image, tone, and accessibility conventions, see [`docs/leaders-guide.md`](leaders-guide.md).
 - For Twills/Profile-specific protected body text, contact detail, image, tone, and accessibility conventions, see [`docs/twills-guide.md`](twills-guide.md).
@@ -82,14 +82,14 @@ The restoration source of truth is [`reports/audio-original-restore.md`](../repo
 - Favor concrete guild images: shared runs, small greetings, warm halls, gentle cheer, and a little Cupcake sweetness.
 - Use rhyme, repeated sounds, and soft cadence only when they feel natural. Do not turn public guidance into verse.
 - Use Cupcake warmth sparingly; do not make every section dessert-themed or unclear.
-- Keep functional labels plain, such as Join Discord, Read the Codex, View Events, Upcoming, Past, and All.
+- Keep functional labels plain, such as Join Discord, Read the Tome, View Events, Upcoming, Past, and All.
 - Avoid generic AI-like phrasing, corporate language, forced rhyme, and direct references from source poems.
 - Do not alter the protected long-form recruitment body or the guild seal poem.
 
 ## 8. Xianxia House Style, Page Purpose, and Vocabulary
 
 - Mōchirīī copy should feel like a warm xianxia guild hall: clear, kind, lightly rhythmic, and rooted in shared effort.
-- Each page should have a distinct job. Home invites, Join orients, Events schedules, Gallery remembers, Ranks explains progression, Leaders directs contact, Codex defines conduct, Recruitment preserves philosophy, and side pages keep their own focus.
+- Each page should have a distinct job. Home invites, Join orients, Events schedules, Gallery remembers, Ranks explains progression, Leaders directs contact, Tome defines conduct, Recruitment preserves philosophy, and side pages keep their own focus.
 - Use cultivation, path, hall, lantern, jade, lotus, bamboo, moon, frost, and qi imagery sparingly. Clear meaning comes first.
 - Keep Cupcake warmth as a playful thread, not a repeated motif.
 - The exact phrase “Where Winds Meet” may remain in titles, metadata, JSON-LD, validation scripts, docs, reports, header, and footer. Avoid it in regular visible body copy outside header/footer when a clear phrase like the game, the Jianghu, the guild road, or the path works better.

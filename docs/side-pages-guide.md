@@ -20,7 +20,7 @@ Side pages should stay page-specific and should not duplicate:
 
 - Join onboarding.
 - Recruitment philosophy.
-- Codex rules.
+- Tome rules.
 - Events schedule.
 - Gallery archive.
 - Leaders contact structure.
@@ -92,7 +92,7 @@ Observed rendering rules:
 
 Tone lane: word, notice, bulletin, update, timing, news.
 
-Do not turn Announcements into long Recruitment copy, an Events schedule replacement, Codex rules, or Gallery memories.
+Do not turn Announcements into long Recruitment copy, an Events schedule replacement, Tome rules, or Gallery memories.
 
 ## 4. Raffles Rules
 
