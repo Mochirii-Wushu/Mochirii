@@ -1672,6 +1672,7 @@ body[data-page="spotify"] .spotify-card__meta{
 body[data-page="spotify"] .spotify-embed{
   margin-top:12px;
   position:relative;
+  min-height:352px;
   overflow:hidden;
   border:1px solid rgba(220,235,255,.14);
   border-radius:14px;
@@ -1680,6 +1681,9 @@ body[data-page="spotify"] .spotify-embed{
     inset 0 1px 0 rgba(255,255,255,.06),
     0 14px 34px rgba(0,0,0,.28);
 }
+
+body[data-page="spotify"] .spotify-embed--compact{min-height:152px;}
+body[data-page="spotify"] .spotify-embed--standard{min-height:352px;}
 
 body[data-page="spotify"] .spotify-embed__placeholder{
   position:absolute;

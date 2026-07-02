@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-07-02T03:36:57.153Z
+Generated: 2026-07-02T05:41:56.424Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
@@ -37,7 +37,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 | Pattern | Severity | Count | Files |
 | --- | --- | ---: | --- |
-| inlineStyleProp | inventory | 1 | apps/web/components/public-pages/SpotifyBrowser.tsx (1) |
+| inlineStyleProp | inventory | 0 | none |
 | iframeElement | inventory | 3 | apps/web/components/mochi-social/MochiSocialAlphaClient.tsx (1)<br>apps/web/components/public-pages/pages.tsx (1)<br>apps/web/components/public-pages/SpotifyBrowser.tsx (1) |
 | scriptElement | review | 0 | none |
 | nextScriptImport | review | 0 | none |

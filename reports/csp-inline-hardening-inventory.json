@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-02T03:36:57.153Z",
+  "checkedAt": "2026-07-02T05:41:56.424Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
@@ -180,20 +180,9 @@
       "inlineStyleProp": {
         "label": "React inline style prop",
         "severity": "inventory",
-        "count": 1,
-        "files": [
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "count": 1
-          }
-        ],
-        "hits": [
-          {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 87,
-            "count": 1
-          }
-        ]
+        "count": 0,
+        "files": [],
+        "hits": []
       },
       "iframeElement": {
         "label": "iframe element",
@@ -221,7 +210,7 @@
           },
           {
             "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 92,
+            "line": 99,
             "count": 1
           },
           {

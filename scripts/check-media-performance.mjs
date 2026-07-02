@@ -150,6 +150,9 @@ assertIncludes("shared image LCP hint", sharedPublicComponents, "fetchPriority={
   'allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"',
   'url.hostname !== "open.spotify.com"',
   "const allowedKinds = new Set",
+  "function spotifyEmbedHeight",
+  "spotify-embed--compact",
+  "spotify-embed--standard",
   "<SpotifyEmbed",
 ].forEach((snippet) => assertIncludes("Spotify deferred embed contract", spotifyBrowser, snippet));
 
