@@ -281,6 +281,93 @@ async function checkSupabaseProviderReadiness() {
   notes.push("Supabase OAuth provider readiness asserted from live read-only checks.");
 }
 
+async function checkPixelfedOAuthClientCredentialReadiness({ required = false } = {}) {
+  const clientId = env("PIXELFED_OAUTH_CLIENT_ID");
+  const oauthClientCredential = env("PIXELFED_OAUTH_CLIENT_SECRET");
+  const tokenAuthMethod = env("PIXELFED_OAUTH_TOKEN_AUTH_METHOD") || "client_secret_post";
+  const redirectUri = env("PIXELFED_OIDC_CALLBACK_URI") || "https://social.mochirii.com/auth/oidc/callback";
+
+  if (!clientId || !oauthClientCredential) {
+    const message = "PIXELFED_OAUTH_CLIENT_ID and PIXELFED_OAUTH_CLIENT_SECRET env vars are required in child-process env for live OAuth client credential readiness.";
+    if (required) failures.push(message);
+    else warnings.push(message);
+    return;
+  }
+
+  if (!["client_secret_post", "client_secret_basic"].includes(tokenAuthMethod)) {
+    failures.push("PIXELFED_OAUTH_TOKEN_AUTH_METHOD: expected client_secret_post or client_secret_basic.");
+    return;
+  }
+
+  const authBase = `https://${projectRef}.supabase.co/auth/v1`;
+  const authorizeParams = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: "openid profile email",
+    state: "codex-redacted-state-check",
+    code_challenge: "e9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+    code_challenge_method: "S256",
+  });
+
+  try {
+    const authorizeResponse = await fetch(`${authBase}/oauth/authorize?${authorizeParams.toString()}`, {
+      redirect: "manual",
+    });
+    const location = authorizeResponse.headers.get("location") || "";
+    if (authorizeResponse.status !== 302) {
+      failures.push(`Pixelfed OAuth client authorize smoke: expected HTTP 302, got ${authorizeResponse.status}.`);
+    } else if (!location.startsWith(`${expectedSiteUrl}${expectedAuthorizationPath}?authorization_id=`)) {
+      failures.push("Pixelfed OAuth client authorize smoke: redirect did not target the configured consent UI.");
+    }
+  } catch (error) {
+    failures.push(`Pixelfed OAuth client authorize smoke: ${error instanceof Error ? error.message : "request failed"}.`);
+    return;
+  }
+
+  const tokenBody = new URLSearchParams({
+    grant_type: "authorization_code",
+    code: "codex-dummy-code",
+    redirect_uri: redirectUri,
+    code_verifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+  });
+  const tokenHeaders = {
+    Accept: "application/json",
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+
+  if (tokenAuthMethod === "client_secret_post") {
+    tokenBody.set("client_id", clientId);
+    tokenBody.set("client_secret", oauthClientCredential);
+  } else {
+    tokenHeaders.Authorization = `Basic ${Buffer.from(`${clientId}:${oauthClientCredential}`, "utf8").toString("base64")}`;
+  }
+
+  try {
+    const tokenResponse = await fetch(`${authBase}/oauth/token`, {
+      method: "POST",
+      headers: tokenHeaders,
+      body: tokenBody,
+    });
+    const tokenJson = await tokenResponse.json().catch(() => ({}));
+    const errorCode = tokenJson.error || tokenJson.error_code || "";
+
+    if (tokenResponse.status === 400 && errorCode === "invalid_grant") {
+      notes.push(`Pixelfed OAuth client credential readiness asserted with ${tokenAuthMethod}.`);
+      return;
+    }
+
+    if (errorCode === "invalid_credentials") {
+      failures.push(`Pixelfed OAuth client credential smoke: registered token endpoint auth method does not accept ${tokenAuthMethod}.`);
+      return;
+    }
+
+    failures.push(`Pixelfed OAuth client credential smoke: expected invalid_grant for dummy code, got HTTP ${tokenResponse.status}.`);
+  } catch (error) {
+    failures.push(`Pixelfed OAuth client credential smoke: ${error instanceof Error ? error.message : "request failed"}.`);
+  }
+}
+
 async function checkPixelfedStagingReadiness() {
   const baseUrl = assertHttpsUrl("PIXELFED_STAGING_BASE_URL", env("PIXELFED_STAGING_BASE_URL"));
   const callbackUrl = assertHttpsUrl("PIXELFED_OIDC_CALLBACK_URI", env("PIXELFED_OIDC_CALLBACK_URI"), "/auth/oidc/callback");
@@ -290,8 +377,11 @@ async function checkPixelfedStagingReadiness() {
   }
 
   assertMarker("PIXELFED_OAUTH_CLIENT_REGISTERED", "Supabase OAuth client registration with the exact callback URI");
+  assertMarker("PIXELFED_OAUTH_CLIENT_CREDENTIAL_READY", "live OAuth client credential and token endpoint auth method compatibility");
   assertMarker("PIXELFED_STAGING_RUNTIME_READY", "Pixelfed web, database, Redis, queue worker, scheduler, HTTPS, and private media configuration");
   assertMarker("PIXELFED_STAGING_SECURITY_READY", "closed registration, federation disabled, upload limits, moderation/report flow, backups, and monitoring");
+
+  await checkPixelfedOAuthClientCredentialReadiness({ required: true });
 
   if (!baseUrl) return;
 
@@ -336,6 +426,8 @@ if (providerReady) {
 
 if (stagingReady) {
   await checkPixelfedStagingReadiness();
+} else if (env("PIXELFED_OAUTH_CLIENT_CREDENTIAL_READY") === "1") {
+  await checkPixelfedOAuthClientCredentialReadiness();
 } else {
   warnings.push("Pixelfed staging readiness is not asserted. OAuth client registration, staging runtime, DNS, and security posture remain approval-gated.");
 }

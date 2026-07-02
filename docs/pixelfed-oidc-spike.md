@@ -29,6 +29,10 @@ complete authorization code login with Supabase OAuth 2.1, including PKCE,
   methods only after the signed-in user is confirmed as an active guild member.
 - Supabase recommends asymmetric JWT signing keys for OAuth clients. ID token
   generation fails with HS256 when clients request `openid`.
+- Supabase confidential OAuth clients default to `client_secret_basic`, but also
+  support `client_secret_post`. Current unpatched Pixelfed OIDC uses The PHP
+  League `GenericProvider`, so the staging client must use
+  `client_secret_post` unless a Pixelfed patch or custom provider is approved.
 - Pixelfed installation currently expects a separate PHP/Laravel runtime and
   supporting services. It is not a Vercel serverless workload.
 - Pixelfed `dev` OIDC config exposes `PF_OIDC_ENABLED`,
@@ -75,10 +79,10 @@ As of the latest read-only Management API check on 2026-07-02:
   `profile`, `email`, and PKCE `S256` support.
 
 The remaining provider/runtime gates before first login testing are an approved
-Pixelfed OAuth client with the exact staging callback URI, a reachable staging
-Pixelfed runtime, and private confirmation of closed registration, disabled
-federation, media limits, queue/scheduler health, backups, monitoring, and
-moderation flow.
+Pixelfed OAuth client with the exact staging callback URI and compatible token
+endpoint auth method, a reachable staging Pixelfed runtime, and private
+confirmation of closed registration, disabled federation, media limits,
+queue/scheduler health, backups, monitoring, and moderation flow.
 
 ## Approval Gates
 
@@ -86,6 +90,7 @@ Use these exact approvals separately. Do not combine them.
 
 - `Approve enabling Supabase OAuth 2.1 Server for project deyvmtncimmcinldjyqe and setting Authorization Path /oauth/consent.`
 - `Approve registering the Pixelfed OAuth client for the approved staging Pixelfed URL with its exact OIDC callback URI.`
+- `Approve updating or re-registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback and token endpoint auth method client_secret_post.`
 - `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
 - `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
 
@@ -123,7 +128,9 @@ store, not this repo.
 - `PF_OIDC_FIELD_ID=sub`
 
 The staging Pixelfed callback URI must match the registered Supabase OAuth
-client redirect URI exactly and must end in `/auth/oidc/callback`.
+client redirect URI exactly and must end in `/auth/oidc/callback`. The Supabase
+client token endpoint auth method must match the staged Pixelfed token exchange;
+use `client_secret_post` for unpatched Pixelfed.
 
 ## Spike Procedure
 
@@ -136,7 +143,7 @@ client redirect URI exactly and must end in `/auth/oidc/callback`.
 4. Confirm OIDC discovery, Authorization, Token, UserInfo, and JWKS endpoints are
    reachable without printing secrets.
 5. After explicit approval, register the staging Pixelfed OAuth client with the
-   exact callback URI.
+   exact callback URI and a compatible token endpoint auth method.
 6. Configure staging Pixelfed OIDC environment variables in the host secret store.
 7. Run the login flow in a browser and inspect only no-secret network facts:
    `state`, requested scopes, redirect URI, and whether a PKCE `code_challenge`
@@ -154,6 +161,8 @@ client redirect URI exactly and must end in `/auth/oidc/callback`.
 - Supabase redirects to `/oauth/consent?authorization_id=...`.
 - Consent UI shows the client, redirect URI, requested scopes, and active member
   status before approval.
+- The token endpoint accepts the configured client authentication method and
+  rejects dummy authorization codes with `invalid_grant`, not credential errors.
 - Pixelfed sends and validates `state`.
 - Pixelfed satisfies Supabase PKCE requirements, preferably with S256.
 - UserInfo contains stable `sub`, verified `email`, and deterministic

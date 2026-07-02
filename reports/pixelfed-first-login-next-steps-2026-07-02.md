@@ -2,8 +2,9 @@
 
 Date: 2026-07-02
 
-Status: Supabase OAuth Server gate complete; Pixelfed staging and OAuth client
-registration remain approval-gated.
+Status: Supabase OAuth Server gate complete; DigitalOcean staging resources
+exist; first-login testing is blocked on Droplet SSH access, DNS, runtime
+installation, and Pixelfed OAuth token-auth compatibility.
 
 ## Source Anchors
 
@@ -18,6 +19,17 @@ registration remain approval-gated.
 - Pixelfed is AGPL-licensed software; keep application code and infrastructure
   outside this website repo:
   <https://github.com/pixelfed/pixelfed>
+- Pixelfed OIDC currently builds on The PHP League `GenericProvider` through
+  `UserOidcService`, and its environment keys are defined in `remote-auth.php`:
+  <https://github.com/pixelfed/pixelfed/blob/dev/app/Services/UserOidcService.php>
+  <https://github.com/pixelfed/pixelfed/blob/dev/config/remote-auth.php>
+- Supabase OAuth clients support `client_secret_basic` and
+  `client_secret_post`; confidential clients default to `client_secret_basic`:
+  <https://supabase.com/docs/guides/auth/oauth-server/getting-started#token-endpoint-authentication-method>
+- DigitalOcean Droplet rebuilds are irreversible and recovery-console password
+  reset is a separate recovery path:
+  <https://docs.digitalocean.com/products/droplets/how-to/rebuild/>
+  <https://docs.digitalocean.com/products/droplets/how-to/recovery/recovery-console/>
 - Media-upload controls should follow OWASP guidance for allowlisted types,
   server-side validation, generated names, size limits, authorized uploads, and
   malware scanning where available:
@@ -33,18 +45,43 @@ registration remain approval-gated.
 - Dynamic OAuth client registration is disabled.
 - Supabase OAuth/OIDC discovery is reachable and advertises Authorization,
   Token, UserInfo, JWKS, `openid`, `profile`, `email`, and PKCE `S256`.
+- A Pixelfed OAuth client credential pair exists only under the local
+  credential folder and is not stored in this repo.
+- The current Pixelfed OAuth client redirects to the Mochirii consent UI, but
+  its token endpoint auth method is `client_secret_basic`. Current unpatched
+  Pixelfed OIDC uses The PHP League `GenericProvider`, so the staging client
+  should use `client_secret_post` unless a Pixelfed patch/custom provider is
+  approved and tested.
+- DigitalOcean dashboard shows a staging Droplet and Spaces bucket under the
+  `Mochirii Social` project. The Droplet is active on Ubuntu 24.04 in SGP1 with
+  automated weekly backups enabled. The Spaces bucket is empty, uses SGP1,
+  restricts file listing, and has CDN enabled.
+- Local SSH offered the expected ED25519 key fingerprint, but the Droplet
+  rejected it for both the intended non-root user and root. Pixelfed runtime
+  provisioning cannot continue until host access is recovered or the empty
+  Droplet is rebuilt/recreated with the approved SSH key and cloud-init.
+- `social.mochirii.com` and `media.social.mochirii.com` do not yet resolve to
+  usable host records.
 - No Pixelfed OAuth client secret, host secret, database URL, cookie, token, or
   media credential is stored in this repo.
 
 ## Recommended Next Steps
 
-1. Choose the staging Pixelfed URL and host plan.
-   Default target remains `https://social.mochirii.com`, but DNS and hosted
-   runtime provisioning still require explicit approval.
+1. Recover DigitalOcean host access before installing Pixelfed. Because the
+   Droplet is still empty, the least complex path is to rebuild or recreate it
+   with the reviewed cloud-init script and the approved SSH key. Recovery-console
+   root-password reset is a fallback, but it is more manual and introduces a
+   temporary password path.
 
-2. Register the Pixelfed OAuth client only after the callback URI is final.
    Required approval:
-   `Approve registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback.`
+   `Approve rebuilding or recreating the empty DigitalOcean Pixelfed staging Droplet with the approved SSH key, non-root cloud-init user, SSH hardening, automated backups, and SGP1 staging project settings.`
+
+2. Update or re-register the Pixelfed OAuth client for the final callback URI
+   using `client_secret_post` unless a Pixelfed patch/custom provider is
+   explicitly chosen.
+
+   Required approval:
+   `Approve updating or re-registering the Pixelfed OAuth client for social.mochirii.com with redirect URI https://social.mochirii.com/auth/oidc/callback and token endpoint auth method client_secret_post.`
 
 3. Store the returned client ID and client secret only in the approved private
    host secret store and local credential vault under
@@ -73,14 +110,16 @@ registration remain approval-gated.
    assertion environment variables from `docs/pixelfed-first-login-testing.md`.
 
 7. Prompt for first admin account creation only after the provider and staging
-   assertions pass. The first admin account is not needed yet because there is
-   no approved Pixelfed OAuth client or reachable staging runtime.
+   assertions pass. The first admin account is not needed yet because the
+   staging runtime is not reachable and the OAuth client token-auth method needs
+   correction or a documented Pixelfed patch.
 
 ## Accepted Current Blockers
 
 - `social.mochirii.com` is not yet confirmed as a reachable Pixelfed runtime.
-- The Pixelfed OAuth client has not been registered.
-- Pixelfed client ID/secret have not been created or stored.
+- The DigitalOcean Droplet currently rejects the expected SSH key.
+- The Pixelfed OAuth client exists locally, but its token endpoint auth method
+  does not match the expected unpatched Pixelfed token exchange.
 - The first browser login smoke cannot start until staging exists.
 - First admin account creation is deliberately deferred until the staging gate
   passes.
