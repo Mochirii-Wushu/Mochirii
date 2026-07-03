@@ -118,7 +118,7 @@ export function uploadAccess(profile?: MemberProfile | null, accessState?: Membe
       ok: false,
       label: `${prettyStatus(status)} member status`,
       tone: "pending",
-      next: "Wait for leadership to activate the website member profile.",
+      next: "Wait for leadership to activate your website member status.",
       guidance: "Discord roles are verified, but upload access also needs active website member status.",
     };
   }

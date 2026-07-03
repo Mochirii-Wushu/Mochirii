@@ -16,6 +16,11 @@ const runbook = read("docs/integration-operations-runbook.md");
 const navGroups = between(header, "const navGroups", "const publicUtilityLinks");
 const publicUtilityLinks = between(header, "const publicUtilityLinks", "const accountWorkflowLinks");
 const accountWorkflowLinks = between(header, "const accountWorkflowLinks", "const focusableSelector");
+const retiredMembersRouteFiles = [
+  "apps/web/app/members/page.tsx",
+  "apps/web/app/members/[slug]/page.tsx",
+  "apps/web/components/member-workflow/MemberDirectory.tsx",
+];
 
 const publicItems = [...extractItems(navGroups), ...extractItems(publicUtilityLinks)];
 const accountItems = extractItems(accountWorkflowLinks);
@@ -43,8 +48,13 @@ assertIncludes("SiteHeader moderator auth marker", header, `"data-auth-moderator
 
 assertNotIncludes("SiteHeader public nav", publicUtilityLinks, `href: "/social", label: "Social"`);
 assertNotIncludes("SiteHeader public utility Social", publicUtilityLinks, `href: SOCIAL_HOST, label: "Social"`);
+assertNotIncludes("SiteHeader account Members", accountWorkflowLinks, `href: "/members"`);
 assertNotIncludes("SiteHeader account Social Status", accountWorkflowLinks, `href: "/social", label: "Social Status"`);
 assertNotIncludes("SiteHeader account Mochi Social", accountWorkflowLinks, `href: "/games/mochi-social"`);
+
+for (const file of retiredMembersRouteFiles) {
+  if (existsSync(resolve(root, file))) failures.push(`${file}: retired members route surface must stay removed.`);
+}
 
 assertIncludes("SiteFooter", footer, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
 assertIncludes("SiteFooter Social", footer, `href: SOCIAL_HOST, label: "Social", external: true`);
@@ -64,6 +74,9 @@ assertIncludes("AccountPanel", accountPanel, `const SOCIAL_HOST = "${SOCIAL_HOST
 assertIncludes("AccountPanel", accountPanel, `href={SOCIAL_HOST}`);
 assertNotIncludes("AccountPanel stale Social Status link", accountPanel, `href="/social">Social Status`);
 assertNotIncludes("AccountPanel stale copy", accountPanel, "SSO compatibility gate passes");
+assertNotIncludes("AccountPanel retired members link", accountPanel, `href={\`/members/`);
+assertNotIncludes("AccountPanel retired publish title", accountPanel, "Published Page");
+assertNotIncludes("AccountPanel retired profile media upload", accountPanel, "profile-media-upload");
 
 assertIncludes("social page metadata", socialPage, "Mochirii Social Handoff");
 assertIncludes("social page intro", socialPage, "Signed-in members continue to Mochirii Social");

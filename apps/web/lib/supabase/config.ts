@@ -10,10 +10,7 @@ export const DISCORD_GUILD_ID = "1078630751077142608";
 export const DISCORD_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"] as const;
 export const DISCORD_REQUIRED_ROLE_NAMES = ["Mōchirīī - WWM", "✅Verified"] as const;
 export const MEMBER_GALLERY_BUCKET = "member-gallery";
-export const MEMBER_PROFILE_MEDIA_BUCKET = "member-profile-media";
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-export const MAX_PROFILE_AVATAR_BYTES = 50 * 1024 * 1024;
-export const MAX_PROFILE_BANNER_BYTES = 50 * 1024 * 1024;
 export const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 export const INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION = "2026-06-website-upload-v1";
@@ -46,10 +43,7 @@ export function getSupabasePublicConfig() {
     requiredRoleIds: [...DISCORD_REQUIRED_ROLE_IDS],
     requiredRoleNames: [...DISCORD_REQUIRED_ROLE_NAMES],
     memberGalleryBucket: MEMBER_GALLERY_BUCKET,
-    memberProfileMediaBucket: MEMBER_PROFILE_MEDIA_BUCKET,
     maxUploadBytes: MAX_UPLOAD_BYTES,
-    maxProfileAvatarBytes: MAX_PROFILE_AVATAR_BYTES,
-    maxProfileBannerBytes: MAX_PROFILE_BANNER_BYTES,
     acceptedImageTypes: [...ACCEPTED_IMAGE_TYPES],
     recentVerificationMs: RECENT_VERIFICATION_MS,
     authProviderIds: NEXT_PUBLIC_AUTH_PROVIDER_IDS,

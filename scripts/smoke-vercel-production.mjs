@@ -17,11 +17,14 @@ const cleanRoutes = [
   "/twills",
   "/auth",
   "/account",
-  "/members",
-  "/members/twills",
   "/gallery-submit",
   "/leader-dashboard",
   "/games/mochi-social",
+];
+
+const retiredRoutes = [
+  "/members",
+  "/members/twills",
 ];
 
 const legacyRedirects = new Map([
@@ -44,10 +47,8 @@ const legacyRedirects = new Map([
 ]);
 
 const bodyChecks = new Map([
-  ["/auth", /M[oō]chir[iī][iī] Login|Sign-in connects your website account|Website Sign-In/i],
+  ["/auth", /Mochirii Login|Sign-in connects your website account|Website Sign-In/i],
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
-  ["/members", /Published profiles|Member Profiles|Sign In Required/i],
-  ["/members/twills", /M[oō]chir[iī][iī] Member Profile|Sign In Required|Access Denied/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
   ["/games/mochi-social", /Mochi Social|Closed alpha|tester password/i],
@@ -98,6 +99,20 @@ async function checkRoute(baseUrl, path) {
   console.log(`OK route ${path} 200`);
 }
 
+async function checkRetiredRoute(baseUrl, path) {
+  let response = await request(baseUrl, path);
+
+  if (response.status === 405) {
+    response = await request(baseUrl, path, { method: "GET" });
+  }
+
+  if (response.status !== 404) {
+    throw new Error(`${path} expected retired route HTTP 404, got ${response.status}`);
+  }
+
+  console.log(`OK retired route ${path} 404`);
+}
+
 async function checkRedirect(baseUrl, from, expectedPath) {
   const first = await request(baseUrl, from, { redirect: "manual" });
   const followed = await request(baseUrl, from, { redirect: "follow" });
@@ -139,6 +154,10 @@ try {
 
   for (const route of cleanRoutes) {
     await checkRoute(baseUrl, route);
+  }
+
+  for (const route of retiredRoutes) {
+    await checkRetiredRoute(baseUrl, route);
   }
 
   for (const [from, expectedPath] of legacyRedirects) {

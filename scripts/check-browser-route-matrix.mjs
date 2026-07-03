@@ -22,7 +22,6 @@ const routes = [
   { route: "/gallery", label: "Gallery", expectMain: true, expectLiveRegion: true },
   { route: "/auth", label: "Auth", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/account", label: "Account", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/members", label: "Members", expectMain: true, expectLiveRegion: true },
   { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/games/mochi-social", label: "Mochi Social", expectMain: true, expectAlert: true },

@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
         displayName: text(profile.display_name, "Mōchirīī Member"),
         guildTitle: titleFromRoles(asStringArray(profile.discord_roles), rankResources),
         avatarUrl: await signedMediaUrl(adminClient, avatar),
-        profileHref: profileSlug ? `/members/${profileSlug}` : "",
+        profileHref: "",
         hasApprovedAvatar: Boolean(avatar),
         hasVisibleProfile: true,
         hasFilledProfile: hasFilledPublicProfile(profile),

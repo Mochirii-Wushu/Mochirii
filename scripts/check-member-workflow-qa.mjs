@@ -1,13 +1,24 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
+const root = process.cwd();
 const failures = [];
 
-function read(path) {
-  return readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+function read(relativePath) {
+  const full = path.join(root, relativePath);
+  if (!existsSync(full)) {
+    failures.push(`${relativePath}: missing required workflow QA file.`);
+    return "";
+  }
+  return readFileSync(full, "utf8");
 }
 
 function assertIncludes(label, text, snippet) {
   if (!text.includes(snippet)) failures.push(`${label}: expected snippet not found: ${snippet}`);
+}
+
+function assertNotIncludes(label, text, snippet) {
+  if (text.includes(snippet)) failures.push(`${label}: unexpected retired snippet found: ${snippet}`);
 }
 
 function assertRegex(label, text, pattern, message) {
@@ -26,7 +37,6 @@ const workflowState = read("apps/web/components/member-workflow/WorkflowState.ts
 const memberWorkflowFormat = read("apps/web/components/member-workflow/format.ts");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
-const memberDirectory = read("apps/web/components/member-workflow/MemberDirectory.tsx");
 const memberProfilesClient = read("apps/web/lib/supabase/member-profiles.ts");
 const profileClient = read("apps/web/lib/supabase/profile.ts");
 const memberProfileShared = read("supabase/functions/_shared/member-profiles.ts");
@@ -39,11 +49,18 @@ const migrationGalleryModeration = read("supabase/migrations/20260513195853_crea
 const migrationProfiles = read("supabase/migrations/20260608210000_add_member_profiles_and_media.sql");
 const migrationRefine = read("supabase/migrations/20260608233000_refine_member_profile_identity_media.sql");
 
-[
-  '"check:member-workflow-qa": "node scripts/check-member-workflow-qa.mjs"',
-].forEach((snippet) => assertIncludes("package scripts", packageJson, snippet));
+const retiredFiles = [
+  "apps/web/app/members/page.tsx",
+  "apps/web/app/members/[slug]/page.tsx",
+  "apps/web/components/member-workflow/MemberDirectory.tsx",
+];
 
+assertIncludes("package scripts", packageJson, '"check:member-workflow-qa": "node scripts/check-member-workflow-qa.mjs"');
 assertIncludes("check-all", checkAll, '["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]]');
+
+for (const file of retiredFiles) {
+  if (existsSync(path.join(root, file))) failures.push(`${file}: retired members route surface must stay removed.`);
+}
 
 [
   "D02: Live OAuth And Account Smoke",
@@ -56,12 +73,11 @@ assertIncludes("check-all", checkAll, '["check:member-workflow-qa", ["node", "sc
 ].forEach((snippet) => assertIncludes("member workflow runbook", runbook, snippet));
 
 [
+  "Retired Member Profile Surface",
   "Discord handle is server-owned.",
   "bio of up to 1,000 characters",
-  "50 MB per file",
-  "private signed URLs",
-  "list-visible-profile-cards",
-  "Discord handle is read-only on Account",
+  "shared backend identity data",
+  "Mochirii Social",
 ].forEach((snippet) => assertIncludes("member profile guide", profileGuide, snippet));
 
 [
@@ -75,10 +91,9 @@ assertIncludes("check-all", checkAll, '["check:member-workflow-qa", ["node", "sc
   "public.handle_new_member_profile()",
   "security definer",
   "member-gallery",
-  "member-profile-media",
-  "The Storage bucket stays private",
   "Approved submissions become eligible for the approved public Gallery feed",
-  "Approved media is returned only through short-lived signed URLs from Edge Functions.",
+  "member profile publishing is retired",
+  "shared backend identity data",
   "list-visible-profile-cards",
   "Bios are capped at 1,000 characters.",
 ].forEach((snippet) => assertIncludes("supabase readme", supabaseReadme, snippet));
@@ -101,8 +116,16 @@ assertRegex(
   "Discord handle must remain read-only and server-derived on Account.",
 );
 assertRegex("AccountPanel", accountPanel, /id="bio"[\s\S]*?maxLength=\{1000\}[\s\S]*?\{bioLength\} \/ 1000 characters/, "Bio must stay capped at 1,000 characters with visible counter.");
-assertIncludes("AccountPanel", accountPanel, "Published profiles are visible only to active verified members. Avatar and banner images appear after moderator approval.");
+assertIncludes("AccountPanel", accountPanel, "Open Mochirii Social");
 assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
+[
+  "Published profiles are visible only to active verified members",
+  "Published Page",
+  "profile-media-upload",
+  "View profile",
+  "Shown on profile",
+  "Show link",
+].forEach((snippet) => assertNotIncludes("AccountPanel", accountPanel, snippet));
 
 [
   "export function WorkflowNotice",
@@ -116,7 +139,6 @@ assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
 [
   ["AccountPanel", accountPanel],
   ["GallerySubmitForm", gallerySubmit],
-  ["MemberDirectory", memberDirectory],
   ["LeaderDashboard", leaderDashboard],
 ].forEach(([label, source]) => {
   assertIncludes(label, source, "WorkflowNotice");
@@ -131,13 +153,17 @@ assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
 ].forEach((snippet) => assertIncludes("GallerySubmitForm", gallerySubmit, snippet));
 
 [
-  "listProfileMediaQueue",
-  "moderateProfileMedia",
   "listGalleryReviewQueue",
   "moderateGallerySubmission",
+  "reviewMemberVerification",
+  "manageMochiSocialAlphaAdmin",
+].forEach((snippet) => assertIncludes("LeaderDashboard", leaderDashboard, snippet));
+[
+  "listProfileMediaQueue",
+  "moderateProfileMedia",
   "Add a decline reason before rejecting this profile image.",
   "profileMediaStatusConfig",
-].forEach((snippet) => assertIncludes("LeaderDashboard", leaderDashboard, snippet));
+].forEach((snippet) => assertNotIncludes("LeaderDashboard", leaderDashboard, snippet));
 
 [
   'export const editableProfileFields = [',
@@ -151,20 +177,18 @@ if (memberWorkflowFormat.includes('"discord_handle"') || memberWorkflowFormat.in
   failures.push("member workflow format: editable profile fields must not include discord_handle or avatar_url.");
 }
 
+assertIncludes("member profile client", memberProfilesClient, "listVisibleProfileCards");
 [
   "MAX_PROFILE_AVATAR_BYTES",
   "MAX_PROFILE_BANNER_BYTES",
   "MEMBER_PROFILE_MEDIA_BUCKET",
   "storagePath",
-  "invokeEdgeFunction",
   "submit-member-profile-media",
   "list-member-profile-media-queue",
   "moderate-member-profile-media",
-].forEach((snippet) => assertIncludes("member profile client", memberProfilesClient, snippet));
+].forEach((snippet) => assertNotIncludes("member profile client", memberProfilesClient, snippet));
 
-[
-  "updateCurrentProfile",
-].forEach((snippet) => assertIncludes("profile client", profileClient, snippet));
+assertIncludes("profile client", profileClient, "updateCurrentProfile");
 assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile updates must use the sanitized editable field payload.");
 
 [
@@ -192,7 +216,7 @@ assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile
   "profile_cards_not_configured",
   "slugs",
   "hasApprovedAvatar",
-  "profileHref",
+  "profileHref: \"\"",
   "signedUrl",
 ].forEach((snippet) => assertIncludes("visible profile cards", visibleProfileCards, snippet));
 

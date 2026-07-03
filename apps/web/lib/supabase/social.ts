@@ -27,32 +27,3 @@ export async function listMySocialAccounts() {
     return failedResult<SocialAccount[]>(error, []);
   }
 }
-
-export async function updateSocialAccountVisibility(accountId: string, visible: boolean) {
-  try {
-    const cleanId = String(accountId || "").trim();
-    if (!cleanId) throw new Error("Choose a social account before updating visibility.");
-
-    const client = requireBrowserSupabaseClient();
-    const { data, error, status, statusText } = await client
-      .from("social_accounts")
-      .update({ profile_link_visible: visible })
-      .eq("id", cleanId)
-      .select(socialAccountFields)
-      .maybeSingle();
-
-    if (error) {
-      return createResult<SocialAccount>({
-        ok: false,
-        status,
-        statusText,
-        data: null,
-        error: createError(error),
-      });
-    }
-
-    return okResult(data as SocialAccount, visible ? "Social profile link shown." : "Social profile link hidden.");
-  } catch (error) {
-    return failedResult<SocialAccount>(error);
-  }
-}

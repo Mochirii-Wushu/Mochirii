@@ -72,7 +72,6 @@ const publicUtilityLinks: NavItem[] = [
 
 const accountWorkflowLinks: NavItem[] = [
   { href: "/account", label: "Profile & Settings", nav: "account", auth: "signed-in" },
-  { href: "/members", label: "Members", nav: "members", auth: "verified" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
   { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "moderator" },
 ];

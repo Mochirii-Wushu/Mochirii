@@ -1,5 +1,5 @@
-/* =========================================================
-   TOKENS — Design variables (colors, spacing, motion, layout)
+﻿/* =========================================================
+   TOKENS â€” Design variables (colors, spacing, motion, layout)
    ========================================================= */
 :root{
   --font-display:var(--font-zhi-mang), ui-serif, serif;
@@ -63,7 +63,7 @@
 }
 
 /* =========================================================
-   BASE — Page defaults, accessibility helpers, global elements
+   BASE â€” Page defaults, accessibility helpers, global elements
    ========================================================= */
 html,body{height:100%;}
 html{background:var(--ink0);}
@@ -143,7 +143,7 @@ img{max-width:100%;display:block;}
 }
 
 /* =========================================================
-   BACKGROUND — Global fixed backdrop (site-wide)
+   BACKGROUND â€” Global fixed backdrop (site-wide)
    ========================================================= */
 .bg-photo{
   position:fixed;
@@ -155,7 +155,7 @@ img{max-width:100%;display:block;}
 .bg-ink,.bg-ink-2,.bg-grain{display:none!important;}
 
 /* =========================================================
-   LAYOUT — Containers, grids, responsive columns
+   LAYOUT â€” Containers, grids, responsive columns
    ========================================================= */
 .container{
   max-width:var(--container);
@@ -188,7 +188,7 @@ img{max-width:100%;display:block;}
 }
 
 /* =========================================================
-   HERO — Hero image shell + overlap card positioning
+   HERO â€” Hero image shell + overlap card positioning
    ========================================================= */
 .page-hero-shell{position:relative; z-index:10; padding-top:var(--hero-shell-pad-top);}
 .page-hero-shell > .container{max-width:var(--hero-frame-max-width);}
@@ -236,7 +236,7 @@ img{max-width:100%;display:block;}
 }
 
 /* =========================================================
-   GLASS — Card surfaces, blur, borders, padding
+   GLASS â€” Card surfaces, blur, borders, padding
    ========================================================= */
 .glass-card{
   position:relative;
@@ -272,7 +272,7 @@ img{max-width:100%;display:block;}
 }
 
 /* =========================================================
-   MOTION — Animated border accent on body cards
+   MOTION â€” Animated border accent on body cards
    ========================================================= */
 .page-main .glass-card{
   border:2px solid var(--card-line, var(--line));
@@ -280,7 +280,7 @@ img{max-width:100%;display:block;}
 }
 
 /* =========================================================
-   CENTER — Centered hero layout utility
+   CENTER â€” Centered hero layout utility
    ========================================================= */
 .center-stack{
   display:flex;
@@ -291,7 +291,7 @@ img{max-width:100%;display:block;}
 .center-stack .badge-row{justify-content:center;}
 
 /* =========================================================
-   TYPE — Global typography for hero + sections
+   TYPE â€” Global typography for hero + sections
    ========================================================= */
 .kicker{
   margin:0 0 10px;
@@ -340,7 +340,7 @@ img{max-width:100%;display:block;}
 .muted{color:var(--ink-2);}
 
 /* =========================================================
-   BADGES — Pill row (hero/meta badges; general purpose)
+   BADGES â€” Pill row (hero/meta badges; general purpose)
    ========================================================= */
 .badge-row{
   display:flex;
@@ -400,7 +400,7 @@ img{max-width:100%;display:block;}
 }
 
 /* =========================================================
-   PROSE — Paragraph stacking and readable rhythm
+   PROSE â€” Paragraph stacking and readable rhythm
    ========================================================= */
 .prose-stack{
   display:flex;
@@ -512,7 +512,7 @@ img{max-width:100%;display:block;}
 .prose-stack p{margin:0;}
 
 /* =========================================================
-   JOIN — Visual onboarding pilot
+   JOIN â€” Visual onboarding pilot
    ========================================================= */
 body[data-page="join"]{
   --join-jade:rgba(48,178,143,.60);
@@ -932,7 +932,7 @@ body[data-page="join"] .join-checklist__link:focus-visible{
 }
 
 /* =========================================================
-   EVENTS — Visual schedule pilot
+   EVENTS â€” Visual schedule pilot
    ========================================================= */
 body[data-page="events"]{
   --events-lantern:rgba(218,181,94,.66);
@@ -1314,7 +1314,7 @@ body[data-page="raffles"] #rafflesLinks > span > a{
 }
 
 /* =========================================================
-   SIDE PAGES — Supporting visual polish pilot
+   SIDE PAGES â€” Supporting visual polish pilot
    ========================================================= */
 body[data-page="announcements"],
 body[data-page="raffles"],
@@ -1789,7 +1789,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   LISTS — Bullet-dot list layout used across pages
+   LISTS â€” Bullet-dot list layout used across pages
    ========================================================= */
 .list-stack{
   list-style:none;
@@ -1816,12 +1816,12 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   SPOTLIGHT — Shared hero intro width
+   SPOTLIGHT â€” Shared hero intro width
    ========================================================= */
 .hero-intro{max-width:72ch;}
 
 /* =========================================================
-   HOME — Guild seal (glass container)
+   HOME â€” Guild seal (glass container)
    ========================================================= */
 .home-guild-seal{
   display:flex;
@@ -1879,7 +1879,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Media cards and click targets
+   HOME â€” Media cards and click targets
    ========================================================= */
 .home-featured,
 .home-spotlight,
@@ -1996,7 +1996,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Bulletins (grid spacing and rhythm)
+   HOME â€” Bulletins (grid spacing and rhythm)
    ========================================================= */
 .home-bulletins{
   display:grid;
@@ -2067,7 +2067,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Bulletins (title typography)
+   HOME â€” Bulletins (title typography)
    ========================================================= */
 .home-title,
 .home-bulletin__title{
@@ -2087,7 +2087,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Bulletins (pill labels; visual only)
+   HOME â€” Bulletins (pill labels; visual only)
    ========================================================= */
 .home-pill,
 .home-bulletin__tag{
@@ -2109,7 +2109,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Doors (grid spacing)
+   HOME â€” Doors (grid spacing)
    ========================================================= */
 .home-doors{
   display:grid;
@@ -2124,7 +2124,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Doors (plate rhythm and typography)
+   HOME â€” Doors (plate rhythm and typography)
    ========================================================= */
 .home-door__plate{
   display:flex;
@@ -2154,7 +2154,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Doors (label pill; visual only)
+   HOME â€” Doors (label pill; visual only)
    ========================================================= */
 .home-door__label{
   display:inline-flex;
@@ -2232,7 +2232,7 @@ body[data-page="spotlight"] .col-4 .glass-card{
 }
 
 /* =========================================================
-   HOME — Visual system pilot (page-scoped ornament)
+   HOME â€” Visual system pilot (page-scoped ornament)
    ========================================================= */
 body[data-page="home"]{
   --home-jade:rgba(48,178,143,.62);
@@ -2923,7 +2923,7 @@ body[data-page="home"] .home-door:nth-child(4){
 }
 
 /* =========================================================
-   RECRUITMENT — Visual readability pilot
+   RECRUITMENT â€” Visual readability pilot
    ========================================================= */
 body[data-page="recruitment"]{
   --recruit-lantern:rgba(218,181,94,.68);
@@ -3311,7 +3311,7 @@ body[data-page="recruitment"] #recruitmentConclusion p{
 }
 
 /* =========================================================
-   TWILLS — Profile avatar presentation (page-scoped)
+   TWILLS â€” Profile avatar presentation (page-scoped)
    ========================================================= */
 body[data-page="twills"]{
   --twills-moon:rgba(218,235,255,.66);
@@ -3504,7 +3504,7 @@ body[data-page="twills"] .footer-nav:focus-visible{
 }
 
 /* =========================================================
-   MEMBER PROFILES — Twills-style reusable profile presentation
+   REUSABLE PROFILE PRESENTATION
    ========================================================= */
 body[data-page="member-profile"]{
   --twills-moon:rgba(218,235,255,.66);
@@ -3695,7 +3695,7 @@ body[data-page="member-profile"] #memberProfileBio p{
 }
 
 /* =========================================================
-   LEADERS — Council intro container (background plate)
+   LEADERS â€” Council intro container (background plate)
    ========================================================= */
 body[data-page="leaders"] .leaders-council-intro{
   margin-top:24px;
@@ -3722,7 +3722,7 @@ body[data-page="leaders"] .leaders-council-intro .muted{
 }
 
 /* =========================================================
-   TOME / RANKS / LEADERS — Ceremonial visual pilot
+   TOME / RANKS / LEADERS â€” Ceremonial visual pilot
    ========================================================= */
 body[data-page="tome"],
 body[data-page="ranks"],
@@ -4036,7 +4036,7 @@ body[data-page="leaders"] #leadersGrid article .badge-row > span{
 }
 
 /* =========================================================
-   GALLERY — Responsive thumbnail grid
+   GALLERY â€” Responsive thumbnail grid
    ========================================================= */
 body[data-page="gallery"]{
   --gallery-moon:rgba(220,235,255,.72);
@@ -4486,11 +4486,10 @@ body[data-page="gallery"] .lightbox-close:focus-visible{
 }
 
 /* =========================================================
-   AUTH / ACCOUNT / SUBMIT / MODERATION — Discord-gated member surfaces
+   AUTH / ACCOUNT / SUBMIT / MODERATION â€” Discord-gated member surfaces
    ========================================================= */
 body[data-page="auth"],
 body[data-page="account"],
-body[data-page="members"],
 body[data-page="social"],
 body[data-page="oauth-consent"],
 body[data-page="leader-dashboard"],
@@ -4505,7 +4504,6 @@ body[data-page="gallery-submit"]{
 
 body[data-page="auth"] .page-hero,
 body[data-page="account"] .page-hero,
-body[data-page="members"] .page-hero,
 body[data-page="social"] .page-hero,
 body[data-page="oauth-consent"] .page-hero,
 body[data-page="leader-dashboard"] .page-hero,
@@ -4522,14 +4520,12 @@ body[data-page="gallery-submit"] .page-hero{
 
 body[data-page="auth"] .hero-intro,
 body[data-page="account"] .hero-intro,
-body[data-page="members"] .hero-intro,
 body[data-page="social"] .hero-intro,
 body[data-page="oauth-consent"] .hero-intro,
 body[data-page="leader-dashboard"] .hero-intro,
 body[data-page="gallery-submit"] .hero-intro,
 body[data-page="auth"] .page-main .glass-card,
 body[data-page="account"] .page-main .glass-card,
-body[data-page="members"] .page-main .glass-card,
 body[data-page="social"] .page-main .glass-card,
 body[data-page="oauth-consent"] .page-main .glass-card,
 body[data-page="leader-dashboard"] .page-main .glass-card,
@@ -4552,14 +4548,12 @@ body[data-page="gallery-submit"] .page-main .glass-card{
 
 body[data-page="auth"] .hero-intro::before,
 body[data-page="account"] .hero-intro::before,
-body[data-page="members"] .hero-intro::before,
 body[data-page="social"] .hero-intro::before,
 body[data-page="oauth-consent"] .hero-intro::before,
 body[data-page="leader-dashboard"] .hero-intro::before,
 body[data-page="gallery-submit"] .hero-intro::before,
 body[data-page="auth"] .page-main .glass-card::before,
 body[data-page="account"] .page-main .glass-card::before,
-body[data-page="members"] .page-main .glass-card::before,
 body[data-page="social"] .page-main .glass-card::before,
 body[data-page="oauth-consent"] .page-main .glass-card::before,
 body[data-page="leader-dashboard"] .page-main .glass-card::before,
@@ -4577,7 +4571,6 @@ body[data-page="gallery-submit"] .page-main .glass-card::before{
 
 body[data-page="auth"] .muted,
 body[data-page="account"] .muted,
-body[data-page="members"] .muted,
 body[data-page="social"] .muted,
 body[data-page="oauth-consent"] .muted,
 body[data-page="leader-dashboard"] .muted,
@@ -4965,12 +4958,10 @@ body[data-page="gallery-submit"] .muted{
 
 .account-action-card,
 .account-summary-card,
-.profile-media-item,
 .review-item,
 .review-meta > div,
 .review-history,
-.moderation-summary__card,
-.member-card{
+.moderation-summary__card{
   background:
     linear-gradient(180deg, rgba(255,255,255,.045), transparent 46%),
     radial-gradient(circle at 16% 0%, rgba(48,178,143,.09), transparent 42%),
@@ -5033,61 +5024,6 @@ body[data-page="gallery-submit"] .muted{
 
 .account-missing-list{
   margin-top:0;
-}
-
-.profile-media-upload-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:10px;
-}
-
-.profile-media-upload input{
-  min-height:48px;
-  padding:10px;
-}
-
-.profile-media-list{
-  display:grid;
-  gap:10px;
-}
-
-.profile-media-item{
-  display:grid;
-  grid-template-columns:minmax(0, 1fr) auto;
-  gap:8px 10px;
-  align-items:start;
-  padding:12px;
-  border-radius:16px;
-  border:1px solid rgba(220,235,255,.12);
-  background:rgba(0,0,0,.15);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-}
-
-.profile-media-item div{
-  min-width:0;
-}
-
-.profile-media-item strong,
-.profile-media-item span{
-  display:block;
-}
-
-.profile-media-item strong{
-  color:var(--ink-0);
-  font-size:13px;
-  line-height:1.25;
-}
-
-.profile-media-item div > span,
-.profile-media-item small{
-  color:var(--auth-muted);
-  font-size:12px;
-  line-height:1.35;
-  overflow-wrap:anywhere;
-}
-
-.profile-media-item small{
-  grid-column:1 / -1;
 }
 
 .auth-form{
@@ -5587,53 +5523,6 @@ body[data-page="gallery-submit"] .muted{
   margin-top:4px;
 }
 
-.member-directory-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:18px;
-}
-
-.member-card{
-  display:grid;
-  grid-template-columns:112px minmax(0, 1fr);
-  gap:16px;
-  align-items:start;
-  padding:14px;
-  border:1px solid rgba(220,235,255,.14);
-  border-radius:22px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 16px 38px rgba(0,0,0,.24);
-}
-
-.member-card__avatar{
-  width:112px;
-  aspect-ratio:1;
-  object-fit:cover;
-  border-radius:22px;
-  border:1px solid rgba(220,235,255,.22);
-  background:rgba(0,0,0,.20);
-  box-shadow:
-    0 16px 34px rgba(0,0,0,.32),
-    0 0 0 1px rgba(255,255,255,.045) inset;
-}
-
-.member-card .section-title{
-  margin-bottom:8px;
-}
-
-.member-card p{
-  margin:8px 0 0;
-  color:var(--auth-muted);
-  line-height:1.56;
-  overflow-wrap:anywhere;
-}
-
-.member-card .footer-link{
-  margin-top:12px;
-  width:fit-content;
-}
-
 @media (max-width:720px){
   .auth-panel__head,
   .submission-item__head,
@@ -5653,23 +5542,13 @@ body[data-page="gallery-submit"] .muted{
   .account-summary-grid,
   .review-item,
   .review-meta,
-  .moderation-summary,
-  .profile-media-upload-grid,
-  .member-directory-grid{
+  .moderation-summary{
     grid-template-columns:1fr;
-  }
-
-  .member-card{
-    grid-template-columns:1fr;
-  }
-
-  .member-card__avatar{
-    width:128px;
   }
 }
 
 /* =========================================================
-   LIGHTBOX / MODALS — Clean stacking + click-off-to-close
+   LIGHTBOX / MODALS â€” Clean stacking + click-off-to-close
    ========================================================= */
 
 /* Show/hide (gallery) */
@@ -5741,7 +5620,7 @@ body[data-page="gallery-submit"] .muted{
 }
 
 /* =========================================================
-   HEADER — Sticky nav, dropdown menu, responsive behavior
+   HEADER â€” Sticky nav, dropdown menu, responsive behavior
    ========================================================= */
 .site-header{
   position:sticky;
@@ -6059,7 +5938,7 @@ body[data-page="gallery-submit"] .muted{
 }
 
 /* =========================================================
-   MOBILE — Slide-in menu shell, layout, and scrolling
+   MOBILE â€” Slide-in menu shell, layout, and scrolling
    ========================================================= */
 
 .mobile-shell{
@@ -6072,7 +5951,7 @@ body[data-page="gallery-submit"] .muted{
 .mobile-shell[hidden]{display:none!important;}
 .mobile-shell[data-open="true"]{pointer-events:auto;}
 
-/* MOBILE — Background scrim */
+/* MOBILE â€” Background scrim */
 .mobile-scrim{
   position:absolute;
   inset:0;
@@ -6090,7 +5969,7 @@ body[data-page="gallery-submit"] .muted{
   pointer-events:auto;
 }
 
-/* MOBILE — Slide-in sheet container */
+/* MOBILE â€” Slide-in sheet container */
 .mobile-sheet{
   position:fixed;
   right:0;
@@ -6121,7 +6000,7 @@ body[data-page="gallery-submit"] .muted{
   opacity:1;
 }
 
-/* MOBILE — Top bar (fixed inside sheet) */
+/* MOBILE â€” Top bar (fixed inside sheet) */
 .mobile-top{
   position:sticky;
   top:0;
@@ -6146,7 +6025,7 @@ body[data-page="gallery-submit"] .muted{
   height:100%;
 }
 
-/* MOBILE — Icon buttons */
+/* MOBILE â€” Icon buttons */
 .icon-btn{
   display:inline-flex;
   align-items:center;
@@ -6173,7 +6052,7 @@ body[data-page="gallery-submit"] .muted{
   border-color:rgba(221,239,255,.28);
 }
 
-/* MOBILE — Scrollable navigation area */
+/* MOBILE â€” Scrollable navigation area */
 .mobile-nav{
   flex:1;
   overflow-y:auto;
@@ -6232,7 +6111,7 @@ body[data-page="gallery-submit"] .muted{
 }
 
 /* =========================================================
-   FOOTER — Footer layout, links, and responsive columns
+   FOOTER â€” Footer layout, links, and responsive columns
    ========================================================= */
 .site-footer{
   position:relative;
@@ -6451,7 +6330,7 @@ body[data-page="gallery-submit"] .muted{
 }
 
 /* =========================================================
-   MOTION — Glint animation used on CTA buttons
+   MOTION â€” Glint animation used on CTA buttons
    ========================================================= */
 @keyframes glint{
   0%{transform:translateX(-70%) rotate(15deg);}

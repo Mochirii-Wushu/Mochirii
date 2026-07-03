@@ -8,10 +8,9 @@ import { getLinkedIdentities, linkProviderIdentity } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
 import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
-import { listMyProfileMedia, updateProfileVisibility, uploadProfileMedia } from "@/lib/supabase/member-profiles";
 import { onAuthStateChange, requireAuth, signOut } from "@/lib/supabase/auth";
-import { listMySocialAccounts, updateSocialAccountVisibility } from "@/lib/supabase/social";
-import { type EditableProfilePayload, type GallerySubmission, type MemberAccessIdentity, type MemberAccessResponse, type MemberProfile, type MemberProfileMedia, type ProfileMediaKind, type SocialAccount, text } from "@/lib/supabase/types";
+import { listMySocialAccounts } from "@/lib/supabase/social";
+import { type EditableProfilePayload, type GallerySubmission, type MemberAccessIdentity, type MemberAccessResponse, type MemberProfile, type SocialAccount, text } from "@/lib/supabase/types";
 import type { User } from "@supabase/supabase-js";
 import {
   coreProfileFields,
@@ -66,24 +65,6 @@ function SubmissionItem({ item }: { item: GallerySubmission }) {
   );
 }
 
-function profileMediaLabel(kind: unknown) {
-  return text(kind, "profile image").toLowerCase() === "banner" ? "Banner" : "Avatar";
-}
-
-function ProfileMediaStatus({ item }: { item: MemberProfileMedia }) {
-  const status = text(item.status, "pending").toLowerCase();
-  return (
-    <article className="profile-media-item">
-      <div>
-        <strong>{profileMediaLabel(item.media_kind)}</strong>
-        <span>{text(item.original_filename, "Uploaded image")}</span>
-      </div>
-      <span className={`submission-status submission-status--${status}`}>{status}</span>
-      <small>{status === "rejected" && item.rejection_reason ? item.rejection_reason : formatDateShort(item.created_at)}</small>
-    </article>
-  );
-}
-
 function formStateFromProfile(profile: MemberProfile | null): FormState {
   return editableProfileFields.reduce((memo, field) => {
     memo[field] = text(profile?.[field], "");
@@ -99,7 +80,6 @@ export function AccountPanel() {
   const [linkedIdentities, setLinkedIdentities] = useState<MemberAccessIdentity[]>([]);
   const [formState, setFormState] = useState<FormState>(emptyFormState);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
-  const [profileMedia, setProfileMedia] = useState<MemberProfileMedia[]>([]);
   const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [moderatorAvailable, setModeratorAvailable] = useState(false);
   const [verifyStatus, setVerifyStatus] = useState("");
@@ -109,7 +89,6 @@ export function AccountPanel() {
   const [socialStatus, setSocialStatus] = useState("");
   const [socialError, setSocialError] = useState("");
   const [submissionsError, setSubmissionsError] = useState("");
-  const [profileMediaError, setProfileMediaError] = useState("");
 
   const loadSubmissions = useCallback(async () => {
     setSubmissionsError("");
@@ -120,17 +99,6 @@ export function AccountPanel() {
       return;
     }
     setSubmissions(Array.isArray(result.data) ? result.data : []);
-  }, []);
-
-  const loadProfileMedia = useCallback(async () => {
-    setProfileMediaError("");
-    const result = await listMyProfileMedia();
-    if (!result.ok) {
-      setProfileMedia([]);
-      setProfileMediaError(result.message || "Profile images could not be loaded.");
-      return;
-    }
-    setProfileMedia(Array.isArray(result.data) ? result.data : []);
   }, []);
 
   const loadSocialAccounts = useCallback(async () => {
@@ -178,7 +146,6 @@ export function AccountPanel() {
     setVerifyError("");
     setProfileError("");
     setSubmissionsError("");
-    setProfileMediaError("");
     setSocialError("");
     setProfileStatus("");
     setSocialStatus("");
@@ -190,7 +157,6 @@ export function AccountPanel() {
       setMemberAccess(null);
       setLinkedIdentities([]);
       setSubmissions([]);
-      setProfileMedia([]);
       setSocialAccounts([]);
       setModeratorAvailable(false);
       setBusy(false);
@@ -213,13 +179,12 @@ export function AccountPanel() {
     const accessResult = await refreshMemberAccess();
     if (!accessResult.ok) setVerifyError(accessResult.message || "Member verification state could not be loaded.");
     await loadSubmissions();
-    await loadProfileMedia();
     await loadSocialAccounts();
 
     const moderation = await checkLeaderGalleryModerationAccess();
     setModeratorAvailable(moderation.ok === true);
     setBusy(false);
-  }, [loadProfileMedia, loadSocialAccounts, loadSubmissions, refreshMemberAccess]);
+  }, [loadSocialAccounts, loadSubmissions, refreshMemberAccess]);
 
   useEffect(() => {
     void Promise.resolve().then(() => loadAccount());
@@ -285,52 +250,6 @@ export function AccountPanel() {
     setBusy(false);
   }
 
-  async function toggleProfileVisibility() {
-    setBusy(true);
-    setProfileError("");
-    setProfileStatus(profile?.profile_public_enabled ? "Hiding member profile." : "Publishing member profile.");
-    const result = await updateProfileVisibility(profile?.profile_public_enabled !== true);
-    if (!result.ok) {
-      setProfileError(result.message || "Profile visibility could not be updated.");
-      setProfileStatus("");
-    } else {
-      setProfile(result.data || null);
-      setFormState(formStateFromProfile(result.data || null));
-      setProfileStatus(result.message || "Profile visibility updated.");
-    }
-    setBusy(false);
-  }
-
-  async function toggleSocialVisibility(account: SocialAccount) {
-    setBusy(true);
-    setSocialError("");
-    setSocialStatus(account.profile_link_visible ? "Hiding guild social profile link." : "Showing guild social profile link.");
-    const result = await updateSocialAccountVisibility(text(account.id), account.profile_link_visible !== true);
-    if (!result.ok) {
-      setSocialError(result.message || "Guild social profile visibility could not be updated.");
-      setSocialStatus("");
-    } else {
-      setSocialStatus(result.message || "Guild social profile visibility updated.");
-      await loadSocialAccounts();
-    }
-    setBusy(false);
-  }
-
-  async function submitProfileMedia(kind: ProfileMediaKind, file: File | null) {
-    setBusy(true);
-    setProfileMediaError("");
-    setProfileStatus(`Uploading ${kind} image for review.`);
-    const result = file ? await uploadProfileMedia(kind, file) : { ok: false, message: "Choose an image file." };
-    if (!result.ok) {
-      setProfileMediaError(result.message || "Profile image could not be uploaded.");
-      setProfileStatus("");
-    } else {
-      setProfileStatus(`${profileMediaLabel(kind)} image sent for moderator review.`);
-      await loadProfileMedia();
-    }
-    setBusy(false);
-  }
-
   async function endSession() {
     setBusy(true);
     await signOut();
@@ -358,9 +277,6 @@ export function AccountPanel() {
   const linkedProviderIds = new Set(linkedIdentities.map((identity) => text(identity.provider).toLowerCase()).filter(Boolean));
   const availableLinkProviders = enabledProviders.filter((provider) => !linkedProviderIds.has(provider.id));
   const counts = countSubmissions(submissions);
-  const profileIsPublished = profile?.profile_public_enabled === true;
-  const profileSlug = text(profile?.profile_slug);
-  const latestMedia = (kind: ProfileMediaKind) => profileMedia.find((item) => text(item.media_kind).toLowerCase() === kind);
   const discordHandle = text(profile?.discord_handle || profile?.discord_username || profile?.discord_global_name, signedInName(user, profile));
   const bioLength = formState.bio.length;
   const pixelfedAccount = socialAccounts.find((account) => text(account.provider).toLowerCase() === "pixelfed") || null;
@@ -577,58 +493,6 @@ export function AccountPanel() {
           </ul>
         </section>
 
-        <section className="glass-card glass-card--soft glass-pad auth-panel profile-publish-panel" aria-labelledby="profilePublishTitle">
-          <div className="auth-panel__head">
-            <div>
-              <p className="kicker">Member Profile</p>
-              <h2 className="section-title section-title--sm" id="profilePublishTitle">Published Page</h2>
-            </div>
-            <StatusPill tone={profileIsPublished ? "active" : "muted"}>{profileIsPublished ? "Published" : "Hidden"}</StatusPill>
-          </div>
-
-          <WorkflowNotice>
-            Published profiles are visible only to active verified members. Avatar and banner images appear after moderator approval.
-          </WorkflowNotice>
-
-          <div className="auth-actions">
-            <button className="hero-cta hero-cta--primary" type="button" onClick={toggleProfileVisibility} disabled={busy || !access.ok}>
-              {profileIsPublished ? "Hide profile" : "Publish profile"}
-            </button>
-            {profileIsPublished && profileSlug ? <Link className="hero-cta" href={`/members/${profileSlug}`}>View profile</Link> : null}
-          </div>
-
-          <div className="profile-media-upload-grid" aria-label="Profile image uploads">
-            {(["avatar", "banner"] as const).map((kind) => (
-              <label className="form-field profile-media-upload" key={kind}>
-                <span>{profileMediaLabel(kind)} image</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  disabled={busy || !access.ok}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0] || null;
-                    event.target.value = "";
-                    void submitProfileMedia(kind, file);
-                  }}
-                />
-              </label>
-            ))}
-          </div>
-
-          <div className="profile-media-list" aria-live="polite">
-            {(["avatar", "banner"] as const).map((kind) => {
-              const item = latestMedia(kind);
-              return item ? <ProfileMediaStatus item={item} key={kind} /> : (
-                <WorkflowEmptyState title={`No ${kind} image`} key={kind}>
-                  No {kind} image submitted yet.
-                </WorkflowEmptyState>
-              );
-            })}
-          </div>
-
-          <WorkflowNotice tone="danger" role="alert" hidden={!profileMediaError}>{profileMediaError}</WorkflowNotice>
-        </section>
-
         <section className="glass-card glass-card--soft glass-pad auth-panel" aria-labelledby="socialProfileTitle">
           <div className="auth-panel__head">
             <div>
@@ -645,7 +509,7 @@ export function AccountPanel() {
                   <strong>{text(pixelfedAccount.username, "Guild social account")}</strong>
                   <span>{text(pixelfedAccount.profile_url, "Profile URL pending")}</span>
                 </div>
-                <small>{pixelfedAccount.profile_link_visible ? "Shown on profile" : "Hidden from profile"}</small>
+                <small>{pixelfedReady ? "Ready" : "Link pending"}</small>
               </article>
             </div>
           ) : (
@@ -655,11 +519,6 @@ export function AccountPanel() {
           )}
 
           <div className="auth-actions">
-            {pixelfedReady && pixelfedAccount ? (
-              <button className="hero-cta" type="button" onClick={() => void toggleSocialVisibility(pixelfedAccount)} disabled={busy}>
-                {pixelfedAccount.profile_link_visible ? "Hide link" : "Show link"}
-              </button>
-            ) : null}
             <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
           </div>
 

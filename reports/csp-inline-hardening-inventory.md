@@ -1,6 +1,6 @@
 # CSP Inline Hardening Inventory
 
-Generated: 2026-07-02T05:41:56.424Z
+Generated: 2026-07-03T14:46:43.203Z
 
 This file is intentionally no-secret. It inventories the current CSP and inline-sensitive production app source before any future removal of `unsafe-inline`.
 
@@ -12,7 +12,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 - Report-only CSP in Next config: no
 - Unsafe-inline directives: script-src, style-src
 - Unsafe-eval directives: none
-- Scanned source files: 65
+- Scanned source files: 68
 
 ## Directives
 
@@ -53,6 +53,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 | https://discord.com | frame-src, connect-src | apps/web/app/page.tsx<br>apps/web/components/SiteFooter.tsx<br>apps/web/components/SiteHeader.tsx<br>apps/web/components/member-workflow/AccountPanel.tsx<br>apps/web/components/public-pages/EventsBoard.tsx<br>apps/web/components/public-pages/pages.tsx |
 | https://mochi-social-game.fly.dev | frame-src, connect-src | apps/web/app/games/mochi-social/page.tsx<br>apps/web/components/mochi-social/MochiSocialAlphaClient.tsx |
 | https://mochirii.com | default-src, base-uri, form-action, script-src, style-src, img-src, font-src, media-src, frame-src, connect-src, worker-src | apps/web/app/account/page.tsx<br>apps/web/app/auth/page.tsx<br>apps/web/app/gallery-submit/page.tsx<br>apps/web/app/layout.tsx<br>apps/web/app/leader-dashboard/page.tsx<br>apps/web/components/public-pages/metadata.ts |
+| https://social.mochirii.com | none | apps/web/components/SiteFooter.tsx<br>apps/web/components/SiteHeader.tsx<br>apps/web/components/member-workflow/AccountPanel.tsx<br>apps/web/components/member-workflow/SocialHubPanel.tsx |
 | https://www.instagram.com | none | apps/web/components/member-workflow/LeaderDashboard.tsx |
 
 ## Browser Route Matrix
@@ -64,32 +65,19 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 | /events | events | event cover images, filter state |
 | /gallery | gallery | Supabase signed media, lightbox, share status |
 | /auth | auth | Supabase auth client, status message |
-| /account | member account | Supabase auth, profile media, status messages |
-| /members | member directory | Supabase profile cards, members-only boundary |
+| /account | member account | Supabase auth, gallery submissions, social handoff, status messages |
 | /gallery-submit | gallery submit | Supabase storage upload, status message |
 | /leader-dashboard | moderation | Supabase moderation queues, status messages |
 | /spotify | Spotify | Spotify iframe embeds |
 | /spotlight | spotlight | Supabase public spotlight endpoint |
 | /games/mochi-social | Mochi Social | Fly iframe, postMessage bridge |
-| /codex | Codex | static conduct content |
+| /tome | Tome | static conduct content |
 
 ## Live Header Sweep
 
 | Route | Status | CSP | Report-only | Unsafe-inline |
 | --- | ---: | --- | --- | --- |
-| / | 200 | yes | no | script-src, style-src |
-| /join | 200 | yes | no | script-src, style-src |
-| /events | 200 | yes | no | script-src, style-src |
-| /gallery | 200 | yes | no | script-src, style-src |
-| /auth | 200 | yes | no | script-src, style-src |
-| /account | 200 | yes | no | script-src, style-src |
-| /members | 200 | yes | no | script-src, style-src |
-| /gallery-submit | 200 | yes | no | script-src, style-src |
-| /leader-dashboard | 200 | yes | no | script-src, style-src |
-| /spotify | 200 | yes | no | script-src, style-src |
-| /spotlight | 200 | yes | no | script-src, style-src |
-| /games/mochi-social | 200 | yes | no | script-src, style-src |
-| /codex | 200 | yes | no | script-src, style-src |
+| skipped | run with --live to check production headers | n/a | n/a | n/a |
 
 ## Next Steps
 
@@ -102,6 +90,7 @@ This file is intentionally no-secret. It inventories the current CSP and inline-
 
 ## Warnings
 
+- https://social.mochirii.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.
 - https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.
 
 ## Failures

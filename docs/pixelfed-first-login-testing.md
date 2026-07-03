@@ -118,8 +118,9 @@ Public website navigation should treat `https://social.mochirii.com` as the
 main Social destination from the regular Guild dropdown and footer. The website
 `/social` route is intentionally noindex: signed-in members are redirected to
 the social host, while signed-out visitors see login/help copy. Account-link
-state and profile-link visibility belong in the website Account page; do not
-make `/social` the primary public Social link again.
+state belongs in the website Account page, while public Social links should
+open `https://social.mochirii.com`; do not make `/social` the primary public
+Social link again.
 
 Minimum staging posture:
 
@@ -133,7 +134,7 @@ Minimum staging posture:
 - Staged source changes stored in a Mochirii-owned private fork or ops repo.
 
 Pixelfed OIDC configuration must map Supabase claims without using Discord
-display names as authority. Prefer deterministic website member profile slugs
+display names as authority. Prefer deterministic website member identity data
 for usernames. If Supabase cannot emit the required claim directly, stop and
 prepare a claim bridge or Pixelfed patch decision packet.
 
@@ -184,8 +185,8 @@ terminal summaries:
    username.
 9. Confirm `/social` shows linked status only after the `social_accounts` row
    is written by a trusted server/operator workflow.
-10. Confirm account profile-link visibility can be toggled by the signed-in
-    owner and appears only on members-only profile pages.
+10. Confirm the website Account page shows linked Mochirii Social status without
+    exposing retired member-page profile visibility controls.
 
 ## Negative Smokes
 

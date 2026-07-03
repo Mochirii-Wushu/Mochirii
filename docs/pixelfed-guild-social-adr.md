@@ -22,7 +22,7 @@ Pixelfed code, infrastructure secrets, media storage credentials, DB passwords, 
 
 ## Architecture Boundaries
 
-- Website repo: `/social`, `/oauth/consent`, `/api/oauth/decision`, account social status, member profile social link display, Supabase migration files, and no-secret docs.
+- Website repo: `/social`, `/oauth/consent`, `/api/oauth/decision`, account social status, Social handoff links, Supabase migration files, and no-secret docs. The website `/members` profile surface is retired.
 - Supabase project `deyvmtncimmcinldjyqe`: Auth, OAuth consent handoff, member access, `social_accounts`, RLS, and future server-side Pixelfed account sync.
 - Discord: guild membership and role verification only; it is not the Pixelfed identity authority.
 - Pixelfed runtime: separate DigitalOcean staging host with HTTPS, PHP, queue worker, scheduler, database, Redis, media storage, backups, monitoring, and pinned Pixelfed release or commit.
