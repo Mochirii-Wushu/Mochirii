@@ -1,6 +1,6 @@
 # Accessibility Route Matrix
 
-Generated: 2026-07-02T03:23:05.520Z
+Generated: 2026-07-03T14:46:43.202Z
 
 This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibility coverage for Mochirii route workflows and names the browser checks that still require manual or Playwright evidence.
 
@@ -9,8 +9,8 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 - OK: yes
 - Routes: 20
 - Protected/noindex routes: 7
-- Routes with live regions: 11
-- Routes with alerts: 5
+- Routes with live regions: 12
+- Routes with alerts: 7
 - Routes with forms: 4
 - Routes with iframes: 3
 
@@ -41,7 +41,7 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 | /gallery | public | media browsing | 4 | 0 | 0 | 0/0 | n/a |
 | /ranks | public | progression reference | 0 | 0 | 0 | 0/0 | n/a |
 | /leaders | public | stewardship reference | 0 | 0 | 0 | 0/0 | n/a |
-| /codex | public | conduct reference | 0 | 0 | 0 | 0/0 | n/a |
+| /tome | public | conduct reference | 0 | 0 | 0 | 0/0 | n/a |
 | /recruitment | public | recruiting copy | 0 | 0 | 0 | 0/0 | n/a |
 | /announcements | public | updates | 1 | 0 | 0 | 0/0 | n/a |
 | /raffles | public | giveaway reference | 0 | 0 | 0 | 0/0 | n/a |
@@ -49,11 +49,11 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 | /spotlight | public | member spotlight | 0 | 0 | 0 | 0/0 | n/a |
 | /twills | public | profile reference | 0 | 0 | 0 | 0/0 | n/a |
 | /auth | protected-entry | Discord OAuth | 1 | 1 | 2 | 0/0 | yes |
-| /account | member | profile and verification | 3 | 4 | 1 | 0/0 | yes |
+| /account | member | profile and verification | 2 | 4 | 1 | 0/0 | yes |
+| /social | member | guild social doorway | 1 | 1 | 0 | 0/0 | yes |
+| /oauth/consent | protected-entry | Supabase OAuth consent | 1 | 1 | 0 | 0/0 | yes |
 | /gallery-submit | member | member upload | 1 | 3 | 1 | 0/0 | yes |
-| /leader-dashboard | moderator | moderation queues | 4 | 5 | 0 | 0/0 | yes |
-| /members | member | member directory | 1 | 0 | 0 | 0/0 | yes |
-| /members/[slug] | member | member profile | 0 | 0 | 0 | 0/0 | yes |
+| /leader-dashboard | moderator | moderation queues | 3 | 4 | 0 | 0/0 | yes |
 | /games/mochi-social | alpha | tester game doorway | 1 | 1 | 2 | 1/1 | yes |
 
 ## Manual Browser Matrix
@@ -69,7 +69,7 @@ This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibil
 
 - /ranks: no route-specific live region found; confirm static-only page status remains intentional.
 - /leaders: no route-specific live region found; confirm static-only page status remains intentional.
-- /codex: no route-specific live region found; confirm static-only page status remains intentional.
+- /tome: no route-specific live region found; confirm static-only page status remains intentional.
 - /recruitment: no route-specific live region found; confirm static-only page status remains intentional.
 - /raffles: no route-specific live region found; confirm static-only page status remains intentional.
 - /spotify: no route-specific live region found; confirm static-only page status remains intentional.

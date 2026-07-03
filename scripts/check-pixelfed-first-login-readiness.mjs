@@ -93,7 +93,7 @@ const snippetChecks = [
     snippets: [
       ".from(\"social_accounts\")",
       "profile_link_visible",
-      "updateSocialAccountVisibility",
+      "listMySocialAccounts",
     ],
   },
   {

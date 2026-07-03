@@ -24,7 +24,7 @@ This repository serves the live Vercel/Next.js production app from `apps/web`; t
 
 Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow. The staging runtime exists outside Vercel; first authenticated testing is admin-only until the source-control, OIDC, media, backup, and moderation gates pass.
 
-`social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`, which controls whether an active Pixelfed profile URL can appear on members-only profile pages.
+`social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`; that field is retained for backend compatibility while website member profile publishing is retired.
 
 The table intentionally does not grant direct insert/delete access to `authenticated`. Production SSO, federation enablement, broad member uploads, account-sync workers, media migration, and any remote database/Auth setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
 
@@ -688,9 +688,11 @@ Reaper allows WWM-only, non-Verified members to see and chat only in channels `1
 
 Preview is the safe first command. Apply requires `confirm:true`, Moderator role `1078630751165222984`, and Discord Manage Roles permission. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md) for the conflict policy and [`../docs/reaper-pending-verification-activation-packet.md`](../docs/reaper-pending-verification-activation-packet.md) for live activation, Gateway release, and rollback steps.
 
-## Member Profiles And Vanity Rank Roles
+## Retired Member Profile Surface And Vanity Rank Roles
 
-Member profiles are a members-only Supabase workflow, not a public directory. Active, recently verified Discord members can view `/members` and `/members/[slug]`; each member must opt in before their profile is listed.
+Website member profile publishing is retired. `/members` and `/members/[slug]` should stay absent from the Next app and resolve through normal 404 behavior with no redirect. Mochirii Social is now the member social/profile destination.
+
+The Supabase profile/media objects remain shared backend identity data until a separate Supabase dependency audit/migration is approved. Do not remove `member_profiles`, `member_profile_media`, profile Edge Functions, Storage buckets, or grants from this website cleanup alone.
 
 Profile media uses a separate private Storage bucket:
 
@@ -698,9 +700,9 @@ Profile media uses a separate private Storage bucket:
 member-profile-media
 ```
 
-The browser uploads avatar/banner candidates to that bucket and then calls `submit-member-profile-media`. Avatar and banner candidates allow up to 50 MB per file, matching the bucket file-size limit, but moderators should approve reasonably optimized images for profile-page performance. Pending, rejected, and archived media does not appear on profile pages. Approved media is returned only through short-lived signed URLs from Edge Functions.
+The legacy browser avatar/banner upload path is no longer exposed in the website UI. Historical profile media remains private in Storage. Approved media is returned only through short-lived signed URLs from Edge Functions if a retained backend function still serves it.
 
-Discord identity fields are service-managed. `verify-discord-member` refreshes `discord_handle` from Discord user data; browser clients may edit only display name, game UID, region, timezone, bio, and profile publication state. Bios are capped at 1,000 characters.
+Discord identity fields are service-managed. `verify-discord-member` refreshes `discord_handle` from Discord user data; browser clients may edit only display name, game UID, region, timezone, and bio from the current Account surface. Bios are capped at 1,000 characters.
 
 Member profile Edge Functions:
 
@@ -710,7 +712,7 @@ Member profile Edge Functions:
 - `list-member-profile-media-queue`
 - `moderate-member-profile-media`
 
-`list-member-profiles` and `get-member-profile` require an active signed-in member. `list-member-profile-media-queue` and `moderate-member-profile-media` require the same server-side Moderator role verification as the gallery Leader Dashboard.
+`list-member-profiles` and `get-member-profile` remain legacy configured functions and require an active signed-in member. `list-member-profile-media-queue` and `moderate-member-profile-media` remain legacy configured functions and require the same server-side Moderator role verification as the gallery Leader Dashboard.
 
 The `reaper-discord-interactions` function also supports the moderator-only rank sync command:
 
@@ -720,7 +722,7 @@ The `reaper-discord-interactions` function also supports the moderator-only rank
 
 Rank roles are display-only vanity roles. Reaper creates or adopts only the configured rank list with zero permissions, no hoist, no mentionable state, and no channel overwrites. Created/adopted role IDs are stored in `discord_resources` with metadata for member profile title mapping. Member profile titles render only from fresh verified Discord roles matched to enabled Reaper-managed rank records. Leaders still assign rank roles manually in Discord for v1.
 
-See [`../docs/member-profiles-and-rank-roles.md`](../docs/member-profiles-and-rank-roles.md) for the implementation boundaries and verification checklist.
+See [`../docs/member-profiles-and-rank-roles.md`](../docs/member-profiles-and-rank-roles.md) for the retired website surface boundary and verification checklist.
 
 ## Instagram Publishing Queue
 

@@ -61,7 +61,7 @@ Do not commit `.vercel/`.
 
 `next.config.ts` owns app-level security headers for the Vercel surface. Keep Cloudflare DNS-only for Vercel web records; use Vercel's platform firewall/DDoS layer as the active edge protection.
 
-Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, member, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch. Keep nonce-based CSP tightening in a dedicated compatibility PR because Next.js nonce middleware makes pages dynamically rendered instead of static/prerendered.
+Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, social handoff, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch. Keep nonce-based CSP tightening in a dedicated compatibility PR because Next.js nonce middleware makes pages dynamically rendered instead of static/prerendered.
 
 The RFC 9116 security contact file is served from `public/.well-known/security.txt` and should match the rollback copy at the repository root.
 
@@ -125,8 +125,8 @@ Current Next routes:
 - `/twills`
 - `/auth`
 - `/account`
-- `/members`
-- `/members/[slug]`
+- `/social`
+- `/oauth/consent`
 - `/gallery-submit`
 - `/leader-dashboard`
 - `/games/mochi-social`
@@ -208,13 +208,13 @@ Approval for the public Gallery never posts to Instagram automatically. If an ap
 
 Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase secrets only. They do not belong in Vercel env vars or any `NEXT_PUBLIC_*` value.
 
-## Member Profiles
+## Retired Member Profiles And Mochirii Social
 
-Member profiles build on the Phase 3 auth/member workflow. `/members` and `/members/[slug]` are members-only, `noindex` routes. They require a signed-in Supabase session plus active, recently verified Discord membership through Supabase Edge Functions.
+The website `/members` and `/members/[slug]` product surface is retired. Those URLs should resolve through the normal missing-route behavior, with no redirect, while member social/profile activity moves to Mochirii Social at `https://social.mochirii.com`.
 
-The Account page lets a member opt in to profile publication, edit safe profile fields, and submit avatar/banner images for review. Discord handle is read-only and refreshed from Discord verification, not typed by the member. Bios allow up to 1,000 characters. Avatar and banner uploads allow up to 50 MB per file before moderation. The Leader Dashboard has a separate profile media moderation queue. Approved profile media is served through short-lived signed URLs from the private `member-profile-media` bucket; pending, rejected, and archived media never renders on profiles.
+The Account page still lets a signed-in member edit safe profile fields, verify Discord membership, review gallery submission history, and open Mochirii Social. Discord handle is read-only and refreshed from Discord verification, not typed by the member. Bios allow up to 1,000 characters.
 
-The Twills route remains protected static profile content, but the visual profile layout is now shared through `components/public-pages/ProfileDisplay.tsx`.
+Shared backend identity data remains in Supabase until a separate Supabase dependency audit/migration is approved. Keep `member_profiles`, Discord verification, gallery/rank dependencies, and `social_accounts` intact during website cleanup work.
 
 Discord guild titles come from fresh verified Discord role snapshots matched against vanity rank role IDs stored in `discord_resources` after Reaper `/sync-ranks` creates or adopts safe zero-permission roles. Vercel/Next never mutates Discord roles and never stores Discord bot tokens.
 
@@ -236,8 +236,8 @@ Route targets to verify:
 ```text
 /auth
 /account
-/members
-/members/[slug]
+/social
+/oauth/consent
 /gallery-submit
 /leader-dashboard
 ```

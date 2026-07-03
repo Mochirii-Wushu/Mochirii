@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
@@ -26,8 +26,11 @@ const protectedRoutes = [
   { route: "/account", file: "apps/web/app/account/page.tsx", expectedFollow: true },
   { route: "/gallery-submit", file: "apps/web/app/gallery-submit/page.tsx", expectedFollow: true },
   { route: "/leader-dashboard", file: "apps/web/app/leader-dashboard/page.tsx", expectedFollow: true },
-  { route: "/members", file: "apps/web/app/members/page.tsx", expectedFollow: false },
-  { route: "/members/twills", file: "apps/web/app/members/[slug]/page.tsx", expectedFollow: false },
+];
+
+const retiredRoutes = [
+  { route: "/members", file: "apps/web/app/members/page.tsx" },
+  { route: "/members/twills", file: "apps/web/app/members/[slug]/page.tsx" },
 ];
 
 const noindexRoutes = [
@@ -98,9 +101,16 @@ function checkProtectedNoindex() {
     assertIncludes(item.file, source, "index: false");
     assertIncludes(item.file, source, `follow: ${item.expectedFollow ? "true" : "false"}`);
 
-    if (item.route !== "/members/twills") {
-      assertIncludes(item.file, source, `canonical: "${item.route}"`);
-    }
+    assertIncludes(item.file, source, `canonical: "${item.route}"`);
+  }
+}
+
+function checkRetiredRoutes() {
+  const smoke = read("scripts/smoke-vercel-production.mjs");
+
+  for (const item of retiredRoutes) {
+    assert(!existsSync(path.join(root, item.file)), `${item.file}: retired members route file must stay removed.`);
+    assertRouteListed("production retired route smoke", smoke, item.route);
   }
 }
 
@@ -117,6 +127,10 @@ function checkDiscoveryFiles() {
     assert(!sitemap.includes(`https://mochirii.com${item.route}`), `sitemap: protected route must stay excluded: ${item.route}`);
   }
 
+  for (const item of retiredRoutes) {
+    assert(!sitemap.includes(`https://mochirii.com${item.route}`), `sitemap: retired route must stay excluded: ${item.route}`);
+  }
+
   assertIncludes("robots", robots, "Sitemap: https://mochirii.com/sitemap.xml");
 }
 
@@ -127,7 +141,7 @@ function checkProductionSmokeCoverage() {
     assertRouteListed("production route smoke", smoke, route);
   }
 
-  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/members", "/members/twills", "/games/mochi-social"]) {
+  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/games/mochi-social"]) {
     assert(smoke.includes(`["${route}",`) || smoke.includes(`['${route}',`), `production body smoke: expected content check for ${route}`);
   }
 }
@@ -261,6 +275,7 @@ await checkLiveIfRequested();
 checkLayoutObservability();
 checkPublicMetadata();
 checkProtectedNoindex();
+checkRetiredRoutes();
 checkDiscoveryFiles();
 checkProductionSmokeCoverage();
 checkDocs();

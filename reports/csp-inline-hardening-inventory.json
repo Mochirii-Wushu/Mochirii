@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-02T05:41:56.424Z",
+  "checkedAt": "2026-07-03T14:46:43.203Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
@@ -170,7 +170,7 @@
     ]
   },
   "sourceInventory": {
-    "scannedFiles": 65,
+    "scannedFiles": 68,
     "scannedRoots": [
       "apps/web/app",
       "apps/web/components",
@@ -209,13 +209,13 @@
             "count": 1
           },
           {
-            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
-            "line": 99,
+            "file": "apps/web/components/public-pages/pages.tsx",
+            "line": 279,
             "count": 1
           },
           {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 279,
+            "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
+            "line": 99,
             "count": 1
           }
         ]
@@ -316,6 +316,16 @@
         ]
       },
       {
+        "origin": "https://social.mochirii.com",
+        "allowedBy": [],
+        "files": [
+          "apps/web/components/SiteFooter.tsx",
+          "apps/web/components/SiteHeader.tsx",
+          "apps/web/components/member-workflow/AccountPanel.tsx",
+          "apps/web/components/member-workflow/SocialHubPanel.tsx"
+        ]
+      },
+      {
         "origin": "https://www.instagram.com",
         "allowedBy": [],
         "files": [
@@ -372,16 +382,9 @@
       "surface": "member account",
       "features": [
         "Supabase auth",
-        "profile media",
+        "gallery submissions",
+        "social handoff",
         "status messages"
-      ]
-    },
-    {
-      "route": "/members",
-      "surface": "member directory",
-      "features": [
-        "Supabase profile cards",
-        "members-only boundary"
       ]
     },
     {
@@ -423,161 +426,16 @@
       ]
     },
     {
-      "route": "/codex",
-      "surface": "Codex",
+      "route": "/tome",
+      "surface": "Tome",
       "features": [
         "static conduct content"
       ]
     }
   ],
   "live": {
-    "status": "checked",
-    "baseUrl": "https://mochirii.com",
-    "routes": [
-      {
-        "route": "/",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/join",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/events",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/gallery",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/auth",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/account",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/members",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/gallery-submit",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/leader-dashboard",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/spotify",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/spotlight",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/games/mochi-social",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      },
-      {
-        "route": "/codex",
-        "status": 200,
-        "cspPresent": true,
-        "reportOnlyPresent": false,
-        "unsafeInlineDirectives": [
-          "script-src",
-          "style-src"
-        ],
-        "unsafeEvalDirectives": []
-      }
-    ]
+    "status": "skipped",
+    "reason": "run with --live to check production headers"
   },
   "nextSteps": [
     "Keep React inline style props at zero before any style-src unsafe-inline removal.",
@@ -588,6 +446,7 @@
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions."
   ],
   "warnings": [
+    "https://social.mochirii.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",
     "https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening."
   ],
   "failures": []

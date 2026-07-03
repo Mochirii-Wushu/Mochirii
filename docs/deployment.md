@@ -44,7 +44,7 @@ The Next app sets conservative response headers from `apps/web/next.config.ts`:
 
 The public RFC 9116 security contact file is tracked at `.well-known/security.txt` and mirrored into `apps/web/public/.well-known/security.txt` for Vercel. Keep both copies identical until the retained static rollback surface is retired.
 
-CSP was promoted from report-only to enforcement after a production Chrome pass found no report-only violations across Home, Join, Gallery, Auth, Account, Gallery Submit, Leader Dashboard, Spotify, Members, and member profile routes. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
+CSP was promoted from report-only to enforcement after a production Chrome pass found no report-only violations across Home, Join, Gallery, Auth, Account, Gallery Submit, Leader Dashboard, Spotify, and current member-adjacent routes. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch.
 
 The Next app currently uses an npm override for `postcss@8.5.15` to resolve GHSA-qx2v-qp2m-jg93 while the stable Next line still declares `postcss@8.4.31`. Remove the override in a later dependency PR after stable Next ships a patched PostCSS dependency and `npm audit --audit-level=moderate` remains clean without it.
 
