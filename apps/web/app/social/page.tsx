@@ -4,8 +4,8 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
-  title: "Mochirii Social - Guild Doorway",
-  description: "Members-only Mochirii doorway for the planned guild social platform.",
+  title: "Mochirii Social Status",
+  description: "Members-only Mochirii account-link and social profile status page.",
   robots: {
     index: false,
     follow: false,
@@ -25,9 +25,9 @@ export default function SocialPage() {
         image="./assets/img/gallery/hero.webp"
         imageAlt="Guild social gallery banner artwork"
         kicker="Guild Social"
-        title="Social"
+        title="Social Status"
         center={false}
-        intro={<p className="lede">Active members can check guild social account status and profile visibility.</p>}
+        intro={<p className="lede">Active members can check website account-link status while the Social button opens the guild social platform.</p>}
       />
       <main className="page-main" id="main">
         <div className="container">

@@ -39,6 +39,7 @@ Run the smallest gate that matches the change, then broaden when provider or use
 ## Current Integration Expectations
 
 - Live app surface: Vercel/Next.js under `apps/web` for `https://mochirii.com`.
+- Website/social split: `https://mochirii.com` is the public information site. Public Social navigation should hand off directly to `https://social.mochirii.com`; the website `/social` route is a protected Social Status helper for account-link/profile-visibility support.
 - Rollback/reference surface: root static files, root `assets/`, root `data/`, and GitHub Pages material remain until a separate retirement plan.
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
 - Vercel project: production-serving `mochirii/mochirii` with root directory `apps/web`.

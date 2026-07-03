@@ -9,6 +9,8 @@ import { text, type MemberAccessResponse, type SocialAccount } from "@/lib/supab
 import { prettyStatus } from "./format";
 import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
+const SOCIAL_HOST = "https://social.mochirii.com";
+
 function pixelfedAccount(accounts: SocialAccount[]) {
   return accounts.find((account) => text(account.provider).toLowerCase() === "pixelfed") || null;
 }
@@ -20,8 +22,8 @@ function GateMessage({ title, message }: { title: string; message: string }) {
       <h2 className="section-title">{title}</h2>
       <p className="muted">{message}</p>
       <div className="auth-actions">
-        <Link className="hero-cta hero-cta--primary" href="/auth?redirect=/social">Login</Link>
-        <Link className="hero-cta" href="/account">Account</Link>
+        <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
+        <Link className="hero-cta" href="/auth?redirect=/social">Website Login</Link>
       </div>
     </section>
   );
@@ -93,7 +95,7 @@ export function SocialHubPanel() {
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Guild Social</p>
-          <h2 className="section-title">Mochirii Social Doorway</h2>
+          <h2 className="section-title">Mochirii Social Status</h2>
         </div>
         <p className={`status-pill status-pill--${activeAccount ? "active" : activeMember ? "pending" : "warning"}`}>
           {activeAccount ? "Linked" : activeMember ? "Pending SSO" : "Locked"}
@@ -133,11 +135,7 @@ export function SocialHubPanel() {
       )}
 
       <div className="auth-actions">
-        {activeAccount ? (
-          <a className="hero-cta hero-cta--primary" href={text(account?.profile_url)} target="_blank" rel="noopener noreferrer">
-            Open Mochirii Social
-          </a>
-        ) : null}
+        <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
         <Link className="hero-cta" href="/account">Account</Link>
       </div>
 
