@@ -39,6 +39,7 @@ Run the smallest gate that matches the change, then broaden when provider or use
 ## Current Integration Expectations
 
 - Live app surface: Vercel/Next.js under `apps/web` for `https://mochirii.com`.
+- Vercel release policy: keep the GitHub website repository private. Vercel Git checks can fail for private GitHub organization repositories on the current plan; treat that as an expected integration blocker, not a reason to make the repo public. After an approved protected/admin merge, deploy production manually from the linked private checkout with Vercel CLI and a local token kept in child-process environment only.
 - Website/social split: `https://mochirii.com` is the public information site. Header Social should stay in the regular Guild dropdown, footer Social should hand off directly to `https://social.mochirii.com`, and the website `/social` route should stay noindex while redirecting signed-in members and offering signed-out login/help copy.
 - Rollback/reference surface: root static files, root `assets/`, root `data/`, and GitHub Pages material remain until a separate retirement plan.
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
@@ -56,4 +57,4 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Use one scoped branch per task.
 - Keep reports no-secret and reviewable.
 - Prefer squash/merge through protected-branch policy after checks are green.
-- After merge, sync local `main`, verify a clean worktree, and only then start the next scoped branch.
+- After merge, sync local `main`, run the approved manual Vercel production deploy when the change is production-bound, verify a clean worktree, and only then start the next scoped branch.

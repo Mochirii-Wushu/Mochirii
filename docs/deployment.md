@@ -29,6 +29,28 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
+## Manual Vercel Release Policy
+
+Keep the Mochirii website GitHub repository private. The current release path intentionally does not require making the repository public to satisfy Vercel Git checks.
+
+GitHub PRs should still use protected-branch review/check discipline. When the Vercel Git status reports the private-organization plan limitation but repository checks and any required provider previews pass, an owner may explicitly approve admin bypass merge plus manual Vercel CLI deployment.
+
+After the approved merge, sync `main` and deploy from the linked private checkout without printing secrets:
+
+```powershell
+$token = (Get-Content -LiteralPath 'C:\Users\xtyty\Documents\Creds\Vercel Token.txt' -Raw).Trim()
+$project = Get-Content -LiteralPath 'apps\web\.vercel\project.json' -Raw | ConvertFrom-Json
+$env:VERCEL_ORG_ID = $project.orgId
+$env:VERCEL_PROJECT_ID = $project.projectId
+npx vercel deploy --prod --yes --token $token
+```
+
+Verify the production alias afterward:
+
+```powershell
+npx vercel inspect https://mochirii.com --timeout 3m --token $token
+```
+
 ## Security Hardening
 
 Production security is Vercel-first: `mochirii.com` stays on the canonical Vercel/Next project, and Cloudflare remains DNS-only for the Vercel web records. Do not orange-cloud the Vercel apex or `www` records unless a separate reverse-proxy test plan is approved.

@@ -41,7 +41,7 @@ Set the Vercel project Root Directory to:
 apps/web
 ```
 
-Dashboard settings remain manual. This branch does not change Vercel project settings, DNS, production domains, Supabase settings, or Discord settings.
+Dashboard settings remain manual. Website releases keep the GitHub repository private and use owner-approved manual Vercel CLI production deploys after protected/admin merges when the Vercel Git check is blocked by the private-organization plan limitation.
 
 The safest local workflow is to pull settings for the linked app, clean generated output, then run the Vercel build from the repository root with `--cwd apps/web`:
 
