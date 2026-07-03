@@ -661,7 +661,6 @@ export function AccountPanel() {
               </button>
             ) : null}
             <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
-            <Link className="hero-cta" href="/social">Social Status</Link>
           </div>
 
           <WorkflowNotice hidden={!socialStatus}>{socialStatus}</WorkflowNotice>

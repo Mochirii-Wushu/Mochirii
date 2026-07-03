@@ -54,16 +54,19 @@ assertNotIncludes("SiteFooter public Social", footer, `href: "/social", label: "
 
 assertIncludes("SocialHubPanel", socialPanel, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
 assertIncludes("SocialHubPanel", socialPanel, `href={SOCIAL_HOST}`);
-assertIncludes("SocialHubPanel", socialPanel, "Mochirii Social Status");
-assertIncludes("SocialHubPanel live copy", socialPanel, "Open Mochirii Social to start or continue the guild social sign-in.");
+assertIncludes("SocialHubPanel", socialPanel, "Mochirii Social Handoff");
+assertIncludes("SocialHubPanel redirect", socialPanel, "window.location.assign(SOCIAL_HOST)");
+assertIncludes("SocialHubPanel signed-out copy", socialPanel, "Sign in on Mochirii before opening the guild social platform.");
 assertNotIncludes("SocialHubPanel", socialPanel, "target=\"_blank\"");
 assertNotIncludes("SocialHubPanel", socialPanel, "href={text(account?.profile_url)}");
+assertNotIncludes("SocialHubPanel stale status query", socialPanel, "listMySocialAccounts");
 assertIncludes("AccountPanel", accountPanel, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
 assertIncludes("AccountPanel", accountPanel, `href={SOCIAL_HOST}`);
-assertIncludes("AccountPanel", accountPanel, `href="/social">Social Status`);
+assertNotIncludes("AccountPanel stale Social Status link", accountPanel, `href="/social">Social Status`);
 assertNotIncludes("AccountPanel stale copy", accountPanel, "SSO compatibility gate passes");
 
-assertIncludes("social page metadata", socialPage, "Mochirii Social Status");
+assertIncludes("social page metadata", socialPage, "Mochirii Social Handoff");
+assertIncludes("social page intro", socialPage, "Signed-in members continue to Mochirii Social");
 assertIncludes("current live state", currentState, "public website information surface");
 assertIncludes("integration runbook", runbook, "public information site");
 
@@ -82,7 +85,7 @@ if (failures.length) {
 console.log("Site navigation OK.");
 console.log("- Header Social and Mochi Social live in the Guild dropdown only.");
 console.log("- Footer Social points to social.mochirii.com.");
-console.log("- /social remains the private Social Status page.");
+console.log("- /social redirects signed-in members and keeps signed-out help.");
 
 function read(file) {
   const full = resolve(root, file);

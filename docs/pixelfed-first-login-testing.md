@@ -116,9 +116,10 @@ first-login smoke, media policy, backup/restore, and moderation gates pass.
 
 Public website navigation should treat `https://social.mochirii.com` as the
 main Social destination from the regular Guild dropdown and footer. The website
-`/social` route is intentionally a protected Social Status helper for
-linked-account state and profile-link visibility; do not make it the primary
-public Social link again.
+`/social` route is intentionally noindex: signed-in members are redirected to
+the social host, while signed-out visitors see login/help copy. Account-link
+state and profile-link visibility belong in the website Account page; do not
+make `/social` the primary public Social link again.
 
 Minimum staging posture:
 
