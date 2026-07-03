@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
-import { enabledAuthProviders, enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
+import { enabledAuthProviders, enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getCurrentUser, onAuthStateChange, signInWithPhoneOtp, signInWithProvider, signOut, verifyPhoneOtp } from "@/lib/supabase/auth";
 import { signedInName } from "@/lib/supabase/profile";
 import type { User } from "@supabase/supabase-js";
@@ -20,6 +20,7 @@ export function AuthPanel() {
   const [phoneCodeSent, setPhoneCodeSent] = useState(false);
   const providers = useMemo(() => enabledAuthProviders(), []);
   const oauthProviders = useMemo(() => enabledOAuthProviders(), []);
+  const placeholderProviders = useMemo(() => placeholderOAuthProviders(), []);
   const phoneProvider = providers.find((provider) => provider.id === "phone");
   const redirectTo = useMemo(() => {
     const raw = String(searchParams.get("redirect") || "").trim();
@@ -141,6 +142,22 @@ export function AuthPanel() {
                 <span className="provider-button__copy">
                   <span>{provider.label}</span>
                   <small>{provider.automaticVerification ? "Automatic Discord role check" : "Moderator review required"}</small>
+                </span>
+              </button>
+            ))}
+            {placeholderProviders.map((provider) => (
+              <button
+                className="provider-button provider-button--placeholder"
+                type="button"
+                disabled
+                aria-label={`${provider.label} sign-in setup pending`}
+                title={provider.setupNote}
+                key={`placeholder-${provider.id}`}
+              >
+                <ProviderLogo provider={provider.id} />
+                <span className="provider-button__copy">
+                  <span>{provider.label}</span>
+                  <small>Setup pending</small>
                 </span>
               </button>
             ))}

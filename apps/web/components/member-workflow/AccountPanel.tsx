@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
-import { enabledOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
+import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getLinkedIdentities, linkProviderIdentity } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
@@ -276,6 +276,10 @@ export function AccountPanel() {
   const enabledProviders = enabledOAuthProviders();
   const linkedProviderIds = new Set(linkedIdentities.map((identity) => text(identity.provider).toLowerCase()).filter(Boolean));
   const availableLinkProviders = enabledProviders.filter((provider) => !linkedProviderIds.has(provider.id));
+  const placeholderLinkProviders = placeholderOAuthProviders().filter((provider) =>
+    !linkedProviderIds.has(provider.id) && !availableLinkProviders.some((availableProvider) => availableProvider.id === provider.id),
+  );
+  const linkProviderCount = availableLinkProviders.length + placeholderLinkProviders.length;
   const counts = countSubmissions(submissions);
   const discordHandle = text(profile?.discord_handle || profile?.discord_username || profile?.discord_global_name, signedInName(user, profile));
   const bioLength = formState.bio.length;
@@ -434,7 +438,7 @@ export function AccountPanel() {
             )}
           </div>
 
-          {availableLinkProviders.length ? (
+          {linkProviderCount ? (
             <div className="provider-grid provider-grid--compact" aria-label="Link another sign-in method">
               {availableLinkProviders.map((provider) => (
                 <button className="provider-button" type="button" onClick={() => linkProvider(provider.id)} disabled={busy} key={provider.id}>
@@ -442,6 +446,22 @@ export function AccountPanel() {
                   <span className="provider-button__copy">
                     <span>Link {provider.shortLabel}</span>
                     <small>{provider.automaticVerification ? "Automatic Discord role check" : "Review required"}</small>
+                  </span>
+                </button>
+              ))}
+              {placeholderLinkProviders.map((provider) => (
+                <button
+                  className="provider-button provider-button--placeholder"
+                  type="button"
+                  disabled
+                  aria-label={`${provider.label} account linking setup pending`}
+                  title={provider.setupNote}
+                  key={`placeholder-${provider.id}`}
+                >
+                  <ProviderLogo provider={provider.id} />
+                  <span className="provider-button__copy">
+                    <span>Link {provider.shortLabel}</span>
+                    <small>Setup pending</small>
                   </span>
                 </button>
               ))}

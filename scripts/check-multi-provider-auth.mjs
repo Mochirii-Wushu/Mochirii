@@ -54,7 +54,10 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   '"spotify"',
   'process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true"',
   'process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true"',
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS",
   'requestedProviderIds()',
+  'requestedPlaceholderProviderIds()',
+  'placeholderOAuthProviders',
 ].forEach((snippet) => assertIncludes("auth provider registry", providerRegistry, snippet));
 
 [
@@ -93,6 +96,8 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "signInWithProvider",
   "signInWithPhoneOtp",
   "verifyPhoneOtp",
+  "placeholderOAuthProviders",
+  "Setup pending",
 ].forEach((snippet) => assertIncludes("AuthPanel", authPanel, snippet));
 
 [
@@ -101,12 +106,15 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "ProviderLogo",
   "refreshMemberAccess({ refreshDiscord: true })",
   "moderator-approved member verification",
+  "placeholderOAuthProviders",
+  "Setup pending",
 ].forEach((snippet) => assertIncludes("AccountPanel", accountPanel, snippet));
 
 [
   ".provider-logo",
   ".provider-logo--discord",
   ".provider-logo--google",
+  ".provider-button--placeholder",
   ".provider-button__copy",
 ].forEach((snippet) => assertIncludes("Next auth CSS", nextCss, snippet));
 

@@ -102,7 +102,7 @@ The Account page does not expose private Storage URLs. It shows submission text 
 
 ## Multi-Provider Auth Setup
 
-The current live sign-in set is Discord, Google, and Twitch. Apple is the only documented future provider lane. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
+The current live sign-in set is Discord, Google, and Twitch. Apple is the only documented visible placeholder lane and should stay disabled in Supabase Auth production until Apple Developer setup, Services ID, callback, and six-month client-secret rotation are ready. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
 
 Social or phone sign-in through Supabase Auth proves account control only. It does not automatically prove guild membership, role ownership, alpha access, game access, or Enjin readiness. Discord remains the only automatic member verification path because guild membership and role checks happen server-side through `verify-discord-member` and `verify-member-access`.
 
@@ -127,6 +127,7 @@ The browser/provider allowlist is controlled separately with public-safe env onl
 
 ```text
 NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch
+NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple
 NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
 ```
