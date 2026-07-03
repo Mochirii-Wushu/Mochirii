@@ -130,7 +130,7 @@ export function SocialHubPanel() {
         </div>
       ) : (
         <WorkflowEmptyState title="No social account yet">
-          The SSO compatibility gate must pass before production guild social accounts are created.
+          Open Mochirii Social to start or continue the guild social sign-in. This status updates after the social account link is recorded.
         </WorkflowEmptyState>
       )}
 

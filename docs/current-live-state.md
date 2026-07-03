@@ -16,7 +16,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Deployment source of truth: `docs/deployment.md`.
 - Current production commit verified from `origin/main`: `1f6b5c11b2423f03c8dc243815365d899001b4f2` (`Rebrand public guild culture page to Tome (#357)`).
 - Production `/tome` is the canonical Tome route after the route refresh; `/codex` and `codex.html` are not retained as redirects.
-- Navigation posture: `mochirii.com` is the public website information surface. Public header/footer `Social` links go directly to `https://social.mochirii.com`, while the website `/social` route remains a protected, noindex Social Status page for account-link/profile-visibility support.
+- Navigation posture: `mochirii.com` is the public website information surface. Header `Social` lives in the regular Guild dropdown and footer `Social` goes directly to `https://social.mochirii.com`, while the website `/social` route remains a protected, noindex Social Status page for account-link/profile-visibility support.
 - Latest full route smoke before the unified release ledger was recorded on 2026-06-18. Run a fresh route matrix after each merged release packet.
 
 ## Data And Assets
@@ -52,7 +52,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Staging target: `https://social.mochirii.com`.
 - Hosting boundary: DigitalOcean staging runtime outside Vercel; Vercel remains the website host only.
 - Identity boundary: Supabase OAuth Server and `/oauth/consent` remain the website consent doorway; Discord remains guild verification, not the social identity authority.
-- Website boundary: header/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only the private website-side Social Status helper.
+- Website boundary: header dropdown/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only the private website-side Social Status helper.
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
 - Source-control gap: the staging host has a Mochirii branding commit, but durable runtime source must still move into a Mochirii-owned private fork or ops repo before further runtime edits.
 - Media gap: broad member upload testing waits for object storage policy, least-privilege keys, exact-origin CORS, backup/restore notes, and moderation gates.

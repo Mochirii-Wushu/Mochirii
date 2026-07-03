@@ -115,9 +115,10 @@ testing only; do not invite regular members or enable federation until the
 first-login smoke, media policy, backup/restore, and moderation gates pass.
 
 Public website navigation should treat `https://social.mochirii.com` as the
-main Social destination. The website `/social` route is intentionally a
-protected Social Status helper for linked-account state and profile-link
-visibility; do not make it the primary public Social link again.
+main Social destination from the regular Guild dropdown and footer. The website
+`/social` route is intentionally a protected Social Status helper for
+linked-account state and profile-link visibility; do not make it the primary
+public Social link again.
 
 Minimum staging posture:
 

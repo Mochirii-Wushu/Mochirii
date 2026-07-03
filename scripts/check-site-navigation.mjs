@@ -9,10 +9,11 @@ const header = read("apps/web/components/SiteHeader.tsx");
 const footer = read("apps/web/components/SiteFooter.tsx");
 const socialPanel = read("apps/web/components/member-workflow/SocialHubPanel.tsx");
 const socialPage = read("apps/web/app/social/page.tsx");
+const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
 const currentState = read("docs/current-live-state.md");
 const runbook = read("docs/integration-operations-runbook.md");
 
-const navGroups = between(header, "const navGroups", "const SOCIAL_HOST");
+const navGroups = between(header, "const navGroups", "const publicUtilityLinks");
 const publicUtilityLinks = between(header, "const publicUtilityLinks", "const accountWorkflowLinks");
 const accountWorkflowLinks = between(header, "const accountWorkflowLinks", "const focusableSelector");
 
@@ -20,17 +21,18 @@ const publicItems = [...extractItems(navGroups), ...extractItems(publicUtilityLi
 const accountItems = extractItems(accountWorkflowLinks);
 const footerItems = extractItems(footer);
 
-const forbiddenPublicHrefs = ["/members", "/social", "/gallery-submit", "/games/mochi-social", "/leader-dashboard"];
+const forbiddenGroupHrefs = ["/members", "/social", "/gallery-submit", "/leader-dashboard"];
 
-for (const href of forbiddenPublicHrefs) {
+for (const href of forbiddenGroupHrefs) {
   if (navGroups.includes(`href: "${href}"`)) {
     failures.push(`SiteHeader navGroups must not expose workflow href ${href}; keep it under Account.`);
   }
 }
 
 assertIncludes("SiteHeader", header, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
-assertIncludes("SiteHeader public Social", publicUtilityLinks, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
-assertIncludes("SiteHeader Social Status", accountWorkflowLinks, `href: "/social", label: "Social Status"`);
+assertIncludes("SiteHeader dropdown Social", navGroups, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
+assertIncludes("SiteHeader dropdown Mochi Social", navGroups, `href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in"`);
+assertIncludes("SiteHeader group auth filtering", header, "&& !navItemHidden(item, authState)");
 assertIncludes("SiteHeader moderator probe", header, "checkLeaderGalleryModerationAccess");
 assertIncludes("SiteHeader lazy moderator trigger", header, `void ensureModeratorAccess();`);
 assertIncludes("SiteHeader mobile moderator trigger", header, "setMobileOpen(true)");
@@ -40,7 +42,9 @@ assertIncludes("SiteHeader account controls", header, `aria-expanded={openGroup 
 assertIncludes("SiteHeader moderator auth marker", header, `"data-auth-moderator"`);
 
 assertNotIncludes("SiteHeader public nav", publicUtilityLinks, `href: "/social", label: "Social"`);
-assertNotIncludes("SiteHeader account nav", accountWorkflowLinks, `label: "Social", nav: "social"`);
+assertNotIncludes("SiteHeader public utility Social", publicUtilityLinks, `href: SOCIAL_HOST, label: "Social"`);
+assertNotIncludes("SiteHeader account Social Status", accountWorkflowLinks, `href: "/social", label: "Social Status"`);
+assertNotIncludes("SiteHeader account Mochi Social", accountWorkflowLinks, `href: "/games/mochi-social"`);
 
 assertIncludes("SiteFooter", footer, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
 assertIncludes("SiteFooter Social", footer, `href: SOCIAL_HOST, label: "Social", external: true`);
@@ -51,8 +55,13 @@ assertNotIncludes("SiteFooter public Social", footer, `href: "/social", label: "
 assertIncludes("SocialHubPanel", socialPanel, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
 assertIncludes("SocialHubPanel", socialPanel, `href={SOCIAL_HOST}`);
 assertIncludes("SocialHubPanel", socialPanel, "Mochirii Social Status");
+assertIncludes("SocialHubPanel live copy", socialPanel, "Open Mochirii Social to start or continue the guild social sign-in.");
 assertNotIncludes("SocialHubPanel", socialPanel, "target=\"_blank\"");
 assertNotIncludes("SocialHubPanel", socialPanel, "href={text(account?.profile_url)}");
+assertIncludes("AccountPanel", accountPanel, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
+assertIncludes("AccountPanel", accountPanel, `href={SOCIAL_HOST}`);
+assertIncludes("AccountPanel", accountPanel, `href="/social">Social Status`);
+assertNotIncludes("AccountPanel stale copy", accountPanel, "SSO compatibility gate passes");
 
 assertIncludes("social page metadata", socialPage, "Mochirii Social Status");
 assertIncludes("current live state", currentState, "public website information surface");
@@ -71,8 +80,8 @@ if (failures.length) {
 }
 
 console.log("Site navigation OK.");
-console.log("- Public Social points to social.mochirii.com.");
-console.log("- Account workflows are grouped without duplicate visible destinations.");
+console.log("- Header Social and Mochi Social live in the Guild dropdown only.");
+console.log("- Footer Social points to social.mochirii.com.");
 console.log("- /social remains the private Social Status page.");
 
 function read(file) {

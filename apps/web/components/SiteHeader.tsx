@@ -29,6 +29,8 @@ type NavGroup = {
   items: NavItem[];
 };
 
+const SOCIAL_HOST = "https://social.mochirii.com";
+
 const navGroups: NavGroup[] = [
   {
     id: "guild",
@@ -37,6 +39,8 @@ const navGroups: NavGroup[] = [
       { href: "/", label: "Home", nav: "home" },
       { href: "/spotlight", label: "Spotlight", nav: "spotlight" },
       { href: "/gallery", label: "Gallery", nav: "gallery" },
+      { href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true },
+      { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
     ],
   },
   {
@@ -61,11 +65,8 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const SOCIAL_HOST = "https://social.mochirii.com";
-
 const publicUtilityLinks: NavItem[] = [
   { href: "/recruitment", label: "Recruitment", nav: "recruitment" },
-  { href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true },
   { href: "/auth", label: "Login", nav: "auth", auth: "signed-out" },
 ];
 
@@ -73,8 +74,6 @@ const accountWorkflowLinks: NavItem[] = [
   { href: "/account", label: "Profile & Settings", nav: "account", auth: "signed-in" },
   { href: "/members", label: "Members", nav: "members", auth: "verified" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
-  { href: "/social", label: "Social Status", nav: "social", auth: "verified" },
-  { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
   { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "moderator" },
 ];
 
@@ -396,7 +395,7 @@ export function SiteHeader() {
                   hidden={!isOpen}
                   data-dropdown-menu
                 >
-                  {group.items.filter((item) => navItemVisibleForPath(item, activeKey)).map((item) => (
+                  {group.items.filter((item) => navItemVisibleForPath(item, activeKey) && !navItemHidden(item, authState)).map((item) => (
                     <SiteNavLink
                       className="nav-item"
                       item={item}
@@ -567,7 +566,7 @@ export function SiteHeader() {
             {navGroups.map((group) => (
               <div className="mobile-group" key={group.id}>
                 <div className="mobile-group-title">{group.label}</div>
-                {group.items.filter((item) => navItemVisibleForPath(item, activeKey)).map((item) => (
+                {group.items.filter((item) => navItemVisibleForPath(item, activeKey) && !navItemHidden(item, authState)).map((item) => (
                   <SiteNavLink
                     className="mobile-link"
                     item={item}
