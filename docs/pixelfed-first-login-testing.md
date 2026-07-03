@@ -114,6 +114,13 @@ Current staging target: `https://social.mochirii.com`. Treat it as admin-first
 testing only; do not invite regular members or enable federation until the
 first-login smoke, media policy, backup/restore, and moderation gates pass.
 
+Public website navigation should treat `https://social.mochirii.com` as the
+main Social destination from the regular Guild dropdown and footer. The website
+`/social` route is intentionally noindex: signed-in members are redirected to
+the social host, while signed-out visitors see login/help copy. Account-link
+state and profile-link visibility belong in the website Account page; do not
+make `/social` the primary public Social link again.
+
 Minimum staging posture:
 
 - Closed registration.

@@ -82,9 +82,8 @@ const snippetChecks = [
     file: "apps/web/components/member-workflow/SocialHubPanel.tsx",
     snippets: [
       "requireAuth",
-      "verifyMemberAccess",
-      "profileIsActive",
-      "listMySocialAccounts",
+      "window.location.assign(SOCIAL_HOST)",
+      "Sign in on Mochirii before opening the guild social platform.",
       "Open Mochirii Social",
     ],
   },

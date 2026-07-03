@@ -47,6 +47,7 @@ const checks = [
   ["check:pixelfed-oidc-spike", ["node", "scripts/check-pixelfed-oidc-spike.mjs"]],
   ["check:pixelfed-first-login-readiness", ["node", "scripts/check-pixelfed-first-login-readiness.mjs"]],
   ["check:shop-brand", ["node", "scripts/check-shop-brand-guardrails.mjs"]],
+  ["check:site-navigation", ["node", "scripts/check-site-navigation.mjs"]],
   ["check:supabase-security-performance", ["node", "scripts/check-supabase-security-performance.mjs"]],
   ["check:security-hardening", ["node", "scripts/check-security-hardening.mjs"]],
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],

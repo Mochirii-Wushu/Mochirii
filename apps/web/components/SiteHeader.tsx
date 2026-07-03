@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getCurrentUser, onAuthStateChange } from "@/lib/supabase/auth";
+import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
 import { getCurrentProfile, profileIsActive } from "@/lib/supabase/profile";
 import {
+  useCallback,
   type KeyboardEvent,
   type MouseEvent,
   useEffect,
@@ -17,7 +19,8 @@ type NavItem = {
   href: string;
   label: string;
   nav: string;
-  auth?: "signed-out" | "signed-in" | "verified";
+  auth?: "signed-out" | "signed-in" | "verified" | "moderator";
+  external?: boolean;
 };
 
 type NavGroup = {
@@ -25,6 +28,8 @@ type NavGroup = {
   label: string;
   items: NavItem[];
 };
+
+const SOCIAL_HOST = "https://social.mochirii.com";
 
 const navGroups: NavGroup[] = [
   {
@@ -34,8 +39,7 @@ const navGroups: NavGroup[] = [
       { href: "/", label: "Home", nav: "home" },
       { href: "/spotlight", label: "Spotlight", nav: "spotlight" },
       { href: "/gallery", label: "Gallery", nav: "gallery" },
-      { href: "/members", label: "Members", nav: "members", auth: "verified" },
-      { href: "/social", label: "Social", nav: "social", auth: "verified" },
+      { href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true },
       { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
     ],
   },
@@ -61,15 +65,16 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-const notesLinks: NavItem[] = [
+const publicUtilityLinks: NavItem[] = [
   { href: "/recruitment", label: "Recruitment", nav: "recruitment" },
   { href: "/auth", label: "Login", nav: "auth", auth: "signed-out" },
-  { href: "/account", label: "Account", nav: "account", auth: "signed-in" },
+];
+
+const accountWorkflowLinks: NavItem[] = [
+  { href: "/account", label: "Profile & Settings", nav: "account", auth: "signed-in" },
   { href: "/members", label: "Members", nav: "members", auth: "verified" },
-  { href: "/social", label: "Social", nav: "social", auth: "verified" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
-  { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
-  { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "signed-in" },
+  { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "moderator" },
 ];
 
 const focusableSelector = [
@@ -97,10 +102,11 @@ function getFocusable(root: HTMLElement | null) {
   });
 }
 
-function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMember: boolean }) {
+function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMember: boolean; moderator: boolean }) {
   if (item.auth === "signed-out") return authState.signedIn;
   if (item.auth === "signed-in") return !authState.signedIn;
   if (item.auth === "verified") return !authState.activeMember;
+  if (item.auth === "moderator") return !authState.moderator;
   return false;
 }
 
@@ -109,7 +115,7 @@ function navItemVisibleForPath(item: NavItem, activeKey: string) {
   return true;
 }
 
-function InternalNavLink({
+function SiteNavLink({
   item,
   activeKey,
   className,
@@ -122,7 +128,7 @@ function InternalNavLink({
   onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
   hidden?: boolean;
 }) {
-  const isActive = item.nav === activeKey;
+  const isActive = !item.external && item.nav === activeKey;
   const authAttrs =
     item.auth === "signed-out"
       ? { "data-auth-signed-out": true }
@@ -130,7 +136,24 @@ function InternalNavLink({
         ? { "data-auth-signed-in": true }
         : item.auth === "verified"
           ? { "data-auth-verified": true }
+          : item.auth === "moderator"
+            ? { "data-auth-moderator": true }
           : {};
+
+  if (item.external) {
+    return (
+      <a
+        className={className}
+        href={item.href}
+        data-nav={item.nav}
+        onClick={onClick}
+        hidden={hidden}
+        {...authAttrs}
+      >
+        {item.label}
+      </a>
+    );
+  }
 
   return (
     <Link
@@ -153,7 +176,8 @@ export function SiteHeader() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [authState, setAuthState] = useState({ signedIn: false, activeMember: false });
+  const [authState, setAuthState] = useState({ signedIn: false, activeMember: false, moderator: false });
+  const [moderatorState, setModeratorState] = useState<"unknown" | "checking" | "allowed" | "denied">("unknown");
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileShellRef = useRef<HTMLDivElement>(null);
@@ -173,7 +197,10 @@ export function SiteHeader() {
     const refreshAuthState = async () => {
       const userResult = await getCurrentUser();
       if (!userResult.ok || !userResult.data?.user) {
-        if (!cancelled) setAuthState({ signedIn: false, activeMember: false });
+        if (!cancelled) {
+          setAuthState({ signedIn: false, activeMember: false, moderator: false });
+          setModeratorState("unknown");
+        }
         return;
       }
 
@@ -182,7 +209,9 @@ export function SiteHeader() {
         setAuthState({
           signedIn: true,
           activeMember: profileResult.ok && profileIsActive(profileResult.data),
+          moderator: false,
         });
+        setModeratorState("unknown");
       }
     };
 
@@ -196,6 +225,18 @@ export function SiteHeader() {
       subscription.data?.subscription?.unsubscribe();
     };
   }, []);
+
+  const ensureModeratorAccess = useCallback(async () => {
+    if (!authState.signedIn || moderatorState !== "unknown") return;
+    setModeratorState("checking");
+    const result = await checkLeaderGalleryModerationAccess();
+    setAuthState((current) => (
+      current.signedIn
+        ? { ...current, moderator: result.ok === true }
+        : current
+    ));
+    setModeratorState(result.ok === true ? "allowed" : "denied");
+  }, [authState.signedIn, moderatorState]);
 
   useEffect(() => {
     const closeDropdowns = (event: globalThis.MouseEvent) => {
@@ -354,8 +395,8 @@ export function SiteHeader() {
                   hidden={!isOpen}
                   data-dropdown-menu
                 >
-                  {group.items.filter((item) => navItemVisibleForPath(item, activeKey)).map((item) => (
-                    <InternalNavLink
+                  {group.items.filter((item) => navItemVisibleForPath(item, activeKey) && !navItemHidden(item, authState)).map((item) => (
+                    <SiteNavLink
                       className="nav-item"
                       item={item}
                       activeKey={activeKey}
@@ -368,8 +409,8 @@ export function SiteHeader() {
             );
           })}
 
-          {notesLinks.map((item) => (
-            <InternalNavLink
+          {publicUtilityLinks.map((item) => (
+            <SiteNavLink
               className={`nav-link${item.auth ? " nav-auth-link" : ""}`}
               item={item}
               activeKey={activeKey}
@@ -377,6 +418,62 @@ export function SiteHeader() {
               hidden={navItemHidden(item, authState)}
             />
           ))}
+
+          {authState.signedIn ? (
+            <div
+              className="nav-group"
+              data-dropdown
+              data-open={openGroup === "account" ? "true" : "false"}
+            >
+              <button
+                className="nav-link nav-trigger"
+                type="button"
+                data-dropdown-btn
+                aria-haspopup="true"
+                aria-expanded={openGroup === "account"}
+                aria-controls="nav-menu-account"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  toggleDropdown("account");
+                  void ensureModeratorAccess();
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toggleDropdown("account");
+                    void ensureModeratorAccess();
+                  }
+
+                  if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    setOpenGroup("account");
+                    void ensureModeratorAccess();
+                    focusFirstDropdownItem("account");
+                  }
+                }}
+              >
+                Account <span className="nav-caret" aria-hidden="true">{"\u25be"}</span>
+              </button>
+              <div
+                className="nav-menu"
+                id="nav-menu-account"
+                hidden={openGroup !== "account"}
+                data-dropdown-menu
+              >
+                {accountWorkflowLinks.map((item) => (
+                  <SiteNavLink
+                    className="nav-item"
+                    item={item}
+                    activeKey={activeKey}
+                    key={item.nav}
+                    onClick={() => setOpenGroup(null)}
+                    hidden={navItemHidden(item, authState)}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
         </nav>
 
         <div className="utils">
@@ -402,6 +499,7 @@ export function SiteHeader() {
               if (mobileOpen) {
                 closeMobile({ returnFocus: true });
               } else {
+                void ensureModeratorAccess();
                 setMobileOpen(true);
               }
             }}
@@ -468,8 +566,8 @@ export function SiteHeader() {
             {navGroups.map((group) => (
               <div className="mobile-group" key={group.id}>
                 <div className="mobile-group-title">{group.label}</div>
-                {group.items.filter((item) => navItemVisibleForPath(item, activeKey)).map((item) => (
-                  <InternalNavLink
+                {group.items.filter((item) => navItemVisibleForPath(item, activeKey) && !navItemHidden(item, authState)).map((item) => (
+                  <SiteNavLink
                     className="mobile-link"
                     item={item}
                     key={item.nav}
@@ -480,9 +578,9 @@ export function SiteHeader() {
             ))}
 
             <div className="mobile-group">
-              <div className="mobile-group-title">Notes</div>
-              {notesLinks.map((item) => (
-                <InternalNavLink
+              <div className="mobile-group-title">Visit</div>
+              {publicUtilityLinks.map((item) => (
+                <SiteNavLink
                   className="mobile-link"
                   item={item}
                   activeKey={activeKey}
@@ -492,6 +590,22 @@ export function SiteHeader() {
                 />
               ))}
             </div>
+
+            {authState.signedIn ? (
+              <div className="mobile-group">
+                <div className="mobile-group-title">Account</div>
+                {accountWorkflowLinks.map((item) => (
+                  <SiteNavLink
+                    className="mobile-link"
+                    item={item}
+                    activeKey={activeKey}
+                    key={item.nav}
+                    onClick={() => closeMobile()}
+                    hidden={navItemHidden(item, authState)}
+                  />
+                ))}
+              </div>
+            ) : null}
           </nav>
         </div>
       </div>

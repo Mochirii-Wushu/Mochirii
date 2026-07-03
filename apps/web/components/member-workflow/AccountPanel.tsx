@@ -28,6 +28,8 @@ import {
 } from "./format";
 import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
+const SOCIAL_HOST = "https://social.mochirii.com";
+
 type FormState = Record<(typeof editableProfileFields)[number], string>;
 
 const emptyFormState = editableProfileFields.reduce((memo, field) => {
@@ -648,7 +650,7 @@ export function AccountPanel() {
             </div>
           ) : (
             <WorkflowEmptyState title="Not linked yet">
-              Mochirii Social account creation starts after the SSO compatibility gate passes.
+              Open Mochirii Social to start or continue the guild social sign-in. This card updates after the account link is recorded.
             </WorkflowEmptyState>
           )}
 
@@ -658,7 +660,7 @@ export function AccountPanel() {
                 {pixelfedAccount.profile_link_visible ? "Hide link" : "Show link"}
               </button>
             ) : null}
-            <Link className="hero-cta" href="/social">Social</Link>
+            <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
           </div>
 
           <WorkflowNotice hidden={!socialStatus}>{socialStatus}</WorkflowNotice>

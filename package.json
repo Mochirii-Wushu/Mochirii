@@ -62,6 +62,7 @@
     "check:recruitment-audio-player": "node scripts/check-recruitment-audio-player.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:security-hardening": "node scripts/check-security-hardening.mjs",
+    "check:site-navigation": "node scripts/check-site-navigation.mjs",
     "check:shop-brand": "node scripts/check-shop-brand-guardrails.mjs",
     "check:supabase-security-performance": "node scripts/check-supabase-security-performance.mjs",
     "check:spotlight-poll": "node scripts/check-spotlight-poll.mjs",

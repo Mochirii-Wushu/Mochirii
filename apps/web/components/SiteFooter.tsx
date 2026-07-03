@@ -7,17 +7,16 @@ import { usePathname } from "next/navigation";
 type FooterLink = {
   href: string;
   label: string;
-  hidden?: boolean;
-  auth?: "signed-out" | "signed-in" | "verified";
+  external?: boolean;
 };
+
+const SOCIAL_HOST = "https://social.mochirii.com";
 
 const guildLinks = [
   { href: "/", label: "Home" },
   { href: "/spotlight", label: "Spotlight" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/members", label: "Members", hidden: true, auth: "verified" },
-  { href: "/social", label: "Social", hidden: true, auth: "verified" },
-  { href: "/gallery-submit", label: "Submit Image", hidden: true, auth: "verified" },
+  { href: SOCIAL_HOST, label: "Social", external: true },
 ] satisfies FooterLink[];
 
 const cultureLinks = [
@@ -26,8 +25,6 @@ const cultureLinks = [
   { href: "/leaders", label: "Leaders" },
   { href: "/tome", label: "Tome" },
   { href: "/spotify", label: "Playlists" },
-  { href: "/auth", label: "Login", auth: "signed-out" },
-  { href: "/account", label: "Account", hidden: true, auth: "signed-in" },
 ] satisfies FooterLink[];
 
 const updateLinks = [
@@ -46,28 +43,17 @@ function FooterColumn({
   return (
     <div className="footer-col">
       <div className="footer-col-title">{title}</div>
-      {links.map((link) => {
-        const authAttrs =
-          link.auth === "signed-out"
-            ? { "data-auth-signed-out": true }
-            : link.auth === "signed-in"
-              ? { "data-auth-signed-in": true }
-              : link.auth === "verified"
-                ? { "data-auth-verified": true }
-                : {};
-
-        return (
-          <Link
-            className="footer-nav"
-            href={link.href}
-            hidden={link.hidden}
-            key={`${title}-${link.href}`}
-            {...authAttrs}
-          >
+      {links.map((link) => (
+        link.external ? (
+          <a className="footer-nav" href={link.href} key={`${title}-${link.href}`}>
+            {link.label}
+          </a>
+        ) : (
+          <Link className="footer-nav" href={link.href} key={`${title}-${link.href}`}>
             {link.label}
           </Link>
-        );
-      })}
+        )
+      ))}
     </div>
   );
 }
