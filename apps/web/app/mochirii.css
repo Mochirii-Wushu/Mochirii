@@ -4778,6 +4778,27 @@ body[data-page="gallery-submit"] .muted{
   transform:none;
 }
 
+.provider-button--placeholder{
+  border-style:dashed;
+  border-color:rgba(220,235,255,.24);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent),
+    rgba(0,0,0,.12);
+}
+
+.provider-button--placeholder:disabled{
+  opacity:.76;
+}
+
+.provider-button--placeholder:disabled:hover{
+  border-color:rgba(220,235,255,.24);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent),
+    rgba(0,0,0,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transform:none;
+}
+
 .provider-button__copy{
   min-width:0;
   display:flex;

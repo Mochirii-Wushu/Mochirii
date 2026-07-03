@@ -39,9 +39,10 @@ assertIncludes(
 
 [
   "| Active | Discord, Google, Twitch |",
-  "| Future | Apple |",
+  "| Visible placeholder | Apple |",
   "| Deferred | Facebook, Kakao, Spotify, Phone |",
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch",
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple",
   "PR #300",
   "https://github.com/Mochirii-Wushu/Mochirii/pull/300",
   "850a13df22853778d8a48ad6b5a319ae029739bc",
@@ -55,9 +56,10 @@ assertIncludes(
 
 [
   "The current live sign-in set is Discord, Google, and Twitch.",
-  "Apple is the only documented future provider lane.",
+  "Apple is the only documented visible placeholder lane",
   "Facebook, Kakao, Spotify, and Phone are deferred",
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch",
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple",
   "ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true npm run smoke:member-verification-preview",
   "refuses project `deyvmtncimmcinldjyqe`",
 ].forEach((snippet) => assertIncludes("Supabase README", supabaseReadme, snippet));
@@ -87,6 +89,8 @@ assertIncludes(
   '"spotify"',
   'process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true"',
   'process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true"',
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS",
+  "placeholderOAuthProviders",
 ].forEach((snippet) => assertIncludes("provider registry conservative support", providerRegistry, snippet));
 
 [

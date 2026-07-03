@@ -1,4 +1,5 @@
 import type { Provider } from "@supabase/supabase-js";
+import { NEXT_PUBLIC_AUTH_PROVIDER_IDS, NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS } from "./config";
 
 export const AUTH_PROVIDER_IDS = [
   "discord",
@@ -125,8 +126,13 @@ function splitProviderEnv(value: string | undefined) {
 }
 
 function requestedProviderIds() {
-  const requested = splitProviderEnv(process.env.NEXT_PUBLIC_AUTH_PROVIDER_IDS);
+  const requested = splitProviderEnv(NEXT_PUBLIC_AUTH_PROVIDER_IDS);
   return requested.length ? requested : ["discord"];
+}
+
+function requestedPlaceholderProviderIds() {
+  const requested = splitProviderEnv(NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS);
+  return requested.length ? requested : ["apple"];
 }
 
 export function isAuthProviderId(value: unknown): value is AuthProviderId {
@@ -157,6 +163,20 @@ export function enabledAuthProviders() {
 
 export function enabledOAuthProviders() {
   return enabledAuthProviders().filter((provider): provider is AuthProviderConfig & { id: OAuthProviderId; kind: "oauth" } =>
+    provider.kind === "oauth" && isOAuthProviderId(provider.id),
+  );
+}
+
+export function placeholderAuthProviders() {
+  const enabledIds = new Set(enabledAuthProviders().map((provider) => provider.id));
+  return requestedPlaceholderProviderIds()
+    .filter(isAuthProviderId)
+    .filter((providerId) => !enabledIds.has(providerId))
+    .map((providerId) => AUTH_PROVIDER_REGISTRY[providerId]);
+}
+
+export function placeholderOAuthProviders() {
+  return placeholderAuthProviders().filter((provider): provider is AuthProviderConfig & { id: OAuthProviderId; kind: "oauth" } =>
     provider.kind === "oauth" && isOAuthProviderId(provider.id),
   );
 }
