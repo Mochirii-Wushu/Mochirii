@@ -76,6 +76,11 @@ Supabase OAuth Server must be configured according to the current Supabase OAuth
 - Requested scopes include `openid profile email`.
 - Approval calls are allowed only for active guild members through
   `/api/oauth/decision`.
+- `/api/oauth/decision` keeps the active-member gate server-side, then submits
+  the consent decision to Supabase Auth with the signed-in user's bearer token.
+  Do not replace this with a sessionless server `supabase.auth.oauth.*` helper:
+  those helpers require an auth-js session and will return `Auth session
+  missing!` in a stateless route handler.
 
 If ID token generation fails because JWT signing keys are still symmetric,
 pause and prepare a JWT signing-key decision packet before continuing.
