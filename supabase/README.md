@@ -132,6 +132,31 @@ NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
 ```
 
+Apple activation uses the Supabase Auth callback only:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
+```
+
+Stable Apple Developer identifiers for this provider lane:
+
+```text
+App ID: com.mochirii.web
+App ID description: Mochirii Web
+Services ID: com.mochirii.web.login
+Services ID description: Mochirii Website Login
+Domain: deyvmtncimmcinldjyqe.supabase.co
+```
+
+Credential artifacts, Apple key metadata, generated client-secret expiry notes,
+and six-month rotation notes belong only under `C:\Users\xtyty\Documents\Creds`.
+Do not commit or print Apple private key material, generated client secrets,
+OAuth payloads, cookies, token values, or digests of those values. Apple is
+identity evidence only; it does not automatically prove guild membership,
+gallery eligibility, moderator status, Mochirii Social account creation, or
+game access. First activation testing should link Apple to the existing admin
+account from Account before testing signed-out Apple login.
+
 Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider lanes are intentionally reopened.
 
 Preview-only member verification smoke:
