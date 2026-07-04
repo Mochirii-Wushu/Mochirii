@@ -29,12 +29,12 @@ const functions = [
   "submit-member-profile-media",
   "list-member-profile-media-queue",
   "moderate-member-profile-media",
-  "mochi-social-alpha-session",
-  "mochi-social-unity-auth",
-  "mochi-social-alpha-action",
-  "mochi-social-alpha-progress",
-  "mochi-social-alpha-admin",
-  "submit-mochi-social-feedback",
+  "mochi-pets-alpha-session",
+  "mochi-pets-unity-auth",
+  "mochi-pets-alpha-action",
+  "mochi-pets-alpha-progress",
+  "mochi-pets-alpha-admin",
+  "submit-mochi-pets-feedback",
   "sync-pixelfed-social-account",
 ];
 

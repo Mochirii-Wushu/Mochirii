@@ -41,7 +41,7 @@ Current website UI:
 - `/social`: noindex Mochirii Social handoff/support page.
 - `/oauth/consent`: Supabase OAuth consent UI for Mochirii Social.
 - `/gallery-submit`: role-gated image upload flow.
-- `/leader-dashboard`: moderator gallery queue, member verification review, Instagram queue, and Mochi Social alpha controls.
+- `/leader-dashboard`: moderator gallery queue, member verification review, Instagram queue, and Mochi Pets alpha controls.
 
 Retired website UI:
 

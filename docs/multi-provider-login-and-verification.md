@@ -118,4 +118,4 @@ provider.
 
 ## Out Of Scope
 
-New website login methods do not grant Mochi Social alpha access, Fly game access, Enjin wallet access, Enjin transactions, Fuel Tanks, cENJ funding, Discord role mutation, or Discord message-content access.
+New website login methods do not grant Mochi Pets alpha access, Fly game access, Enjin wallet access, Enjin transactions, Fuel Tanks, cENJ funding, Discord role mutation, or Discord message-content access.

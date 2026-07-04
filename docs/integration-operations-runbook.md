@@ -34,13 +34,14 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Provider evidence: `npm run check:full-stack-release-evidence -- --providers --strict-provider`; add `--write` only after strict mode passes.
 - Supabase work: `npm run check:supabase-security-performance`, `npm run check:supabase-edge-types`, relevant Deno tests, migration list, linked advisors, and Supabase Preview evidence for PRs with `supabase/` changes.
 - Browser/accessibility/performance work: route matrix, accessibility route matrix, Lighthouse Home/Recruitment/Gallery, and focused Playwright smokes for authenticated or media flows.
-- CSP work: `npm run check:csp-inline-hardening -- --live --write`; do not remove inline allowances until Preview browser evidence covers Supabase, Spotify, Vercel telemetry, and Mochi Social iframe/postMessage behavior.
+- CSP work: `npm run check:csp-inline-hardening -- --live --write`; do not remove inline allowances until Preview browser evidence covers Supabase, Spotify, Vercel telemetry, and Mochi Pets iframe/postMessage behavior.
 
 ## Current Integration Expectations
 
 - Live app surface: Vercel/Next.js under `apps/web` for `https://mochirii.com`.
 - Vercel release policy: keep the GitHub website repository private. Vercel Git checks can fail for private GitHub organization repositories on the current plan; treat that as an expected integration blocker, not a reason to make the repo public. After an approved protected/admin merge, deploy production manually from the linked private checkout with Vercel CLI and a local token kept in child-process environment only.
 - Website/social split: `https://mochirii.com` is the public information site. Header Social should stay in the regular Guild dropdown, footer Social should hand off directly to `https://social.mochirii.com`, and the website `/social` route should stay noindex while redirecting signed-in members and offering signed-out login/help copy.
+- Game/social split: Mochi Pets is the guild game and Mochirii Social is the guild social platform. Follow `docs/mochi-pets-rename-manifest.md` for route, prefix, migration, and runtime-manifest cutover rules.
 - Rollback/reference surface: root static files, root `assets/`, root `data/`, and GitHub Pages material remain until a separate retirement plan.
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
 - Vercel project: production-serving `mochirii/mochirii` with root directory `apps/web`.

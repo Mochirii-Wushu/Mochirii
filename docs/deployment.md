@@ -84,7 +84,7 @@ For a release packet that needs production header evidence, opt into the read-on
 npm run check:csp-inline-hardening -- --live --write
 ```
 
-Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Social iframe bridge. For `script-src`, choose a Next-compatible nonce or SRI path before enforcement. Treat nonce-based CSP as a separate compatibility PR because Next.js nonce middleware makes pages dynamically rendered instead of static/prerendered.
+Do not remove either inline allowance until the inventory and a Vercel Preview browser pass cover Discord handoff surfaces, Spotify embeds, Supabase auth/storage, Vercel Analytics/Speed Insights, and the Mochi Pets iframe bridge. For `script-src`, choose a Next-compatible nonce or SRI path before enforcement. Treat nonce-based CSP as a separate compatibility PR because Next.js nonce middleware makes pages dynamically rendered instead of static/prerendered.
 
 ## Supabase Preview Migration History
 
@@ -142,7 +142,7 @@ Post-deploy production smoke:
 npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
 ```
 
-This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, the `/games/mochi-social` noindex route, and the `www` redirect. Static route metadata, live social preview image reachability, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
+This verifies clean Vercel routes, legacy `.html` redirects, signed-out member/admin route content, Vercel headers on the apex, the `/games/mochi-pets` noindex route, and the `www` redirect. Static route metadata, live social preview image reachability, noindex boundaries, sitemap membership, observability wiring, and smoke-route coverage are guarded locally by `npm run check:observability-metadata-smoke`.
 
 Accessibility review starts with the no-secret route matrix:
 

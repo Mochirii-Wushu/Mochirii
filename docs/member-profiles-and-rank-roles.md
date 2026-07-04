@@ -95,7 +95,7 @@ Account must not show:
 - avatar and banner upload controls
 - profile media review status
 
-Leader Dashboard keeps gallery moderation, member verification review, Instagram queue controls, and Mochi Social alpha controls. It must not show the old profile media review queue.
+Leader Dashboard keeps gallery moderation, member verification review, Instagram queue controls, and Mochi Pets alpha controls. It must not show the old profile media review queue.
 
 ## Verification
 

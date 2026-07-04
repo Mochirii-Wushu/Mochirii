@@ -61,7 +61,7 @@ function FooterColumn({
 export function SiteFooter() {
   const year = new Date().getFullYear();
   const pathname = usePathname();
-  const hideToolingLanguage = (pathname || "").replace(/\/+$/, "") === "/games/mochi-social";
+  const hideToolingLanguage = (pathname || "").replace(/\/+$/, "") === "/games/mochi-pets";
   const visibleCultureLinks = hideToolingLanguage
     ? cultureLinks.filter((link) => link.href !== "/tome")
     : cultureLinks;

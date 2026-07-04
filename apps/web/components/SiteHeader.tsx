@@ -40,7 +40,7 @@ const navGroups: NavGroup[] = [
       { href: "/spotlight", label: "Spotlight", nav: "spotlight" },
       { href: "/gallery", label: "Gallery", nav: "gallery" },
       { href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true },
-      { href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in" },
+      { href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets", auth: "signed-in" },
     ],
   },
   {
@@ -110,7 +110,7 @@ function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMemb
 }
 
 function navItemVisibleForPath(item: NavItem, activeKey: string) {
-  if (activeKey === "games/mochi-social" && item.nav === "tome") return false;
+  if (activeKey === "games/mochi-pets" && item.nav === "tome") return false;
   return true;
 }
 

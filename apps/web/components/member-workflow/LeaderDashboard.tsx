@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { requireAuth, onAuthStateChange } from "@/lib/supabase/auth";
 import {
-  manageMochiSocialAlphaAdmin,
-  type MochiSocialAlphaAdmin,
-  type MochiSocialAlphaTester,
-} from "@/lib/mochi-social/alpha";
+  manageMochiPetsAlphaAdmin,
+  type MochiPetsAlphaAdmin,
+  type MochiPetsAlphaTester,
+} from "@/lib/mochi-pets/alpha";
 import {
   checkInstagramApiStatus,
   checkLeaderGalleryModerationAccess,
@@ -428,9 +428,9 @@ function AlphaTesterRow({
   busy,
   onRevoke,
 }: {
-  tester: MochiSocialAlphaTester;
+  tester: MochiPetsAlphaTester;
   busy: boolean;
-  onRevoke: (tester: MochiSocialAlphaTester) => void;
+  onRevoke: (tester: MochiPetsAlphaTester) => void;
 }) {
   const status = text(tester.status, "unknown").toLowerCase();
   return (
@@ -465,7 +465,7 @@ function AlphaTesterRow({
   );
 }
 
-function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
+function AlphaAuditPanel({ data }: { data: MochiPetsAlphaAdmin | null }) {
   const audit = data?.audit || {};
   const summary = audit.summary || {};
   const recentLedger = Array.isArray(audit.recentLedger) ? audit.recentLedger : [];
@@ -483,7 +483,7 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
 
   return (
     <>
-      <div className="moderation-summary" aria-label="Mochi Social alpha audit summary">
+      <div className="moderation-summary" aria-label="Mochi Pets alpha audit summary">
         {cards.map(([label, value]) => (
           <div className="moderation-summary__card" key={label}>
             <span>{label}</span>
@@ -491,7 +491,7 @@ function AlphaAuditPanel({ data }: { data: MochiSocialAlphaAdmin | null }) {
           </div>
         ))}
       </div>
-      <div className="review-list" aria-label="Recent Mochi Social alpha audit rows">
+      <div className="review-list" aria-label="Recent Mochi Pets alpha audit rows">
         <details className="review-storage" open>
           <summary>Recent ledger events</summary>
           {recentLedger.length ? recentLedger.map((event) => (
@@ -613,9 +613,9 @@ export function LeaderDashboard() {
   const [instagramNotes, setInstagramNotes] = useState<Record<string, string>>({});
   const [instagramConfirmations, setInstagramConfirmations] = useState<Record<string, InstagramAction | undefined>>({});
   const [instagramJobMessages, setInstagramJobMessages] = useState<Record<string, InstagramJobMessage | undefined>>({});
-  const [mochiAlpha, setMochiAlpha] = useState<MochiSocialAlphaAdmin | null>(null);
+  const [mochiAlpha, setMochiAlpha] = useState<MochiPetsAlphaAdmin | null>(null);
   const [mochiAlphaBusy, setMochiAlphaBusy] = useState(false);
-  const [mochiAlphaStatus, setMochiAlphaStatus] = useState("Mochi Social alpha controls have not loaded yet.");
+  const [mochiAlphaStatus, setMochiAlphaStatus] = useState("Mochi Pets alpha controls have not loaded yet.");
   const [mochiAlphaError, setMochiAlphaError] = useState("");
   const [mochiAlphaUserId, setMochiAlphaUserId] = useState("");
   const [mochiAlphaNotes, setMochiAlphaNotes] = useState("");
@@ -723,12 +723,12 @@ export function LeaderDashboard() {
   const loadMochiAlpha = useCallback(async ({ successMessage = "" }: { successMessage?: string } = {}) => {
     setMochiAlphaBusy(true);
     setMochiAlphaError("");
-    setMochiAlphaStatus("Loading Mochi Social alpha access and audit state.");
+    setMochiAlphaStatus("Loading Mochi Pets alpha access and audit state.");
 
-    const result = await manageMochiSocialAlphaAdmin({ action: "list" });
+    const result = await manageMochiPetsAlphaAdmin({ action: "list" });
     if (!result.ok) {
       setMochiAlpha(null);
-      setMochiAlphaError(result.message || "Mochi Social alpha controls could not be loaded.");
+      setMochiAlphaError(result.message || "Mochi Pets alpha controls could not be loaded.");
       setMochiAlphaStatus("");
       setMochiAlphaBusy(false);
       return;
@@ -736,7 +736,7 @@ export function LeaderDashboard() {
 
     const data = result.data || { testers: [] };
     setMochiAlpha(data);
-    setMochiAlphaStatus(successMessage || `${data.testers?.length || 0} Mochi Social alpha tester${data.testers?.length === 1 ? "" : "s"} shown.`);
+    setMochiAlphaStatus(successMessage || `${data.testers?.length || 0} Mochi Pets alpha tester${data.testers?.length === 1 ? "" : "s"} shown.`);
     setMochiAlphaBusy(false);
   }, []);
 
@@ -1012,15 +1012,15 @@ export function LeaderDashboard() {
 
     setMochiAlphaBusy(true);
     setMochiAlphaError("");
-    setMochiAlphaStatus("Granting Mochi Social alpha access.");
-    const result = await manageMochiSocialAlphaAdmin({
+    setMochiAlphaStatus("Granting Mochi Pets alpha access.");
+    const result = await manageMochiPetsAlphaAdmin({
       action: "grant",
       user_id: userId,
       notes: mochiAlphaNotes.trim(),
     });
 
     if (!result.ok) {
-      setMochiAlphaError(result.message || "Mochi Social alpha access could not be granted.");
+      setMochiAlphaError(result.message || "Mochi Pets alpha access could not be granted.");
       setMochiAlphaStatus("");
       setMochiAlphaBusy(false);
       return;
@@ -1029,36 +1029,36 @@ export function LeaderDashboard() {
     setMochiAlphaUserId("");
     setMochiAlphaNotes("");
     setMochiAlpha(result.data || { testers: [] });
-    setMochiAlphaStatus(result.message || "Mochi Social alpha access granted.");
+    setMochiAlphaStatus(result.message || "Mochi Pets alpha access granted.");
     setMochiAlphaBusy(false);
   }
 
-  async function revokeMochiAlphaAccess(tester: MochiSocialAlphaTester) {
+  async function revokeMochiAlphaAccess(tester: MochiPetsAlphaTester) {
     const userId = text(tester.user_id);
     if (!userId) return;
     const confirmed =
       typeof window !== "undefined" &&
-      window.confirm("Revoke Mochi Social alpha access for this tester?");
+      window.confirm("Revoke Mochi Pets alpha access for this tester?");
     if (!confirmed) return;
 
     setMochiAlphaBusy(true);
     setMochiAlphaError("");
-    setMochiAlphaStatus("Revoking Mochi Social alpha access.");
-    const result = await manageMochiSocialAlphaAdmin({
+    setMochiAlphaStatus("Revoking Mochi Pets alpha access.");
+    const result = await manageMochiPetsAlphaAdmin({
       action: "revoke",
       user_id: userId,
       notes: mochiAlphaNotes.trim() || "Revoked from leader dashboard.",
     });
 
     if (!result.ok) {
-      setMochiAlphaError(result.message || "Mochi Social alpha access could not be revoked.");
+      setMochiAlphaError(result.message || "Mochi Pets alpha access could not be revoked.");
       setMochiAlphaStatus("");
       setMochiAlphaBusy(false);
       return;
     }
 
     setMochiAlpha(result.data || { testers: [] });
-    setMochiAlphaStatus(result.message || "Mochi Social alpha access revoked.");
+    setMochiAlphaStatus(result.message || "Mochi Pets alpha access revoked.");
     setMochiAlphaBusy(false);
   }
 
@@ -1289,10 +1289,10 @@ export function LeaderDashboard() {
         )}
       </div>
     </section>
-    <section className="glass-card glass-card--primary glass-pad auth-panel" id="mochiSocialAlphaPanel" aria-busy={mochiAlphaBusy}>
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="mochiPetsAlphaPanel" aria-busy={mochiAlphaBusy}>
       <div className="auth-panel__head">
         <div>
-          <p className="kicker">Mochi Social Alpha</p>
+          <p className="kicker">Mochi Pets Alpha</p>
           <h2 className="section-title">Access And Audit</h2>
         </div>
         <button className="hero-cta" type="button" onClick={() => loadMochiAlpha()} disabled={mochiAlphaBusy}>Refresh</button>
@@ -1343,7 +1343,7 @@ export function LeaderDashboard() {
           ))
         ) : (
           <WorkflowEmptyState title={mochiAlphaBusy ? "Loading alpha testers" : "No alpha testers shown"}>
-            {mochiAlphaBusy ? "Checking Mochi Social alpha access." : "No Mochi Social alpha testers yet."}
+            {mochiAlphaBusy ? "Checking Mochi Pets alpha access." : "No Mochi Pets alpha testers yet."}
           </WorkflowEmptyState>
         )}
       </div>

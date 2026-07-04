@@ -36,7 +36,7 @@ for (const href of forbiddenGroupHrefs) {
 
 assertIncludes("SiteHeader", header, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
 assertIncludes("SiteHeader dropdown Social", navGroups, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
-assertIncludes("SiteHeader dropdown Mochi Social", navGroups, `href: "/games/mochi-social", label: "Mochi Social", nav: "games/mochi-social", auth: "signed-in"`);
+assertIncludes("SiteHeader dropdown Mochi Pets", navGroups, `href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets", auth: "signed-in"`);
 assertIncludes("SiteHeader group auth filtering", header, "&& !navItemHidden(item, authState)");
 assertIncludes("SiteHeader moderator probe", header, "checkLeaderGalleryModerationAccess");
 assertIncludes("SiteHeader lazy moderator trigger", header, `void ensureModeratorAccess();`);
@@ -50,7 +50,7 @@ assertNotIncludes("SiteHeader public nav", publicUtilityLinks, `href: "/social",
 assertNotIncludes("SiteHeader public utility Social", publicUtilityLinks, `href: SOCIAL_HOST, label: "Social"`);
 assertNotIncludes("SiteHeader account Members", accountWorkflowLinks, `href: "/members"`);
 assertNotIncludes("SiteHeader account Social Status", accountWorkflowLinks, `href: "/social", label: "Social Status"`);
-assertNotIncludes("SiteHeader account Mochi Social", accountWorkflowLinks, `href: "/games/mochi-social"`);
+assertNotIncludes("SiteHeader account Mochi Pets", accountWorkflowLinks, `href: "/games/mochi-pets"`);
 
 for (const file of retiredMembersRouteFiles) {
   if (existsSync(resolve(root, file))) failures.push(`${file}: retired members route surface must stay removed.`);
@@ -96,7 +96,7 @@ if (failures.length) {
 }
 
 console.log("Site navigation OK.");
-console.log("- Header Social and Mochi Social live in the Guild dropdown only.");
+console.log("- Header Social and Mochi Pets live in the Guild dropdown only.");
 console.log("- Footer Social points to social.mochirii.com.");
 console.log("- /social redirects signed-in members and keeps signed-out help.");
 

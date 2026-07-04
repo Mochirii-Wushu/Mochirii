@@ -143,41 +143,41 @@ verify_jwt = true
 import_map = "./functions/moderate-member-profile-media/deno.json"
 entrypoint = "./functions/moderate-member-profile-media/index.ts"
 
-[functions.mochi-social-alpha-session]
+[functions.mochi-pets-alpha-session]
 enabled = true
 verify_jwt = true
-import_map = "./functions/mochi-social-alpha-session/deno.json"
-entrypoint = "./functions/mochi-social-alpha-session/index.ts"
+import_map = "./functions/mochi-pets-alpha-session/deno.json"
+entrypoint = "./functions/mochi-pets-alpha-session/index.ts"
 
-[functions.mochi-social-unity-auth]
+[functions.mochi-pets-unity-auth]
 enabled = true
 verify_jwt = true
-import_map = "./functions/mochi-social-unity-auth/deno.json"
-entrypoint = "./functions/mochi-social-unity-auth/index.ts"
+import_map = "./functions/mochi-pets-unity-auth/deno.json"
+entrypoint = "./functions/mochi-pets-unity-auth/index.ts"
 
-[functions.mochi-social-alpha-action]
+[functions.mochi-pets-alpha-action]
 enabled = true
 verify_jwt = false
-import_map = "./functions/mochi-social-alpha-action/deno.json"
-entrypoint = "./functions/mochi-social-alpha-action/index.ts"
+import_map = "./functions/mochi-pets-alpha-action/deno.json"
+entrypoint = "./functions/mochi-pets-alpha-action/index.ts"
 
-[functions.mochi-social-alpha-progress]
+[functions.mochi-pets-alpha-progress]
 enabled = true
 verify_jwt = false
-import_map = "./functions/mochi-social-alpha-progress/deno.json"
-entrypoint = "./functions/mochi-social-alpha-progress/index.ts"
+import_map = "./functions/mochi-pets-alpha-progress/deno.json"
+entrypoint = "./functions/mochi-pets-alpha-progress/index.ts"
 
-[functions.mochi-social-alpha-admin]
+[functions.mochi-pets-alpha-admin]
 enabled = true
 verify_jwt = true
-import_map = "./functions/mochi-social-alpha-admin/deno.json"
-entrypoint = "./functions/mochi-social-alpha-admin/index.ts"
+import_map = "./functions/mochi-pets-alpha-admin/deno.json"
+entrypoint = "./functions/mochi-pets-alpha-admin/index.ts"
 
-[functions.submit-mochi-social-feedback]
+[functions.submit-mochi-pets-feedback]
 enabled = true
 verify_jwt = true
-import_map = "./functions/submit-mochi-social-feedback/deno.json"
-entrypoint = "./functions/submit-mochi-social-feedback/index.ts"
+import_map = "./functions/submit-mochi-pets-feedback/deno.json"
+entrypoint = "./functions/submit-mochi-pets-feedback/index.ts"
 
 [functions.sync-pixelfed-social-account]
 enabled = true
