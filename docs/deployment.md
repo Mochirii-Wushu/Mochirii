@@ -35,7 +35,9 @@ Keep the Mochirii website GitHub repository private. The current release path in
 
 GitHub PRs should still use protected-branch review/check discipline. When the Vercel Git status reports the private-organization plan limitation but repository checks and any required provider previews pass, an owner may explicitly approve admin bypass merge plus manual Vercel CLI deployment.
 
-After the approved merge, sync `main` and deploy from the linked private checkout without printing secrets:
+After the approved merge, sync `main` and deploy from the repository root without printing secrets. The
+linked Vercel project keeps `apps/web` as its configured Root Directory, so running the CLI from
+`apps/web` can incorrectly resolve the path as `apps/web/apps/web` on current Vercel CLI versions.
 
 ```powershell
 $token = (Get-Content -LiteralPath 'C:\Users\xtyty\Documents\Creds\Vercel Token.txt' -Raw).Trim()
