@@ -132,7 +132,7 @@ function requestedProviderIds() {
 
 function requestedPlaceholderProviderIds() {
   const requested = splitProviderEnv(NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS);
-  return requested.length ? requested : ["apple"];
+  return requested;
 }
 
 export function isAuthProviderId(value: unknown): value is AuthProviderId {

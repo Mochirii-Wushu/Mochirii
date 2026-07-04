@@ -2,8 +2,8 @@ export const SUPABASE_PROJECT_REF = "deyvmtncimmcinldjyqe";
 export const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
 export const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
 export const NEXT_PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");
-export const NEXT_PUBLIC_AUTH_PROVIDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_IDS || "discord";
-export const NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS || "apple";
+export const NEXT_PUBLIC_AUTH_PROVIDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_IDS || "discord,google,twitch,apple";
+export const NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS || "";
 export const NEXT_PUBLIC_PHONE_AUTH_READY = process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true";
 export const NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
 
