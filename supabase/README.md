@@ -119,10 +119,12 @@ In Supabase Dashboard:
 2. Enable only the providers that are ready for live callbacks.
 3. Add each provider's Client ID / public app identifier.
 4. Add each provider's Client Secret in Supabase only.
-5. Set the production Site URL to the public site URL.
-6. Add production redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
-7. Add local development redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
-8. Confirm every provider callback URL matches:
+5. Enable Supabase Auth Manual Linking so signed-in users can link Discord,
+   Google, Twitch, and Apple identities from Account with `linkIdentity`.
+6. Set the production Site URL to the public site URL.
+7. Add production redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
+8. Add local development redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
+9. Confirm every provider callback URL matches:
 
 ```text
 https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
@@ -161,6 +163,13 @@ Apple: active identity evidence only. It does not automatically prove guild
 membership, gallery eligibility, moderator status, Mochirii Social account
 creation, or game access. First activation testing should link Apple to the
 existing admin account from Account before testing signed-out Apple login.
+
+If Account identity linking shows `Manual linking is disabled`, the website is
+already calling Supabase correctly. Enable the production project's Manual
+Linking Auth setting after exact owner approval, then retry the provider link
+from Account. The equivalent Management API field is
+`security_manual_linking_enabled`; never print the bearer token or raw auth
+config response while checking it.
 
 Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider lanes are intentionally reopened.
 

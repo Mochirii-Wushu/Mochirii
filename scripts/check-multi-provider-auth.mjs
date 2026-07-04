@@ -23,6 +23,8 @@ const profileClient = read("apps/web/lib/supabase/profile.ts");
 const authPanel = read("apps/web/components/member-workflow/AuthPanel.tsx");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
 const nextCss = read("apps/web/app/mochirii.css");
+const multiProviderDoc = read("docs/multi-provider-login-and-verification.md");
+const supabaseReadme = read("supabase/README.md");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
 const moderationClient = read("apps/web/lib/supabase/moderation.ts");
@@ -109,6 +111,14 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "placeholderOAuthProviders",
   "Setup pending",
 ].forEach((snippet) => assertIncludes("AccountPanel", accountPanel, snippet));
+
+[
+  "Manual Linking",
+  "security_manual_linking_enabled",
+].forEach((snippet) => {
+  assertIncludes("multi-provider docs", multiProviderDoc, snippet);
+  assertIncludes("Supabase README", supabaseReadme, snippet);
+});
 
 [
   ".provider-logo",
