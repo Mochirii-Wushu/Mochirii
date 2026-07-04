@@ -156,7 +156,7 @@ assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
   "listGalleryReviewQueue",
   "moderateGallerySubmission",
   "reviewMemberVerification",
-  "manageMochiSocialAlphaAdmin",
+  "manageMochiPetsAlphaAdmin",
 ].forEach((snippet) => assertIncludes("LeaderDashboard", leaderDashboard, snippet));
 [
   "listProfileMediaQueue",

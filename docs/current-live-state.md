@@ -41,11 +41,12 @@ This is the short source-of-truth index for the current Mochirii production post
 - Browser code uses only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
-- Supabase function list was verified on 2026-06-17 for project `deyvmtncimmcinldjyqe`; expected website, Reaper, Instagram, vote, spotlight, profile, and Mochi Social alpha functions are active.
+- Supabase function list was verified on 2026-06-17 for project `deyvmtncimmcinldjyqe`; expected website, Reaper, Instagram, vote, spotlight, profile, and Mochi Pets alpha functions are active.
 - Supabase CLI function-list readback timed out during the 2026-06-19 unified release ledger pass. Treat this as a read-only CLI evidence blocker, not a product failure; use Supabase Dashboard readback or retry once later before any Supabase deploy.
 - Supabase CLI was updated to `2.107.0` for the Supabase hardening packet.
-- Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Social-specific advisor findings.
-- Supabase advisor snapshot still includes leaked-password protection as a provider configuration follow-up, intentional service-only RLS/no-policy findings documented in `supabase/README.md`, informational unused-index findings, and deferred Mochi Social RLS/index performance warnings.
+- Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Pets-specific advisor findings.
+- Supabase advisor snapshot still includes leaked-password protection as a provider configuration follow-up, intentional service-only RLS/no-policy findings documented in `supabase/README.md`, informational unused-index findings, and deferred Mochi Pets RLS/index performance warnings.
+- Mochi Pets route/function/table rename is an atomic maintenance cutover. Do not deploy the website route rename independently; apply the approved Supabase migration, deploy the renamed Edge Functions, update the game runtime manifest, and resume tester traffic in the same verified window.
 
 ## Mochirii Social / Pixelfed
 

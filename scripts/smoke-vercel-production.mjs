@@ -1,5 +1,6 @@
 const DEFAULT_BASE_URL = "https://mochirii.vercel.app";
 const TIMEOUT_MS = 30000;
+const retiredGameRoute = `/games/${["mochi", "social"].join("-")}`;
 
 const cleanRoutes = [
   "/",
@@ -19,12 +20,13 @@ const cleanRoutes = [
   "/account",
   "/gallery-submit",
   "/leader-dashboard",
-  "/games/mochi-social",
+  "/games/mochi-pets",
 ];
 
 const retiredRoutes = [
   "/members",
   "/members/twills",
+  retiredGameRoute,
 ];
 
 const legacyRedirects = new Map([
@@ -51,7 +53,7 @@ const bodyChecks = new Map([
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
-  ["/games/mochi-social", /Mochi Social|Closed alpha|tester password/i],
+  ["/games/mochi-pets", /Mochi Pets|Closed alpha|tester password/i],
 ]);
 
 const requestHeaders = {

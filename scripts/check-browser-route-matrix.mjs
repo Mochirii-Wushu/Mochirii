@@ -24,7 +24,7 @@ const routes = [
   { route: "/account", label: "Account", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/games/mochi-social", label: "Mochi Social", expectMain: true, expectAlert: true },
+  { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectAlert: true },
 ];
 
 const viewports = [

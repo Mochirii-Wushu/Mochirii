@@ -30,7 +30,7 @@ const routes = [
   { route: "/oauth/consent", label: "OAuth Consent", file: "apps/web/app/oauth/consent/page.tsx", type: "protected-entry", workflow: "Supabase OAuth consent", componentFiles: ["apps/web/components/member-workflow/OAuthConsentPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/gallery-submit", label: "Gallery Submit", file: "apps/web/app/gallery-submit/page.tsx", type: "member", workflow: "member upload", componentFiles: ["apps/web/components/member-workflow/GallerySubmitForm.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", file: "apps/web/app/leader-dashboard/page.tsx", type: "moderator", workflow: "moderation queues", componentFiles: ["apps/web/components/member-workflow/LeaderDashboard.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/games/mochi-social", label: "Mochi Social", file: "apps/web/app/games/mochi-social/page.tsx", type: "alpha", workflow: "tester game doorway", componentFiles: ["apps/web/components/mochi-social/MochiSocialTesterPasswordGate.tsx", "apps/web/components/mochi-social/MochiSocialAlphaClient.tsx"], expectsForm: true, expectsIframe: true, expectsAlert: true, expectsDescribedBy: true, protectedNoindex: true },
+  { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "alpha", workflow: "tester game doorway", componentFiles: ["apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx", "apps/web/components/mochi-pets/MochiPetsAlphaClient.tsx"], expectsForm: true, expectsIframe: true, expectsAlert: true, expectsDescribedBy: true, protectedNoindex: true },
 ];
 
 const shell = inspectShell();
@@ -55,11 +55,11 @@ const report = {
   routes: matrix,
   manualBrowserMatrix: [
     "Keyboard tab order and Escape behavior for header dropdowns and mobile menu at 360x800, 375x812, 390x844, 414x896, 430x932, 1280x720, 1366x768, 1440x900, 1536x864, and 1920x1080.",
-    "Visible focus rings for nav, buttons, gallery thumbnails, forms, queue tabs, Spotify chips, and Mochi Social gate controls.",
+    "Visible focus rings for nav, buttons, gallery thumbnails, forms, queue tabs, Spotify chips, and Mochi Pets gate controls.",
     "Color contrast for muted text, status pills, form errors, badges, and glass panels in light and dark image areas.",
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
-    "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, leader queues, and Mochi Social gate errors.",
-    "Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Social embeds.",
+    "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, leader queues, and Mochi Pets gate errors.",
+    "Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Pets embeds.",
   ],
   warnings,
   failures,

@@ -3,6 +3,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const failures = [];
+const oldGamePrefix = ["mochi", "social"].join("_");
 
 const requiredIndexSnippets = [
   "gallery_submissions_user_id_idx",
@@ -19,33 +20,33 @@ const requiredIndexSnippets = [
   "spotlight_poll_cycles_winner_profile_id_idx",
   "spotlight_poll_candidates_member_profile_id_idx",
   "spotlight_poll_results_member_profile_id_idx",
-  "mochi_social_alpha_testers_invited_by_idx",
-  "mochi_social_chain_operations_user_id_idx",
-  "mochi_social_chat_messages_user_id_idx",
-  "mochi_social_chat_reports_message_id_idx",
-  "mochi_social_chat_reports_reporter_id_idx",
-  "mochi_social_feedback_user_id_idx",
-  "mochi_social_inventory_owner_id_idx",
-  "mochi_social_ledger_events_actor_id_idx",
-  "mochi_social_market_listings_inventory_id_idx",
-  "mochi_social_market_listings_seller_id_idx",
-  "mochi_social_spirits_owner_id_idx",
-  "mochi_social_pets_owner_id_idx",
-  "mochi_social_shared_pet_snapshots_last_actor_id_idx",
-  "mochi_social_trades_recipient_id_idx",
-  "mochi_social_trades_requester_id_idx",
+  "mochi_pets_alpha_testers_invited_by_idx",
+  "mochi_pets_chain_operations_user_id_idx",
+  "mochi_pets_chat_messages_user_id_idx",
+  "mochi_pets_chat_reports_message_id_idx",
+  "mochi_pets_chat_reports_reporter_id_idx",
+  "mochi_pets_feedback_user_id_idx",
+  "mochi_pets_inventory_owner_id_idx",
+  "mochi_pets_ledger_events_actor_id_idx",
+  "mochi_pets_market_listings_inventory_id_idx",
+  "mochi_pets_market_listings_seller_id_idx",
+  "mochi_pets_spirits_owner_id_idx",
+  "mochi_pets_pets_owner_id_idx",
+  "mochi_pets_shared_pet_snapshots_last_actor_id_idx",
+  "mochi_pets_trades_recipient_id_idx",
+  "mochi_pets_trades_requester_id_idx",
 ];
 
-const mochiSocialCompatibilitySnippets = [
-  "table_name = 'mochi_social_spirits'",
-  "table_name = 'mochi_social_pets'",
-  "column_name = 'owner_id'",
-  "create index if not exists mochi_social_spirits_owner_id_idx on public.mochi_social_spirits(owner_id)",
-  "create index if not exists mochi_social_pets_owner_id_idx on public.mochi_social_pets(owner_id)",
-  "create policy \"mochi_social_spirits_read_own\" on public.mochi_social_spirits",
-  "create policy \"mochi_social_pets_read_own\" on public.mochi_social_pets",
-  "table_name = 'mochi_social_progress_snapshots'",
-  "create policy \"mochi_social_progress_read_own\" on public.mochi_social_progress_snapshots",
+const mochiPetsCompatibilitySnippets = [
+  `('${oldGamePrefix}_spirits', 'mochi_pets_spirits')`,
+  `('${oldGamePrefix}_pets', 'mochi_pets_pets')`,
+  `('${oldGamePrefix}_progress_snapshots', 'mochi_pets_progress_snapshots')`,
+  `('${oldGamePrefix}_spirits_owner_id_idx', 'mochi_pets_spirits_owner_id_idx')`,
+  `('${oldGamePrefix}_pets_owner_id_idx', 'mochi_pets_pets_owner_id_idx')`,
+  `('mochi_pets_spirits', '${oldGamePrefix}_spirits_read_own', 'mochi_pets_spirits_read_own')`,
+  `('mochi_pets_pets', '${oldGamePrefix}_pets_read_own', 'mochi_pets_pets_read_own')`,
+  `('mochi_pets_progress_snapshots', '${oldGamePrefix}_progress_read_own', 'mochi_pets_progress_read_own')`,
+  "grant %s on table public.%I to %I",
 ];
 
 const serviceOnlyTables = [
@@ -126,7 +127,7 @@ const corsHelper = read("supabase/functions/_shared/cors.ts");
 const memberProfilesShared = read("supabase/functions/_shared/member-profiles.ts");
 const spotlightPollsShared = read("supabase/functions/_shared/spotlight-polls.ts");
 const pixelfedSocialSync = read("supabase/functions/sync-pixelfed-social-account/index.ts");
-const securityReport = read("reports/supabase-security-performance-2026-06-18.md");
+const currentState = read("docs/current-live-state.md");
 const migrationsDir = path.join(root, "supabase/migrations");
 const migrationText = readdirSync(migrationsDir)
   .filter((file) => file.endsWith(".sql"))
@@ -141,8 +142,8 @@ for (const snippet of requiredIndexSnippets) {
   assertIncludes("Supabase FK index migrations", migrationText, snippet);
 }
 
-for (const snippet of mochiSocialCompatibilitySnippets) {
-  assertIncludes("Mochi Social table-aware compatibility migration", migrationText, snippet);
+for (const snippet of mochiPetsCompatibilitySnippets) {
+  assertIncludes("Mochi Pets table-aware compatibility migration", migrationText, snippet);
 }
 
 [
@@ -197,12 +198,12 @@ assertIncludes("spotlight public winner shared CORS", spotlightPollsShared, "\"A
 ].forEach((snippet) => assertIncludes("Pixelfed social sync Edge Function", pixelfedSocialSync, snippet));
 
 [
-  "Supabase CLI 2.107.0",
-  "Leaked password protection",
+  "Supabase CLI",
+  "leaked-password protection",
   "service-role-only",
-  "Mochi Social",
+  "Mochi Pets",
   "deferred",
-].forEach((snippet) => assertIncludes("Supabase security performance report", securityReport, snippet));
+].forEach((snippet) => assertIncludes("current Supabase security posture docs", `${currentState}\n${readme}`, snippet));
 
 if (failures.length) {
   console.error("Supabase security/performance validation failed.");

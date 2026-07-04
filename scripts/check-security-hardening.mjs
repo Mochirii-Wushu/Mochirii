@@ -15,9 +15,9 @@ const files = {
   reaperMemberSync: "supabase/functions/reaper-discord-member-sync/index.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
-  mochiSocialAlphaShared: "supabase/functions/_shared/mochi-social-alpha.ts",
-  mochiSocialAlphaAction: "supabase/functions/mochi-social-alpha-action/index.ts",
-  mochiSocialAlphaProgress: "supabase/functions/mochi-social-alpha-progress/index.ts",
+  mochiPetsAlphaShared: "supabase/functions/_shared/mochi-pets-alpha.ts",
+  mochiPetsAlphaAction: "supabase/functions/mochi-pets-alpha-action/index.ts",
+  mochiPetsAlphaProgress: "supabase/functions/mochi-pets-alpha-progress/index.ts",
   discordIngest: "supabase/functions/submit-discord-gallery-image/index.ts",
   voteReminder: "supabase/functions/send-vote-reminder/index.ts",
   spotlightPollShared: "supabase/functions/_shared/spotlight-polls.ts",
@@ -70,9 +70,9 @@ const reaper = read(files.reaper);
 const reaperMemberSync = read(files.reaperMemberSync);
 const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
-const mochiSocialAlphaShared = read(files.mochiSocialAlphaShared);
-const mochiSocialAlphaAction = read(files.mochiSocialAlphaAction);
-const mochiSocialAlphaProgress = read(files.mochiSocialAlphaProgress);
+const mochiPetsAlphaShared = read(files.mochiPetsAlphaShared);
+const mochiPetsAlphaAction = read(files.mochiPetsAlphaAction);
+const mochiPetsAlphaProgress = read(files.mochiPetsAlphaProgress);
 const discordIngest = read(files.discordIngest);
 const voteReminder = read(files.voteReminder);
 const spotlightPollShared = read(files.spotlightPollShared);
@@ -173,8 +173,8 @@ const expectedUnauthenticatedFunctions = [
   "send-member-spotlight-poll",
   "publish-member-spotlight-winner",
   "get-current-spotlight-winner",
-  "mochi-social-alpha-action",
-  "mochi-social-alpha-progress",
+  "mochi-pets-alpha-action",
+  "mochi-pets-alpha-progress",
   "sync-pixelfed-social-account",
 ];
 
@@ -200,21 +200,21 @@ for (const name of verifyJwtFalseFunctions) {
 ].forEach((snippet) => assertIncludes("sync-pixelfed-social-account", pixelfedSocialSync, snippet));
 
 [
-  "x-mochi-social-server-token",
-  "MOCHI_SOCIAL_GAME_SERVER_TOKEN",
-].forEach((snippet) => assertIncludes("mochi-social-alpha shared security", mochiSocialAlphaShared, snippet));
+  "x-mochi-pets-server-token",
+  "MOCHI_PETS_GAME_SERVER_TOKEN",
+].forEach((snippet) => assertIncludes("mochi-pets-alpha shared security", mochiPetsAlphaShared, snippet));
 
 [
   "requireGameServer(req)",
   "noRealValue: true",
-].forEach((snippet) => assertIncludes("mochi-social-alpha-action", mochiSocialAlphaAction, snippet));
+].forEach((snippet) => assertIncludes("mochi-pets-alpha-action", mochiPetsAlphaAction, snippet));
 
 [
   "requireGameServer(req)",
   "loadAlphaProgressSnapshot(adminClient, playerId)",
   "normalizeAlphaProgressSnapshot(data)",
   "noRealValue: true",
-].forEach((snippet) => assertIncludes("mochi-social-alpha-progress", mochiSocialAlphaProgress, snippet));
+].forEach((snippet) => assertIncludes("mochi-pets-alpha-progress", mochiPetsAlphaProgress, snippet));
 
 [
   "x-signature-ed25519",

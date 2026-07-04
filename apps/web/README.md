@@ -129,13 +129,13 @@ Current Next routes:
 - `/oauth/consent`
 - `/gallery-submit`
 - `/leader-dashboard`
-- `/games/mochi-social`
+- `/games/mochi-pets`
 
 Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
-## Mochi Social Doorway
+## Mochi Pets Doorway
 
-`/games/mochi-social` is the closed playtest doorway. The page stays behind the tester password wall, and saved play requires a signed-in approved Mochirii member account after the password unlock.
+`/games/mochi-pets` is the closed playtest doorway. The page stays behind the tester password wall, and saved play requires a signed-in approved Mochirii member account after the password unlock.
 
 Player-facing copy should stay focused on the shared guild room, curated character creation, Lirabao care, closed alpha access, and no real value. The page should show a playtest-paused message if the room is unavailable instead of opening an old fallback.
 

@@ -24,7 +24,7 @@ const routeMatrix = [
   { route: "/leader-dashboard", surface: "moderation", features: ["Supabase moderation queues", "status messages"] },
   { route: "/spotify", surface: "Spotify", features: ["Spotify iframe embeds"] },
   { route: "/spotlight", surface: "spotlight", features: ["Supabase public spotlight endpoint"] },
-  { route: "/games/mochi-social", surface: "Mochi Social", features: ["Fly iframe", "postMessage bridge"] },
+  { route: "/games/mochi-pets", surface: "Mochi Pets", features: ["Fly iframe", "postMessage bridge"] },
   { route: "/tome", surface: "Tome", features: ["static conduct content"] },
 ];
 
@@ -53,8 +53,8 @@ if (sourceInventory.blockingHits.length) {
 if (!directiveHasSource(policy.directiveMap, "frame-src", "https://open.spotify.com")) {
   failures.push("CSP frame-src must explicitly allow Spotify embeds.");
 }
-if (!directiveHasSource(policy.directiveMap, "frame-src", "https://mochi-social-game.fly.dev")) {
-  failures.push("CSP frame-src must explicitly allow the Mochi Social game origin.");
+if (!directiveHasSource(policy.directiveMap, "frame-src", "https://mochi-pets-game.fly.dev")) {
+  failures.push("CSP frame-src must explicitly allow the Mochi Pets game origin.");
 }
 if (
   !directiveHasSource(policy.directiveMap, "connect-src", "https://*.supabase.co") ||
@@ -76,8 +76,8 @@ const report = {
   nextSteps: [
     "Keep React inline style props at zero before any style-src unsafe-inline removal.",
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
-    "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
-    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
+    "Keep Spotify and Mochi Pets iframe routes in the browser route sweep.",
+    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Pets postMessage behavior before tightening CSP.",
     "Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.",
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions.",
   ],
@@ -146,8 +146,8 @@ function extractCspEntries(text) {
     failures.push("apps/web/next.config.ts: unable to locate contentSecurityPolicy array.");
     return [];
   }
-  const mochiSocialDefault =
-    text.match(/NEXT_PUBLIC_MOCHI_SOCIAL_URL\s*\|\|\s*["']([^"']+)["']/)?.[1] || "https://mochi-social-game.fly.dev";
+  const mochiPetsDefault =
+    text.match(/NEXT_PUBLIC_MOCHI_PETS_URL\s*\|\|\s*["']([^"']+)["']/)?.[1] || "https://mochi-pets-game.fly.dev";
   const entries = [];
   for (const rawLine of match[1].split(/\r?\n/)) {
     let line = rawLine.trim();
@@ -157,7 +157,7 @@ function extractCspEntries(text) {
     if (!["'", '"', "`"].includes(quote) || line[line.length - 1] !== quote) continue;
     const entry = line
       .slice(1, -1)
-      .replace(/\$\{mochiSocialOrigin\}/g, mochiSocialDefault)
+      .replace(/\$\{mochiPetsOrigin\}/g, mochiPetsDefault)
       .trim();
     if (entry) entries.push(entry);
   }

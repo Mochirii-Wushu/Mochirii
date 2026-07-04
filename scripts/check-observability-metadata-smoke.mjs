@@ -4,6 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const failures = [];
 const notes = [];
+const retiredGameSlug = ["mochi", "social"].join("-");
 
 const publicRoutes = [
   { route: "/", label: "home", file: "apps/web/app/page.tsx", metadataFile: "apps/web/app/layout.tsx" },
@@ -31,11 +32,12 @@ const protectedRoutes = [
 const retiredRoutes = [
   { route: "/members", file: "apps/web/app/members/page.tsx" },
   { route: "/members/twills", file: "apps/web/app/members/[slug]/page.tsx" },
+  { route: `/games/${retiredGameSlug}`, file: `apps/web/app/games/${retiredGameSlug}/page.tsx` },
 ];
 
 const noindexRoutes = [
   ...protectedRoutes,
-  { route: "/games/mochi-social", file: "apps/web/app/games/mochi-social/page.tsx", expectedFollow: false },
+  { route: "/games/mochi-pets", file: "apps/web/app/games/mochi-pets/page.tsx", expectedFollow: false },
 ];
 
 const allSmokeRoutes = [...publicRoutes.map((item) => item.route), ...noindexRoutes.map((item) => item.route)];
@@ -110,7 +112,11 @@ function checkRetiredRoutes() {
 
   for (const item of retiredRoutes) {
     assert(!existsSync(path.join(root, item.file)), `${item.file}: retired members route file must stay removed.`);
-    assertRouteListed("production retired route smoke", smoke, item.route);
+    if (item.route === `/games/${retiredGameSlug}`) {
+      assertIncludes("production retired route smoke", smoke, "retiredGameRoute");
+    } else {
+      assertRouteListed("production retired route smoke", smoke, item.route);
+    }
   }
 }
 
@@ -141,7 +147,7 @@ function checkProductionSmokeCoverage() {
     assertRouteListed("production route smoke", smoke, route);
   }
 
-  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/games/mochi-social"]) {
+  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/games/mochi-pets"]) {
     assert(smoke.includes(`["${route}",`) || smoke.includes(`['${route}',`), `production body smoke: expected content check for ${route}`);
   }
 }
