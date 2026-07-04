@@ -23,6 +23,9 @@ const requiredFiles = [
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
   "apps/web/lib/supabase/social.ts",
   "supabase/migrations/20260702080720_add_pixelfed_social_accounts.sql",
+  "supabase/functions/sync-pixelfed-social-account/index.ts",
+  "supabase/functions/_shared/pixelfed-social-sync.ts",
+  "supabase/functions/_shared/pixelfed-social-sync_test.ts",
 ];
 
 const snippetChecks = [
@@ -110,10 +113,32 @@ const snippetChecks = [
     ],
   },
   {
+    label: "Pixelfed social sync Edge Function",
+    file: "supabase/functions/sync-pixelfed-social-account/index.ts",
+    snippets: [
+      "PIXELFED_SOCIAL_SYNC_SECRET",
+      "auth.admin.getUserById",
+      ".from(\"social_accounts\")",
+      "provider: \"pixelfed\"",
+      "federation_enabled: false",
+    ],
+  },
+  {
+    label: "Pixelfed social sync validator",
+    file: "supabase/functions/_shared/pixelfed-social-sync.ts",
+    snippets: [
+      "https://social.mochirii.com/",
+      "PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS",
+      "constantTimeEquals",
+      "parsePixelfedSocialSyncPayload",
+    ],
+  },
+  {
     label: "package script",
     file: "package.json",
     snippets: [
       "\"check:pixelfed-first-login-readiness\": \"node scripts/check-pixelfed-first-login-readiness.mjs\"",
+      "\"test:pixelfed-social-sync\"",
     ],
   },
   {
@@ -122,6 +147,7 @@ const snippetChecks = [
     snippets: [
       "check:pixelfed-first-login-readiness",
       "scripts/check-pixelfed-first-login-readiness.mjs",
+      "test:pixelfed-social-sync",
     ],
   },
 ];
@@ -416,6 +442,8 @@ for (const { label, file, snippets } of snippetChecks) {
   "docs/pixelfed-first-login-testing.md",
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
+  "supabase/functions/sync-pixelfed-social-account/index.ts",
+  "supabase/functions/_shared/pixelfed-social-sync.ts",
   "scripts/check-pixelfed-first-login-readiness.mjs",
 ].forEach((file) => scanNoSecrets(file, read(file)));
 

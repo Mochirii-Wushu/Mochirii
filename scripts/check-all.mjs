@@ -27,6 +27,7 @@ const checks = [
   ["check:mochi-social-discord-oauth", ["node", "scripts/check-mochi-social-discord-oauth-self-test.mjs"]],
   ["check:mochi-social-edge-authority", ["node", "scripts/check-mochi-social-edge-authority.mjs"]],
   ["test:mochi-social-alpha", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/mochi-social-unity-auth/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/mochi-social-alpha_test.ts"]],
+  ["test:pixelfed-social-sync", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/sync-pixelfed-social-account/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/pixelfed-social-sync_test.ts"]],
   ["check:mochi-social-game-contract", ["node", "scripts/check-mochi-social-game-contract.mjs"]],
   ["check:mochi-social-preview-key-loader", ["node", "scripts/check-mochi-social-preview-key-loader.mjs"]],
   ["check:mochi-social-preview-url", ["node", "scripts/check-mochi-social-preview-url-self-test.mjs"]],

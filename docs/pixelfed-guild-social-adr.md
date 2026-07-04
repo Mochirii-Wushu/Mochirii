@@ -22,10 +22,11 @@ Pixelfed code, infrastructure secrets, media storage credentials, DB passwords, 
 
 ## Architecture Boundaries
 
-- Website repo: `/social`, `/oauth/consent`, `/api/oauth/decision`, account social status, Social handoff links, Supabase migration files, and no-secret docs. The website `/members` profile surface is retired.
-- Supabase project `deyvmtncimmcinldjyqe`: Auth, OAuth consent handoff, member access, `social_accounts`, RLS, and future server-side Pixelfed account sync.
+- Website repo: `/social`, `/oauth/consent`, `/api/oauth/decision`, account social status, Social handoff links, Supabase migration/function files, and no-secret docs. The website `/members` profile surface is retired.
+- Supabase project `deyvmtncimmcinldjyqe`: Auth, OAuth consent handoff, member access, `social_accounts`, RLS, and the `sync-pixelfed-social-account` Edge Function. The service-role key stays inside Supabase; Pixelfed receives only a narrow sync secret.
 - Discord: guild membership and role verification only; it is not the Pixelfed identity authority.
 - Pixelfed runtime: separate DigitalOcean staging host with HTTPS, PHP, queue worker, scheduler, database, Redis, media storage, backups, monitoring, and pinned Pixelfed release or commit.
+- DigitalOcean Spaces: required primary media object storage before broad member upload testing. Use a dedicated media Space, exact-origin CORS for `https://social.mochirii.com`, separate backup storage, host-only credentials, and restore notes.
 - Durable runtime source: a Mochirii-owned private fork or ops repo; never the public website repo.
 
 ## SSO Gate
@@ -40,6 +41,24 @@ Do not provision production Pixelfed until staging proves Supabase OAuth 2.1 and
 6. Invalid `state`, missing sessions, non-members, suspended members, duplicate username/email, and callback retry paths fail safely.
 
 If PKCE or required claims fail, pause and prepare a decision packet for a minimal Pixelfed patch/fork, an identity broker, or native Pixelfed accounts mapped back to Supabase. Do not force a brittle production workaround.
+
+## Account Sync Gate
+
+First admin login is not complete until Pixelfed writes back to Supabase through
+the trusted sync bridge:
+
+1. Pixelfed completes OIDC callback and creates or links the local user.
+2. Pixelfed calls `sync-pixelfed-social-account` with `sub`, Pixelfed user id,
+   username, `https://social.mochirii.com/...` profile URL, event, timestamp,
+   and the shared sync secret.
+3. Supabase verifies the secret, timestamp freshness, user id, username shape,
+   and profile URL boundary, then upserts `public.social_accounts` as
+   `provider = 'pixelfed'`, `status = 'active'`, and
+   `federation_enabled = false`.
+
+Do not store the Supabase service-role key on the Pixelfed host. Deploying the
+Edge Function, setting `PIXELFED_SOCIAL_SYNC_SECRET`, and setting Pixelfed host
+sync env vars are provider/runtime mutations and require exact approval.
 
 ## Federation And Moderation Gate
 
@@ -59,6 +78,9 @@ Use exact prompts before provider mutations:
 - `Approve provisioning the Pixelfed staging host at [host/provider] with the reviewed cost, backup, and monitoring plan.`
 - `Approve creating DNS for social.mochirii.com pointing to the approved Pixelfed host.`
 - `Approve creating a private GitHub repository under Mochirii-Wushu named mochirii-pixelfed-ops for the Mochirii-controlled Pixelfed staging source and no-secret ops docs, then pushing the existing Droplet-local branding branch to it. No secrets, .env files, DB files, Redis data, media, backups, cache files, or host-private notes will be committed.`
+- `Approve deploying Supabase Edge Function sync-pixelfed-social-account for project deyvmtncimmcinldjyqe and setting PIXELFED_SOCIAL_SYNC_SECRET from the local credential vault.`
+- `Approve setting Pixelfed host env vars MOCHIRII_SOCIAL_SYNC_URL and MOCHIRII_SOCIAL_SYNC_SECRET on social.mochirii.com, clearing Laravel config cache, and restarting app services only if required.`
+- `Approve configuring DigitalOcean Spaces as the primary Pixelfed media store for social.mochirii.com with exact-origin CORS and host-only credentials before broad member uploads.`
 - `Approve enabling ActivityPub federation for social.mochirii.com after the moderation gate passes.`
 
 ## Rollback
@@ -79,6 +101,7 @@ Supabase-changing PRs must also pass:
 
 - `npm run check:supabase-security-performance`
 - `npm run check:supabase-edge-types`
+- `npm run test:pixelfed-social-sync`
 - Supabase Preview evidence after PR creation
 
 Provider reads may be performed with credentials from `C:\Users\xtyty\Documents\Creds`; provider writes require the approval prompts above.

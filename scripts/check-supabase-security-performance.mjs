@@ -125,6 +125,7 @@ const readme = read("supabase/README.md");
 const corsHelper = read("supabase/functions/_shared/cors.ts");
 const memberProfilesShared = read("supabase/functions/_shared/member-profiles.ts");
 const spotlightPollsShared = read("supabase/functions/_shared/spotlight-polls.ts");
+const pixelfedSocialSync = read("supabase/functions/sync-pixelfed-social-account/index.ts");
 const securityReport = read("reports/supabase-security-performance-2026-06-18.md");
 const migrationsDir = path.join(root, "supabase/migrations");
 const migrationText = readdirSync(migrationsDir)
@@ -187,6 +188,13 @@ for (const name of publicFunctions) {
 assertIncludes("list-approved-gallery-submissions public CORS", read("supabase/functions/list-approved-gallery-submissions/index.ts"), "\"Access-Control-Allow-Origin\": \"*\"");
 assertIncludes("member profile public card shared CORS", memberProfilesShared, "\"Access-Control-Allow-Origin\": \"*\"");
 assertIncludes("spotlight public winner shared CORS", spotlightPollsShared, "\"Access-Control-Allow-Origin\": \"*\"");
+[
+  "PIXELFED_SOCIAL_SYNC_SECRET",
+  "auth.admin.getUserById",
+  ".from(\"social_accounts\")",
+  "provider: \"pixelfed\"",
+  "federation_enabled: false",
+].forEach((snippet) => assertIncludes("Pixelfed social sync Edge Function", pixelfedSocialSync, snippet));
 
 [
   "Supabase CLI 2.107.0",

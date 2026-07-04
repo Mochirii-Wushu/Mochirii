@@ -14,6 +14,9 @@ this public website repo.
 - Runtime host: DigitalOcean Droplet in the Mochirii Social project.
 - Runtime stack: Pixelfed PHP/Laravel app, MariaDB, Redis, Horizon queue worker,
   scheduler, and Docker Compose.
+- Media target before broad uploads: a dedicated DigitalOcean Space with
+  exact-origin CORS for `https://social.mochirii.com`, separate backup storage,
+  and credentials stored only on the host and local credential vault.
 - Public launch posture: closed registration, SSO-only, admin-first testing,
   federation disabled, public discovery minimized.
 - Website production host: Vercel `apps/web`; Pixelfed stays outside Vercel.
@@ -97,6 +100,9 @@ Minimum no-secret checks before first admin login:
 - Public root and login pages show only Mochirii-approved public branding.
 - OIDC start redirects to Supabase OAuth with exact redirect URI and scopes.
 - Supabase consent page returns to the social callback after approval.
+- Successful OIDC callback calls the Supabase
+  `sync-pixelfed-social-account` Edge Function and creates or updates one
+  active `social_accounts` row.
 - Queue worker and scheduler containers stay healthy after login.
 - Disk usage leaves operational headroom.
 - Backups are enabled and a restore note exists.
@@ -122,6 +128,10 @@ Before broad member upload testing:
 - Verify DigitalOcean Droplet backups are enabled.
 - Move media to object storage such as DigitalOcean Spaces or Cloudflare R2 with
   least-privilege access keys and exact-origin CORS.
+- DigitalOcean Spaces is the preferred media target for this project because
+  the Droplet and Space live under the same DigitalOcean operational boundary.
+  Use a dedicated media Space, not the backup Space, and do not commit Spaces
+  keys or bucket names that are not already public.
 - Keep media outside the public webroot when possible.
 - Retain a private restore drill note covering database restore, media restore,
   app rebuild, and DNS/OAuth rollback.

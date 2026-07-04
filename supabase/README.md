@@ -26,7 +26,7 @@ Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code ins
 
 `social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`; that field is retained for backend compatibility while website member profile publishing is retired.
 
-The table intentionally does not grant direct insert/delete access to `authenticated`. Production SSO, federation enablement, broad member uploads, account-sync workers, media migration, and any remote database/Auth setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
+The table intentionally does not grant direct insert/delete access to `authenticated`. The trusted write path is the `sync-pixelfed-social-account` Edge Function, which keeps the service-role key inside Supabase and accepts only a narrow Pixelfed host sync secret. Production SSO, federation enablement, broad member uploads, Spaces media migration, and any remote database/Auth/Function setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
 
 ## Browser Helper
 
