@@ -11,8 +11,7 @@ This feature separates four layers that must stay distinct:
 
 | State | Providers | Operational rule |
 | --- | --- | --- |
-| Active | Discord, Google, Twitch | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch`. |
-| Visible placeholder | Apple | Keep disabled in Supabase Auth production and render as setup-pending with `NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple` until the Apple Developer setup, Services ID, callback, and six-month client-secret rotation calendar are ready. |
+| Active | Discord, Google, Twitch, Apple | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`. Apple is active identity evidence and still requires moderator review for member-only privileges. |
 | Deferred | Facebook, Kakao, Spotify, Phone | Keep disabled and hidden from public activation until a scoped provider lane is reopened. |
 
 This is an operational activation list, not a destructive schema list. Existing code and database constraints may retain historical/future provider values so linked identity history and future Apple work do not need a migration churn pass.
@@ -25,8 +24,8 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
 - OAuth callback URL for every social provider: `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback`.
 - Redirect allowlist should include production, approved Vercel preview patterns, and localhost development.
 - Browser/Vercel public env may contain only provider IDs and public readiness flags:
-  - `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch`
-  - `NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple`
+  - `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`
+  - `NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=`
   - `NEXT_PUBLIC_PHONE_AUTH_READY=false`
   - `NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false`
 - OAuth client secrets stay only in Supabase Auth provider settings.
@@ -35,7 +34,7 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
 ## Provider Notes
 
 - Discord: automatic verification through guild membership, onboarding state, and required roles.
-- Apple: visible setup-pending placeholder only; member review required after activation and schedule six-month OAuth secret rotation before enabling.
+- Apple: active identity evidence; member review is required for member-only privileges and the OAuth client secret must stay on a six-month rotation cadence.
 - Google: use minimal `openid email profile` scopes.
 - Twitch: identity evidence only, not membership proof.
 - Facebook: deferred; request `email` only if the Facebook lane is reopened.
@@ -100,13 +99,13 @@ provider.
 
 ## Activation Checklist
 
-1. Confirm Supabase Auth production has only Discord, Google, and Twitch enabled among the current active set.
-2. Confirm Apple, Facebook, Kakao, Spotify, and Phone remain disabled in Supabase Auth production.
-3. Set the public provider allowlist to `discord,google,twitch` only.
-4. Set the public placeholder list to `apple` only.
+1. Confirm Supabase Auth production has Discord, Google, Twitch, and Apple enabled among the current active set.
+2. Confirm Facebook, Kakao, Spotify, and Phone remain disabled in Supabase Auth production.
+3. Set the public provider allowlist to `discord,google,twitch,apple`.
+4. Leave the public placeholder list empty.
 5. Deploy `verify-member-access` and `review-member-verification`.
-6. Smoke Discord, Google, and Twitch provider flows without recording tokens, cookies, raw headers, or OAuth payloads.
-7. Confirm Apple is visible but not clickable until the provider lane is approved.
+6. Smoke Discord, Google, Twitch, and Apple provider flows without recording tokens, cookies, raw headers, or OAuth payloads.
+7. Confirm Apple is clickable, redirects through Supabase Auth, and links to the existing admin account before signed-out Apple login is tested.
 8. Confirm a non-Discord account remains blocked until moderator approval.
 9. In Supabase Preview, confirm an approved active member can upload and an expired/revoked/suspended/archived member cannot.
 

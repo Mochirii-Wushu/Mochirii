@@ -26,7 +26,7 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - Deployment protection: enabled for previews if member/auth workflow state should not be public
 - Web Analytics: enabled for `mochirii/mochirii`
 - Speed Insights: enabled for `mochirii/mochirii`
-- Environment variables: only browser-safe `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL` in the app
+- Environment variables: only browser-safe public configuration such as `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and `NEXT_PUBLIC_AUTH_PROVIDER_IDS` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
 ## Manual Vercel Release Policy

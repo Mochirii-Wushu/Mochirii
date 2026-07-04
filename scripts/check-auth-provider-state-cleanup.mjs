@@ -38,14 +38,14 @@ assertIncludes(
 );
 
 [
-  "| Active | Discord, Google, Twitch |",
-  "| Visible placeholder | Apple |",
+  "| Active | Discord, Google, Twitch, Apple |",
   "| Deferred | Facebook, Kakao, Spotify, Phone |",
-  "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch",
-  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple",
+  "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple",
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=",
   "PR #300",
   "https://github.com/Mochirii-Wushu/Mochirii/pull/300",
   "850a13df22853778d8a48ad6b5a319ae029739bc",
+  "Apple: active identity evidence",
   "Kakao: deferred",
   "Facebook: deferred",
   "Spotify: deferred",
@@ -55,16 +55,19 @@ assertIncludes(
 ].forEach((snippet) => assertIncludes("multi-provider docs", multiProviderDoc, snippet));
 
 [
-  "The current live sign-in set is Discord, Google, and Twitch.",
-  "Apple is the only documented visible placeholder lane",
+  "The current live sign-in set is Discord, Google, Twitch, and Apple.",
+  "Apple is active identity evidence only",
   "Facebook, Kakao, Spotify, and Phone are deferred",
-  "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch",
-  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple",
+  "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple",
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=",
   "ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true npm run smoke:member-verification-preview",
   "refuses project `deyvmtncimmcinldjyqe`",
 ].forEach((snippet) => assertIncludes("Supabase README", supabaseReadme, snippet));
 
 [
+  "| Visible placeholder | Apple |",
+  "Apple is the only documented visible placeholder lane",
+  "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple",
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,...",
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,kakao",
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,kakao",

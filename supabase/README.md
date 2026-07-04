@@ -102,7 +102,12 @@ The Account page does not expose private Storage URLs. It shows submission text 
 
 ## Multi-Provider Auth Setup
 
-The current live sign-in set is Discord, Google, and Twitch. Apple is the only documented visible placeholder lane and should stay disabled in Supabase Auth production until Apple Developer setup, Services ID, callback, and six-month client-secret rotation are ready. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
+The current live sign-in set is Discord, Google, Twitch, and Apple. Apple is active identity evidence only and must keep its generated OAuth client secret on a six-month rotation cadence. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
+
+| State | Providers | Operational rule |
+| --- | --- | --- |
+| Active | Discord, Google, Twitch, Apple | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`. Apple is active identity evidence and still requires moderator review for member-only privileges. |
+| Deferred | Facebook, Kakao, Spotify, Phone | Keep disabled and hidden from public activation until a scoped provider lane is reopened. |
 
 Social or phone sign-in through Supabase Auth proves account control only. It does not automatically prove guild membership, role ownership, alpha access, game access, or Enjin readiness. Discord remains the only automatic member verification path because guild membership and role checks happen server-side through `verify-discord-member` and `verify-member-access`.
 
@@ -126,8 +131,8 @@ https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
 The browser/provider allowlist is controlled separately with public-safe env only:
 
 ```text
-NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch
-NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=apple
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple
+NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=
 NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
 ```
@@ -151,11 +156,11 @@ Domain: deyvmtncimmcinldjyqe.supabase.co
 Credential artifacts, Apple key metadata, generated client-secret expiry notes,
 and six-month rotation notes belong only under `C:\Users\xtyty\Documents\Creds`.
 Do not commit or print Apple private key material, generated client secrets,
-OAuth payloads, cookies, token values, or digests of those values. Apple is
-identity evidence only; it does not automatically prove guild membership,
-gallery eligibility, moderator status, Mochirii Social account creation, or
-game access. First activation testing should link Apple to the existing admin
-account from Account before testing signed-out Apple login.
+OAuth payloads, cookies, token values, or digests of those values.
+Apple: active identity evidence only. It does not automatically prove guild
+membership, gallery eligibility, moderator status, Mochirii Social account
+creation, or game access. First activation testing should link Apple to the
+existing admin account from Account before testing signed-out Apple login.
 
 Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider lanes are intentionally reopened.
 
