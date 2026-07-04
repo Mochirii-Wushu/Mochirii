@@ -43,6 +43,41 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
 - Spotify: deferred; identity evidence only and no membership proof.
 - Phone: deferred; SMS control only and still requires moderator review for gallery access.
 
+## Apple Activation Gate
+
+Apple login uses Supabase Auth's hosted OAuth callback, not a Vercel route or a
+custom website callback:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
+```
+
+Stable Apple Developer identifiers for this website lane:
+
+```text
+App ID: com.mochirii.web
+App ID description: Mochirii Web
+Services ID: com.mochirii.web.login
+Services ID description: Mochirii Website Login
+Domain: deyvmtncimmcinldjyqe.supabase.co
+```
+
+Credential artifacts, Apple key metadata, generated client-secret expiry notes,
+and rotation notes belong only under `C:\Users\xtyty\Documents\Creds`. Do not
+commit or print Apple private key material, generated client secrets, token
+payloads, cookies, raw OAuth responses, or digests of those values.
+
+Apple is identity evidence only. It does not automatically prove Discord guild
+membership, role ownership, gallery upload eligibility, moderator access,
+Mochirii Social account creation, or any game access. First activation testing
+must link Apple to the existing admin account from Account before testing
+signed-out Apple login, so the flow does not accidentally create a duplicate
+admin identity.
+
+Apple's generated OAuth client secret must be rotated on a six-month cadence.
+Record the next rotation date in the local credential notes after enabling the
+provider.
+
 ## Tables And Policies
 
 - `member_auth_identities` stores redacted identity evidence only: provider, provider subject, verified email/phone flags, display label, and timestamps.

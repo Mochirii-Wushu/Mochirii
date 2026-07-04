@@ -54,7 +54,7 @@ const report = {
   summary,
   routes: matrix,
   manualBrowserMatrix: [
-    "Keyboard tab order and Escape behavior for header dropdowns and mobile menu at 360, 390, 768, 1024, and 1440 widths.",
+    "Keyboard tab order and Escape behavior for header dropdowns and mobile menu at 360x800, 375x812, 390x844, 414x896, 430x932, 1280x720, 1366x768, 1440x900, 1536x864, and 1920x1080.",
     "Visible focus rings for nav, buttons, gallery thumbnails, forms, queue tabs, Spotify chips, and Mochi Social gate controls.",
     "Color contrast for muted text, status pills, form errors, badges, and glass panels in light and dark image areas.",
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",

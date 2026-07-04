@@ -14,6 +14,7 @@
     "check:accessibility-route-matrix": "node scripts/check-accessibility-route-matrix.mjs",
     "check:browser-route-matrix": "node scripts/check-browser-route-matrix.mjs",
     "check:assets": "node scripts/check-assets.mjs",
+    "check:apple-auth-readiness": "node scripts/check-apple-auth-readiness.mjs",
     "check:auth-provider-state-cleanup": "node scripts/check-auth-provider-state-cleanup.mjs",
     "check:content": "node scripts/check-content-guardrails.mjs",
     "check:csp-inline-hardening": "node scripts/check-csp-inline-hardening.mjs",

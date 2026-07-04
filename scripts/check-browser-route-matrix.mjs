@@ -28,8 +28,18 @@ const routes = [
 ];
 
 const viewports = [
-  { name: "desktop", width: 1440, height: 1100 },
-  { name: "mobile", width: 390, height: 900 },
+  { name: "mobile-360x800", width: 360, height: 800 },
+  { name: "mobile-375x812", width: 375, height: 812 },
+  { name: "mobile-390x844", width: 390, height: 844 },
+  { name: "mobile-390x900", width: 390, height: 900 },
+  { name: "mobile-414x896", width: 414, height: 896 },
+  { name: "mobile-430x932", width: 430, height: 932 },
+  { name: "desktop-1280x720", width: 1280, height: 720 },
+  { name: "desktop-1366x768", width: 1366, height: 768 },
+  { name: "desktop-1440x900", width: 1440, height: 900 },
+  { name: "desktop-1440x1100", width: 1440, height: 1100 },
+  { name: "desktop-1536x864", width: 1536, height: 864 },
+  { name: "desktop-1920x1080", width: 1920, height: 1080 },
 ];
 
 const { chromium } = await import("playwright");
@@ -69,7 +79,7 @@ const report = {
   ok: failures.length === 0,
   checkedAt,
   scope:
-    "No-secret Playwright browser route matrix for Mochirii route readiness. Runs in clean browser contexts with reduced motion enabled and records route, layout, focus, iframe, form, live-region, alert, and console evidence without cookies or headers.",
+    "No-secret Playwright browser route matrix for Mochirii route readiness. Runs in clean browser contexts with reduced motion enabled and records route, layout, focus, iframe, form, live-region, alert, and console evidence without cookies or headers. Viewports include common current mobile and desktop widths from StatCounter plus the existing tall evidence sizes.",
   baseUrl,
   browser: "playwright chromium",
   viewports,
