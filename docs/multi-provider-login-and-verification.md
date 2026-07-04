@@ -23,6 +23,12 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
 - Supabase Site URL: `https://mochirii.com`.
 - OAuth callback URL for every social provider: `https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback`.
 - Redirect allowlist should include production, approved Vercel preview patterns, and localhost development.
+- Supabase Auth Manual Linking must be enabled for signed-in account linking.
+  This is the project-level gate behind `linkIdentity`; if it is disabled, the
+  Account page will show `Manual linking is disabled` before any provider flow
+  starts. The equivalent Management API field is
+  `security_manual_linking_enabled`; do not print bearer tokens or raw auth
+  config responses while checking it.
 - Browser/Vercel public env may contain only provider IDs and public readiness flags:
   - `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`
   - `NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=`
@@ -100,14 +106,15 @@ provider.
 ## Activation Checklist
 
 1. Confirm Supabase Auth production has Discord, Google, Twitch, and Apple enabled among the current active set.
-2. Confirm Facebook, Kakao, Spotify, and Phone remain disabled in Supabase Auth production.
-3. Set the public provider allowlist to `discord,google,twitch,apple`.
-4. Leave the public placeholder list empty.
-5. Deploy `verify-member-access` and `review-member-verification`.
-6. Smoke Discord, Google, Twitch, and Apple provider flows without recording tokens, cookies, raw headers, or OAuth payloads.
-7. Confirm Apple is clickable, redirects through Supabase Auth, and links to the existing admin account before signed-out Apple login is tested.
-8. Confirm a non-Discord account remains blocked until moderator approval.
-9. In Supabase Preview, confirm an approved active member can upload and an expired/revoked/suspended/archived member cannot.
+2. Confirm Supabase Auth Manual Linking is enabled for the production project.
+3. Confirm Facebook, Kakao, Spotify, and Phone remain disabled in Supabase Auth production.
+4. Set the public provider allowlist to `discord,google,twitch,apple`.
+5. Leave the public placeholder list empty.
+6. Deploy `verify-member-access` and `review-member-verification`.
+7. Smoke Discord, Google, Twitch, and Apple provider flows without recording tokens, cookies, raw headers, or OAuth payloads.
+8. Confirm Apple is clickable, redirects through Supabase Auth, and links to the existing admin account before signed-out Apple login is tested.
+9. Confirm a non-Discord account remains blocked until moderator approval.
+10. In Supabase Preview, confirm an approved active member can upload and an expired/revoked/suspended/archived member cannot.
 
 ## Out Of Scope
 

@@ -22,7 +22,7 @@ Provider reads are allowed when credentials are scoped to child-process environm
 - DigitalOcean/Spaces/Cloudflare: require approval before changing Droplets, firewalls, backups, monitoring, Spaces buckets/keys/CORS/CDN/lifecycle, DNS records, TLS mode, HSTS, cache rules, or origin protection.
 - Discord/Meta/Enjin/Fly/Pixelfed: require approval before changing portals, secrets, roles, webhooks, funded-chain state, hosted runtimes, federation settings, or quota/cost-bearing operations.
 
-Use exact approval wording in task updates, for example: `Approve enabling Supabase Auth leaked-password protection for project deyvmtncimmcinldjyqe now.`
+Use exact approval wording in task updates, for example: `Approve enabling Supabase Auth leaked-password protection for project deyvmtncimmcinldjyqe now.` For account-linking releases, use: `Approve enabling Supabase Auth Manual Linking for project deyvmtncimmcinldjyqe so signed-in users can link Discord, Google, Twitch, and Apple identities from Account.`
 
 ## Standard Evidence Gates
 

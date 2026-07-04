@@ -81,6 +81,8 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
   "com.mochirii.web.login",
   "Mochirii Web",
   "Mochirii Website Login",
+  "Manual Linking",
+  "security_manual_linking_enabled",
   "six-month",
   "C:\\Users\\xtyty\\Documents\\Creds",
   "identity evidence only",
