@@ -100,6 +100,7 @@
     "smoke:gallery:serve": "node scripts/serve-static.mjs --port 8765",
     "verify:local": "node scripts/verify-local-dev.mjs",
     "test:mochi-social-alpha": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/mochi-social-unity-auth/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/mochi-social-alpha_test.ts",
+    "test:pixelfed-social-sync": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/sync-pixelfed-social-account/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/pixelfed-social-sync_test.ts",
     "test:spotlight-poll": "deno test --allow-env --node-modules-dir=auto --import-map=deno-spotlight-poll.import_map.json --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
     "test:modmail-audit": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/modmail-audit_test.ts",
     "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"

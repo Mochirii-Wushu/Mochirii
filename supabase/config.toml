@@ -178,3 +178,9 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/submit-mochi-social-feedback/deno.json"
 entrypoint = "./functions/submit-mochi-social-feedback/index.ts"
+
+[functions.sync-pixelfed-social-account]
+enabled = true
+verify_jwt = false
+import_map = "./functions/sync-pixelfed-social-account/deno.json"
+entrypoint = "./functions/sync-pixelfed-social-account/index.ts"

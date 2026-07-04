@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-07-02.
+Last checked for this index: 2026-07-04.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -54,8 +54,10 @@ This is the short source-of-truth index for the current Mochirii production post
 - Identity boundary: Supabase OAuth Server and `/oauth/consent` remain the website consent doorway; Discord remains guild verification, not the social identity authority.
 - Website boundary: header dropdown/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only a noindex handoff route that redirects signed-in members and gives signed-out visitors login/help options.
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
-- Source-control gap: the staging host has a Mochirii branding commit, but durable runtime source must still move into a Mochirii-owned private fork or ops repo before further runtime edits.
-- Media gap: broad member upload testing waits for object storage policy, least-privilege keys, exact-origin CORS, backup/restore notes, and moderation gates.
+- Source control: Pixelfed staging source is tracked in the private Mochirii ops repo; do not commit host `.env`, DB/Redis state, media, backups, cache files, or host-private notes.
+- Account sync gate: first-admin login is not complete until the Pixelfed OIDC callback writes one active `social_accounts` row through the trusted Supabase sync bridge.
+- Media gap: broad member upload testing waits for DigitalOcean Spaces as the primary media store, least-privilege host-only keys, exact-origin CORS, backup/restore notes, and moderation gates.
+- Federation gap: ActivityPub federation remains disabled/internal-only until a separate fediverse hub activation packet passes moderation, privacy, blocklist, remote-delivery, and rollback tests.
 - Runbooks: `docs/pixelfed-guild-social-adr.md`, `docs/pixelfed-oidc-spike.md`, `docs/pixelfed-first-login-testing.md`, and `docs/pixelfed-staging-ops.md`.
 
 ## Discord And Reaper

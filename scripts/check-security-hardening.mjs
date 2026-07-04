@@ -24,6 +24,7 @@ const files = {
   spotlightPollSender: "supabase/functions/send-member-spotlight-poll/index.ts",
   spotlightPollPublisher: "supabase/functions/publish-member-spotlight-winner/index.ts",
   spotlightPollPublicWinner: "supabase/functions/get-current-spotlight-winner/index.ts",
+  pixelfedSocialSync: "supabase/functions/sync-pixelfed-social-account/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
   deployment: "docs/deployment.md",
@@ -78,6 +79,7 @@ const spotlightPollShared = read(files.spotlightPollShared);
 const spotlightPollSender = read(files.spotlightPollSender);
 const spotlightPollPublisher = read(files.spotlightPollPublisher);
 const spotlightPollPublicWinner = read(files.spotlightPollPublicWinner);
+const pixelfedSocialSync = read(files.pixelfedSocialSync);
 const report = read(files.report);
 const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
@@ -173,6 +175,7 @@ const expectedUnauthenticatedFunctions = [
   "get-current-spotlight-winner",
   "mochi-social-alpha-action",
   "mochi-social-alpha-progress",
+  "sync-pixelfed-social-account",
 ];
 
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
@@ -186,6 +189,15 @@ for (const name of verifyJwtFalseFunctions) {
     failures.push(`supabase/config.toml: unauthenticated function ${name} needs an explicit security review.`);
   }
 }
+
+[
+  "PIXELFED_SOCIAL_SYNC_SECRET",
+  "PIXELFED_SOCIAL_SYNC_SECRET_HEADER",
+  "verifySyncSecret(req)",
+  "auth.admin.getUserById",
+  ".from(\"social_accounts\")",
+  "federation_enabled: false",
+].forEach((snippet) => assertIncludes("sync-pixelfed-social-account", pixelfedSocialSync, snippet));
 
 [
   "x-mochi-social-server-token",

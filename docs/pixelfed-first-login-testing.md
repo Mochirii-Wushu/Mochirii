@@ -59,6 +59,37 @@ Minimum verification:
 - Service-role server workflows can write Pixelfed identity fields.
 - `npm run check:supabase-security-performance` still passes locally.
 
+### Social Account Sync Bridge
+
+The first login smoke must create or update one active `social_accounts` row.
+The trusted write path is the Supabase Edge Function
+`sync-pixelfed-social-account`; Pixelfed must not receive a Supabase
+service-role key.
+
+Approved sync flow:
+
+1. Pixelfed OIDC callback completes.
+2. Pixelfed sends a server-to-server POST to the Edge Function with `sub`,
+   Pixelfed local user id, username, `https://social.mochirii.com/...` profile
+   URL, event, timestamp, and the shared sync secret header.
+3. The Edge Function verifies the secret, timestamp freshness, Supabase user id,
+   username shape, and profile URL boundary.
+4. The Edge Function upserts `public.social_accounts` with
+   `provider = 'pixelfed'`, `status = 'active'`, and
+   `federation_enabled = false`.
+
+Required deployment approval before using this live:
+
+```text
+Approve deploying Supabase Edge Function sync-pixelfed-social-account for project deyvmtncimmcinldjyqe and setting PIXELFED_SOCIAL_SYNC_SECRET from the local credential vault.
+```
+
+Required Pixelfed host approval before using this live:
+
+```text
+Approve setting Pixelfed host env vars MOCHIRII_SOCIAL_SYNC_URL and MOCHIRII_SOCIAL_SYNC_SECRET on social.mochirii.com, clearing Laravel config cache, and restarting app services only if required.
+```
+
 ## Supabase OAuth Gate
 
 Supabase OAuth Server must be configured according to the current Supabase OAuth
@@ -183,8 +214,8 @@ terminal summaries:
 7. Confirm Pixelfed callback completes.
 8. Confirm the Pixelfed account is created or linked to the deterministic
    username.
-9. Confirm `/social` shows linked status only after the `social_accounts` row
-   is written by a trusted server/operator workflow.
+9. Confirm `social_accounts` has one active Pixelfed row written by the sync
+   bridge.
 10. Confirm the website Account page shows linked Mochirii Social status without
     exposing retired member-page profile visibility controls.
 
@@ -200,6 +231,9 @@ Before declaring first-login ready, verify:
 - Deny action redirects safely without creating a Pixelfed account.
 - Duplicate username or duplicate email produces a documented decision packet.
 - Logout and re-login do not expose another member's `social_accounts` row.
+- Missing or invalid Pixelfed sync secret is rejected by the Edge Function.
+- Stale Pixelfed sync timestamps are rejected by the Edge Function.
+- Off-domain `profile_url` values are rejected by the Edge Function.
 
 ## Result Packet
 

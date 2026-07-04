@@ -35,6 +35,7 @@ const functions = [
   "mochi-social-alpha-progress",
   "mochi-social-alpha-admin",
   "submit-mochi-social-feedback",
+  "sync-pixelfed-social-account",
 ];
 
 function denoBinary() {
