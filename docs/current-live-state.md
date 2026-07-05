@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-07-04.
+Last checked for this index: 2026-07-05.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -14,7 +14,10 @@ This is the short source-of-truth index for the current Mochirii production post
 - Root static files and GitHub Pages remain rollback/reference material until a later stabilization task retires them.
 - Read-only GitHub Pages API on 2026-07-02 reported legacy root deployment for `mochirii.com` with status `errored`; the latest deploy built successfully but timed out in `deployment_queued`. Vercel production remained healthy, so treat this as a rollback-surface/settings cleanup item, not a live-site outage.
 - Deployment source of truth: `docs/deployment.md`.
-- Current production commit verified from `origin/main`: `1f6b5c11b2423f03c8dc243815365d899001b4f2` (`Rebrand public guild culture page to Tome (#357)`).
+- Current `origin/main` commit verified locally on 2026-07-04: `4b36c948a6635ccc2dffe1d82c4cdab482f1b39f` (`Rename Mochi Pets game surface (#371)`).
+- Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii` as public. Keep this public state unless the owner separately approves making the repo private again.
+- PR #371 merged on 2026-07-04 with `validate`, `validate-next`, and Supabase Preview green. The GitHub Vercel status recorded on that release still pointed at the old private-organization plan limitation, so fresh Vercel status checks are required before treating that failure as current evidence.
+- Local production smoke blocker on 2026-07-05: this workstation resets TLS handshakes for `https://mochirii.com` and `https://social.mochirii.com` while `https://mochirii.vercel.app`, Vercel, Cloudflare, GitHub, Google, and `https://mochi-pets-game.fly.dev/healthz` work locally, and external fetches confirm `mochirii.com`, `/games/mochi-pets`, and `social.mochirii.com` are live. Treat `npm run check:production` failure as a local workstation/network validation blocker until ProtonVPN/security routing is tested or disabled with owner approval; do not mutate DNS, Cloudflare, or Vercel from this evidence alone.
 - Production `/tome` is the canonical Tome route after the route refresh; `/codex` and `codex.html` are not retained as redirects.
 - Navigation posture: `mochirii.com` is the public website information surface. Header `Social` lives in the regular Guild dropdown and footer `Social` goes directly to `https://social.mochirii.com`. The website `/social` route remains noindex, redirects signed-in members to the social host, and keeps signed-out login/help copy.
 - Latest full route smoke before the unified release ledger was recorded on 2026-06-18. Run a fresh route matrix after each merged release packet.
@@ -46,7 +49,16 @@ This is the short source-of-truth index for the current Mochirii production post
 - Supabase CLI was updated to `2.107.0` for the Supabase hardening packet.
 - Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Pets-specific advisor findings.
 - Supabase advisor snapshot still includes leaked-password protection as a provider configuration follow-up, intentional service-only RLS/no-policy findings documented in `supabase/README.md`, informational unused-index findings, and deferred Mochi Pets RLS/index performance warnings.
-- Mochi Pets route/function/table rename is an atomic maintenance cutover. Do not deploy the website route rename independently; apply the approved Supabase migration, deploy the renamed Edge Functions, update the game runtime manifest, and resume tester traffic in the same verified window.
+- Mochi Pets route/function/table rename completed through PR #371 and the approved cutover window. Current website route posture is `/games/mochi-pets` active/noindex and the former game route retired as a normal 404 with no redirect.
+
+## Mochi Pets Runtime
+
+- Runtime target: `https://mochi-pets-game.fly.dev`.
+- Source recovery status on 2026-07-04: the private runtime source was found in the user's existing game runtime repository and a local recovery branch updates the active contract to Mochi Pets naming, `/games/mochi-pets`, `MOCHI_PETS_*` bridge events, and `mochi-pets-*` Supabase Edge Function names.
+- Current local verification for the recovered runtime source: Node `24.17.0`; `npm run typecheck`, `npm run lint`, `npm test`, `npm run alpha:public-copy`, `npm run unity:cloud-code-contract`, and `npm run build` pass. A local built-Express fallback smoke confirms `/healthz`, `/integration/game-manifest.json`, `/integration/alpha/status`, and `/embed` return Mochi Pets metadata when `MOCHI_PETS_REQUIRE_UNITY_WEBGL=false`.
+- Current blocker: release-grade `npm run alpha:built-server-smoke` fails because `unity/Builds/WebGL/Build/WebGL.framework.js.br` is missing. This is a real Unity WebGL export gap, not a website route failure.
+- Current hosted readback from this workstation: `https://mochi-pets-game.fly.dev/healthz` returns 200. Do not change Fly secrets, scaling, deploys, or hosted smoke/load checks until the user approves the exact runtime action.
+- Website contract gate remains: `MOCHI_PETS_GAME_CONTRACT_URL=https://mochi-pets-game.fly.dev MOCHI_PETS_SITE_ORIGIN=https://mochirii.com npm run check:mochi-pets-game-contract` must pass before first tester/game-runtime readiness is claimed.
 
 ## Mochirii Social / Pixelfed
 
@@ -56,6 +68,8 @@ This is the short source-of-truth index for the current Mochirii production post
 - Website boundary: header dropdown/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only a noindex handoff route that redirects signed-in members and gives signed-out visitors login/help options.
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
 - Source control: Pixelfed staging source is tracked in the private Mochirii ops repo; do not commit host `.env`, DB/Redis state, media, backups, cache files, or host-private notes.
+- Source-control evidence: Pixelfed ops PR #7 (`Document Mochirii Social ops readiness`) merged on 2026-07-04 at `d2a04b751e2ab838550714ee0e3edce0d19e1ff3`.
+- Pixelfed ops repository evidence on 2026-07-05: `origin` points at the private Mochirii ops repo, `upstream` fetch points at `pixelfed/pixelfed`, and upstream push is disabled.
 - Account sync gate: first-admin login is not complete until the Pixelfed OIDC callback writes one active `social_accounts` row through the trusted Supabase sync bridge.
 - Media gap: broad member upload testing waits for DigitalOcean Spaces as the primary media store, least-privilege host-only keys, exact-origin CORS, backup/restore notes, and moderation gates.
 - Federation gap: ActivityPub federation remains disabled/internal-only until a separate fediverse hub activation packet passes moderation, privacy, blocklist, remote-delivery, and rollback tests.
@@ -77,7 +91,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
-- Open PR queue on 2026-06-19 contains 26 Mochirii PRs, most behind current `main`; do not merge them as a batch. Treat each as a separate refresh, close, or release decision using `reports/unified-release-ledger-2026-06-19.md`.
+- Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
 
 ## Shopify Storefront
 

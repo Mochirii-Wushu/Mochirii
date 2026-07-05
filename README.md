@@ -273,7 +273,7 @@ For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/road
 - Root static files can still be opened directly in a browser or via static server for rollback/reference checks.
 - Production changes are validated through the Next app in `apps/web` and Vercel.
 - Use `git pull --rebase` (recommended) to keep history clean
-- Keep this GitHub repository private. Production releases use protected/admin merge to `main`, then an owner-approved manual Vercel CLI deploy from the linked private checkout with Root Directory `apps/web`.
+- This GitHub repository is currently public. Keep that state unless the owner separately approves making it private again. Production releases use protected merge to `main` with fresh required checks; if a future approved private-repo posture blocks Vercel Git checks, use the owner-approved manual Vercel CLI deploy path with Root Directory `apps/web`.
 - GitHub Pages/root static files remain available as rollback/reference material until a later stabilization task retires them.
 - Keep root `assets/` and `data/` as the editable content source for now; use `npm run sync:next-public` to mirror them into `apps/web/public/`.
 - Optional Lighthouse audits can be run manually from GitHub Actions using **Manual Lighthouse audit**; they are not required PR gates.
@@ -286,7 +286,7 @@ This site is purpose-built for the Mōchirīī guild.
 
 Content, branding, and structure are not intended for redistribution without permission.
 
-This repository is private and not open source. See [`COPYRIGHT.md`](COPYRIGHT.md) and [`NOTICE.md`](NOTICE.md).
+This repository is public for source visibility, but the Mochirii site content, branding, and structure are not open source for reuse. See [`COPYRIGHT.md`](COPYRIGHT.md) and [`NOTICE.md`](NOTICE.md).
 
 ---
 

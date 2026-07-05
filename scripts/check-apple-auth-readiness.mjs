@@ -92,7 +92,9 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 });
 
 [
-  "Manual Vercel Release Policy",
+  "Vercel Release Policy",
+  "GitHub repository is currently public",
+  "fresh required checks",
   "npx vercel deploy --prod --yes --token $token",
   "private",
 ].forEach((snippet) => assertIncludes("deployment docs", deploymentDoc, snippet));
