@@ -1,19 +1,69 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-03T14:47:01.591Z",
-  "scope": "No-secret Playwright browser route matrix for Mochirii route readiness. Runs in clean browser contexts with reduced motion enabled and records route, layout, focus, iframe, form, live-region, alert, and console evidence without cookies or headers.",
+  "checkedAt": "2026-07-05T11:51:51.199Z",
+  "scope": "No-secret Playwright browser route matrix for Mochirii route readiness. Runs in clean browser contexts with reduced motion enabled and records route, layout, focus, iframe, form, live-region, alert, and console evidence without cookies or headers. Viewports include common current mobile and desktop widths from StatCounter plus the existing tall evidence sizes.",
   "baseUrl": "https://mochirii.vercel.app",
   "browser": "playwright chromium",
   "viewports": [
     {
-      "name": "desktop",
+      "name": "mobile-360x800",
+      "width": 360,
+      "height": 800
+    },
+    {
+      "name": "mobile-375x812",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "name": "mobile-390x844",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "name": "mobile-390x900",
+      "width": 390,
+      "height": 900
+    },
+    {
+      "name": "mobile-414x896",
+      "width": 414,
+      "height": 896
+    },
+    {
+      "name": "mobile-430x932",
+      "width": 430,
+      "height": 932
+    },
+    {
+      "name": "desktop-1280x720",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "name": "desktop-1366x768",
+      "width": 1366,
+      "height": 768
+    },
+    {
+      "name": "desktop-1440x900",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "desktop-1440x1100",
       "width": 1440,
       "height": 1100
     },
     {
-      "name": "mobile",
-      "width": 390,
-      "height": 900
+      "name": "desktop-1536x864",
+      "width": 1536,
+      "height": 864
+    },
+    {
+      "name": "desktop-1920x1080",
+      "width": 1920,
+      "height": 1080
     }
   ],
   "routes": [
@@ -46,26 +96,26 @@
       "label": "Leader Dashboard"
     },
     {
-      "route": "/games/mochi-social",
-      "label": "Mochi Social"
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets"
     }
   ],
   "summary": {
     "routeCount": 8,
-    "viewportCount": 2,
-    "checks": 16,
-    "statusOk": 16,
-    "noOverflow": 16,
-    "focusVisible": 16,
-    "reducedMotionMatched": 16,
-    "iframeTitlePass": 16
+    "viewportCount": 12,
+    "checks": 96,
+    "statusOk": 96,
+    "noOverflow": 96,
+    "focusVisible": 96,
+    "reducedMotionMatched": 96,
+    "iframeTitlePass": 96
   },
   "matrix": [
     {
       "route": "/",
       "label": "Home",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/",
       "status": 200,
       "statusOk": true,
@@ -85,8 +135,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -116,8 +166,8 @@
     {
       "route": "/join",
       "label": "Join",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/join",
       "status": 200,
       "statusOk": true,
@@ -137,8 +187,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -158,7 +208,7 @@
       },
       "keyboardTrap": {
         "checkedTabs": 18,
-        "uniqueFocusStops": 16,
+        "uniqueFocusStops": 15,
         "likelyTrap": false
       },
       "consoleErrors": [],
@@ -168,8 +218,8 @@
     {
       "route": "/gallery",
       "label": "Gallery",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/gallery",
       "status": 200,
       "statusOk": true,
@@ -189,8 +239,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -210,7 +260,7 @@
       },
       "keyboardTrap": {
         "checkedTabs": 18,
-        "uniqueFocusStops": 17,
+        "uniqueFocusStops": 13,
         "likelyTrap": false
       },
       "consoleErrors": [],
@@ -220,8 +270,8 @@
     {
       "route": "/auth",
       "label": "Auth",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/auth",
       "status": 200,
       "statusOk": true,
@@ -241,8 +291,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -285,8 +335,8 @@
     {
       "route": "/account",
       "label": "Account",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/account",
       "status": 200,
       "statusOk": true,
@@ -306,8 +356,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -327,7 +377,7 @@
       },
       "keyboardTrap": {
         "checkedTabs": 18,
-        "uniqueFocusStops": 17,
+        "uniqueFocusStops": 18,
         "likelyTrap": false
       },
       "consoleErrors": [],
@@ -337,8 +387,8 @@
     {
       "route": "/social",
       "label": "Social",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/social",
       "status": 200,
       "statusOk": true,
@@ -358,8 +408,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -389,8 +439,8 @@
     {
       "route": "/leader-dashboard",
       "label": "Leader Dashboard",
-      "viewport": "desktop",
-      "size": "1440x1100",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
       "url": "https://mochirii.vercel.app/leader-dashboard",
       "status": 200,
       "statusOk": true,
@@ -410,8 +460,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -431,7 +481,7 @@
       },
       "keyboardTrap": {
         "checkedTabs": 18,
-        "uniqueFocusStops": 17,
+        "uniqueFocusStops": 18,
         "likelyTrap": false
       },
       "consoleErrors": [],
@@ -439,15 +489,15 @@
       "gotoError": ""
     },
     {
-      "route": "/games/mochi-social",
-      "label": "Mochi Social",
-      "viewport": "desktop",
-      "size": "1440x1100",
-      "url": "https://mochirii.vercel.app/games/mochi-social",
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "mobile-360x800",
+      "size": "360x800",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
       "status": 200,
       "statusOk": true,
-      "title": "Mochi Social Alpha",
-      "h1": "Mochi Social",
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
       "main": true,
       "liveRegions": 0,
       "alerts": 0,
@@ -462,8 +512,8 @@
       },
       "horizontalOverflow": false,
       "widths": {
-        "document": 1440,
-        "viewport": 1440
+        "document": 360,
+        "viewport": 360
       },
       "reducedMotion": {
         "matches": true,
@@ -493,7 +543,865 @@
     {
       "route": "/",
       "label": "Home",
-      "viewport": "mobile",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 15,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 13,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "mobile-375x812",
+      "size": "375x812",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 375,
+        "viewport": 375
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 15,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 13,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "mobile-390x844",
+      "size": "390x844",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 390,
+        "viewport": 390
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/",
       "status": 200,
@@ -545,7 +1453,7 @@
     {
       "route": "/join",
       "label": "Join",
-      "viewport": "mobile",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/join",
       "status": 200,
@@ -597,7 +1505,7 @@
     {
       "route": "/gallery",
       "label": "Gallery",
-      "viewport": "mobile",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/gallery",
       "status": 200,
@@ -649,7 +1557,7 @@
     {
       "route": "/auth",
       "label": "Auth",
-      "viewport": "mobile",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/auth",
       "status": 200,
@@ -714,7 +1622,7 @@
     {
       "route": "/account",
       "label": "Account",
-      "viewport": "mobile",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/account",
       "status": 200,
@@ -766,7 +1674,7 @@
     {
       "route": "/social",
       "label": "Social",
-      "viewport": "mobile",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/social",
       "status": 200,
@@ -818,7 +1726,7 @@
     {
       "route": "/leader-dashboard",
       "label": "Leader Dashboard",
-      "viewport": "mobile",
+      "viewport": "mobile-390x900",
       "size": "390x900",
       "url": "https://mochirii.vercel.app/leader-dashboard",
       "status": 200,
@@ -868,15 +1776,15 @@
       "gotoError": ""
     },
     {
-      "route": "/games/mochi-social",
-      "label": "Mochi Social",
-      "viewport": "mobile",
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "mobile-390x900",
       "size": "390x900",
-      "url": "https://mochirii.vercel.app/games/mochi-social",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
       "status": 200,
       "statusOk": true,
-      "title": "Mochi Social Alpha",
-      "h1": "Mochi Social",
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
       "main": true,
       "liveRegions": 0,
       "alerts": 0,
@@ -918,19 +1826,3501 @@
       "consoleErrors": [],
       "pageErrors": [],
       "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 15,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 13,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "mobile-414x896",
+      "size": "414x896",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 414,
+        "viewport": 414
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 15,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 13,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "mobile-430x932",
+      "size": "430x932",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 430,
+        "viewport": 430
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 16,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "desktop-1280x720",
+      "size": "1280x720",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1280,
+        "viewport": 1280
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 16,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "desktop-1366x768",
+      "size": "1366x768",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1366,
+        "viewport": 1366
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 16,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "desktop-1440x900",
+      "size": "1440x900",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 16,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "desktop-1440x1100",
+      "size": "1440x1100",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1440,
+        "viewport": 1440
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 16,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "desktop-1536x864",
+      "size": "1536x864",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1536,
+        "viewport": 1536
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/",
+      "label": "Home",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī • Where Winds Meet Guild",
+      "h1": "Mōchirīī",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/join",
+      "label": "Join",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/join",
+      "status": 200,
+      "statusOk": true,
+      "title": "Join Mōchirīī • Where Winds Meet Guild",
+      "h1": "Join Mōchirīī",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 1,
+        "titled": 1
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 16,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/gallery",
+      "label": "Gallery",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/gallery",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Gallery • Where Winds Meet Guild",
+      "h1": "Guild Album",
+      "main": true,
+      "liveRegions": 5,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/auth",
+      "label": "Auth",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/auth",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Login • Guild Account",
+      "h1": "Login",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 1,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": [
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          },
+          {
+            "tag": "span",
+            "animationName": "border-shift",
+            "animationDuration": "1e-06s",
+            "transitionDuration": "1e-06s"
+          }
+        ]
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/account",
+      "label": "Account",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/account",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Account • Guild Verification",
+      "h1": "Account",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/social",
+      "label": "Social",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/social",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochirii Social Handoff",
+      "h1": "Social",
+      "main": true,
+      "liveRegions": 1,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/leader-dashboard",
+      "label": "Leader Dashboard",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/leader-dashboard",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mōchirīī Leader Dashboard • Gallery Moderation",
+      "h1": "Gallery Moderation",
+      "main": true,
+      "liveRegions": 2,
+      "alerts": 0,
+      "forms": 0,
+      "inputs": {
+        "total": 0,
+        "labeled": 0
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 17,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
+    },
+    {
+      "route": "/games/mochi-pets",
+      "label": "Mochi Pets",
+      "viewport": "desktop-1920x1080",
+      "size": "1920x1080",
+      "url": "https://mochirii.vercel.app/games/mochi-pets",
+      "status": 200,
+      "statusOk": true,
+      "title": "Mochi Pets Alpha",
+      "h1": "Mochi Pets",
+      "main": true,
+      "liveRegions": 0,
+      "alerts": 0,
+      "forms": 1,
+      "inputs": {
+        "total": 1,
+        "labeled": 1
+      },
+      "iframes": {
+        "total": 0,
+        "titled": 0
+      },
+      "horizontalOverflow": false,
+      "widths": {
+        "document": 1920,
+        "viewport": 1920
+      },
+      "reducedMotion": {
+        "matches": true,
+        "animated": []
+      },
+      "focus": {
+        "tag": "a",
+        "id": "",
+        "role": "",
+        "ariaLabel": "",
+        "text": "Skip to main content",
+        "outlineStyle": "solid",
+        "outlineWidth": "2px",
+        "boxShadow": "present",
+        "visible": true,
+        "inViewport": true
+      },
+      "keyboardTrap": {
+        "checkedTabs": 18,
+        "uniqueFocusStops": 18,
+        "likelyTrap": false
+      },
+      "consoleErrors": [],
+      "pageErrors": [],
+      "gotoError": ""
     }
   ],
   "warnings": [
-    "/auth desktop: reduced-motion context still reported 2 animated or transitioning sampled elements.",
-    "/account desktop: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/social desktop: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/leader-dashboard desktop: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/games/mochi-social desktop: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/auth mobile: reduced-motion context still reported 2 animated or transitioning sampled elements.",
-    "/account mobile: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/social mobile: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/leader-dashboard mobile: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
-    "/games/mochi-social mobile: no alert region observed in signed-out/default browser state; confirm error state remains covered statically."
+    "/auth mobile-360x800: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account mobile-360x800: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social mobile-360x800: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard mobile-360x800: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets mobile-360x800: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth mobile-375x812: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account mobile-375x812: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social mobile-375x812: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard mobile-375x812: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets mobile-375x812: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth mobile-390x844: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account mobile-390x844: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social mobile-390x844: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard mobile-390x844: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets mobile-390x844: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth mobile-390x900: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account mobile-390x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social mobile-390x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard mobile-390x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets mobile-390x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth mobile-414x896: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account mobile-414x896: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social mobile-414x896: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard mobile-414x896: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets mobile-414x896: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth mobile-430x932: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account mobile-430x932: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social mobile-430x932: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard mobile-430x932: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets mobile-430x932: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth desktop-1280x720: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account desktop-1280x720: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social desktop-1280x720: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard desktop-1280x720: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets desktop-1280x720: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth desktop-1366x768: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account desktop-1366x768: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social desktop-1366x768: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard desktop-1366x768: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets desktop-1366x768: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth desktop-1440x900: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account desktop-1440x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social desktop-1440x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard desktop-1440x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets desktop-1440x900: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth desktop-1440x1100: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account desktop-1440x1100: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social desktop-1440x1100: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard desktop-1440x1100: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets desktop-1440x1100: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth desktop-1536x864: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account desktop-1536x864: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social desktop-1536x864: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard desktop-1536x864: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets desktop-1536x864: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/auth desktop-1920x1080: reduced-motion context still reported 2 animated or transitioning sampled elements.",
+    "/account desktop-1920x1080: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/social desktop-1920x1080: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/leader-dashboard desktop-1920x1080: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.",
+    "/games/mochi-pets desktop-1920x1080: no alert region observed in signed-out/default browser state; confirm error state remains covered statically."
   ],
   "failures": []
 }
