@@ -29,11 +29,11 @@ Verify these settings in the production-serving `mochirii/mochirii` Vercel proje
 - Environment variables: only browser-safe public configuration such as `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`, and `NEXT_PUBLIC_AUTH_PROVIDER_IDS` in the app
 - Secrets: no service-role keys, Discord bot tokens, OAuth client secrets, or privileged credentials in browser code or docs
 
-## Manual Vercel Release Policy
+## Vercel Release Policy
 
-Keep the Mochirii website GitHub repository private. The current release path intentionally does not require making the repository public to satisfy Vercel Git checks.
+The Mochirii website GitHub repository is currently public. Keep this visibility unless the owner separately approves making it private again. Vercel Git statuses that still point at the old private-organization plan limitation are stale until rerun or refreshed; do not treat those stale failures as current release evidence.
 
-GitHub PRs should still use protected-branch review/check discipline. When the Vercel Git status reports the private-organization plan limitation but repository checks and any required provider previews pass, an owner may explicitly approve admin bypass merge plus manual Vercel CLI deployment.
+GitHub PRs should use protected-branch review/check discipline and fresh required checks. If the owner later approves making the repository private again and Vercel Git checks become unavailable on the current plan, an owner may explicitly approve admin bypass merge plus manual Vercel CLI deployment after repository checks and required provider previews pass.
 
 After the approved merge, sync `main` and deploy from the repository root without printing secrets. The
 linked Vercel project keeps `apps/web` as its configured Root Directory, so running the CLI from

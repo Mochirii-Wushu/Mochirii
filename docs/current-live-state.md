@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-07-04.
+Last checked for this index: 2026-07-05.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -15,7 +15,8 @@ This is the short source-of-truth index for the current Mochirii production post
 - Read-only GitHub Pages API on 2026-07-02 reported legacy root deployment for `mochirii.com` with status `errored`; the latest deploy built successfully but timed out in `deployment_queued`. Vercel production remained healthy, so treat this as a rollback-surface/settings cleanup item, not a live-site outage.
 - Deployment source of truth: `docs/deployment.md`.
 - Current `origin/main` commit verified locally on 2026-07-04: `4b36c948a6635ccc2dffe1d82c4cdab482f1b39f` (`Rename Mochi Pets game surface (#371)`).
-- PR #371 merged on 2026-07-04 with `validate`, `validate-next`, and Supabase Preview green. The GitHub Vercel status reported the known private-organization plan limitation; production releases keep using the approved manual Vercel CLI deploy path from `docs/deployment.md`.
+- Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii` as public. Keep this public state unless the owner separately approves making the repo private again.
+- PR #371 merged on 2026-07-04 with `validate`, `validate-next`, and Supabase Preview green. The GitHub Vercel status recorded on that release still pointed at the old private-organization plan limitation, so fresh Vercel status checks are required before treating that failure as current evidence.
 - Production `/tome` is the canonical Tome route after the route refresh; `/codex` and `codex.html` are not retained as redirects.
 - Navigation posture: `mochirii.com` is the public website information surface. Header `Social` lives in the regular Guild dropdown and footer `Social` goes directly to `https://social.mochirii.com`. The website `/social` route remains noindex, redirects signed-in members to the social host, and keeps signed-out login/help copy.
 - Latest full route smoke before the unified release ledger was recorded on 2026-06-18. Run a fresh route matrix after each merged release packet.
@@ -55,7 +56,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Source recovery status on 2026-07-04: the private runtime source was found in the user's existing game runtime repository and a local recovery branch updates the active contract to Mochi Pets naming, `/games/mochi-pets`, `MOCHI_PETS_*` bridge events, and `mochi-pets-*` Supabase Edge Function names.
 - Current local verification for the recovered runtime source: Node `24.17.0`; `npm run typecheck`, `npm run lint`, `npm test`, `npm run alpha:public-copy`, `npm run unity:cloud-code-contract`, and `npm run build` pass. A local built-Express fallback smoke confirms `/healthz`, `/integration/game-manifest.json`, `/integration/alpha/status`, and `/embed` return Mochi Pets metadata when `MOCHI_PETS_REQUIRE_UNITY_WEBGL=false`.
 - Current blocker: release-grade `npm run alpha:built-server-smoke` fails because `unity/Builds/WebGL/Build/WebGL.framework.js.br` is missing. This is a real Unity WebGL export gap, not a website route failure.
-- Current live blocker from this workstation: `mochi-pets-game.fly.dev` has no DNS answer. Do not change Fly/DNS or deploy until the user approves the exact runtime recovery/deployment action.
+- Current hosted readback from this workstation: `https://mochi-pets-game.fly.dev/healthz` returns 200. Do not change Fly secrets, scaling, deploys, or hosted smoke/load checks until the user approves the exact runtime action.
 - Website contract gate remains: `MOCHI_PETS_GAME_CONTRACT_URL=https://mochi-pets-game.fly.dev MOCHI_PETS_SITE_ORIGIN=https://mochirii.com npm run check:mochi-pets-game-contract` must pass before first tester/game-runtime readiness is claimed.
 
 ## Mochirii Social / Pixelfed
@@ -67,6 +68,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
 - Source control: Pixelfed staging source is tracked in the private Mochirii ops repo; do not commit host `.env`, DB/Redis state, media, backups, cache files, or host-private notes.
 - Source-control evidence: Pixelfed ops PR #7 (`Document Mochirii Social ops readiness`) merged on 2026-07-04 at `d2a04b751e2ab838550714ee0e3edce0d19e1ff3`.
+- Pixelfed ops repository evidence on 2026-07-05: `origin` points at the private Mochirii ops repo, `upstream` fetch points at `pixelfed/pixelfed`, and upstream push is disabled.
 - Account sync gate: first-admin login is not complete until the Pixelfed OIDC callback writes one active `social_accounts` row through the trusted Supabase sync bridge.
 - Media gap: broad member upload testing waits for DigitalOcean Spaces as the primary media store, least-privilege host-only keys, exact-origin CORS, backup/restore notes, and moderation gates.
 - Federation gap: ActivityPub federation remains disabled/internal-only until a separate fediverse hub activation packet passes moderation, privacy, blocklist, remote-delivery, and rollback tests.
@@ -88,7 +90,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
-- Current private-repo release posture: keep the GitHub repository private. If GitHub's Vercel status fails only because of the private-organization plan limitation, use the documented protected/admin merge plus owner-approved manual Vercel production deploy path; do not make the repo public to satisfy that status.
+- Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
 
 ## Shopify Storefront
 

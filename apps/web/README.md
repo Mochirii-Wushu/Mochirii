@@ -41,7 +41,7 @@ Set the Vercel project Root Directory to:
 apps/web
 ```
 
-Dashboard settings remain manual. Website releases keep the GitHub repository private and use owner-approved manual Vercel CLI production deploys after protected/admin merges when the Vercel Git check is blocked by the private-organization plan limitation. Run production deploys from the repository root while reading project IDs from `apps/web/.vercel/project.json`; the Vercel project already has `apps/web` configured as Root Directory, and running `vercel deploy` from inside `apps/web` can double-apply that path on current CLI versions.
+Dashboard settings remain manual. The website GitHub repository is currently public, so release decisions should use fresh Vercel/GitHub required checks rather than stale private-organization plan-limit statuses. If the owner later approves making the repository private again and Vercel Git checks are blocked, use owner-approved manual Vercel CLI production deploys after protected/admin merges. Run production deploys from the repository root while reading project IDs from `apps/web/.vercel/project.json`; the Vercel project already has `apps/web` configured as Root Directory, and running `vercel deploy` from inside `apps/web` can double-apply that path on current CLI versions.
 
 The safest local workflow is to pull settings for the linked app, clean generated output, then run the Vercel build from the repository root with `--cwd apps/web`:
 
