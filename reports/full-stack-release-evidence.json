@@ -1,13 +1,13 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-02T06:07:04.307Z",
+  "checkedAt": "2026-07-05T12:11:58.375Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
   "providerReadsEnabled": true,
-  "strictProviders": true,
+  "strictProviders": false,
   "git": {
     "branch": "main",
-    "head": "3077c445bc51",
+    "head": "f1b2b354c9b8",
     "upstream": "origin/main",
     "upstreamStatus": "configured",
     "ahead": 0,
@@ -42,7 +42,7 @@
       "name": "mochirii",
       "target": "production",
       "readyState": "READY",
-      "url": "https://mochirii-48d0oin16-mochirii.vercel.app",
+      "url": "https://mochirii-8uf57959o-mochirii.vercel.app",
       "aliases": [
         "mochirii.com",
         "mochirii.vercel.app",
@@ -50,15 +50,17 @@
         "mochirii-mochirii.vercel.app",
         "mochirii-git-main-mochirii.vercel.app"
       ],
-      "createdAt": 1782972153422
+      "createdAt": 1783252828356
     },
     "environmentNames": {
       "production": {
         "status": "checked",
         "target": "production",
         "names": [
-          "MOCHI_SOCIAL_TESTER_PASSWORD",
+          "MOCHI_PETS_ALPHA_ACCESS_MODE",
+          "MOCHI_PETS_TESTER_PASSWORD",
           "NEXT_PUBLIC_AUTH_PROVIDER_IDS",
+          "NEXT_PUBLIC_MOCHI_PETS_URL",
           "NEXT_PUBLIC_SITE_URL",
           "NEXT_PUBLIC_SUPABASE_ANON_KEY",
           "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
@@ -77,32 +79,30 @@
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ],
-        "count": 19
+        "count": 21
       },
       "preview": {
         "status": "checked",
         "target": "preview",
         "names": [
-          "MOCHI_SOCIAL_ALPHA_ACCESS_MODE",
-          "MOCHI_SOCIAL_TESTER_PASSWORD",
           "MOCHI_SOCIAL_TESTER_PASSWORD_SHA256",
           "NEXT_PUBLIC_SITE_URL",
           "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
           "NEXT_PUBLIC_SUPABASE_URL"
         ],
-        "count": 8
+        "count": 6
       }
     }
   },
   "supabase": {
-    "status": "checked",
+    "status": "skipped",
     "cli": {
       "available": true,
       "version": "2.108.0"
     },
     "projectRef": "deyvmtncimmcinldjyqe",
     "localMigrations": {
-      "total": 21,
+      "total": 23,
       "versions": [
         "20260513081523",
         "20260513193110",
@@ -124,7 +124,9 @@
         "20260618041559",
         "20260621120000",
         "20260622204823",
-        "20260702043644"
+        "20260702043644",
+        "20260702080720",
+        "20260704120856"
       ],
       "files": [
         "20260513081523_create_discord_role_gated_gallery_uploads.sql",
@@ -147,11 +149,13 @@
         "20260618041559_add_active_workflow_fk_indexes.sql",
         "20260621120000_add_mochi_social_unity_room.sql",
         "20260622204823_add_mochi_social_alpha_explicit_grants.sql",
-        "20260702043644_harden_mochi_social_advisor_findings.sql"
+        "20260702043644_harden_mochi_social_advisor_findings.sql",
+        "20260702080720_add_pixelfed_social_accounts.sql",
+        "20260704120856_rename_mochi_pets_internal_prefix.sql"
       ]
     },
     "localFunctions": {
-      "total": 29,
+      "total": 30,
       "names": [
         "check-instagram-api-status",
         "get-current-spotlight-winner",
@@ -163,11 +167,11 @@
         "list-member-profiles",
         "list-visible-profile-cards",
         "mark-instagram-gallery-submission-shared",
-        "mochi-social-alpha-action",
-        "mochi-social-alpha-admin",
-        "mochi-social-alpha-progress",
-        "mochi-social-alpha-session",
-        "mochi-social-unity-auth",
+        "mochi-pets-alpha-action",
+        "mochi-pets-alpha-admin",
+        "mochi-pets-alpha-progress",
+        "mochi-pets-alpha-session",
+        "mochi-pets-unity-auth",
         "moderate-gallery-submission",
         "moderate-member-profile-media",
         "publish-instagram-gallery-submission",
@@ -179,7 +183,8 @@
         "send-vote-reminder",
         "submit-discord-gallery-image",
         "submit-member-profile-media",
-        "submit-mochi-social-feedback",
+        "submit-mochi-pets-feedback",
+        "sync-pixelfed-social-account",
         "verify-discord-member",
         "verify-member-access"
       ],
@@ -207,168 +212,20 @@
         "submit-member-profile-media": true,
         "list-member-profile-media-queue": true,
         "moderate-member-profile-media": true,
-        "mochi-social-alpha-session": true,
-        "mochi-social-unity-auth": true,
-        "mochi-social-alpha-action": false,
-        "mochi-social-alpha-progress": false,
-        "mochi-social-alpha-admin": true,
-        "submit-mochi-social-feedback": true
+        "mochi-pets-alpha-session": true,
+        "mochi-pets-unity-auth": true,
+        "mochi-pets-alpha-action": false,
+        "mochi-pets-alpha-progress": false,
+        "mochi-pets-alpha-admin": true,
+        "submit-mochi-pets-feedback": true,
+        "sync-pixelfed-social-account": false
       }
     },
-    "remoteMigrations": {
-      "totalRows": 21,
-      "versions": [
-        "20260513081523",
-        "20260513193110",
-        "20260513195853",
-        "20260514010338",
-        "20260524114802",
-        "20260524115932",
-        "20260607094500",
-        "20260607125027",
-        "20260608093407",
-        "20260608173000",
-        "20260608210000",
-        "20260608233000",
-        "20260609090000",
-        "20260610090000",
-        "20260610120000",
-        "20260612105232",
-        "20260615041842",
-        "20260618041559",
-        "20260621120000",
-        "20260622204823",
-        "20260702043644"
-      ],
-      "rows": [
-        {
-          "local": "20260513081523",
-          "remote": "20260513081523"
-        },
-        {
-          "local": "20260513193110",
-          "remote": "20260513193110"
-        },
-        {
-          "local": "20260513195853",
-          "remote": "20260513195853"
-        },
-        {
-          "local": "20260514010338",
-          "remote": "20260514010338"
-        },
-        {
-          "local": "20260524114802",
-          "remote": "20260524114802"
-        },
-        {
-          "local": "20260524115932",
-          "remote": "20260524115932"
-        },
-        {
-          "local": "20260607094500",
-          "remote": "20260607094500"
-        },
-        {
-          "local": "20260607125027",
-          "remote": "20260607125027"
-        },
-        {
-          "local": "20260608093407",
-          "remote": "20260608093407"
-        },
-        {
-          "local": "20260608173000",
-          "remote": "20260608173000"
-        },
-        {
-          "local": "20260608210000",
-          "remote": "20260608210000"
-        },
-        {
-          "local": "20260608233000",
-          "remote": "20260608233000"
-        },
-        {
-          "local": "20260609090000",
-          "remote": "20260609090000"
-        },
-        {
-          "local": "20260610090000",
-          "remote": "20260610090000"
-        },
-        {
-          "local": "20260610120000",
-          "remote": "20260610120000"
-        },
-        {
-          "local": "20260612105232",
-          "remote": "20260612105232"
-        },
-        {
-          "local": "20260615041842",
-          "remote": "20260615041842"
-        },
-        {
-          "local": "20260618041559",
-          "remote": "20260618041559"
-        },
-        {
-          "local": "20260621120000",
-          "remote": "20260621120000"
-        },
-        {
-          "local": "20260622204823",
-          "remote": "20260622204823"
-        },
-        {
-          "local": "20260702043644",
-          "remote": ""
-        }
-      ],
-      "mismatch": {
-        "localOnly": [],
-        "remoteOnly": []
-      }
-    },
-    "remoteFunctions": {
-      "total": 29,
-      "active": 29,
-      "names": [
-        "check-instagram-api-status",
-        "get-current-spotlight-winner",
-        "get-member-profile",
-        "list-approved-gallery-submissions",
-        "list-gallery-review-queue",
-        "list-instagram-publish-queue",
-        "list-member-profile-media-queue",
-        "list-member-profiles",
-        "list-visible-profile-cards",
-        "mark-instagram-gallery-submission-shared",
-        "mochi-social-alpha-action",
-        "mochi-social-alpha-admin",
-        "mochi-social-alpha-progress",
-        "mochi-social-alpha-session",
-        "mochi-social-unity-auth",
-        "moderate-gallery-submission",
-        "moderate-member-profile-media",
-        "publish-instagram-gallery-submission",
-        "publish-member-spotlight-winner",
-        "reaper-discord-interactions",
-        "reaper-discord-member-sync",
-        "review-member-verification",
-        "send-member-spotlight-poll",
-        "send-vote-reminder",
-        "submit-discord-gallery-image",
-        "submit-member-profile-media",
-        "submit-mochi-social-feedback",
-        "verify-discord-member",
-        "verify-member-access"
-      ],
-      "inactive": [],
-      "localConfiguredMissingRemote": []
-    },
-    "secrets": "not read by this no-secret evidence command"
+    "remoteMigrations": null,
+    "remoteFunctions": null,
+    "secrets": "not read by this no-secret evidence command",
+    "reason": "supabase linked migration list failed",
+    "error": "Initialising login role... 2026/07/05 05:12:03 Access token not provided. Supply an access token by running supabase login or setting the SUPABASE_ACCESS_TOKEN environment variable."
   },
   "discordReaper": {
     "status": "static-checked",
@@ -402,7 +259,7 @@
       "docs/vote-reminder-runbook.md"
     ]
   },
-  "mochiSocial": {
+  "mochiPets": {
     "status": "static-checked",
     "previewReadyReportPresent": false,
     "previewReadyReport": null,
@@ -421,17 +278,17 @@
     "fundedChainActionsAuthorized": false,
     "evidence": [
       {
-        "file": "docs/mochi-social-visual-polish.md",
+        "file": "docs/mochi-pets-visual-polish.md",
         "configuredPreviewStub": false,
         "fundedChainGate": false
       },
       {
-        "file": "scripts/check-mochi-social-alpha.mjs",
+        "file": "scripts/check-mochi-pets-alpha.mjs",
         "configuredPreviewStub": true,
         "fundedChainGate": true
       },
       {
-        "file": "scripts/check-mochi-social-edge-authority.mjs",
+        "file": "scripts/check-mochi-pets-edge-authority.mjs",
         "configuredPreviewStub": false,
         "fundedChainGate": false
       }
@@ -445,6 +302,8 @@
     "noSecretReportsExpected": true
   },
   "warnings": [],
-  "skipped": [],
+  "skipped": [
+    "supabase linked migration list failed"
+  ],
   "failures": []
 }
