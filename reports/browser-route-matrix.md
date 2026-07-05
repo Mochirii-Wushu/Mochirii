@@ -1,6 +1,6 @@
 # Browser Route Matrix
 
-Generated: 2026-07-05T11:51:51.199Z
+Generated: 2026-07-05T18:27:45.243Z
 
 This file is intentionally no-secret. It records clean-context Playwright browser evidence for key Mochirii routes without cookies, request headers, raw response headers, screenshots, or private form values.
 

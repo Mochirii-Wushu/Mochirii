@@ -1,6 +1,6 @@
 # Accessibility Route Matrix
 
-Generated: 2026-07-05T11:51:50.921Z
+Generated: 2026-07-05T18:27:45.243Z
 
 This file is intentionally no-secret. It records WCAG 2.2 AA-oriented accessibility coverage for Mochirii route workflows and names the browser checks that still require manual or Playwright evidence.
 

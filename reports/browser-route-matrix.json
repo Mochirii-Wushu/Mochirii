@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-05T11:51:51.199Z",
+  "checkedAt": "2026-07-05T18:27:45.243Z",
   "scope": "No-secret Playwright browser route matrix for Mochirii route readiness. Runs in clean browser contexts with reduced motion enabled and records route, layout, focus, iframe, form, live-region, alert, and console evidence without cookies or headers. Viewports include common current mobile and desktop widths from StatCounter plus the existing tall evidence sizes.",
   "baseUrl": "https://mochirii.vercel.app",
   "browser": "playwright chromium",
