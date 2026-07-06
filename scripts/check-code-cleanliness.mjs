@@ -10,7 +10,9 @@ import {
 const sourceLineBudgets = [
   { path: "apps/web/app/styles/public-pages.css", warnAt: 3000, reason: "public page styles should keep moving into page-scoped partials" },
   { path: "apps/web/app/styles/member-workflow.css", warnAt: 900, reason: "member workflow styles should split by surface" },
-  { path: "apps/web/app/styles/shell-overlays.css", warnAt: 800, reason: "shell, overlay, and footer styles should stay separately reviewable" },
+  { path: "apps/web/app/styles/shell-header-nav.css", warnAt: 450, reason: "header and navigation styles should stay separately reviewable" },
+  { path: "apps/web/app/styles/shell-mobile-menu.css", warnAt: 250, reason: "mobile menu styles should stay separately reviewable" },
+  { path: "apps/web/app/styles/shell-footer.css", warnAt: 350, reason: "footer styles should stay separately reviewable" },
   { path: "apps/web/components/public-pages/pages.tsx", warnAt: 900, reason: "public page render helpers should stay reviewable" },
   { path: "apps/web/components/member-workflow/LeaderDashboard.tsx", warnAt: 900, reason: "moderation panels should split by workflow" },
   { path: "apps/web/components/SiteHeader.tsx", warnAt: 450, reason: "navigation data and interaction logic should stay separable" },
