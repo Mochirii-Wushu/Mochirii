@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-06T09:20:45.038Z",
+  "checkedAt": "2026-07-06T11:16:52.060Z",
   "baseUrl": "https://mochirii.com",
   "expectedCorsOrigin": "https://mochirii.com",
   "socialHost": "https://social.mochirii.com",
@@ -220,12 +220,279 @@
       "checkedSnippets": 4
     }
   ],
+  "browserProof": {
+    "enabled": true,
+    "skipped": false,
+    "browser": "playwright chromium",
+    "viewports": [
+      {
+        "name": "mobile-390x844",
+        "width": 390,
+        "height": 844
+      },
+      {
+        "name": "desktop-1440x900",
+        "width": 1440,
+        "height": 900
+      }
+    ],
+    "routes": [
+      {
+        "id": "home",
+        "path": "/",
+        "url": "https://mochirii.com/",
+        "viewport": "mobile-390x844",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mōchirīī • Where Winds Meet Guild",
+        "h1": "Mōchirīī",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "auth",
+        "path": "/auth",
+        "url": "https://mochirii.com/auth",
+        "viewport": "mobile-390x844",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mōchirīī Login • Guild Account",
+        "h1": "Login",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "account",
+        "path": "/account",
+        "url": "https://mochirii.com/account",
+        "viewport": "mobile-390x844",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mōchirīī Account • Guild Verification",
+        "h1": "Account",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "social",
+        "path": "/social",
+        "url": "https://mochirii.com/social",
+        "viewport": "mobile-390x844",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mochirii Social Handoff",
+        "h1": "Social",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": {
+          "ok": true,
+          "linkCount": 4
+        },
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "oauth-consent",
+        "path": "/oauth/consent",
+        "url": "https://mochirii.com/oauth/consent",
+        "viewport": "mobile-390x844",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mochirii OAuth Consent - Guild Social",
+        "h1": "OAuth Consent",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": {
+          "status": 401,
+          "requestOrigin": "https://mochirii.com",
+          "pageOrigin": "https://mochirii.com",
+          "ok": true
+        },
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "mochi-pets",
+        "path": "/games/mochi-pets",
+        "url": "https://mochirii.com/games/mochi-pets",
+        "viewport": "mobile-390x844",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mochi Pets Alpha",
+        "h1": "Mochi Pets",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": {
+          "ok": true,
+          "state": "not-rendered-in-signed-out-proof",
+          "frameCount": 0,
+          "frameOrigins": [],
+          "expectedOrigin": "https://mochi-pets-game.fly.dev"
+        }
+      },
+      {
+        "id": "home",
+        "path": "/",
+        "url": "https://mochirii.com/",
+        "viewport": "desktop-1440x900",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mōchirīī • Where Winds Meet Guild",
+        "h1": "Mōchirīī",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "auth",
+        "path": "/auth",
+        "url": "https://mochirii.com/auth",
+        "viewport": "desktop-1440x900",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mōchirīī Login • Guild Account",
+        "h1": "Login",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "account",
+        "path": "/account",
+        "url": "https://mochirii.com/account",
+        "viewport": "desktop-1440x900",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mōchirīī Account • Guild Verification",
+        "h1": "Account",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "social",
+        "path": "/social",
+        "url": "https://mochirii.com/social",
+        "viewport": "desktop-1440x900",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mochirii Social Handoff",
+        "h1": "Social",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": {
+          "ok": true,
+          "linkCount": 4
+        },
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "oauth-consent",
+        "path": "/oauth/consent",
+        "url": "https://mochirii.com/oauth/consent",
+        "viewport": "desktop-1440x900",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mochirii OAuth Consent - Guild Social",
+        "h1": "OAuth Consent",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": {
+          "status": 401,
+          "requestOrigin": "https://mochirii.com",
+          "pageOrigin": "https://mochirii.com",
+          "ok": true
+        },
+        "socialHandoff": null,
+        "mochiPetsFrame": null
+      },
+      {
+        "id": "mochi-pets",
+        "path": "/games/mochi-pets",
+        "url": "https://mochirii.com/games/mochi-pets",
+        "viewport": "desktop-1440x900",
+        "status": 200,
+        "statusOk": true,
+        "origin": "https://mochirii.com",
+        "title": "Mochi Pets Alpha",
+        "h1": "Mochi Pets",
+        "corsConsoleErrors": [],
+        "pageErrors": [],
+        "gotoError": "",
+        "oauthDecision": null,
+        "socialHandoff": null,
+        "mochiPetsFrame": {
+          "ok": true,
+          "state": "not-rendered-in-signed-out-proof",
+          "frameCount": 0,
+          "frameOrigins": [],
+          "expectedOrigin": "https://mochi-pets-game.fly.dev"
+        }
+      }
+    ],
+    "summary": {
+      "checks": 12,
+      "statusOk": 12,
+      "noCorsConsoleErrors": 12,
+      "sameOriginApiChecks": 2,
+      "socialHandoffChecks": 2,
+      "mochiPetsFrameChecks": 2,
+      "narrowingBlockers": 2
+    },
+    "narrowingBlockers": [
+      "mochi-pets mobile-390x844: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.",
+      "mochi-pets desktop-1440x900: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing."
+    ]
+  },
   "recommendation": {
     "currentGlobalHeader": true,
     "currentHeaderSource": "apps/web/next.config.ts source /(.*)",
     "smallestFuturePattern": "/api/:path* is the narrowest candidate if future browser evidence proves any cross-origin JSON route needs CORS; current OAuth, social handoff, and Mochi Pets evidence does not prove public pages or static assets need it.",
     "keepUntilBrowserProof": "Do not narrow the global header until OAuth consent approve/deny, Pixelfed OIDC return, and Mochi Pets iframe/postMessage are browser-tested on a Vercel preview."
   },
-  "warnings": [],
+  "warnings": [
+    "mochi-pets mobile-390x844: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.",
+    "mochi-pets desktop-1440x900: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing."
+  ],
   "failures": []
 }

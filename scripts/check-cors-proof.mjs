@@ -12,6 +12,7 @@ const getArg = (name, fallback) => {
 
 const baseUrl = getArg("--base-url", process.env.CORS_PROOF_BASE_URL || SITE_ORIGIN).replace(/\/+$/, "");
 const writeReport = argSet.has("--write") || process.env.CORS_PROOF_WRITE === "true";
+const skipBrowserProof = argSet.has("--skip-browser") || process.env.CORS_PROOF_SKIP_BROWSER === "true";
 const reportJsonPath = resolve(root, process.env.CORS_PROOF_JSON || "reports/cors-proof.json");
 const reportMdPath = resolve(root, process.env.CORS_PROOF_MD || "reports/cors-proof.md");
 const expectedCorsOrigin = SITE_ORIGIN;
@@ -130,6 +131,20 @@ const staticProofChecks = [
   },
 ];
 
+const browserViewports = [
+  { name: "mobile-390x844", width: 390, height: 844 },
+  { name: "desktop-1440x900", width: 1440, height: 900 },
+];
+
+const browserRouteProbes = [
+  { id: "home", path: "/", expectedStatus: [200] },
+  { id: "auth", path: "/auth", expectedStatus: [200] },
+  { id: "account", path: "/account", expectedStatus: [200] },
+  { id: "social", path: "/social", expectedStatus: [200], requireSocialHandoff: true },
+  { id: "oauth-consent", path: "/oauth/consent", expectedStatus: [200], probeOauthDecision: true },
+  { id: "mochi-pets", path: "/games/mochi-pets", expectedStatus: [200], inspectMochiPetsFrame: true },
+];
+
 const selectedHeaders = [
   "access-control-allow-origin",
   "access-control-allow-methods",
@@ -224,6 +239,202 @@ function inspectStaticProof(proof) {
   };
 }
 
+function isCorsConsoleError(message) {
+  return /(?:\bcors\b|cross-origin|access-control-allow-origin|preflight)/i.test(String(message || ""));
+}
+
+function safeText(value) {
+  return String(value || "").replace(/\s+/g, " ").slice(0, 500);
+}
+
+async function inspectBrowserProof() {
+  if (skipBrowserProof) {
+    warnings.push("browser proof skipped by --skip-browser/CORS_PROOF_SKIP_BROWSER; do not narrow CORS from fetch/static proof alone.");
+    return {
+      enabled: false,
+      skipped: true,
+      browser: "playwright chromium",
+      viewports: browserViewports,
+      routes: [],
+      summary: {
+        checks: 0,
+        statusOk: 0,
+        noCorsConsoleErrors: 0,
+        sameOriginApiChecks: 0,
+        socialHandoffChecks: 0,
+        mochiPetsFrameChecks: 0,
+        narrowingBlockers: 1,
+      },
+      narrowingBlockers: ["Browser proof was skipped."],
+    };
+  }
+
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  const results = [];
+  const narrowingBlockers = [];
+
+  try {
+    for (const viewport of browserViewports) {
+      const context = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+        colorScheme: "dark",
+        reducedMotion: "reduce",
+        ignoreHTTPSErrors: false,
+      });
+
+      for (const probe of browserRouteProbes) {
+        results.push(await inspectBrowserRoute(context, probe, viewport, narrowingBlockers));
+      }
+
+      await context.close();
+    }
+  } finally {
+    await browser.close();
+  }
+
+  const summary = {
+    checks: results.length,
+    statusOk: results.filter((entry) => entry.statusOk).length,
+    noCorsConsoleErrors: results.filter((entry) => entry.corsConsoleErrors.length === 0).length,
+    sameOriginApiChecks: results.filter((entry) => entry.oauthDecision?.ok).length,
+    socialHandoffChecks: results.filter((entry) => entry.socialHandoff?.ok).length,
+    mochiPetsFrameChecks: results.filter((entry) => entry.mochiPetsFrame?.ok).length,
+    narrowingBlockers: narrowingBlockers.length,
+  };
+
+  return {
+    enabled: true,
+    skipped: false,
+    browser: "playwright chromium",
+    viewports: browserViewports,
+    routes: results,
+    summary,
+    narrowingBlockers,
+  };
+}
+
+async function inspectBrowserRoute(context, probe, viewport, narrowingBlockers) {
+  const page = await context.newPage();
+  const consoleMessages = [];
+  const pageErrors = [];
+  page.on("console", (message) => consoleMessages.push({ type: message.type(), text: safeText(message.text()) }));
+  page.on("pageerror", (error) => pageErrors.push(safeText(error?.message || String(error))));
+
+  const url = absoluteUrl(probe.path);
+  let response = null;
+  let gotoError = "";
+  try {
+    response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => null);
+    await page.waitForSelector("body", { timeout: 10000 });
+  } catch (error) {
+    gotoError = safeText(error?.message || String(error));
+  }
+
+  const status = response?.status() || 0;
+  const statusOk = probe.expectedStatus.includes(status) && !gotoError;
+  const corsConsoleErrors = consoleMessages.filter((entry) => entry.type === "error" && isCorsConsoleError(entry.text));
+  const browserState = await page.evaluate(() => ({
+    origin: window.location.origin,
+    title: document.title,
+    h1: document.querySelector("h1")?.textContent?.trim() || "",
+    socialLinks: [...document.querySelectorAll("a[href]")].map((anchor) => anchor.href),
+    iframeSrcs: [...document.querySelectorAll("iframe[src]")].map((iframe) => iframe.src),
+  })).catch((error) => ({ evaluationError: safeText(error?.message || String(error)) }));
+
+  let oauthDecision = null;
+  if (probe.probeOauthDecision && statusOk) {
+    oauthDecision = await page.evaluate(async () => {
+      const url = new URL("/api/oauth/decision", window.location.href);
+      const response = await fetch(url.href, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+        credentials: "same-origin",
+      });
+      return {
+        status: response.status,
+        requestOrigin: url.origin,
+        pageOrigin: window.location.origin,
+        ok: [400, 401, 403].includes(response.status) && url.origin === window.location.origin,
+      };
+    }).catch((error) => ({ ok: false, error: safeText(error?.message || String(error)) }));
+  }
+
+  let socialHandoff = null;
+  if (probe.requireSocialHandoff) {
+    const links = Array.isArray(browserState.socialLinks) ? browserState.socialLinks : [];
+    const matchingLinks = links.filter((href) => href === SOCIAL_HOST || href.startsWith(`${SOCIAL_HOST}/`));
+    socialHandoff = { ok: matchingLinks.length > 0, linkCount: matchingLinks.length };
+  }
+
+  let mochiPetsFrame = null;
+  if (probe.inspectMochiPetsFrame) {
+    const iframeSrcs = Array.isArray(browserState.iframeSrcs) ? browserState.iframeSrcs : [];
+    const frameOrigins = iframeSrcs.map((src) => {
+      try {
+        return new URL(src).origin;
+      } catch {
+        return "";
+      }
+    });
+    const hasFrame = frameOrigins.length > 0;
+    mochiPetsFrame = {
+      ok: hasFrame ? frameOrigins.every((origin) => origin === mochiPetsOrigin) : true,
+      state: hasFrame ? "rendered" : "not-rendered-in-signed-out-proof",
+      frameCount: frameOrigins.length,
+      frameOrigins,
+      expectedOrigin: mochiPetsOrigin,
+    };
+    if (!hasFrame) {
+      const blocker = `${probe.id} ${viewport.name}: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.`;
+      narrowingBlockers.push(blocker);
+      warnings.push(blocker);
+    }
+  }
+
+  await page.close();
+
+  const result = {
+    id: probe.id,
+    path: probe.path,
+    url,
+    viewport: viewport.name,
+    status,
+    statusOk,
+    origin: browserState.origin || "",
+    title: safeText(browserState.title || ""),
+    h1: safeText(browserState.h1 || ""),
+    corsConsoleErrors,
+    pageErrors,
+    gotoError,
+    oauthDecision,
+    socialHandoff,
+    mochiPetsFrame,
+  };
+
+  validateBrowserResult(probe, result);
+  return result;
+}
+
+function validateBrowserResult(probe, result) {
+  const label = `${probe.id} ${result.viewport}`;
+  if (!result.statusOk) failures.push(`${label}: browser route expected status ${probe.expectedStatus.join(" or ")}, got ${result.status}${result.gotoError ? ` (${result.gotoError})` : ""}.`);
+  if (result.origin !== baseUrl) failures.push(`${label}: expected browser origin ${baseUrl}, got ${result.origin || "missing"}.`);
+  if (result.corsConsoleErrors.length) failures.push(`${label}: browser console reported CORS error(s): ${result.corsConsoleErrors.map((entry) => entry.text).join(" | ")}`);
+  for (const error of result.pageErrors) failures.push(`${label}: page error: ${error}`);
+  if (probe.probeOauthDecision && !result.oauthDecision?.ok) {
+    failures.push(`${label}: same-origin /api/oauth/decision browser fetch did not fail closed as expected.`);
+  }
+  if (probe.requireSocialHandoff && !result.socialHandoff?.ok) {
+    failures.push(`${label}: no same-tab social handoff link to ${SOCIAL_HOST} was found.`);
+  }
+  if (probe.inspectMochiPetsFrame && !result.mochiPetsFrame?.ok) {
+    failures.push(`${label}: Mochi Pets iframe origin did not match ${mochiPetsOrigin}.`);
+  }
+}
+
 function futureScopeRecommendation(routeEvidence) {
   const currentHeaderOnEveryRequiredRoute = routeEvidence
     .filter((entry) => entry.requiredHeader)
@@ -246,10 +457,23 @@ function renderMarkdown(report) {
   const staticRows = report.staticProofs
     .map((entry) => `| ${entry.id} | ${entry.file} | ${entry.ok ? "yes" : "no"} | ${entry.claim} |`)
     .join("\n");
+  const browserRows = report.browserProof.routes.length
+    ? report.browserProof.routes
+      .map((entry) => {
+        const oauth = entry.oauthDecision ? `${entry.oauthDecision.status}/${entry.oauthDecision.ok ? "ok" : "fail"}` : "n/a";
+        const social = entry.socialHandoff ? `${entry.socialHandoff.linkCount}/${entry.socialHandoff.ok ? "ok" : "fail"}` : "n/a";
+        const frame = entry.mochiPetsFrame ? `${entry.mochiPetsFrame.state}/${entry.mochiPetsFrame.ok ? "ok" : "fail"}` : "n/a";
+        return `| ${entry.id} | ${entry.viewport} | ${entry.status} | ${entry.corsConsoleErrors.length} | ${oauth} | ${social} | ${frame} |`;
+      })
+      .join("\n")
+    : "| skipped | n/a | n/a | n/a | n/a | n/a | n/a |";
+  const blockersText = report.browserProof.narrowingBlockers.length
+    ? report.browserProof.narrowingBlockers.map((blocker) => `- ${blocker}`).join("\n")
+    : "- None";
   const warningsText = report.warnings.length ? report.warnings.map((warning) => `- ${warning}`).join("\n") : "- None";
   const failuresText = report.failures.length ? report.failures.map((failure) => `- ${failure}`).join("\n") : "- None";
 
-  return `# Mochirii CORS Proof\n\nGenerated: ${report.checkedAt}\n\nThis file is intentionally no-secret. It records current website CORS behavior and static handoff evidence only; it does not approve or perform header narrowing.\n\n## Result\n\n- OK: ${report.ok ? "yes" : "no"}\n- Base URL: ${report.baseUrl}\n- Expected CORS origin: ${report.expectedCorsOrigin}\n- Social host: ${report.socialHost}\n- Mochi Pets origin: ${report.mochiPetsOrigin}\n\n## Route Evidence\n\n| Surface | Route | Status | Access-Control-Allow-Origin | Future CORS need |\n| --- | --- | ---: | --- | --- |\n${routes}\n\n## Static Handoff Evidence\n\n| Check | File | OK | Claim |\n| --- | --- | --- | --- |\n${staticRows}\n\n## Future Scope Recommendation\n\n- Current global header source: ${report.recommendation.currentHeaderSource}\n- Current required-route global header observed: ${report.recommendation.currentGlobalHeader ? "yes" : "no"}\n- Smallest future candidate: ${report.recommendation.smallestFuturePattern}\n- Guardrail: ${report.recommendation.keepUntilBrowserProof}\n\n## Warnings\n\n${warningsText}\n\n## Failures\n\n${failuresText}\n`;
+  return `# Mochirii CORS Proof\n\nGenerated: ${report.checkedAt}\n\nThis file is intentionally no-secret. It records current website CORS behavior and static/browser handoff evidence only; it does not approve or perform header narrowing.\n\n## Result\n\n- OK: ${report.ok ? "yes" : "no"}\n- Base URL: ${report.baseUrl}\n- Expected CORS origin: ${report.expectedCorsOrigin}\n- Social host: ${report.socialHost}\n- Mochi Pets origin: ${report.mochiPetsOrigin}\n\n## Route Evidence\n\n| Surface | Route | Status | Access-Control-Allow-Origin | Future CORS need |\n| --- | --- | ---: | --- | --- |\n${routes}\n\n## Static Handoff Evidence\n\n| Check | File | OK | Claim |\n| --- | --- | --- | --- |\n${staticRows}\n\n## Browser Proof\n\n- Enabled: ${report.browserProof.enabled ? "yes" : "no"}\n- Browser: ${report.browserProof.browser}\n- Checks: ${report.browserProof.summary.checks}\n- Routes without CORS console errors: ${report.browserProof.summary.noCorsConsoleErrors}/${report.browserProof.summary.checks}\n- Same-origin OAuth decision checks: ${report.browserProof.summary.sameOriginApiChecks}\n- Social handoff checks: ${report.browserProof.summary.socialHandoffChecks}\n- Mochi Pets frame checks: ${report.browserProof.summary.mochiPetsFrameChecks}\n\n| Surface | Viewport | Status | CORS console errors | OAuth decision | Social handoff | Mochi Pets frame |\n| --- | --- | ---: | ---: | --- | --- | --- |\n${browserRows}\n\n## Future Scope Recommendation\n\n- Current global header source: ${report.recommendation.currentHeaderSource}\n- Current required-route global header observed: ${report.recommendation.currentGlobalHeader ? "yes" : "no"}\n- Smallest future candidate: ${report.recommendation.smallestFuturePattern}\n- Guardrail: ${report.recommendation.keepUntilBrowserProof}\n\n## CORS Narrowing Blockers\n\n${blockersText}\n\n## Warnings\n\n${warningsText}\n\n## Failures\n\n${failuresText}\n`;
 }
 
 function scanRenderedArtifact(label, text) {
@@ -294,6 +518,7 @@ for (const probe of routeProbes) {
 }
 
 const staticProofs = staticProofChecks.map(inspectStaticProof);
+const browserProof = await inspectBrowserProof();
 const recommendation = futureScopeRecommendation(routes);
 
 const report = {
@@ -305,6 +530,7 @@ const report = {
   mochiPetsOrigin,
   routes,
   staticProofs,
+  browserProof,
   recommendation,
   warnings,
   failures,
@@ -332,6 +558,8 @@ console.log("CORS proof OK.");
 console.log(`- Base URL: ${baseUrl}`);
 console.log(`- Required routes with current CORS origin: ${routes.filter((entry) => entry.requiredHeader && entry.corsOk).length}/${routes.filter((entry) => entry.requiredHeader).length}`);
 console.log(`- Static proofs: ${staticProofs.filter((entry) => entry.ok).length}/${staticProofs.length}`);
+console.log(`- Browser proof checks without CORS console errors: ${browserProof.summary.noCorsConsoleErrors}/${browserProof.summary.checks}`);
+if (browserProof.summary.narrowingBlockers) console.log(`- CORS narrowing blockers documented: ${browserProof.summary.narrowingBlockers}`);
 if (warnings.length) console.log(`- Warnings documented: ${warnings.length}`);
 if (writeReport) {
   console.log(`- JSON report: ${relative(root, reportJsonPath).replace(/\\/g, "/")}`);
