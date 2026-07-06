@@ -1,0 +1,123 @@
+/* =========================================================
+   HOME â€” Doors (grid spacing)
+   ========================================================= */
+.home-doors{
+  display:grid;
+  gap:clamp(12px, 2.2vw, 18px);
+  margin-top:clamp(12px, 2.2vw, 18px);
+}
+
+@media (min-width:900px){
+  .home-doors{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   HOME â€” Doors (plate rhythm and typography)
+   ========================================================= */
+.home-door__plate{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.home-door__title,
+.home-door__subtitle{
+  margin:0;
+}
+
+.home-door__title{
+  font-family:var(--font-body);
+  font-size:14px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  line-height:1.35;
+  color:var(--ink-1);
+}
+
+@media (max-width:640px){
+  .home-door__title{
+    font-size:24px;
+  }
+}
+
+/* =========================================================
+   HOME â€” Doors (label pill; visual only)
+   ========================================================= */
+.home-door__label{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:var(--pill-border,2px) solid var(--card-line, rgba(255,255,255,.12));
+  background:rgba(0,0,0,.22);
+  color:var(--ink-1);
+  animation:border-shift 7.5s var(--ease) infinite;
+  width:fit-content;
+
+  font-family:var(--font-display);
+  font-size:24px;
+  letter-spacing:.04em;
+  text-transform:none;
+
+  }
+
+.home-gallery{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+  margin-top:clamp(14px, 2.4vw, 20px);
+}
+
+.home-thumb{
+  position:relative;
+  display:block;
+  width:100%;
+  aspect-ratio:16 / 10;
+  overflow:hidden;
+  padding:0;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.55);
+  cursor:zoom-in;
+  transition:transform .18s var(--ease), border-color .18s var(--ease);
+}
+
+.home-thumb:hover,
+.home-thumb:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(200,162,75,.42);
+}
+
+.home-thumb__img{
+  display:block;
+}
+
+@media (min-width:760px){
+  .home-gallery{grid-template-columns:repeat(4, minmax(0, 1fr));}
+}
+
+@media (max-width:640px){
+  .home-featured,
+  .home-spotlight{min-height:240px;}
+
+  .home-featured__plate,
+  .home-spotlight__plate{
+    margin-top:88px;
+    padding:14px;
+  }
+
+  .home-bulletin,
+  .home-door{
+    grid-template-columns:1fr;
+  }
+
+  .home-bulletin__media,
+  .home-door__media{
+    min-height:0;
+  }
+}
+

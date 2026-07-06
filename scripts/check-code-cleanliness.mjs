@@ -8,7 +8,7 @@ import {
 } from "./lib/public-urls.mjs";
 
 const sourceLineBudgets = [
-  { path: "apps/web/app/styles/public-home.css", warnAt: 1200, reason: "home page styles should keep moving into page-scoped partials" },
+  { path: "apps/web/app/styles/public-home-visual.css", warnAt: 800, reason: "home visual-system styles should stay focused" },
   { path: "apps/web/app/styles/public-gallery.css", warnAt: 700, reason: "gallery styles should stay focused" },
   { path: "apps/web/app/styles/public-profiles.css", warnAt: 850, reason: "profile and recruitment styles should stay focused" },
   { path: "apps/web/app/styles/public-side-pages.css", warnAt: 600, reason: "supporting page styles should stay focused" },

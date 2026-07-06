@@ -1,0 +1,32 @@
+/* =========================================================
+   LISTS â€” Bullet-dot list layout used across pages
+   ========================================================= */
+.list-stack{
+  list-style:none;
+  padding:0;
+  margin:14px 0 0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  color:var(--ink-1);
+}
+.list-stack li{
+  position:relative;
+  padding-left:14px;
+}
+.list-stack li::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:.65em;
+  width:6px;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.55);
+}
+
+/* =========================================================
+   SPOTLIGHT â€” Shared hero intro width
+   ========================================================= */
+.hero-intro{max-width:72ch;}
+
