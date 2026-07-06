@@ -35,6 +35,12 @@ verify_jwt = true
 import_map = "./functions/moderate-gallery-submission/deno.json"
 entrypoint = "./functions/moderate-gallery-submission/index.ts"
 
+[functions.delete-rejected-gallery-submission]
+enabled = true
+verify_jwt = true
+import_map = "./functions/delete-rejected-gallery-submission/deno.json"
+entrypoint = "./functions/delete-rejected-gallery-submission/index.ts"
+
 [functions.list-approved-gallery-submissions]
 enabled = true
 verify_jwt = false

@@ -1,8 +1,8 @@
 # Member Gallery Cleanup Plan
 
-Date checked: 2026-05-14
+Date checked: 2026-07-06
 
-This plan defines how to think about future cleanup of private member Gallery uploads. It does not delete data, change retention, create scripts, alter migrations, deploy Edge Functions, or mutate Supabase.
+This plan defines how to think about cleanup of private member Gallery uploads. It does not authorize data deletion, change retention, alter migrations, deploy Edge Functions, or mutate Supabase.
 
 Cleanup work must stay evidence-led because the public Gallery feed, private Storage objects, database rows, moderation events, signed URLs, and member expectations are connected.
 
@@ -33,8 +33,9 @@ Current member Gallery behavior:
 - Public Gallery reads approved member submissions through `list-approved-gallery-submissions`
 - Leader Dashboard reads queue states through `list-gallery-review-queue`
 - Moderation actions are expected to create `gallery_moderation_events`
+- Rejected smoke-test cleanup is implemented through `delete-rejected-gallery-submission` and the Leader Dashboard rejected queue. It remains deploy-gated until the Edge Function is explicitly deployed.
 
-The current website does not expose a cleanup button, cleanup script, retention scheduler, or owner-facing permanent delete workflow.
+The current website does not expose a retention scheduler or broad owner-facing permanent delete workflow. The focused rejected-cleanup path is for rejected smoke-test artifacts or explicitly owner-approved rejected items only.
 
 ## Cleanup Principles
 
@@ -44,7 +45,7 @@ The current website does not expose a cleanup button, cleanup script, retention 
 - Never edit `data/gallery.json` to hide or remove member uploads.
 - Never delete Storage objects directly from routine moderation.
 - Never delete Storage metadata with SQL.
-- Never remove moderation events as routine cleanup.
+- Do not treat rejected cleanup as a durable moderation audit event; related rows use cascading foreign keys and may be removed with the submission row.
 - Never paste signed URLs, Storage paths, user IDs, or private screenshots into public places.
 - Require explicit owner approval before permanent deletion.
 - Use a dry-run inventory before any future destructive action.
@@ -57,7 +58,7 @@ These are planning targets, not active automation.
 | --- | --- | --- | --- |
 | Pending | Keep until reviewed. Review weekly when active. | Escalate if pending longer than a review cycle or preview cannot load. | Do not delete while a member reasonably expects review. |
 | Approved | Keep while public Gallery display is desired. | Archive first if removal is needed. Delete only after a separate owner-approved cleanup task. | Approved images may be visible through signed URLs until status/feed refresh. |
-| Rejected | Keep short-term for member context and audit. | Consider cleanup after the appeal/resubmit window expires. | Keep decline reason and moderation event. |
+| Rejected | Keep short-term for member context and audit. | Consider cleanup after the appeal/resubmit window expires, or immediately for smoke-test artifacts. | Focused admin cleanup deletes the private object and rejected row; do not use it for unresolved member disputes. |
 | Archived | Keep as non-public retained material until an owner-approved cleanup window. | Candidate for future cleanup after inventory confirms no public dependency. | Archive is the safest pre-delete state. |
 | Orphaned object | Investigate before any action. | Candidate only when Storage object has no matching valid submission row and owner approves. | Confirm object owner/path/date before deletion. |
 | Orphaned row | Investigate before any action. | Candidate only when DB row points to a missing object and cannot be repaired. | Do not approve rows whose preview/object cannot load. |
@@ -143,6 +144,7 @@ Recommended future branches, in order:
    - Use a trusted backend/admin context.
    - Delete objects through the Storage API, not SQL metadata edits.
    - Update or preserve database rows according to the approved policy.
+   - For rejected smoke-test artifacts, use the Leader Dashboard rejected cleanup action once `delete-rejected-gallery-submission` is deployed.
 
 5. `qa/member-gallery-cleanup-regression`
    - Verify public Gallery, approved feed, moderation queue, member submission history, and signed-out browsing after cleanup.
@@ -234,4 +236,3 @@ Additional checks after any approved cleanup execution:
 Do not perform cleanup yet.
 
 The next safe step is a read-only inventory branch after leadership chooses retention windows. Until then, keep routine moderation in the Leader Dashboard and monitor Storage growth through the Supabase cost usage runbook.
-

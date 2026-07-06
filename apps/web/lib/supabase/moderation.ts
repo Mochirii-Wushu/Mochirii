@@ -7,6 +7,7 @@ import {
   type InstagramPublishJob,
   type MemberVerificationReviewResponse,
   type ModerationStatus,
+  type RejectedGalleryCleanupResponse,
 } from "./types";
 
 export async function checkLeaderGalleryModerationAccess() {
@@ -34,6 +35,21 @@ export async function moderateGallerySubmission(submissionId: string, action: st
     submission_id: cleanSubmissionId,
     action: cleanAction,
     reason: String(reason || "").trim().slice(0, 500),
+  });
+}
+
+export async function deleteRejectedGallerySubmission(submissionId: string, confirmCleanup: boolean) {
+  const cleanSubmissionId = String(submissionId || "").trim();
+  if (!cleanSubmissionId) {
+    return failedResult("Choose a rejected gallery submission before cleanup.");
+  }
+  if (!confirmCleanup) {
+    return failedResult("Confirm rejected submission cleanup before deleting.");
+  }
+
+  return invokeEdgeFunction<RejectedGalleryCleanupResponse>("delete-rejected-gallery-submission", {
+    submission_id: cleanSubmissionId,
+    confirm_cleanup: true,
   });
 }
 
