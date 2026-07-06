@@ -1,14 +1,7 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 import {
-  buildVoteReminderPayload,
-  currentStreak,
-  dateInTimeZone as voteDateInTimeZone,
-  DEFAULT_VOTE_TIME_ZONE,
   EXPECTED_DISCORD_VOTE_CHANNEL_ID,
-  leaderboardWindowStart,
-  loadVoteLinks,
-  previewText,
   voteDateFromCustomId,
 } from "../_shared/vote-reminders.ts";
 import {
@@ -51,14 +44,15 @@ import {
 } from "../_shared/discord-interaction-helpers.ts";
 import { verifyDiscordSignature } from "../_shared/discord-signature.ts";
 import { SITE_ORIGIN, siteUrl } from "../_shared/public-origins.ts";
+import { processEventSync } from "../_shared/reaper-event-sync-workflow.ts";
 import {
-  DISCORD_EVENT_ENTITY_EXTERNAL,
-  desiredEventsFromSchedule,
-  eventLocation,
-  managedEventLine,
-  scheduledEventBody,
-  type ScheduleEvent,
-} from "../_shared/reaper-discord-events.ts";
+  discordDisplayName,
+  recordVoteConfirmation,
+  voteLeaderboardMessage,
+  voteReminderPreviewMessage,
+  voteStatusMessage,
+  voteToday,
+} from "../_shared/reaper-vote-interactions.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -607,301 +601,6 @@ async function processRankSync(
   }
 }
 
-async function fetchGuildSchedule(): Promise<JsonRecord> {
-  const scheduleUrl = Deno.env.get("GUILD_SCHEDULE_URL") || GUILD_SCHEDULE_URL;
-  const response = await fetch(scheduleUrl, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": DISCORD_API_USER_AGENT,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Schedule fetch failed with HTTP ${response.status}.`);
-  }
-
-  return asRecord(await response.json());
-}
-
-async function loadManagedEventResources(): Promise<JsonRecord[]> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const serviceRoleKey = getServiceRoleKey();
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Supabase service credentials are not configured for event registry lookup.");
-  }
-
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  const { data, error } = await adminClient
-    .from("discord_resources")
-    .select("id,label,discord_id,metadata,enabled")
-    .eq("kind", "scheduled_event")
-    .eq("enabled", true);
-
-  if (error) {
-    console.error("reaper-discord-interactions scheduled event registry lookup failed", {
-      code: error.code,
-      message: error.message,
-    });
-    throw new Error("Scheduled event registry could not be read.");
-  }
-
-  return asArray(data).map(asRecord).filter((resource) => {
-    const metadata = asRecord(resource.metadata);
-    return metadata.managedBy === "reaper-event-sync";
-  });
-}
-
-async function upsertDiscordEventResource(event: JsonRecord, desired: ScheduleEvent): Promise<void> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const serviceRoleKey = getServiceRoleKey();
-  const eventId = safeString(event.id, 24);
-
-  if (!supabaseUrl || !serviceRoleKey || !eventId) {
-    throw new Error("Supabase service credentials are not configured for event registry updates.");
-  }
-
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  const { error } = await adminClient
-    .from("discord_resources")
-    .upsert(
-      {
-        kind: "scheduled_event",
-        label: desired.title,
-        discord_id: eventId,
-        discord_parent_id: EXPECTED_DISCORD_GUILD_ID,
-        enabled: true,
-        url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`,
-        description: desired.description,
-        metadata: {
-          managedBy: "reaper-event-sync",
-          siteEventKey: desired.key,
-          location: desired.location,
-          websiteLocation: desired.websiteLocation,
-          coverImageUrl: desired.coverImageUrl,
-          canonicalEventId: desired.canonicalEventId,
-          recurrenceRule: desired.recurrenceRule,
-          source: "data/guild-schedule.json",
-          startIso: desired.startIso,
-          endIso: desired.endIso,
-          entityType: "EXTERNAL",
-        },
-      },
-      { onConflict: "kind,discord_id" },
-    );
-
-  if (error) {
-    console.error("reaper-discord-interactions scheduled event registry upsert failed", {
-      code: error.code,
-      message: error.message,
-    });
-    throw new Error("Scheduled event was changed but could not be recorded in the website registry.");
-  }
-}
-
-async function disableDuplicateEventResource(eventId: string, desired: ScheduleEvent): Promise<void> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const serviceRoleKey = getServiceRoleKey();
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Supabase service credentials are not configured for duplicate event registry updates.");
-  }
-
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  const { error } = await adminClient
-    .from("discord_resources")
-    .update({
-      enabled: false,
-      description: `Retired duplicate scheduled event for ${desired.title}.`,
-      metadata: {
-        managedBy: "reaper-event-sync",
-        siteEventKey: desired.key,
-        duplicateOf: desired.canonicalEventId,
-        retiredBy: "reaper-event-sync",
-        retiredReason: "duplicate-monthly-raffle",
-        retiredAt: new Date().toISOString(),
-      },
-    })
-    .eq("kind", "scheduled_event")
-    .eq("discord_id", eventId);
-
-  if (error) {
-    console.error("reaper-discord-interactions duplicate scheduled event registry update failed", {
-      code: error.code,
-      message: error.message,
-    });
-    throw new Error("Duplicate scheduled event was removed but could not be retired in the website registry.");
-  }
-}
-
-async function processDuplicateScheduledEvents(
-  apply: boolean,
-  desired: ScheduleEvent,
-  existingEvents: JsonRecord[],
-  lines: string[],
-): Promise<void> {
-  for (const duplicateId of desired.duplicateEventIds) {
-    if (!duplicateId || duplicateId === desired.canonicalEventId) continue;
-    const existingDuplicate = existingEvents.find((event) => safeString(event.id, 24) === duplicateId);
-    if (!existingDuplicate) {
-      lines.push(managedEventLine("Duplicate already absent", desired, `event ${duplicateId}`));
-      continue;
-    }
-
-    lines.push(managedEventLine(apply ? "Removed duplicate" : "Would remove duplicate", desired, `event ${duplicateId}`));
-    if (!apply) continue;
-
-    const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events/${duplicateId}`, {
-      method: "DELETE",
-      headers: discordApiHeaders(),
-    });
-    if (!response.ok) {
-      lines[lines.length - 1] = managedEventLine("Blocked duplicate removal", desired, `Discord API ${response.status}`);
-      continue;
-    }
-    await disableDuplicateEventResource(duplicateId, desired);
-  }
-}
-
-async function processEventSync(
-  mode: string,
-  interactionToken: string,
-  applicationId: string,
-): Promise<void> {
-  const apply = mode === "apply";
-  const lines: string[] = [];
-
-  try {
-    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
-      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper event sync is missing the Discord bot token.");
-      return;
-    }
-
-    const schedule = await fetchGuildSchedule();
-    const desiredEvents = desiredEventsFromSchedule(schedule);
-    if (!desiredEvents.length) {
-      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper event sync found no website schedule events.");
-      return;
-    }
-
-    const [resources, eventsResponse] = await Promise.all([
-      loadManagedEventResources(),
-      discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events`, {
-        headers: discordApiHeaders(),
-      }),
-    ]);
-
-    if (!eventsResponse.ok) {
-      await editOriginalInteractionResponse(
-        applicationId,
-        interactionToken,
-        "Reaper could not read Discord scheduled events. Check bot event permissions.",
-      );
-      return;
-    }
-
-    const existingEvents = asArray(eventsResponse.data).map(asRecord);
-    const resourceByKey = new Map(resources.map((resource) => [safeString(asRecord(resource.metadata).siteEventKey, 100) || "", resource]));
-
-    for (const desired of desiredEvents) {
-      const resource = resourceByKey.get(desired.key);
-      const resourceEventId = safeString(resource?.discord_id, 24);
-      const existingByCanonical = desired.canonicalEventId
-        ? existingEvents.find((event) => safeString(event.id, 24) === desired.canonicalEventId)
-        : null;
-      const existingByResource = resourceEventId
-        ? existingEvents.find((event) => safeString(event.id, 24) === resourceEventId)
-        : null;
-      const existingByName = existingEvents.find((event) =>
-        safeString(event.name, 100) === desired.title &&
-        safeString(event.scheduled_start_time, 60) === desired.startIso &&
-        Number(event.entity_type) === DISCORD_EVENT_ENTITY_EXTERNAL &&
-        eventLocation(event) === desired.location
-      );
-      const existing = existingByCanonical || existingByResource || existingByName;
-
-      if (existing) {
-        lines.push(managedEventLine(apply ? "Updated" : "Would update", desired, `event ${safeString(existing.id, 24) || "unknown"}`));
-        if (apply) {
-          let body: JsonRecord;
-          try {
-            body = await scheduledEventBody(desired, true, { userAgent: DISCORD_API_USER_AGENT });
-          } catch {
-            lines[lines.length - 1] = managedEventLine("Blocked", desired, "cover image unavailable");
-            continue;
-          }
-          const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events/${safeString(existing.id, 24)}`, {
-            method: "PATCH",
-            headers: discordApiHeaders(true),
-            body: JSON.stringify(body),
-          });
-          if (!response.ok) {
-            lines[lines.length - 1] = managedEventLine("Blocked", desired, `Discord API ${response.status}`);
-            continue;
-          }
-          await upsertDiscordEventResource(asRecord(response.data), desired);
-        }
-        await processDuplicateScheduledEvents(apply, desired, existingEvents, lines);
-        continue;
-      }
-
-      lines.push(managedEventLine(apply ? "Created" : "Would create", desired, "external scheduled event"));
-      if (apply) {
-        let body: JsonRecord;
-        try {
-          body = await scheduledEventBody(desired, true, { userAgent: DISCORD_API_USER_AGENT });
-        } catch {
-          lines[lines.length - 1] = managedEventLine("Blocked", desired, "cover image unavailable");
-          continue;
-        }
-        const response = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/scheduled-events`, {
-          method: "POST",
-          headers: discordApiHeaders(true),
-          body: JSON.stringify(body),
-        });
-        if (!response.ok) {
-          lines[lines.length - 1] = managedEventLine("Blocked", desired, `Discord API ${response.status}`);
-          continue;
-        }
-        await upsertDiscordEventResource(asRecord(response.data), desired);
-      }
-      await processDuplicateScheduledEvents(apply, desired, existingEvents, lines);
-    }
-
-    const intro = apply
-      ? "Event sync finished. Only Reaper-managed external Discord events were created or updated."
-      : "Event sync preview. No Discord scheduled events were changed.";
-    await editOriginalInteractionResponse(applicationId, interactionToken, `${intro}\n${lines.slice(0, 25).join("\n")}`);
-  } catch (error) {
-    console.error("reaper-discord-interactions event sync failed", {
-      message: error instanceof Error ? error.message : String(error),
-    });
-    await editOriginalInteractionResponse(
-      applicationId,
-      interactionToken,
-      "Reaper event sync could not be completed. Check configuration and try preview again.",
-    );
-  }
-}
-
 function sourceEndpoint(supabaseUrl: string): string {
   return `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/submit-discord-gallery-image`;
 }
@@ -987,158 +686,13 @@ async function processSubmission(payload: JsonRecord, interactionToken: string, 
   }
 }
 
-function voteTimeZone(): string {
-  return Deno.env.get("VOTE_REMINDER_TIME_ZONE") || DEFAULT_VOTE_TIME_ZONE;
-}
-
-function voteToday(): string {
-  return voteDateInTimeZone(new Date(), voteTimeZone());
-}
-
-function voteAdminClient() {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const serviceRoleKey = getServiceRoleKey();
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Supabase service credentials are not configured for vote reminders.");
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-}
-
-function discordDisplayName(member: JsonRecord): string | null {
-  const user = asRecord(member.user);
-  return safeString(user.global_name || user.username, 80);
-}
-
-async function voteDatesForUser(adminClient: SupabaseAdminClient, discordUserId: string, today: string): Promise<string[]> {
-  const { data, error } = await adminClient
-    .from("vote_confirmations")
-    .select("vote_date")
-    .eq("discord_user_id", discordUserId)
-    .gte("vote_date", leaderboardWindowStart(today, 366))
-    .order("vote_date", { ascending: false });
-
-  if (error) throw error;
-  return asArray(data).map((row) => safeString(asRecord(row).vote_date, 20) || "").filter(Boolean);
-}
-
-async function recordVoteConfirmation(options: {
-  discordUserId: string;
-  discordUsername: string | null;
-  voteDate: string;
-  channelId: string | null;
-  interactionId: string;
-}): Promise<{ duplicate: boolean; streak: number }> {
-  const adminClient = voteAdminClient();
-  const { error } = await adminClient
-    .from("vote_confirmations")
-    .insert({
-      discord_user_id: options.discordUserId,
-      discord_username: options.discordUsername,
-      vote_date: options.voteDate,
-      source: "discord_button",
-      discord_guild_id: EXPECTED_DISCORD_GUILD_ID,
-      discord_channel_id: options.channelId,
-      discord_interaction_id: options.interactionId,
-      metadata: {
-        managedBy: "manual-vote-reminder",
-      },
-    });
-
-  if (error && error.code !== "23505") throw error;
-
-  const dates = await voteDatesForUser(adminClient, options.discordUserId, options.voteDate);
+function voteDependencies() {
   return {
-    duplicate: error?.code === "23505",
-    streak: currentStreak(dates, options.voteDate),
+    expectedGuildId: EXPECTED_DISCORD_GUILD_ID,
+    expectedVoteChannelId: EXPECTED_DISCORD_VOTE_CHANNEL_ID,
+    adminClient: () => serviceAdminClient("vote reminders"),
+    discordApi,
   };
-}
-
-async function voteStatusMessage(discordUserId: string): Promise<string> {
-  const today = voteToday();
-  const adminClient = voteAdminClient();
-  const dates = await voteDatesForUser(adminClient, discordUserId, today);
-  const streak = currentStreak(dates, today);
-  const todayDone = dates.includes(today);
-  const lastDate = dates[0] || "none yet";
-
-  return todayDone
-    ? `You are marked done for ${today}. Current streak: ${streak} day(s). Last confirmation: ${lastDate}.`
-    : `You are not marked done for ${today} yet. Current streak: ${streak} day(s). Last confirmation: ${lastDate}.`;
-}
-
-async function voteLeaderboardMessage(): Promise<string> {
-  const today = voteToday();
-  const start = leaderboardWindowStart(today, 30);
-  const adminClient = voteAdminClient();
-  const { data, error } = await adminClient
-    .from("vote_confirmations")
-    .select("discord_user_id,discord_username,vote_date,confirmed_at")
-    .gte("vote_date", start)
-    .order("vote_date", { ascending: false })
-    .order("confirmed_at", { ascending: false });
-
-  if (error) throw error;
-
-  const grouped = new Map<string, { username: string; dates: Set<string>; latest: string }>();
-  for (const row of asArray(data).map(asRecord)) {
-    const userId = snowflake(row.discord_user_id);
-    const voteDate = safeString(row.vote_date, 20);
-    if (!userId || !voteDate) continue;
-
-    const current = grouped.get(userId) || {
-      username: safeString(row.discord_username, 80) || `User ${userId.slice(-4)}`,
-      dates: new Set<string>(),
-      latest: voteDate,
-    };
-    current.dates.add(voteDate);
-    if (voteDate > current.latest) current.latest = voteDate;
-    grouped.set(userId, current);
-  }
-
-  const leaders = [...grouped.entries()]
-    .map(([userId, record]) => ({
-      userId,
-      username: record.username,
-      count: record.dates.size,
-      streak: currentStreak([...record.dates], today),
-      latest: record.latest,
-    }))
-    .sort((left, right) => right.count - left.count || right.streak - left.streak || left.username.localeCompare(right.username))
-    .slice(0, 10);
-
-  if (!leaders.length) {
-    return `No manual vote confirmations have been recorded since ${start}.`;
-  }
-
-  return [
-    `Manual vote leaderboard since ${start}:`,
-    ...leaders.map((leader, index) =>
-      `${index + 1}. ${leader.username}: ${leader.count} day(s), streak ${leader.streak}, latest ${leader.latest}`
-    ),
-  ].join("\n");
-}
-
-async function voteReminderPreviewMessage(voteDate: string): Promise<string> {
-  const links = await loadVoteLinks({
-    channelId: EXPECTED_DISCORD_VOTE_CHANNEL_ID,
-    discordFetch: (path, init) => discordApi(path, init),
-    linksJson: Deno.env.get("DISCORD_VOTE_LINKS_JSON") || "",
-  });
-
-  if (!links.length) {
-    return "No configured or pinned vote links were found. Add DISCORD_VOTE_LINKS_JSON or pin a message containing [vote-links].";
-  }
-
-  const payload = buildVoteReminderPayload(links, voteDate);
-  const rowCount = asArray(payload.components).length;
-  return `${previewText(links, voteDate)}\n\nDiscord component rows: ${rowCount}. Done button custom ID: vote_done:${voteDate}.`;
 }
 
 Deno.serve(async (req: Request) => {
@@ -1212,7 +766,7 @@ Deno.serve(async (req: Request) => {
         voteDate,
         channelId,
         interactionId,
-      });
+      }, voteDependencies());
       const prefix = result.duplicate ? "You were already marked done" : "Done voting recorded";
       return interactionMessage(`${prefix} for ${voteDate}. Current streak: ${result.streak} day(s).`);
     } catch (error) {
@@ -1255,7 +809,7 @@ Deno.serve(async (req: Request) => {
     }
 
     try {
-      return interactionMessage(await voteStatusMessage(discordUserId));
+      return interactionMessage(await voteStatusMessage(discordUserId, voteDependencies()));
     } catch (error) {
       console.error("reaper-discord-interactions vote status failed", {
         message: error instanceof Error ? error.message : String(error),
@@ -1274,7 +828,7 @@ Deno.serve(async (req: Request) => {
     }
 
     try {
-      return interactionMessage(await voteLeaderboardMessage());
+      return interactionMessage(await voteLeaderboardMessage(voteDependencies()));
     } catch (error) {
       console.error("reaper-discord-interactions vote leaderboard failed", {
         message: error instanceof Error ? error.message : String(error),
@@ -1299,7 +853,7 @@ Deno.serve(async (req: Request) => {
     }
 
     try {
-      return interactionMessage(await voteReminderPreviewMessage(voteToday()));
+      return interactionMessage(await voteReminderPreviewMessage(voteToday(), voteDependencies()));
     } catch (error) {
       console.error("reaper-discord-interactions vote reminder preview failed", {
         message: error instanceof Error ? error.message : String(error),
@@ -1445,7 +999,15 @@ Deno.serve(async (req: Request) => {
       return interactionMessage("Event sync apply requires Discord Create Events and Manage Events permissions.");
     }
 
-    EdgeRuntime.waitUntil(processEventSync(mode, interactionToken, applicationId));
+    EdgeRuntime.waitUntil(processEventSync(mode, interactionToken, applicationId, {
+      expectedGuildId: EXPECTED_DISCORD_GUILD_ID,
+      guildScheduleUrl: GUILD_SCHEDULE_URL,
+      discordApiUserAgent: DISCORD_API_USER_AGENT,
+      discordApi,
+      discordApiHeaders,
+      editOriginalInteractionResponse,
+      serviceAdminClient,
+    }));
     return deferredEphemeralResponse();
   }
 

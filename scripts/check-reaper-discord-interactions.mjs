@@ -11,6 +11,8 @@ const files = {
   function: "supabase/functions/reaper-discord-interactions/index.ts",
   discordSignature: "supabase/functions/_shared/discord-signature.ts",
   reaperEvents: "supabase/functions/_shared/reaper-discord-events.ts",
+  reaperEventSyncWorkflow: "supabase/functions/_shared/reaper-event-sync-workflow.ts",
+  reaperVoteInteractions: "supabase/functions/_shared/reaper-vote-interactions.ts",
   interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
   sharedPendingContainment: "supabase/functions/_shared/pending-verification-containment.ts",
   memberSyncFunction: "supabase/functions/reaper-discord-member-sync/index.ts",
@@ -55,8 +57,17 @@ const config = read(files.config);
 const functionSource = read(files.function);
 const discordSignature = read(files.discordSignature);
 const reaperEvents = read(files.reaperEvents);
+const reaperEventSyncWorkflow = read(files.reaperEventSyncWorkflow);
+const reaperVoteInteractions = read(files.reaperVoteInteractions);
 const interactionHelpers = read(files.interactionHelpers);
-const interactionContractSource = [functionSource, discordSignature, reaperEvents, interactionHelpers].join("\n");
+const interactionContractSource = [
+  functionSource,
+  discordSignature,
+  reaperEvents,
+  reaperEventSyncWorkflow,
+  reaperVoteInteractions,
+  interactionHelpers,
+].join("\n");
 const sharedPendingContainment = read(files.sharedPendingContainment);
 const memberSyncFunction = read(files.memberSyncFunction);
 const memberSyncImportMap = read(files.memberSyncImportMap);
@@ -183,7 +194,7 @@ assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
   "privacy_level: DISCORD_EVENT_PRIVACY_GUILD_ONLY",
   "reaper-event-sync",
   "discord_resources",
-  "url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`",
+  "url: `https://discord.com/events/${deps.expectedGuildId}/${eventId}`",
 ].forEach((snippet) => assertIncludes("reaper-discord-interactions", interactionContractSource, snippet));
 
 [
