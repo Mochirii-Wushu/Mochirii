@@ -4,111 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DISCORD_INVITE_URL } from "@/lib/public-urls";
-import { accountWorkflowLinks, navGroups, publicUtilityLinks, type NavItem } from "@/lib/site-navigation";
-import { getCurrentUser, onAuthStateChange } from "@/lib/supabase/auth";
-import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
-import { getCurrentProfile, profileIsActive } from "@/lib/supabase/profile";
+import { accountWorkflowLinks, navGroups, publicUtilityLinks } from "@/lib/site-navigation";
 import {
-  useCallback,
-  type KeyboardEvent,
-  type MouseEvent,
   useEffect,
   useRef,
   useState,
 } from "react";
-
-const focusableSelector = [
-  "a[href]",
-  "button:not([disabled])",
-  "input:not([disabled])",
-  "select:not([disabled])",
-  "textarea:not([disabled])",
-  "[tabindex]:not([tabindex='-1'])",
-].join(",");
-
-function navKeyFromPath(pathname: string | null) {
-  const path = (pathname || "/").replace(/\/+$/, "") || "/";
-  if (path === "/" || path === "/index.html") return "home";
-  return path.slice(1).replace(/\.html$/, "") || "home";
-}
-
-function getFocusable(root: HTMLElement | null) {
-  if (!root) return [];
-
-  return Array.from(root.querySelectorAll<HTMLElement>(focusableSelector)).filter((el) => {
-    if (el.hidden || el.getAttribute("aria-hidden") === "true") return false;
-    if (el.closest("[hidden]")) return false;
-    return el.getClientRects().length > 0;
-  });
-}
-
-function navItemHidden(item: NavItem, authState: { signedIn: boolean; activeMember: boolean; moderator: boolean }) {
-  if (item.auth === "signed-out") return authState.signedIn;
-  if (item.auth === "signed-in") return !authState.signedIn;
-  if (item.auth === "verified") return !authState.activeMember;
-  if (item.auth === "moderator") return !authState.moderator;
-  return false;
-}
-
-function navItemVisibleForPath(item: NavItem, activeKey: string) {
-  if (activeKey === "games/mochi-pets" && item.nav === "tome") return false;
-  return true;
-}
-
-function SiteNavLink({
-  item,
-  activeKey,
-  className,
-  onClick,
-  hidden = false,
-}: {
-  item: NavItem;
-  activeKey?: string;
-  className: string;
-  onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
-  hidden?: boolean;
-}) {
-  const isActive = !item.external && item.nav === activeKey;
-  const authAttrs =
-    item.auth === "signed-out"
-      ? { "data-auth-signed-out": true }
-      : item.auth === "signed-in"
-        ? { "data-auth-signed-in": true }
-        : item.auth === "verified"
-          ? { "data-auth-verified": true }
-          : item.auth === "moderator"
-            ? { "data-auth-moderator": true }
-          : {};
-
-  if (item.external) {
-    return (
-      <a
-        className={className}
-        href={item.href}
-        data-nav={item.nav}
-        onClick={onClick}
-        hidden={hidden}
-        {...authAttrs}
-      >
-        {item.label}
-      </a>
-    );
-  }
-
-  return (
-    <Link
-      className={`${className}${isActive ? " is-active" : ""}`}
-      href={item.href}
-      data-nav={item.nav}
-      aria-current={isActive ? "page" : undefined}
-      onClick={onClick}
-      hidden={hidden}
-      {...authAttrs}
-    >
-      {item.label}
-    </Link>
-  );
-}
+import {
+  navItemHidden,
+  navItemVisibleForPath,
+  navKeyFromPath,
+  SiteNavLink,
+} from "./site-header/header-navigation";
+import { useHeaderAuthState } from "./site-header/use-header-auth-state";
+import { useMobileMenuFocusTrap } from "./site-header/use-mobile-menu-focus-trap";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -116,13 +25,18 @@ export function SiteHeader() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [authState, setAuthState] = useState({ signedIn: false, activeMember: false, moderator: false });
-  const [moderatorState, setModeratorState] = useState<"unknown" | "checking" | "allowed" | "denied">("unknown");
+  const { authState, ensureModeratorAccess } = useHeaderAuthState();
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileShellRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const lastFocusRef = useRef<HTMLElement | null>(null);
+  const { closeMobile, trapMobileTab } = useMobileMenuFocusTrap({
+    mobileOpen,
+    setMobileOpen,
+    menuButtonRef,
+    mobileShellRef,
+    closeButtonRef,
+  });
 
   useEffect(() => {
     const update = () => setScrolled(window.scrollY > 8);
@@ -130,53 +44,6 @@ export function SiteHeader() {
     window.addEventListener("scroll", update, { passive: true });
     return () => window.removeEventListener("scroll", update);
   }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const refreshAuthState = async () => {
-      const userResult = await getCurrentUser();
-      if (!userResult.ok || !userResult.data?.user) {
-        if (!cancelled) {
-          setAuthState({ signedIn: false, activeMember: false, moderator: false });
-          setModeratorState("unknown");
-        }
-        return;
-      }
-
-      const profileResult = await getCurrentProfile();
-      if (!cancelled) {
-        setAuthState({
-          signedIn: true,
-          activeMember: profileResult.ok && profileIsActive(profileResult.data),
-          moderator: false,
-        });
-        setModeratorState("unknown");
-      }
-    };
-
-    void Promise.resolve().then(() => refreshAuthState());
-    const subscription = onAuthStateChange(() => {
-      void refreshAuthState();
-    });
-
-    return () => {
-      cancelled = true;
-      subscription.data?.subscription?.unsubscribe();
-    };
-  }, []);
-
-  const ensureModeratorAccess = useCallback(async () => {
-    if (!authState.signedIn || moderatorState !== "unknown") return;
-    setModeratorState("checking");
-    const result = await checkLeaderGalleryModerationAccess();
-    setAuthState((current) => (
-      current.signedIn
-        ? { ...current, moderator: result.ok === true }
-        : current
-    ));
-    setModeratorState(result.ok === true ? "allowed" : "denied");
-  }, [authState.signedIn, moderatorState]);
 
   useEffect(() => {
     const closeDropdowns = (event: globalThis.MouseEvent) => {
@@ -195,57 +62,6 @@ export function SiteHeader() {
       window.removeEventListener("keydown", handleEscape);
     };
   }, []);
-
-  useEffect(() => {
-    if (!mobileOpen) return undefined;
-
-    lastFocusRef.current = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.setTimeout(() => closeButtonRef.current?.focus({ preventScroll: true }), 0);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [mobileOpen]);
-
-  const closeMobile = ({ returnFocus = false } = {}) => {
-    setMobileOpen(false);
-    if (returnFocus) {
-      window.setTimeout(() => {
-        const focusTarget = lastFocusRef.current || menuButtonRef.current;
-        focusTarget?.focus({ preventScroll: true });
-        lastFocusRef.current = null;
-      }, 0);
-    }
-  };
-
-  const trapMobileTab = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape") {
-      closeMobile({ returnFocus: true });
-      return;
-    }
-
-    if (event.key !== "Tab") return;
-
-    const focusable = getFocusable(mobileShellRef.current);
-    if (!focusable.length) return;
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement;
-
-    if (event.shiftKey && active === first) {
-      event.preventDefault();
-      last.focus({ preventScroll: true });
-      return;
-    }
-
-    if (!event.shiftKey && active === last) {
-      event.preventDefault();
-      first.focus({ preventScroll: true });
-    }
-  };
 
   const toggleDropdown = (groupId: string) => {
     setOpenGroup((current) => (current === groupId ? null : groupId));

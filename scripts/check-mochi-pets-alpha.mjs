@@ -121,7 +121,7 @@ const checks = [
     includes: ['configuredMochiPetsOrigin', 'MOCHI_PETS_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiPetsFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Mochirii member sign-in is required for saved play', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiPetsBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
   },
   {
-    file: 'apps/web/components/SiteHeader.tsx',
+    file: 'apps/web/components/site-header/header-navigation.tsx',
     includes: ['navItemVisibleForPath', 'activeKey === "games/mochi-pets" && item.nav === "tome"']
   },
   {
