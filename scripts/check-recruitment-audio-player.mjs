@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { readAppCss } from "./lib/app-css.mjs";
+import { readPublicPageExport } from "./lib/public-page-source.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -31,7 +32,7 @@ function assertAudioHasNoVisibleControls(label, text) {
   assert(/controlsList="nodownload"|controlslist="nodownload"/.test(recruitmentAudio), `${label}: recruitment audio must keep nodownload controlsList.`);
 }
 
-const pages = read("apps/web/components/public-pages/pages.tsx");
+const recruitmentPage = readPublicPageExport(root, "RecruitmentPage", failures).text;
 const player = read("apps/web/components/public-pages/RecruitmentAudioPlayer.tsx");
 const appCss = readAppCss();
 const staticHtml = read("recruitment.html");
@@ -43,9 +44,9 @@ const recruitmentData = JSON.parse(read("data/recruitment.json"));
 assert(existsSync(path.join(root, "assets/audio/mochiriiiiii.mp3")), "Recruitment MP3 asset is missing.");
 assert(existsSync(path.join(root, "apps/web/public/assets/audio/mochiriiiiii.mp3")), "Mirrored Recruitment MP3 asset is missing.");
 
-assertIncludes("Next Recruitment page", pages, "RecruitmentAudioPlayer");
-assertIncludes("Next Recruitment page", pages, "const audioSources = sources.map");
-assert(!pages.includes("controls={sources.length > 0}"), "Next Recruitment page must not use native audio controls.");
+assertIncludes("Next Recruitment page", recruitmentPage, "RecruitmentAudioPlayer");
+assertIncludes("Next Recruitment page", recruitmentPage, "const audioSources = sources.map");
+assert(!recruitmentPage.includes("controls={sources.length > 0}"), "Next Recruitment page must not use native audio controls.");
 
 [
   '"use client";',
