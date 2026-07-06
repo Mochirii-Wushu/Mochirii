@@ -19,9 +19,10 @@ import {
   type PendingContainmentPlan,
   type SupabaseAdminClient,
 } from "../_shared/pending-verification-containment.ts";
+import { SITE_ORIGIN } from "../_shared/public-origins.ts";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
-const DISCORD_API_USER_AGENT = "Mochirii-Reaper-MemberSync/1.0 (https://mochirii.com)";
+const DISCORD_API_USER_AGENT = `Mochirii-Reaper-MemberSync/1.0 (${SITE_ORIGIN})`;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment";
 const MEMBER_SYNC_SECRET_HEADER = "x-mochirii-reaper-member-sync-secret";

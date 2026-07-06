@@ -1,3 +1,5 @@
+import { SOCIAL_ORIGIN } from "./public-origins.ts";
+
 export type JsonRecord = Record<string, unknown>;
 
 export type PixelfedSocialSyncPayload = {
@@ -15,7 +17,7 @@ export const PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS = 5 * 60 * 1000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const USERNAME_RE = /^[a-z0-9_][a-z0-9_.-]{1,63}$/;
 const ALLOWED_EVENTS = new Set(["login", "account_created", "account_updated"]);
-const SOCIAL_PROFILE_PREFIX = "https://social.mochirii.com/";
+const SOCIAL_PROFILE_PREFIX = `${SOCIAL_ORIGIN}/`;
 
 export function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? value as JsonRecord : {};
@@ -65,7 +67,7 @@ export function parsePixelfedSocialSyncPayload(value: unknown, nowMs = Date.now(
     throw new Error("username must match the Mochirii Social username contract.");
   }
   if (!profileUrl || !profileUrl.startsWith(SOCIAL_PROFILE_PREFIX)) {
-    throw new Error("profile_url must stay under https://social.mochirii.com/.");
+    throw new Error(`profile_url must stay under ${SOCIAL_PROFILE_PREFIX}.`);
   }
   if (!event || !ALLOWED_EVENTS.has(event)) {
     throw new Error("event must be login, account_created, or account_updated.");

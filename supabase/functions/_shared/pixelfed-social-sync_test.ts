@@ -3,13 +3,14 @@ import {
   parsePixelfedSocialSyncPayload,
   PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS,
 } from "./pixelfed-social-sync.ts";
+import { socialUrl } from "./public-origins.ts";
 
 const now = Date.parse("2026-07-04T10:00:00.000Z");
 const validPayload = {
   sub: "8ccaa7af-909f-44e7-84cb-67cdccb56be6",
   provider_user_id: "1",
   username: "faylui_4d9519c2",
-  profile_url: "https://social.mochirii.com/faylui_4d9519c2",
+  profile_url: socialUrl("faylui_4d9519c2"),
   event: "login",
   timestamp: "2026-07-04T10:00:00.000Z",
 };

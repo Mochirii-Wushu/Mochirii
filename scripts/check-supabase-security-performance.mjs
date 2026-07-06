@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { SITE_ORIGIN } from "./lib/public-urls.mjs";
+import { SITE_ORIGIN, SOCIAL_HOST } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -125,6 +125,7 @@ const packageJson = read("package.json");
 const checkAll = read("scripts/check-all.mjs");
 const readme = read("supabase/README.md");
 const corsHelper = read("supabase/functions/_shared/cors.ts");
+const publicOriginsHelper = read("supabase/functions/_shared/public-origins.ts");
 const memberProfilesShared = read("supabase/functions/_shared/member-profiles.ts");
 const spotlightPollsShared = read("supabase/functions/_shared/spotlight-polls.ts");
 const pixelfedSocialSync = read("supabase/functions/sync-pixelfed-social-account/index.ts");
@@ -165,7 +166,7 @@ for (const snippet of socialAccountSnippets) {
 assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_accounts` maps a signed-in website member");
 
 [
-  SITE_ORIGIN,
+  "import { SITE_ORIGIN } from \"./public-origins.ts\"",
   "https://mochirii.vercel.app",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -173,6 +174,13 @@ assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_account
   "Vary",
   "Origin",
 ].forEach((snippet) => assertIncludes("protected CORS helper", corsHelper, snippet));
+
+[
+  `SITE_ORIGIN = "${SITE_ORIGIN}"`,
+  `SOCIAL_ORIGIN = "${SOCIAL_HOST}"`,
+  "siteUrl(path = \"\")",
+  "socialUrl(path = \"\")",
+].forEach((snippet) => assertIncludes("Edge public origins helper", publicOriginsHelper, snippet));
 
 for (const name of protectedFunctions) {
   const source = read(`supabase/functions/${name}/index.ts`);

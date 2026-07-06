@@ -1,7 +1,7 @@
-const DEFAULT_SITE_ORIGIN = "https://mochirii.com";
+import { SITE_ORIGIN } from "./public-origins.ts";
 
 const DEFAULT_ALLOWED_ORIGINS = new Set([
-  DEFAULT_SITE_ORIGIN,
+  SITE_ORIGIN,
   "https://mochirii.vercel.app",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
@@ -50,7 +50,7 @@ export async function withProtectedCors(
 }
 
 export function allowedOrigin(origin: string | null): string {
-  if (!origin) return DEFAULT_SITE_ORIGIN;
+  if (!origin) return SITE_ORIGIN;
   if (DEFAULT_ALLOWED_ORIGINS.has(origin)) return origin;
 
   try {
@@ -69,5 +69,5 @@ export function allowedOrigin(origin: string | null): string {
     // Fall through to the canonical origin.
   }
 
-  return DEFAULT_SITE_ORIGIN;
+  return SITE_ORIGIN;
 }

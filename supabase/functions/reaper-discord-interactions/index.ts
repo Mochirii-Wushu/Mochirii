@@ -50,6 +50,7 @@ import {
   stringOption,
   successMessage,
 } from "../_shared/discord-interaction-helpers.ts";
+import { SITE_ORIGIN, siteUrl } from "../_shared/public-origins.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -61,7 +62,7 @@ declare const EdgeRuntime: {
 };
 
 const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
-const DISCORD_API_USER_AGENT = "Mochirii-Reaper-RankSync/1.0 (https://mochirii.com)";
+const DISCORD_API_USER_AGENT = `Mochirii-Reaper-RankSync/1.0 (${SITE_ORIGIN})`;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
@@ -70,7 +71,7 @@ const EXPECTED_MODMAIL_BOT_USER_ID = MODMAIL_BOT_USER_ID;
 const EXPECTED_MODMAIL_LOG_CHANNEL_ID = MODMAIL_LOG_CHANNEL_ID;
 const EXPECTED_MODMAIL_MODERATOR_ROLE_ID = MODMAIL_MODERATOR_ROLE_ID;
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
-const GUILD_SCHEDULE_URL = "https://mochirii.com/data/guild-schedule.json";
+const GUILD_SCHEDULE_URL = siteUrl("data/guild-schedule.json");
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const MANAGE_EVENTS_PERMISSION = 1n << 33n;
 const CREATE_EVENTS_PERMISSION = 1n << 44n;
@@ -188,7 +189,7 @@ function scheduleAssetUrl(value: unknown, versionValue?: unknown): string | null
   if (/^https:\/\/[^\s]+$/i.test(raw)) return withVersion(raw);
   const normalized = raw.replace(/^\.?\//, "");
   if (!normalized.startsWith("assets/")) return null;
-  return withVersion(`https://mochirii.com/${normalized}`);
+  return withVersion(siteUrl(normalized));
 }
 
 function recurrenceRule(value: unknown, startIso: string): JsonRecord | null {
@@ -265,8 +266,8 @@ function nextWeeklyDate(schedule: JsonRecord, item: JsonRecord, day: number, now
 
 function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonRecord, localDate: string): ScheduleEvent | null {
   const title = safeString(item.title, 100);
-  const websiteLocation = safeString(item.location, 300) || "https://mochirii.com/events";
-  const location = safeString(item.discordLocation, 100) || safeString(item.location, 100) || "https://mochirii.com/events";
+  const websiteLocation = safeString(item.location, 300) || siteUrl("events");
+  const location = safeString(item.discordLocation, 100) || safeString(item.location, 100) || siteUrl("events");
   const startTime = safeString(item.startTime, 20) || "00:00";
   const endTime = safeString(item.endTime, 20) || "01:00";
   const offset = scheduleOffsetMinutes(schedule);
