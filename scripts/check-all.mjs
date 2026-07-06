@@ -12,6 +12,8 @@ const checks = [
   ["check:discord-reaper-parity", ["node", "scripts/check-discord-reaper-parity.mjs"]],
   ["check:discord-event-covers", ["node", "scripts/check-discord-event-covers.mjs"]],
   ["check:reaper-discord-interactions", ["node", "scripts/check-reaper-discord-interactions.mjs"]],
+  ["test:discord-signature", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/discord-signature_test.ts"]],
+  ["test:reaper-discord-events", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/reaper-discord-events_test.ts"]],
   ["check:reaper-modmail-audit", ["node", "scripts/check-reaper-modmail-audit.mjs"]],
   ["check:reaper-pending-verification", ["node", "scripts/check-reaper-pending-verification.mjs"]],
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
