@@ -98,6 +98,7 @@ if (writeReport) {
 function inspectShell() {
   const layout = readRequired("apps/web/app/layout.tsx");
   const header = readRequired("apps/web/components/SiteHeader.tsx");
+  const mobileMenuFocus = readRequired("apps/web/components/site-header/use-mobile-menu-focus-trap.ts");
   const footer = readOptional("apps/web/components/SiteFooter.tsx");
   const css = readAppCss();
 
@@ -107,9 +108,9 @@ function inspectShell() {
     skipLink: /className=["']skip-link["'][\s\S]*href=["']#main["']/.test(header),
     primaryNavLabel: /<nav\s+className=["']nav["']\s+aria-label=["']Primary["']/.test(header),
     mobileMenuControls: /aria-controls=["']mobile-menu["']/.test(header) && /aria-expanded=\{mobileOpen\}/.test(header),
-    mobileFocusTrap: /trapMobileTab/.test(header) && /event\.key\s*!==\s*"Tab"|event\.key\s*===\s*"Tab"/.test(header),
-    escapeClosesMenu: /event\.key === "Escape"/.test(header),
-    focusReturn: /returnFocus/.test(header) && /focusTarget\?\.focus/.test(header),
+    mobileFocusTrap: /trapMobileTab/.test(header) && /event\.key\s*!==\s*"Tab"|event\.key\s*===\s*"Tab"/.test(mobileMenuFocus),
+    escapeClosesMenu: /event\.key === "Escape"/.test(mobileMenuFocus),
+    focusReturn: /returnFocus/.test(mobileMenuFocus) && /focusTarget\?\.focus/.test(mobileMenuFocus),
     srOnlyClass: /\.sr-only\s*\{/.test(css),
     focusVisible: /:focus-visible\s*\{/.test(css),
     reducedMotion: /@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(css),
