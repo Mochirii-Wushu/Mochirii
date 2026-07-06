@@ -144,7 +144,10 @@ async function liveDiscordRead(scheduleInstances) {
 
 const schedule = readJson("data/guild-schedule.json");
 const publicSchedule = readJson("apps/web/public/data/guild-schedule.json");
-const reaper = read("supabase/functions/reaper-discord-interactions/index.ts");
+const reaper = [
+  read("supabase/functions/reaper-discord-interactions/index.ts"),
+  read("supabase/functions/_shared/reaper-event-sync-workflow.ts"),
+].join("\n");
 const runbook = read("docs/reaper-event-sync-runbook.md");
 const runtimeChecklist = read("docs/reaper-runtime-health-checklist.md");
 const currentState = read("docs/current-live-state.md");
