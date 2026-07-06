@@ -156,6 +156,7 @@ function scanTrackedFiles() {
     .split(/\r?\n/)
     .map((file) => file.trim())
     .filter(Boolean)
+    .filter((file) => existsSync(resolve(root, file)))
     .filter((file) => isTextFile(file));
 
   for (const file of files) {

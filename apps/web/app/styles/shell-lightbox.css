@@ -1,0 +1,72 @@
+﻿/* =========================================================
+   LIGHTBOX / MODALS â€” Clean stacking + click-off-to-close
+   ========================================================= */
+
+/* Show/hide (gallery) */
+#lightbox[aria-hidden="false"]{display:block;}
+#lightbox.hidden{display:none;}
+
+/* Show/hide (home) */
+#modalRoot[aria-hidden="false"]{display:block;}
+#modalRoot.hidden{display:none;}
+
+/* Base overlay for both */
+#lightbox,
+#modalRoot{
+  position:fixed;
+  inset:0;
+  z-index:20000;
+  pointer-events:auto;
+  isolation:isolate;
+  overscroll-behavior:contain;
+}
+
+/* Backdrops: must be clickable and above the page */
+#lightboxBackdrop,
+#modalBackdrop,
+.lightbox-backdrop{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  cursor:zoom-out;
+  background:rgba(0,0,0,.55);
+}
+
+/* Shell sits above backdrop, but should NOT block backdrop clicks */
+#lightbox .lightbox-shell,
+#modalRoot .lightbox-shell{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:grid;
+  place-items:center;
+  box-sizing:border-box;
+  padding:clamp(12px, 4vw, 24px);
+  overflow:hidden;
+  pointer-events:none; /* key: allow clicks to pass through to backdrop */
+}
+
+/* The actual card + close button must still be clickable */
+#lightbox .lightbox-card,
+#lightbox .lightbox-close,
+#modalRoot .lightbox-card,
+#modalRoot .lightbox-close,
+#lightbox #lightboxClose,
+#modalRoot #modalClose{
+  pointer-events:auto;
+}
+
+/* Prevent dimming of the image itself (gallery + home) */
+#lightboxImg,
+#modalImage,
+#lightbox .lightbox-img,
+#modalRoot .lightbox-img,
+#lightbox img,
+#modalRoot img{
+  opacity:1 !important;
+  filter:none !important;
+  mix-blend-mode:normal !important;
+  max-width:100%;
+  height:auto;
+}
+

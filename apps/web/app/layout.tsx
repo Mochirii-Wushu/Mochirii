@@ -10,7 +10,10 @@ import "./styles/tokens-base.css";
 import "./styles/shared-ui.css";
 import "./styles/public-pages.css";
 import "./styles/member-workflow.css";
-import "./styles/shell-overlays.css";
+import "./styles/shell-lightbox.css";
+import "./styles/shell-header-nav.css";
+import "./styles/shell-mobile-menu.css";
+import "./styles/shell-footer.css";
 import "./styles/mochi-pets.css";
 
 const title = "Mōchirīī • Where Winds Meet Guild";

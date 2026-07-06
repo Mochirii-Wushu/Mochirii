@@ -191,7 +191,7 @@ checkEnvFiles(trackedFiles, untrackedFiles);
 checkGitignore();
 checkSupabaseJs();
 
-trackedFiles.filter(isTextFile).forEach((file) => {
+trackedFiles.filter((file) => existsSync(path.join(root, file))).filter(isTextFile).forEach((file) => {
   const text = readText(file);
   if (text == null) {
     warnings.push(`${file}: skipped binary-like text file.`);
