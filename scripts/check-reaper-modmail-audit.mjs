@@ -10,6 +10,7 @@ const files = {
   packageJson: "package.json",
   checkAll: "scripts/check-all.mjs",
   function: "supabase/functions/reaper-discord-interactions/index.ts",
+  interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
   sharedAudit: "supabase/functions/_shared/modmail-audit.ts",
   sharedTest: "supabase/functions/_shared/modmail-audit_test.ts",
   commandRegistration: "scripts/register-reaper-modmail-audit-command.mjs",
@@ -50,6 +51,8 @@ function denoBinary() {
 const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const functionSource = read(files.function);
+const interactionHelpers = read(files.interactionHelpers);
+const interactionContractSource = [functionSource, interactionHelpers].join("\n");
 const sharedAudit = read(files.sharedAudit);
 const sharedTest = read(files.sharedTest);
 const commandRegistration = read(files.commandRegistration);
@@ -79,7 +82,7 @@ assertIncludes("check-all", checkAll, "check:reaper-modmail-audit");
   "EdgeRuntime.waitUntil(processModmailAudit(interactionToken, applicationId))",
   "return deferredEphemeralResponse();",
   "allowed_mentions",
-].forEach((snippet) => assertIncludes("reaper-discord-interactions", functionSource, snippet));
+].forEach((snippet) => assertIncludes("reaper-discord-interactions", interactionContractSource, snippet));
 
 [
   "MODMAIL_BOT_USER_ID = \"575252669443211264\"",
@@ -169,7 +172,7 @@ assertNotMatches(
 );
 assertMatches(
   "reaper-discord-interactions",
-  functionSource,
+  interactionContractSource,
   /type:\s*INTERACTION_RESPONSE_CHANNEL_MESSAGE[\s\S]*flags:\s*EPHEMERAL_FLAG/,
   "ModMail audit denial and status responses must be ephemeral.",
 );
