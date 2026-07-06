@@ -107,6 +107,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Vercel Web Analytics and Speed Insights are wired from the root layout with `@vercel/analytics/next` and `@vercel/speed-insights/next`.
 - Dashboard data can lag after deployment and needs real production visits.
 - Use `apps/web/README.md` for the browser script inspection snippet.
+- Latest read-only Speed Insights evidence is recorded in `docs/speed-insights-evidence.md`. Current field data is broadly healthy; the Singapore country segment remains watch-only until repeated p75 LCP/INP/CLS evidence identifies an actionable route/device issue.
 - Metadata, noindex, sitemap, social preview image reachability, observability wiring, and production smoke coverage are guarded by `npm run check:observability-metadata-smoke`. Use `MOCHIRII_OBSERVABILITY_LIVE=1` for the read-only live pass.
 
 ## Current Improvement Queue
