@@ -1,0 +1,231 @@
+{
+  "ok": true,
+  "checkedAt": "2026-07-06T09:20:45.038Z",
+  "baseUrl": "https://mochirii.com",
+  "expectedCorsOrigin": "https://mochirii.com",
+  "socialHost": "https://social.mochirii.com",
+  "mochiPetsOrigin": "https://mochi-pets-game.fly.dev",
+  "routes": [
+    {
+      "id": "home",
+      "method": "GET",
+      "path": "/",
+      "url": "https://mochirii.com/",
+      "surface": "public page",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "none observed; same-origin page load",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "text/html; charset=utf-8",
+        "server": "Vercel",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "auth",
+      "method": "GET",
+      "path": "/auth",
+      "url": "https://mochirii.com/auth",
+      "surface": "public auth page",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "none observed; Supabase Auth is reached from client code, not by cross-origin reads of this route",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "text/html; charset=utf-8",
+        "server": "Vercel",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "account",
+      "method": "GET",
+      "path": "/account",
+      "url": "https://mochirii.com/account",
+      "surface": "member workflow page",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "none observed; browser access is same-origin",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "text/html; charset=utf-8",
+        "server": "Vercel",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "social",
+      "method": "GET",
+      "path": "/social",
+      "url": "https://mochirii.com/social",
+      "surface": "social handoff page",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "none observed; handoff is navigation to social.mochirii.com",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "text/html; charset=utf-8",
+        "server": "Vercel",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "oauth-consent",
+      "method": "GET",
+      "path": "/oauth/consent",
+      "url": "https://mochirii.com/oauth/consent",
+      "surface": "Supabase OAuth consent UI",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "none observed; Pixelfed/Supabase reach this through browser navigation",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "text/html; charset=utf-8",
+        "server": "Vercel",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "oauth-decision",
+      "method": "POST",
+      "path": "/api/oauth/decision",
+      "url": "https://mochirii.com/api/oauth/decision",
+      "surface": "OAuth decision API",
+      "status": 401,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "possible future scoped candidate only if cross-origin browser callers are introduced",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "application/json",
+        "server": "Vercel",
+        "cache-control": "private, no-store"
+      }
+    },
+    {
+      "id": "mochi-pets",
+      "method": "GET",
+      "path": "/games/mochi-pets",
+      "url": "https://mochirii.com/games/mochi-pets",
+      "surface": "Mochi Pets iframe host page",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": true,
+      "futureCorsNeed": "none observed; iframe uses frame-src and postMessage origin checks instead of CORS",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "text/html; charset=utf-8",
+        "server": "Vercel",
+        "cache-control": "private, no-cache, no-store, max-age=0, must-revalidate"
+      }
+    },
+    {
+      "id": "favicon",
+      "method": "GET",
+      "path": "/favicon.ico",
+      "url": "https://mochirii.com/favicon.ico",
+      "surface": "public static asset",
+      "status": 200,
+      "statusOk": true,
+      "corsOrigin": "https://mochirii.com",
+      "corsOk": true,
+      "requiredHeader": false,
+      "futureCorsNeed": "none observed; static assets do not need CORS for the current first-party flows",
+      "headers": {
+        "access-control-allow-origin": "https://mochirii.com",
+        "content-security-policy": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co; font-src 'self' data:; media-src 'self' data: blob:; frame-src 'self' https://discord.com https://open.spotify.com https://mochi-pets-game.fly.dev; connect-src 'self' https://*.supabase.co ",
+        "cross-origin-opener-policy": "same-origin-allow-popups",
+        "x-frame-options": "DENY",
+        "content-type": "image/vnd.microsoft.icon",
+        "server": "Vercel",
+        "cache-control": "public, max-age=0, must-revalidate"
+      }
+    }
+  ],
+  "staticProofs": [
+    {
+      "id": "next-global-cors",
+      "file": "apps/web/next.config.ts",
+      "ok": true,
+      "claim": "Current Next.js headers apply the configured Access-Control-Allow-Origin value globally.",
+      "checkedSnippets": 3
+    },
+    {
+      "id": "oauth-consent-page",
+      "file": "apps/web/app/oauth/consent/page.tsx",
+      "ok": true,
+      "claim": "OAuth consent is a noindex website page used for browser authorization review.",
+      "checkedSnippets": 3
+    },
+    {
+      "id": "oauth-decision-api",
+      "file": "apps/web/app/api/oauth/decision/route.ts",
+      "ok": true,
+      "claim": "The OAuth decision endpoint is a POST-only same-origin API that forwards the consent decision to Supabase.",
+      "checkedSnippets": 4
+    },
+    {
+      "id": "pixelfed-first-login",
+      "file": "docs/pixelfed-first-login-testing.md",
+      "ok": true,
+      "claim": "Pixelfed first-login docs route the browser through the consent page and same-origin decision API.",
+      "checkedSnippets": 3
+    },
+    {
+      "id": "mochi-pets-postmessage",
+      "file": "apps/web/components/mochi-pets/MochiPetsAlphaClient.tsx",
+      "ok": true,
+      "claim": "Mochi Pets uses an iframe plus strict postMessage origin checks, not permissive CORS.",
+      "checkedSnippets": 4
+    }
+  ],
+  "recommendation": {
+    "currentGlobalHeader": true,
+    "currentHeaderSource": "apps/web/next.config.ts source /(.*)",
+    "smallestFuturePattern": "/api/:path* is the narrowest candidate if future browser evidence proves any cross-origin JSON route needs CORS; current OAuth, social handoff, and Mochi Pets evidence does not prove public pages or static assets need it.",
+    "keepUntilBrowserProof": "Do not narrow the global header until OAuth consent approve/deny, Pixelfed OIDC return, and Mochi Pets iframe/postMessage are browser-tested on a Vercel preview."
+  },
+  "warnings": [],
+  "failures": []
+}
