@@ -1,8 +1,8 @@
 # Mochirii CORS Proof
 
-Generated: 2026-07-06T09:20:45.038Z
+Generated: 2026-07-06T11:16:52.060Z
 
-This file is intentionally no-secret. It records current website CORS behavior and static handoff evidence only; it does not approve or perform header narrowing.
+This file is intentionally no-secret. It records current website CORS behavior and static/browser handoff evidence only; it does not approve or perform header narrowing.
 
 ## Result
 
@@ -35,6 +35,31 @@ This file is intentionally no-secret. It records current website CORS behavior a
 | pixelfed-first-login | docs/pixelfed-first-login-testing.md | yes | Pixelfed first-login docs route the browser through the consent page and same-origin decision API. |
 | mochi-pets-postmessage | apps/web/components/mochi-pets/MochiPetsAlphaClient.tsx | yes | Mochi Pets uses an iframe plus strict postMessage origin checks, not permissive CORS. |
 
+## Browser Proof
+
+- Enabled: yes
+- Browser: playwright chromium
+- Checks: 12
+- Routes without CORS console errors: 12/12
+- Same-origin OAuth decision checks: 2
+- Social handoff checks: 2
+- Mochi Pets frame checks: 2
+
+| Surface | Viewport | Status | CORS console errors | OAuth decision | Social handoff | Mochi Pets frame |
+| --- | --- | ---: | ---: | --- | --- | --- |
+| home | mobile-390x844 | 200 | 0 | n/a | n/a | n/a |
+| auth | mobile-390x844 | 200 | 0 | n/a | n/a | n/a |
+| account | mobile-390x844 | 200 | 0 | n/a | n/a | n/a |
+| social | mobile-390x844 | 200 | 0 | n/a | 4/ok | n/a |
+| oauth-consent | mobile-390x844 | 200 | 0 | 401/ok | n/a | n/a |
+| mochi-pets | mobile-390x844 | 200 | 0 | n/a | n/a | not-rendered-in-signed-out-proof/ok |
+| home | desktop-1440x900 | 200 | 0 | n/a | n/a | n/a |
+| auth | desktop-1440x900 | 200 | 0 | n/a | n/a | n/a |
+| account | desktop-1440x900 | 200 | 0 | n/a | n/a | n/a |
+| social | desktop-1440x900 | 200 | 0 | n/a | 4/ok | n/a |
+| oauth-consent | desktop-1440x900 | 200 | 0 | 401/ok | n/a | n/a |
+| mochi-pets | desktop-1440x900 | 200 | 0 | n/a | n/a | not-rendered-in-signed-out-proof/ok |
+
 ## Future Scope Recommendation
 
 - Current global header source: apps/web/next.config.ts source /(.*)
@@ -42,9 +67,15 @@ This file is intentionally no-secret. It records current website CORS behavior a
 - Smallest future candidate: /api/:path* is the narrowest candidate if future browser evidence proves any cross-origin JSON route needs CORS; current OAuth, social handoff, and Mochi Pets evidence does not prove public pages or static assets need it.
 - Guardrail: Do not narrow the global header until OAuth consent approve/deny, Pixelfed OIDC return, and Mochi Pets iframe/postMessage are browser-tested on a Vercel preview.
 
+## CORS Narrowing Blockers
+
+- mochi-pets mobile-390x844: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.
+- mochi-pets desktop-1440x900: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.
+
 ## Warnings
 
-- None
+- mochi-pets mobile-390x844: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.
+- mochi-pets desktop-1440x900: iframe is not rendered in signed-out/default proof; signed-in preview proof is still required before CORS narrowing.
 
 ## Failures
 
