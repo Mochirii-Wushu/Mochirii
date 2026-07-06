@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
-const DEFAULT_BASE_URL = "https://mochirii.com";
+const DEFAULT_BASE_URL = SITE_ORIGIN;
 const TIMEOUT_MS = 30000;
 
 const args = process.argv.slice(2);

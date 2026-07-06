@@ -1,4 +1,6 @@
-const BASE_URL = process.env.MOCHIRII_PRODUCTION_BASE_URL || "https://mochirii.com";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
+
+const BASE_URL = (process.env.MOCHIRII_PRODUCTION_BASE_URL || SITE_ORIGIN).replace(/\/+$/, "");
 const TIMEOUT_MS = 30000;
 const MAX_ATTEMPTS = 3;
 const DIAGNOSE = process.argv.includes("--diagnose");
@@ -121,6 +123,10 @@ function assertIncludes(text, pattern, label) {
   if (!pattern.test(text)) throw new Error(`Missing ${label}`);
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function extractMetaContent(html, selector) {
   const match = html.match(selector);
   return match?.[1] || "";
@@ -145,7 +151,7 @@ async function checkMetadata() {
   const home = await fetchText("/");
   assertIncludes(home.text, /<title>[^<]*Where Winds Meet/i, "homepage title");
   assertIncludes(home.text, /<meta\s+name="description"\s+content="[^"]+"/i, "homepage description");
-  assertIncludes(home.text, /<link\s+rel="canonical"\s+href="https:\/\/mochirii\.com\/?"/i, "homepage canonical");
+  assertIncludes(home.text, new RegExp(`<link\\s+rel="canonical"\\s+href="${escapeRegExp(BASE_URL)}/?"`, "i"), "homepage canonical");
   assertIncludes(home.text, /property="og:title"/i, "homepage OG title");
   assertIncludes(home.text, /property="og:image"/i, "homepage OG image");
 
@@ -160,7 +166,7 @@ async function checkMetadata() {
   assertIncludes(recruitment.text, /Recruitment/i, "recruitment page content");
   assertIncludes(
     recruitment.text,
-    /<link\s+rel="canonical"\s+href="https:\/\/mochirii\.com\/recruitment"/i,
+    new RegExp(`<link\\s+rel="canonical"\\s+href="${escapeRegExp(BASE_URL)}/recruitment"`, "i"),
     "recruitment canonical"
   );
 }
@@ -168,10 +174,10 @@ async function checkMetadata() {
 async function checkDiscoveryFiles() {
   const sitemap = await fetchText("/sitemap.xml");
   assertIncludes(sitemap.text, /<urlset[\s>]/i, "sitemap urlset");
-  assertIncludes(sitemap.text, /https:\/\/mochirii\.com\/gallery/i, "gallery sitemap entry");
+  assertIncludes(sitemap.text, new RegExp(`${escapeRegExp(BASE_URL)}/gallery`, "i"), "gallery sitemap entry");
 
   const robots = await fetchText("/robots.txt");
-  assertIncludes(robots.text, /Sitemap:\s*https:\/\/mochirii\.com\/sitemap\.xml/i, "robots sitemap entry");
+  assertIncludes(robots.text, new RegExp(`Sitemap:\\s*${escapeRegExp(BASE_URL)}/sitemap\\.xml`, "i"), "robots sitemap entry");
 }
 
 function printFailure(error) {
