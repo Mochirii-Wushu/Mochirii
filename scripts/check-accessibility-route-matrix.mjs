@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
 import { readAppCss } from "./lib/app-css.mjs";
+import { readPublicPageExport } from "./lib/public-page-source.mjs";
 
 const root = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -178,39 +179,10 @@ function routeSourceEntries(route) {
   const entries = [{ file: route.file, text: routeText }];
   const publicPageMatch = routeText.match(/import\s+\{\s*([A-Za-z0-9_]+)\s*\}\s+from\s+["']@\/components\/public-pages\/pages["']/);
   if (publicPageMatch) {
-    const sharedFile = "apps/web/components/public-pages/pages.tsx";
-    const sharedText = readRequired(sharedFile);
-    entries.push({
-      file: sharedFile,
-      text: extractExportedFunction(sharedText, publicPageMatch[1], sharedFile),
-    });
+    entries.push(readPublicPageExport(root, publicPageMatch[1], failures));
   }
   for (const file of route.componentFiles || []) entries.push({ file, text: readRequired(file) });
   return entries;
-}
-
-function extractExportedFunction(source, functionName, file) {
-  const start = source.indexOf(`export function ${functionName}`);
-  if (start < 0) {
-    failures.push(`${file}: expected exported function ${functionName}.`);
-    return "";
-  }
-  const bodyStart = source.indexOf("{", start);
-  if (bodyStart < 0) {
-    failures.push(`${file}: expected function body for ${functionName}.`);
-    return "";
-  }
-  let depth = 0;
-  for (let index = bodyStart; index < source.length; index += 1) {
-    const char = source[index];
-    if (char === "{") depth += 1;
-    if (char === "}") {
-      depth -= 1;
-      if (depth === 0) return source.slice(start, index + 1);
-    }
-  }
-  failures.push(`${file}: could not extract function body for ${functionName}.`);
-  return "";
 }
 
 function renderMarkdown(report) {

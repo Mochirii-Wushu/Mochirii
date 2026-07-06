@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { readPublicPageExport } from "./lib/public-page-source.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -52,7 +53,7 @@ const publisher = read("supabase/functions/publish-member-spotlight-winner/index
 const publicWinner = read("supabase/functions/get-current-spotlight-winner/index.ts");
 const envExample = read("supabase/functions/.env.example");
 const homePage = read("apps/web/app/page.tsx");
-const sidePages = read("apps/web/components/public-pages/pages.tsx");
+const spotlightPage = readPublicPageExport(root, "SpotlightPage", failures).text;
 const winnerComponent = read("apps/web/components/public-pages/SpotlightWinnerTitle.tsx");
 const supabaseReadme = read("supabase/README.md");
 
@@ -130,7 +131,7 @@ assertNotMatches(
 ].forEach((snippet) => assertIncludes("env example", envExample, snippet));
 
 assertIncludes("home page", homePage, "SpotlightWinnerTitle");
-assertIncludes("spotlight page", sidePages, "SpotlightWinnerTitle");
+assertIncludes("spotlight page", spotlightPage, "SpotlightWinnerTitle");
 assertSpotlightLabelsDoNotUseFallbackTitle();
 assertNotMatches(
   "home page",
@@ -140,7 +141,7 @@ assertNotMatches(
 );
 assertNotMatches(
   "spotlight page",
-  sidePages,
+  spotlightPage,
   /SpotlightProfileCard/,
   "Spotlight page should not expose a profile card for the poll winner.",
 );

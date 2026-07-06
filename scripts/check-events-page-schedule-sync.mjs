@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { readAppCss } from "./lib/app-css.mjs";
+import { readPublicPageExport } from "./lib/public-page-source.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -21,18 +22,13 @@ function assertNotIncludes(label, source, snippet) {
   if (source.includes(snippet)) fail(`${label}: unexpected ${snippet}`);
 }
 
-const pagesSource = read("apps/web/components/public-pages/pages.tsx");
+const eventsSource = readPublicPageExport(root, "EventsPage", failures).text;
 const boardSource = read("apps/web/components/public-pages/EventsBoard.tsx");
 const cssSource = readAppCss().replace(/\r\n/g, "\n");
 const scheduleSource = read("apps/web/lib/guild-schedule.ts");
 const schedule = JSON.parse(read("data/guild-schedule.json"));
 
-const eventsStart = pagesSource.indexOf("export function EventsPage()");
-const eventsEnd = pagesSource.indexOf("export function AnnouncementsPage()", eventsStart);
-const eventsSource = eventsStart >= 0 ? pagesSource.slice(eventsStart, eventsEnd >= 0 ? eventsEnd : undefined) : "";
-
 if (!eventsSource) fail("EventsPage source block not found.");
-assertIncludes("EventsPage", pagesSource, "websiteEventCardsFromSchedule");
 assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData)");
 assertNotIncludes("EventsPage", eventsSource, "records(data.upcoming)");
 assertNotIncludes("EventsPage", eventsSource, "eventBoardItemsFromSchedule");
