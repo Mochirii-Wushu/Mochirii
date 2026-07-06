@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -115,7 +116,7 @@ async function liveDiscordRead(scheduleInstances) {
   const response = await fetch(`https://discord.com/api/v10/guilds/${guildId}/scheduled-events`, {
     headers: {
       Authorization: `Bot ${token}`,
-      "User-Agent": "Mochirii-Reaper-ParityCheck/1.0 (https://mochirii.com)",
+      "User-Agent": `Mochirii-Reaper-ParityCheck/1.0 (${SITE_ORIGIN})`,
     },
   });
 

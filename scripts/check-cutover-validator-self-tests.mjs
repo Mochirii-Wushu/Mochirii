@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
+import { SUPABASE_PROJECT_URL } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const tempDir = mkdtempSync(path.join(tmpdir(), "mochirii-cutover-validator-self-test-"));
@@ -452,7 +453,7 @@ try {
       cleanupChecker,
       validCleanupNote,
       "signed Storage URL",
-      "https://deyvmtncimmcinldjyqe.supabase.co/storage/v1/object/sign/member-gallery/private/proof.webp?token=fake",
+      `${SUPABASE_PROJECT_URL}/storage/v1/object/sign/member-gallery/private/proof.webp?token=fake`,
     ],
     [
       "live-member cleanup note API credential assignment",

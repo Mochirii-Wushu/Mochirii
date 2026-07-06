@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { SUPABASE_FUNCTIONS_URL } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 
@@ -405,7 +406,7 @@ assertNotMatches(
 
 [
   "reaper-discord-interactions",
-  "https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions",
+  `${SUPABASE_FUNCTIONS_URL}/reaper-discord-interactions`,
   "DISCORD_PUBLIC_KEY",
   "supabase functions deploy reaper-discord-interactions",
   "guild-scoped `/submit` command",

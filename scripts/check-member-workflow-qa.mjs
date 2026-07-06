@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { siteUrl } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -65,7 +66,7 @@ for (const file of retiredFiles) {
 [
   "D02: Live OAuth And Account Smoke",
   "D03: Live Upload And Moderation Smoke",
-  "https://mochirii.com/auth",
+  siteUrl("/auth"),
   "Pending content was not public before approval.",
   "Cleanup must not be ad hoc.",
   "Do not record:",

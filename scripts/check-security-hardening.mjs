@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { readAppCss } from "./lib/app-css.mjs";
+import { siteUrl } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -394,7 +395,7 @@ assertMatches(
   "Contact: https://github.com/Mochirii-Wushu/Mochirii/security/policy",
   "Policy: https://github.com/Mochirii-Wushu/Mochirii/security/policy",
   "Preferred-Languages: en",
-  "Canonical: https://mochirii.com/.well-known/security.txt",
+  `Canonical: ${siteUrl("/.well-known/security.txt")}`,
   "Expires: 2027-06-10T00:00:00Z",
 ].forEach((snippet) => assertIncludes("security.txt", securityTxt, snippet));
 

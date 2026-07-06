@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
 
-const PRODUCTION_PROJECT_REF = "deyvmtncimmcinldjyqe";
+const PRODUCTION_PROJECT_REF = SUPABASE_PROJECT_REF;
 const MODERATOR_ROLE_ID = "1078630751165222984";
 const ENABLED = process.env.ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE === "true";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -8,7 +9,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 if (!ENABLED) {
   console.log("Member verification preview smoke skipped.");
   console.log("- Set ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true to run against a Supabase Preview project.");
-  console.log("- The smoke refuses production project deyvmtncimmcinldjyqe.");
+  console.log(`- The smoke refuses production project ${SUPABASE_PROJECT_REF}.`);
   process.exit(0);
 }
 

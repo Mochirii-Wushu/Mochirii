@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -164,7 +165,7 @@ for (const snippet of socialAccountSnippets) {
 assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_accounts` maps a signed-in website member");
 
 [
-  "https://mochirii.com",
+  SITE_ORIGIN,
   "https://mochirii.vercel.app",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
