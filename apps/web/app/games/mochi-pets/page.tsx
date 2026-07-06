@@ -3,6 +3,7 @@ import { MochiPetsAlphaClient } from "@/components/mochi-pets/MochiPetsAlphaClie
 import { MochiPetsTesterPasswordGate } from "@/components/mochi-pets/MochiPetsTesterPasswordGate";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { hasMochiPetsTesterSession } from "@/lib/mochi-pets/tester-password";
+import { configuredMochiPetsOrigin } from "@/lib/public-urls";
 
 export const metadata: Metadata = {
   title: "Mochi Pets Alpha",
@@ -31,7 +32,7 @@ function testerGateError(value: string | undefined) {
 }
 
 async function getMochiPetsGameRuntimeStatus(): Promise<MochiPetsGameRuntimeStatus> {
-  const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_PETS_URL || "https://mochi-pets-game.fly.dev").replace(/\/+$/, "");
+  const gameOrigin = configuredMochiPetsOrigin();
   const paused = {
     available: false,
     message: "The Mochi Pets room is temporarily paused. The tester page is still open, and saved play will resume when the room is ready.",

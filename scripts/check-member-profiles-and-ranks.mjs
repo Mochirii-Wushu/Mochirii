@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -69,7 +70,7 @@ const profileFormat = read(files.profileFormat);
 const accountPanel = read(files.accountPanel);
 const leaderDashboard = read(files.leaderDashboard);
 const memberProfilesClient = read(files.memberProfilesClient);
-const css = read(files.css);
+const css = readAppCss();
 const supabaseReadme = read(files.supabaseReadme);
 const featureDoc = read(files.featureDoc);
 
@@ -153,7 +154,7 @@ assertMatches(
   "discord_handle_readonly",
   "readOnly",
   "maxLength={1000}",
-  "const SOCIAL_HOST = \"https://social.mochirii.com\"",
+  "\"@/lib/public-urls\"",
   "Open Mochirii Social",
 ].forEach((snippet) => assertIncludes("account panel", accountPanel, snippet));
 

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -32,7 +33,7 @@ function assertAudioHasNoVisibleControls(label, text) {
 
 const pages = read("apps/web/components/public-pages/pages.tsx");
 const player = read("apps/web/components/public-pages/RecruitmentAudioPlayer.tsx");
-const appCss = read("apps/web/app/mochirii.css");
+const appCss = readAppCss();
 const staticHtml = read("recruitment.html");
 const staticJs = read("recruitment.js");
 const staticCss = read("styles.css");

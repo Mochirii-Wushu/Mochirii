@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GallerySubmitForm } from "@/components/member-workflow/GallerySubmitForm";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
+import { SITE_ORIGIN } from "@/lib/public-urls";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Submit Image • Gallery Upload",
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title: "Mōchirīī Submit Image • Gallery Upload",
     description: "Submit a private pending gallery image for later Mōchirīī moderation after member verification.",
-    url: "https://mochirii.com/gallery-submit",
+    url: `${SITE_ORIGIN}/gallery-submit`,
     images: ["/assets/img/gallery/hero.webp"],
   },
   twitter: {

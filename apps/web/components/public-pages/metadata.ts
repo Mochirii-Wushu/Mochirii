@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_ORIGIN } from "@/lib/public-urls";
 
 type PageKey =
   | "join"
@@ -13,8 +14,6 @@ type PageKey =
   | "spotify"
   | "recruitment"
   | "twills";
-
-const siteUrl = "https://mochirii.com";
 
 const pageMeta: Record<
   PageKey,
@@ -113,7 +112,7 @@ const pageMeta: Record<
 
 export function metadataFor(page: PageKey): Metadata {
   const meta = pageMeta[page];
-  const url = `${siteUrl}${meta.path}`;
+  const url = `${SITE_ORIGIN}${meta.path}`;
 
   return {
     title: meta.title,

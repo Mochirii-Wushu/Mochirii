@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
+import { readAppCss } from "./lib/app-css.mjs";
 
-const cssPath = "apps/web/app/mochirii.css";
-const css = readFileSync(cssPath, "utf8").replace(/\r\n/g, "\n");
+const cssPath = "apps/web/app/styles/*.css";
+const css = readAppCss().replace(/\r\n/g, "\n");
 const homePagePath = "apps/web/app/page.tsx";
 const homePage = readFileSync(homePagePath, "utf8").replace(/\r\n/g, "\n");
 

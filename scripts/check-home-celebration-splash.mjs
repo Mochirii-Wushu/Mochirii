@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -38,7 +39,7 @@ const homeData = readJson("data/home.json");
 const publicHomeData = readJson("apps/web/public/data/home.json");
 const page = read("apps/web/app/page.tsx");
 const component = read("apps/web/components/HomeBirthdaySplash.tsx");
-const appCss = read("apps/web/app/mochirii.css");
+const appCss = readAppCss();
 const staticCss = read("styles.css");
 const staticHome = read("home.js");
 

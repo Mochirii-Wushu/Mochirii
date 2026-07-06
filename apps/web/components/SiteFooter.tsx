@@ -3,14 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
 
 type FooterLink = {
   href: string;
   label: string;
   external?: boolean;
 };
-
-const SOCIAL_HOST = "https://social.mochirii.com";
 
 const guildLinks = [
   { href: "/", label: "Home" },
@@ -95,7 +94,7 @@ export function SiteFooter() {
               <div className="footer-actions">
                 <a
                   className="footer-cta"
-                  href="https://discord.com/invite/dPafqMwWPK"
+                  href={DISCORD_INVITE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Join Mōchirīī on Discord"

@@ -72,9 +72,10 @@ function checkLayoutObservability() {
 
   assertIncludes("root layout", layout, 'import { Analytics } from "@vercel/analytics/next";');
   assertIncludes("root layout", layout, 'import { SpeedInsights } from "@vercel/speed-insights/next";');
+  assertIncludes("root layout", layout, 'import { SITE_ORIGIN } from "@/lib/public-urls";');
   assertIncludes("root layout", layout, "<Analytics />");
   assertIncludes("root layout", layout, "<SpeedInsights />");
-  assertIncludes("root layout", layout, "metadataBase: new URL(siteUrl)");
+  assertIncludes("root layout", layout, "metadataBase: new URL(SITE_ORIGIN)");
   assertIncludes("root layout", layout, 'canonical: "/"');
 }
 

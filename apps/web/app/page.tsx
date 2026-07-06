@@ -10,6 +10,7 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { SpotlightWinnerTitle } from "@/components/public-pages/SpotlightWinnerTitle";
 import { StaticImage } from "@/components/public-pages/common";
 import { monthlyScheduleDate } from "@/lib/guild-schedule";
+import { DISCORD_INVITE_URL } from "@/lib/public-urls";
 
 export const revalidate = 3600;
 
@@ -313,7 +314,7 @@ export default function Home() {
               <div className="hero-cta-row" aria-label="Primary actions">
                 <a
                   className="hero-cta hero-cta--primary"
-                  href="https://discord.com/invite/dPafqMwWPK"
+                  href={DISCORD_INVITE_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

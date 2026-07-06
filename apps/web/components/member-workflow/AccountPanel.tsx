@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
+import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
 import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getLinkedIdentities, linkProviderIdentity } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
@@ -26,8 +27,6 @@ import {
   uploadAccess,
 } from "./format";
 import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
-
-const SOCIAL_HOST = "https://social.mochirii.com";
 
 type FormState = Record<(typeof editableProfileFields)[number], string>;
 
@@ -382,7 +381,7 @@ export function AccountPanel() {
               <span>Public Gallery</span>
               <small>View approved images and gallery sorting.</small>
             </Link>
-            <a className="account-action-card" href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">
+            <a className="account-action-card" href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
               <span>Join Discord</span>
               <small>Open the live guild hub.</small>
             </a>

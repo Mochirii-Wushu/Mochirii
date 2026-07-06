@@ -5,9 +5,14 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import "./mochirii.css";
+import { SITE_ORIGIN } from "@/lib/public-urls";
+import "./styles/tokens-base.css";
+import "./styles/shared-ui.css";
+import "./styles/public-pages.css";
+import "./styles/member-workflow.css";
+import "./styles/shell-overlays.css";
+import "./styles/mochi-pets.css";
 
-const siteUrl = "https://mochirii.com";
 const title = "Mōchirīī • Where Winds Meet Guild";
 const description =
   "Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall.";
@@ -25,7 +30,7 @@ const bodyFont = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_ORIGIN),
   title,
   description,
   alternates: {
@@ -36,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title,
     description,
-    url: siteUrl,
+    url: SITE_ORIGIN,
     images: [
       {
         url: "/assets/img/hero/hero.webp",

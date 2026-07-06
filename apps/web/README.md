@@ -150,7 +150,7 @@ Visual-only shell releases should verify Home and all shared routes at `360`, `3
 - Next.js TypeScript App Router scaffold under `apps/web`.
 - Existing `assets/` copied to `public/assets/`.
 - Existing `data/` copied to `public/data/`.
-- Existing `styles.css` copied to `app/mochirii.css`.
+- Existing `styles.css` copied into the Next app CSS surface; `app/mochirii.css` is now a compatibility aggregator while ordered global partials live under `app/styles/`.
 - Shared header and footer converted to React components.
 - Homepage converted from `index.html` and `home.js` DOM mutation to React rendering.
 - Legacy `.html` redirects configured in `next.config.ts`.

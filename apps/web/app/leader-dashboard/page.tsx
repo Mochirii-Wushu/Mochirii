@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LeaderDashboard } from "@/components/member-workflow/LeaderDashboard";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
+import { SITE_ORIGIN } from "@/lib/public-urls";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Leader Dashboard • Gallery Moderation",
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title: "Mōchirīī Leader Dashboard • Gallery Moderation",
     description: "Review pending member gallery image submissions with Discord Moderator access.",
-    url: "https://mochirii.com/leader-dashboard",
+    url: `${SITE_ORIGIN}/leader-dashboard`,
     images: ["/assets/img/gallery/hero.webp"],
   },
   twitter: {

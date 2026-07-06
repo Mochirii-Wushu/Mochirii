@@ -118,7 +118,7 @@ const checks = [
   },
   {
     file: 'apps/web/components/mochi-pets/MochiPetsAlphaClient.tsx',
-    includes: ['NEXT_PUBLIC_MOCHI_PETS_URL', 'MOCHI_PETS_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiPetsFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Mochirii member sign-in is required for saved play', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiPetsBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
+    includes: ['configuredMochiPetsOrigin', 'MOCHI_PETS_AUTH', 'No real value', 'Shared guild room', 'shared Lirabao', 'submitMochiPetsFeedback', 'mochi-game-preview-contract', 'saved for this member', 'Mochirii member sign-in is required for saved play', 'Room connection:', 'data-mochi-bridge-state', 'resolveMochiPetsBridgeMessage', 'sendAuthToGame(accessToken)', 'gameAvailable', 'visibleBridgeStatus', 'Playtest temporarily paused', 'role="status"', 'aria-live="polite"']
   },
   {
     file: 'apps/web/components/SiteHeader.tsx',
