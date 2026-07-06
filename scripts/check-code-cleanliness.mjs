@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { collectRepoFiles, fromRoot, readText } from "./lib/repo-paths.mjs";
+import { appCssFiles } from "./lib/app-css.mjs";
 import {
   MOCHI_PETS_DEFAULT_ORIGIN,
   SITE_ORIGIN,
@@ -47,6 +48,18 @@ const literalAllowedPrefixes = [
 ];
 
 const warnings = [];
+const failures = [];
+
+for (const file of appCssFiles) {
+  const fullPath = fromRoot(file);
+  if (!existsSync(fullPath)) continue;
+  const bytes = readFileSync(fullPath);
+  const hasUtf8Bom = bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
+  const startsWithByteOrderMark = readFileSync(fullPath, "utf8").charCodeAt(0) === 0xfeff;
+  if (hasUtf8Bom || startsWithByteOrderMark) {
+    failures.push(`${file}: imported app CSS must not start with a UTF-8 BOM or leading U+FEFF because it can invalidate the first selector.`);
+  }
+}
 
 for (const budget of sourceLineBudgets) {
   const fullPath = fromRoot(budget.path);
@@ -72,6 +85,12 @@ for (const file of files) {
 }
 
 console.log("Code cleanliness guard completed.");
+if (failures.length) {
+  console.error(`- Failure findings: ${failures.length}`);
+  for (const failure of failures) console.error(`  - ${failure}`);
+  process.exit(1);
+}
+
 if (!warnings.length) {
   console.log("- No warning-budget findings.");
   process.exit(0);
