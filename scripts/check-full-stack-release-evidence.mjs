@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+import { SITE_ORIGIN, SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const checkedAt = new Date().toISOString();
@@ -11,10 +12,10 @@ const writeReports =
   args.has("--write") || process.env.FULL_STACK_RELEASE_EVIDENCE_WRITE === "true";
 const strictProviders =
   args.has("--strict-provider") || process.env.FULL_STACK_RELEASE_EVIDENCE_STRICT_PROVIDER === "true";
-const productionUrl = process.env.FULL_STACK_RELEASE_EVIDENCE_URL || "https://mochirii.com";
+const productionUrl = process.env.FULL_STACK_RELEASE_EVIDENCE_URL || SITE_ORIGIN;
 const vercelProject = process.env.FULL_STACK_RELEASE_EVIDENCE_VERCEL_PROJECT || "mochirii";
 const supabaseProjectRef =
-  process.env.FULL_STACK_RELEASE_EVIDENCE_SUPABASE_PROJECT_REF || "deyvmtncimmcinldjyqe";
+  process.env.FULL_STACK_RELEASE_EVIDENCE_SUPABASE_PROJECT_REF || SUPABASE_PROJECT_REF;
 const jsonReportPath = resolve(root, "reports/full-stack-release-evidence.json");
 const markdownReportPath = resolve(root, "reports/full-stack-release-evidence.md");
 const isWindows = process.platform === "win32";

@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { SUPABASE_PROJECT_REF, supabaseProjectUrl } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -28,7 +29,7 @@ const snippetChecks = [
       "PF_OIDC_USERNAME_FIELD=preferred_username",
       "PF_OIDC_FIELD_ID=sub",
       "PKCE compatibility as unproven",
-      "Approve enabling Supabase OAuth 2.1 Server for project deyvmtncimmcinldjyqe and setting Authorization Path /oauth/consent.",
+      `Approve enabling Supabase OAuth 2.1 Server for project ${SUPABASE_PROJECT_REF} and setting Authorization Path /oauth/consent.`,
       "Approve registering the Pixelfed OAuth client for the approved staging Pixelfed URL with its exact OIDC callback URI.",
     ],
   },
@@ -110,8 +111,8 @@ async function checkLiveDiscovery() {
     return;
   }
 
-  const projectRef = process.env.SUPABASE_PROJECT_REF || "deyvmtncimmcinldjyqe";
-  const discoveryUrl = `https://${projectRef}.supabase.co/auth/v1/.well-known/openid-configuration`;
+  const projectRef = process.env.SUPABASE_PROJECT_REF || SUPABASE_PROJECT_REF;
+  const discoveryUrl = `${supabaseProjectUrl(projectRef)}/auth/v1/.well-known/openid-configuration`;
   const response = await fetch(discoveryUrl);
   if (!response.ok) {
     failures.push(`OIDC discovery ${discoveryUrl}: HTTP ${response.status}.`);

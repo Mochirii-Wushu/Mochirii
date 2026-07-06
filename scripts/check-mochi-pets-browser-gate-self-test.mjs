@@ -2,6 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
+import { MOCHI_PETS_DEFAULT_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const tempDir = mkdtempSync(join(tmpdir(), "mochirii-mochi-pets-browser-gates-"));
@@ -187,7 +188,7 @@ function assertStoredBrowserGateReportCanPassManualGateOnly() {
       MOCHI_PETS_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-report"),
       MOCHI_PETS_SITE_PREVIEW_READY_MD: reportMdPath("stored-report"),
       MOCHI_PETS_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
-      MOCHI_PETS_GAME_CONTRACT_URL: "https://mochi-pets-game.fly.dev",
+      MOCHI_PETS_GAME_CONTRACT_URL: MOCHI_PETS_DEFAULT_ORIGIN,
       MOCHI_PETS_SITE_ORIGIN: "https://mochirii-git-mochi-pets-alpha-preview-mochirii.vercel.app",
       MOCHI_PETS_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
     }),
@@ -234,7 +235,7 @@ function assertStoredTesterPasswordBrowserGateReportCanPassManualGateOnly() {
       MOCHI_PETS_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-tester-password-report"),
       MOCHI_PETS_SITE_PREVIEW_READY_MD: reportMdPath("stored-tester-password-report"),
       MOCHI_PETS_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
-      MOCHI_PETS_GAME_CONTRACT_URL: "https://mochi-pets-game.fly.dev",
+      MOCHI_PETS_GAME_CONTRACT_URL: MOCHI_PETS_DEFAULT_ORIGIN,
       MOCHI_PETS_SITE_ORIGIN: "https://mochirii-git-mochi-pets-alpha-preview-mochirii.vercel.app",
       MOCHI_PETS_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
     }),
@@ -282,7 +283,7 @@ function assertStoredSupabaseReportCannotSatisfyTesterPasswordMode() {
       MOCHI_PETS_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-supabase-report-tester-password-target"),
       MOCHI_PETS_SITE_PREVIEW_READY_MD: reportMdPath("stored-supabase-report-tester-password-target"),
       MOCHI_PETS_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
-      MOCHI_PETS_GAME_CONTRACT_URL: "https://mochi-pets-game.fly.dev",
+      MOCHI_PETS_GAME_CONTRACT_URL: MOCHI_PETS_DEFAULT_ORIGIN,
       MOCHI_PETS_SITE_ORIGIN: "https://mochirii-git-mochi-pets-alpha-preview-mochirii.vercel.app",
       MOCHI_PETS_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
     }),
@@ -328,7 +329,7 @@ function assertStoredWrongUrlPathCannotSatisfyManualGate() {
       MOCHI_PETS_SITE_PREVIEW_READY_JSON: reportJsonPath("stored-wrong-path-report"),
       MOCHI_PETS_SITE_PREVIEW_READY_MD: reportMdPath("stored-wrong-path-report"),
       MOCHI_PETS_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
-      MOCHI_PETS_GAME_CONTRACT_URL: "https://mochi-pets-game.fly.dev",
+      MOCHI_PETS_GAME_CONTRACT_URL: MOCHI_PETS_DEFAULT_ORIGIN,
       MOCHI_PETS_SITE_ORIGIN: "https://mochirii-git-mochi-pets-alpha-preview-mochirii.vercel.app",
       MOCHI_PETS_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
     }),
@@ -352,7 +353,7 @@ function runAndAssertManualGate(label, env, assertGate) {
       MOCHI_PETS_SITE_PREVIEW_READY_MD: reportMdPath(label),
       MOCHI_PETS_SITE_BROWSER_GATES_JSON: join(tempDir, `${label}-browser-gates.json`),
       MOCHI_PETS_GAME_REPO_PATH: join(tempDir, "missing-game-repo"),
-      MOCHI_PETS_GAME_CONTRACT_URL: "https://mochi-pets-game.fly.dev",
+      MOCHI_PETS_GAME_CONTRACT_URL: MOCHI_PETS_DEFAULT_ORIGIN,
       MOCHI_PETS_SITE_ORIGIN: "https://mochirii-git-mochi-pets-alpha-preview-mochirii.vercel.app",
       MOCHI_PETS_ALPHA_EDGE_URL: "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1",
     }),

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { readAppCss } from "./lib/app-css.mjs";
+import { SUPABASE_AUTH_CALLBACK_URL } from "./lib/public-urls.mjs";
 
 const failures = [];
 const args = new Set(process.argv.slice(2));
@@ -77,7 +78,7 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 ].forEach((snippet) => assertIncludes("Apple provider logo support", `${providerLogo}\n${readAppCss()}`, snippet));
 
 [
-  "https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback",
+  SUPABASE_AUTH_CALLBACK_URL,
   "com.mochirii.web",
   "com.mochirii.web.login",
   "Mochirii Web",

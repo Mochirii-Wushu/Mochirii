@@ -2,8 +2,9 @@ import { access, readFile } from "node:fs/promises";
 import { constants } from "node:fs";
 import { execFileSync, spawn } from "node:child_process";
 import { Resolver } from "node:dns/promises";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
-const CURRENT_CUSTOM_DOMAIN = "https://mochirii.com";
+const CURRENT_CUSTOM_DOMAIN = SITE_ORIGIN;
 const WWW_CUSTOM_DOMAIN = "https://www.mochirii.com";
 const TIMEOUT_MS = 30000;
 const SKIP_CHILD_CHECKS = process.argv.includes("--skip-child-checks");

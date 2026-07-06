@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
 
 const failures = [];
 
@@ -51,7 +52,7 @@ assertIncludes(
   "Spotify: deferred",
   "Phone: deferred",
   "ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true",
-  "the script refuses the production project `deyvmtncimmcinldjyqe`",
+  `the script refuses the production project \`${SUPABASE_PROJECT_REF}\``,
 ].forEach((snippet) => assertIncludes("multi-provider docs", multiProviderDoc, snippet));
 
 [
@@ -61,7 +62,7 @@ assertIncludes(
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple",
   "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=",
   "ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true npm run smoke:member-verification-preview",
-  "refuses project `deyvmtncimmcinldjyqe`",
+  `refuses project \`${SUPABASE_PROJECT_REF}\``,
 ].forEach((snippet) => assertIncludes("Supabase README", supabaseReadme, snippet));
 
 [
@@ -128,9 +129,10 @@ assertIncludes(
 ].forEach((snippet) => assertIncludes("static Leader Dashboard review surface", staticLeaderDashboard, snippet));
 
 [
+  'import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";',
   uuidPatternSnippet,
   "ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE",
-  "PRODUCTION_PROJECT_REF = \"deyvmtncimmcinldjyqe\"",
+  "PRODUCTION_PROJECT_REF = SUPABASE_PROJECT_REF",
   "refuseProduction(supabaseUrl)",
   "PREVIEW_MEMBER_VERIFICATION_MODERATOR_DISCORD_USER_ID",
   "review-member-verification",
