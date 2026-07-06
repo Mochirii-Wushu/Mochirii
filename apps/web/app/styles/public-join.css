@@ -1,0 +1,420 @@
+﻿/* =========================================================
+   JOIN â€” Visual onboarding pilot
+   ========================================================= */
+body[data-page="join"]{
+  --join-jade:rgba(48,178,143,.60);
+  --join-jade-soft:rgba(31,122,99,.20);
+  --join-lotus:rgba(222,151,177,.44);
+  --join-lotus-soft:rgba(222,151,177,.13);
+  --join-lantern:rgba(218,181,94,.62);
+  --join-lantern-soft:rgba(218,181,94,.17);
+  --join-moon:rgba(220,235,255,.28);
+  --join-panel:rgba(9,13,12,.82);
+  --join-panel-strong:rgba(11,16,14,.92);
+  --join-ink:rgba(244,255,248,.88);
+  --join-muted:rgba(226,246,238,.68);
+}
+
+body[data-page="join"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(7,11,10,.14), rgba(7,11,10,.18)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.36), rgba(222,151,177,.16) 48%, rgba(218,181,94,.30)) border-box;
+  box-shadow:
+    0 30px 82px rgba(0,0,0,.48),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 42px rgba(48,178,143,.10);
+}
+
+body[data-page="join"] .hero-intro,
+body[data-page="join"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  animation:none;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 12% 0%, var(--join-jade-soft), transparent 36%),
+    linear-gradient(155deg, var(--join-panel-strong), var(--join-panel)) padding-box,
+    linear-gradient(135deg, var(--join-jade), rgba(255,255,255,.08) 42%, var(--join-lantern)) border-box;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.46),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.09);
+}
+
+body[data-page="join"] .hero-intro::before,
+body[data-page="join"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 88% 10%, var(--join-lotus-soft), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 48%);
+}
+
+body[data-page="join"] .hero-intro{
+  background:
+    radial-gradient(circle at 18% 0%, rgba(48,178,143,.23), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(222,151,177,.14), transparent 34%),
+    linear-gradient(155deg, rgba(11,17,15,.94), rgba(7,10,10,.82)) padding-box,
+    linear-gradient(135deg, var(--join-jade), rgba(222,151,177,.24), rgba(218,181,94,.30)) border-box;
+}
+
+body[data-page="join"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="join"] .glass-pad{
+  padding:clamp(20px, 3vw, 30px);
+}
+
+body[data-page="join"] .kicker,
+body[data-page="join"] .meta-text,
+body[data-page="join"] .muted{
+  color:var(--join-muted);
+}
+
+body[data-page="join"] .display-title,
+body[data-page="join"] .section-title{
+  text-shadow:0 10px 26px rgba(48,178,143,.16);
+}
+
+body[data-page="join"] .badge-row > span{
+  animation:none;
+  border:1px solid rgba(218,181,94,.32);
+  background:
+    linear-gradient(135deg, rgba(48,178,143,.18), rgba(218,181,94,.12));
+  color:var(--join-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="join"] #joinBadges > span{
+  font-family:var(--font-body);
+  font-size:14px;
+  letter-spacing:.01em;
+  text-transform:none;
+  line-height:1.2;
+  padding:6px 10px;
+}
+
+body[data-page="join"] #joinBadges > span > a{
+  display:inline;
+  line-height:inherit;
+}
+
+body[data-page="join"] #joinLinks > span,
+body[data-page="join"] #joinNotesBadges > span{
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+}
+
+body[data-page="join"] #joinLinks > span:first-child{
+  border-color:rgba(218,181,94,.48);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.18), transparent 60%),
+    linear-gradient(135deg, rgba(31,122,99,.34), rgba(218,181,94,.22));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    0 12px 26px rgba(0,0,0,.28),
+    0 0 20px rgba(218,181,94,.09);
+}
+
+body[data-page="join"] #joinLinks > span:hover,
+body[data-page="join"] #joinLinks > span:focus-within,
+body[data-page="join"] #joinNotesBadges > span:hover,
+body[data-page="join"] #joinNotesBadges > span:focus-within{
+  transform:translateY(-1px);
+  border-color:rgba(244,255,248,.44);
+  background:
+    linear-gradient(135deg, rgba(48,178,143,.22), rgba(222,151,177,.10));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 12px 28px rgba(0,0,0,.30),
+    0 0 0 1px rgba(48,178,143,.14);
+}
+
+body[data-page="join"] #joinLinks > span > a,
+body[data-page="join"] #joinNotesBadges > span > a{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  margin:-6px -10px;
+  padding:6px 10px;
+  text-decoration:none;
+}
+
+body[data-page="join"] #joinLinks > span > a:focus-visible,
+body[data-page="join"] #joinNotesBadges > span > a:focus-visible,
+body[data-page="join"] .join-checklist__link:focus-visible{
+  outline:2px solid rgba(244,255,248,.78);
+  outline-offset:4px;
+  box-shadow:
+    0 0 0 3px rgba(48,178,143,.22),
+    0 0 0 5px rgba(218,181,94,.14);
+}
+
+body[data-page="join"] .join-discord-widget{
+  display:flex;
+  justify-content:center;
+  margin-top:18px;
+}
+
+body[data-page="join"] .join-discord-widget__frame{
+  box-sizing:border-box;
+  width:min(100%, 350px);
+  max-width:350px;
+  min-height:500px;
+  overflow:hidden;
+  border-radius:18px;
+  border:1px solid rgba(220,235,255,.16);
+  background:linear-gradient(180deg, rgba(10,13,13,.84), rgba(4,6,7,.88));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.28);
+}
+
+body[data-page="join"] .join-discord-widget__frame iframe{
+  display:block;
+  width:100%;
+  max-width:350px;
+  height:500px;
+  border:0;
+}
+
+body[data-page="join"] #joinStepsIntro,
+body[data-page="join"] #joinQuickBody,
+body[data-page="join"] #joinCultureIntro,
+body[data-page="join"] #joinCultureCards,
+body[data-page="join"] #joinNotes{
+  gap:14px;
+}
+
+body[data-page="join"] #joinStepsList{
+  gap:12px;
+  margin-top:18px;
+}
+
+body[data-page="join"] #joinStepsList li{
+  padding:14px 16px 14px 22px;
+  border-radius:18px;
+  border:1px solid rgba(48,178,143,.18);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(48,178,143,.12), transparent 44%),
+    linear-gradient(135deg, rgba(255,255,255,.035), rgba(0,0,0,.18));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 12px 28px rgba(0,0,0,.22);
+}
+
+body[data-page="join"] #joinStepsList li::before{
+  left:8px;
+  top:20px;
+  width:6px;
+  height:calc(100% - 40px);
+  min-height:18px;
+  border-radius:999px;
+  background:
+    linear-gradient(180deg, var(--join-lantern), var(--join-jade));
+  box-shadow:0 0 18px rgba(48,178,143,.18);
+}
+
+body[data-page="join"] #joinStepsList strong{
+  display:block;
+  color:var(--join-ink);
+  line-height:1.35;
+}
+
+body[data-page="join"] #joinStepsList p{
+  margin:10px 0 0;
+  line-height:1.6;
+}
+
+body[data-page="join"] .col-4 .glass-card{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.18), transparent 46%),
+    linear-gradient(160deg, rgba(14,18,15,.92), rgba(7,9,9,.78)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.52), rgba(222,151,177,.18) 56%, rgba(48,178,143,.22)) border-box;
+}
+
+body[data-page="join"] #joinCultureCards{
+  margin-top:14px;
+}
+
+body[data-page="join"] #joinCultureCards > div{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(135deg, rgba(48,178,143,.08), rgba(0,0,0,.16));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+body[data-page="join"] #joinCultureCards > div > .section-title{
+  margin:0;
+}
+
+body[data-page="join"] #joinCultureCards > div > p{
+  margin:0;
+  line-height:1.6;
+}
+
+body[data-page="join"] .join-checklist{
+  margin-top:clamp(24px, 3vw, 34px);
+}
+
+body[data-page="join"] .join-checklist .glass-card{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(48,178,143,.16), transparent 40%),
+    radial-gradient(circle at 100% 10%, rgba(222,151,177,.12), transparent 34%),
+    linear-gradient(160deg, rgba(10,15,13,.92), rgba(6,8,8,.82)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.54), rgba(218,181,94,.22) 48%, rgba(222,151,177,.24)) border-box;
+}
+
+body[data-page="join"] .join-checklist__intro{
+  margin:0;
+  max-width:72ch;
+  line-height:1.68;
+}
+
+body[data-page="join"] .join-checklist__grid{
+  list-style:none;
+  padding:0;
+  margin:20px 0 0;
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:clamp(12px, 1.4vw, 16px);
+}
+
+body[data-page="join"] .join-checklist__item{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr);
+  gap:11px;
+  align-items:flex-start;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid transparent;
+  background:
+    linear-gradient(160deg, rgba(11,16,14,.78), rgba(4,6,6,.82)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.34), rgba(255,255,255,.07) 46%, rgba(218,181,94,.22)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 32px rgba(0,0,0,.26);
+  transition:transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
+}
+
+body[data-page="join"] .join-checklist__item:hover,
+body[data-page="join"] .join-checklist__item:focus-within{
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 18px 40px rgba(0,0,0,.32),
+    0 0 0 1px rgba(48,178,143,.13);
+}
+
+body[data-page="join"] .join-checklist__marker{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  border:1px solid rgba(218,181,94,.42);
+  color:var(--join-ink);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.26), transparent 58%),
+    rgba(8,11,10,.66);
+  font-size:12px;
+  line-height:1;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 8px 18px rgba(0,0,0,.26);
+}
+
+body[data-page="join"] .join-checklist__body{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+body[data-page="join"] .join-checklist__title{
+  margin:0;
+  color:var(--ink-0);
+  font-family:var(--font-body);
+  font-size:13px;
+  line-height:1.35;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  overflow-wrap:anywhere;
+}
+
+body[data-page="join"] .join-checklist__text{
+  margin:0;
+  color:var(--join-muted);
+  font-size:13px;
+  line-height:1.6;
+}
+
+body[data-page="join"] .join-checklist__link{
+  width:fit-content;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  color:var(--join-lantern);
+  font-size:13px;
+  font-weight:700;
+  text-decoration:none;
+  border-bottom:1px solid rgba(218,181,94,.40);
+  transition:color .18s var(--ease), border-color .18s var(--ease);
+}
+
+body[data-page="join"] .join-checklist__link:hover,
+body[data-page="join"] .join-checklist__link:focus-visible{
+  color:var(--ink-0);
+  border-bottom-color:rgba(244,255,248,.62);
+}
+
+@media (max-width:1120px){
+  body[data-page="join"] .join-checklist__grid{
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width:760px){
+  body[data-page="join"] .join-checklist__grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width:640px){
+  body[data-page="join"] .hero-intro{
+    text-align:left;
+    align-items:flex-start;
+  }
+
+  body[data-page="join"] .hero-intro .badge-row{
+    justify-content:flex-start;
+  }
+
+  body[data-page="join"] #joinStepsList li,
+  body[data-page="join"] .join-checklist__item{
+    padding:14px;
+  }
+}
+
+@media (max-width:560px){
+  body[data-page="join"] .join-checklist__grid{
+    grid-template-columns:1fr;
+  }
+}
+

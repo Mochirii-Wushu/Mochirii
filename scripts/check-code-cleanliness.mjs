@@ -8,7 +8,10 @@ import {
 } from "./lib/public-urls.mjs";
 
 const sourceLineBudgets = [
-  { path: "apps/web/app/styles/public-pages.css", warnAt: 3000, reason: "public page styles should keep moving into page-scoped partials" },
+  { path: "apps/web/app/styles/public-home.css", warnAt: 1200, reason: "home page styles should keep moving into page-scoped partials" },
+  { path: "apps/web/app/styles/public-gallery.css", warnAt: 700, reason: "gallery styles should stay focused" },
+  { path: "apps/web/app/styles/public-profiles.css", warnAt: 850, reason: "profile and recruitment styles should stay focused" },
+  { path: "apps/web/app/styles/public-side-pages.css", warnAt: 600, reason: "supporting page styles should stay focused" },
   { path: "apps/web/app/styles/member-workflow.css", warnAt: 500, reason: "shared member workflow styles should stay focused" },
   { path: "apps/web/app/styles/member-leader-dashboard.css", warnAt: 400, reason: "leader dashboard workflow styles should stay focused" },
   { path: "apps/web/app/styles/shell-header-nav.css", warnAt: 450, reason: "header and navigation styles should stay separately reviewable" },
