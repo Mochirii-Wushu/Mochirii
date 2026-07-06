@@ -14,6 +14,7 @@ const files = {
   nextConfig: "apps/web/next.config.ts",
   supabaseConfig: "supabase/config.toml",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
+  reaperSignature: "supabase/functions/_shared/discord-signature.ts",
   reaperMemberSync: "supabase/functions/reaper-discord-member-sync/index.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
@@ -69,6 +70,8 @@ const appCss = readAppCss();
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
+const reaperSignature = read(files.reaperSignature);
+const reaperSecuritySource = [reaper, reaperSignature].join("\n");
 const reaperMemberSync = read(files.reaperMemberSync);
 const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
@@ -226,7 +229,7 @@ for (const name of verifyJwtFalseFunctions) {
   "SIGNATURE_WINDOW_MS",
   "Retry-After",
   "retry_after",
-].forEach((snippet) => assertIncludes("reaper-discord-interactions", reaper, snippet));
+].forEach((snippet) => assertIncludes("reaper-discord-interactions", reaperSecuritySource, snippet));
 
 [
   "x-mochirii-reaper-member-sync-secret",

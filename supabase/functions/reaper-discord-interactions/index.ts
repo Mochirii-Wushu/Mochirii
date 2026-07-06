@@ -1,6 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
-import nacl from "tweetnacl";
 import {
   buildVoteReminderPayload,
   currentStreak,
@@ -50,7 +49,16 @@ import {
   stringOption,
   successMessage,
 } from "../_shared/discord-interaction-helpers.ts";
+import { verifyDiscordSignature } from "../_shared/discord-signature.ts";
 import { SITE_ORIGIN, siteUrl } from "../_shared/public-origins.ts";
+import {
+  DISCORD_EVENT_ENTITY_EXTERNAL,
+  desiredEventsFromSchedule,
+  eventLocation,
+  managedEventLine,
+  scheduledEventBody,
+  type ScheduleEvent,
+} from "../_shared/reaper-discord-events.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -80,14 +88,10 @@ const MAX_PENDING_VERIFICATION_MUTATIONS = 500;
 const DISCORD_API_MAX_RETRIES = 2;
 const DISCORD_FUNCTION_RETRY_BUDGET_MS = 45_000;
 const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment";
-const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
 const INTERACTION_TYPE_PING = 1;
 const INTERACTION_TYPE_APPLICATION_COMMAND = 2;
 const INTERACTION_TYPE_MESSAGE_COMPONENT = 3;
 const INTERACTION_RESPONSE_PONG = 1;
-const DISCORD_EVENT_PRIVACY_GUILD_ONLY = 2;
-const DISCORD_EVENT_ENTITY_EXTERNAL = 3;
-const eventCoverImageCache = new Map<string, string>();
 
 const RANK_ROLES = [
   { name: "Guild Leader", tier: "senior", order: 1 },
@@ -101,225 +105,6 @@ const RANK_ROLES = [
   { name: "Softwind", tier: "members", order: 9 },
   { name: "Rice Sprout", tier: "members", order: 10 },
 ];
-
-type ScheduleEvent = {
-  key: string;
-  title: string;
-  description: string;
-  location: string;
-  websiteLocation: string;
-  startIso: string;
-  endIso: string;
-  coverImageUrl: string | null;
-  canonicalEventId: string | null;
-  duplicateEventIds: string[];
-  recurrenceRule: JsonRecord | null;
-};
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-function scheduleOffsetMinutes(schedule: JsonRecord): number {
-  const timezone = asRecord(schedule.timezone);
-  const value = Number(timezone.offsetMinutes);
-  return Number.isFinite(value) ? value : 480;
-}
-
-function localParts(now: Date, offset: number) {
-  const shifted = new Date(now.getTime() + offset * 60 * 1000);
-  return {
-    year: shifted.getUTCFullYear(),
-    month: shifted.getUTCMonth() + 1,
-    day: shifted.getUTCDate(),
-    weekday: shifted.getUTCDay(),
-    hour: shifted.getUTCHours(),
-    minute: shifted.getUTCMinutes(),
-  };
-}
-
-function dateKey(year: number, month: number, day: number): string {
-  return `${year}-${pad(month)}-${pad(day)}`;
-}
-
-function parseDateKey(value: string): { year: number; month: number; day: number } | null {
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-  return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
-}
-
-function addDays(value: string, days: number): string {
-  const parsed = parseDateKey(value);
-  if (!parsed) return value;
-  const next = new Date(Date.UTC(parsed.year, parsed.month - 1, parsed.day) + days * MS_PER_DAY);
-  return dateKey(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate());
-}
-
-function parseTime(value: unknown): { hour: number; minute: number } {
-  const match = String(value || "00:00").match(/^(\d{2}):(\d{2})$/);
-  if (!match) return { hour: 0, minute: 0 };
-  return {
-    hour: Math.min(Math.max(Number(match[1]), 0), 23),
-    minute: Math.min(Math.max(Number(match[2]), 0), 59),
-  };
-}
-
-function localToUtcIso(localDate: string, time: string, offset: number): string {
-  const parsed = parseDateKey(localDate);
-  if (!parsed) return "";
-  const parsedTime = parseTime(time);
-  return new Date(
-    Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsedTime.hour, parsedTime.minute) -
-      offset * 60 * 1000,
-  ).toISOString();
-}
-
-function scheduleAssetUrl(value: unknown, versionValue?: unknown): string | null {
-  const raw = safeString(value, 300);
-  if (!raw) return null;
-  const version = safeString(versionValue, 80);
-  const withVersion = (url: string) => {
-    if (!version) return url;
-    const parsed = new URL(url);
-    parsed.searchParams.set("v", version);
-    return parsed.toString();
-  };
-  if (/^https:\/\/[^\s]+$/i.test(raw)) return withVersion(raw);
-  const normalized = raw.replace(/^\.?\//, "");
-  if (!normalized.startsWith("assets/")) return null;
-  return withVersion(siteUrl(normalized));
-}
-
-function recurrenceRule(value: unknown, startIso: string): JsonRecord | null {
-  const rule = asRecord(value);
-  const frequency = Number(rule.frequency);
-  const interval = Number(rule.interval || 1);
-  const byNWeekday = asArray(rule.by_n_weekday)
-    .map(asRecord)
-    .map((entry) => ({
-      n: Number(entry.n),
-      day: Number(entry.day),
-    }))
-    .filter((entry) =>
-      Number.isInteger(entry.n) &&
-      entry.n >= 1 &&
-      entry.n <= 5 &&
-      Number.isInteger(entry.day) &&
-      entry.day >= 0 &&
-      entry.day <= 6
-    );
-
-  if (!Number.isInteger(frequency) || !Number.isInteger(interval) || interval < 1) return null;
-
-  const normalized: JsonRecord = {
-    start: startIso,
-    frequency,
-    interval,
-  };
-
-  if (byNWeekday.length) normalized.by_n_weekday = byNWeekday.slice(0, 1);
-  return normalized;
-}
-
-function eventEndDate(startDate: string, startTime: string, endTime: string): string {
-  const start = parseTime(startTime);
-  const end = parseTime(endTime);
-  const crossesMidnight = end.hour * 60 + end.minute <= start.hour * 60 + start.minute;
-  return crossesMidnight ? addDays(startDate, 1) : startDate;
-}
-
-function firstSaturday(year: number, month: number): string {
-  const first = new Date(Date.UTC(year, month - 1, 1));
-  const delta = (6 - first.getUTCDay() + 7) % 7;
-  return dateKey(year, month, 1 + delta);
-}
-
-function nextFirstSaturday(schedule: JsonRecord, now: Date): string {
-  const parts = localParts(now, scheduleOffsetMinutes(schedule));
-  const current = firstSaturday(parts.year, parts.month);
-  const today = dateKey(parts.year, parts.month, parts.day);
-  if (today <= current) return current;
-  const nextMonth = new Date(Date.UTC(parts.year, parts.month, 1));
-  return firstSaturday(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1);
-}
-
-function nextWeeklyDate(schedule: JsonRecord, item: JsonRecord, day: number, now: Date): string {
-  const offset = scheduleOffsetMinutes(schedule);
-  const parts = localParts(now, offset);
-  const today = dateKey(parts.year, parts.month, parts.day);
-  const start = parseTime(item.startTime);
-  const end = parseTime(item.endTime);
-  const nowMinutes = parts.hour * 60 + parts.minute;
-  const startMinutes = start.hour * 60 + start.minute;
-  const endMinutes = end.hour * 60 + end.minute;
-  let delta = (day - parts.weekday + 7) % 7;
-
-  if (delta === 0) {
-    const stillUpcoming = endMinutes <= startMinutes ? nowMinutes < 24 * 60 : nowMinutes < endMinutes;
-    if (!stillUpcoming) delta = 7;
-  }
-
-  return addDays(today, delta);
-}
-
-function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonRecord, localDate: string): ScheduleEvent | null {
-  const title = safeString(item.title, 100);
-  const websiteLocation = safeString(item.location, 300) || siteUrl("events");
-  const location = safeString(item.discordLocation, 100) || safeString(item.location, 100) || siteUrl("events");
-  const startTime = safeString(item.startTime, 20) || "00:00";
-  const endTime = safeString(item.endTime, 20) || "01:00";
-  const offset = scheduleOffsetMinutes(schedule);
-  const endDate = eventEndDate(localDate, startTime, endTime);
-  const startIso = localToUtcIso(localDate, startTime, offset);
-  const endIso = localToUtcIso(endDate, endTime, offset);
-
-  if (!title || !startIso || !endIso) return null;
-
-  return {
-    key,
-    title,
-    description: safeString(item.description || item.summary || item.timeText, 1000) || title,
-    location,
-    websiteLocation,
-    startIso,
-    endIso,
-    coverImageUrl: scheduleAssetUrl(item.discordCoverImage, schedule.discordCoverVersion),
-    canonicalEventId: snowflake(item.discordEventId),
-    duplicateEventIds: asArray(item.discordDuplicateEventIds).map(snowflake).filter((id): id is string => Boolean(id)),
-    recurrenceRule: recurrenceRule(item.discordRecurrenceRule, startIso),
-  };
-}
-
-function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()): ScheduleEvent[] {
-  const monthly = asRecord(schedule.monthly);
-  const events: ScheduleEvent[] = [];
-
-  Object.entries(monthly).forEach(([fallbackKey, value]) => {
-    const item = asRecord(value);
-    const key = safeString(item.id, 80) || fallbackKey;
-    const localDate = nextFirstSaturday(schedule, now);
-    const event = scheduleEventFromDate(schedule, key, item, localDate);
-    if (event) events.push(event);
-  });
-
-  asArray(schedule.weekly).map(asRecord).forEach((item) => {
-    if (item.discord !== true) return;
-    const key = safeString(item.id, 80);
-    if (!key) return;
-    asArray(item.days)
-      .map((day) => Number(day))
-      .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
-      .forEach((day) => {
-        const localDate = nextWeeklyDate(schedule, item, day, now);
-        const event = scheduleEventFromDate(schedule, `${key}-${day}`, item, localDate);
-        if (event) events.push(event);
-      });
-  });
-
-  return events;
-}
 
 function getServiceRoleKey(): string {
   const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -350,17 +135,6 @@ function serviceAdminClient(purpose: string): SupabaseAdminClient {
       autoRefreshToken: false,
     },
   });
-}
-
-function hexToBytes(value: string): Uint8Array | null {
-  const hex = value.trim();
-  if (!/^[\da-f]+$/i.test(hex) || hex.length % 2 !== 0) return null;
-
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let index = 0; index < bytes.length; index += 1) {
-    bytes[index] = Number.parseInt(hex.slice(index * 2, index * 2 + 2), 16);
-  }
-  return bytes;
 }
 
 function expectedRoleConfigMatches(configuredRoleIds: string[]): boolean {
@@ -978,73 +752,6 @@ async function disableDuplicateEventResource(eventId: string, desired: ScheduleE
   }
 }
 
-function bytesToBase64(bytes: Uint8Array): string {
-  const chunkSize = 0x8000;
-  let binary = "";
-  for (let index = 0; index < bytes.length; index += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
-  }
-  return btoa(binary);
-}
-
-async function eventCoverImageData(url: string): Promise<string> {
-  const cached = eventCoverImageCache.get(url);
-  if (cached) return cached;
-
-  const response = await fetch(url, {
-    headers: {
-      Accept: "image/png,image/jpeg,image/webp",
-      "User-Agent": DISCORD_API_USER_AGENT,
-    },
-  });
-  const contentType = normalizedMime(response.headers.get("Content-Type"));
-  if (!response.ok || !contentType) {
-    throw new Error(`Event cover image fetch failed with HTTP ${response.status}.`);
-  }
-
-  const bytes = new Uint8Array(await response.arrayBuffer());
-  if (!bytes.length) {
-    throw new Error("Event cover image fetch returned an empty file.");
-  }
-
-  const data = `data:${contentType};base64,${bytesToBase64(bytes)}`;
-  eventCoverImageCache.set(url, data);
-  return data;
-}
-
-async function scheduledEventBody(desired: ScheduleEvent, includeImage: boolean): Promise<JsonRecord> {
-  const body: JsonRecord = {
-    channel_id: null,
-    name: desired.title.slice(0, 100),
-    description: desired.description.slice(0, 1000),
-    scheduled_start_time: desired.startIso,
-    scheduled_end_time: desired.endIso,
-    privacy_level: DISCORD_EVENT_PRIVACY_GUILD_ONLY,
-    entity_type: DISCORD_EVENT_ENTITY_EXTERNAL,
-    entity_metadata: {
-      location: desired.location.slice(0, 100),
-    },
-  };
-
-  if (desired.recurrenceRule) {
-    body.recurrence_rule = desired.recurrenceRule;
-  }
-
-  if (includeImage && desired.coverImageUrl) {
-    body.image = await eventCoverImageData(desired.coverImageUrl);
-  }
-
-  return body;
-}
-
-function eventLocation(event: JsonRecord): string {
-  return safeString(asRecord(event.entity_metadata).location, 100) || "";
-}
-
-function managedEventLine(action: string, desired: ScheduleEvent, detail = ""): string {
-  return detail ? `${action}: ${desired.title} (${detail})` : `${action}: ${desired.title}`;
-}
-
 async function processDuplicateScheduledEvents(
   apply: boolean,
   desired: ScheduleEvent,
@@ -1136,7 +843,7 @@ async function processEventSync(
         if (apply) {
           let body: JsonRecord;
           try {
-            body = await scheduledEventBody(desired, true);
+            body = await scheduledEventBody(desired, true, { userAgent: DISCORD_API_USER_AGENT });
           } catch {
             lines[lines.length - 1] = managedEventLine("Blocked", desired, "cover image unavailable");
             continue;
@@ -1160,7 +867,7 @@ async function processEventSync(
       if (apply) {
         let body: JsonRecord;
         try {
-          body = await scheduledEventBody(desired, true);
+          body = await scheduledEventBody(desired, true, { userAgent: DISCORD_API_USER_AGENT });
         } catch {
           lines[lines.length - 1] = managedEventLine("Blocked", desired, "cover image unavailable");
           continue;
@@ -1193,25 +900,6 @@ async function processEventSync(
       "Reaper event sync could not be completed. Check configuration and try preview again.",
     );
   }
-}
-
-function verifyDiscordSignature(req: Request, rawBody: string, publicKey: string): boolean {
-  const signatureHeader = req.headers.get("x-signature-ed25519") || "";
-  const timestampHeader = req.headers.get("x-signature-timestamp") || "";
-  const signature = hexToBytes(signatureHeader);
-  const key = hexToBytes(publicKey);
-  const timestampMs = Number(timestampHeader) * 1000;
-
-  if (!signature || signature.length !== 64 || !key || key.length !== 32 || !Number.isFinite(timestampMs)) {
-    return false;
-  }
-
-  if (Math.abs(Date.now() - timestampMs) > SIGNATURE_WINDOW_MS) {
-    return false;
-  }
-
-  const message = new TextEncoder().encode(`${timestampHeader}${rawBody}`);
-  return nacl.sign.detached.verify(message, signature, key);
 }
 
 function sourceEndpoint(supabaseUrl: string): string {

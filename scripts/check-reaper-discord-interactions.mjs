@@ -9,6 +9,8 @@ const files = {
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
   function: "supabase/functions/reaper-discord-interactions/index.ts",
+  discordSignature: "supabase/functions/_shared/discord-signature.ts",
+  reaperEvents: "supabase/functions/_shared/reaper-discord-events.ts",
   interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
   sharedPendingContainment: "supabase/functions/_shared/pending-verification-containment.ts",
   memberSyncFunction: "supabase/functions/reaper-discord-member-sync/index.ts",
@@ -51,8 +53,10 @@ const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
 const functionSource = read(files.function);
+const discordSignature = read(files.discordSignature);
+const reaperEvents = read(files.reaperEvents);
 const interactionHelpers = read(files.interactionHelpers);
-const interactionContractSource = [functionSource, interactionHelpers].join("\n");
+const interactionContractSource = [functionSource, discordSignature, reaperEvents, interactionHelpers].join("\n");
 const sharedPendingContainment = read(files.sharedPendingContainment);
 const memberSyncFunction = read(files.memberSyncFunction);
 const memberSyncImportMap = read(files.memberSyncImportMap);
