@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const args = process.argv.slice(2);
@@ -9,7 +10,7 @@ const getArg = (name, fallback) => {
   return index >= 0 && args[index + 1] ? args[index + 1] : fallback;
 };
 const writeReport = argSet.has("--write") || process.env.BROWSER_ROUTE_MATRIX_WRITE === "true";
-const baseUrl = getArg("--base-url", process.env.BROWSER_ROUTE_MATRIX_BASE_URL || "https://mochirii.com").replace(/\/$/, "");
+const baseUrl = getArg("--base-url", process.env.BROWSER_ROUTE_MATRIX_BASE_URL || SITE_ORIGIN).replace(/\/$/, "");
 const reportJsonPath = resolve(root, "reports/browser-route-matrix.json");
 const reportMdPath = resolve(root, "reports/browser-route-matrix.md");
 const checkedAt = new Date().toISOString();

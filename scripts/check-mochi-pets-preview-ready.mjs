@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { MOCHI_PETS_DEFAULT_ORIGIN, SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const gameRepoPath = resolve(root, process.env.MOCHI_PETS_GAME_REPO_PATH || "../mochi-pets");
@@ -17,8 +18,8 @@ const productionDoorwayReportPath = resolve(root, process.env.MOCHI_PETS_PRODUCT
 const hostedChecksAllowed = process.env.MOCHI_PETS_SITE_PREVIEW_READY_ALLOW_HOSTED === "true";
 const skipNestedSelfTestCommands = process.env.MOCHI_PETS_SITE_PREVIEW_READY_SKIP_SELF_TEST_COMMANDS === "true";
 const browserGateMode = normalizeBrowserGateMode(process.env.MOCHI_PETS_SITE_BROWSER_GATES_ACCESS_MODE || process.env.MOCHI_PETS_ALPHA_ACCESS_MODE || "tester-password");
-const gameUrl = normalizeUrl(process.env.MOCHI_PETS_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_PETS_URL || previewEnv.gameUrl || "https://mochi-pets-game.fly.dev");
-const siteOrigin = normalizeOrigin(process.env.MOCHI_PETS_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || "https://mochirii.com");
+const gameUrl = normalizeUrl(process.env.MOCHI_PETS_GAME_CONTRACT_URL || process.env.NEXT_PUBLIC_MOCHI_PETS_URL || previewEnv.gameUrl || MOCHI_PETS_DEFAULT_ORIGIN);
+const siteOrigin = normalizeOrigin(process.env.MOCHI_PETS_SITE_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || previewEnv.sitePreviewUrl || SITE_ORIGIN);
 const functionsUrl = normalizeUrl(process.env.MOCHI_PETS_ALPHA_EDGE_URL || "https://dnxumaiooljdnbjvzbdc.supabase.co/functions/v1");
 const authUrl = normalizeUrl(process.env.MOCHI_PETS_ALPHA_AUTH_URL || inferSupabaseAuthUrl(functionsUrl));
 const supabaseProjectRef = inferSupabaseProjectRef(functionsUrl);
@@ -667,7 +668,7 @@ ${failures}
 ## Production Approval Prompt
 
 \`\`\`text
-I approve the Mochirii hosted production verification using MOCHI_PETS_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured live game URL, https://mochirii.com origin, and Supabase production/approved Edge URL. I understand this may hit Fly/Vercel/Supabase hosted resources and add usage.
+I approve the Mochirii hosted production verification using MOCHI_PETS_SITE_PREVIEW_READY_ALLOW_HOSTED=true against the configured live game URL, ${SITE_ORIGIN} origin, and Supabase production/approved Edge URL. I understand this may hit Fly/Vercel/Supabase hosted resources and add usage.
 \`\`\`
 
 ## Preview Rehearsal Approval Prompt

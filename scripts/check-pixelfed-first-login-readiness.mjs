@@ -1,14 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { lookup } from "node:dns/promises";
 import path from "node:path";
+import { SITE_ORIGIN, SOCIAL_HOST, SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
 const warnings = [];
 const notes = [];
 
-const projectRef = process.env.SUPABASE_PROJECT_REF || "deyvmtncimmcinldjyqe";
-const expectedSiteUrl = process.env.PIXELFED_SUPABASE_SITE_URL || "https://mochirii.com";
+const projectRef = process.env.SUPABASE_PROJECT_REF || SUPABASE_PROJECT_REF;
+const expectedSiteUrl = process.env.PIXELFED_SUPABASE_SITE_URL || SITE_ORIGIN;
 const expectedAuthorizationPath = "/oauth/consent";
 const providerReady = process.env.PIXELFED_FIRST_LOGIN_PROVIDER_READY === "1";
 const stagingReady = process.env.PIXELFED_FIRST_LOGIN_STAGING_READY === "1";
@@ -44,8 +45,8 @@ const snippetChecks = [
     label: "first login runbook",
     file: "docs/pixelfed-first-login-testing.md",
     snippets: [
-      "Approve Supabase db push for project deyvmtncimmcinldjyqe migration 20260702080720.",
-      "Approve enabling Supabase OAuth 2.1 Server for project deyvmtncimmcinldjyqe and setting Authorization Path /oauth/consent.",
+      `Approve Supabase db push for project ${SUPABASE_PROJECT_REF} migration 20260702080720.`,
+      `Approve enabling Supabase OAuth 2.1 Server for project ${SUPABASE_PROJECT_REF} and setting Authorization Path /oauth/consent.`,
       "PIXELFED_FIRST_LOGIN_PROVIDER_READY",
       "PIXELFED_FIRST_LOGIN_STAGING_READY",
       "Closed registration.",
@@ -127,7 +128,7 @@ const snippetChecks = [
     label: "Pixelfed social sync validator",
     file: "supabase/functions/_shared/pixelfed-social-sync.ts",
     snippets: [
-      "https://social.mochirii.com/",
+      `${SOCIAL_HOST}/`,
       "PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS",
       "constantTimeEquals",
       "parsePixelfedSocialSyncPayload",
@@ -312,7 +313,7 @@ async function checkPixelfedOAuthClientCredentialReadiness({ required = false } 
   const clientId = env("PIXELFED_OAUTH_CLIENT_ID");
   const oauthClientCredential = env("PIXELFED_OAUTH_CLIENT_SECRET");
   const tokenAuthMethod = env("PIXELFED_OAUTH_TOKEN_AUTH_METHOD") || "client_secret_post";
-  const redirectUri = env("PIXELFED_OIDC_CALLBACK_URI") || "https://social.mochirii.com/auth/oidc/callback";
+  const redirectUri = env("PIXELFED_OIDC_CALLBACK_URI") || `${SOCIAL_HOST}/auth/oidc/callback`;
 
   if (!clientId || !oauthClientCredential) {
     const message = "PIXELFED_OAUTH_CLIENT_ID and PIXELFED_OAUTH_CLIENT_SECRET env vars are required in child-process env for live OAuth client credential readiness.";
