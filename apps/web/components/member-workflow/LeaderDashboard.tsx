@@ -11,6 +11,7 @@ import {
 import {
   checkInstagramApiStatus,
   checkLeaderGalleryModerationAccess,
+  deleteRejectedGallerySubmission,
   listGalleryReviewQueue,
   listInstagramPublishQueue,
   markInstagramGallerySubmissionShared,
@@ -58,6 +59,8 @@ export function LeaderDashboard() {
   const [reviewError, setReviewError] = useState("");
   const [accessDeniedMessage, setAccessDeniedMessage] = useState("Gallery moderation requires Discord membership, completed onboarding, and the Moderator role.");
   const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [cleanupConfirmations, setCleanupConfirmations] = useState<Record<string, boolean | undefined>>({});
+  const [cleanupBusyId, setCleanupBusyId] = useState("");
   const [instagramActiveStatus, setInstagramActiveStatus] = useState("queued");
   const [instagramQueue, setInstagramQueue] = useState<InstagramPublishQueue | null>(null);
   const [instagramApiStatus, setInstagramApiStatus] = useState<InstagramApiStatus | null>(null);
@@ -262,6 +265,59 @@ export function LeaderDashboard() {
     if (action === "approved") {
       await loadInstagramQueue({ status: instagramActiveStatus });
     }
+  }
+
+  function armRejectedCleanup(item: GalleryReviewSubmission) {
+    const submissionId = text(item.id);
+    if (!submissionId) {
+      setReviewError("Choose a rejected gallery submission before cleanup.");
+      return;
+    }
+
+    setReviewError("");
+    setReviewStatus("Ready to permanently clean up this rejected submission. Confirm only for smoke-test artifacts or owner-approved cleanup.");
+    setCleanupConfirmations((current) => ({ ...current, [submissionId]: true }));
+  }
+
+  function cancelRejectedCleanup(item: GalleryReviewSubmission) {
+    const submissionId = text(item.id);
+    if (!submissionId) return;
+    setCleanupConfirmations((current) => ({ ...current, [submissionId]: undefined }));
+    setReviewStatus("Rejected submission cleanup canceled.");
+  }
+
+  async function cleanupRejectedSubmission(item: GalleryReviewSubmission) {
+    const submissionId = text(item.id);
+    if (!submissionId) {
+      setReviewError("Choose a rejected gallery submission before cleanup.");
+      return;
+    }
+
+    if (!cleanupConfirmations[submissionId]) {
+      armRejectedCleanup(item);
+      return;
+    }
+
+    setBusy(true);
+    setCleanupBusyId(submissionId);
+    setReviewError("");
+    setReviewStatus("Deleting rejected submission and its Storage object.");
+
+    const result = await deleteRejectedGallerySubmission(submissionId, true);
+    if (!result.ok) {
+      setReviewError(result.message || "Rejected submission cleanup failed.");
+      setReviewStatus("");
+      setCleanupBusyId("");
+      setBusy(false);
+      return;
+    }
+
+    setCleanupConfirmations((current) => ({ ...current, [submissionId]: undefined }));
+    setCleanupBusyId("");
+    await loadQueue({
+      status: activeStatus,
+      successMessage: result.message || "Rejected submission cleaned up.",
+    });
   }
 
   async function reviewVerification(action: "approve" | "reject" | "revoke") {
@@ -594,11 +650,15 @@ export function LeaderDashboard() {
               <SubmissionCard
                 item={item}
                 activeStatus={activeStatus}
-                busy={busy}
+                busy={busy || cleanupBusyId === id}
                 reason={reasons[id] || ""}
+                cleanupArmed={Boolean(cleanupConfirmations[id])}
                 key={id}
                 onReasonChange={(value) => setReasons((current) => ({ ...current, [id]: value.slice(0, 500) }))}
                 onModerate={moderate}
+                onArmCleanup={armRejectedCleanup}
+                onCancelCleanup={cancelRejectedCleanup}
+                onDeleteRejected={cleanupRejectedSubmission}
               />
             );
           })

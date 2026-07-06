@@ -11,6 +11,7 @@ const functions = [
   "review-member-verification",
   "list-gallery-review-queue",
   "moderate-gallery-submission",
+  "delete-rejected-gallery-submission",
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",

@@ -108,15 +108,23 @@ export function SubmissionCard({
   activeStatus,
   busy,
   reason,
+  cleanupArmed,
   onReasonChange,
   onModerate,
+  onArmCleanup,
+  onCancelCleanup,
+  onDeleteRejected,
 }: {
   item: GalleryReviewSubmission;
   activeStatus: ModerationStatus;
   busy: boolean;
   reason: string;
+  cleanupArmed: boolean;
   onReasonChange: (value: string) => void;
   onModerate: (item: GalleryReviewSubmission, action: "approved" | "rejected") => void;
+  onArmCleanup: (item: GalleryReviewSubmission) => void;
+  onCancelCleanup: (item: GalleryReviewSubmission) => void;
+  onDeleteRejected: (item: GalleryReviewSubmission) => void;
 }) {
   const status = normalizeStatus(item.status || activeStatus);
   const title = text(item.title || item.originalFilename, "Untitled image");
@@ -203,6 +211,31 @@ export function SubmissionCard({
               <button className="hero-cta" type="button" onClick={() => onModerate(item, "rejected")} disabled={busy}>Decline</button>
             </div>
           </>
+        ) : null}
+        {status === "rejected" ? (
+          <section className="review-history" aria-label="Rejected submission cleanup">
+            <h4>Rejected Cleanup</h4>
+            <p className="review-action-note" role={cleanupArmed ? "status" : undefined}>
+              {cleanupArmed
+                ? "Confirm permanent cleanup only for smoke-test artifacts or owner-approved rejected items."
+                : "Cleanup permanently removes this rejected item from the moderation queue and Storage."}
+            </p>
+            <div className="auth-actions">
+              <button
+                className="hero-cta"
+                type="button"
+                onClick={() => cleanupArmed ? onDeleteRejected(item) : onArmCleanup(item)}
+                disabled={busy}
+              >
+                {cleanupArmed ? "Delete rejected item" : "Prepare cleanup"}
+              </button>
+              {cleanupArmed ? (
+                <button className="hero-cta" type="button" onClick={() => onCancelCleanup(item)} disabled={busy}>
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+          </section>
         ) : null}
       </div>
     </article>

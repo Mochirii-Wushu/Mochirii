@@ -230,6 +230,14 @@ export type GalleryReviewQueue = {
   summary?: Record<string, number | string | undefined>;
 };
 
+export type RejectedGalleryCleanupResponse = {
+  submissionId?: string | null;
+  storageBucket?: string | null;
+  storagePath?: string | null;
+  removedObjectCount?: number | null;
+  deletedAt?: string | null;
+};
+
 export type InstagramPublishJobStatus = "queued" | "ineligible" | "publishing" | "published" | "failed" | "canceled" | "shared_manually";
 
 export type InstagramPublishEvent = {
