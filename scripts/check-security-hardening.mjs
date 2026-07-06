@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -63,7 +64,7 @@ function extractVerifyJwtFalseFunctions(config) {
 const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const appLayout = read(files.appLayout);
-const appCss = read(files.appCss);
+const appCss = readAppCss();
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
@@ -134,7 +135,7 @@ assertIncludes("check-all", checkAll, "check:security-hardening");
 [
   "Content-Security-Policy",
   "Access-Control-Allow-Origin",
-  "https://mochirii.com",
+  "publicUrls.siteOrigin",
   "X-Content-Type-Options",
   "nosniff",
   "Referrer-Policy",

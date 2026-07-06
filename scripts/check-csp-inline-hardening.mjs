@@ -1,11 +1,12 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
+import { MOCHI_PETS_DEFAULT_ORIGIN, SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const args = new Set(process.argv.slice(2));
 const writeReport = args.has("--write") || process.env.CSP_INLINE_HARDENING_WRITE === "true";
 const liveHeaders = args.has("--live") || process.env.CSP_INLINE_HARDENING_LIVE === "true";
-const baseUrl = (process.env.CSP_INLINE_HARDENING_BASE_URL || "https://mochirii.com").replace(/\/+$/, "");
+const baseUrl = (process.env.CSP_INLINE_HARDENING_BASE_URL || SITE_ORIGIN).replace(/\/+$/, "");
 const reportJsonPath = resolve(root, "reports/csp-inline-hardening-inventory.json");
 const reportMdPath = resolve(root, "reports/csp-inline-hardening-inventory.md");
 const checkedAt = new Date().toISOString();
@@ -53,7 +54,7 @@ if (sourceInventory.blockingHits.length) {
 if (!directiveHasSource(policy.directiveMap, "frame-src", "https://open.spotify.com")) {
   failures.push("CSP frame-src must explicitly allow Spotify embeds.");
 }
-if (!directiveHasSource(policy.directiveMap, "frame-src", "https://mochi-pets-game.fly.dev")) {
+if (!directiveHasSource(policy.directiveMap, "frame-src", MOCHI_PETS_DEFAULT_ORIGIN)) {
   failures.push("CSP frame-src must explicitly allow the Mochi Pets game origin.");
 }
 if (
@@ -147,7 +148,7 @@ function extractCspEntries(text) {
     return [];
   }
   const mochiPetsDefault =
-    text.match(/NEXT_PUBLIC_MOCHI_PETS_URL\s*\|\|\s*["']([^"']+)["']/)?.[1] || "https://mochi-pets-game.fly.dev";
+    text.match(/NEXT_PUBLIC_MOCHI_PETS_URL\s*\|\|\s*["']([^"']+)["']/)?.[1] || MOCHI_PETS_DEFAULT_ORIGIN;
   const entries = [];
   for (const rawLine of match[1].split(/\r?\n/)) {
     let line = rawLine.trim();

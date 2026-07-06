@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { SOCIAL_HOST } from "@/lib/public-urls";
 import { onAuthStateChange, requireAuth } from "@/lib/supabase/auth";
 import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
-
-const SOCIAL_HOST = "https://social.mochirii.com";
 
 function GateMessage({ title, message }: { title: string; message: string }) {
   return (

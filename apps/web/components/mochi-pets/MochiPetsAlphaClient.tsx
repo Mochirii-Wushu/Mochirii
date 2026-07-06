@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { configuredMochiPetsOrigin } from "@/lib/public-urls";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { SUPABASE_URL } from "@/lib/supabase/config";
 import { getMochiPetsAlphaSession, submitMochiPetsFeedback, type MochiPetsAlphaSession } from "@/lib/mochi-pets/alpha";
@@ -9,7 +10,7 @@ import { resolveMochiPetsBridgeMessage, type MochiPetsBridgeStatus } from "@/lib
 
 type LoadState = "loading" | "signed-out" | "blocked" | "terms" | "ready" | "error";
 
-const gameOrigin = (process.env.NEXT_PUBLIC_MOCHI_PETS_URL || "https://mochi-pets-game.fly.dev").replace(/\/+$/, "");
+const gameOrigin = configuredMochiPetsOrigin();
 const supabaseFunctionsUrl = SUPABASE_URL ? `${SUPABASE_URL}/functions/v1` : "";
 
 type MochiPetsAlphaClientProps = {

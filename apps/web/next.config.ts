@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import publicUrls from "./config/public-urls.json";
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
-const mochiPetsOrigin = (process.env.NEXT_PUBLIC_MOCHI_PETS_URL || "https://mochi-pets-game.fly.dev").replace(/\/+$/, "");
+const mochiPetsOrigin = (process.env.NEXT_PUBLIC_MOCHI_PETS_URL || publicUrls.mochiPetsDefaultOrigin).replace(/\/+$/, "");
 
 const legacyHtmlRedirects = [
   ["/index.html", "/"],
@@ -49,7 +50,7 @@ const securityHeaders = [
   },
   {
     key: "Access-Control-Allow-Origin",
-    value: "https://mochirii.com",
+    value: publicUrls.siteOrigin,
   },
   {
     key: "X-Content-Type-Options",

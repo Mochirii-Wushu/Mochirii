@@ -28,6 +28,7 @@ import {
   websiteEventCardsFromSchedule,
   weeklyScheduleLines,
 } from "@/lib/guild-schedule";
+import { DISCORD_INVITE_URL } from "@/lib/public-urls";
 import {
   BadgeRow,
   cleanRoute,
@@ -844,7 +845,7 @@ export function EventsPage() {
                 </div>
                 <div className="badge-row u-mt-14">
                   <span>
-                    <a href="https://discord.com/invite/dPafqMwWPK" target="_blank" rel="noopener noreferrer">
+                    <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
                       Discord RSVP
                     </a>
                   </span>

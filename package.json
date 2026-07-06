@@ -17,6 +17,7 @@
     "check:apple-auth-readiness": "node scripts/check-apple-auth-readiness.mjs",
     "check:auth-provider-state-cleanup": "node scripts/check-auth-provider-state-cleanup.mjs",
     "check:content": "node scripts/check-content-guardrails.mjs",
+    "check:code-cleanliness": "node scripts/check-code-cleanliness.mjs",
     "check:csp-inline-hardening": "node scripts/check-csp-inline-hardening.mjs",
     "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",
     "check:discord-gallery-ingest": "node scripts/check-discord-gallery-ingest.mjs",

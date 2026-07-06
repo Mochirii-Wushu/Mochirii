@@ -1,11 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { SOCIAL_HOST } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
-const SOCIAL_HOST = "https://social.mochirii.com";
 
 const header = read("apps/web/components/SiteHeader.tsx");
+const navSource = read("apps/web/lib/site-navigation.ts");
 const footer = read("apps/web/components/SiteFooter.tsx");
 const socialPanel = read("apps/web/components/member-workflow/SocialHubPanel.tsx");
 const socialPage = read("apps/web/app/social/page.tsx");
@@ -13,9 +14,9 @@ const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx"
 const currentState = read("docs/current-live-state.md");
 const runbook = read("docs/integration-operations-runbook.md");
 
-const navGroups = between(header, "const navGroups", "const publicUtilityLinks");
-const publicUtilityLinks = between(header, "const publicUtilityLinks", "const accountWorkflowLinks");
-const accountWorkflowLinks = between(header, "const accountWorkflowLinks", "const focusableSelector");
+const navGroups = between(navSource, "export const navGroups", "export const publicUtilityLinks");
+const publicUtilityLinks = between(navSource, "export const publicUtilityLinks", "export const accountWorkflowLinks");
+const accountWorkflowLinks = between(navSource, "export const accountWorkflowLinks", "");
 const retiredMembersRouteFiles = [
   "apps/web/app/members/page.tsx",
   "apps/web/app/members/[slug]/page.tsx",
@@ -34,9 +35,9 @@ for (const href of forbiddenGroupHrefs) {
   }
 }
 
-assertIncludes("SiteHeader", header, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
-assertIncludes("SiteHeader dropdown Social", navGroups, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
-assertIncludes("SiteHeader dropdown Mochi Pets", navGroups, `href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets", auth: "signed-in"`);
+assertIncludes("site navigation public URL config", navSource, `"@/lib/public-urls"`);
+assertIncludes("site navigation dropdown Social", navGroups, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
+assertIncludes("site navigation dropdown Mochi Pets", navGroups, `href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets", auth: "signed-in"`);
 assertIncludes("SiteHeader group auth filtering", header, "&& !navItemHidden(item, authState)");
 assertIncludes("SiteHeader moderator probe", header, "checkLeaderGalleryModerationAccess");
 assertIncludes("SiteHeader lazy moderator trigger", header, `void ensureModeratorAccess();`);
@@ -56,13 +57,13 @@ for (const file of retiredMembersRouteFiles) {
   if (existsSync(resolve(root, file))) failures.push(`${file}: retired members route surface must stay removed.`);
 }
 
-assertIncludes("SiteFooter", footer, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
+assertIncludes("SiteFooter public URL config", footer, `"@/lib/public-urls"`);
 assertIncludes("SiteFooter Social", footer, `href: SOCIAL_HOST, label: "Social", external: true`);
 assertNotIncludes("SiteFooter", footer, "hidden:");
 assertNotIncludes("SiteFooter", footer, "data-auth-");
 assertNotIncludes("SiteFooter public Social", footer, `href: "/social", label: "Social"`);
 
-assertIncludes("SocialHubPanel", socialPanel, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
+assertIncludes("SocialHubPanel public URL config", socialPanel, `"@/lib/public-urls"`);
 assertIncludes("SocialHubPanel", socialPanel, `href={SOCIAL_HOST}`);
 assertIncludes("SocialHubPanel", socialPanel, "Mochirii Social Handoff");
 assertIncludes("SocialHubPanel redirect", socialPanel, "window.location.assign(SOCIAL_HOST)");
@@ -70,7 +71,7 @@ assertIncludes("SocialHubPanel signed-out copy", socialPanel, "Sign in on Mochir
 assertNotIncludes("SocialHubPanel", socialPanel, "target=\"_blank\"");
 assertNotIncludes("SocialHubPanel", socialPanel, "href={text(account?.profile_url)}");
 assertNotIncludes("SocialHubPanel stale status query", socialPanel, "listMySocialAccounts");
-assertIncludes("AccountPanel", accountPanel, `const SOCIAL_HOST = "${SOCIAL_HOST}"`);
+assertIncludes("AccountPanel public URL config", accountPanel, `"@/lib/public-urls"`);
 assertIncludes("AccountPanel", accountPanel, `href={SOCIAL_HOST}`);
 assertNotIncludes("AccountPanel stale Social Status link", accountPanel, `href="/social">Social Status`);
 assertNotIncludes("AccountPanel stale copy", accountPanel, "SSO compatibility gate passes");
@@ -111,7 +112,7 @@ function read(file) {
 
 function between(text, startMarker, endMarker) {
   const start = text.indexOf(startMarker);
-  const end = text.indexOf(endMarker, start + startMarker.length);
+  const end = endMarker ? text.indexOf(endMarker, start + startMarker.length) : text.length;
   if (start < 0 || end < 0) {
     failures.push(`Could not extract section ${startMarker} -> ${endMarker}.`);
     return "";

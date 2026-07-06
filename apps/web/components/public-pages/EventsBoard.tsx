@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DISCORD_INVITE_URL } from "@/lib/public-urls";
 import { StaticImage } from "./common";
 
 type EventItem = {
@@ -165,7 +166,7 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
               .map((value) => text(value))
               .filter(Boolean)
               .join(" • ");
-            const href = text(item.href, "https://discord.com/invite/dPafqMwWPK");
+            const href = text(item.href, DISCORD_INVITE_URL);
 
             return (
               <section className="events-list__item" key={`${item.id || item.title}-${item.date}`}>

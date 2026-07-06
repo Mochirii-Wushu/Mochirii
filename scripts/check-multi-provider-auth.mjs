@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const failures = [];
 
@@ -22,7 +23,7 @@ const authClient = read("apps/web/lib/supabase/auth.ts");
 const profileClient = read("apps/web/lib/supabase/profile.ts");
 const authPanel = read("apps/web/components/member-workflow/AuthPanel.tsx");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
-const nextCss = read("apps/web/app/mochirii.css");
+const nextCss = readAppCss();
 const multiProviderDoc = read("docs/multi-provider-login-and-verification.md");
 const supabaseReadme = read("supabase/README.md");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");

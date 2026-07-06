@@ -7,7 +7,7 @@ const helperText = readFileSync(helperPath, "utf8");
 const combinedText = `${componentText}\n${helperText}`;
 const failures = [];
 
-requireSnippet("NEXT_PUBLIC_MOCHI_PETS_URL", "game origin must come from the public Mochi Pets URL env.");
+requireSnippet("configuredMochiPetsOrigin", "game origin must come from the shared public Mochi Pets URL helper.");
 requireSnippet("payload: { accessToken: token }", "MOCHI_PETS_AUTH payload must contain only the short-lived access token field.");
 requireSnippet("functionsUrl: supabaseFunctionsUrl || undefined", "MOCHI_PETS_AUTH must include the public Supabase Functions URL for Unity token exchange.");
 requireSnippet('`${SUPABASE_URL}/functions/v1`', "Supabase Functions URL must be derived from the public Supabase URL.");

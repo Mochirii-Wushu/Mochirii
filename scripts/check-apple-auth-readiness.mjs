@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const failures = [];
 const args = new Set(process.argv.slice(2));
@@ -73,7 +74,7 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 [
   'provider === "apple"',
   "provider-logo--apple",
-].forEach((snippet) => assertIncludes("Apple provider logo support", `${providerLogo}\n${read("apps/web/app/mochirii.css")}`, snippet));
+].forEach((snippet) => assertIncludes("Apple provider logo support", `${providerLogo}\n${readAppCss()}`, snippet));
 
 [
   "https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback",

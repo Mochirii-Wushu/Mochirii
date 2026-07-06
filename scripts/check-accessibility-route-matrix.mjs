@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
+import { readAppCss } from "./lib/app-css.mjs";
 
 const root = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -97,7 +98,7 @@ function inspectShell() {
   const layout = readRequired("apps/web/app/layout.tsx");
   const header = readRequired("apps/web/components/SiteHeader.tsx");
   const footer = readOptional("apps/web/components/SiteFooter.tsx");
-  const css = readRequired("apps/web/app/mochirii.css");
+  const css = readAppCss();
 
   const shellChecks = {
     htmlLang: /<html\s+lang=["']en["']/.test(layout),

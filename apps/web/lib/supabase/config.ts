@@ -1,4 +1,6 @@
-export const SUPABASE_PROJECT_REF = "deyvmtncimmcinldjyqe";
+import { SUPABASE_PROJECT_REF } from "@/lib/public-urls";
+
+export { SUPABASE_PROJECT_REF };
 export const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
 export const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
 export const NEXT_PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");

@@ -1,0 +1,276 @@
+﻿/* =========================================================
+   GLASS â€” Card surfaces, blur, borders, padding
+   ========================================================= */
+.glass-card{
+  position:relative;
+  isolation:isolate;
+  border-radius:var(--radius-card);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+}
+.glass-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), transparent 38%) top / 100% 42% no-repeat,
+    linear-gradient(90deg, transparent, rgba(255,255,255,.045), transparent) top / 100% 1px no-repeat;
+}
+.glass-card--strong{background:var(--surface-hero-shell);}
+.glass-card--primary{background:var(--surface-primary-card);}
+.glass-card--soft{background:var(--surface-quiet-card);}
+
+.glass-pad{padding:var(--card-pad);}
+@media (max-width:640px){ .glass-pad{padding:18px;} }
+
+@keyframes border-shift{
+  0%{--card-line:rgba(31,122,99,.34);}
+  50%{--card-line:rgba(200,162,75,.34);}
+  100%{--card-line:rgba(31,122,99,.34);}
+}
+
+/* =========================================================
+   MOTION â€” Animated border accent on body cards
+   ========================================================= */
+.page-main .glass-card{
+  border:2px solid var(--card-line, var(--line));
+  animation:border-shift 7.5s var(--ease) infinite;
+}
+
+/* =========================================================
+   CENTER â€” Centered hero layout utility
+   ========================================================= */
+.center-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.center-stack .badge-row{justify-content:center;}
+
+/* =========================================================
+   TYPE â€” Global typography for hero + sections
+   ========================================================= */
+.kicker{
+  margin:0 0 10px;
+  font-size:12px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--ink-2);
+}
+
+.display-title{
+  margin:0;
+  font-family:var(--font-display);
+  letter-spacing:.02em;
+  line-height:1.0;
+  font-size:44px;
+  color:var(--ink-0);
+}
+@media (max-width:640px){ .display-title{font-size:36px;} }
+
+.meta-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:10px;
+}
+.meta-text{color:var(--ink-1); font-size:13px;}
+.meta-dot{color:rgba(255,255,255,.35);}
+
+.lede{
+  margin:14px 0 0;
+  color:var(--ink-1);
+  font-size:15px;
+  line-height:1.55;
+  max-width:70ch;
+}
+
+.section-title{
+  margin:0 0 14px;
+  font-family:var(--font-display);
+  font-size:28px;
+  line-height:1.15;
+  color:var(--ink-0);
+}
+.section-title--sm{font-size:24px;}
+
+.muted{color:var(--ink-2);}
+
+/* =========================================================
+   BADGES â€” Pill row (hero/meta badges; general purpose)
+   ========================================================= */
+.badge-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:14px;
+}
+.badge-row > span{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:var(--pill-border,2px) solid var(--card-line, rgba(255,255,255,.12));
+  background:rgba(0,0,0,.22);
+  color:var(--ink-1);
+  font-size:12px;
+  letter-spacing:.01em;
+  animation:border-shift 7.5s var(--ease) infinite;
+}
+
+.hero-cta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+
+.hero-cta{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.60);
+  color:var(--ink-0);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:700;
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+}
+
+.hero-cta--primary{
+  background:linear-gradient(90deg, rgba(31,122,99,.32), rgba(200,162,75,.24));
+  border-color:rgba(255,255,255,.16);
+}
+
+.hero-cta:hover,
+.hero-cta:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(200,162,75,.42);
+  background:rgba(10,12,14,.78);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.26),
+    0 0 0 1px rgba(218,181,94,.10);
+}
+
+/* =========================================================
+   PROSE â€” Paragraph stacking and readable rhythm
+   ========================================================= */
+.prose-stack{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  color:var(--ink-1);
+  line-height:1.75;
+}
+
+.u-mt-10{margin:10px 0 0;}
+.u-mt-12{margin-top:12px;}
+.u-mt-14{margin-top:14px;}
+.u-mt-16{margin-top:16px;}
+.u-mt-18{margin-top:18px;}
+.u-mt-24{margin-top:24px;}
+.u-mb-8{margin-bottom:8px;}
+.u-mb-6{margin-bottom:6px;}
+.u-m-0{margin:0;}
+.u-block{display:block;}
+.u-inline-flex{display:inline-flex;}
+.u-full-width{width:100%;}
+.u-card-no-shadow{box-shadow:none;}
+.u-list-inset{
+  margin:12px 0 0;
+  padding-left:18px;
+}
+
+.image-panel__img{
+  width:100%;
+  height:auto;
+  border-radius:var(--radius-media);
+  border:1px solid var(--surface-hairline);
+  box-shadow:
+    inset 0 1px 0 var(--surface-shine),
+    var(--shadow-soft);
+}
+
+.overlay-card__image{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.overlay-card{
+  overflow:hidden;
+}
+
+.overlay-card__frame{
+  position:relative;
+}
+
+.overlay-card__frame--portrait{
+  aspect-ratio:3 / 4;
+}
+
+.overlay-card__frame--wide{
+  aspect-ratio:16 / 10;
+}
+
+.overlay-card__scrim{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.22);
+}
+
+.overlay-card__content{
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:16px;
+}
+
+.overlay-card__panel{
+  padding:14px;
+  border-radius:18px;
+  box-shadow:none;
+}
+
+.overlay-card__meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.events-featured__img,
+.events-list__image{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
+  object-fit:cover;
+  aspect-ratio:5 / 2;
+  border-radius:var(--radius-media);
+  border:1px solid var(--surface-hairline);
+  box-shadow:
+    inset 0 1px 0 var(--surface-shine),
+    0 16px 34px rgba(0,0,0,.26);
+}
+
+.page-main > .container > .glass-card + .glass-card,
+.page-main > .container > section + section,
+.page-main > .container > div + div{
+  margin-top:var(--section-gap);
+}
+.prose-stack p{margin:0;}
+
