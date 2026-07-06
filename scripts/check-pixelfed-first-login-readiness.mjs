@@ -128,7 +128,8 @@ const snippetChecks = [
     label: "Pixelfed social sync validator",
     file: "supabase/functions/_shared/pixelfed-social-sync.ts",
     snippets: [
-      `${SOCIAL_HOST}/`,
+      "import { SOCIAL_ORIGIN } from \"./public-origins.ts\"",
+      "`${SOCIAL_ORIGIN}/`",
       "PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS",
       "constantTimeEquals",
       "parsePixelfedSocialSyncPayload",

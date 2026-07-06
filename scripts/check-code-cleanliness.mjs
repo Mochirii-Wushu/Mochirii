@@ -38,6 +38,7 @@ const literalAllowedFiles = new Set([
   "apps/web/lib/public-urls.ts",
   "scripts/lib/public-urls.mjs",
   "scripts/check-code-cleanliness.mjs",
+  "supabase/functions/_shared/public-origins.ts",
 ]);
 
 const literalAllowedPrefixes = [
