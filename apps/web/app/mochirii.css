@@ -4,7 +4,12 @@
 @import "./styles/public-join.css";
 @import "./styles/public-events.css";
 @import "./styles/public-side-pages.css";
-@import "./styles/public-home.css";
+@import "./styles/public-content-shared.css";
+@import "./styles/public-home-seal.css";
+@import "./styles/public-home-media.css";
+@import "./styles/public-home-bulletins.css";
+@import "./styles/public-home-doors.css";
+@import "./styles/public-home-visual.css";
 @import "./styles/public-profiles.css";
 @import "./styles/public-ceremony.css";
 @import "./styles/public-gallery.css";
