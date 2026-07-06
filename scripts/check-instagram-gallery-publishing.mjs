@@ -22,6 +22,7 @@ const files = {
   deploymentRunbook: "docs/instagram-gallery-publishing-deployment-runbook.md",
   nextSubmit: "apps/web/components/member-workflow/GallerySubmitForm.tsx",
   nextDashboard: "apps/web/components/member-workflow/LeaderDashboard.tsx",
+  nextDashboardParts: "apps/web/components/member-workflow/LeaderDashboardParts.tsx",
   nextHelpers: "apps/web/lib/supabase/moderation.ts",
   nextUploads: "apps/web/lib/supabase/gallery-submissions.ts",
   staticHelper: "supabase.js",
@@ -87,7 +88,7 @@ const supabaseReadme = read(files.supabaseReadme);
 const moderationRunbook = read(files.moderationRunbook);
 const deploymentRunbook = read(files.deploymentRunbook);
 const nextSubmit = read(files.nextSubmit);
-const nextDashboard = read(files.nextDashboard);
+const nextDashboard = [read(files.nextDashboard), read(files.nextDashboardParts)].join("\n");
 const nextHelpers = read(files.nextHelpers);
 const nextUploads = read(files.nextUploads);
 const staticHelper = read(files.staticHelper);
