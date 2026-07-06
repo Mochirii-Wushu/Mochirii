@@ -46,9 +46,9 @@ This is the short source-of-truth index for the current Mochirii production post
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
 - Supabase migration and function-list readback was refreshed on 2026-07-05 for project `deyvmtncimmcinldjyqe` with CLI `2.108.0`; expected website, Reaper, Instagram, vote, spotlight, profile, Mochi Pets, and `sync-pixelfed-social-account` functions are active.
-- Supabase CLI readback from the current toolchain reports `2.108.0`.
+- Supabase CLI readback from the current toolchain reports `2.108.0`. Use the repo-local binary on Windows (`node_modules/.bin/supabase.cmd`) and run Supabase CLI calls serially to avoid telemetry-file `EPERM` races.
 - Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Pets-specific advisor findings.
-- Supabase advisor snapshot on 2026-07-05: performance advisors report no issues; security advisors report one known leaked-password protection warning, `auth_leaked_password_protection`, as a provider configuration follow-up.
+- Supabase linked advisor snapshot on 2026-07-05 with CLI `2.108.0`: security advisors returned 14 findings (`13` acknowledged service-only `rls_enabled_no_policy` info findings plus `1` leaked-password protection warning); performance advisors returned 48 info-level `unused_index` findings. No Supabase mutation or password reset was performed.
 - Mochi Pets route/function/table rename completed through PR #371 and the approved cutover window. Current website route posture is `/games/mochi-pets` active/noindex and the former game route retired as a normal 404 with no redirect.
 
 ## Mochi Pets Runtime
