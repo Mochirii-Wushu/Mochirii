@@ -270,7 +270,7 @@ assertNotMatches(
 
 [
   "Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>",
-  "/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>",
+  "/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]",
   "No real Instagram post may be created without explicit action-time owner approval.",
   "DISCORD_GALLERY_CHANNEL_ID",
   "INSTAGRAM_ACCOUNT_ID",

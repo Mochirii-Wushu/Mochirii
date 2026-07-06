@@ -78,7 +78,7 @@ Production Reaper gallery submission handling is Supabase-hosted through Discord
 https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
 ```
 
-The `reaper-discord-interactions` function validates Discord request signatures with `DISCORD_PUBLIC_KEY`, answers Discord PING requests, accepts the guild-scoped `/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>` command, then calls the existing `submit-discord-gallery-image` ingest function with `instagramOptIn` mapped from the optional boolean.
+The `reaper-discord-interactions` function validates Discord request signatures with `DISCORD_PUBLIC_KEY`, answers Discord PING requests, accepts the guild-scoped `/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]` command, then calls the existing `submit-discord-gallery-image` ingest function with `instagramOptIn` mapped from the optional boolean. The image option is required; title, subtitle, and Instagram opt-in are optional so the live slash command matches the pinned channel instructions.
 
 The same Interactions endpoint handles the manual Discord vote reminder contract: `Done voting` button clicks, `/vote-status`, `/vote-leaderboard`, and moderator-only `/vote-reminder-preview`. The scheduled sender is the separate `send-vote-reminder` Edge Function. It posts link buttons only; it never automates third-party upvotes, vote submissions, CAPTCHA bypasses, browser clicks, vote-site sessions, or vote-site result checks.
 
@@ -706,13 +706,13 @@ All three tables have RLS enabled and service-role-only grants. Browser clients 
 
 Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved. Discord attachment `content_type` is advisory because Discord may omit or mislabel it; `submit-discord-gallery-image` downloads the approved Discord CDN URL and accepts only JPEG, PNG, or WebP byte signatures under 50 MB before storing the sniffed MIME type.
 
-The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command must include the optional Discord boolean option:
+The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command requires only `image`; `title`, `subtitle`, and the Discord boolean opt-in stay optional:
 
 ```text
-/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>
+/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]
 ```
 
-`share_to_instagram` defaults to `false`. Reaper maps `subtitle` to the existing website `caption` field and sends `instagramOptIn` in the `submit-discord-gallery-image` JSON payload. The user-facing Discord copy should say whether Instagram sharing was enabled. Duplicate Discord message/attachment submissions stay idempotent and do not mutate existing stored consent.
+`share_to_instagram` defaults to `false`. Reaper maps `subtitle` to the existing website `caption` field when supplied and sends `instagramOptIn` in the `submit-discord-gallery-image` JSON payload. The user-facing Discord copy should say whether Instagram sharing was enabled. Duplicate Discord message/attachment submissions stay idempotent and do not mutate existing stored consent.
 
 There is no automatic Instagram publishing. Website gallery approval creates an Instagram publishing job only when the submission has explicit opt-in consent. Moderators then review the separate Instagram Queue before any external post is sent.
 

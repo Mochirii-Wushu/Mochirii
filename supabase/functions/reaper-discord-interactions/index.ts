@@ -1055,10 +1055,6 @@ Deno.serve(async (req: Request) => {
     return interactionMessage("Attach a JPEG, PNG, or WebP image for the gallery submission.");
   }
 
-  if (!title || !caption) {
-    return interactionMessage("Add both a title and subtitle for the gallery submission.");
-  }
-
   const payload = {
     guildId,
     channelId,

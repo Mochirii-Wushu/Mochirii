@@ -19,6 +19,7 @@ const files = {
   memberSyncImportMap: "supabase/functions/reaper-discord-member-sync/deno.json",
   importMap: "supabase/functions/reaper-discord-interactions/deno.json",
   pendingOverwriteMigration: "supabase/migrations/20260612105232_add_reaper_pending_verification_overwrites.sql",
+  gallerySubmitRegistration: "scripts/register-reaper-gallery-submit-command.mjs",
   commandRegistration: "scripts/register-reaper-pending-verification-command.mjs",
   rollbackScript: "scripts/rollback-reaper-pending-verification-overwrites.mjs",
   envExample: "supabase/functions/.env.example",
@@ -41,6 +42,10 @@ function read(file) {
 
 function assertIncludes(label, text, snippet) {
   if (!text.includes(snippet)) failures.push(`${label}: expected snippet not found: ${snippet}`);
+}
+
+function assertNotIncludes(label, text, snippet) {
+  if (text.includes(snippet)) failures.push(`${label}: unexpected snippet found: ${snippet}`);
 }
 
 function assertMatches(label, text, pattern, message) {
@@ -73,6 +78,7 @@ const memberSyncFunction = read(files.memberSyncFunction);
 const memberSyncImportMap = read(files.memberSyncImportMap);
 const importMap = read(files.importMap);
 const pendingOverwriteMigration = read(files.pendingOverwriteMigration);
+const gallerySubmitRegistration = read(files.gallerySubmitRegistration);
 const commandRegistration = read(files.commandRegistration);
 const rollbackScript = read(files.rollbackScript);
 const envExample = read(files.envExample);
@@ -84,6 +90,7 @@ const activationPacket = read(files.activationPacket);
 [
   '"check:reaper-discord-interactions"',
   '"check:reaper-pending-verification"',
+  '"register:reaper-gallery-submit-command"',
   '"register:reaper-pending-verification-command"',
   '"rollback:reaper-pending-verification"',
 ].forEach((snippet) => assertIncludes("package.json", packageJson, snippet));
@@ -136,6 +143,8 @@ assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
   "mimeType: declaredMime",
   "subtitle",
   "caption",
+  'const title = stringOption(data, "title", 90);',
+  'const caption = stringOption(data, "subtitle", 220);',
   "Use this command in the gallery submissions channel.",
   "Refresh Discord verification on mochirii.com/account before submitting gallery images.",
   "sync-ranks",
@@ -196,6 +205,31 @@ assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
   "discord_resources",
   "url: `https://discord.com/events/${deps.expectedGuildId}/${eventId}`",
 ].forEach((snippet) => assertIncludes("reaper-discord-interactions", interactionContractSource, snippet));
+
+assertNotIncludes(
+  "reaper-discord-interactions",
+  functionSource,
+  "Add both a title and subtitle for the gallery submission.",
+);
+
+[
+  'COMMAND_NAME = "submit"',
+  "EXPECTED_DISCORD_GALLERY_CHANNEL_ID",
+  'name: "image"',
+  "required: true",
+  'name: "title"',
+  'name: "subtitle"',
+  'name: "share_to_instagram"',
+  "Refusing to register /submit with required title option.",
+  "Refusing to register /submit with required subtitle option.",
+].forEach((snippet) => assertIncludes("gallery submit command registration", gallerySubmitRegistration, snippet));
+
+assertMatches(
+  "gallery submit command registration",
+  gallerySubmitRegistration,
+  /name:\s*"title"[\s\S]*?required:\s*false[\s\S]*?name:\s*"subtitle"[\s\S]*?required:\s*false[\s\S]*?name:\s*"share_to_instagram"[\s\S]*?required:\s*false/,
+  "title, subtitle, and Instagram opt-in options must stay optional in Discord registration.",
+);
 
 [
   "PENDING_BASE_ROLE_ID = \"1468659807736299520\"",
@@ -413,7 +447,7 @@ assertNotMatches(
   "reaper-discord-interactions",
   "Discord Interactions Endpoint URL",
   "DISCORD_PUBLIC_KEY",
-  "/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>",
+  "/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]",
   "/sync-pending-verification mode:<preview|apply> confirm:<true|false>",
   "discord_managed_permission_overwrites",
   "Supabase-hosted Discord Interactions",
@@ -425,6 +459,7 @@ assertNotMatches(
   "DISCORD_PUBLIC_KEY",
   "supabase functions deploy reaper-discord-interactions",
   "guild-scoped `/submit` command",
+  "`image` is required. `title`, `subtitle`, and `share_to_instagram` are optional.",
 ].forEach((snippet) => assertIncludes("Instagram deployment runbook", deploymentRunbook, snippet));
 
 if (failures.length) {
