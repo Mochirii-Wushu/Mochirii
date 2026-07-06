@@ -1,0 +1,798 @@
+/* =========================================================
+   RECRUITMENT â€” Visual readability pilot
+   ========================================================= */
+body[data-page="recruitment"]{
+  --recruit-lantern:rgba(218,181,94,.68);
+  --recruit-lantern-soft:rgba(218,181,94,.18);
+  --recruit-lotus:rgba(222,151,177,.46);
+  --recruit-lotus-soft:rgba(222,151,177,.14);
+  --recruit-jade:rgba(48,178,143,.42);
+  --recruit-jade-soft:rgba(31,122,99,.16);
+  --recruit-panel:rgba(15,12,10,.84);
+  --recruit-panel-strong:rgba(18,14,11,.92);
+  --recruit-ink:rgba(255,246,232,.86);
+  --recruit-muted:rgba(255,238,210,.68);
+}
+
+body[data-page="recruitment"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(12,9,7,.10), rgba(12,9,7,.18)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.40), rgba(222,151,177,.16) 46%, rgba(48,178,143,.24)) border-box;
+  box-shadow:
+    0 30px 82px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 44px rgba(218,181,94,.10);
+}
+
+body[data-page="recruitment"] .hero-intro,
+body[data-page="recruitment"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  animation:none;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 12% 0%, var(--recruit-lantern-soft), transparent 36%),
+    linear-gradient(155deg, var(--recruit-panel-strong), var(--recruit-panel)) padding-box,
+    linear-gradient(135deg, var(--recruit-lantern), rgba(255,255,255,.08) 42%, var(--recruit-jade)) border-box;
+  box-shadow:
+    0 24px 66px rgba(0,0,0,.48),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.09);
+}
+
+body[data-page="recruitment"] .hero-intro::before,
+body[data-page="recruitment"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 88% 12%, rgba(222,151,177,.12), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 50%);
+}
+
+body[data-page="recruitment"] .hero-intro{
+  background:
+    radial-gradient(circle at 20% 0%, rgba(218,181,94,.20), transparent 34%),
+    radial-gradient(circle at 88% 14%, rgba(222,151,177,.15), transparent 34%),
+    linear-gradient(155deg, rgba(18,14,11,.93), rgba(10,9,9,.82)) padding-box,
+    linear-gradient(135deg, var(--recruit-lantern), rgba(222,151,177,.28), rgba(48,178,143,.24)) border-box;
+}
+
+body[data-page="recruitment"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="recruitment"] .glass-pad{
+  padding:clamp(20px, 3vw, 30px);
+}
+
+body[data-page="recruitment"] .kicker,
+body[data-page="recruitment"] .meta-text,
+body[data-page="recruitment"] .muted{
+  color:var(--recruit-muted);
+}
+
+body[data-page="recruitment"] .display-title,
+body[data-page="recruitment"] .section-title{
+  text-shadow:0 10px 26px rgba(218,181,94,.16);
+}
+
+body[data-page="recruitment"] .badge-row > span{
+  animation:none;
+  border:1px solid rgba(218,181,94,.34);
+  background:
+    linear-gradient(135deg, rgba(218,181,94,.16), rgba(222,151,177,.10));
+  color:var(--recruit-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="recruitment"] .col-4 .glass-card{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.22), transparent 48%),
+    linear-gradient(160deg, rgba(20,15,11,.92), rgba(9,8,8,.78)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.64), rgba(222,151,177,.22) 56%, rgba(48,178,143,.18)) border-box;
+}
+
+body[data-page="recruitment"] #recruitmentAudioTitle{
+  margin-bottom:10px;
+}
+
+body[data-page="recruitment"] #recruitmentAudioDesc{
+  max-width:34ch;
+  line-height:1.65;
+}
+
+body[data-page="recruitment"] .recruitment-audio-shell{
+  position:relative;
+}
+
+body[data-page="recruitment"] .recruitment-audio-native{
+  position:absolute;
+  inline-size:1px;
+  block-size:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
+body[data-page="recruitment"] .recruitment-audio-player{
+  --audio-progress:0%;
+  --audio-volume:100%;
+  display:grid;
+  grid-template-columns:36px minmax(0, 1fr) max-content;
+  align-items:center;
+  column-gap:8px;
+  row-gap:7px;
+  inline-size:min(100%, 360px);
+  justify-self:center;
+  min-block-size:58px;
+  padding:7px 9px;
+  border:1px solid rgba(218,181,94,.26);
+  border-radius:999px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.065), transparent 32%, rgba(48,178,143,.06)) top / 100% 1px no-repeat,
+    radial-gradient(circle at 10% 50%, rgba(218,181,94,.18), transparent 36%),
+    linear-gradient(145deg, rgba(9,8,8,.92), rgba(18,14,11,.78));
+  box-shadow:
+    0 18px 34px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 30px rgba(48,178,143,.10);
+  overflow:hidden;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button{
+  display:inline-grid;
+  place-items:center;
+  min-inline-size:36px;
+  min-block-size:36px;
+  border:1px solid rgba(218,181,94,.42);
+  border-radius:999px;
+  background:
+    radial-gradient(circle at 36% 24%, rgba(255,246,232,.22), transparent 34%),
+    linear-gradient(145deg, rgba(218,181,94,.22), rgba(48,178,143,.12));
+  color:rgba(255,246,232,.92);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 10px 22px rgba(0,0,0,.30);
+  cursor:pointer;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button:disabled{
+  cursor:not-allowed;
+  opacity:.56;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button:hover:not(:disabled){
+  border-color:rgba(218,181,94,.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 12px 26px rgba(0,0,0,.36),
+    0 0 22px rgba(218,181,94,.16);
+}
+
+body[data-page="recruitment"] .recruitment-audio-button:focus-visible,
+body[data-page="recruitment"] .recruitment-audio-progress:focus-visible,
+body[data-page="recruitment"] .recruitment-audio-volume:focus-visible{
+  outline:2px solid rgba(255,246,232,.84);
+  outline-offset:3px;
+  box-shadow:
+    0 0 0 3px rgba(218,181,94,.22),
+    0 0 0 5px rgba(48,178,143,.14);
+}
+
+body[data-page="recruitment"] .recruitment-audio-button__icon{
+  position:relative;
+  inline-size:16px;
+  block-size:16px;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button__icon[data-icon="play"]::before{
+  content:"";
+  position:absolute;
+  inset:2px 1px 2px 4px;
+  clip-path:polygon(0 0, 100% 50%, 0 100%);
+  background:currentColor;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button__icon[data-icon="pause"]::before,
+body[data-page="recruitment"] .recruitment-audio-button__icon[data-icon="pause"]::after{
+  content:"";
+  position:absolute;
+  top:2px;
+  bottom:2px;
+  inline-size:4px;
+  border-radius:999px;
+  background:currentColor;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button__icon[data-icon="pause"]::before{
+  left:3px;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button__icon[data-icon="pause"]::after{
+  right:3px;
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress-wrap,
+body[data-page="recruitment"] .recruitment-audio-volume-wrap{
+  display:block;
+  min-inline-size:0;
+}
+
+body[data-page="recruitment"] .recruitment-audio-volume-wrap{
+  grid-column:2 / -1;
+  padding-inline:3px;
+}
+
+body[data-page="recruitment"] .recruitment-audio-volume-row{
+  display:grid;
+  grid-column:1 / -1;
+  grid-template-columns:34px minmax(0, 112px);
+  align-items:center;
+  justify-content:center;
+  justify-self:center;
+  gap:8px;
+  inline-size:min(156px, 58%);
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress,
+body[data-page="recruitment"] .recruitment-audio-volume{
+  display:block;
+  inline-size:100%;
+  min-inline-size:0;
+  accent-color:rgba(218,181,94,.92);
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress{
+  background:
+    linear-gradient(90deg, rgba(218,181,94,.92) var(--audio-progress), rgba(255,246,232,.14) var(--audio-progress)),
+    linear-gradient(90deg, rgba(48,178,143,.14), transparent);
+}
+
+body[data-page="recruitment"] .recruitment-audio-volume{
+  background:
+    linear-gradient(90deg, rgba(48,178,143,.78) var(--audio-volume), rgba(255,246,232,.14) var(--audio-volume));
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress,
+body[data-page="recruitment"] .recruitment-audio-volume{
+  appearance:none;
+  block-size:4px;
+  border-radius:999px;
+  cursor:pointer;
+  box-shadow:0 0 18px rgba(48,178,143,.10);
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress:disabled,
+body[data-page="recruitment"] .recruitment-audio-volume:disabled{
+  cursor:not-allowed;
+  opacity:.56;
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress::-webkit-slider-thumb,
+body[data-page="recruitment"] .recruitment-audio-volume::-webkit-slider-thumb{
+  appearance:none;
+  inline-size:14px;
+  block-size:14px;
+  border:2px solid rgba(255,246,232,.92);
+  border-radius:50%;
+  background:linear-gradient(145deg, rgba(218,181,94,.98), rgba(48,178,143,.76));
+  box-shadow:0 5px 12px rgba(0,0,0,.35);
+}
+
+body[data-page="recruitment"] .recruitment-audio-progress::-moz-range-thumb,
+body[data-page="recruitment"] .recruitment-audio-volume::-moz-range-thumb{
+  inline-size:13px;
+  block-size:13px;
+  border:2px solid rgba(255,246,232,.92);
+  border-radius:50%;
+  background:linear-gradient(145deg, rgba(218,181,94,.98), rgba(48,178,143,.76));
+  box-shadow:0 5px 12px rgba(0,0,0,.35);
+}
+
+body[data-page="recruitment"] .recruitment-audio-time{
+  color:rgba(255,246,232,.86);
+  font-size:.8rem;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button--mute{
+  grid-column:1 / 2;
+  min-inline-size:34px;
+  min-block-size:34px;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+body[data-page="recruitment"] .recruitment-audio-button--mute[data-muted="true"]{
+  color:rgba(255,238,210,.58);
+  border-color:rgba(222,151,177,.32);
+}
+
+@media (max-width:520px){
+  body[data-page="recruitment"] .recruitment-audio-player{
+    grid-template-columns:36px minmax(0, 1fr) max-content;
+    border-radius:24px;
+  }
+}
+
+body[data-page="recruitment"] .col-8 .glass-card{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(222,151,177,.12), transparent 38%),
+    linear-gradient(160deg, rgba(17,13,10,.92), rgba(7,7,7,.82)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.50), rgba(255,255,255,.08) 45%, rgba(48,178,143,.25)) border-box;
+}
+
+body[data-page="recruitment"] #recruitmentBody{
+  max-width:72ch;
+  color:var(--recruit-ink);
+  font-size:clamp(1rem, .98rem + .14vw, 1.075rem);
+  line-height:1.82;
+  gap:clamp(16px, 1.8vw, 22px);
+}
+
+body[data-page="recruitment"] #recruitmentBody p{
+  text-wrap:pretty;
+}
+
+body[data-page="recruitment"] #recruitmentConclusion{
+  margin-top:clamp(22px, 3vw, 32px) !important;
+  max-width:72ch;
+  padding:clamp(16px, 2.4vw, 22px);
+  border-radius:22px;
+  border:1px solid rgba(222,151,177,.30);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(222,151,177,.16), transparent 42%),
+    linear-gradient(135deg, rgba(218,181,94,.12), rgba(0,0,0,.18));
+  color:rgba(255,246,232,.90);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.26);
+}
+
+body[data-page="recruitment"] #recruitmentConclusion p{
+  margin:0;
+  line-height:1.78;
+}
+
+@media (min-width:981px){
+  body[data-page="recruitment"] .col-4 .glass-card{
+    margin-top:clamp(14px, 4vw, 34px);
+  }
+}
+
+@media (max-width:640px){
+  body[data-page="recruitment"] .hero-intro{
+    text-align:left;
+    align-items:flex-start;
+  }
+
+  body[data-page="recruitment"] .hero-intro .badge-row{
+    justify-content:flex-start;
+  }
+
+  body[data-page="recruitment"] #recruitmentBody{
+    line-height:1.78;
+  }
+}
+
+/* =========================================================
+   TWILLS â€” Profile avatar presentation (page-scoped)
+   ========================================================= */
+body[data-page="twills"]{
+  --twills-moon:rgba(218,235,255,.66);
+  --twills-frost:rgba(232,244,255,.42);
+  --twills-frost-soft:rgba(218,235,255,.14);
+  --twills-lantern:rgba(218,181,94,.46);
+  --twills-lantern-soft:rgba(218,181,94,.12);
+  --twills-jade:rgba(48,178,143,.38);
+  --twills-lotus:rgba(222,151,177,.16);
+  --twills-panel:rgba(7,10,13,.82);
+  --twills-panel-strong:rgba(9,13,17,.92);
+  --twills-ink:rgba(244,250,255,.91);
+  --twills-muted:rgba(224,237,247,.70);
+}
+
+body[data-page="twills"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(6,9,12,.12), rgba(6,9,12,.18)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(255,255,255,.08) 48%, var(--twills-lantern)) border-box;
+  box-shadow:
+    0 30px 86px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 48px rgba(218,235,255,.10);
+}
+
+body[data-page="twills"] .hero-intro,
+body[data-page="twills"] .page-main .glass-card,
+body[data-page="twills"] .badge-row > span{
+  animation:none;
+}
+
+body[data-page="twills"] .hero-intro,
+body[data-page="twills"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 14% 0%, var(--twills-frost-soft), transparent 38%),
+    radial-gradient(circle at 92% 12%, var(--twills-lantern-soft), transparent 34%),
+    linear-gradient(155deg, var(--twills-panel-strong), var(--twills-panel)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(255,255,255,.07) 44%, var(--twills-lantern)) border-box;
+  box-shadow:
+    0 24px 66px rgba(0,0,0,.46),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-page="twills"] .hero-intro::before,
+body[data-page="twills"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.075), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.08), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 54%);
+}
+
+body[data-page="twills"] .hero-intro{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.16), transparent 42%),
+    radial-gradient(circle at 90% 14%, rgba(218,181,94,.12), transparent 34%),
+    linear-gradient(155deg, rgba(10,15,20,.94), rgba(7,10,13,.84)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(48,178,143,.18) 46%, var(--twills-lantern)) border-box;
+}
+
+body[data-page="twills"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="twills"] .glass-pad{
+  padding:clamp(20px, 2.8vw, 30px);
+}
+
+body[data-page="twills"] .kicker,
+body[data-page="twills"] .meta-text,
+body[data-page="twills"] .muted,
+body[data-page="twills"] .prose-stack{
+  color:var(--twills-muted);
+}
+
+body[data-page="twills"] .display-title,
+body[data-page="twills"] .section-title{
+  color:var(--twills-ink);
+  text-shadow:
+    0 10px 28px rgba(218,235,255,.14),
+    0 0 20px rgba(218,181,94,.08);
+}
+
+body[data-page="twills"] .badge-row{
+  gap:10px;
+}
+
+body[data-page="twills"] .badge-row > span{
+  min-height:30px;
+  box-sizing:border-box;
+  border:1px solid rgba(218,235,255,.30);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,.10), transparent 46%),
+    linear-gradient(135deg, rgba(218,235,255,.13), rgba(7,10,13,.30));
+  color:var(--twills-ink);
+  letter-spacing:0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="twills"] #twillsBadges > span:first-child{
+  border-color:rgba(218,181,94,.36);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(218,181,94,.18), transparent 48%),
+    linear-gradient(135deg, rgba(48,178,143,.14), rgba(218,181,94,.12));
+}
+
+body[data-page="twills"] .col-4 .glass-card{
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.16), transparent 42%),
+    linear-gradient(160deg, rgba(8,12,16,.90), rgba(5,8,11,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,235,255,.58), rgba(255,255,255,.07) 44%, rgba(218,181,94,.30)) border-box;
+}
+
+body[data-page="twills"] .col-8 .glass-card{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(218,235,255,.11), transparent 42%),
+    radial-gradient(circle at 100% 8%, rgba(222,151,177,.08), transparent 38%),
+    linear-gradient(160deg, rgba(8,12,16,.90), rgba(6,9,12,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,235,255,.48), rgba(255,255,255,.07) 46%, rgba(48,178,143,.26)) border-box;
+}
+
+body[data-page="twills"] .profile-avatar{
+  width:100%;
+  max-width:330px;
+  aspect-ratio:787 / 909;
+  margin:14px auto 0;
+  object-fit:cover;
+  border-radius:24px;
+  border:1px solid rgba(218,235,255,.34);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.38),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    0 0 30px rgba(218,235,255,.12),
+    0 0 42px rgba(218,181,94,.08);
+}
+
+body[data-page="twills"] #twillsBio{
+  width:100%;
+  max-width:68ch;
+  box-sizing:border-box;
+  padding:clamp(16px, 2.4vw, 22px);
+  border-radius:22px;
+  border:1px solid rgba(218,235,255,.24);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(218,235,255,.10), transparent 42%),
+    linear-gradient(135deg, rgba(218,235,255,.08), rgba(0,0,0,.16));
+  color:rgba(244,250,255,.86);
+  line-height:1.82;
+  gap:16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.24);
+}
+
+body[data-page="twills"] #twillsBio p{
+  margin:0;
+}
+
+body[data-page="twills"] .footer-link:focus-visible,
+body[data-page="twills"] .footer-nav:focus-visible{
+  outline:2px solid color-mix(in srgb, var(--twills-moon) 74%, #fff);
+  outline-offset:4px;
+  box-shadow:
+    0 0 0 3px rgba(218,235,255,.18),
+    0 0 0 5px rgba(218,181,94,.12);
+}
+
+@media (max-width:640px){
+  body[data-page="twills"] .hero-intro{
+    text-align:center;
+  }
+
+  body[data-page="twills"] #twillsBio{
+    line-height:1.78;
+  }
+}
+
+/* =========================================================
+   REUSABLE PROFILE PRESENTATION
+   ========================================================= */
+body[data-page="member-profile"]{
+  --twills-moon:rgba(218,235,255,.66);
+  --twills-frost:rgba(232,244,255,.42);
+  --twills-frost-soft:rgba(218,235,255,.14);
+  --twills-lantern:rgba(218,181,94,.46);
+  --twills-lantern-soft:rgba(218,181,94,.12);
+  --twills-jade:rgba(48,178,143,.38);
+  --twills-lotus:rgba(222,151,177,.16);
+  --twills-panel:rgba(7,10,13,.82);
+  --twills-panel-strong:rgba(9,13,17,.92);
+  --twills-ink:rgba(244,250,255,.91);
+  --twills-muted:rgba(224,237,247,.70);
+}
+
+body[data-page="member-profile"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(6,9,12,.12), rgba(6,9,12,.18)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(255,255,255,.08) 48%, var(--twills-lantern)) border-box;
+  box-shadow:
+    0 30px 86px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.05) inset,
+    0 0 48px rgba(218,235,255,.10);
+}
+
+body[data-page="member-profile"] .hero-intro,
+body[data-page="member-profile"] .page-main .glass-card,
+body[data-page="member-profile"] .badge-row > span{
+  animation:none;
+}
+
+body[data-page="member-profile"] .hero-intro,
+body[data-page="member-profile"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 14% 0%, var(--twills-frost-soft), transparent 38%),
+    radial-gradient(circle at 92% 12%, var(--twills-lantern-soft), transparent 34%),
+    linear-gradient(155deg, var(--twills-panel-strong), var(--twills-panel)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(255,255,255,.07) 44%, var(--twills-lantern)) border-box;
+  box-shadow:
+    0 24px 66px rgba(0,0,0,.46),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-page="member-profile"] .hero-intro::before,
+body[data-page="member-profile"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.075), transparent) top / 100% 1px no-repeat,
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.08), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 54%);
+}
+
+body[data-page="member-profile"] .hero-intro{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.16), transparent 42%),
+    radial-gradient(circle at 90% 14%, rgba(218,181,94,.12), transparent 34%),
+    linear-gradient(155deg, rgba(10,15,20,.94), rgba(7,10,13,.84)) padding-box,
+    linear-gradient(135deg, var(--twills-moon), rgba(48,178,143,.18) 46%, var(--twills-lantern)) border-box;
+}
+
+body[data-page="member-profile"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="member-profile"] .glass-pad{
+  padding:clamp(20px, 2.8vw, 30px);
+}
+
+body[data-page="member-profile"] .kicker,
+body[data-page="member-profile"] .meta-text,
+body[data-page="member-profile"] .muted,
+body[data-page="member-profile"] .prose-stack{
+  color:var(--twills-muted);
+}
+
+body[data-page="member-profile"] .display-title,
+body[data-page="member-profile"] .section-title{
+  color:var(--twills-ink);
+  text-shadow:
+    0 10px 28px rgba(218,235,255,.14),
+    0 0 20px rgba(218,181,94,.08);
+}
+
+body[data-page="member-profile"] .badge-row > span{
+  min-height:30px;
+  box-sizing:border-box;
+  border:1px solid rgba(218,235,255,.30);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,.10), transparent 46%),
+    linear-gradient(135deg, rgba(218,235,255,.13), rgba(7,10,13,.30));
+  color:var(--twills-ink);
+  letter-spacing:0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="member-profile"] .col-4 .glass-card{
+  text-align:center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,235,255,.16), transparent 42%),
+    linear-gradient(160deg, rgba(8,12,16,.90), rgba(5,8,11,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,235,255,.58), rgba(255,255,255,.07) 44%, rgba(218,181,94,.30)) border-box;
+}
+
+body[data-page="member-profile"] .col-8 .glass-card{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(218,235,255,.11), transparent 42%),
+    radial-gradient(circle at 100% 8%, rgba(222,151,177,.08), transparent 38%),
+    linear-gradient(160deg, rgba(8,12,16,.90), rgba(6,9,12,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,235,255,.48), rgba(255,255,255,.07) 46%, rgba(48,178,143,.26)) border-box;
+}
+
+body[data-page="member-profile"] .profile-avatar{
+  width:100%;
+  max-width:330px;
+  aspect-ratio:787 / 909;
+  margin:14px auto 0;
+  object-fit:cover;
+  border-radius:24px;
+  border:1px solid rgba(218,235,255,.34);
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.38),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    0 0 30px rgba(218,235,255,.12),
+    0 0 42px rgba(218,181,94,.08);
+}
+
+.profile-detail-list{
+  display:grid;
+  gap:10px;
+  margin:18px 0 0;
+}
+
+.profile-detail-list div{
+  display:grid;
+  gap:4px;
+  padding:10px 12px;
+  border:1px solid rgba(220,235,255,.14);
+  border-radius:14px;
+  background:rgba(0,0,0,.16);
+}
+
+.profile-detail-list dt{
+  color:var(--muted);
+  font-size:.78rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.profile-detail-list dd{
+  margin:0;
+  color:var(--text);
+  overflow-wrap:anywhere;
+}
+
+body[data-page="member-profile"] #memberProfileBio{
+  width:100%;
+  max-width:68ch;
+  box-sizing:border-box;
+  padding:clamp(16px, 2.4vw, 22px);
+  border-radius:22px;
+  border:1px solid rgba(218,235,255,.24);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(218,235,255,.10), transparent 42%),
+    linear-gradient(135deg, rgba(218,235,255,.08), rgba(0,0,0,.16));
+  color:rgba(244,250,255,.86);
+  line-height:1.82;
+  gap:16px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.24);
+}
+
+body[data-page="member-profile"] #memberProfileBio p{
+  margin:0;
+}
+
+/* =========================================================
+   LEADERS â€” Council intro container (background plate)
+   ========================================================= */
+body[data-page="leaders"] .leaders-council-intro{
+  margin-top:24px;
+  padding:14px 18px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:var(--bg-2);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+}
+
+body[data-page="leaders"] .leaders-council-intro .section-title{
+  margin:0 0 8px;
+}
+
+body[data-page="leaders"] .leaders-council-intro .muted{
+  margin:0;
+}
+
+@media (max-width:640px){
+  body[data-page="leaders"] #respGrid article > div:first-child{
+    aspect-ratio:4 / 3 !important;
+  }
+}

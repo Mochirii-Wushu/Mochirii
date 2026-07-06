@@ -1,0 +1,313 @@
+/* =========================================================
+   TOME / RANKS / LEADERS â€” Ceremonial visual pilot
+   ========================================================= */
+body[data-page="tome"],
+body[data-page="ranks"],
+body[data-page="leaders"]{
+  --ceremony-panel:rgba(8,10,12,.82);
+  --ceremony-panel-strong:rgba(9,12,14,.92);
+  --ceremony-ink:rgba(248,249,241,.90);
+  --ceremony-muted:rgba(230,235,224,.68);
+  --ceremony-rim-a:rgba(48,178,143,.54);
+  --ceremony-rim-b:rgba(218,181,94,.48);
+  --ceremony-rim-c:rgba(255,255,255,.08);
+  --ceremony-glow:rgba(48,178,143,.12);
+  --ceremony-warm:rgba(218,181,94,.16);
+}
+
+body[data-page="tome"]{
+  --ceremony-rim-a:rgba(48,178,143,.58);
+  --ceremony-rim-b:rgba(218,181,94,.54);
+  --ceremony-glow:rgba(48,178,143,.14);
+  --ceremony-warm:rgba(218,181,94,.14);
+}
+
+body[data-page="ranks"]{
+  --ceremony-rim-a:rgba(218,181,94,.64);
+  --ceremony-rim-b:rgba(124,171,115,.42);
+  --ceremony-glow:rgba(218,181,94,.13);
+  --ceremony-warm:rgba(124,171,115,.12);
+}
+
+body[data-page="leaders"]{
+  --ceremony-rim-a:rgba(48,178,143,.52);
+  --ceremony-rim-b:rgba(220,235,255,.46);
+  --ceremony-glow:rgba(118,178,188,.13);
+  --ceremony-warm:rgba(48,178,143,.11);
+}
+
+body[data-page="tome"] .page-hero,
+body[data-page="ranks"] .page-hero,
+body[data-page="leaders"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(7,9,10,.16), rgba(7,9,10,.20)) padding-box,
+    linear-gradient(135deg, var(--ceremony-rim-a), rgba(255,255,255,.08) 48%, var(--ceremony-rim-b)) border-box;
+  box-shadow:
+    0 30px 84px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    0 0 44px var(--ceremony-glow);
+}
+
+body[data-page="tome"] .hero-intro,
+body[data-page="ranks"] .hero-intro,
+body[data-page="leaders"] .hero-intro,
+body[data-page="tome"] .page-main .glass-card,
+body[data-page="ranks"] .page-main .glass-card,
+body[data-page="leaders"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  animation:none;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 12% 0%, var(--ceremony-glow), transparent 36%),
+    radial-gradient(circle at 88% 12%, var(--ceremony-warm), transparent 36%),
+    linear-gradient(155deg, var(--ceremony-panel-strong), var(--ceremony-panel)) padding-box,
+    linear-gradient(135deg, var(--ceremony-rim-a), var(--ceremony-rim-c) 44%, var(--ceremony-rim-b)) border-box;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.45),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-page="tome"] .hero-intro::before,
+body[data-page="ranks"] .hero-intro::before,
+body[data-page="leaders"] .hero-intro::before,
+body[data-page="tome"] .page-main .glass-card::before,
+body[data-page="ranks"] .page-main .glass-card::before,
+body[data-page="leaders"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent) top / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 48%);
+}
+
+body[data-page="tome"] .page-main .grid-gap,
+body[data-page="ranks"] .page-main .grid-gap,
+body[data-page="leaders"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="tome"] .glass-pad,
+body[data-page="ranks"] .glass-pad,
+body[data-page="leaders"] .glass-pad{
+  padding:clamp(20px, 2.8vw, 30px);
+}
+
+body[data-page="tome"] .kicker,
+body[data-page="tome"] .meta-text,
+body[data-page="tome"] .muted,
+body[data-page="ranks"] .kicker,
+body[data-page="ranks"] .meta-text,
+body[data-page="ranks"] .muted,
+body[data-page="leaders"] .kicker,
+body[data-page="leaders"] .meta-text,
+body[data-page="leaders"] .muted{
+  color:var(--ceremony-muted);
+}
+
+body[data-page="tome"] .display-title,
+body[data-page="tome"] .section-title,
+body[data-page="ranks"] .display-title,
+body[data-page="ranks"] .section-title,
+body[data-page="leaders"] .display-title,
+body[data-page="leaders"] .section-title{
+  text-shadow:0 10px 28px var(--ceremony-glow);
+}
+
+body[data-page="tome"] .badge-row > span,
+body[data-page="ranks"] .badge-row > span,
+body[data-page="leaders"] .badge-row > span{
+  animation:none;
+  border:1px solid color-mix(in srgb, var(--ceremony-rim-a) 55%, rgba(255,255,255,.12));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ceremony-rim-a) 34%, transparent), rgba(255,255,255,.045));
+  color:var(--ceremony-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="tome"] .footer-link,
+body[data-page="ranks"] .footer-link,
+body[data-page="leaders"] .footer-link{
+  border-color:color-mix(in srgb, var(--ceremony-rim-a) 35%, rgba(255,255,255,.12));
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.04), rgba(0,0,0,.18));
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
+}
+
+body[data-page="tome"] .footer-link:hover,
+body[data-page="ranks"] .footer-link:hover,
+body[data-page="leaders"] .footer-link:hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb, var(--ceremony-rim-b) 65%, rgba(255,255,255,.18));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ceremony-rim-a) 20%, rgba(0,0,0,.28)), rgba(255,255,255,.055));
+}
+
+body[data-page="tome"] .footer-link:focus-visible,
+body[data-page="ranks"] .footer-link:focus-visible,
+body[data-page="leaders"] .footer-link:focus-visible{
+  outline:2px solid color-mix(in srgb, var(--ceremony-rim-b) 72%, #fff);
+  outline-offset:4px;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ceremony-rim-a) 32%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--ceremony-rim-b) 20%, transparent);
+}
+
+body[data-page="tome"] #introImage,
+body[data-page="tome"] #tenetsImage,
+body[data-page="tome"] #etiquetteImage,
+body[data-page="tome"] #rhythmImage,
+body[data-page="tome"] #recImage,
+body[data-page="ranks"] #ranksHeroImage,
+body[data-page="ranks"] #seniorImage,
+body[data-page="ranks"] #middleImage,
+body[data-page="ranks"] #membersImage,
+body[data-page="leaders"] #leadersHeroImage,
+body[data-page="leaders"] #leadersPanelImage{
+  border-radius:22px;
+  border:1px solid color-mix(in srgb, var(--ceremony-rim-b) 34%, rgba(255,255,255,.10));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 18px 42px rgba(0,0,0,.34),
+    0 0 26px var(--ceremony-glow);
+}
+
+body[data-page="tome"] #tenetsGrid .glass-card,
+body[data-page="tome"] #rhythmGrid .glass-card,
+body[data-page="tome"] #recGrid .glass-card{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(48,178,143,.13), transparent 42%),
+    linear-gradient(160deg, rgba(10,15,13,.90), rgba(6,8,8,.78)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.44), rgba(255,255,255,.06) 48%, rgba(218,181,94,.24)) border-box;
+}
+
+body[data-page="tome"] #etiquetteBlocks .glass-card{
+  background:
+    radial-gradient(circle at 100% 0%, rgba(218,181,94,.14), transparent 42%),
+    linear-gradient(160deg, rgba(13,14,10,.90), rgba(7,8,7,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.42), rgba(255,255,255,.06) 48%, rgba(48,178,143,.24)) border-box;
+}
+
+body[data-page="tome"] #etiquetteBlocks ul{
+  margin:14px 0 0;
+  padding-left:1.15rem;
+  color:var(--ceremony-muted);
+  line-height:1.68;
+}
+
+body[data-page="tome"] #etiquetteBlocks li + li{
+  margin-top:8px;
+}
+
+body[data-page="ranks"] #progressionPills > span,
+body[data-page="ranks"] #middlePills > span,
+body[data-page="ranks"] #membersPills > span{
+  border-color:rgba(218,181,94,.34);
+  background:
+    linear-gradient(135deg, rgba(218,181,94,.17), rgba(124,171,115,.10));
+}
+
+body[data-page="ranks"] #seniorRanks .glass-card,
+body[data-page="ranks"] #middleRanks .glass-card,
+body[data-page="ranks"] #membersRanks .glass-card{
+  background:
+    linear-gradient(160deg, rgba(14,13,8,.88), rgba(7,8,7,.80)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.48), rgba(255,255,255,.06) 46%, rgba(124,171,115,.24)) border-box;
+}
+
+body[data-page="ranks"] #middleRanks .glass-card{
+  background:
+    linear-gradient(160deg, rgba(12,13,9,.88), rgba(7,8,7,.80)) padding-box,
+    linear-gradient(135deg, rgba(124,171,115,.38), rgba(255,255,255,.06) 46%, rgba(218,181,94,.32)) border-box;
+}
+
+body[data-page="ranks"] #membersRanks .glass-card{
+  background:
+    linear-gradient(160deg, rgba(10,13,9,.88), rgba(6,8,7,.80)) padding-box,
+    linear-gradient(135deg, rgba(124,171,115,.34), rgba(255,255,255,.06) 46%, rgba(218,181,94,.22)) border-box;
+}
+
+body[data-page="ranks"] #seniorRanks h3,
+body[data-page="ranks"] #middleRanks h3,
+body[data-page="ranks"] #membersRanks h3{
+  margin-bottom:10px;
+  color:var(--ceremony-ink);
+}
+
+body[data-page="leaders"] .leaders-council-intro{
+  margin-top:clamp(24px, 3vw, 34px);
+  padding:clamp(18px, 2.4vw, 26px);
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(48,178,143,.12), transparent 38%),
+    linear-gradient(155deg, rgba(8,13,14,.88), rgba(5,7,8,.78)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.42), rgba(220,235,255,.18) 50%, rgba(255,255,255,.07)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 18px 46px rgba(0,0,0,.30);
+}
+
+body[data-page="leaders"] #leadersGrid article,
+body[data-page="leaders"] #respGrid article{
+  background:
+    radial-gradient(circle at 12% 0%, rgba(48,178,143,.12), transparent 38%),
+    linear-gradient(160deg, rgba(8,13,14,.90), rgba(5,7,8,.80)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.42), rgba(255,255,255,.07) 46%, rgba(220,235,255,.26)) border-box;
+}
+
+body[data-page="leaders"] #leadersGrid article > div:first-child,
+body[data-page="leaders"] #respGrid article > div:first-child{
+  border:1px solid rgba(220,235,255,.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 18px 40px rgba(0,0,0,.32);
+}
+
+body[data-page="leaders"] #leadersGrid article img,
+body[data-page="leaders"] #respGrid article img{
+  filter:saturate(1.03) contrast(1.02);
+}
+
+body[data-page="leaders"] #leadersGrid article .glass-card--primary,
+body[data-page="leaders"] #respGrid article .glass-card--primary{
+  border:1px solid rgba(220,235,255,.18);
+  background:
+    linear-gradient(135deg, rgba(8,12,14,.78), rgba(4,6,7,.70));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 12px 28px rgba(0,0,0,.30);
+}
+
+body[data-page="leaders"] #leadersGrid article .badge-row > span{
+  border-color:rgba(48,178,143,.34);
+  background:
+    linear-gradient(135deg, rgba(48,178,143,.20), rgba(220,235,255,.08));
+}
+
+@media (max-width:640px){
+  body[data-page="tome"] .hero-intro,
+  body[data-page="ranks"] .hero-intro,
+  body[data-page="leaders"] .hero-intro{
+    text-align:left;
+    align-items:flex-start;
+  }
+
+  body[data-page="tome"] .hero-intro .badge-row,
+  body[data-page="ranks"] .hero-intro .badge-row,
+  body[data-page="leaders"] .hero-intro .badge-row{
+    justify-content:flex-start;
+  }
+
+  body[data-page="tome"] #etiquetteBlocks ul{
+    padding-left:1rem;
+  }
+}

@@ -1,0 +1,474 @@
+/* =========================================================
+   SIDE PAGES â€” Supporting visual polish pilot
+   ========================================================= */
+body[data-page="announcements"],
+body[data-page="raffles"],
+body[data-page="spotify"],
+body[data-page="spotlight"]{
+  --side-panel:rgba(8,10,12,.82);
+  --side-panel-strong:rgba(9,12,14,.92);
+  --side-ink:rgba(248,250,246,.90);
+  --side-muted:rgba(229,237,232,.70);
+  --side-rim-a:rgba(48,178,143,.52);
+  --side-rim-b:rgba(220,235,255,.42);
+  --side-rim-c:rgba(255,255,255,.08);
+  --side-glow:rgba(48,178,143,.12);
+  --side-warm:rgba(220,235,255,.10);
+}
+
+body[data-page="announcements"]{
+  --side-rim-a:rgba(48,178,143,.56);
+  --side-rim-b:rgba(220,235,255,.44);
+  --side-glow:rgba(48,178,143,.13);
+  --side-warm:rgba(220,235,255,.12);
+}
+
+body[data-page="raffles"]{
+  --side-rim-a:rgba(218,181,94,.62);
+  --side-rim-b:rgba(48,178,143,.42);
+  --side-glow:rgba(218,181,94,.13);
+  --side-warm:rgba(48,178,143,.10);
+}
+
+body[data-page="spotify"]{
+  --side-rim-a:rgba(220,235,255,.54);
+  --side-rim-b:rgba(210,147,188,.34);
+  --side-glow:rgba(134,185,210,.13);
+  --side-warm:rgba(210,147,188,.10);
+}
+
+body[data-page="spotlight"]{
+  --side-rim-a:rgba(222,151,177,.50);
+  --side-rim-b:rgba(218,181,94,.46);
+  --side-glow:rgba(222,151,177,.13);
+  --side-warm:rgba(48,178,143,.10);
+}
+
+body[data-page="announcements"] .page-hero,
+body[data-page="raffles"] .page-hero,
+body[data-page="spotify"] .page-hero,
+body[data-page="spotlight"] .page-hero{
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(7,9,10,.16), rgba(7,9,10,.20)) padding-box,
+    linear-gradient(135deg, var(--side-rim-a), rgba(255,255,255,.08) 48%, var(--side-rim-b)) border-box;
+  box-shadow:
+    0 30px 82px rgba(0,0,0,.50),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    0 0 42px var(--side-glow);
+}
+
+body[data-page="announcements"] .hero-intro,
+body[data-page="raffles"] .hero-intro,
+body[data-page="spotify"] .hero-intro,
+body[data-page="spotlight"] .hero-intro,
+body[data-page="announcements"] .page-main .glass-card,
+body[data-page="raffles"] .page-main .glass-card,
+body[data-page="spotify"] .page-main .glass-card,
+body[data-page="spotlight"] .page-main .glass-card{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+  animation:none;
+  border:1px solid transparent;
+  background:
+    radial-gradient(circle at 10% 0%, var(--side-glow), transparent 36%),
+    radial-gradient(circle at 90% 12%, var(--side-warm), transparent 36%),
+    linear-gradient(155deg, var(--side-panel-strong), var(--side-panel)) padding-box,
+    linear-gradient(135deg, var(--side-rim-a), var(--side-rim-c) 44%, var(--side-rim-b)) border-box;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.45),
+    0 0 0 1px rgba(255,255,255,.045) inset,
+    inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-page="announcements"] .hero-intro::before,
+body[data-page="raffles"] .hero-intro::before,
+body[data-page="spotify"] .hero-intro::before,
+body[data-page="spotlight"] .hero-intro::before,
+body[data-page="announcements"] .page-main .glass-card::before,
+body[data-page="raffles"] .page-main .glass-card::before,
+body[data-page="spotify"] .page-main .glass-card::before,
+body[data-page="spotlight"] .page-main .glass-card::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  z-index:-1;
+  border-radius:inherit;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent) top / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 48%);
+}
+
+body[data-page="announcements"] .page-main .grid-gap,
+body[data-page="raffles"] .page-main .grid-gap,
+body[data-page="spotify"] .page-main .grid-gap,
+body[data-page="spotlight"] .page-main .grid-gap{
+  gap:clamp(22px, 3vw, 34px);
+}
+
+body[data-page="announcements"] .glass-pad,
+body[data-page="raffles"] .glass-pad,
+body[data-page="spotify"] .glass-pad,
+body[data-page="spotlight"] .glass-pad{
+  padding:clamp(20px, 2.8vw, 30px);
+}
+
+body[data-page="announcements"] .kicker,
+body[data-page="announcements"] .meta-text,
+body[data-page="announcements"] .muted,
+body[data-page="raffles"] .kicker,
+body[data-page="raffles"] .meta-text,
+body[data-page="raffles"] .muted,
+body[data-page="spotify"] .kicker,
+body[data-page="spotify"] .meta-text,
+body[data-page="spotify"] .muted,
+body[data-page="spotlight"] .kicker,
+body[data-page="spotlight"] .meta-text,
+body[data-page="spotlight"] .muted{
+  color:var(--side-muted);
+}
+
+body[data-page="announcements"] .display-title,
+body[data-page="announcements"] .section-title,
+body[data-page="raffles"] .display-title,
+body[data-page="raffles"] .section-title,
+body[data-page="spotify"] .display-title,
+body[data-page="spotify"] .section-title,
+body[data-page="spotlight"] .display-title,
+body[data-page="spotlight"] .section-title{
+  text-shadow:0 10px 28px var(--side-glow);
+}
+
+body[data-page="announcements"] .badge-row > span,
+body[data-page="raffles"] .badge-row > span,
+body[data-page="spotify"] .badge-row > span,
+body[data-page="spotlight"] .badge-row > span{
+  animation:none;
+  border:1px solid color-mix(in srgb, var(--side-rim-a) 55%, rgba(255,255,255,.12));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--side-rim-a) 30%, transparent), rgba(255,255,255,.045));
+  color:var(--side-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    0 8px 20px rgba(0,0,0,.24);
+}
+
+body[data-page="announcements"] .list-stack,
+body[data-page="raffles"] .list-stack,
+body[data-page="spotlight"] .list-stack{
+  gap:12px;
+}
+
+body[data-page="announcements"] .list-stack li::before,
+body[data-page="raffles"] .list-stack li::before,
+body[data-page="spotlight"] .list-stack li::before{
+  background:linear-gradient(180deg, var(--side-rim-a), var(--side-rim-b));
+  box-shadow:0 0 14px var(--side-glow);
+}
+
+body[data-page="announcements"] #announcementsList{
+  gap:16px;
+  margin-top:18px;
+}
+
+body[data-page="announcements"] #announcementsList > section{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(48,178,143,.12), transparent 38%),
+    linear-gradient(155deg, rgba(8,13,14,.88), rgba(5,7,8,.78)) padding-box,
+    linear-gradient(135deg, rgba(48,178,143,.44), rgba(255,255,255,.06) 48%, rgba(220,235,255,.24)) border-box;
+}
+
+body[data-page="announcements"] #announcementsList > section .lede{
+  color:var(--side-ink);
+}
+
+body[data-page="announcements"] #announcementsList > section .badge-row{
+  margin-top:14px;
+}
+
+body[data-page="raffles"] .col-4 .glass-card{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.17), transparent 46%),
+    linear-gradient(160deg, rgba(14,13,8,.92), rgba(7,8,7,.78)) padding-box,
+    linear-gradient(135deg, rgba(218,181,94,.52), rgba(255,255,255,.07) 46%, rgba(48,178,143,.24)) border-box;
+}
+
+body[data-page="raffles"] #rafflesRules{
+  margin-top:16px;
+}
+
+body[data-page="raffles"] #rafflesThisMonth .list-stack{
+  padding:12px;
+  border-radius:18px;
+  border:1px solid rgba(218,181,94,.20);
+  background:
+    linear-gradient(135deg, rgba(218,181,94,.10), rgba(0,0,0,.14));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+body[data-page="raffles"] #rafflesLinks{
+  margin-top:16px;
+}
+
+body[data-page="raffles"] #rafflesLinks > span{
+  border-color:rgba(218,181,94,.34);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(218,181,94,.16), transparent 58%),
+    linear-gradient(135deg, rgba(218,181,94,.14), rgba(48,178,143,.10));
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+}
+
+body[data-page="raffles"] #rafflesLinks > span:hover,
+body[data-page="raffles"] #rafflesLinks > span:focus-within{
+  transform:translateY(-1px);
+  border-color:rgba(248,250,246,.44);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    0 12px 28px rgba(0,0,0,.28),
+    0 0 0 1px rgba(218,181,94,.12);
+}
+
+body[data-page="raffles"] #rafflesLinks > span > a{
+  text-decoration:none;
+}
+
+body[data-page="raffles"] #rafflesLinks > span > a:focus-visible{
+  outline:2px solid color-mix(in srgb, var(--side-rim-a) 72%, #fff);
+  outline-offset:4px;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--side-rim-a) 30%, transparent),
+    0 0 0 5px color-mix(in srgb, var(--side-rim-b) 18%, transparent);
+}
+
+body[data-page="spotify"] .spotify-toolbar{
+  gap:14px;
+  margin-top:18px;
+  padding:14px;
+  border-radius:22px;
+  border:1px solid rgba(220,235,255,.14);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(220,235,255,.10), transparent 46%),
+    rgba(0,0,0,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+body[data-page="spotify"] .spotify-search{
+  min-width:min(100%, 240px);
+}
+
+body[data-page="spotify"] .spotify-search input{
+  border-radius:16px;
+  border-color:rgba(220,235,255,.20);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), transparent),
+    rgba(4,7,11,.62);
+  color:var(--side-ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 10px 24px rgba(0,0,0,.22);
+  transition:border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+}
+
+body[data-page="spotify"] .spotify-search input:focus-visible{
+  outline:2px solid rgba(220,235,255,.78);
+  outline-offset:3px;
+  border-color:rgba(220,235,255,.44);
+  background:rgba(7,11,16,.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 0 0 3px rgba(134,185,210,.20),
+    0 0 0 5px rgba(210,147,188,.12);
+}
+
+body[data-page="spotify"] .spotify-chips{
+  gap:10px;
+}
+
+body[data-page="spotify"] .spotify-chip{
+  border-color:rgba(220,235,255,.17);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), transparent),
+    rgba(5,8,13,.58);
+  color:var(--side-muted);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    0 9px 20px rgba(0,0,0,.18);
+  transition:transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease), box-shadow .18s var(--ease);
+}
+
+body[data-page="spotify"] .spotify-chip:hover,
+body[data-page="spotify"] .spotify-chip:focus-visible{
+  transform:translateY(-1px);
+  border-color:rgba(220,235,255,.42);
+  background:
+    linear-gradient(180deg, rgba(220,235,255,.08), rgba(210,147,188,.05)),
+    rgba(7,11,16,.70);
+  color:var(--side-ink);
+}
+
+body[data-page="spotify"] .spotify-chip:focus-visible{
+  outline:2px solid rgba(220,235,255,.78);
+  outline-offset:3px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 0 0 3px rgba(134,185,210,.20),
+    0 0 0 5px rgba(210,147,188,.12);
+}
+
+body[data-page="spotify"] .spotify-chip[aria-pressed="true"]{
+  border-color:rgba(220,235,255,.42);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(220,235,255,.16), transparent 58%),
+    linear-gradient(135deg, rgba(134,185,210,.18), rgba(210,147,188,.12));
+  color:var(--side-ink);
+  opacity:1;
+}
+
+body[data-page="spotify"] .spotify-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:clamp(14px, 1.7vw, 20px);
+  margin-top:18px;
+}
+
+body[data-page="spotify"] .spotify-card{
+  background:
+    radial-gradient(circle at 0% 0%, rgba(220,235,255,.11), transparent 38%),
+    linear-gradient(155deg, rgba(8,12,18,.90), rgba(4,7,11,.82)) padding-box,
+    linear-gradient(135deg, rgba(220,235,255,.44), rgba(255,255,255,.06) 48%, rgba(210,147,188,.22)) border-box;
+}
+
+body[data-page="spotify"] .spotify-card__head{
+  margin-bottom:12px;
+}
+
+body[data-page="spotify"] .spotify-card__title{
+  color:var(--side-ink);
+  letter-spacing:.01em;
+}
+
+body[data-page="spotify"] .spotify-card__meta{
+  color:var(--side-muted);
+  opacity:1;
+}
+
+body[data-page="spotify"] .spotify-embed{
+  margin-top:12px;
+  position:relative;
+  min-height:352px;
+  overflow:hidden;
+  border:1px solid rgba(220,235,255,.14);
+  border-radius:14px;
+  background:rgba(0,0,0,.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 14px 34px rgba(0,0,0,.28);
+}
+
+body[data-page="spotify"] .spotify-embed--compact{min-height:152px;}
+body[data-page="spotify"] .spotify-embed--standard{min-height:352px;}
+
+body[data-page="spotify"] .spotify-embed__placeholder{
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(220,235,255,.12), transparent 34%),
+    linear-gradient(135deg, rgba(134,185,210,.10), rgba(210,147,188,.08)),
+    rgba(0,0,0,.18);
+}
+
+body[data-page="spotify"] .spotify-embed iframe{
+  position:relative;
+  display:block;
+  width:100%;
+  max-width:100%;
+  border:0;
+  border-radius:inherit;
+}
+
+@media (max-width:640px){
+  body[data-page="spotify"] .spotify-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+body[data-page="spotify"] .spotify-empty{
+  border-color:rgba(220,235,255,.24);
+  background:
+    linear-gradient(135deg, rgba(220,235,255,.10), rgba(210,147,188,.06));
+  opacity:1;
+}
+
+body[data-page="spotlight"] #spotlightBody{
+  max-width:74ch;
+}
+
+body[data-page="spotlight"] #spotlightBody p{
+  line-height:1.78;
+}
+
+body[data-page="spotlight"] #spotlightConclusion{
+  margin-top:20px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(218,181,94,.22);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(222,151,177,.12), transparent 40%),
+    linear-gradient(135deg, rgba(218,181,94,.10), rgba(48,178,143,.07));
+  color:var(--side-ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+body[data-page="spotlight"] #spotlightConclusion:empty{
+  display:none;
+}
+
+body[data-page="spotlight"] #spotlightHighlights{
+  margin-top:16px;
+}
+
+body[data-page="spotlight"] .col-4 .glass-card{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(222,151,177,.15), transparent 46%),
+    linear-gradient(160deg, rgba(14,10,12,.92), rgba(7,8,7,.78)) padding-box,
+    linear-gradient(135deg, rgba(222,151,177,.42), rgba(255,255,255,.07) 48%, rgba(218,181,94,.26)) border-box;
+}
+
+@media (max-width:640px){
+  body[data-page="announcements"] .hero-intro,
+  body[data-page="raffles"] .hero-intro,
+  body[data-page="spotify"] .hero-intro,
+  body[data-page="spotlight"] .hero-intro{
+    text-align:left;
+    align-items:flex-start;
+  }
+
+  body[data-page="announcements"] .hero-intro .badge-row,
+  body[data-page="raffles"] .hero-intro .badge-row,
+  body[data-page="spotify"] .hero-intro .badge-row,
+  body[data-page="spotlight"] .hero-intro .badge-row{
+    justify-content:flex-start;
+  }
+
+  body[data-page="spotify"] .spotify-toolbar{
+    align-items:stretch;
+  }
+
+  body[data-page="spotify"] .spotify-chips{
+    width:100%;
+  }
+
+  body[data-page="spotify"] .spotify-chip{
+    flex:1 1 auto;
+  }
+}
+
+@media (max-width:480px){
+  body[data-page="events"] .events-filter{
+    flex:1 1 auto;
+    justify-content:center;
+  }
+}
