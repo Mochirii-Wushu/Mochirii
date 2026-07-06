@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -126,19 +127,19 @@ function checkDiscoveryFiles() {
   const robots = read("apps/web/public/robots.txt");
 
   for (const item of publicRoutes) {
-    const loc = item.route === "/" ? "https://mochirii.com/" : `https://mochirii.com${item.route}`;
+    const loc = item.route === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${item.route}`;
     assertIncludes("sitemap", sitemap, `<loc>${loc}</loc>`);
   }
 
   for (const item of noindexRoutes) {
-    assert(!sitemap.includes(`https://mochirii.com${item.route}`), `sitemap: protected route must stay excluded: ${item.route}`);
+    assert(!sitemap.includes(`${SITE_ORIGIN}${item.route}`), `sitemap: protected route must stay excluded: ${item.route}`);
   }
 
   for (const item of retiredRoutes) {
-    assert(!sitemap.includes(`https://mochirii.com${item.route}`), `sitemap: retired route must stay excluded: ${item.route}`);
+    assert(!sitemap.includes(`${SITE_ORIGIN}${item.route}`), `sitemap: retired route must stay excluded: ${item.route}`);
   }
 
-  assertIncludes("robots", robots, "Sitemap: https://mochirii.com/sitemap.xml");
+  assertIncludes("robots", robots, `Sitemap: ${SITE_ORIGIN}/sitemap.xml`);
 }
 
 function checkProductionSmokeCoverage() {
@@ -170,7 +171,7 @@ async function checkLiveIfRequested() {
     return;
   }
 
-  const baseUrl = process.env.MOCHIRII_PRODUCTION_BASE_URL || "https://mochirii.com";
+  const baseUrl = process.env.MOCHIRII_PRODUCTION_BASE_URL || SITE_ORIGIN;
   const requiredHeaders = [
     "content-security-policy",
     "x-content-type-options",

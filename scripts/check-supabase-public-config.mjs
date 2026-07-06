@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const allowedEnvFiles = new Set([
@@ -8,7 +9,7 @@ const allowedEnvFiles = new Set([
   "apps/web/.env.example",
   "supabase/functions/.env.example",
 ]);
-const expectedProjectRef = "deyvmtncimmcinldjyqe";
+const expectedProjectRef = SUPABASE_PROJECT_REF;
 const expectedUrl = `https://${expectedProjectRef}.supabase.co`;
 
 const forbiddenBrowserTerms = [
