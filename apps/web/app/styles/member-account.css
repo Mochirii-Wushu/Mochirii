@@ -1,0 +1,154 @@
+.account-main{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.account-overview-grid{
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+}
+
+.account-action-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:10px;
+}
+
+.account-action-card{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:104px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(220,235,255,.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), transparent),
+    rgba(0,0,0,.16);
+  color:var(--ink-0);
+  text-decoration:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  transition:border-color .16s ease, background .16s ease, transform .16s ease;
+}
+
+.account-action-card:hover,
+.account-action-card:focus-visible{
+  border-color:rgba(220,235,255,.32);
+  background:rgba(255,255,255,.055);
+  transform:translateY(-1px);
+}
+
+.account-action-card:focus-visible{
+  outline:2px solid rgba(220,235,255,.72);
+  outline-offset:3px;
+}
+
+.account-action-card span{
+  color:var(--ink-0);
+  font-weight:800;
+  line-height:1.25;
+}
+
+.account-action-card small{
+  margin-top:10px;
+  color:var(--auth-muted);
+  font-size:12px;
+  line-height:1.45;
+}
+
+.account-action-card--button{
+  cursor:pointer;
+  font:inherit;
+  text-align:left;
+}
+
+.account-action-card--button:disabled{
+  cursor:not-allowed;
+  opacity:.58;
+  transform:none;
+}
+
+.account-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:10px;
+}
+
+.account-summary-card{
+  min-width:0;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(220,235,255,.11);
+  background:rgba(0,0,0,.15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.account-action-card,
+.account-summary-card,
+.review-item,
+.review-meta > div,
+.review-history,
+.moderation-summary__card{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.045), transparent 46%),
+    radial-gradient(circle at 16% 0%, rgba(48,178,143,.09), transparent 42%),
+    var(--surface-admin-panel);
+  border-color:rgba(220,235,255,.14);
+}
+
+.account-summary-card span{
+  display:block;
+  color:var(--auth-muted);
+  font-size:11px;
+  line-height:1.2;
+}
+
+.account-summary-card strong{
+  display:block;
+  margin-top:5px;
+  color:var(--ink-0);
+  font-size:20px;
+  line-height:1;
+}
+
+.profile-completion-panel{
+  margin-bottom:18px;
+}
+
+.profile-publish-panel{
+  margin-bottom:18px;
+}
+
+.profile-progress{
+  display:block;
+  width:100%;
+  appearance:none;
+  -webkit-appearance:none;
+  overflow:hidden;
+  height:9px;
+  border-radius:999px;
+  border:1px solid rgba(220,235,255,.12);
+  background:rgba(0,0,0,.22);
+}
+
+.profile-progress::-webkit-progress-bar{
+  background:transparent;
+}
+
+.profile-progress::-webkit-progress-value{
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg, rgba(48,178,143,.86), rgba(218,181,94,.82));
+  transition:width .2s ease;
+}
+
+.profile-progress::-moz-progress-bar{
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg, rgba(48,178,143,.86), rgba(218,181,94,.82));
+  transition:width .2s ease;
+}
+
+.account-missing-list{
+  margin-top:0;
+}
