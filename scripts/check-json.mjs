@@ -1,22 +1,24 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import path from "node:path";
+import { readJsonFile } from "./lib/json.mjs";
+import { fromRoot, toRepoPath } from "./lib/repo-paths.mjs";
 
-const root = process.cwd();
 const jsonDirs = ["data", "assets/lottie"];
 let checked = 0;
 let failed = false;
 
 for (const dir of jsonDirs) {
-  const fullDir = path.join(root, dir);
+  const fullDir = fromRoot(dir);
   for (const entry of readdirSync(fullDir, { withFileTypes: true })) {
     if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
     const file = path.join(fullDir, entry.name);
+    const repoPath = toRepoPath(file);
     checked += 1;
     try {
-      JSON.parse(readFileSync(file, "utf8"));
+      readJsonFile(repoPath);
     } catch (error) {
       failed = true;
-      console.error(`${path.relative(root, file)}: ${error.message}`);
+      console.error(error.message);
     }
   }
 }
@@ -27,4 +29,3 @@ if (failed) {
 }
 
 console.log(`JSON OK (${checked} files).`);
-

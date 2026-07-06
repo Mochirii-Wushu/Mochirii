@@ -1,14 +1,9 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { readAppCss } from "./lib/app-css.mjs";
+import { readJsonFile } from "./lib/json.mjs";
 import { readPublicPageExport } from "./lib/public-page-source.mjs";
+import { readText, repoRoot } from "./lib/repo-paths.mjs";
 
-const root = process.cwd();
 const failures = [];
-
-function read(relativePath) {
-  return readFileSync(path.join(root, relativePath), "utf8");
-}
 
 function fail(message) {
   failures.push(message);
@@ -22,11 +17,11 @@ function assertNotIncludes(label, source, snippet) {
   if (source.includes(snippet)) fail(`${label}: unexpected ${snippet}`);
 }
 
-const eventsSource = readPublicPageExport(root, "EventsPage", failures).text;
-const boardSource = read("apps/web/components/public-pages/EventsBoard.tsx");
+const eventsSource = readPublicPageExport(repoRoot, "EventsPage", failures).text;
+const boardSource = readText("apps/web/components/public-pages/EventsBoard.tsx");
 const cssSource = readAppCss().replace(/\r\n/g, "\n");
-const scheduleSource = read("apps/web/lib/guild-schedule.ts");
-const schedule = JSON.parse(read("data/guild-schedule.json"));
+const scheduleSource = readText("apps/web/lib/guild-schedule.ts");
+const schedule = readJsonFile("data/guild-schedule.json");
 
 if (!eventsSource) fail("EventsPage source block not found.");
 assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData)");

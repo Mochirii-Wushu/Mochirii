@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readJsonFile } from "./lib/json.mjs";
 
 const file = "data/gallery.json";
-const data = JSON.parse(readFileSync(file, "utf8"));
+const data = readJsonFile(file);
 const albums = Array.isArray(data.albums) ? data.albums : [];
 const isoUtcPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const failures = [];
@@ -38,4 +38,3 @@ if (failures.length) {
 }
 
 console.log(`Gallery timestamps OK (${checked} items).`);
-

@@ -1,4 +1,4 @@
-import { spawnSync } from "node:child_process";
+import { runCheckSuite } from "./lib/check-runner.mjs";
 
 const checks = [
   ["check:js", ["node", "scripts/check-js.mjs"]],
@@ -61,15 +61,7 @@ const checks = [
   ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],
 ];
 
-let failed = false;
-
-for (const [label, command] of checks) {
-  console.log(`\n== ${label} ==`);
-  const result = spawnSync(command[0], command.slice(1), { stdio: "inherit" });
-  if (result.status !== 0) failed = true;
-}
-
-if (failed) {
+if (!runCheckSuite(checks)) {
   console.error("\nValidation failed.");
   process.exit(1);
 }
