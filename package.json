@@ -87,6 +87,7 @@
     "prepare:live-member-qa-image": "node scripts/prepare-live-member-qa-image.mjs",
     "prepare:live-member-qa-local": "node scripts/prepare-live-member-qa-local.mjs",
     "register:reaper-modmail-audit-command": "node scripts/register-reaper-modmail-audit-command.mjs",
+    "register:reaper-gallery-submit-command": "node scripts/register-reaper-gallery-submit-command.mjs",
     "register:reaper-pending-verification-command": "node scripts/register-reaper-pending-verification-command.mjs",
     "rollback:reaper-pending-verification": "node scripts/rollback-reaper-pending-verification-overwrites.mjs",
     "smoke:dns-cutover-post": "node scripts/smoke-dns-cutover-post.mjs",

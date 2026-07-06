@@ -47,10 +47,10 @@ Allow Mōchirīī to share this image on our official Instagram if approved.
 Reaper's Gallery command must match this interface:
 
 ```text
-/submit image:<file> title:<title> subtitle:<subtitle> share_to_instagram:<true|false>
+/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]
 ```
 
-`share_to_instagram` is optional, defaults to `false`, and maps to the Supabase ingest payload field:
+`image` is required. `title`, `subtitle`, and `share_to_instagram` are optional. `share_to_instagram` defaults to `false` and maps to the Supabase ingest payload field:
 
 ```json
 {
@@ -207,6 +207,7 @@ Allow Mōchirīī to share this image on our official Instagram if approved.
 The guild-scoped `/submit` command must:
 
 - reject submissions outside channel `1508077313965817856`
+- require only `image`; keep `title`, `subtitle`, and `share_to_instagram` optional so the command matches the pinned channel instructions
 - default `share_to_instagram` to `false`
 - send `instagramOptIn: true` only when the user explicitly selects true
 - preserve Discord message/attachment idempotency
