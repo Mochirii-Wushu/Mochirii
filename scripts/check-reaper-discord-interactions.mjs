@@ -8,6 +8,7 @@ const files = {
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
   function: "supabase/functions/reaper-discord-interactions/index.ts",
+  interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
   sharedPendingContainment: "supabase/functions/_shared/pending-verification-containment.ts",
   memberSyncFunction: "supabase/functions/reaper-discord-member-sync/index.ts",
   memberSyncImportMap: "supabase/functions/reaper-discord-member-sync/deno.json",
@@ -49,6 +50,8 @@ const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
 const functionSource = read(files.function);
+const interactionHelpers = read(files.interactionHelpers);
+const interactionContractSource = [functionSource, interactionHelpers].join("\n");
 const sharedPendingContainment = read(files.sharedPendingContainment);
 const memberSyncFunction = read(files.memberSyncFunction);
 const memberSyncImportMap = read(files.memberSyncImportMap);
@@ -176,7 +179,7 @@ assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
   "reaper-event-sync",
   "discord_resources",
   "url: `https://discord.com/events/${EXPECTED_DISCORD_GUILD_ID}/${eventId}`",
-].forEach((snippet) => assertIncludes("reaper-discord-interactions", functionSource, snippet));
+].forEach((snippet) => assertIncludes("reaper-discord-interactions", interactionContractSource, snippet));
 
 [
   "PENDING_BASE_ROLE_ID = \"1468659807736299520\"",
@@ -356,7 +359,7 @@ assertMatches(
 
 assertIncludes(
   "reaper-discord-interactions",
-  functionSource,
+  interactionContractSource,
   "return /\\.(jpe?g|png|webp)$/i.test(filename);",
 );
 
@@ -369,7 +372,7 @@ assertNotMatches(
 
 assertMatches(
   "reaper-discord-interactions",
-  functionSource,
+  interactionContractSource,
   /type:\s*INTERACTION_RESPONSE_CHANNEL_MESSAGE[\s\S]*flags:\s*EPHEMERAL_FLAG/,
   "validation messages must be ephemeral interaction responses.",
 );

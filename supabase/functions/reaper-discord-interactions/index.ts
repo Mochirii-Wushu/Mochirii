@@ -32,6 +32,24 @@ import {
   MODMAIL_LOG_CHANNEL_ID,
   MODMAIL_MODERATOR_ROLE_ID,
 } from "../_shared/modmail-audit.ts";
+import {
+  allowedImageFilename,
+  asArray,
+  asRecord,
+  asStringArray,
+  attachmentOption,
+  booleanOption,
+  deferredEphemeralResponse,
+  interactionMessage,
+  jsonResponse,
+  normalizedMime,
+  parseCsv,
+  safeDiscordResponseMessage,
+  safeString,
+  snowflake,
+  stringOption,
+  successMessage,
+} from "../_shared/discord-interaction-helpers.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -53,7 +71,6 @@ const EXPECTED_MODMAIL_LOG_CHANNEL_ID = MODMAIL_LOG_CHANNEL_ID;
 const EXPECTED_MODMAIL_MODERATOR_ROLE_ID = MODMAIL_MODERATOR_ROLE_ID;
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
 const GUILD_SCHEDULE_URL = "https://mochirii.com/data/guild-schedule.json";
-const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const MANAGE_EVENTS_PERMISSION = 1n << 33n;
 const CREATE_EVENTS_PERMISSION = 1n << 44n;
@@ -63,16 +80,10 @@ const DISCORD_API_MAX_RETRIES = 2;
 const DISCORD_FUNCTION_RETRY_BUDGET_MS = 45_000;
 const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment";
 const SIGNATURE_WINDOW_MS = 5 * 60 * 1000;
-const EPHEMERAL_FLAG = 1 << 6;
 const INTERACTION_TYPE_PING = 1;
 const INTERACTION_TYPE_APPLICATION_COMMAND = 2;
 const INTERACTION_TYPE_MESSAGE_COMPONENT = 3;
 const INTERACTION_RESPONSE_PONG = 1;
-const INTERACTION_RESPONSE_CHANNEL_MESSAGE = 4;
-const INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5;
-const OPTION_TYPE_STRING = 3;
-const OPTION_TYPE_BOOLEAN = 5;
-const OPTION_TYPE_ATTACHMENT = 11;
 const DISCORD_EVENT_PRIVACY_GUILD_ONLY = 2;
 const DISCORD_EVENT_ENTITY_EXTERNAL = 3;
 const eventCoverImageCache = new Map<string, string>();
@@ -309,64 +320,6 @@ function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()): Sche
   return events;
 }
 
-function jsonResponse(body: JsonRecord, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-}
-
-function interactionMessage(content: string): Response {
-  return jsonResponse(
-    {
-      type: INTERACTION_RESPONSE_CHANNEL_MESSAGE,
-      data: {
-        content,
-        flags: EPHEMERAL_FLAG,
-        allowed_mentions: {
-          parse: [],
-        },
-      },
-    },
-  );
-}
-
-function deferredEphemeralResponse(): Response {
-  return jsonResponse({
-    type: INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE,
-    data: {
-      flags: EPHEMERAL_FLAG,
-    },
-  });
-}
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as JsonRecord : {};
-}
-
-function asArray(value: unknown): unknown[] {
-  return Array.isArray(value) ? value : [];
-}
-
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean) : [];
-}
-
-function safeString(value: unknown, maxLength: number): string | null {
-  const text = String(value ?? "").trim();
-  if (!text) return null;
-  return text.slice(0, maxLength);
-}
-
-function parseCsv(value: string | null | undefined): string[] {
-  return String(value || "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function getServiceRoleKey(): string {
   const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (direct) return direct;
@@ -396,22 +349,6 @@ function serviceAdminClient(purpose: string): SupabaseAdminClient {
       autoRefreshToken: false,
     },
   });
-}
-
-function snowflake(value: unknown): string | null {
-  const id = safeString(value, 24);
-  return id && /^\d{16,22}$/.test(id) ? id : null;
-}
-
-function normalizedMime(value: unknown): string | null {
-  const mime = safeString(value, 80)?.split(";")[0]?.trim().toLowerCase() || null;
-  if (mime === "image/jpg") return "image/jpeg";
-  return mime && ALLOWED_MIME_TYPES.has(mime) ? mime : null;
-}
-
-function allowedImageFilename(value: unknown): boolean {
-  const filename = safeString(value, 255)?.toLowerCase() || "";
-  return /\.(jpe?g|png|webp)$/i.test(filename);
 }
 
 function hexToBytes(value: string): Uint8Array | null {
@@ -1276,50 +1213,8 @@ function verifyDiscordSignature(req: Request, rawBody: string, publicKey: string
   return nacl.sign.detached.verify(message, signature, key);
 }
 
-function optionByName(data: JsonRecord, name: string): JsonRecord {
-  return asRecord(asArray(data.options).find((option) => safeString(asRecord(option).name, 80) === name));
-}
-
-function stringOption(data: JsonRecord, name: string, maxLength: number): string | null {
-  const option = optionByName(data, name);
-  if (option.type !== OPTION_TYPE_STRING) return null;
-  return safeString(option.value, maxLength);
-}
-
-function booleanOption(data: JsonRecord, name: string): boolean {
-  const option = optionByName(data, name);
-  return option.type === OPTION_TYPE_BOOLEAN && option.value === true;
-}
-
-function attachmentOption(data: JsonRecord, name: string): JsonRecord {
-  const option = optionByName(data, name);
-  if (option.type !== OPTION_TYPE_ATTACHMENT) return {};
-
-  const attachmentId = snowflake(option.value);
-  if (!attachmentId) return {};
-
-  const resolved = asRecord(data.resolved);
-  const attachments = asRecord(resolved.attachments);
-  return {
-    id: attachmentId,
-    ...asRecord(attachments[attachmentId]),
-  };
-}
-
 function sourceEndpoint(supabaseUrl: string): string {
   return `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/submit-discord-gallery-image`;
-}
-
-function safeDiscordResponseMessage(body: JsonRecord, fallback: string): string {
-  return safeString(body.message, 220) || fallback;
-}
-
-function successMessage(instagramOptIn: boolean, duplicate: boolean): string {
-  const status = duplicate ? "That image is already in the moderation queue." : "Image submitted to the moderation queue.";
-  const instagram = instagramOptIn
-    ? " Instagram sharing is enabled for moderator review after gallery approval."
-    : " Instagram sharing is not enabled for this submission.";
-  return `${status}${instagram}`;
 }
 
 async function editOriginalInteractionResponse(
