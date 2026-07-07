@@ -56,6 +56,10 @@ function assertMatches(label, text, pattern, message) {
   if (!pattern.test(text)) failures.push(`${label}: ${message}`);
 }
 
+function assertNotMatches(label, text, pattern, message) {
+  if (pattern.test(text)) failures.push(`${label}: ${message}`);
+}
+
 function extractVerifyJwtFalseFunctions(config) {
   const blocks = [...config.matchAll(/\[functions\.([^\]]+)\]([\s\S]*?)(?=\n\[functions\.|\s*$)/g)];
   return blocks
@@ -194,6 +198,94 @@ for (const name of verifyJwtFalseFunctions) {
     failures.push(`supabase/config.toml: unauthenticated function ${name} needs an explicit security review.`);
   }
 }
+
+const unauthenticatedFunctionGuardSpecs = {
+  "list-approved-gallery-submissions": {
+    source: approvedFeed,
+    kind: "public read-only signed gallery DTO",
+    snippets: ['"Access-Control-Allow-Origin": "*"', ".eq(\"status\", \"approved\")", "createSignedUrl", "signed_url"],
+  },
+  "list-visible-profile-cards": {
+    source: visibleProfileCards,
+    kind: "public read-only profile-card DTO",
+    snippets: [".eq(\"profile_public_enabled\", true)", ".eq(\"member_status\", \"active\")", "recentVerification(profile.discord_verified_at)", "signedMediaUrl"],
+  },
+  "submit-discord-gallery-image": {
+    source: discordIngest,
+    kind: "shared-secret Reaper ingest",
+    snippets: ["DISCORD_GALLERY_INGEST_SECRET", "x-mochirii-reaper-secret", "bearerOrHeaderSecret(req) !== ingestSecret"],
+  },
+  "reaper-discord-interactions": {
+    source: reaperSecuritySource,
+    kind: "Discord signature verified",
+    snippets: ["x-signature-ed25519", "x-signature-timestamp", "verifyDiscordSignature(req, rawBody, publicKey)"],
+  },
+  "reaper-discord-member-sync": {
+    source: reaperMemberSync,
+    kind: "shared-secret Reaper member sync",
+    snippets: ["x-mochirii-reaper-member-sync-secret", "REAPER_PENDING_VERIFICATION_SYNC_SECRET", "verifyMemberSyncSecret(req)"],
+  },
+  "send-vote-reminder": {
+    source: voteReminder,
+    kind: "shared-secret scheduled vote reminder",
+    snippets: ["VOTE_REMINDER_CRON_SECRET", "x-mochirii-vote-reminder-secret", "bearerOrHeaderSecret(req) !== cronSecret"],
+  },
+  "send-member-spotlight-poll": {
+    source: `${spotlightPollShared}\n${spotlightPollSender}`,
+    kind: "shared-secret spotlight sender",
+    snippets: ["bearerOrHeaderSecret(req) !== config.secret", "SPOTLIGHT_POLL_CRON_SECRET", "buildDiscordPollPayload"],
+  },
+  "publish-member-spotlight-winner": {
+    source: `${spotlightPollShared}\n${spotlightPollPublisher}`,
+    kind: "shared-secret spotlight publisher",
+    snippets: ["bearerOrHeaderSecret(req) !== config.secret", "SPOTLIGHT_POLL_CRON_SECRET", "results.finalized"],
+  },
+  "get-current-spotlight-winner": {
+    source: spotlightPollPublicWinner,
+    kind: "public read-only spotlight DTO",
+    snippets: [".eq(\"status\", \"published\")", "winner_display_name", "monthly-discord-poll"],
+  },
+  "mochi-pets-alpha-action": {
+    source: `${mochiPetsAlphaShared}\n${mochiPetsAlphaAction}`,
+    kind: "game-server shared token",
+    snippets: ["requireGameServer(req)", "MOCHI_PETS_GAME_SERVER_TOKEN", "noRealValue: true"],
+  },
+  "mochi-pets-alpha-progress": {
+    source: `${mochiPetsAlphaShared}\n${mochiPetsAlphaProgress}`,
+    kind: "game-server shared token",
+    snippets: ["requireGameServer(req)", "MOCHI_PETS_GAME_SERVER_TOKEN", "loadAlphaProgressSnapshot(adminClient, playerId)"],
+  },
+  "sync-pixelfed-social-account": {
+    source: pixelfedSocialSync,
+    kind: "shared-secret Pixelfed sync",
+    snippets: ["PIXELFED_SOCIAL_SYNC_SECRET", "PIXELFED_SOCIAL_SYNC_SECRET_HEADER", "verifySyncSecret(req)"],
+  },
+};
+
+for (const name of expectedUnauthenticatedFunctions) {
+  const spec = unauthenticatedFunctionGuardSpecs[name];
+  if (!spec) {
+    failures.push(`supabase/config.toml: unauthenticated function ${name} lacks an explicit guard classification.`);
+    continue;
+  }
+
+  for (const snippet of spec.snippets) {
+    assertIncludes(`${name} ${spec.kind}`, spec.source, snippet);
+  }
+}
+
+[
+  ["list-approved-gallery-submissions", approvedFeed],
+  ["list-visible-profile-cards", visibleProfileCards],
+  ["get-current-spotlight-winner", spotlightPollPublicWinner],
+].forEach(([name, source]) => {
+  assertNotMatches(
+    `${name} public read-only posture`,
+    source,
+    /\.(insert|update|upsert|delete)\s*\(/,
+    "verify_jwt=false public DTO endpoints must not perform Supabase table mutations.",
+  );
+});
 
 [
   "PIXELFED_SOCIAL_SYNC_SECRET",

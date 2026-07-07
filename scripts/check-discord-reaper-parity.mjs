@@ -146,6 +146,7 @@ const schedule = readJson("data/guild-schedule.json");
 const publicSchedule = readJson("apps/web/public/data/guild-schedule.json");
 const reaper = [
   read("supabase/functions/reaper-discord-interactions/index.ts"),
+  read("supabase/functions/_shared/discord-interaction-helpers.ts"),
   read("supabase/functions/_shared/reaper-event-sync-workflow.ts"),
 ].join("\n");
 const runbook = read("docs/reaper-event-sync-runbook.md");
