@@ -13,6 +13,8 @@ const files = {
   reaperEvents: "supabase/functions/_shared/reaper-discord-events.ts",
   reaperEventSyncWorkflow: "supabase/functions/_shared/reaper-event-sync-workflow.ts",
   reaperVoteInteractions: "supabase/functions/_shared/reaper-vote-interactions.ts",
+  reaperPhotoDayPollWorkflow: "supabase/functions/_shared/reaper-photo-day-poll-workflow.ts",
+  reaperRankSyncWorkflow: "supabase/functions/_shared/reaper-rank-sync-workflow.ts",
   photoDayPolls: "supabase/functions/_shared/photo-day-polls.ts",
   photoDayPollTests: "supabase/functions/_shared/photo-day-polls_test.ts",
   interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
@@ -67,6 +69,8 @@ const discordSignature = read(files.discordSignature);
 const reaperEvents = read(files.reaperEvents);
 const reaperEventSyncWorkflow = read(files.reaperEventSyncWorkflow);
 const reaperVoteInteractions = read(files.reaperVoteInteractions);
+const reaperPhotoDayPollWorkflow = read(files.reaperPhotoDayPollWorkflow);
+const reaperRankSyncWorkflow = read(files.reaperRankSyncWorkflow);
 const photoDayPolls = read(files.photoDayPolls);
 const photoDayPollTests = read(files.photoDayPollTests);
 const interactionHelpers = read(files.interactionHelpers);
@@ -76,6 +80,8 @@ const interactionContractSource = [
   reaperEvents,
   reaperEventSyncWorkflow,
   reaperVoteInteractions,
+  reaperPhotoDayPollWorkflow,
+  reaperRankSyncWorkflow,
   photoDayPolls,
   interactionHelpers,
 ].join("\n");

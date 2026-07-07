@@ -14,6 +14,7 @@ const files = {
   refinementMigration: "supabase/migrations/20260608233000_refine_member_profile_identity_media.sql",
   socialAccountsMigration: "supabase/migrations/20260702080720_add_pixelfed_social_accounts.sql",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
+  reaperRankSyncWorkflow: "supabase/functions/_shared/reaper-rank-sync-workflow.ts",
   sharedMemberProfiles: "supabase/functions/_shared/member-profiles.ts",
   verifyDiscordMember: "supabase/functions/verify-discord-member/index.ts",
   appConfig: "apps/web/lib/supabase/config.ts",
@@ -61,7 +62,7 @@ const visibleProfileCards = read(files.visibleProfileCards);
 const migration = read(files.migration);
 const refinementMigration = read(files.refinementMigration);
 const socialAccountsMigration = read(files.socialAccountsMigration);
-const reaper = read(files.reaper);
+const reaper = [read(files.reaper), read(files.reaperRankSyncWorkflow)].join("\n");
 const sharedMemberProfiles = read(files.sharedMemberProfiles);
 const verifyDiscordMember = read(files.verifyDiscordMember);
 const appConfig = read(files.appConfig);

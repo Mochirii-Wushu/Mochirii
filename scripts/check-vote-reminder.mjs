@@ -15,6 +15,7 @@ const files = {
   sender: "supabase/functions/send-vote-reminder/index.ts",
   senderImportMap: "supabase/functions/send-vote-reminder/deno.json",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
+  interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
   reaperVoteInteractions: "supabase/functions/_shared/reaper-vote-interactions.ts",
   readme: "supabase/README.md",
   runbook: "docs/vote-reminder-runbook.md",
@@ -54,7 +55,7 @@ const helper = read(files.helper);
 const helperTest = read(files.helperTest);
 const sender = read(files.sender);
 const senderImportMap = read(files.senderImportMap);
-const reaper = [read(files.reaper), read(files.reaperVoteInteractions)].join("\n");
+const reaper = [read(files.reaper), read(files.interactionHelpers), read(files.reaperVoteInteractions)].join("\n");
 const readme = read(files.readme);
 const runbook = read(files.runbook);
 const skill = read(files.skill);

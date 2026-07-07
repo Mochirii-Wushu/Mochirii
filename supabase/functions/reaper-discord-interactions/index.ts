@@ -4,7 +4,6 @@ import {
   EXPECTED_DISCORD_VOTE_CHANNEL_ID,
   voteDateFromCustomId,
 } from "../_shared/vote-reminders.ts";
-import { discordFetch } from "../_shared/discord-api.ts";
 import {
   applyPendingContainmentPlan,
   buildPendingContainmentPlan,
@@ -33,6 +32,7 @@ import {
   attachmentOption,
   booleanOption,
   deferredEphemeralResponse,
+  editOriginalInteractionResponse,
   interactionMessage,
   jsonResponse,
   normalizedMime,
@@ -47,6 +47,12 @@ import { verifyDiscordSignature } from "../_shared/discord-signature.ts";
 import { SITE_ORIGIN, siteUrl } from "../_shared/public-origins.ts";
 import { processEventSync } from "../_shared/reaper-event-sync-workflow.ts";
 import {
+  handlePhotoDayPollCommand,
+  handlePhotoDayPollComponent,
+  handlePhotoDayPollModalSubmit,
+} from "../_shared/reaper-photo-day-poll-workflow.ts";
+import { processRankSync } from "../_shared/reaper-rank-sync-workflow.ts";
+import {
   discordDisplayName,
   recordVoteConfirmation,
   voteLeaderboardMessage,
@@ -54,21 +60,6 @@ import {
   voteStatusMessage,
   voteToday,
 } from "../_shared/reaper-vote-interactions.ts";
-import {
-  buildPhotoDayPollEditModal,
-  buildPhotoDayPollDraft,
-  buildPhotoDayPollPublicMessage,
-  buildPhotoDayPollReviewMessage,
-  buildPhotoDayPollStatusInteractionData,
-  EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID,
-  photoDayPollDraftFromModalSubmit,
-  photoDayPollDraftFromPreviewMessage,
-  PHOTO_DAY_POLL_APPROVE_CUSTOM_ID,
-  PHOTO_DAY_POLL_CANCEL_CUSTOM_ID,
-  PHOTO_DAY_POLL_EDIT_CUSTOM_ID,
-  PHOTO_DAY_POLL_EDIT_MODAL_CUSTOM_ID,
-  type PhotoDayPollDraft,
-} from "../_shared/photo-day-polls.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -103,22 +94,6 @@ const INTERACTION_TYPE_APPLICATION_COMMAND = 2;
 const INTERACTION_TYPE_MESSAGE_COMPONENT = 3;
 const INTERACTION_TYPE_MODAL_SUBMIT = 5;
 const INTERACTION_RESPONSE_PONG = 1;
-const INTERACTION_RESPONSE_DEFERRED_MESSAGE_UPDATE = 6;
-const INTERACTION_RESPONSE_UPDATE_MESSAGE = 7;
-const INTERACTION_RESPONSE_MODAL = 9;
-
-const RANK_ROLES = [
-  { name: "Guild Leader", tier: "senior", order: 1 },
-  { name: "Vice Leader", tier: "senior", order: 2 },
-  { name: "Hall Leader", tier: "senior", order: 3 },
-  { name: "Dharmapala", tier: "middle", order: 4 },
-  { name: "Lotus Warden", tier: "middle", order: 5 },
-  { name: "Petal Keeper", tier: "middle", order: 6 },
-  { name: "Mochi Blossom", tier: "members", order: 7 },
-  { name: "Young Bamboo", tier: "members", order: 8 },
-  { name: "Softwind", tier: "members", order: 9 },
-  { name: "Rice Sprout", tier: "members", order: 10 },
-];
 
 function getServiceRoleKey(): string {
   const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -172,10 +147,6 @@ function hasPermission(permissionValue: unknown, permission: bigint): boolean {
   } catch {
     return false;
   }
-}
-
-function roleNameKey(value: unknown): string {
-  return String(value || "").trim().toLowerCase();
 }
 
 function discordApiHeaders(contentType = false): Headers {
@@ -457,207 +428,8 @@ async function processModmailAudit(interactionToken: string, applicationId: stri
   }
 }
 
-function hasChannelOverwrite(channels: JsonRecord[], roleId: string): boolean {
-  return channels.some((channel) =>
-    asArray(channel.permission_overwrites).some((overwrite) => {
-      const record = asRecord(overwrite);
-      if (safeString(record.id, 24) !== roleId) return false;
-      const allow = String(record.allow || "0");
-      const deny = String(record.deny || "0");
-      return allow !== "0" || deny !== "0";
-    })
-  );
-}
-
-function roleSafetyProblems(role: JsonRecord, channels: JsonRecord[]): string[] {
-  const problems: string[] = [];
-  const roleId = safeString(role.id, 24) || "";
-  if (String(role.permissions || "0") !== "0") problems.push("nonzero permissions");
-  if (role.hoist === true) problems.push("displayed separately");
-  if (role.mentionable === true) problems.push("mentionable");
-  if (hasChannelOverwrite(channels, roleId)) problems.push("channel overwrites");
-  return problems;
-}
-
-function rankSummaryLine(action: string, rankName: string, detail = ""): string {
-  return detail ? `${action}: ${rankName} (${detail})` : `${action}: ${rankName}`;
-}
-
-async function upsertDiscordResource(role: JsonRecord, rank: typeof RANK_ROLES[number]): Promise<void> {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const serviceRoleKey = getServiceRoleKey();
-  const roleId = safeString(role.id, 24);
-
-  if (!supabaseUrl || !serviceRoleKey || !roleId) {
-    throw new Error("Supabase service credentials are not configured for rank registry updates.");
-  }
-
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-
-  const { error } = await adminClient
-    .from("discord_resources")
-    .upsert(
-      {
-        kind: "role",
-        label: rank.name,
-        discord_id: roleId,
-        discord_parent_id: EXPECTED_DISCORD_GUILD_ID,
-        enabled: true,
-        description: `Vanity guild rank role for ${rank.name}.`,
-        metadata: {
-          managedBy: "reaper-rank-sync",
-          vanityOnly: true,
-          rankTier: rank.tier,
-          rankOrder: rank.order,
-          source: "data/ranks.json",
-          baseAccessRoleId: BASE_GUILD_ROLE_ID,
-        },
-      },
-      { onConflict: "kind,discord_id" },
-    );
-
-  if (error) {
-    console.error("reaper-discord-interactions rank registry upsert failed", {
-      code: error.code,
-      message: error.message,
-    });
-    throw new Error("Rank role was created but could not be recorded in the website registry.");
-  }
-}
-
-async function processRankSync(
-  mode: string,
-  interactionToken: string,
-  applicationId: string,
-): Promise<void> {
-  const apply = mode === "apply";
-  const lines: string[] = [];
-
-  try {
-    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
-      await editOriginalInteractionResponse(applicationId, interactionToken, "Reaper rank sync is missing the Discord bot token.");
-      return;
-    }
-
-    const rolesResponse = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
-      headers: discordApiHeaders(),
-    });
-    const channelsResponse = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/channels`, {
-      headers: discordApiHeaders(),
-    });
-
-    if (!rolesResponse.ok || !channelsResponse.ok) {
-      await editOriginalInteractionResponse(
-        applicationId,
-        interactionToken,
-        "Reaper could not read guild roles and channels. Check bot role hierarchy and permissions.",
-      );
-      return;
-    }
-
-    const roles = asArray(rolesResponse.data).map(asRecord);
-    const channels = asArray(channelsResponse.data).map(asRecord);
-    const roleByName = new Map(roles.map((role) => [roleNameKey(role.name), role]));
-
-    for (const rank of RANK_ROLES) {
-      const existing = roleByName.get(roleNameKey(rank.name));
-      if (existing) {
-        const problems = roleSafetyProblems(existing, channels);
-        if (problems.length) {
-          lines.push(rankSummaryLine("Blocked", rank.name, problems.join(", ")));
-          continue;
-        }
-
-        lines.push(rankSummaryLine("Adopted", rank.name, `role ${safeString(existing.id, 24) || "unknown"}`));
-        if (apply) await upsertDiscordResource(existing, rank);
-        continue;
-      }
-
-      if (!apply) {
-        lines.push(rankSummaryLine("Would create", rank.name, "zero-permission vanity role"));
-        continue;
-      }
-
-      const createResponse = await discordApi(`/guilds/${EXPECTED_DISCORD_GUILD_ID}/roles`, {
-        method: "POST",
-        headers: discordApiHeaders(true),
-        body: JSON.stringify({
-          name: rank.name,
-          permissions: "0",
-          color: 0,
-          hoist: false,
-          mentionable: false,
-        }),
-      });
-
-      if (!createResponse.ok) {
-        lines.push(rankSummaryLine("Blocked", rank.name, `Discord API ${createResponse.status}`));
-        continue;
-      }
-
-      const createdRole = asRecord(createResponse.data);
-      lines.push(rankSummaryLine("Created", rank.name, `role ${safeString(createdRole.id, 24) || "unknown"}`));
-      await upsertDiscordResource(createdRole, rank);
-    }
-
-    const intro = apply
-      ? "Rank sync finished. Rank roles are vanity-only; assign them manually in Discord."
-      : "Rank sync preview. No Discord roles were changed.";
-    await editOriginalInteractionResponse(applicationId, interactionToken, `${intro}\n${lines.slice(0, 20).join("\n")}`);
-  } catch (error) {
-    console.error("reaper-discord-interactions rank sync failed", {
-      message: error instanceof Error ? error.message : String(error),
-    });
-    await editOriginalInteractionResponse(
-      applicationId,
-      interactionToken,
-      "Reaper rank sync could not be completed. Check configuration and try preview again.",
-    );
-  }
-}
-
 function sourceEndpoint(supabaseUrl: string): string {
   return `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/submit-discord-gallery-image`;
-}
-
-async function editOriginalInteractionResponse(
-  applicationId: string,
-  interactionToken: string,
-  content: string,
-): Promise<void> {
-  await editOriginalInteractionPayload(applicationId, interactionToken, {
-    content,
-    allowed_mentions: {
-      parse: [],
-    },
-  });
-}
-
-async function editOriginalInteractionPayload(
-  applicationId: string,
-  interactionToken: string,
-  payload: JsonRecord,
-): Promise<void> {
-  const endpoint = `${DISCORD_API_BASE_URL}/webhooks/${applicationId}/${interactionToken}/messages/@original`;
-  const response = await fetch(endpoint, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    console.error("reaper-discord-interactions original response edit failed", {
-      status: response.status,
-      statusText: response.statusText,
-    });
-  }
 }
 
 async function processSubmission(payload: JsonRecord, interactionToken: string, applicationId: string): Promise<void> {
@@ -727,183 +499,6 @@ function hasModeratorRole(memberRoleIds: string[]): boolean {
   return EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
 }
 
-function photoDayPollCustomId(value: unknown): string | null {
-  const customId = safeString(value, 100);
-  return (
-      customId === PHOTO_DAY_POLL_APPROVE_CUSTOM_ID ||
-      customId === PHOTO_DAY_POLL_EDIT_CUSTOM_ID ||
-      customId === PHOTO_DAY_POLL_CANCEL_CUSTOM_ID
-    )
-    ? customId
-    : null;
-}
-
-function photoDayPollOptionValues(data: JsonRecord): string[] | undefined {
-  const options = [1, 2, 3, 4, 5]
-    .map((index) => stringOption(data, `option_${index}`, 90))
-    .filter((option): option is string => Boolean(option));
-
-  return options.length ? options : undefined;
-}
-
-function deferredMessageUpdateResponse(): Response {
-  return jsonResponse({
-    type: INTERACTION_RESPONSE_DEFERRED_MESSAGE_UPDATE,
-  });
-}
-
-function updateMessageResponse(data: JsonRecord): Response {
-  return jsonResponse({
-    type: INTERACTION_RESPONSE_UPDATE_MESSAGE,
-    data,
-  });
-}
-
-function modalResponse(data: JsonRecord): Response {
-  return jsonResponse({
-    type: INTERACTION_RESPONSE_MODAL,
-    data,
-  });
-}
-
-async function postPhotoDayPollReview(draft: PhotoDayPollDraft): Promise<{ ok: boolean; status: number }> {
-  const response = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages`, {
-    method: "POST",
-    headers: {
-      "User-Agent": DISCORD_API_USER_AGENT,
-    },
-    body: buildPhotoDayPollReviewMessage(draft),
-  });
-
-  return {
-    ok: response.ok,
-    status: response.status,
-  };
-}
-
-async function patchPhotoDayPollReview(messageId: string, draft: PhotoDayPollDraft): Promise<{ ok: boolean; status: number }> {
-  const response = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}`, {
-    method: "PATCH",
-    headers: {
-      "User-Agent": DISCORD_API_USER_AGENT,
-    },
-    body: buildPhotoDayPollReviewMessage(draft),
-  });
-
-  return {
-    ok: response.ok,
-    status: response.status,
-  };
-}
-
-async function addPhotoDayPollReactions(messageId: string, draft: PhotoDayPollDraft): Promise<string[]> {
-  const failures: string[] = [];
-
-  for (const choice of draft.choices) {
-    const reactionResponse = await discordFetch(
-      `/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}/reactions/${encodeURIComponent(choice.emoji)}/@me`,
-      {
-        method: "PUT",
-        headers: {
-          "User-Agent": DISCORD_API_USER_AGENT,
-        },
-      },
-    );
-
-    if (!reactionResponse.ok) {
-      failures.push(`${choice.emoji} (HTTP ${reactionResponse.status})`);
-    }
-  }
-
-  return failures;
-}
-
-async function editPhotoDayPublicSetupWarning(messageId: string): Promise<void> {
-  const response = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}`, {
-    method: "PATCH",
-    headers: {
-      "User-Agent": DISCORD_API_USER_AGENT,
-    },
-    body: {
-      content: "Setup note: Reaper could not add every starter reaction. Please use the listed emojis manually.",
-      allowed_mentions: {
-        parse: [],
-      },
-    },
-  });
-
-  if (!response.ok) {
-    console.error("reaper-discord-interactions photo day public warning edit failed", {
-      status: response.status,
-    });
-  }
-}
-
-async function processPhotoDayPollApproval(
-  draft: PhotoDayPollDraft,
-  messageId: string,
-  interactionToken: string,
-  applicationId: string,
-): Promise<void> {
-  try {
-    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
-      await editOriginalInteractionPayload(
-        applicationId,
-        interactionToken,
-        buildPhotoDayPollStatusInteractionData("Photo day poll was not sent. Reaper is missing the Discord bot token."),
-      );
-      return;
-    }
-
-    const publishResponse = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}`, {
-      method: "PATCH",
-      headers: {
-        "User-Agent": DISCORD_API_USER_AGENT,
-      },
-      body: buildPhotoDayPollPublicMessage(draft),
-    });
-
-    if (!publishResponse.ok) {
-      await editOriginalInteractionPayload(
-        applicationId,
-        interactionToken,
-        buildPhotoDayPollStatusInteractionData(`Photo day poll was not sent. Discord API returned HTTP ${publishResponse.status}.`),
-      );
-      return;
-    }
-
-    const reactionFailures = await addPhotoDayPollReactions(messageId, draft);
-    if (reactionFailures.length) {
-      await editPhotoDayPublicSetupWarning(messageId);
-      await editOriginalInteractionPayload(
-        applicationId,
-        interactionToken,
-        buildPhotoDayPollStatusInteractionData(
-          `Photo day poll was sent to <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}>, but starter reaction setup failed for ${reactionFailures.join(", ")}.`,
-        ),
-      );
-      return;
-    }
-
-    await editOriginalInteractionPayload(
-      applicationId,
-      interactionToken,
-      buildPhotoDayPollStatusInteractionData(
-        `Photo day poll sent to <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}>. Starter reactions added: ${draft.choices.map((choice) => choice.emoji).join(" ")}.`,
-      ),
-    );
-  } catch (error) {
-    console.error("reaper-discord-interactions photo day poll approval failed", {
-      message: error instanceof Error ? error.message : String(error),
-    });
-    await editOriginalInteractionPayload(
-      applicationId,
-      interactionToken,
-      buildPhotoDayPollStatusInteractionData("Photo day poll approval could not be completed. No confirmed public send result is available."),
-    );
-  }
-}
-
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed.", { status: 405 });
@@ -946,56 +541,26 @@ Deno.serve(async (req: Request) => {
     return interactionMessage("Discord interaction could not be identified.");
   }
 
+  const photoDayContext = {
+    applicationId,
+    configuredGuildId,
+    configuredModeratorRoleIds,
+    data,
+    discordApiUserAgent: DISCORD_API_USER_AGENT,
+    discordUserId,
+    expectedGuildId: EXPECTED_DISCORD_GUILD_ID,
+    expectedModeratorConfigMatches,
+    guildId,
+    hasModeratorRole,
+    interactionMessage: asRecord(interaction.message),
+    interactionToken,
+    memberRoleIds,
+    waitUntil: (promise: Promise<unknown>) => EdgeRuntime.waitUntil(promise),
+  };
+
   if (interaction.type === INTERACTION_TYPE_MESSAGE_COMPONENT) {
-    const photoDayCustomId = photoDayPollCustomId(data.custom_id);
-    if (photoDayCustomId) {
-      if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
-        console.error("reaper-discord-interactions missing or mismatched photo day poll configuration", {
-          guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
-          moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
-          configuredModeratorRoleCount: configuredModeratorRoleIds.length,
-        });
-        return interactionMessage("Photo day poll approval is not configured yet.");
-      }
-
-      if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole(memberRoleIds)) {
-        return interactionMessage("Photo day poll approval requires the Moderator role.");
-      }
-
-      if (photoDayCustomId === PHOTO_DAY_POLL_CANCEL_CUSTOM_ID) {
-        return updateMessageResponse(buildPhotoDayPollStatusInteractionData("Photo day poll canceled. No Discord message was sent."));
-      }
-
-      let draft: PhotoDayPollDraft;
-      try {
-        draft = photoDayPollDraftFromPreviewMessage(asRecord(interaction.message));
-      } catch (error) {
-        console.error("reaper-discord-interactions photo day poll preview parse failed", {
-          message: error instanceof Error ? error.message : String(error),
-        });
-        return updateMessageResponse(
-          buildPhotoDayPollStatusInteractionData("Photo day poll preview could not be read. No Discord message was sent."),
-        );
-      }
-
-      if (photoDayCustomId === PHOTO_DAY_POLL_EDIT_CUSTOM_ID) {
-        return modalResponse(buildPhotoDayPollEditModal(draft));
-      }
-
-      if (!interactionToken || !applicationId) {
-        return interactionMessage("Discord interaction could not be identified.");
-      }
-
-      const messageId = snowflake(asRecord(interaction.message).id);
-      if (!messageId) {
-        return updateMessageResponse(
-          buildPhotoDayPollStatusInteractionData("Photo day poll review message could not be identified. No Discord message was sent."),
-        );
-      }
-
-      EdgeRuntime.waitUntil(processPhotoDayPollApproval(draft, messageId, interactionToken, applicationId));
-      return deferredMessageUpdateResponse();
-    }
+    const photoDayResponse = handlePhotoDayPollComponent(photoDayContext);
+    if (photoDayResponse) return photoDayResponse;
 
     const voteDate = voteDateFromCustomId(data.custom_id);
     if (!voteDate) {
@@ -1037,47 +602,8 @@ Deno.serve(async (req: Request) => {
   }
 
   if (interaction.type === INTERACTION_TYPE_MODAL_SUBMIT) {
-    const modalCustomId = safeString(data.custom_id, 100);
-    if (modalCustomId !== PHOTO_DAY_POLL_EDIT_MODAL_CUSTOM_ID) {
-      return interactionMessage("That Discord modal is not supported.");
-    }
-
-    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
-      return interactionMessage("Photo day poll editing is not configured yet.");
-    }
-
-    if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole(memberRoleIds)) {
-      return interactionMessage("Photo day poll editing requires the Moderator role.");
-    }
-
-    const messageId = snowflake(asRecord(interaction.message).id);
-    if (!messageId) {
-      return interactionMessage("Photo day poll review message could not be identified.");
-    }
-
-    let draft: PhotoDayPollDraft;
-    try {
-      draft = photoDayPollDraftFromModalSubmit(data);
-    } catch (error) {
-      console.error("reaper-discord-interactions photo day poll modal parse failed", {
-        message: error instanceof Error ? error.message : String(error),
-      });
-      return interactionMessage("Photo day poll edits require one question and 2-5 non-empty answer options.");
-    }
-
-    try {
-      const patchResponse = await patchPhotoDayPollReview(messageId, draft);
-      if (!patchResponse.ok) {
-        return interactionMessage(`Photo day poll draft could not be updated. Discord API returned HTTP ${patchResponse.status}.`);
-      }
-    } catch (error) {
-      console.error("reaper-discord-interactions photo day poll review update failed", {
-        message: error instanceof Error ? error.message : String(error),
-      });
-      return interactionMessage("Photo day poll draft could not be updated.");
-    }
-
-    return interactionMessage(`Photo day poll draft updated in <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}>.`);
+    const photoDayResponse = await handlePhotoDayPollModalSubmit(photoDayContext);
+    return photoDayResponse || interactionMessage("That Discord modal is not supported.");
   }
 
   if (interaction.type !== INTERACTION_TYPE_APPLICATION_COMMAND) {
@@ -1104,46 +630,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (commandName === "photo-day-poll") {
-    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
-      console.error("reaper-discord-interactions missing or mismatched photo day poll configuration", {
-        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
-        moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
-        configuredModeratorRoleCount: configuredModeratorRoleIds.length,
-      });
-      return interactionMessage("Photo day poll is not configured yet.");
-    }
-
-    if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole(memberRoleIds)) {
-      return interactionMessage("Photo day poll requires the Moderator role.");
-    }
-
-    let draft: PhotoDayPollDraft;
-    try {
-      draft = buildPhotoDayPollDraft({
-        question: stringOption(data, "question", 220),
-        options: photoDayPollOptionValues(data),
-      });
-    } catch (error) {
-      console.error("reaper-discord-interactions photo day poll preview failed", {
-        message: error instanceof Error ? error.message : String(error),
-      });
-      return interactionMessage("Photo day poll requires 2-5 non-empty answer options.");
-    }
-
-    try {
-      const postResponse = await postPhotoDayPollReview(draft);
-
-      if (!postResponse.ok) {
-        return interactionMessage(`Photo day poll review could not be posted. Discord API returned HTTP ${postResponse.status}.`);
-      }
-
-      return interactionMessage(`Photo day poll review posted to <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}> for moderator approval and editing.`);
-    } catch (error) {
-      console.error("reaper-discord-interactions photo day poll review post failed", {
-        message: error instanceof Error ? error.message : String(error),
-      });
-      return interactionMessage("Photo day poll review could not be posted. Check Reaper bot token and channel permissions.");
-    }
+    return await handlePhotoDayPollCommand(photoDayContext);
   }
 
   if (commandName === "vote-status") {
@@ -1304,7 +791,14 @@ Deno.serve(async (req: Request) => {
       return interactionMessage("Run /sync-ranks mode:apply confirm:true after reviewing preview.");
     }
 
-    EdgeRuntime.waitUntil(processRankSync(mode, interactionToken, applicationId));
+    EdgeRuntime.waitUntil(processRankSync(mode, interactionToken, applicationId, {
+      baseGuildRoleId: BASE_GUILD_ROLE_ID,
+      discordApi,
+      discordApiHeaders,
+      editOriginalInteractionResponse,
+      expectedGuildId: EXPECTED_DISCORD_GUILD_ID,
+      serviceAdminClient,
+    }));
     return deferredEphemeralResponse();
   }
 

@@ -3,10 +3,14 @@ export type JsonRecord = Record<string, unknown>;
 const EPHEMERAL_FLAG = 1 << 6;
 const INTERACTION_RESPONSE_CHANNEL_MESSAGE = 4;
 const INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5;
+const INTERACTION_RESPONSE_DEFERRED_MESSAGE_UPDATE = 6;
+const INTERACTION_RESPONSE_UPDATE_MESSAGE = 7;
+const INTERACTION_RESPONSE_MODAL = 9;
 const OPTION_TYPE_STRING = 3;
 const OPTION_TYPE_BOOLEAN = 5;
 const OPTION_TYPE_ATTACHMENT = 11;
 const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
 
 export function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -39,6 +43,61 @@ export function deferredEphemeralResponse(): Response {
       flags: EPHEMERAL_FLAG,
     },
   });
+}
+
+export function deferredMessageUpdateResponse(): Response {
+  return jsonResponse({
+    type: INTERACTION_RESPONSE_DEFERRED_MESSAGE_UPDATE,
+  });
+}
+
+export function updateMessageResponse(data: JsonRecord): Response {
+  return jsonResponse({
+    type: INTERACTION_RESPONSE_UPDATE_MESSAGE,
+    data,
+  });
+}
+
+export function modalResponse(data: JsonRecord): Response {
+  return jsonResponse({
+    type: INTERACTION_RESPONSE_MODAL,
+    data,
+  });
+}
+
+export async function editOriginalInteractionResponse(
+  applicationId: string,
+  interactionToken: string,
+  content: string,
+): Promise<void> {
+  await editOriginalInteractionPayload(applicationId, interactionToken, {
+    content,
+    allowed_mentions: {
+      parse: [],
+    },
+  });
+}
+
+export async function editOriginalInteractionPayload(
+  applicationId: string,
+  interactionToken: string,
+  payload: JsonRecord,
+): Promise<void> {
+  const endpoint = `${DISCORD_API_BASE_URL}/webhooks/${applicationId}/${interactionToken}/messages/@original`;
+  const response = await fetch(endpoint, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    console.error("reaper-discord-interactions original response edit failed", {
+      status: response.status,
+      statusText: response.statusText,
+    });
+  }
 }
 
 export function asRecord(value: unknown): JsonRecord {

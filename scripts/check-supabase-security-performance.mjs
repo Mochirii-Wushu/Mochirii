@@ -5,6 +5,7 @@ import { SITE_ORIGIN, SOCIAL_HOST } from "./lib/public-urls.mjs";
 const root = process.cwd();
 const failures = [];
 const oldGamePrefix = ["mochi", "social"].join("_");
+const currentGamePrefix = ["mochi", "pets"].join("_");
 
 const requiredIndexSnippets = [
   "gallery_submissions_user_id_idx",
@@ -121,6 +122,41 @@ function assertIncludes(label, text, snippet) {
   if (!text.includes(snippet)) failures.push(`${label}: expected snippet not found: ${snippet}`);
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractCreatedPublicTables(sql) {
+  const tables = new Set();
+  const pattern = /\bcreate\s+table\s+(?:if\s+not\s+exists\s+)?public\.("?)([a-zA-Z0-9_]+)\1\b/gi;
+  for (const match of sql.matchAll(pattern)) {
+    tables.add(match[2]);
+  }
+  return [...tables].sort();
+}
+
+function tableGrantNames(table) {
+  const oldGameTablePrefix = `${oldGamePrefix}_`;
+  return [...new Set([
+    table,
+    table.startsWith(oldGameTablePrefix) ? `${currentGamePrefix}_${table.slice(oldGameTablePrefix.length)}` : table,
+  ])];
+}
+
+function hasRlsEnableForTable(sql, table) {
+  const name = escapeRegExp(table);
+  return new RegExp(`\\balter\\s+table\\s+public\\."?${name}"?\\s+enable\\s+row\\s+level\\s+security\\b`, "i").test(sql);
+}
+
+function hasExplicitGrantForTable(sql, table) {
+  return tableGrantNames(table).some((name) => {
+    const escaped = escapeRegExp(name);
+    const literalGrant = new RegExp(`\\bgrant\\b[\\s\\S]{0,240}?\\bon\\s+(?:table\\s+)?public\\."?${escaped}"?\\s+to\\s+`, "i");
+    const dynamicGrant = sql.includes(`('${name}',`) && sql.includes("'grant %s on table public.%I to %I'");
+    return literalGrant.test(sql) || dynamicGrant;
+  });
+}
+
 const packageJson = read("package.json");
 const checkAll = read("scripts/check-all.mjs");
 const readme = read("supabase/README.md");
@@ -142,6 +178,16 @@ assertIncludes("check-all", checkAll, "check:supabase-security-performance");
 
 for (const snippet of requiredIndexSnippets) {
   assertIncludes("Supabase FK index migrations", migrationText, snippet);
+}
+
+for (const table of extractCreatedPublicTables(migrationText)) {
+  if (!hasRlsEnableForTable(migrationText, table)) {
+    failures.push(`Supabase public table guardrail: public.${table} is created without an explicit RLS enable migration.`);
+  }
+
+  if (!hasExplicitGrantForTable(migrationText, table)) {
+    failures.push(`Supabase public table guardrail: public.${table} is created without explicit Data API grants.`);
+  }
 }
 
 for (const snippet of mochiPetsCompatibilitySnippets) {
