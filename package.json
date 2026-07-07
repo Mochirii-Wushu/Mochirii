@@ -88,6 +88,7 @@
     "prepare:live-member-qa-local": "node scripts/prepare-live-member-qa-local.mjs",
     "register:reaper-modmail-audit-command": "node scripts/register-reaper-modmail-audit-command.mjs",
     "register:reaper-gallery-submit-command": "node scripts/register-reaper-gallery-submit-command.mjs",
+    "register:reaper-photo-day-poll-command": "node scripts/register-reaper-photo-day-poll-command.mjs",
     "register:reaper-pending-verification-command": "node scripts/register-reaper-pending-verification-command.mjs",
     "rollback:reaper-pending-verification": "node scripts/rollback-reaper-pending-verification-overwrites.mjs",
     "smoke:dns-cutover-post": "node scripts/smoke-dns-cutover-post.mjs",
@@ -108,6 +109,7 @@
     "test:gallery-cleanup": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/delete-rejected-gallery-submission/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/gallery-cleanup_test.ts",
     "test:spotlight-poll": "deno test --allow-env --node-modules-dir=auto --import-map=deno-spotlight-poll.import_map.json --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
     "test:modmail-audit": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/modmail-audit_test.ts",
+    "test:photo-day-poll": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/reaper-discord-interactions/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/photo-day-polls_test.ts",
     "test:discord-signature": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/reaper-discord-interactions/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/discord-signature_test.ts",
     "test:reaper-discord-events": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/reaper-discord-interactions/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/reaper-discord-events_test.ts",
     "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"
