@@ -4,6 +4,7 @@ import {
   EXPECTED_DISCORD_VOTE_CHANNEL_ID,
   voteDateFromCustomId,
 } from "../_shared/vote-reminders.ts";
+import { discordFetch } from "../_shared/discord-api.ts";
 import {
   applyPendingContainmentPlan,
   buildPendingContainmentPlan,
@@ -53,6 +54,21 @@ import {
   voteStatusMessage,
   voteToday,
 } from "../_shared/reaper-vote-interactions.ts";
+import {
+  buildPhotoDayPollEditModal,
+  buildPhotoDayPollDraft,
+  buildPhotoDayPollPublicMessage,
+  buildPhotoDayPollReviewMessage,
+  buildPhotoDayPollStatusInteractionData,
+  EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID,
+  photoDayPollDraftFromModalSubmit,
+  photoDayPollDraftFromPreviewMessage,
+  PHOTO_DAY_POLL_APPROVE_CUSTOM_ID,
+  PHOTO_DAY_POLL_CANCEL_CUSTOM_ID,
+  PHOTO_DAY_POLL_EDIT_CUSTOM_ID,
+  PHOTO_DAY_POLL_EDIT_MODAL_CUSTOM_ID,
+  type PhotoDayPollDraft,
+} from "../_shared/photo-day-polls.ts";
 
 type JsonRecord = SharedJsonRecord;
 type SupabaseAdminClient = {
@@ -85,7 +101,11 @@ const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containme
 const INTERACTION_TYPE_PING = 1;
 const INTERACTION_TYPE_APPLICATION_COMMAND = 2;
 const INTERACTION_TYPE_MESSAGE_COMPONENT = 3;
+const INTERACTION_TYPE_MODAL_SUBMIT = 5;
 const INTERACTION_RESPONSE_PONG = 1;
+const INTERACTION_RESPONSE_DEFERRED_MESSAGE_UPDATE = 6;
+const INTERACTION_RESPONSE_UPDATE_MESSAGE = 7;
+const INTERACTION_RESPONSE_MODAL = 9;
 
 const RANK_ROLES = [
   { name: "Guild Leader", tier: "senior", order: 1 },
@@ -610,18 +630,26 @@ async function editOriginalInteractionResponse(
   interactionToken: string,
   content: string,
 ): Promise<void> {
+  await editOriginalInteractionPayload(applicationId, interactionToken, {
+    content,
+    allowed_mentions: {
+      parse: [],
+    },
+  });
+}
+
+async function editOriginalInteractionPayload(
+  applicationId: string,
+  interactionToken: string,
+  payload: JsonRecord,
+): Promise<void> {
   const endpoint = `${DISCORD_API_BASE_URL}/webhooks/${applicationId}/${interactionToken}/messages/@original`;
   const response = await fetch(endpoint, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      content,
-      allowed_mentions: {
-        parse: [],
-      },
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -695,6 +723,187 @@ function voteDependencies() {
   };
 }
 
+function hasModeratorRole(memberRoleIds: string[]): boolean {
+  return EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => memberRoleIds.includes(roleId));
+}
+
+function photoDayPollCustomId(value: unknown): string | null {
+  const customId = safeString(value, 100);
+  return (
+      customId === PHOTO_DAY_POLL_APPROVE_CUSTOM_ID ||
+      customId === PHOTO_DAY_POLL_EDIT_CUSTOM_ID ||
+      customId === PHOTO_DAY_POLL_CANCEL_CUSTOM_ID
+    )
+    ? customId
+    : null;
+}
+
+function photoDayPollOptionValues(data: JsonRecord): string[] | undefined {
+  const options = [1, 2, 3, 4, 5]
+    .map((index) => stringOption(data, `option_${index}`, 90))
+    .filter((option): option is string => Boolean(option));
+
+  return options.length ? options : undefined;
+}
+
+function deferredMessageUpdateResponse(): Response {
+  return jsonResponse({
+    type: INTERACTION_RESPONSE_DEFERRED_MESSAGE_UPDATE,
+  });
+}
+
+function updateMessageResponse(data: JsonRecord): Response {
+  return jsonResponse({
+    type: INTERACTION_RESPONSE_UPDATE_MESSAGE,
+    data,
+  });
+}
+
+function modalResponse(data: JsonRecord): Response {
+  return jsonResponse({
+    type: INTERACTION_RESPONSE_MODAL,
+    data,
+  });
+}
+
+async function postPhotoDayPollReview(draft: PhotoDayPollDraft): Promise<{ ok: boolean; status: number }> {
+  const response = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages`, {
+    method: "POST",
+    headers: {
+      "User-Agent": DISCORD_API_USER_AGENT,
+    },
+    body: buildPhotoDayPollReviewMessage(draft),
+  });
+
+  return {
+    ok: response.ok,
+    status: response.status,
+  };
+}
+
+async function patchPhotoDayPollReview(messageId: string, draft: PhotoDayPollDraft): Promise<{ ok: boolean; status: number }> {
+  const response = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}`, {
+    method: "PATCH",
+    headers: {
+      "User-Agent": DISCORD_API_USER_AGENT,
+    },
+    body: buildPhotoDayPollReviewMessage(draft),
+  });
+
+  return {
+    ok: response.ok,
+    status: response.status,
+  };
+}
+
+async function addPhotoDayPollReactions(messageId: string, draft: PhotoDayPollDraft): Promise<string[]> {
+  const failures: string[] = [];
+
+  for (const choice of draft.choices) {
+    const reactionResponse = await discordFetch(
+      `/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}/reactions/${encodeURIComponent(choice.emoji)}/@me`,
+      {
+        method: "PUT",
+        headers: {
+          "User-Agent": DISCORD_API_USER_AGENT,
+        },
+      },
+    );
+
+    if (!reactionResponse.ok) {
+      failures.push(`${choice.emoji} (HTTP ${reactionResponse.status})`);
+    }
+  }
+
+  return failures;
+}
+
+async function editPhotoDayPublicSetupWarning(messageId: string): Promise<void> {
+  const response = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}`, {
+    method: "PATCH",
+    headers: {
+      "User-Agent": DISCORD_API_USER_AGENT,
+    },
+    body: {
+      content: "Setup note: Reaper could not add every starter reaction. Please use the listed emojis manually.",
+      allowed_mentions: {
+        parse: [],
+      },
+    },
+  });
+
+  if (!response.ok) {
+    console.error("reaper-discord-interactions photo day public warning edit failed", {
+      status: response.status,
+    });
+  }
+}
+
+async function processPhotoDayPollApproval(
+  draft: PhotoDayPollDraft,
+  messageId: string,
+  interactionToken: string,
+  applicationId: string,
+): Promise<void> {
+  try {
+    if (!Deno.env.get("DISCORD_BOT_TOKEN")) {
+      await editOriginalInteractionPayload(
+        applicationId,
+        interactionToken,
+        buildPhotoDayPollStatusInteractionData("Photo day poll was not sent. Reaper is missing the Discord bot token."),
+      );
+      return;
+    }
+
+    const publishResponse = await discordFetch(`/channels/${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/${messageId}`, {
+      method: "PATCH",
+      headers: {
+        "User-Agent": DISCORD_API_USER_AGENT,
+      },
+      body: buildPhotoDayPollPublicMessage(draft),
+    });
+
+    if (!publishResponse.ok) {
+      await editOriginalInteractionPayload(
+        applicationId,
+        interactionToken,
+        buildPhotoDayPollStatusInteractionData(`Photo day poll was not sent. Discord API returned HTTP ${publishResponse.status}.`),
+      );
+      return;
+    }
+
+    const reactionFailures = await addPhotoDayPollReactions(messageId, draft);
+    if (reactionFailures.length) {
+      await editPhotoDayPublicSetupWarning(messageId);
+      await editOriginalInteractionPayload(
+        applicationId,
+        interactionToken,
+        buildPhotoDayPollStatusInteractionData(
+          `Photo day poll was sent to <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}>, but starter reaction setup failed for ${reactionFailures.join(", ")}.`,
+        ),
+      );
+      return;
+    }
+
+    await editOriginalInteractionPayload(
+      applicationId,
+      interactionToken,
+      buildPhotoDayPollStatusInteractionData(
+        `Photo day poll sent to <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}>. Starter reactions added: ${draft.choices.map((choice) => choice.emoji).join(" ")}.`,
+      ),
+    );
+  } catch (error) {
+    console.error("reaper-discord-interactions photo day poll approval failed", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    await editOriginalInteractionPayload(
+      applicationId,
+      interactionToken,
+      buildPhotoDayPollStatusInteractionData("Photo day poll approval could not be completed. No confirmed public send result is available."),
+    );
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed.", { status: 405 });
@@ -738,6 +947,56 @@ Deno.serve(async (req: Request) => {
   }
 
   if (interaction.type === INTERACTION_TYPE_MESSAGE_COMPONENT) {
+    const photoDayCustomId = photoDayPollCustomId(data.custom_id);
+    if (photoDayCustomId) {
+      if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+        console.error("reaper-discord-interactions missing or mismatched photo day poll configuration", {
+          guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+          moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
+          configuredModeratorRoleCount: configuredModeratorRoleIds.length,
+        });
+        return interactionMessage("Photo day poll approval is not configured yet.");
+      }
+
+      if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole(memberRoleIds)) {
+        return interactionMessage("Photo day poll approval requires the Moderator role.");
+      }
+
+      if (photoDayCustomId === PHOTO_DAY_POLL_CANCEL_CUSTOM_ID) {
+        return updateMessageResponse(buildPhotoDayPollStatusInteractionData("Photo day poll canceled. No Discord message was sent."));
+      }
+
+      let draft: PhotoDayPollDraft;
+      try {
+        draft = photoDayPollDraftFromPreviewMessage(asRecord(interaction.message));
+      } catch (error) {
+        console.error("reaper-discord-interactions photo day poll preview parse failed", {
+          message: error instanceof Error ? error.message : String(error),
+        });
+        return updateMessageResponse(
+          buildPhotoDayPollStatusInteractionData("Photo day poll preview could not be read. No Discord message was sent."),
+        );
+      }
+
+      if (photoDayCustomId === PHOTO_DAY_POLL_EDIT_CUSTOM_ID) {
+        return modalResponse(buildPhotoDayPollEditModal(draft));
+      }
+
+      if (!interactionToken || !applicationId) {
+        return interactionMessage("Discord interaction could not be identified.");
+      }
+
+      const messageId = snowflake(asRecord(interaction.message).id);
+      if (!messageId) {
+        return updateMessageResponse(
+          buildPhotoDayPollStatusInteractionData("Photo day poll review message could not be identified. No Discord message was sent."),
+        );
+      }
+
+      EdgeRuntime.waitUntil(processPhotoDayPollApproval(draft, messageId, interactionToken, applicationId));
+      return deferredMessageUpdateResponse();
+    }
+
     const voteDate = voteDateFromCustomId(data.custom_id);
     if (!voteDate) {
       return interactionMessage("That Discord component is not supported.");
@@ -777,6 +1036,50 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+  if (interaction.type === INTERACTION_TYPE_MODAL_SUBMIT) {
+    const modalCustomId = safeString(data.custom_id, 100);
+    if (modalCustomId !== PHOTO_DAY_POLL_EDIT_MODAL_CUSTOM_ID) {
+      return interactionMessage("That Discord modal is not supported.");
+    }
+
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+      return interactionMessage("Photo day poll editing is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole(memberRoleIds)) {
+      return interactionMessage("Photo day poll editing requires the Moderator role.");
+    }
+
+    const messageId = snowflake(asRecord(interaction.message).id);
+    if (!messageId) {
+      return interactionMessage("Photo day poll review message could not be identified.");
+    }
+
+    let draft: PhotoDayPollDraft;
+    try {
+      draft = photoDayPollDraftFromModalSubmit(data);
+    } catch (error) {
+      console.error("reaper-discord-interactions photo day poll modal parse failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Photo day poll edits require one question and 2-5 non-empty answer options.");
+    }
+
+    try {
+      const patchResponse = await patchPhotoDayPollReview(messageId, draft);
+      if (!patchResponse.ok) {
+        return interactionMessage(`Photo day poll draft could not be updated. Discord API returned HTTP ${patchResponse.status}.`);
+      }
+    } catch (error) {
+      console.error("reaper-discord-interactions photo day poll review update failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Photo day poll draft could not be updated.");
+    }
+
+    return interactionMessage(`Photo day poll draft updated in <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}>.`);
+  }
+
   if (interaction.type !== INTERACTION_TYPE_APPLICATION_COMMAND) {
     return interactionMessage("That Discord interaction is not supported.");
   }
@@ -791,12 +1094,56 @@ Deno.serve(async (req: Request) => {
     "vote-status",
     "vote-leaderboard",
     "vote-reminder-preview",
+    "photo-day-poll",
   ].includes(commandName)) {
     return interactionMessage("That Reaper command is not supported.");
   }
 
   if (!interactionToken || !applicationId) {
     return interactionMessage("Discord interaction could not be identified.");
+  }
+
+  if (commandName === "photo-day-poll") {
+    if (configuredGuildId !== EXPECTED_DISCORD_GUILD_ID || !expectedModeratorConfigMatches(configuredModeratorRoleIds)) {
+      console.error("reaper-discord-interactions missing or mismatched photo day poll configuration", {
+        guildConfigMatches: configuredGuildId === EXPECTED_DISCORD_GUILD_ID,
+        moderatorRoleConfigMatches: expectedModeratorConfigMatches(configuredModeratorRoleIds),
+        configuredModeratorRoleCount: configuredModeratorRoleIds.length,
+      });
+      return interactionMessage("Photo day poll is not configured yet.");
+    }
+
+    if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId || !hasModeratorRole(memberRoleIds)) {
+      return interactionMessage("Photo day poll requires the Moderator role.");
+    }
+
+    let draft: PhotoDayPollDraft;
+    try {
+      draft = buildPhotoDayPollDraft({
+        question: stringOption(data, "question", 220),
+        options: photoDayPollOptionValues(data),
+      });
+    } catch (error) {
+      console.error("reaper-discord-interactions photo day poll preview failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Photo day poll requires 2-5 non-empty answer options.");
+    }
+
+    try {
+      const postResponse = await postPhotoDayPollReview(draft);
+
+      if (!postResponse.ok) {
+        return interactionMessage(`Photo day poll review could not be posted. Discord API returned HTTP ${postResponse.status}.`);
+      }
+
+      return interactionMessage(`Photo day poll review posted to <#${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}> for moderator approval and editing.`);
+    } catch (error) {
+      console.error("reaper-discord-interactions photo day poll review post failed", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return interactionMessage("Photo day poll review could not be posted. Check Reaper bot token and channel permissions.");
+    }
   }
 
   if (commandName === "vote-status") {

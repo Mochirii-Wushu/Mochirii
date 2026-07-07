@@ -82,6 +82,8 @@ The `reaper-discord-interactions` function validates Discord request signatures 
 
 The same Interactions endpoint handles the manual Discord vote reminder contract: `Done voting` button clicks, `/vote-status`, `/vote-leaderboard`, and moderator-only `/vote-reminder-preview`. The scheduled sender is the separate `send-vote-reminder` Edge Function. It posts link buttons only; it never automates third-party upvotes, vote submissions, CAPTCHA bypasses, browser clicks, vote-site sessions, or vote-site result checks.
 
+The Interactions endpoint also supports moderator-only `/photo-day-poll`. It posts a no-ping moderator review draft to channel `1468667003366674721` with `Approve & Send`, `Edit Draft`, and `Cancel` controls. Moderators can edit the exact question and answer options through the modal before approval; approving converts that same channel message into the reaction poll and adds starter reactions. The default public poll is the concise Guild Photo Day gathering-hour format: question, UTC+8 instruction, five 2-hour answers from Saturday midnight through 10:00 AM, and the closing line `Let's take pretty things in pretty places!`. Emoji choices are defined with Unicode escapes in the shared helper so Discord messages and starter reactions do not degrade into `??`. Registration uses `npm run register:reaper-photo-day-poll-command` for dry run first; deploying the function or applying the command registration still requires explicit approval.
+
 The Interactions endpoint also supports moderator-only pending-verification containment with `/sync-pending-verification mode:<preview|apply> confirm:<true|false>`. It is preview-first and only manages tracked member-specific containment overwrites for WWM-only, unverified Discord members. See [`../docs/reaper-pending-verification-containment.md`](../docs/reaper-pending-verification-containment.md).
 
 Script order on pages with Auth or upload behavior is:
@@ -449,7 +451,8 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 9. Register the guild-scoped `/sync-pending-verification` command with string option `mode` (`preview` or `apply`) and optional boolean `confirm`. Use `npm run register:reaper-pending-verification-command` for dry run first; approved apply uses `npm run register:reaper-pending-verification-command -- --apply`.
 10. Register the guild-scoped `/audit-modmail` command. Use `npm run register:reaper-modmail-audit-command` for dry run first; approved apply uses `npm run register:reaper-modmail-audit-command -- --apply`.
 11. Register the guild-scoped `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview` commands. `/vote-reminder-preview` is enforced by the configured Moderator role.
-11. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
+12. Register the guild-scoped `/photo-day-poll` command. Use `npm run register:reaper-photo-day-poll-command` for dry run first; approved apply uses `npm run register:reaper-photo-day-poll-command -- --apply`.
+13. Add the bot to guild `1078630751077142608` with permission to read guild member and role data needed by:
 
 ```text
 GET /guilds/1078630751077142608/members/{discord_user_id}
@@ -664,7 +667,7 @@ The same Reaper Interactions endpoint also supports:
 Manual vote reminders use two Edge Functions:
 
 - `send-vote-reminder`: scheduled sender for channel `1082802012095266866`.
-- `reaper-discord-interactions`: Discord interaction endpoint for `Done voting`, `/vote-status`, `/vote-leaderboard`, and `/vote-reminder-preview`.
+- `reaper-discord-interactions`: Discord interaction endpoint for `Done voting`, `/vote-status`, `/vote-leaderboard`, `/vote-reminder-preview`, and moderator-approved `/photo-day-poll`.
 
 The feature presents HTTPS vote links and records a member's manual confirmation after they click `Done voting`. It does not automate third-party voting. The reminder uses `allowed_mentions: { parse: [] }` and creates link buttons plus a single `vote_done:<YYYY-MM-DD>` confirmation button.
 

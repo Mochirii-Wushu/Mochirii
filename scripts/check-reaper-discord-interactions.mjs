@@ -13,6 +13,8 @@ const files = {
   reaperEvents: "supabase/functions/_shared/reaper-discord-events.ts",
   reaperEventSyncWorkflow: "supabase/functions/_shared/reaper-event-sync-workflow.ts",
   reaperVoteInteractions: "supabase/functions/_shared/reaper-vote-interactions.ts",
+  photoDayPolls: "supabase/functions/_shared/photo-day-polls.ts",
+  photoDayPollTests: "supabase/functions/_shared/photo-day-polls_test.ts",
   interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
   sharedPendingContainment: "supabase/functions/_shared/pending-verification-containment.ts",
   memberSyncFunction: "supabase/functions/reaper-discord-member-sync/index.ts",
@@ -20,6 +22,7 @@ const files = {
   importMap: "supabase/functions/reaper-discord-interactions/deno.json",
   pendingOverwriteMigration: "supabase/migrations/20260612105232_add_reaper_pending_verification_overwrites.sql",
   gallerySubmitRegistration: "scripts/register-reaper-gallery-submit-command.mjs",
+  photoDayPollRegistration: "scripts/register-reaper-photo-day-poll-command.mjs",
   commandRegistration: "scripts/register-reaper-pending-verification-command.mjs",
   rollbackScript: "scripts/rollback-reaper-pending-verification-overwrites.mjs",
   envExample: "supabase/functions/.env.example",
@@ -64,6 +67,8 @@ const discordSignature = read(files.discordSignature);
 const reaperEvents = read(files.reaperEvents);
 const reaperEventSyncWorkflow = read(files.reaperEventSyncWorkflow);
 const reaperVoteInteractions = read(files.reaperVoteInteractions);
+const photoDayPolls = read(files.photoDayPolls);
+const photoDayPollTests = read(files.photoDayPollTests);
 const interactionHelpers = read(files.interactionHelpers);
 const interactionContractSource = [
   functionSource,
@@ -71,6 +76,7 @@ const interactionContractSource = [
   reaperEvents,
   reaperEventSyncWorkflow,
   reaperVoteInteractions,
+  photoDayPolls,
   interactionHelpers,
 ].join("\n");
 const sharedPendingContainment = read(files.sharedPendingContainment);
@@ -79,6 +85,7 @@ const memberSyncImportMap = read(files.memberSyncImportMap);
 const importMap = read(files.importMap);
 const pendingOverwriteMigration = read(files.pendingOverwriteMigration);
 const gallerySubmitRegistration = read(files.gallerySubmitRegistration);
+const photoDayPollRegistration = read(files.photoDayPollRegistration);
 const commandRegistration = read(files.commandRegistration);
 const rollbackScript = read(files.rollbackScript);
 const envExample = read(files.envExample);
@@ -90,11 +97,14 @@ const activationPacket = read(files.activationPacket);
 [
   '"check:reaper-discord-interactions"',
   '"check:reaper-pending-verification"',
+  '"test:photo-day-poll"',
   '"register:reaper-gallery-submit-command"',
+  '"register:reaper-photo-day-poll-command"',
   '"register:reaper-pending-verification-command"',
   '"rollback:reaper-pending-verification"',
 ].forEach((snippet) => assertIncludes("package.json", packageJson, snippet));
 assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
+assertIncludes("check-all", checkAll, "test:photo-day-poll");
 assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
 
 [
@@ -151,12 +161,13 @@ assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
   "sync-events",
   "sync-pending-verification",
   "MAX_PENDING_VERIFICATION_MUTATIONS",
-  "PENDING_VERIFICATION_AUDIT_REASON = \"Reaper pending verification containment\"",
+  "PENDING_VERIFICATION_AUDIT_REASON",
+  "Reaper pending verification containment",
   "processPendingVerificationSync",
   "fetchGuildMembers",
   "fetchGuildChannels",
   "fetchGuildRoles",
-  "buildPendingContainmentPlan(adminClient, channels, members, roles)",
+  "buildPendingContainmentPlan",
   "type: DISCORD_MEMBER_OVERWRITE_TYPE",
   "X-Audit-Log-Reason",
   "modeValue === \"apply\" && !confirm",
@@ -170,6 +181,27 @@ assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
   "vote-reminder-preview",
   "voteDateFromCustomId",
   "recordVoteConfirmation",
+  "INTERACTION_TYPE_MODAL_SUBMIT",
+  "photo-day-poll",
+  "EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID",
+  "PHOTO_DAY_POLL_APPROVE_CUSTOM_ID",
+  "PHOTO_DAY_POLL_EDIT_CUSTOM_ID",
+  "PHOTO_DAY_POLL_EDIT_MODAL_CUSTOM_ID",
+  "PHOTO_DAY_POLL_CANCEL_CUSTOM_ID",
+  "buildPhotoDayPollDraft",
+  "buildPhotoDayPollEditModal",
+  "buildPhotoDayPollPublicMessage",
+  "buildPhotoDayPollReviewMessage",
+  "photoDayPollDraftFromModalSubmit",
+  "photoDayPollDraftFromPreviewMessage",
+  "postPhotoDayPollReview",
+  "patchPhotoDayPollReview",
+  "processPhotoDayPollApproval",
+  "Photo day poll requires the Moderator role.",
+  "Photo day poll canceled. No Discord message was sent.",
+  "Photo day poll review posted to",
+  `/channels/\${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages`,
+  `/channels/\${EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID}/messages/\${messageId}/reactions/\${encodeURIComponent(choice.emoji)}/@me`,
   "allowed_mentions",
   "permissions: \"0\"",
   "hoist: false",
@@ -229,6 +261,71 @@ assertMatches(
   gallerySubmitRegistration,
   /name:\s*"title"[\s\S]*?required:\s*false[\s\S]*?name:\s*"subtitle"[\s\S]*?required:\s*false[\s\S]*?name:\s*"share_to_instagram"[\s\S]*?required:\s*false/,
   "title, subtitle, and Instagram opt-in options must stay optional in Discord registration.",
+);
+
+[
+  'EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID = "1468667003366674721"',
+  'PHOTO_DAY_POLL_APPROVE_CUSTOM_ID = "photo_day_poll:approve"',
+  'PHOTO_DAY_POLL_EDIT_CUSTOM_ID = "photo_day_poll:edit"',
+  'PHOTO_DAY_POLL_EDIT_MODAL_CUSTOM_ID = "photo_day_poll:edit_modal"',
+  'PHOTO_DAY_POLL_CANCEL_CUSTOM_ID = "photo_day_poll:cancel"',
+  'PHOTO_DAY_POLL_PUBLIC_TITLE =',
+  "Guild Photo Day: Choose Your Gathering Hour",
+  'PHOTO_DAY_POLL_REACTION_EMOJIS = [',
+  "\\u{1F30C}",
+  "\\u{1F989}",
+  "\\u{1F305}",
+  "\\u{2600}\\u{FE0F}",
+  "\\u{1F324}\\u{FE0F}",
+  "DEFAULT_PHOTO_DAY_POLL_QUESTION",
+  "When can you join Guild Photo Day?",
+  "Times are UTC+8. React to every answer that works for you.",
+  "Saturday, 12:00 AM - 2:00 AM",
+  "Saturday, 8:00 AM - 10:00 AM",
+  "Let's take pretty things in pretty places!",
+  "sanitizePhotoDayPollText",
+  "buildPhotoDayPollEditModal",
+  "buildPhotoDayPollPublicMessage",
+  "buildPhotoDayPollReviewMessage",
+  "photoDayPollDraftFromModalSubmit",
+  "photoDayPollDraftFromPreviewMessage",
+  "allowed_mentions: allowedMentions()",
+].forEach((snippet) => assertIncludes("photo day poll helper", photoDayPolls, snippet));
+
+assertNotMatches(
+  "photo day poll helper",
+  photoDayPolls,
+  /Dawn Pavilion|Sunlit Courtyard|Lantern Hour|Sunday Moonbridge|strongest window|\u00f0\u0178|\u00e2\u02dc|\u00e2\u0153/,
+  "photo day poll defaults must stay on the concise gathering-hour structure with ASCII Unicode escapes.",
+);
+
+[
+  "photo day poll defaults render the approved gathering-hour draft exactly",
+  "photo day poll public message mirrors the concise official structure",
+  "photo day poll accepts sanitized question and option overrides",
+  "photo day poll rejects invalid answer counts",
+  "photo day poll strips Discord mention formatting hazards",
+  "photo day poll review message round-trips approved question and answer options",
+  "photo day poll edit modal rebuilds a revised draft",
+  "photo day poll public message stays under Discord embed limits and suppresses pings",
+].forEach((snippet) => assertIncludes("photo day poll tests", photoDayPollTests, snippet));
+
+[
+  'COMMAND_NAME = "photo-day-poll"',
+  'EXPECTED_DISCORD_PHOTO_DAY_CHANNEL_ID = "1468667003366674721"',
+  "Dry run only",
+  "method: existing ? \"PATCH\" : \"POST\"",
+  'name: "question"',
+  'name: "option_1"',
+  'name: "option_5"',
+  "Refusing to register /${COMMAND_NAME} with required",
+].forEach((snippet) => assertIncludes("photo day poll command registration", photoDayPollRegistration, snippet));
+
+assertNotMatches(
+  "photo day poll command registration",
+  photoDayPollRegistration,
+  /method:\s*"PUT"|method:\s*'PUT'/,
+  "photo day poll command registration must never bulk-overwrite guild commands.",
 );
 
 [
@@ -448,6 +545,9 @@ assertNotMatches(
   "Discord Interactions Endpoint URL",
   "DISCORD_PUBLIC_KEY",
   "/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]",
+  "/photo-day-poll",
+  "1468667003366674721",
+  "register:reaper-photo-day-poll-command",
   "/sync-pending-verification mode:<preview|apply> confirm:<true|false>",
   "discord_managed_permission_overwrites",
   "Supabase-hosted Discord Interactions",
