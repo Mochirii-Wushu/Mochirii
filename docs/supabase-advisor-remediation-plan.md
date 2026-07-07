@@ -1,6 +1,6 @@
 # Supabase Advisor Remediation Plan
 
-Last refreshed: 2026-07-06
+Last refreshed: 2026-07-07
 
 Project: `deyvmtncimmcinldjyqe`
 
@@ -10,18 +10,23 @@ This packet records the current linked Supabase advisor evidence and the planned
 
 - Supabase Database Advisors: https://supabase.com/docs/guides/database/database-advisors
 - Supabase Row Level Security: https://supabase.com/docs/guides/database/postgres/row-level-security
+- Supabase explicit Data API grants changelog: https://supabase.com/changelog
 - Repo RLS summary: `supabase/README.md`
 - Operations approval rules: `docs/integration-operations-runbook.md`
 
 ## Current Advisor Evidence
 
-Linked CLI readback with Supabase CLI `2.108.0` succeeded on 2026-07-06 using the repo-local Windows binary and credentials loaded only into child-process environment variables.
+Linked CLI readback with Supabase CLI `2.108.0` succeeded on 2026-07-07 using the repo-local Windows binary and credentials loaded only into child-process environment variables.
+
+The exact requested credential file `C:\Users\xtyty\Documents\Creds\supabase-db-password.txt` was not present during this refresh. No alternate password file was read or substituted. The linked readbacks below succeeded with `SUPABASE_ACCESS_TOKEN` only.
 
 - Security advisors: 14 findings.
 - `rls_enabled_no_policy`: 13 info findings.
 - `auth_leaked_password_protection`: 1 warning.
 - Performance advisors: 47 info-level `unused_index` findings.
 - Function inventory and migration list readback succeeded before the advisor pass.
+- Local and remote migration IDs matched through `20260704120856`.
+- Linked schema lint returned no warning-level findings.
 
 ## RLS No-Policy Classification
 
@@ -44,6 +49,8 @@ The current `rls_enabled_no_policy` findings are classified as intentional servi
 | `vote_reminder_sends` | Service-only vote reminder tracking | Keep default-deny; expose through trusted functions only. |
 
 Do not add dummy public policies just to silence the advisor. If any table later needs direct browser access, create a narrow policy with an explicit `TO` clause plus a row ownership or moderator predicate, and verify with Supabase Preview, advisors, and route tests.
+
+Supabase's 2026 default-grants timeline makes explicit grants a separate, deliberate access decision from RLS. Keep grants and RLS policies paired in the same reviewed migration when a table is intentionally exposed through the Data API.
 
 ## Leaked-Password Protection
 
