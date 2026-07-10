@@ -63,19 +63,24 @@ Deno.serve(async (req: Request) => {
     },
   });
 
-  const { data: userData, error: userError } = await adminClient.auth.admin.getUserById(payload.sub);
+  const [
+    { data: userData, error: userError },
+    { data: profileData, error: profileError },
+  ] = await Promise.all([
+    adminClient.auth.admin.getUserById(payload.sub),
+    adminClient
+      .from("member_profiles")
+      .select("id")
+      .eq("id", payload.sub)
+      .maybeSingle(),
+  ]);
+
   if (userError || !userData?.user?.id) {
     console.warn("sync-pixelfed-social-account rejected unknown user", {
       message: userError?.message || "Missing user",
     });
     return jsonResponse({ ok: false, error: "unknown_user" }, 404);
   }
-
-  const { data: profileData, error: profileError } = await adminClient
-    .from("member_profiles")
-    .select("id")
-    .eq("id", payload.sub)
-    .maybeSingle();
 
   if (profileError) {
     console.error("sync-pixelfed-social-account profile lookup failed", {

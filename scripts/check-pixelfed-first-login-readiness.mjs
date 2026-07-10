@@ -119,6 +119,8 @@ const snippetChecks = [
     snippets: [
       "PIXELFED_SOCIAL_SYNC_SECRET",
       "auth.admin.getUserById",
+      "Promise.all([",
+      ".from(\"member_profiles\")",
       ".from(\"social_accounts\")",
       "provider: \"pixelfed\"",
       "federation_enabled: false",
