@@ -492,11 +492,31 @@ async function handleRequest(req: Request): Promise<Response> {
     }
   }
 
-  const { data: profileData, error: profileError } = await adminClient
+  // These final-state reads are independent after the optional Discord refresh.
+  const profileQuery = adminClient
     .from("member_profiles")
     .select("*")
     .eq("id", userId)
     .maybeSingle();
+
+  const verificationQuery = adminClient
+    .from("member_verifications")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const identityQuery = adminClient
+    .from("member_auth_identities")
+    .select("provider,provider_subject,display_label,provider_email_verified,provider_phone_verified,active,last_observed_at")
+    .eq("user_id", userId)
+    .eq("active", true)
+    .order("provider", { ascending: true });
+
+  const [
+    { data: profileData, error: profileError },
+    { data: verificationData, error: verificationLookupError },
+    { data: identityRows, error: identityLookupError },
+  ] = await Promise.all([profileQuery, verificationQuery, identityQuery]);
 
   if (profileError) {
     console.error("verify-member-access profile lookup failed", {
@@ -505,12 +525,6 @@ async function handleRequest(req: Request): Promise<Response> {
     });
     return jsonResponse({ ok: false, message: "Member profile could not be loaded." }, 500);
   }
-
-  const { data: verificationData, error: verificationLookupError } = await adminClient
-    .from("member_verifications")
-    .select("*")
-    .eq("user_id", userId)
-    .maybeSingle();
 
   if (verificationLookupError) {
     console.error("verify-member-access verification lookup failed", {
@@ -536,13 +550,6 @@ async function handleRequest(req: Request): Promise<Response> {
       .maybeSingle();
     verification = expiredData as JsonRecord | null;
   }
-
-  const { data: identityRows, error: identityLookupError } = await adminClient
-    .from("member_auth_identities")
-    .select("provider,provider_subject,display_label,provider_email_verified,provider_phone_verified,active,last_observed_at")
-    .eq("user_id", userId)
-    .eq("active", true)
-    .order("provider", { ascending: true });
 
   if (identityLookupError) {
     console.error("verify-member-access identity lookup failed", {
