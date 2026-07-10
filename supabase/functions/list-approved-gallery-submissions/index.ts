@@ -1,5 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -27,21 +28,6 @@ function safeString(value: unknown, maxLength: number): string | null {
   const text = String(value ?? "").trim();
   if (!text) return null;
   return text.slice(0, maxLength);
-}
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 Deno.serve(async (req: Request) => {

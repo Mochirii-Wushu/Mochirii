@@ -1,6 +1,7 @@
 import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -53,21 +54,6 @@ function parseCsv(value: string | null | undefined): string[] {
 
 function booleanTrue(value: unknown): boolean {
   return value === true;
-}
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 function snowflake(value: unknown): string | null {
