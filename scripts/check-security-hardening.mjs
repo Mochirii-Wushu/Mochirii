@@ -258,7 +258,13 @@ const unauthenticatedFunctionGuardSpecs = {
   "sync-pixelfed-social-account": {
     source: pixelfedSocialSync,
     kind: "shared-secret Pixelfed sync",
-    snippets: ["PIXELFED_SOCIAL_SYNC_SECRET", "PIXELFED_SOCIAL_SYNC_SECRET_HEADER", "verifySyncSecret(req)"],
+    snippets: [
+      "PIXELFED_SOCIAL_SYNC_SECRET",
+      "PIXELFED_SOCIAL_SYNC_SECRET_HEADER",
+      "verifySyncSecret(req)",
+      "../_shared/supabase-service-role.ts",
+      "getServiceRoleKey()",
+    ],
   },
 };
 
@@ -294,6 +300,8 @@ for (const name of expectedUnauthenticatedFunctions) {
   "auth.admin.getUserById",
   ".from(\"social_accounts\")",
   "federation_enabled: false",
+  "../_shared/supabase-service-role.ts",
+  "getServiceRoleKey()",
 ].forEach((snippet) => assertIncludes("sync-pixelfed-social-account", pixelfedSocialSync, snippet));
 
 [

@@ -76,6 +76,39 @@ const files = collectRepoFiles(["apps/web", "scripts", "supabase/functions"], {
   ignoredSegments: ["node_modules", ".next", ".git"],
 });
 
+const serviceRoleResolverPath = "supabase/functions/_shared/supabase-service-role.ts";
+const serviceRoleResolverDefinition = /\b(?:export\s+)?function\s+getServiceRoleKey\s*\(/g;
+const directServiceRoleReads = [
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+];
+
+for (const file of files.filter((entry) => entry.startsWith("supabase/functions/") && entry.endsWith(".ts"))) {
+  const text = readText(file);
+  const definitionCount = (text.match(serviceRoleResolverDefinition) || []).length;
+
+  if (file === serviceRoleResolverPath) {
+    if (definitionCount !== 1) {
+      failures.push(`${file}: the canonical service-role resolver must define getServiceRoleKey exactly once.`);
+    }
+    for (const requiredRead of directServiceRoleReads) {
+      if (!text.includes(requiredRead)) {
+        failures.push(`${file}: the canonical service-role resolver must retain ${requiredRead}.`);
+      }
+    }
+    continue;
+  }
+
+  if (definitionCount) {
+    failures.push(`${file}: Edge Functions must import the canonical service-role resolver instead of defining it locally.`);
+  }
+  for (const forbiddenRead of directServiceRoleReads) {
+    if (text.includes(forbiddenRead)) {
+      failures.push(`${file}: Edge Functions must not read service-role environment values outside the canonical resolver.`);
+    }
+  }
+}
+
 for (const file of files) {
   if (literalAllowedFiles.has(file) || literalAllowedPrefixes.some((prefix) => file.startsWith(prefix))) continue;
   const text = readText(file);
