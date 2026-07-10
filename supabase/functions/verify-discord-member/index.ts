@@ -10,6 +10,7 @@ import {
   safeString,
   type JsonRecord,
 } from "../_shared/member-verification-identity.ts";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
 type VerificationResponse = {
   verified: boolean;
@@ -47,21 +48,6 @@ function parseCsv(value: string | null | undefined): string[] {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-}
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 function verificationBody(input: VerificationResponse): VerificationResponse {

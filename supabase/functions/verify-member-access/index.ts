@@ -11,6 +11,7 @@ import {
   safeString,
   type JsonRecord,
 } from "../_shared/member-verification-identity.ts";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
 type SyncedIdentity = {
   provider: string;
@@ -58,21 +59,6 @@ function parseCsv(value: string | null | undefined): string[] {
 
 function truthy(value: unknown): boolean {
   return value === true || String(value).toLowerCase() === "true";
-}
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 async function readOptionalBody(req: Request): Promise<JsonRecord> {
