@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getServiceRoleKey } from "./supabase-service-role.ts";
 import {
   asArray,
   asRecord,
@@ -65,21 +66,6 @@ export async function readJson(req: Request): Promise<JsonRecord> {
     return asRecord(JSON.parse(raw));
   } catch {
     throw new Error("Request body must be valid JSON.");
-  }
-}
-
-export function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
   }
 }
 

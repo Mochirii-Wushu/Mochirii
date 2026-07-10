@@ -12,6 +12,7 @@ const files = {
   migration: "supabase/migrations/20260609090000_add_discord_vote_reminders.sql",
   helper: "supabase/functions/_shared/vote-reminders.ts",
   helperTest: "supabase/functions/_shared/vote-reminders_test.ts",
+  serviceRole: "supabase/functions/_shared/supabase-service-role.ts",
   sender: "supabase/functions/send-vote-reminder/index.ts",
   senderImportMap: "supabase/functions/send-vote-reminder/deno.json",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
@@ -53,6 +54,7 @@ const envExample = read(files.envExample);
 const migration = read(files.migration);
 const helper = read(files.helper);
 const helperTest = read(files.helperTest);
+const serviceRole = read(files.serviceRole);
 const sender = read(files.sender);
 const senderImportMap = read(files.senderImportMap);
 const reaper = [read(files.reaper), read(files.interactionHelpers), read(files.reaperVoteInteractions)].join("\n");
@@ -133,6 +135,34 @@ assertNotMatches(
   "status: \"pending\"",
   "duplicate: true",
 ].forEach((snippet) => assertIncludes("send-vote-reminder", sender, snippet));
+
+[
+  "../_shared/supabase-service-role.ts",
+  "getServiceRoleKey()",
+].forEach((snippet) => assertIncludes("send-vote-reminder service role", sender, snippet));
+[
+  /function\s+getServiceRoleKey/,
+  /Deno\.env\.get\("SUPABASE_SERVICE_ROLE_KEY"\)/,
+  /Deno\.env\.get\("SUPABASE_SECRET_KEYS"\)/,
+].forEach((pattern) =>
+  assertNotMatches(
+    "send-vote-reminder service role",
+    sender,
+    pattern,
+    "service-role resolution must stay centralized in the shared security helper.",
+  )
+);
+[
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+  "resolveServiceRoleKey",
+].forEach((snippet) => assertIncludes("shared Supabase service role", serviceRole, snippet));
+assertNotMatches(
+  "shared Supabase service role",
+  serviceRole,
+  /console\./,
+  "secret-resolution state must not be logged.",
+);
 
 [
   "INTERACTION_TYPE_MESSAGE_COMPONENT",
