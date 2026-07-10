@@ -20,6 +20,7 @@ import {
   type SupabaseAdminClient,
 } from "../_shared/pending-verification-containment.ts";
 import { SITE_ORIGIN } from "../_shared/public-origins.ts";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
 const DISCORD_API_USER_AGENT = `Mochirii-Reaper-MemberSync/1.0 (${SITE_ORIGIN})`;
@@ -46,21 +47,6 @@ function jsonResponse(body: unknown, status = 200): Response {
       "Content-Type": "application/json",
     },
   });
-}
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 function serviceAdminClient(purpose: string): SupabaseAdminClient {

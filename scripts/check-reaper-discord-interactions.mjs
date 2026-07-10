@@ -18,6 +18,7 @@ const files = {
   photoDayPolls: "supabase/functions/_shared/photo-day-polls.ts",
   photoDayPollTests: "supabase/functions/_shared/photo-day-polls_test.ts",
   interactionHelpers: "supabase/functions/_shared/discord-interaction-helpers.ts",
+  supabaseServiceRole: "supabase/functions/_shared/supabase-service-role.ts",
   sharedPendingContainment: "supabase/functions/_shared/pending-verification-containment.ts",
   memberSyncFunction: "supabase/functions/reaper-discord-member-sync/index.ts",
   memberSyncImportMap: "supabase/functions/reaper-discord-member-sync/deno.json",
@@ -74,6 +75,7 @@ const reaperRankSyncWorkflow = read(files.reaperRankSyncWorkflow);
 const photoDayPolls = read(files.photoDayPolls);
 const photoDayPollTests = read(files.photoDayPollTests);
 const interactionHelpers = read(files.interactionHelpers);
+const supabaseServiceRole = read(files.supabaseServiceRole);
 const interactionContractSource = [
   functionSource,
   discordSignature,
@@ -99,6 +101,23 @@ const supabaseReadme = read(files.supabaseReadme);
 const deploymentRunbook = read(files.deploymentRunbook);
 const pendingContainmentRunbook = read(files.pendingContainmentRunbook);
 const activationPacket = read(files.activationPacket);
+
+[
+  ["reaper-discord-interactions", functionSource],
+  ["reaper-discord-member-sync", memberSyncFunction],
+].forEach(([label, source]) => {
+  assertIncludes(label, source, "../_shared/supabase-service-role.ts");
+  assertIncludes(label, source, "getServiceRoleKey()");
+  assertNotIncludes(label, source, "function getServiceRoleKey");
+  assertNotIncludes(label, source, 'Deno.env.get("SUPABASE_SECRET_KEYS")');
+});
+
+[
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+  "resolveServiceRoleKey",
+].forEach((snippet) => assertIncludes("shared Supabase service role", supabaseServiceRole, snippet));
+assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.");
 
 [
   '"check:reaper-discord-interactions"',

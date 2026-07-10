@@ -45,6 +45,7 @@ import {
 } from "../_shared/discord-interaction-helpers.ts";
 import { verifyDiscordSignature } from "../_shared/discord-signature.ts";
 import { SITE_ORIGIN, siteUrl } from "../_shared/public-origins.ts";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 import { processEventSync } from "../_shared/reaper-event-sync-workflow.ts";
 import {
   handlePhotoDayPollCommand,
@@ -94,21 +95,6 @@ const INTERACTION_TYPE_APPLICATION_COMMAND = 2;
 const INTERACTION_TYPE_MESSAGE_COMPONENT = 3;
 const INTERACTION_TYPE_MODAL_SUBMIT = 5;
 const INTERACTION_RESPONSE_PONG = 1;
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
-}
 
 function serviceAdminClient(purpose: string): SupabaseAdminClient {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
