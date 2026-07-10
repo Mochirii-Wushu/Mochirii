@@ -35,6 +35,8 @@ const verifyMemberAccess = read("supabase/functions/verify-member-access/index.t
 const verifyDiscordMember = read("supabase/functions/verify-discord-member/index.ts");
 const memberVerificationIdentity = read("supabase/functions/_shared/member-verification-identity.ts");
 const memberVerificationIdentityTest = read("supabase/functions/_shared/member-verification-identity_test.ts");
+const supabaseServiceRole = read("supabase/functions/_shared/supabase-service-role.ts");
+const supabaseServiceRoleTest = read("supabase/functions/_shared/supabase-service-role_test.ts");
 const reviewMemberVerification = read("supabase/functions/review-member-verification/index.ts");
 const staticSupabase = read("supabase.js");
 const staticAuth = read("auth.js");
@@ -45,10 +47,12 @@ const staticLeaderDashboardHtml = read("leader-dashboard.html");
 [
   '"check:multi-provider-auth": "node scripts/check-multi-provider-auth.mjs"',
   '"test:member-verification-identity": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/member-verification-identity_test.ts"',
+  '"test:supabase-service-role": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/supabase-service-role_test.ts"',
 ].forEach((snippet) => assertIncludes("package scripts", packageJson, snippet));
 
 assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "scripts/check-multi-provider-auth.mjs"]]');
 assertIncludes("check-all", checkAll, '["test:member-verification-identity", ["deno", "test"');
+assertIncludes("check-all", checkAll, '["test:supabase-service-role", ["deno", "test"');
 
 [
   '"discord"',
@@ -212,6 +216,28 @@ assertIncludes("check-all", checkAll, '["test:member-verification-identity", ["d
   "Discord identity resolution uses synced, auth, profile, then metadata precedence",
   "Discord avatar URLs select static and animated CDN formats",
 ].forEach((snippet) => assertIncludes("shared member verification identity tests", memberVerificationIdentityTest, snippet));
+
+[
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+  "resolveServiceRoleKey",
+].forEach((snippet) => assertIncludes("shared Supabase service role", supabaseServiceRole, snippet));
+assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.");
+
+[
+  "direct service role key wins unchanged",
+  "bundled default key wins over the legacy key",
+  "missing or unusable service role values fail closed",
+].forEach((snippet) => assertIncludes("shared Supabase service role tests", supabaseServiceRoleTest, snippet));
+
+[
+  ["verify-member-access", verifyMemberAccess],
+  ["verify-discord-member", verifyDiscordMember],
+].forEach(([label, source]) => {
+  assertIncludes(label, source, "../_shared/supabase-service-role.ts");
+  assertIncludes(label, source, "getServiceRoleKey()");
+  assertNotIncludes(label, source, "function getServiceRoleKey");
+});
 
 [
   "requireModeratorAccess(req)",

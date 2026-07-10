@@ -22,6 +22,7 @@ const checks = [
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]],
   ["test:member-verification-identity", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/member-verification-identity_test.ts"]],
+  ["test:supabase-service-role", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/supabase-service-role_test.ts"]],
   ["check:multi-provider-auth", ["node", "scripts/check-multi-provider-auth.mjs"]],
   ["check:apple-auth-readiness", ["node", "scripts/check-apple-auth-readiness.mjs"]],
   ["check:auth-provider-state-cleanup", ["node", "scripts/check-auth-provider-state-cleanup.mjs"]],

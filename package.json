@@ -108,6 +108,7 @@
     "test:pixelfed-social-sync": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/sync-pixelfed-social-account/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/pixelfed-social-sync_test.ts",
     "test:gallery-cleanup": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/delete-rejected-gallery-submission/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/gallery-cleanup_test.ts",
     "test:member-verification-identity": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/member-verification-identity_test.ts",
+    "test:supabase-service-role": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/supabase-service-role_test.ts",
     "test:spotlight-poll": "deno test --allow-env --node-modules-dir=auto --import-map=deno-spotlight-poll.import_map.json --lock=deno.lock --frozen=true supabase/functions/_shared/spotlight-polls_test.ts",
     "test:modmail-audit": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/modmail-audit_test.ts",
     "test:photo-day-poll": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/reaper-discord-interactions/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/photo-day-polls_test.ts",
