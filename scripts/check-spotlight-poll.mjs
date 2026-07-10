@@ -48,6 +48,7 @@ const checkAll = read("scripts/check-all.mjs");
 const config = read("supabase/config.toml");
 const migration = read("supabase/migrations/20260610120000_add_member_spotlight_polls.sql");
 const shared = read("supabase/functions/_shared/spotlight-polls.ts");
+const serviceRole = read("supabase/functions/_shared/supabase-service-role.ts");
 const sender = read("supabase/functions/send-member-spotlight-poll/index.ts");
 const publisher = read("supabase/functions/publish-member-spotlight-winner/index.ts");
 const publicWinner = read("supabase/functions/get-current-spotlight-winner/index.ts");
@@ -96,6 +97,34 @@ assertIncludes("check-all", checkAll, "check:spotlight-poll");
   "allow_multiselect: false",
   "allowed_mentions: { parse: [] }",
 ].forEach((snippet) => assertIncludes("spotlight shared helper", shared, snippet));
+
+[
+  "./supabase-service-role.ts",
+  "getServiceRoleKey()",
+].forEach((snippet) => assertIncludes("spotlight shared service role", shared, snippet));
+[
+  /export\s+function\s+getServiceRoleKey/,
+  /Deno\.env\.get\("SUPABASE_SERVICE_ROLE_KEY"\)/,
+  /Deno\.env\.get\("SUPABASE_SECRET_KEYS"\)/,
+].forEach((pattern) =>
+  assertNotMatches(
+    "spotlight shared service role",
+    shared,
+    pattern,
+    "service-role resolution must stay centralized in the shared security helper.",
+  )
+);
+[
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+  "resolveServiceRoleKey",
+].forEach((snippet) => assertIncludes("shared Supabase service role", serviceRole, snippet));
+assertNotMatches(
+  "shared Supabase service role",
+  serviceRole,
+  /console\./,
+  "secret-resolution state must not be logged.",
+);
 
 [
   "spotlightPollConfig",
