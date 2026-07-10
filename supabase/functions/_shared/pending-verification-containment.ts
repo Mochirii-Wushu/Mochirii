@@ -589,6 +589,14 @@ export async function applyPendingContainmentPlan(
   let dbWrites = 0;
 
   for (const change of plan.changes) {
+    const ownsPermissionsAfterChange = change.nextOwnedAllow !== 0n || change.nextOwnedDeny !== 0n;
+
+    // Persist newly acquired ownership first so a failed Discord write remains safely retryable.
+    if (change.dbWrite && ownsPermissionsAfterChange) {
+      await savePendingOverwriteRecord(adminClient, change, config);
+      dbWrites += 1;
+    }
+
     if (change.discordWrite) {
       try {
         await writePendingDiscordOverwrite(change);
@@ -612,7 +620,8 @@ export async function applyPendingContainmentPlan(
       }
     }
 
-    if (change.dbWrite) {
+    // Release ownership only after Discord no longer has the Reaper-managed bits.
+    if (change.dbWrite && !ownsPermissionsAfterChange) {
       await savePendingOverwriteRecord(adminClient, change, config);
       dbWrites += 1;
     }

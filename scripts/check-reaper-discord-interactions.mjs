@@ -111,7 +111,7 @@ const activationPacket = read(files.activationPacket);
 ].forEach((snippet) => assertIncludes("package.json", packageJson, snippet));
 assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
 assertIncludes("check-all", checkAll, "test:photo-day-poll");
-assertIncludes("check-all", checkAll, "check:reaper-pending-verification");
+assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
 
 [
   "[functions.reaper-discord-interactions]",
