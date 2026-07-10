@@ -2,12 +2,14 @@ import { readFileSync } from "node:fs";
 
 const actionPath = "supabase/functions/mochi-pets-alpha-action/index.ts";
 const sharedPath = "supabase/functions/_shared/mochi-pets-alpha.ts";
+const serviceRolePath = "supabase/functions/_shared/supabase-service-role.ts";
 const sessionPath = "supabase/functions/mochi-pets-alpha-session/index.ts";
 const progressPath = "supabase/functions/mochi-pets-alpha-progress/index.ts";
 const migrationPath = "supabase/migrations/20260704120856_rename_mochi_pets_internal_prefix.sql";
 
 const action = readFileSync(actionPath, "utf8");
 const shared = readFileSync(sharedPath, "utf8");
+const serviceRole = readFileSync(serviceRolePath, "utf8");
 const session = readFileSync(sessionPath, "utf8");
 const progress = readFileSync(progressPath, "utf8");
 const migration = readFileSync(migrationPath, "utf8");
@@ -43,6 +45,23 @@ assertIncludes(sharedPath, shared, 'Deno.env.get("MOCHI_PETS_GAME_SERVER_TOKEN")
 assertIncludes(sharedPath, shared, 'req.headers.get("x-mochi-pets-server-token")');
 assertIncludes(sharedPath, shared, "expected && provided && expected === provided");
 assertIncludes(sharedPath, shared, "invalid_game_server_token");
+assertIncludes(sharedPath, shared, './supabase-service-role.ts');
+assertIncludes(sharedPath, shared, "getServiceRoleKey()");
+for (const forbidden of [
+  "export function getServiceRoleKey",
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+]) {
+  assert(!shared.includes(forbidden), `${sharedPath} must centralize service-role resolution: ${forbidden}.`);
+}
+for (const required of [
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+  "resolveServiceRoleKey",
+]) {
+  assertIncludes(serviceRolePath, serviceRole, required);
+}
+assert(!serviceRole.includes("console."), `${serviceRolePath} must not log secret-resolution state.`);
 assertIncludes(sharedPath, shared, 'UNITY_ROOM_KEY = "jade-lantern-room-alpha"');
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_KEY = "lirabao"');
 assertIncludes(sharedPath, shared, 'UNITY_SHARED_PET_DISPLAY_NAME = "Lirabao"');
