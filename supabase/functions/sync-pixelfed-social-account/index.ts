@@ -6,6 +6,7 @@ import {
   PIXELFED_SOCIAL_SYNC_SECRET_HEADER,
   type JsonRecord,
 } from "../_shared/pixelfed-social-sync.ts";
+import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -14,21 +15,6 @@ function jsonResponse(body: JsonRecord, status = 200): Response {
       "Content-Type": "application/json",
     },
   });
-}
-
-function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 function verifySyncSecret(req: Request): boolean {
