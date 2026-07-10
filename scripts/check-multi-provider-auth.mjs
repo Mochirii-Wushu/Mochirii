@@ -187,6 +187,10 @@ assertIncludes("check-all", checkAll, '["test:member-verification-identity", ["d
   "provider_email_verified",
   "provider_phone_verified",
   "galleryEligible",
+  "const profileQuery =",
+  "const verificationQuery =",
+  "const identityQuery =",
+  "await Promise.all([profileQuery, verificationQuery, identityQuery])",
 ].forEach((snippet) => assertIncludes("verify-member-access", verifyMemberAccess, snippet));
 
 [
