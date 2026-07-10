@@ -16,7 +16,7 @@ const checks = [
   ["test:discord-signature", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/discord-signature_test.ts"]],
   ["test:reaper-discord-events", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/reaper-discord-events_test.ts"]],
   ["check:reaper-modmail-audit", ["node", "scripts/check-reaper-modmail-audit.mjs"]],
-  ["check:reaper-pending-verification", ["node", "scripts/check-reaper-pending-verification.mjs"]],
+  ["test:reaper-pending-verification", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/pending-verification-containment_test.ts"]],
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
