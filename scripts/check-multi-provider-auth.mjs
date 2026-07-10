@@ -32,6 +32,9 @@ const moderationClient = read("apps/web/lib/supabase/moderation.ts");
 const supabaseConfig = read("supabase/config.toml");
 const migration = read("supabase/migrations/20260615041842_add_multi_provider_member_verification.sql");
 const verifyMemberAccess = read("supabase/functions/verify-member-access/index.ts");
+const verifyDiscordMember = read("supabase/functions/verify-discord-member/index.ts");
+const memberVerificationIdentity = read("supabase/functions/_shared/member-verification-identity.ts");
+const memberVerificationIdentityTest = read("supabase/functions/_shared/member-verification-identity_test.ts");
 const reviewMemberVerification = read("supabase/functions/review-member-verification/index.ts");
 const staticSupabase = read("supabase.js");
 const staticAuth = read("auth.js");
@@ -41,9 +44,11 @@ const staticLeaderDashboardHtml = read("leader-dashboard.html");
 
 [
   '"check:multi-provider-auth": "node scripts/check-multi-provider-auth.mjs"',
+  '"test:member-verification-identity": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/member-verification-identity_test.ts"',
 ].forEach((snippet) => assertIncludes("package scripts", packageJson, snippet));
 
 assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "scripts/check-multi-provider-auth.mjs"]]');
+assertIncludes("check-all", checkAll, '["test:member-verification-identity", ["deno", "test"');
 
 [
   '"discord"',
@@ -183,6 +188,26 @@ assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "s
   "provider_phone_verified",
   "galleryEligible",
 ].forEach((snippet) => assertIncludes("verify-member-access", verifyMemberAccess, snippet));
+
+[
+  "../_shared/member-verification-identity.ts",
+  "resolveDiscordIdentity",
+].forEach((snippet) => {
+  assertIncludes("verify-member-access shared identity", verifyMemberAccess, snippet);
+  assertIncludes("verify-discord-member shared identity", verifyDiscordMember, snippet);
+});
+
+[
+  "defaultDisplayName",
+  "providerSubject",
+  "resolveDiscordIdentity",
+  "discordAvatarUrl",
+].forEach((snippet) => assertIncludes("shared member verification identity", memberVerificationIdentity, snippet));
+
+[
+  "Discord identity resolution uses synced, auth, profile, then metadata precedence",
+  "Discord avatar URLs select static and animated CDN formats",
+].forEach((snippet) => assertIncludes("shared member verification identity tests", memberVerificationIdentityTest, snippet));
 
 [
   "requireModeratorAccess(req)",

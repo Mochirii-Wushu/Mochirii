@@ -1,8 +1,15 @@
 import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
-type JsonRecord = Record<string, unknown>;
+import {
+  asRecord,
+  asStringArray,
+  defaultDisplayName,
+  discordAvatarUrl,
+  resolveDiscordIdentity,
+  safeString,
+  type JsonRecord,
+} from "../_shared/member-verification-identity.ts";
 
 type VerificationResponse = {
   verified: boolean;
@@ -42,39 +49,6 @@ function parseCsv(value: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
-function safeString(value: unknown, maxLength: number): string | null {
-  const text = String(value ?? "").trim();
-  if (!text) return null;
-  return text.slice(0, maxLength);
-}
-
-function defaultDisplayName(user: JsonRecord): string {
-  const metadata = asRecord(user.user_metadata);
-  const email = safeString(user.email, 120);
-  const emailPrefix = email?.split("@")[0];
-  const display = safeString(
-    metadata.global_name ||
-      metadata.full_name ||
-      metadata.name ||
-      metadata.preferred_username ||
-      metadata.user_name ||
-      metadata.username ||
-      emailPrefix ||
-      "Mochirii Member",
-    40,
-  );
-
-  return display && display.length >= 2 ? display : "Mochirii Member";
-}
-
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as JsonRecord : {};
-}
-
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean) : [];
-}
-
 function getServiceRoleKey(): string {
   const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (direct) return direct;
@@ -88,45 +62,6 @@ function getServiceRoleKey(): string {
   } catch {
     return "";
   }
-}
-
-function resolveDiscordIdentity(user: JsonRecord, profile: JsonRecord | null): string | null {
-  const identities = Array.isArray(user.identities) ? user.identities : [];
-
-  for (const identity of identities) {
-    const record = asRecord(identity);
-    if (record.provider !== "discord") continue;
-
-    const identityData = asRecord(record.identity_data);
-    const id = safeString(
-      record.provider_id ||
-        identityData.provider_id ||
-        identityData.sub ||
-        identityData.id ||
-        identityData.user_id,
-      40,
-    );
-    if (id) return id;
-  }
-
-  const metadata = asRecord(user.user_metadata);
-  return safeString(
-    profile?.discord_user_id ||
-      metadata.provider_id ||
-      metadata.sub ||
-      metadata.id ||
-      metadata.user_id,
-    40,
-  );
-}
-
-function discordAvatarUrl(discordUser: JsonRecord): string | null {
-  const id = safeString(discordUser.id, 40);
-  const avatar = safeString(discordUser.avatar, 120);
-  if (!id || !avatar) return null;
-
-  const extension = avatar.startsWith("a_") ? "gif" : "png";
-  return `https://cdn.discordapp.com/avatars/${encodeURIComponent(id)}/${encodeURIComponent(avatar)}.${extension}`;
 }
 
 function verificationBody(input: VerificationResponse): VerificationResponse {

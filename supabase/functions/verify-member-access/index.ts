@@ -1,8 +1,16 @@
 import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-
-type JsonRecord = Record<string, unknown>;
+import {
+  asRecord,
+  asStringArray,
+  defaultDisplayName,
+  discordAvatarUrl,
+  providerSubject,
+  resolveDiscordIdentity,
+  safeString,
+  type JsonRecord,
+} from "../_shared/member-verification-identity.ts";
 
 type SyncedIdentity = {
   provider: string;
@@ -41,20 +49,6 @@ function jsonResponse(body: JsonRecord, status = 200): Response {
   });
 }
 
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as JsonRecord : {};
-}
-
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.map((item) => String(item)).filter(Boolean) : [];
-}
-
-function safeString(value: unknown, maxLength: number): string | null {
-  const text = String(value ?? "").trim();
-  if (!text) return null;
-  return text.slice(0, maxLength);
-}
-
 function parseCsv(value: string | null | undefined): string[] {
   return String(value || "")
     .split(",")
@@ -91,39 +85,6 @@ async function readOptionalBody(req: Request): Promise<JsonRecord> {
   }
 }
 
-function defaultDisplayName(user: JsonRecord): string {
-  const metadata = asRecord(user.user_metadata);
-  const email = safeString(user.email, 120);
-  const emailPrefix = email?.split("@")[0];
-  const display = safeString(
-    metadata.global_name ||
-      metadata.full_name ||
-      metadata.name ||
-      metadata.preferred_username ||
-      metadata.user_name ||
-      metadata.username ||
-      emailPrefix ||
-      "Mochirii Member",
-    40,
-  );
-
-  return display && display.length >= 2 ? display : "Mochirii Member";
-}
-
-function providerSubject(provider: string, identity: JsonRecord, identityData: JsonRecord, user: JsonRecord): string | null {
-  if (provider === "phone") {
-    return safeString(identity.provider_id || identityData.provider_id || identityData.sub || user.phone, 255);
-  }
-
-  return safeString(
-    identity.provider_id ||
-      identityData.provider_id ||
-      identityData.sub ||
-      identityData.id ||
-      identityData.user_id,
-    255,
-  );
-}
 
 function identityDisplayLabel(provider: string, identityData: JsonRecord, user: JsonRecord): string | null {
   const metadata = asRecord(user.user_metadata);
@@ -185,31 +146,6 @@ function phoneIdentity(user: JsonRecord, now: string): SyncedIdentity | null {
     active: true,
     last_observed_at: now,
   };
-}
-
-function discordIdentityFromUser(user: JsonRecord, profile: JsonRecord | null, identities: SyncedIdentity[]): string | null {
-  const synced = identities.find((identity) => identity.provider === "discord")?.provider_subject;
-  if (synced) return synced;
-
-  const userIdentities = Array.isArray(user.identities) ? user.identities : [];
-  for (const identity of userIdentities) {
-    const record = asRecord(identity);
-    if (record.provider !== "discord") continue;
-    const identityData = asRecord(record.identity_data);
-    const id = providerSubject("discord", record, identityData, user);
-    if (id) return id;
-  }
-
-  const metadata = asRecord(user.user_metadata);
-  return safeString(profile?.discord_user_id || metadata.provider_id || metadata.sub || metadata.id || metadata.user_id, 40);
-}
-
-function discordAvatarUrl(discordUser: JsonRecord): string | null {
-  const id = safeString(discordUser.id, 40);
-  const avatar = safeString(discordUser.avatar, 120);
-  if (!id || !avatar) return null;
-  const extension = avatar.startsWith("a_") ? "gif" : "png";
-  return `https://cdn.discordapp.com/avatars/${encodeURIComponent(id)}/${encodeURIComponent(avatar)}.${extension}`;
 }
 
 function recentDiscordVerification(profile: JsonRecord | null): boolean {
@@ -536,7 +472,7 @@ async function handleRequest(req: Request): Promise<Response> {
     return jsonResponse({ ok: false, message: error instanceof Error ? error.message : "Identity sync failed." }, 500);
   }
 
-  const discordUserId = discordIdentityFromUser(user, profile, syncedIdentities);
+  const discordUserId = resolveDiscordIdentity(user, profile, syncedIdentities);
   let verificationMessage: string | null = null;
   if (discordUserId && (body.refreshDiscord === true || !profile?.discord_checked_at)) {
     try {
