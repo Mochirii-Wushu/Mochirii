@@ -37,6 +37,9 @@ const memberVerificationIdentity = read("supabase/functions/_shared/member-verif
 const memberVerificationIdentityTest = read("supabase/functions/_shared/member-verification-identity_test.ts");
 const supabaseServiceRole = read("supabase/functions/_shared/supabase-service-role.ts");
 const supabaseServiceRoleTest = read("supabase/functions/_shared/supabase-service-role_test.ts");
+const approvedGalleryFeed = read("supabase/functions/list-approved-gallery-submissions/index.ts");
+const discordGalleryIngest = read("supabase/functions/submit-discord-gallery-image/index.ts");
+const galleryModeration = read("supabase/functions/_shared/gallery-moderation.ts");
 const reviewMemberVerification = read("supabase/functions/review-member-verification/index.ts");
 const staticSupabase = read("supabase.js");
 const staticAuth = read("auth.js");
@@ -237,6 +240,18 @@ assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.
   assertIncludes(label, source, "../_shared/supabase-service-role.ts");
   assertIncludes(label, source, "getServiceRoleKey()");
   assertNotIncludes(label, source, "function getServiceRoleKey");
+});
+
+[
+  ["list-approved-gallery-submissions", approvedGalleryFeed, "../_shared/supabase-service-role.ts"],
+  ["submit-discord-gallery-image", discordGalleryIngest, "../_shared/supabase-service-role.ts"],
+  ["shared gallery moderation", galleryModeration, "./supabase-service-role.ts"],
+].forEach(([label, source, importPath]) => {
+  assertIncludes(label, source, importPath);
+  assertIncludes(label, source, "getServiceRoleKey()");
+  assertNotIncludes(label, source, "function getServiceRoleKey");
+  assertNotIncludes(label, source, 'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")');
+  assertNotIncludes(label, source, 'Deno.env.get("SUPABASE_SECRET_KEYS")');
 });
 
 [
