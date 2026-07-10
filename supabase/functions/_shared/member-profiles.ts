@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import { getServiceRoleKey } from "./supabase-service-role.ts";
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -77,21 +78,6 @@ export function normalizedMime(value: unknown): string | null {
 export function slug(value: unknown): string | null {
   const clean = safeString(value, 80)?.toLowerCase() || "";
   return /^[a-z0-9][a-z0-9-]{1,63}$/.test(clean) ? clean : null;
-}
-
-export function getServiceRoleKey(): string {
-  const direct = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (direct) return direct;
-
-  const secretKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (!secretKeys) return "";
-
-  try {
-    const parsed = JSON.parse(secretKeys);
-    return String(parsed.default || parsed.service_role || "");
-  } catch {
-    return "";
-  }
 }
 
 export function createAdminClient(): SupabaseClient | null {

@@ -16,6 +16,7 @@ const files = {
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
   reaperRankSyncWorkflow: "supabase/functions/_shared/reaper-rank-sync-workflow.ts",
   sharedMemberProfiles: "supabase/functions/_shared/member-profiles.ts",
+  supabaseServiceRole: "supabase/functions/_shared/supabase-service-role.ts",
   verifyDiscordMember: "supabase/functions/verify-discord-member/index.ts",
   appConfig: "apps/web/lib/supabase/config.ts",
   profileTypes: "apps/web/lib/supabase/types.ts",
@@ -64,6 +65,7 @@ const refinementMigration = read(files.refinementMigration);
 const socialAccountsMigration = read(files.socialAccountsMigration);
 const reaper = [read(files.reaper), read(files.reaperRankSyncWorkflow)].join("\n");
 const sharedMemberProfiles = read(files.sharedMemberProfiles);
+const supabaseServiceRole = read(files.supabaseServiceRole);
 const verifyDiscordMember = read(files.verifyDiscordMember);
 const appConfig = read(files.appConfig);
 const profileTypes = read(files.profileTypes);
@@ -210,6 +212,22 @@ assertMatches(
   "region",
   "signedMediaUrl",
 ].forEach((snippet) => assertIncludes("shared member profiles", sharedMemberProfiles, snippet));
+
+[
+  "./supabase-service-role.ts",
+  "getServiceRoleKey()",
+].forEach((snippet) => assertIncludes("shared member profiles service role", sharedMemberProfiles, snippet));
+[
+  "export function getServiceRoleKey",
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+].forEach((snippet) => assertNotIncludes("shared member profiles service role", sharedMemberProfiles, snippet));
+[
+  'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',
+  'Deno.env.get("SUPABASE_SECRET_KEYS")',
+  "resolveServiceRoleKey",
+].forEach((snippet) => assertIncludes("shared Supabase service role", supabaseServiceRole, snippet));
+assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.");
 
 assertIncludes("verify discord member", verifyDiscordMember, "discord_handle: discordUsername || discordGlobalName");
 
