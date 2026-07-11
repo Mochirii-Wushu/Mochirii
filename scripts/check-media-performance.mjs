@@ -66,6 +66,8 @@ for (const item of galleryItems) {
 }
 
 const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
+const homeGalleryLightbox = read("apps/web/components/HomeGalleryLightbox.tsx");
+const homeGalleryLightboxModal = read("apps/web/components/HomeGalleryLightboxModal.tsx");
 const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
 const galleryTypes = read("apps/web/lib/supabase/types.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
@@ -78,6 +80,21 @@ const staticGallery = read("gallery.js");
 const staticGalleryHtml = read("gallery.html");
 const staticStyles = read("styles.css");
 const sidePagesGuide = read("docs/side-pages-guide.md");
+
+[
+  "lazy(() =>",
+  'import("@/components/HomeGalleryLightboxModal")',
+  "<Suspense fallback={null}>",
+  "{openItem ? (",
+].forEach((snippet) => assertIncludes("Home gallery deferred lightbox", homeGalleryLightbox, snippet));
+assert(!homeGalleryLightbox.includes("createPortal"), "Home gallery grid must not ship portal implementation before interaction.");
+[
+  'import { createPortal } from "react-dom";',
+  "useBodyScrollLock(true);",
+  'role="dialog"',
+  'aria-modal="true"',
+  'src={item.full}',
+].forEach((snippet) => assertIncludes("Home gallery deferred modal", homeGalleryLightboxModal, snippet));
 
 [
   "const galleryRenderBatchSize = 24;",

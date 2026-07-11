@@ -56,6 +56,7 @@ const envExample = read("supabase/functions/.env.example");
 const homePage = read("apps/web/app/page.tsx");
 const spotlightPage = readPublicPageExport(root, "SpotlightPage", failures).text;
 const winnerComponent = read("apps/web/components/public-pages/SpotlightWinnerTitle.tsx");
+const winnerLookup = read("apps/web/lib/supabase/spotlight.ts");
 const supabaseReadme = read("supabase/README.md");
 
 assertIncludes("package.json", packageJson, '"check:spotlight-poll"');
@@ -182,6 +183,19 @@ assertNotMatches(
   "Congratulations to: ${winnerName}.",
   "This Month: ${winnerName}",
 ].forEach((snippet) => assertIncludes("winner component", winnerComponent, snippet));
+assertNotMatches(
+  "winner component",
+  winnerComponent,
+  /["']use client["']|useEffect|useState/,
+  "public spotlight winner resolution must stay server-rendered.",
+);
+[
+  'import "server-only";',
+  "SUPABASE_PUBLISHABLE_KEY",
+  'method: "GET"',
+  "next: { revalidate: 3600 }",
+  "if (!response.ok) return null;",
+].forEach((snippet) => assertIncludes("server spotlight lookup", winnerLookup, snippet));
 
 [
   "Monthly member spotlight polls",

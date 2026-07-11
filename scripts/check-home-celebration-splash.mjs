@@ -55,8 +55,13 @@ if (splash?.message !== "Mochi spirits love you!!") fail("Home celebration splas
 if (typeof splash?.enabled !== "boolean") fail("Home celebration splash enabled flag must be boolean.");
 if (!splash?.storageKey) fail("Home celebration splash must have a storage key.");
 
-assertIncludes("Home page", page, 'import { HomeBirthdaySplash } from "@/components/HomeBirthdaySplash";');
-assertIncludes("Home page", page, "<HomeBirthdaySplash config={homeData.celebrationSplash} />");
+if (page.includes('import { HomeBirthdaySplash } from "@/components/HomeBirthdaySplash";')) {
+  fail("Home page must not include the disabled celebration client module in its static imports.");
+}
+assertIncludes("Home page", page, "async function OptionalBirthdaySplash");
+assertIncludes("Home page", page, "if (config.enabled !== true) return null;");
+assertIncludes("Home page", page, 'await import("@/components/HomeBirthdaySplash")');
+assertIncludes("Home page", page, "<OptionalBirthdaySplash config={homeData.celebrationSplash} />");
 
 const componentReferences = walkFiles(path.join(root, "apps", "web"), [".ts", ".tsx"])
   .map((file) => path.relative(root, file).split(path.sep).join("/"))

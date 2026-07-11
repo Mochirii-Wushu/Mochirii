@@ -1,3 +1,5 @@
+import "../styles/public-content-shared.css";
+import "../styles/member-workflow.css";
 import type { Metadata } from "next";
 import { SocialHubPanel } from "@/components/member-workflow/SocialHubPanel";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";

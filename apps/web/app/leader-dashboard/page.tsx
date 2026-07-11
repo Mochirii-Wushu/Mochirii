@@ -1,3 +1,8 @@
+import "../styles/public-content-shared.css";
+import "../styles/member-workflow.css";
+import "../styles/member-forms.css";
+import "../styles/member-gallery-submit.css";
+import "../styles/member-leader-dashboard.css";
 import type { Metadata } from "next";
 import { LeaderDashboard } from "@/components/member-workflow/LeaderDashboard";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
