@@ -46,6 +46,7 @@ const checks = [
   ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
   ["check:media-performance", ["node", "scripts/check-media-performance.mjs"]],
+  ["check:next-route-delivery", ["node", "scripts/check-next-route-delivery.mjs"]],
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
   ["check:home-celebration-splash", ["node", "scripts/check-home-celebration-splash.mjs"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],

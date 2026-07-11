@@ -1,3 +1,7 @@
+import "../styles/public-content-shared.css";
+import "../styles/member-workflow.css";
+import "../styles/member-forms.css";
+import "../styles/member-gallery-submit.css";
 import type { Metadata } from "next";
 import { GallerySubmitForm } from "@/components/member-workflow/GallerySubmitForm";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";

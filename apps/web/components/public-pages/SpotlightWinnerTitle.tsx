@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { getCurrentSpotlightWinner } from "@/lib/supabase/spotlight";
 
 function clean(value: unknown, fallback = "") {
@@ -26,7 +23,7 @@ function titleForWinner(template: "home" | "spotlight", fallbackTitle: string, w
     : replaceSpotlightTitleName(fallbackTitle, winnerName);
 }
 
-export function SpotlightWinnerTitle({
+export async function SpotlightWinnerTitle({
   fallbackTitle,
   template,
 }: {
@@ -34,34 +31,9 @@ export function SpotlightWinnerTitle({
   template: "home" | "spotlight";
 }) {
   const fallback = clean(fallbackTitle, "Spotlight");
-  const [winnerTitle, setWinnerTitle] = useState<{
-    fallback: string;
-    template: "home" | "spotlight";
-    title: string;
-  } | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-
-    getCurrentSpotlightWinner().then((result) => {
-      if (!alive) return;
-      const winnerName = clean(result.data?.winnerName);
-      if (result.ok && winnerName) {
-        setWinnerTitle({
-          fallback,
-          template,
-          title: titleForWinner(template, fallback, winnerName),
-        });
-      }
-    });
-
-    return () => {
-      alive = false;
-    };
-  }, [fallback, template]);
-
-  const title =
-    winnerTitle?.fallback === fallback && winnerTitle.template === template ? winnerTitle.title : fallback;
+  const winner = await getCurrentSpotlightWinner();
+  const winnerName = clean(winner?.winnerName);
+  const title = winnerName ? titleForWinner(template, fallback, winnerName) : fallback;
 
   return <>{title}</>;
 }

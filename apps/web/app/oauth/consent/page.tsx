@@ -1,3 +1,6 @@
+import "../../styles/public-content-shared.css";
+import "../../styles/member-workflow.css";
+import "../../styles/member-forms.css";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { OAuthConsentPanel } from "@/components/member-workflow/OAuthConsentPanel";

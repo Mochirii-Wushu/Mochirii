@@ -1,9 +1,15 @@
+import "./styles/public-content-shared.css";
+import "./styles/public-home-seal.css";
+import "./styles/public-home-media.css";
+import "./styles/public-home-bulletins.css";
+import "./styles/public-home-doors.css";
+import "./styles/public-home-visual.css";
+import "./styles/shell-lightbox.css";
 import { Fragment } from "react";
 import Link from "next/link";
 import homeData from "@/public/data/home.json";
 import galleryData from "@/public/data/gallery.json";
 import guildScheduleData from "@/public/data/guild-schedule.json";
-import { HomeBirthdaySplash } from "@/components/HomeBirthdaySplash";
 import { HomeGallerySpotlight } from "@/components/HomeGallerySpotlight";
 import { type GallerySpotlightItem } from "@/components/HomeGalleryLightbox";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
@@ -19,6 +25,17 @@ type GalleryData = typeof galleryData;
 type Bulletin = HomeData["bulletins"][number];
 type DoorTile = HomeData["tiles"][number];
 type GalleryAlbumItem = GalleryData["albums"][number]["items"][number];
+
+async function OptionalBirthdaySplash({
+  config,
+}: {
+  config: HomeData["celebrationSplash"];
+}) {
+  if (config.enabled !== true) return null;
+
+  const { HomeBirthdaySplash } = await import("@/components/HomeBirthdaySplash");
+  return <HomeBirthdaySplash config={config} />;
+}
 
 const htmlRouteMap = new Map<string, string>([
   ["index.html", "/"],
@@ -266,7 +283,7 @@ export default function Home() {
   return (
     <>
       <BodyPageMarker page="home" />
-      <HomeBirthdaySplash config={homeData.celebrationSplash} />
+      <OptionalBirthdaySplash config={homeData.celebrationSplash} />
       <header className="page-hero-shell" aria-label="Home hero">
         <div className="container">
           <section className="page-hero page-hero--tall">
