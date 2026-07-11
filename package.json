@@ -121,6 +121,6 @@
   "devDependencies": {
     "lighthouse": "12.6.1",
     "playwright": "1.61.0",
-    "supabase": "2.108.0"
+    "supabase": "2.109.1"
   }
 }
