@@ -50,6 +50,8 @@ const checks = [
   ["check:next-route-delivery", ["node", "scripts/check-next-route-delivery.mjs"]],
   ["check:guild-schedule", ["node", "scripts/check-guild-schedule.mjs"]],
   ["check:home-celebration-splash", ["node", "scripts/check-home-celebration-splash.mjs"]],
+  ["check:header-auth-loading", ["node", "scripts/check-header-auth-loading.mjs"]],
+  ["test:header-auth-loader", ["deno", "test", "--lock=deno.lock", "--frozen=true", "apps/web/components/site-header/deferred-task_test.ts"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],
   ["test:supabase-migration-list", ["node", "scripts/test-supabase-migration-list.mjs"]],
