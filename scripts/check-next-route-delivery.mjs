@@ -17,6 +17,7 @@ function expectExcludes(label, source, snippet) {
 }
 
 const rootLayout = read("apps/web/app/layout.tsx");
+const nextConfig = read("apps/web/next.config.ts");
 const globalStyles = [
   "tokens-base.css",
   "shared-ui.css",
@@ -49,6 +50,12 @@ const routeStyles = [
 
 globalStyles.forEach((style) => expectIncludes("root layout", rootLayout, style));
 routeStyles.forEach((style) => expectExcludes("root layout", rootLayout, style));
+
+[
+  'const workspaceRoot = resolve(appRoot, "../..");',
+  "outputFileTracingRoot: workspaceRoot,",
+  "root: workspaceRoot,",
+].forEach((snippet) => expectIncludes("Next workspace root", nextConfig, snippet));
 
 const routeContracts = {
   "apps/web/app/page.tsx": [
