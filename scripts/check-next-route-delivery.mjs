@@ -17,6 +17,7 @@ function expectExcludes(label, source, snippet) {
 }
 
 const rootLayout = read("apps/web/app/layout.tsx");
+const nextConfig = read("apps/web/next.config.ts");
 const globalStyles = [
   "tokens-base.css",
   "shared-ui.css",
@@ -49,6 +50,12 @@ const routeStyles = [
 
 globalStyles.forEach((style) => expectIncludes("root layout", rootLayout, style));
 routeStyles.forEach((style) => expectExcludes("root layout", rootLayout, style));
+
+[
+  'const workspaceRoot = resolve(appRoot, "../..");',
+  "outputFileTracingRoot: workspaceRoot,",
+  "root: workspaceRoot,",
+].forEach((snippet) => expectIncludes("Next workspace root", nextConfig, snippet));
 
 const routeContracts = {
   "apps/web/app/page.tsx": [
@@ -83,6 +90,18 @@ const routeContracts = {
 for (const [file, styles] of Object.entries(routeContracts)) {
   const source = read(file);
   styles.forEach((style) => expectIncludes(file, source, style));
+}
+
+for (const file of [
+  "apps/web/app/announcements/page.tsx",
+  "apps/web/app/events/page.tsx",
+  "apps/web/app/raffles/page.tsx",
+]) {
+  expectExcludes(file, read(file), "export const revalidate");
+}
+
+for (const file of ["apps/web/app/page.tsx", "apps/web/app/spotlight/page.tsx"]) {
+  expectIncludes(file, read(file), "export const revalidate = 3600;");
 }
 
 const homePage = read("apps/web/app/page.tsx");
