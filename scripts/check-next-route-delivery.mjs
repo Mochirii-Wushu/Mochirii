@@ -92,6 +92,18 @@ for (const [file, styles] of Object.entries(routeContracts)) {
   styles.forEach((style) => expectIncludes(file, source, style));
 }
 
+for (const file of [
+  "apps/web/app/announcements/page.tsx",
+  "apps/web/app/events/page.tsx",
+  "apps/web/app/raffles/page.tsx",
+]) {
+  expectExcludes(file, read(file), "export const revalidate");
+}
+
+for (const file of ["apps/web/app/page.tsx", "apps/web/app/spotlight/page.tsx"]) {
+  expectIncludes(file, read(file), "export const revalidate = 3600;");
+}
+
 const homePage = read("apps/web/app/page.tsx");
 expectExcludes("home page", homePage, 'import { HomeBirthdaySplash } from "@/components/HomeBirthdaySplash";');
 [
