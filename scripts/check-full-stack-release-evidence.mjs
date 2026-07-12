@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { SITE_ORIGIN, SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
+import { parseSupabaseMigrationList } from "./lib/supabase-migration-list.mjs";
 
 const root = process.cwd();
 const checkedAt = new Date().toISOString();
@@ -224,7 +225,7 @@ function inspectSupabase() {
   }
 
   section.status = "checked";
-  section.remoteMigrations = parseMigrationList(migrations.stdout);
+  section.remoteMigrations = parseSupabaseMigrationList(migrations.stdout);
   const migrationMismatch = compareMigrationVersions(section.localMigrations.versions, section.remoteMigrations.versions);
   section.remoteMigrations.mismatch = migrationMismatch;
   if (migrationMismatch.localOnly.length || migrationMismatch.remoteOnly.length) {
@@ -441,23 +442,6 @@ function readLocalFunctionConfig() {
     total: names.length,
     names: names.sort(),
     verifyJwt,
-  };
-}
-
-function parseMigrationList(text) {
-  const rows = [];
-  for (const line of String(text || "").split(/\r?\n/)) {
-    const match = line.match(/^\s*(\d{14}|)\s*\|\s*(\d{14}|)\s*\|/);
-    if (!match) continue;
-    const local = match[1] || "";
-    const remote = match[2] || "";
-    if (local || remote) rows.push({ local, remote });
-  }
-  const versions = uniqueStrings(rows.flatMap((row) => [row.local, row.remote]).filter(Boolean)).sort();
-  return {
-    totalRows: rows.length,
-    versions,
-    rows,
   };
 }
 
