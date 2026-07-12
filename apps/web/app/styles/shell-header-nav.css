@@ -154,6 +154,19 @@
   transform:translateY(0) rotate(180deg);
 }
 
+.nav-auth-slot{
+  display:inline-flex;
+  align-items:center;
+  inline-size:92px;
+  flex:0 0 92px;
+}
+.nav-auth-slot > .nav-link,
+.nav-auth-slot > .nav-group,
+.nav-auth-slot > .nav-group > .nav-trigger{
+  inline-size:100%;
+  justify-content:center;
+}
+
 .nav-menu{
   position:absolute;
   left:0;
