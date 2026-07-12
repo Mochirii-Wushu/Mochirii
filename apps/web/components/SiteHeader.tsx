@@ -25,7 +25,7 @@ export function SiteHeader() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { authState, ensureModeratorAccess } = useHeaderAuthState();
+  const { authState, ensureAuthLoaded, ensureModeratorAccess } = useHeaderAuthState();
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileShellRef = useRef<HTMLDivElement>(null);
@@ -82,6 +82,9 @@ export function SiteHeader() {
       ref={headerRef}
       className="site-header"
       data-state={scrolled ? "scrolled" : "top"}
+      onPointerEnter={() => void ensureAuthLoaded()}
+      onPointerDown={() => void ensureAuthLoaded()}
+      onFocusCapture={() => void ensureAuthLoaded()}
     >
       <a className="skip-link" href="#main">
         Skip to main content
@@ -165,7 +168,7 @@ export function SiteHeader() {
             );
           })}
 
-          {publicUtilityLinks.map((item) => (
+          {publicUtilityLinks.filter((item) => !item.auth).map((item) => (
             <SiteNavLink
               className={`nav-link${item.auth ? " nav-auth-link" : ""}`}
               item={item}
@@ -175,61 +178,72 @@ export function SiteHeader() {
             />
           ))}
 
-          {authState.signedIn ? (
-            <div
-              className="nav-group"
-              data-dropdown
-              data-open={openGroup === "account" ? "true" : "false"}
-            >
-              <button
-                className="nav-link nav-trigger"
-                type="button"
-                data-dropdown-btn
-                aria-haspopup="true"
-                aria-expanded={openGroup === "account"}
-                aria-controls="nav-menu-account"
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  toggleDropdown("account");
-                  void ensureModeratorAccess();
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
+          <div className="nav-auth-slot">
+            {authState.signedIn ? (
+              <div
+                className="nav-group"
+                data-dropdown
+                data-open={openGroup === "account" ? "true" : "false"}
+              >
+                <button
+                  className="nav-link nav-trigger"
+                  type="button"
+                  data-dropdown-btn
+                  aria-haspopup="true"
+                  aria-expanded={openGroup === "account"}
+                  aria-controls="nav-menu-account"
+                  onClick={(event) => {
                     event.preventDefault();
+                    event.stopPropagation();
                     toggleDropdown("account");
                     void ensureModeratorAccess();
-                  }
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleDropdown("account");
+                      void ensureModeratorAccess();
+                    }
 
-                  if (event.key === "ArrowDown") {
-                    event.preventDefault();
-                    setOpenGroup("account");
-                    void ensureModeratorAccess();
-                    focusFirstDropdownItem("account");
-                  }
-                }}
-              >
-                Account <span className="nav-caret" aria-hidden="true">{"\u25be"}</span>
-              </button>
-              <div
-                className="nav-menu"
-                id="nav-menu-account"
-                hidden={openGroup !== "account"}
-                data-dropdown-menu
-              >
-                {accountWorkflowLinks.map((item) => (
-                  <SiteNavLink
-                    className="nav-item"
-                    item={item}
-                    activeKey={activeKey}
-                    key={item.nav}
-                    onClick={() => setOpenGroup(null)}
-                    hidden={navItemHidden(item, authState)}
-                  />
-                ))}
+                    if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      setOpenGroup("account");
+                      void ensureModeratorAccess();
+                      focusFirstDropdownItem("account");
+                    }
+                  }}
+                >
+                  Account <span className="nav-caret" aria-hidden="true">{"\u25be"}</span>
+                </button>
+                <div
+                  className="nav-menu"
+                  id="nav-menu-account"
+                  hidden={openGroup !== "account"}
+                  data-dropdown-menu
+                >
+                  {accountWorkflowLinks.map((item) => (
+                    <SiteNavLink
+                      className="nav-item"
+                      item={item}
+                      activeKey={activeKey}
+                      key={item.nav}
+                      onClick={() => setOpenGroup(null)}
+                      hidden={navItemHidden(item, authState)}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : (
+              publicUtilityLinks.filter((item) => item.auth === "signed-out").map((item) => (
+                <SiteNavLink
+                  className="nav-link nav-auth-link"
+                  item={item}
+                  activeKey={activeKey}
+                  key={item.nav}
+                />
+              ))
+            )}
+          </div>
         </nav>
 
         <div className="utils">

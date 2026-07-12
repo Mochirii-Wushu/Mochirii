@@ -11,6 +11,8 @@ const files = {
   checkAll: "scripts/check-all.mjs",
   appLayout: "apps/web/app/layout.tsx",
   appCss: "apps/web/app/mochirii.css",
+  fontFallbacks: "apps/web/app/styles/font-fallbacks.css",
+  fontBundleGuard: "apps/web/scripts/check-font-bundle.mjs",
   nextConfig: "apps/web/next.config.ts",
   supabaseConfig: "supabase/config.toml",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
@@ -71,6 +73,8 @@ const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const appLayout = read(files.appLayout);
 const appCss = readAppCss();
+const fontFallbacks = read(files.fontFallbacks);
+const fontBundleGuard = read(files.fontBundleGuard);
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
 const reaper = read(files.reaper);
@@ -118,12 +122,33 @@ assertIncludes("package.json", packageJson, '"check:security-hardening"');
 assertIncludes("check-all", checkAll, "check:security-hardening");
 
 [
-  "next/font/google",
-  "Zhi_Mang_Xing",
-  "Noto_Serif_SC",
+  "next/font/local",
+  "./fonts/zhi-mang-xing-latin.woff2",
+  "./fonts/noto-serif-sc-latin.woff2",
+  'fallback: ["Zhi Mang Xing Fallback"]',
+  'fallback: ["Noto Serif SC Fallback"]',
+  "adjustFontFallback: false",
   "--font-zhi-mang",
   "--font-noto-serif-sc",
 ].forEach((snippet) => assertIncludes("Next font setup", appLayout, snippet));
+
+[
+  'font-family:"Zhi Mang Xing Fallback"',
+  'src:local("Arial")',
+  "ascent-override:126.14%",
+  "size-adjust:69.76%",
+  'font-family:"Noto Serif SC Fallback"',
+  'src:local("Times New Roman")',
+  "ascent-override:95.04%",
+  "size-adjust:121.11%",
+].forEach((snippet) => assertIncludes("Next font fallbacks", fontFallbacks, snippet));
+
+[
+  "fontCssLimit = 12 * 1024",
+  "font CSS must not emit Unicode-range slices",
+  "zhi-mang-xing-latin.woff2",
+  "noto-serif-sc-latin.woff2",
+].forEach((snippet) => assertIncludes("Next font bundle guard", fontBundleGuard, snippet));
 
 [
   "@import url(\"https://fonts.googleapis.com",

@@ -24,7 +24,6 @@ const globalStyles = [
   "shell-header-nav.css",
   "shell-mobile-menu.css",
   "shell-footer.css",
-  "mochi-pets.css",
 ];
 const routeStyles = [
   "public-join.css",
@@ -46,6 +45,7 @@ const routeStyles = [
   "member-gallery-submit.css",
   "member-leader-dashboard.css",
   "shell-lightbox.css",
+  "mochi-pets.css",
 ];
 
 globalStyles.forEach((style) => expectIncludes("root layout", rootLayout, style));
@@ -85,6 +85,7 @@ const routeContracts = {
   "apps/web/app/oauth/consent/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-forms.css"],
   "apps/web/app/gallery-submit/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-forms.css", "member-gallery-submit.css"],
   "apps/web/app/leader-dashboard/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-forms.css", "member-gallery-submit.css", "member-leader-dashboard.css"],
+  "apps/web/app/games/mochi-pets/layout.tsx": ["mochi-pets.css"],
 };
 
 for (const [file, styles] of Object.entries(routeContracts)) {

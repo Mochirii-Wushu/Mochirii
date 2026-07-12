@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Serif_SC, Zhi_Mang_Xing } from "next/font/google";
+import localFont from "next/font/local";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/next";
@@ -8,22 +8,32 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_ORIGIN } from "@/lib/public-urls";
 import { SITE_DESCRIPTION, SITE_LANGUAGE, SITE_OG_LOCALE, SITE_TITLE } from "@/lib/site-metadata";
+import "./styles/font-fallbacks.css";
 import "./styles/tokens-base.css";
 import "./styles/shared-ui.css";
 import "./styles/shell-header-nav.css";
 import "./styles/shell-mobile-menu.css";
 import "./styles/shell-footer.css";
-import "./styles/mochi-pets.css";
 
-const displayFont = Zhi_Mang_Xing({
+const displayFont = localFont({
+  src: "./fonts/zhi-mang-xing-latin.woff2",
   weight: "400",
-  subsets: ["latin"],
+  style: "normal",
+  display: "swap",
+  preload: true,
+  fallback: ["Zhi Mang Xing Fallback"],
+  adjustFontFallback: false,
   variable: "--font-zhi-mang",
 });
 
-const bodyFont = Noto_Serif_SC({
-  weight: ["400", "500", "600"],
-  subsets: ["latin"],
+const bodyFont = localFont({
+  src: "./fonts/noto-serif-sc-latin.woff2",
+  weight: "400 600",
+  style: "normal",
+  display: "swap",
+  preload: true,
+  fallback: ["Noto Serif SC Fallback"],
+  adjustFontFallback: false,
   variable: "--font-noto-serif-sc",
 });
 

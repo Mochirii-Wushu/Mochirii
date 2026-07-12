@@ -37,6 +37,15 @@ function assertIncludes(label, source, snippet) {
   assert(source.includes(snippet), `${label}: missing ${JSON.stringify(snippet)}.`);
 }
 
+function assertCompactOccurrenceCount(label, source, snippet, expectedCount) {
+  const compactSource = source.replace(/\s+/g, " ");
+  const actualCount = compactSource.split(snippet).length - 1;
+  assert(
+    actualCount === expectedCount,
+    `${label}: expected ${expectedCount} occurrences of ${JSON.stringify(snippet)}, found ${actualCount}.`,
+  );
+}
+
 function decodeHtmlAttribute(value) {
   return String(value || "").replaceAll("&amp;", "&").replaceAll("&quot;", '"').replaceAll("&#39;", "'");
 }
@@ -153,10 +162,12 @@ assertIncludes("static footer", footerStatic, expected.footer);
 
 const headerComponent = read("apps/web/components/SiteHeader.tsx");
 const headerStatic = read("header.html");
-assertIncludes("Next header brand", headerComponent, `<span className="brand-sub">${expected.brandSubtitle}</span>`);
-assertIncludes("static header brand", headerStatic, `<span class="brand-sub">${expected.brandSubtitle}</span>`);
-assertIncludes("Next footer brand", footerComponent, `<span className="brand-sub">${expected.brandSubtitle}</span>`);
-assertIncludes("static footer brand", footerStatic, `<span class="brand-sub">${expected.brandSubtitle}</span>`);
+const nextBrandLockup = `<span className="brand-text"> <span className="brand-name">Mōchirīī</span> <span className="brand-sub">${expected.brandSubtitle}</span>`;
+const staticBrandLockup = `<span class="brand-text"> <span class="brand-name">Mōchirīī</span> <span class="brand-sub">${expected.brandSubtitle}</span>`;
+assertCompactOccurrenceCount("Next header brand lockups", headerComponent, nextBrandLockup, 2);
+assertCompactOccurrenceCount("Next footer brand lockup", footerComponent, nextBrandLockup, 1);
+assertCompactOccurrenceCount("static header brand lockups", headerStatic, staticBrandLockup, 2);
+assertCompactOccurrenceCount("static footer brand lockup", footerStatic, staticBrandLockup, 1);
 assert(!headerComponent.includes("Where Winds Meet Guild"), "the Next header brand must use the concise regional label.");
 assert(!headerStatic.includes("Where Winds Meet Guild"), "the static header brand must use the concise regional label.");
 
