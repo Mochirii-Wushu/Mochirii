@@ -18,6 +18,7 @@
     "check:auth-provider-state-cleanup": "node scripts/check-auth-provider-state-cleanup.mjs",
     "check:content": "node scripts/check-content-guardrails.mjs",
     "check:code-cleanliness": "node scripts/check-code-cleanliness.mjs",
+    "check:github-actions-security": "node scripts/check-github-actions-security.mjs",
     "check:cors-proof": "node scripts/check-cors-proof.mjs",
     "check:csp-inline-hardening": "node scripts/check-csp-inline-hardening.mjs",
     "check:cutover-validators": "node scripts/check-cutover-validator-self-tests.mjs",

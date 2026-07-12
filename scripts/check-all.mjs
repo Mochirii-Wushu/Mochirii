@@ -7,6 +7,7 @@ const checks = [
   ["check:recruitment-audio-player", ["node", "scripts/check-recruitment-audio-player.mjs"]],
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
   ["check:code-cleanliness", ["node", "scripts/check-code-cleanliness.mjs"]],
+  ["check:github-actions-security", ["node", "scripts/check-github-actions-security.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],
   ["check:discord-gallery-ingest", ["node", "scripts/check-discord-gallery-ingest.mjs"]],
   ["check:discord-reaper-parity", ["node", "scripts/check-discord-reaper-parity.mjs"]],

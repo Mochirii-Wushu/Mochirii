@@ -8,7 +8,7 @@ and CI run the same checks before website changes reach Vercel.
 - Node.js `22.23.1` via `fnm`; `.node-version` and `.nvmrc` pin the repo.
 - npm `10.x`, bundled with the pinned Node.js runtime.
 - Git and GitHub CLI for branch, PR, and repository hygiene.
-- Deno `2.x` for Supabase Edge Function tests.
+- Deno `2.9.2` for Supabase Edge Function tests, matching GitHub Actions.
 - Docker Desktop for Supabase local containers.
 - Supabase CLI as a root dev dependency; run through `npm` or
   `node_modules/.bin/supabase` to avoid the root `supabase.js` name collision.
@@ -21,6 +21,7 @@ and CI run the same checks before website changes reach Vercel.
 
 ```powershell
 fnm use 22.23.1
+deno upgrade --version 2.9.2
 npm ci
 npm run setup:playwright
 cd apps\web
