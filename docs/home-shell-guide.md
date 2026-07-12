@@ -85,6 +85,8 @@ Current dropdown behavior:
 
 The live Next header keeps its signed-out shell lightweight. It loads the Supabase-backed auth state once during browser idle time, with a 1500ms deadline and timer fallback, or immediately when a pointer or keyboard user interacts with the header. Keep the loader deduplicated, fail closed to signed-out navigation, and reserve stable desktop space for the Login/Account control.
 
+The Next root layout uses two tracked Latin WOFF2 files through `next/font/local`. `apps/web/scripts/check-font-bundle.mjs` prevents Unicode-range expansion, fallback-metric drift, and font-bearing CSS above 12 KiB Brotli.
+
 The exact game name may remain in header brand text and shared shell metadata contexts.
 
 ## 5. Footer
