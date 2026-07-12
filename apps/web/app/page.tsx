@@ -294,7 +294,7 @@ export default function Home() {
               className="page-hero__img"
               width="1536"
               height="1024"
-              priority
+              loading="eager"
               sizes="(max-width: 1232px) calc(100vw - 32px), 1200px"
             />
             {homeData.hero.atmosphereImage ? (

@@ -85,6 +85,7 @@ export default function RootLayout({
             fill
             sizes="100vw"
             loading="eager"
+            fetchPriority="high"
           />
         </div>
         {children}

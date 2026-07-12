@@ -205,7 +205,7 @@ export function PageHero({
             className="page-hero__img"
             width="1536"
             height="1024"
-            priority
+            loading="eager"
             sizes="(max-width: 1232px) calc(100vw - 32px), 1200px"
           />
           {atmosphere ? (

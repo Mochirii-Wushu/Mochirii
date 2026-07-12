@@ -135,11 +135,12 @@ if (responseItemMatch) {
 
 const heroBlock = extractStaticImageBlock(homePage, "heroImage");
 const sealBlock = extractStaticImageBlock(homePage, "sealImage");
-assertIncludes("Home hero image", heroBlock, "priority");
+assertIncludes("Home hero image", heroBlock, 'loading="eager"');
+assert(!heroBlock.includes("priority"), "Home hero must not compete with the background priority experiment.");
 assert(sealBlock && !sealBlock.includes("priority"), "Home guild seal must not use priority preload.");
 
 const homePriorityCount = [...homePage.matchAll(/\bpriority\b/g)].length;
-assert(homePriorityCount === 1, `Home page should have exactly one priority image, found ${homePriorityCount}.`);
+assert(homePriorityCount === 0, `Home page should have no priority image in the background experiment, found ${homePriorityCount}.`);
 
 [
   'import Image from "next/image";',
@@ -148,6 +149,7 @@ assert(homePriorityCount === 1, `Home page should have exactly one priority imag
   "fill",
   'sizes="100vw"',
   'loading="eager"',
+  'fetchPriority="high"',
 ].forEach((snippet) => assertIncludes("responsive global background", rootLayout, snippet));
 assert(!staticStyles.includes("bg-photo__image"), "Responsive background styles must remain owned by the Next app.");
 assertIncludes("responsive global background styles", tokenStyles, ".bg-photo__image{");
@@ -155,7 +157,7 @@ assertIncludes("responsive global background styles", tokenStyles, "object-fit:c
 assert(!tokenStyles.includes('background:url("/assets/bg/wuxia-bg.webp")'), "Next background must not retain the full-size CSS request.");
 
 assertIncludes("shared PageHero", sharedPublicComponents, "className=\"page-hero__img\"");
-assertIncludes("shared PageHero", sharedPublicComponents, "priority");
+assertIncludes("shared PageHero", sharedPublicComponents, 'loading="eager"');
 assertIncludes("shared image LCP hint", sharedPublicComponents, "resolvedFetchPriority");
 assertIncludes("shared image LCP hint", sharedPublicComponents, "fetchPriority={resolvedFetchPriority}");
 
