@@ -19,7 +19,7 @@ This is the short source-of-truth index for the current Mochirii production post
   check results on that commit instead of copying an undated SHA into this
   index.
 - Active website worktree on this workstation is
-  `C:\Github Repo's\Mochirii Website\website`. The older Documents and
+  `C:\Github Repo's\Mochirii Website\Website`. The older Documents and
   CodexWork paths are compatibility junctions into the canonical project root,
   not separate worktrees.
 - Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii` as public. Keep this public state unless the owner separately approves making the repo private again.
@@ -79,7 +79,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Identity boundary: Supabase OAuth Server and `/oauth/consent` remain the website consent doorway; Discord remains guild verification, not the social identity authority.
 - Website boundary: header dropdown/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only a noindex handoff route that redirects signed-in members and gives signed-out visitors login/help options.
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
-- Source control: Pixelfed staging source is tracked in the private Mochirii ops repo at `C:\Github Repo's\Mochirii Website\pixelfed-ops`; do not commit host `.env`, DB/Redis state, media, backups, cache files, or host-private notes.
+- Source control: Pixelfed staging source is tracked in the private Mochirii ops repo at `C:\Github Repo's\Mochirii Website\Mochirii Social`; do not commit host `.env`, DB/Redis state, media, backups, cache files, or host-private notes.
 - Pixelfed ops release ledger for 2026-07-12: PR #37 documented the canonical credential boundary and merged to `main`; resolve the current remote commit with `git fetch --prune origin` and `git rev-parse origin/main` from the canonical ops worktree.
 - Pixelfed ops repository evidence on 2026-07-05: `origin` points at the private Mochirii ops repo, `upstream` fetch points at `pixelfed/pixelfed`, and upstream push is disabled.
 - Account sync gate completed for admin-first testing on 2026-07-05: the linked admin lands in the Mochirii Social app, Pixelfed has one local admin user, and Supabase `public.social_accounts` has exactly one active `provider = 'pixelfed'` row with `federation_enabled = false` and a profile URL under `https://social.mochirii.com`.
