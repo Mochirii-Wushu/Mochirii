@@ -1,0 +1,17 @@
+@font-face{
+  font-family:"Zhi Mang Xing Fallback";
+  src:local("Arial");
+  ascent-override:126.14%;
+  descent-override:17.2%;
+  line-gap-override:0%;
+  size-adjust:69.76%;
+}
+
+@font-face{
+  font-family:"Noto Serif SC Fallback";
+  src:local("Times New Roman");
+  ascent-override:95.04%;
+  descent-override:23.62%;
+  line-gap-override:0%;
+  size-adjust:121.11%;
+}
