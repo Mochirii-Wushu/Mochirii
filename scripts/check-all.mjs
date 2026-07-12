@@ -52,6 +52,7 @@ const checks = [
   ["check:home-celebration-splash", ["node", "scripts/check-home-celebration-splash.mjs"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],
+  ["test:supabase-migration-list", ["node", "scripts/test-supabase-migration-list.mjs"]],
   ["check:full-stack-release-evidence", ["node", "scripts/check-full-stack-release-evidence.mjs"]],
   ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],
   ["check:accessibility-route-matrix", ["node", "scripts/check-accessibility-route-matrix.mjs"]],
