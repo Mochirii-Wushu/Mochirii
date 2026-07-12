@@ -12,12 +12,13 @@
     "clean": "node scripts/clean.mjs",
     "build:clean": "npm run clean && next build",
     "build": "next build",
+    "check:route-css-bundle": "node scripts/check-route-css-bundle.mjs",
     "vercel:build:local": "npm run clean && cd ../.. && vercel build --prod --cwd apps/web",
     "vercel:version": "vercel --version",
     "start": "next start",
     "lint": "eslint",
     "toolchain:check": "node scripts/check-local-toolchain.mjs",
-    "verify:local": "npm run toolchain:check && npm run lint && npm run build"
+    "verify:local": "npm run toolchain:check && npm run lint && npm run build && npm run check:route-css-bundle"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.2",

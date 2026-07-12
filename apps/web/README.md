@@ -151,6 +151,7 @@ Visual-only shell releases should verify Home and all shared routes at `360`, `3
 - Existing `assets/` copied to `public/assets/`.
 - Existing `data/` copied to `public/data/`.
 - Existing `styles.css` copied into the Next app CSS surface; `app/mochirii.css` is now a compatibility aggregator while ordered global partials live under `app/styles/`.
+- Mochi Pets styles load from `app/games/mochi-pets/layout.tsx`; keep them out of the root layout so public routes do not receive game-only CSS.
 - Shared header and footer converted to React components.
 - Homepage converted from `index.html` and `home.js` DOM mutation to React rendering.
 - Legacy `.html` redirects configured in `next.config.ts`.

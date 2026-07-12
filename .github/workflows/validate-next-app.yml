@@ -41,3 +41,6 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Check route CSS delivery
+        run: npm run check:route-css-bundle
