@@ -8,6 +8,15 @@ The project stays **static, fast, readable, and data-driven**, with a clear sepa
 
 ---
 
+## Repository Workspace
+
+The canonical checkout is `C:\Github Repo's\Mochirii Website\Website`.
+Mochirii Social and Mochi Pets remain independent sibling repositories; this
+repository connects to their hosted services through documented URLs and API
+contracts, not through a shared Git history or production filesystem.
+
+---
+
 ## Deployment Status
 
 - `https://mochirii.com` is the current production domain and is served by the Vercel-hosted Next.js app in `apps/web`.
