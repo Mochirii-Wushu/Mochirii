@@ -72,6 +72,7 @@ const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
 const galleryTypes = read("apps/web/lib/supabase/types.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
 const homePage = read("apps/web/app/page.tsx");
+const rootLayout = read("apps/web/app/layout.tsx");
 const sharedPublicComponents = read("apps/web/components/public-pages/common.tsx");
 const siteHeader = read("apps/web/components/SiteHeader.tsx");
 const siteFooter = read("apps/web/components/SiteFooter.tsx");
@@ -79,6 +80,7 @@ const spotifyBrowser = read("apps/web/components/public-pages/SpotifyBrowser.tsx
 const staticGallery = read("gallery.js");
 const staticGalleryHtml = read("gallery.html");
 const staticStyles = read("styles.css");
+const tokenStyles = read("apps/web/app/styles/tokens-base.css");
 const sidePagesGuide = read("docs/side-pages-guide.md");
 
 [
@@ -138,6 +140,19 @@ assert(sealBlock && !sealBlock.includes("priority"), "Home guild seal must not u
 
 const homePriorityCount = [...homePage.matchAll(/\bpriority\b/g)].length;
 assert(homePriorityCount === 1, `Home page should have exactly one priority image, found ${homePriorityCount}.`);
+
+[
+  'import Image from "next/image";',
+  'src="/assets/bg/wuxia-bg.webp"',
+  'className="bg-photo__image"',
+  "fill",
+  'sizes="100vw"',
+  'loading="eager"',
+].forEach((snippet) => assertIncludes("responsive global background", rootLayout, snippet));
+assert(!staticStyles.includes("bg-photo__image"), "Responsive background styles must remain owned by the Next app.");
+assertIncludes("responsive global background styles", tokenStyles, ".bg-photo__image{");
+assertIncludes("responsive global background styles", tokenStyles, "object-fit:cover;");
+assert(!tokenStyles.includes('background:url("/assets/bg/wuxia-bg.webp")'), "Next background must not retain the full-size CSS request.");
 
 assertIncludes("shared PageHero", sharedPublicComponents, "className=\"page-hero__img\"");
 assertIncludes("shared PageHero", sharedPublicComponents, "priority");

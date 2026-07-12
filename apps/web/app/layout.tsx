@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Serif_SC, Zhi_Mang_Xing } from "next/font/google";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -76,7 +77,16 @@ export default function RootLayout({
     <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body data-page="home">
         <SiteHeader />
-        <div className="bg-photo" aria-hidden="true" />
+        <div className="bg-photo" aria-hidden="true">
+          <Image
+            src="/assets/bg/wuxia-bg.webp"
+            alt=""
+            className="bg-photo__image"
+            fill
+            sizes="100vw"
+            loading="eager"
+          />
+        </div>
         {children}
         <SiteFooter />
         <Analytics />
