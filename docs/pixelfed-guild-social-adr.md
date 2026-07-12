@@ -104,7 +104,9 @@ Supabase-changing PRs must also pass:
 - `npm run test:pixelfed-social-sync`
 - Supabase Preview evidence after PR creation
 
-Provider reads may be performed with credentials from `C:\Users\xtyty\Documents\Creds`; provider writes require the approval prompts above.
+Provider reads may be performed with credentials from
+`C:\Github Repo's\Mochirii Website\Mochi Creds`; provider writes require the
+approval prompts above.
 
 See [`pixelfed-staging-ops.md`](pixelfed-staging-ops.md) for the no-secret
 staging deploy, cache, health, rollback, backup, and source-control runbook.

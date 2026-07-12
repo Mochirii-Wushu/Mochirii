@@ -18,7 +18,11 @@ This packet records the current linked Supabase advisor evidence and the planned
 
 Linked CLI readback with Supabase CLI `2.108.0` succeeded on 2026-07-07 using the repo-local Windows binary and credentials loaded only into child-process environment variables.
 
-The exact requested credential file `C:\Users\xtyty\Documents\Creds\supabase-db-password.txt` was not present during this refresh. No alternate password file was read or substituted. The linked readbacks below succeeded with `SUPABASE_ACCESS_TOKEN` only.
+The exact requested credential file
+`C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase\supabase-db-password.txt`
+was not present during this refresh. No alternate password file was read or
+substituted. The linked readbacks below succeeded with
+`SUPABASE_ACCESS_TOKEN` only.
 
 - Security advisors: 14 findings.
 - `rls_enabled_no_policy`: 13 info findings.
@@ -79,8 +83,9 @@ Recommended future process:
 Use the repo-local Supabase binary on Windows and disable telemetry to avoid local telemetry-file races:
 
 ```powershell
-$supa = "C:\Users\xtyty\CodexWork\Mochirii\repo\node_modules\@supabase\cli-windows-x64\bin\supabase.exe"
-# Load the access token and DB password from C:\Users\xtyty\Documents\Creds
+$supa = "C:\Github Repo's\Mochirii Website\website\node_modules\@supabase\cli-windows-x64\bin\supabase.exe"
+# Load the access token and DB password from
+# C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase
 # into child-process environment variables before running these commands.
 # Do not print, commit, or paste those values into docs or PR text.
 & $supa functions list --project-ref deyvmtncimmcinldjyqe --output-format json

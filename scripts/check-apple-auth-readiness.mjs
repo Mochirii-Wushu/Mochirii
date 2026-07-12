@@ -86,7 +86,7 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
   "Manual Linking",
   "security_manual_linking_enabled",
   "six-month",
-  "C:\\Users\\xtyty\\Documents\\Creds",
+  "C:\\Github Repo's\\Mochirii Website\\Mochi Creds\\Apple",
   "identity evidence only",
 ].forEach((snippet) => {
   assertIncludes("multi-provider Apple activation docs", multiProviderDoc, snippet);

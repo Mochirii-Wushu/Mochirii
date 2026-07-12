@@ -122,7 +122,7 @@ After the OAuth Server approval is applied, assert the live Supabase provider
 state without printing token values:
 
 ```powershell
-$tokenFromCreds = (Get-Content -LiteralPath 'C:\Users\xtyty\Documents\Creds\Supabase Key.txt' -Raw).Trim()
+$tokenFromCreds = (Get-Content -LiteralPath "C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase\Supabase Key.txt" -Raw).Trim()
 [Environment]::SetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', $tokenFromCreds, 'Process')
 $env:PIXELFED_FIRST_LOGIN_PROVIDER_READY = '1'
 npm run check:pixelfed-first-login-readiness
