@@ -12,7 +12,6 @@ import "./styles/shared-ui.css";
 import "./styles/shell-header-nav.css";
 import "./styles/shell-mobile-menu.css";
 import "./styles/shell-footer.css";
-import "./styles/mochi-pets.css";
 
 const title = "Mōchirīī • Where Winds Meet Guild";
 const description =
