@@ -582,9 +582,9 @@ No public read access is granted.
 - service_role can manage rows from trusted Edge Functions after moderator verification.
 - Rows store only owned permission bitfields and Discord IDs for Reaper-managed overwrites.
 
-## Advisor-Acknowledged Service-Only Tables
+## Service-Only Default-Deny Tables
 
-Supabase advisors intentionally report `RLS Enabled No Policy` for the following tables because they are service-role-only audit, sync, moderation, or poll internals. Do not add anon or authenticated browser policies to these tables unless a future task explicitly redesigns their public data contract.
+The following tables are service-role-only audit, sync, moderation, or poll internals. Migration `20260712164503_service_only_default_deny_policies.sql` reasserts revoked `public`, `anon`, and `authenticated` privileges and adds one restrictive `service_only_default_deny` policy for the client roles. The policy always evaluates to false and exists to make the default-deny intent explicit without granting browser access. Do not add permissive anon or authenticated policies unless a future task explicitly redesigns the table's public data contract.
 
 - `discord_managed_permission_overwrites`
 - `discord_resources`
@@ -599,6 +599,8 @@ Supabase advisors intentionally report `RLS Enabled No Policy` for the following
 - `spotlight_poll_results`
 - `vote_confirmations`
 - `vote_reminder_sends`
+
+The migration verifies that RLS remains enabled, the restrictive policy is complete, client roles retain no table privileges, and `service_role` retains the trusted backend privileges. Supabase Preview and production advisor readbacks must report no `rls_enabled_no_policy` finding for these tables after deployment.
 
 These tables should keep RLS enabled, direct browser grants revoked, and `service_role` writes constrained to trusted Edge Functions, Reaper workflows, or scheduled jobs. If a user-facing view is ever needed, expose a narrow Edge Function DTO instead of direct table access.
 

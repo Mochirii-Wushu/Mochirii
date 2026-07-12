@@ -22,6 +22,7 @@ const boardSource = readText("apps/web/components/public-pages/EventsBoard.tsx")
 const cssSource = readAppCss().replace(/\r\n/g, "\n");
 const scheduleSource = readText("apps/web/lib/guild-schedule.ts");
 const schedule = readJsonFile("data/guild-schedule.json");
+const legacyEvents = readJsonFile("data/events.json");
 
 if (!eventsSource) fail("EventsPage source block not found.");
 assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData)");
@@ -55,6 +56,44 @@ const monthlyEvents = Object.values(schedule.monthly || {});
 const weeklyEvents = (schedule.weekly || []).filter((item) => item.discord === true);
 const websiteEventCount = monthlyEvents.length + weeklyEvents.length;
 if (websiteEventCount !== 8) fail(`expected 8 schedule-derived website event cards, received ${websiteEventCount}.`);
+
+const legacyUpcoming = Array.isArray(legacyEvents.upcoming) ? legacyEvents.upcoming : [];
+const weeklyById = new Map(weeklyEvents.map((item) => [String(item.id || ""), item]));
+const seenLegacyIds = new Set();
+const mirroredFields = [
+  ["title", "title"],
+  ["time", "timeText"],
+  ["summary", "summary"],
+  ["image", "image"],
+  ["href", "href"],
+];
+
+for (const item of legacyUpcoming) {
+  const scheduleId = String(item.scheduleId || "");
+  if (!scheduleId) {
+    fail("data/events.json upcoming entry is missing scheduleId.");
+    continue;
+  }
+  if (seenLegacyIds.has(scheduleId)) fail(`data/events.json repeats scheduleId ${scheduleId}.`);
+  seenLegacyIds.add(scheduleId);
+
+  const scheduled = weeklyById.get(scheduleId);
+  if (!scheduled) {
+    fail(`data/events.json references missing weekly schedule ${scheduleId}.`);
+    continue;
+  }
+
+  for (const [legacyField, scheduleField] of mirroredFields) {
+    if (String(item[legacyField] || "") !== String(scheduled[scheduleField] || "")) {
+      fail(`event source drift for ${scheduleId}: ${legacyField} must match guild-schedule ${scheduleField}.`);
+    }
+  }
+
+  const scheduledTimezone = String(scheduled.timezone || schedule.timezone?.label || "");
+  if (String(item.timezone || "") !== scheduledTimezone) {
+    fail(`event source drift for ${scheduleId}: timezone must match guild-schedule timezone.`);
+  }
+}
 
 const coverImages = [...monthlyEvents, ...weeklyEvents].map((item) => String(item.discordCoverImage || ""));
 for (const cover of coverImages) {

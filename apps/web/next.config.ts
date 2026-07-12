@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import publicUrls from "./config/public-urls.json";
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = resolve(appRoot, "../..");
 const mochiPetsOrigin = (process.env.NEXT_PUBLIC_MOCHI_PETS_URL || publicUrls.mochiPetsDefaultOrigin).replace(/\/+$/, "");
 
 const legacyHtmlRedirects = [
@@ -75,8 +76,9 @@ const securityHeaders = [
 ] as const;
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: workspaceRoot,
   turbopack: {
-    root: appRoot,
+    root: workspaceRoot,
   },
   async headers() {
     return [
