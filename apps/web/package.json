@@ -58,7 +58,12 @@
       "ajv": "8.20.0"
     },
     "vercel": {
-      "undici": "6.27.0"
+      "undici": "6.27.0",
+      "sandbox": {
+        "@vercel/sandbox": {
+          "undici": "7.28.0"
+        }
+      }
     }
   },
   "devDependencies": {
@@ -68,6 +73,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "typescript": "^5",
-    "vercel": "54.18.1"
+    "vercel": "55.0.0"
   }
 }
