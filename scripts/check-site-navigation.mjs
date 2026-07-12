@@ -7,6 +7,7 @@ const failures = [];
 
 const header = read("apps/web/components/SiteHeader.tsx");
 const headerAuthState = read("apps/web/components/site-header/use-header-auth-state.ts");
+const headerAuthRuntime = read("apps/web/components/site-header/header-auth-runtime.ts");
 const headerNavigation = read("apps/web/components/site-header/header-navigation.tsx");
 const navSource = read("apps/web/lib/site-navigation.ts");
 const footer = read("apps/web/components/SiteFooter.tsx");
@@ -41,7 +42,8 @@ assertIncludes("site navigation public URL config", navSource, `"@/lib/public-ur
 assertIncludes("site navigation dropdown Social", navGroups, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
 assertIncludes("site navigation dropdown Mochi Pets", navGroups, `href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets", auth: "signed-in"`);
 assertIncludes("SiteHeader group auth filtering", header, "&& !navItemHidden(item, authState)");
-assertIncludes("SiteHeader moderator probe", headerAuthState, "checkLeaderGalleryModerationAccess");
+assertIncludes("SiteHeader deferred auth import", headerAuthState, 'import("./header-auth-runtime")');
+assertIncludes("SiteHeader moderator probe", headerAuthRuntime, "checkLeaderGalleryModerationAccess");
 assertIncludes("SiteHeader lazy moderator trigger", header, `void ensureModeratorAccess();`);
 assertIncludes("SiteHeader mobile moderator trigger", header, "setMobileOpen(true)");
 assertIncludes("SiteHeader account controls", header, `aria-controls="nav-menu-account"`);
