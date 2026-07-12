@@ -92,7 +92,7 @@ The restoration source of truth is [`reports/audio-original-restore.md`](../repo
 - Each page should have a distinct job. Home invites, Join orients, Events schedules, Gallery remembers, Ranks explains progression, Leaders directs contact, Tome defines conduct, Recruitment preserves philosophy, and side pages keep their own focus.
 - Use cultivation, path, hall, lantern, jade, lotus, bamboo, moon, frost, and qi imagery sparingly. Clear meaning comes first.
 - Keep Cupcake warmth as a playful thread, not a repeated motif.
-- The exact phrase “Where Winds Meet” may remain in titles, metadata, JSON-LD, validation scripts, docs, reports, header, and footer. Avoid it in regular visible body copy outside header/footer when a clear phrase like the game, the Jianghu, the guild road, or the path works better.
+- The exact phrase “Where Winds Meet” may remain in the approved Home subtitle `Asia Pacific • Where Winds Meet Guild`, titles, metadata, JSON-LD, validation scripts, docs, reports, header, and footer. Avoid it elsewhere in regular visible body copy when a clear phrase like the game, the Jianghu, the guild road, or the path works better.
 - Do not imitate named authors, copy poem/article phrases, force rhyme, blur functional labels, or repeat the same vocabulary across pages without purpose.
 
 ## 9. Validation Before PR

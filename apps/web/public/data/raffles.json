@@ -4,7 +4,7 @@
     "title": "Mōchirīī Monthly Raffles",
     "intro": "Once a month we run a raffle for active members as thanks for being part of the family. Sign up in-game, stay recently active & you're in the draw.",
     "frequency": "Monthly",
-    "timezoneLabel": "UTC + 8",
+    "timezoneLabel": "Singapore Time (UTC+8)",
     "badges": ["Sign up in guild menu", "Recent activity required", "Winners announced in game & Discord."],
     "hero": {
       "image": "./assets/img/raffles/hero.webp",
@@ -29,7 +29,7 @@
     "scheduleId": "monthly-raffle",
     "date": "2026-02-20",
     "time": "9:30 PM",
-    "timezone": "UTC + 8",
+    "timezone": "Singapore Time (UTC+8)",
     "prizes": [
       "Exclusive in-game items (as available)",
       "Guild-funded reward bundle",

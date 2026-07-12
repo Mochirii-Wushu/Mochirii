@@ -170,7 +170,10 @@ function validateGenericValue(filePath, valuePath, key, value, parent) {
     if (/<[A-Za-z][^>]*>/.test(value)) addFailure(`${fullPath}: inline HTML is not supported in JSON text fields.`);
 
     const keyName = String(key || "");
-    const isAllowedGameNamePath = keyName === "title" || valuePath.includes(".meta.");
+    const isAllowedGameNamePath =
+      keyName === "title" ||
+      valuePath.includes(".meta.") ||
+      fullPath === "data/home.json.hero.subtitle";
     if (/Where Winds Meet/i.test(value) && !isAllowedGameNamePath) {
       addFailure(`${fullPath}: visible body copy should not contain the exact game name outside allowed title/metadata contexts.`);
     }
@@ -331,6 +334,12 @@ function isTime24(value) {
 function validateGuildSchedule(data) {
   const filePath = "data/guild-schedule.json";
   if (data?.timezone?.label !== "UTC+8") addFailure(`${filePath}.timezone.label: expected UTC+8.`);
+  if (data?.timezone?.displayLabel !== "Singapore Time (UTC+8)") {
+    addFailure(`${filePath}.timezone.displayLabel: expected Singapore Time (UTC+8).`);
+  }
+  if (data?.timezone?.ianaZone !== "Asia/Singapore") {
+    addFailure(`${filePath}.timezone.ianaZone: expected Asia/Singapore.`);
+  }
   if (data?.timezone?.offsetMinutes !== 480) addFailure(`${filePath}.timezone.offsetMinutes: expected 480.`);
 
   ["gathering", "raffle"].forEach((key) => {

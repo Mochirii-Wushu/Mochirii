@@ -136,13 +136,14 @@ Do not reorder scripts casually. `utils.js` should remain available before share
 - Home should feel clear, human, xianxia-inspired, and Mōchirīī-specific.
 - Cupcake warmth may appear lightly.
 - Do not overuse Cupcake language.
-- Do not use `Where Winds Meet` in regular visible Home body copy.
+- Keep the approved `data/home.json` `hero.subtitle` exactly `Asia Pacific • Where Winds Meet Guild`; this is the sole Home body-copy exception for the exact game name.
+- Do not use `Where Winds Meet` elsewhere in regular visible Home body copy.
 - Keep functional labels clear.
 - Avoid generic AI-like language.
 - Avoid forced rhyme.
 - Do not duplicate page-specific content from other sections.
 
-The exact game name may remain in header/footer, titles, metadata, SEO, JSON-LD, internal code, docs, reports, and validation scripts.
+The exact game name may remain in the approved Home subtitle, header/footer, titles, metadata, SEO, JSON-LD, internal code, docs, reports, and validation scripts.
 
 ## 8. Metadata and Social Preview
 
@@ -151,11 +152,11 @@ Home metadata is owned by `index.html`.
 Current conventions:
 
 - Title: `Mōchirīī • Where Winds Meet Guild`
-- Description: `Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall.`
+- Description: `Join Mōchirīī, an Asia Pacific Where Winds Meet guild full of yummy cupcakes for everyone & pretty people to share them all with.`
 - Canonical: `https://mochirii.com/`
-- Open Graph tags for type, site name, title, description, URL, and image.
+- Open Graph tags for type, locale `en_SG`, site name, title, description, URL, and image.
 - Twitter summary-large-image tags for title, description, and image.
-- JSON-LD `WebSite` object.
+- A home-only JSON-LD graph containing `WebSite` and `Organization`, with canonical IDs, `en-SG`, Asia Pacific service area, and only verified identity links.
 - Favicon and Apple touch icon references.
 - Home hero preload.
 

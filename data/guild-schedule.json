@@ -1,20 +1,22 @@
 {
   "timezone": {
     "label": "UTC+8",
+    "displayLabel": "Singapore Time (UTC+8)",
+    "ianaZone": "Asia/Singapore",
     "offsetMinutes": 480
   },
   "discordCoverVersion": "2026-06-10-event-panels",
   "monthly": {
     "gathering": {
       "id": "monthly-gathering",
-      "title": "Monthly gatherings open to all members to be heard.",
+      "title": "Monthly Guild Gathering",
       "rule": "next-first-saturday",
       "time": "8:00 PM",
       "startTime": "20:00",
       "endTime": "21:00",
       "location": "https://mochirii.com/events",
       "discordCoverImage": "./assets/img/discord-events/monthly-gathering.png",
-      "description": "Monthly gatherings open to all members to be heard."
+      "description": "A monthly gathering where every member can discuss anything they'd like with the guild."
     },
     "raffle": {
       "id": "monthly-raffle",

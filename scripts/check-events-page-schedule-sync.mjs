@@ -89,7 +89,7 @@ for (const item of legacyUpcoming) {
     }
   }
 
-  const scheduledTimezone = String(scheduled.timezone || schedule.timezone?.label || "");
+  const scheduledTimezone = String(schedule.timezone?.displayLabel || schedule.timezone?.label || "");
   if (String(item.timezone || "") !== scheduledTimezone) {
     fail(`event source drift for ${scheduleId}: timezone must match guild-schedule timezone.`);
   }

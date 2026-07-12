@@ -12,6 +12,7 @@
     "toolchain:check": "node scripts/check-local-toolchain.mjs",
     "check": "node scripts/check-all.mjs",
     "check:accessibility-route-matrix": "node scripts/check-accessibility-route-matrix.mjs",
+    "check:apac-content": "node scripts/check-apac-content.mjs",
     "check:browser-route-matrix": "node scripts/check-browser-route-matrix.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "check:apple-auth-readiness": "node scripts/check-apple-auth-readiness.mjs",

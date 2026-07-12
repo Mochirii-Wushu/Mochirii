@@ -7,6 +7,7 @@ import { GallerySubmitForm } from "@/components/member-workflow/GallerySubmitFor
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 import { SITE_ORIGIN } from "@/lib/public-urls";
+import { SITE_OG_LOCALE } from "@/lib/site-metadata";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Submit Image • Gallery Upload",
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title: "Mōchirīī Submit Image • Gallery Upload",
     description: "Submit a private pending gallery image for later Mōchirīī moderation after member verification.",
+    locale: SITE_OG_LOCALE,
     url: `${SITE_ORIGIN}/gallery-submit`,
     images: ["/assets/img/gallery/hero.webp"],
   },

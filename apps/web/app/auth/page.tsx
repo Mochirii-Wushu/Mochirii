@@ -7,6 +7,7 @@ import { AuthPanel } from "@/components/member-workflow/AuthPanel";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { BadgeRow, PageHero } from "@/components/public-pages/common";
 import { SITE_ORIGIN } from "@/lib/public-urls";
+import { SITE_OG_LOCALE } from "@/lib/site-metadata";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Login • Guild Account",
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title: "Mōchirīī Login • Guild Account",
     description: "Choose a Mōchirīī sign-in method, link identities, and request member verification for gallery upload access.",
+    locale: SITE_OG_LOCALE,
     url: `${SITE_ORIGIN}/auth`,
     images: ["/assets/img/join/hero.webp"],
   },

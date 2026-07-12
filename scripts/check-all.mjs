@@ -6,6 +6,7 @@ const checks = [
   ["check:protected-content", ["node", "scripts/check-protected-content.mjs"]],
   ["check:recruitment-audio-player", ["node", "scripts/check-recruitment-audio-player.mjs"]],
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
+  ["check:apac-content", ["node", "scripts/check-apac-content.mjs"]],
   ["check:code-cleanliness", ["node", "scripts/check-code-cleanliness.mjs"]],
   ["check:github-actions-security", ["node", "scripts/check-github-actions-security.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],

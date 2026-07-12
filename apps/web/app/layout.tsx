@@ -7,16 +7,13 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SITE_ORIGIN } from "@/lib/public-urls";
+import { SITE_DESCRIPTION, SITE_LANGUAGE, SITE_OG_LOCALE, SITE_TITLE } from "@/lib/site-metadata";
 import "./styles/tokens-base.css";
 import "./styles/shared-ui.css";
 import "./styles/shell-header-nav.css";
 import "./styles/shell-mobile-menu.css";
 import "./styles/shell-footer.css";
 import "./styles/mochi-pets.css";
-
-const title = "Mōchirīī • Where Winds Meet Guild";
-const description =
-  "Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall.";
 
 const displayFont = Zhi_Mang_Xing({
   weight: "400",
@@ -32,16 +29,17 @@ const bodyFont = Noto_Serif_SC({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
-  title,
-  description,
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     siteName: "Mōchirīī",
-    title,
-    description,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: SITE_OG_LOCALE,
     url: SITE_ORIGIN,
     images: [
       {
@@ -54,8 +52,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title,
-    description,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     images: ["/assets/img/hero/hero.webp"],
   },
   icons: {
@@ -74,7 +72,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${displayFont.variable} ${bodyFont.variable}`}>
+    <html lang={SITE_LANGUAGE} className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body data-page="home">
         <SiteHeader />
         <div className="bg-photo" aria-hidden="true">

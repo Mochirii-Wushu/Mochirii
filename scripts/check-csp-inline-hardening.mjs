@@ -228,15 +228,18 @@ function inspectSource(directiveMap) {
       },
     ]),
   );
-  const blockingHits = Object.values(summarizedPatterns)
-    .filter((pattern) => pattern.severity === "block")
-    .flatMap((pattern) => pattern.hits.map((hit) => ({ ...hit, label: pattern.label })));
+  const allBlockingHits = Object.entries(summarizedPatterns)
+    .filter(([, pattern]) => pattern.severity === "block")
+    .flatMap(([patternId, pattern]) => pattern.hits.map((hit) => ({ ...hit, patternId, label: pattern.label })));
+  const reviewedBlockingHits = allBlockingHits.filter(isReviewedInlineUsage);
+  const blockingHits = allBlockingHits.filter((hit) => !isReviewedInlineUsage(hit));
 
   return {
     scannedFiles: files.length,
     scannedRoots: dirs,
     patterns: summarizedPatterns,
     blockingHits,
+    reviewedBlockingHits,
     externalOrigins: [...externalOrigins.entries()]
       .map(([origin, originFiles]) => ({
         origin,
@@ -247,6 +250,19 @@ function inspectSource(directiveMap) {
       }))
       .sort((a, b) => a.origin.localeCompare(b.origin)),
   };
+}
+
+function isReviewedInlineUsage(hit) {
+  if (hit.patternId !== "dangerouslySetInnerHTML" || hit.file !== "apps/web/app/page.tsx") return false;
+  const source = readFileSync(resolve(root, hit.file), "utf8");
+  const occurrences = source.match(/\bdangerouslySetInnerHTML\b/g) || [];
+  return (
+    occurrences.length === 1 &&
+    source.includes('type="application/ld+json"') &&
+    source.includes("function serializeJsonLd") &&
+    source.includes("JSON.stringify(value).replace(/</g") &&
+    source.includes("\\\\u003c")
+  );
 }
 
 async function inspectLiveHeaders() {

@@ -1,21 +1,22 @@
 <!-- index.html — Home -->
 <!doctype html>
-<html lang="en">
+<html lang="en-SG">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mōchirīī • Where Winds Meet Guild</title>
-  <meta name="description" content="Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall." />
+  <meta name="description" content="Join Mōchirīī, an Asia Pacific Where Winds Meet guild full of yummy cupcakes for everyone &amp; pretty people to share them all with." />
   <link rel="canonical" href="https://mochirii.com/" />
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_SG" />
   <meta property="og:site_name" content="Mōchirīī" />
   <meta property="og:title" content="Mōchirīī • Where Winds Meet Guild" />
-  <meta property="og:description" content="Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall." />
+  <meta property="og:description" content="Join Mōchirīī, an Asia Pacific Where Winds Meet guild full of yummy cupcakes for everyone &amp; pretty people to share them all with." />
   <meta property="og:url" content="https://mochirii.com/" />
   <meta property="og:image" content="https://mochirii.com/assets/img/hero/hero.webp" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Mōchirīī • Where Winds Meet Guild" />
-  <meta name="twitter:description" content="Join Mōchirīī, a warm Where Winds Meet guild for friendly runs, clear event notes, and a cozy wuxia guild hall." />
+  <meta name="twitter:description" content="Join Mōchirīī, an Asia Pacific Where Winds Meet guild full of yummy cupcakes for everyone &amp; pretty people to share them all with." />
   <meta name="twitter:image" content="https://mochirii.com/assets/img/hero/hero.webp" />
   <meta name="theme-color" content="#0a0c0e" />
   <link rel="icon" href="./favicon.ico" sizes="any" />
@@ -23,16 +24,31 @@
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Mōchirīī",
-      "url": "https://mochirii.com/",
-      "description": "A Where Winds Meet guild website for recruitment, events, culture, and community updates.",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Mōchirīī",
-        "url": "https://mochirii.com/",
-        "logo": "https://mochirii.com/assets/img/brand/social-card.png"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://mochirii.com/#website",
+          "url": "https://mochirii.com/",
+          "name": "Mōchirīī",
+          "alternateName": "Mochirii",
+          "description": "Join Mōchirīī, an Asia Pacific Where Winds Meet guild full of yummy cupcakes for everyone & pretty people to share them all with.",
+          "inLanguage": "en-SG",
+          "publisher": { "@id": "https://mochirii.com/#organization" }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://mochirii.com/#organization",
+          "url": "https://mochirii.com/",
+          "name": "Mōchirīī",
+          "alternateName": "Mochirii",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://mochirii.com/assets/img/brand/social-card.png"
+          },
+          "areaServed": "Asia Pacific",
+          "sameAs": ["https://social.mochirii.com"]
+        }
+      ]
     }
   </script>
 
@@ -77,6 +93,7 @@
         <section class="glass-card glass-card--strong glass-pad hero-intro">
           <p class="kicker" id="homeKicker">Jianghu Guild Hall</p>
           <h1 class="display-title" id="homeHeading">Mōchirīī</h1>
+          <p class="meta-text u-mt-10" id="homeSubtitle"></p>
 
           <div id="heroDescriptor" class="prose-stack" aria-live="polite">
             <p class="muted">Loading…</p>

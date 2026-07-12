@@ -100,10 +100,16 @@ function inspectShell() {
   const header = readRequired("apps/web/components/SiteHeader.tsx");
   const mobileMenuFocus = readRequired("apps/web/components/site-header/use-mobile-menu-focus-trap.ts");
   const footer = readOptional("apps/web/components/SiteFooter.tsx");
+  const siteMetadata = readOptional("apps/web/lib/site-metadata.ts");
   const css = readAppCss();
 
+  const literalHtmlLanguage = /<html\s+lang=["']en(?:-SG)?["']/.test(layout);
+  const configuredHtmlLanguage =
+    /<html\s+lang=\{SITE_LANGUAGE\}/.test(layout) &&
+    /SITE_LANGUAGE\s*=\s*["']en-SG["']/.test(siteMetadata);
+
   const shellChecks = {
-    htmlLang: /<html\s+lang=["']en["']/.test(layout),
+    htmlLang: literalHtmlLanguage || configuredHtmlLanguage,
     mainTargetCoverage: routes.every((route) => routeHasMainTarget(route)),
     skipLink: /className=["']skip-link["'][\s\S]*href=["']#main["']/.test(header),
     primaryNavLabel: /<nav\s+className=["']nav["']\s+aria-label=["']Primary["']/.test(header),

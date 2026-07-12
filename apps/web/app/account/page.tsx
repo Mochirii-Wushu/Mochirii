@@ -7,6 +7,7 @@ import { AccountPanel } from "@/components/member-workflow/AccountPanel";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 import { SITE_ORIGIN } from "@/lib/public-urls";
+import { SITE_OG_LOCALE } from "@/lib/site-metadata";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Account • Guild Verification",
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title: "Mōchirīī Account • Guild Verification",
     description: "View member verification, linked sign-in methods, member status, and safe profile fields for a Mōchirīī website account.",
+    locale: SITE_OG_LOCALE,
     url: `${SITE_ORIGIN}/account`,
     images: ["/assets/img/leaders/panel.webp"],
   },
