@@ -4809,7 +4809,6 @@ body[data-page="gallery-submit"] .muted{
 }
 .brand-text{display:flex; flex-direction:column; line-height:1.05;}
 .brand-name{font-family:var(--font-display); font-size:28px; letter-spacing:.02em;}
-.brand-sub{margin-top:2px; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2);}
 
 .nav{
   display:flex;

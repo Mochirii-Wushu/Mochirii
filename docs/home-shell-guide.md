@@ -59,6 +59,8 @@ The guild seal poem is protected. Do not alter wording, punctuation, line breaks
 
 Header behavior comes from `header.html` and `site.js`.
 
+The header brand shows only the Mōchirīī guild name beside the emblem. Keep game and regional context in page content, metadata, and the footer instead of adding a second header line.
+
 Current desktop navigation:
 
 - Guild: Home, Spotlight, Gallery.

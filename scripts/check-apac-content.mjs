@@ -150,6 +150,11 @@ const footerStatic = read("footer.html");
 assertIncludes("Next footer", footerComponent, expected.footer);
 assertIncludes("static footer", footerStatic, expected.footer);
 
+const headerComponent = read("apps/web/components/SiteHeader.tsx");
+const headerStatic = read("header.html");
+assert(!headerComponent.includes("brand-sub"), "the Next header brand must show only the guild name.");
+assert(!headerStatic.includes("brand-sub"), "the static header brand must show only the guild name.");
+
 const scheduleHelper = read("apps/web/lib/guild-schedule.ts");
 assertIncludes("schedule helper", scheduleHelper, 'new Intl.DateTimeFormat("en-SG"');
 assertIncludes("schedule helper", scheduleHelper, "timeZone: scheduleIanaZone(schedule)");
