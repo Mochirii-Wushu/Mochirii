@@ -15,7 +15,10 @@ This is the short source-of-truth index for the current Mochirii production post
 - Read-only GitHub Pages API on 2026-07-02 reported legacy root deployment for `mochirii.com` with status `errored`; the latest deploy built successfully but timed out in `deployment_queued`. Vercel production remained healthy, so treat this as a rollback-surface/settings cleanup item, not a live-site outage.
 - Deployment source of truth: `docs/deployment.md`.
 - Current `origin/main` commit verified locally on 2026-07-05: `fcd5f2c9e1b24ba11118c7307bfe93d8ad72a741` (`Refresh post-avatar readiness ledger (#384)`).
-- Active website worktree on this workstation is `C:\Users\xtyty\CodexWork\Mochirii\repo`. The older `C:\Users\xtyty\Documents\Mochirii Website` shell is historical/non-worktree state and should not be used for active website edits unless a separate workspace-hygiene task explicitly restores or removes it.
+- Active website worktree on this workstation is
+  `C:\Github Repo's\Mochirii Website\website`. The older Documents and
+  CodexWork paths are compatibility junctions into the canonical project root,
+  not separate worktrees.
 - Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii` as public. Keep this public state unless the owner separately approves making the repo private again.
 - Current website closeout on 2026-07-05: PR #381 refreshed route-matrix readiness evidence, and Dependabot PRs #376, #378, #379, and #380 merged after fresh `validate`, `validate-next`, and Vercel checks. PRs #373, #375, #377, and #374 were closed/deferred because their refreshed checks exposed Deno lock drift or ESLint 10 compatibility risk.
 - Local production smoke blocker cleared on 2026-07-05: `npm run check:production` now passes from this workstation, and `curl.exe -I` returns 200 for `https://mochirii.com`, `https://social.mochirii.com`, and `https://mochirii.vercel.app`. PowerShell `Invoke-WebRequest -Method Head` still reports a local object-reference error, but the repo production smoke and curl path are green; do not mutate DNS, Cloudflare, or Vercel from the older reset evidence.

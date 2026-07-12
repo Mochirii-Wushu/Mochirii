@@ -83,7 +83,7 @@ Recommended future process:
 Use the repo-local Supabase binary on Windows and disable telemetry to avoid local telemetry-file races:
 
 ```powershell
-$supa = "C:\Users\xtyty\CodexWork\Mochirii\repo\node_modules\@supabase\cli-windows-x64\bin\supabase.exe"
+$supa = "C:\Github Repo's\Mochirii Website\website\node_modules\@supabase\cli-windows-x64\bin\supabase.exe"
 # Load the access token and DB password from
 # C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase
 # into child-process environment variables before running these commands.
