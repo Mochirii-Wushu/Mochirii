@@ -150,7 +150,11 @@ img{max-width:100%;display:block;}
   inset:0;
   z-index:0;
   pointer-events:none;
-  background:url("/assets/bg/wuxia-bg.webp") center / cover no-repeat;
+  overflow:hidden;
+}
+.bg-photo__image{
+  object-fit:cover;
+  object-position:center;
 }
 .bg-ink,.bg-ink-2,.bg-grain{display:none!important;}
 
