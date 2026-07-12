@@ -67,6 +67,10 @@ const serviceOnlyTables = [
   "vote_reminder_sends",
 ];
 
+const serviceOnlyPolicyMigration = read(
+  "supabase/migrations/20260712164503_service_only_default_deny_policies.sql",
+);
+
 const socialAccountSnippets = [
   "create table if not exists public.social_accounts",
   "constraint social_accounts_visible_requires_active_check",
@@ -157,6 +161,48 @@ function hasExplicitGrantForTable(sql, table) {
   });
 }
 
+function assertServiceOnlyBoundary(table) {
+  const name = escapeRegExp(table);
+  const checks = [
+    [
+      "revoked public, anon, and authenticated grants",
+      new RegExp(
+        `\\brevoke\\s+all\\s+on\\s+table\\s+public\\.${name}\\s+from\\s+public\\s*,\\s*anon\\s*,\\s*authenticated\\s*;`,
+        "i",
+      ),
+    ],
+    [
+      "service_role grant",
+      new RegExp(
+        `\\bgrant\\s+all\\s+on\\s+table\\s+public\\.${name}\\s+to\\s+service_role\\s*;`,
+        "i",
+      ),
+    ],
+    [
+      "idempotent policy replacement",
+      new RegExp(
+        `\\bdrop\\s+policy\\s+if\\s+exists\\s+service_only_default_deny\\s+on\\s+public\\.${name}\\s*;`,
+        "i",
+      ),
+    ],
+    [
+      "restrictive false policy for client roles",
+      new RegExp(
+        `\\bcreate\\s+policy\\s+service_only_default_deny\\s+on\\s+public\\.${name}`
+          + "\\s+as\\s+restrictive\\s+for\\s+all\\s+to\\s+anon\\s*,\\s*authenticated"
+          + "\\s+using\\s*\\(\\s*false\\s*\\)\\s+with\\s+check\\s*\\(\\s*false\\s*\\)\\s*;",
+        "i",
+      ),
+    ],
+  ];
+
+  for (const [label, pattern] of checks) {
+    if (!pattern.test(serviceOnlyPolicyMigration)) {
+      failures.push(`Service-only boundary for public.${table}: missing ${label}.`);
+    }
+  }
+}
+
 const packageJson = read("package.json");
 const checkAll = read("scripts/check-all.mjs");
 const readme = read("supabase/README.md");
@@ -203,7 +249,16 @@ for (const snippet of mochiPetsCompatibilitySnippets) {
 
 for (const table of serviceOnlyTables) {
   assertIncludes("Supabase README service-only table allowlist", readme, `\`${table}\``);
+  assertServiceOnlyBoundary(table);
 }
+
+[
+  "Required service-only relation is missing",
+  "RLS must remain enabled",
+  "Explicit service-only policy is incomplete",
+  "Client role retained",
+  "service_role is missing",
+].forEach((snippet) => assertIncludes("Service-only migration verification", serviceOnlyPolicyMigration, snippet));
 
 for (const snippet of socialAccountSnippets) {
   assertIncludes("Pixelfed social account mapping migration", migrationText, snippet);
