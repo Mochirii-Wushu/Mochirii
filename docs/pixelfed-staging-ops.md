@@ -136,7 +136,7 @@ Before broad member upload testing:
 - Retain a private restore drill note covering database restore, media restore,
   app rebuild, and DNS/OAuth rollback.
 - Keep object storage credentials only in the host secret store and local
-  `C:\Users\xtyty\Documents\Creds`, never in Git.
+  `C:\Github Repo's\Mochirii Website\Mochi Creds`, never in Git.
 
 ## Federation Gate
 

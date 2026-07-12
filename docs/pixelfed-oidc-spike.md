@@ -101,7 +101,8 @@ redirect URI.
 
 ## Local Credential Boundary
 
-Credentials remain local only under `C:\Users\xtyty\Documents\Creds`.
+Credentials remain local only under
+`C:\Github Repo's\Mochirii Website\Mochi Creds`.
 
 Recommended local filenames once the provider steps are approved:
 

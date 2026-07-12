@@ -40,7 +40,7 @@ linked Vercel project keeps `apps/web` as its configured Root Directory, so runn
 `apps/web` can incorrectly resolve the path as `apps/web/apps/web` on current Vercel CLI versions.
 
 ```powershell
-$token = (Get-Content -LiteralPath 'C:\Users\xtyty\Documents\Creds\Vercel Token.txt' -Raw).Trim()
+$token = (Get-Content -LiteralPath "C:\Github Repo's\Mochirii Website\Mochi Creds\Vercel\Vercel Token.txt" -Raw).Trim()
 $project = Get-Content -LiteralPath 'apps\web\.vercel\project.json' -Raw | ConvertFrom-Json
 $env:VERCEL_ORG_ID = $project.orgId
 $env:VERCEL_PROJECT_ID = $project.projectId

@@ -68,7 +68,8 @@ Domain: deyvmtncimmcinldjyqe.supabase.co
 ```
 
 Credential artifacts, Apple key metadata, generated client-secret expiry notes,
-and rotation notes belong only under `C:\Users\xtyty\Documents\Creds`. Do not
+and rotation notes belong only under
+`C:\Github Repo's\Mochirii Website\Mochi Creds\Apple`. Do not
 commit or print Apple private key material, generated client secrets, token
 payloads, cookies, raw OAuth responses, or digests of those values.
 
