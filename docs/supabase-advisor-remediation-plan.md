@@ -1,10 +1,10 @@
 # Supabase Advisor Remediation Plan
 
-Last refreshed: 2026-07-07
+Last refreshed: 2026-07-12
 
 Project: `deyvmtncimmcinldjyqe`
 
-This packet records the current linked Supabase advisor evidence and the planned remediation path without changing remote database state. Supabase advisors are evidence inputs, not automatic migration instructions. Any schema, RLS, Auth, or index mutation still requires a separate approval and PR.
+This packet records the linked Supabase advisor evidence and the protected-PR remediation path without changing production database state. Supabase advisors are evidence inputs, not automatic migration instructions. Any production schema or Auth mutation still requires separate exact approval.
 
 ## Source Basis
 
@@ -34,7 +34,7 @@ substituted. The linked readbacks below succeeded with
 
 ## RLS No-Policy Classification
 
-The current `rls_enabled_no_policy` findings are classified as intentional service-only/default-deny tables. These tables should keep RLS enabled, direct browser grants revoked, and writes limited to trusted Edge Functions, Reaper workflows, or scheduled jobs.
+The current `rls_enabled_no_policy` findings are classified as service-only/default-deny tables. Migration `20260712164503_service_only_default_deny_policies.sql` keeps RLS enabled, reasserts revoked client grants, retains service-role privileges, and adds an explicit restrictive false policy for `anon` and `authenticated`. Writes remain limited to trusted Edge Functions, Reaper workflows, or scheduled jobs.
 
 | Table | Classification | Next action |
 | --- | --- | --- |
@@ -52,21 +52,13 @@ The current `rls_enabled_no_policy` findings are classified as intentional servi
 | `vote_confirmations` | Service-only vote reminder tracking | Keep default-deny; expose through trusted functions only. |
 | `vote_reminder_sends` | Service-only vote reminder tracking | Keep default-deny; expose through trusted functions only. |
 
-Do not add dummy public policies just to silence the advisor. If any table later needs direct browser access, create a narrow policy with an explicit `TO` clause plus a row ownership or moderator predicate, and verify with Supabase Preview, advisors, and route tests.
+The restrictive policy documents the service-only boundary and does not grant browser access. If any table later needs direct browser access, replace that contract through a dedicated migration with the narrowest explicit `TO` clause plus a row-ownership or moderator predicate, then verify it with Supabase Preview, advisors, and route tests.
 
 Supabase's 2026 default-grants timeline makes explicit grants a separate, deliberate access decision from RLS. Keep grants and RLS policies paired in the same reviewed migration when a table is intentionally exposed through the Data API.
 
 ## Leaked-Password Protection
 
-The remaining warning is Supabase Auth leaked-password protection. This is a provider setting, not a repo-only change.
-
-Approval packet:
-
-```text
-Approve enabling Supabase Auth leaked-password protection for project deyvmtncimmcinldjyqe. Expected impact: new password-based signups or password changes may reject compromised passwords. Rollback: disable the same Auth setting in the Supabase dashboard if legitimate users are blocked unexpectedly. No database migration or secret rotation is included.
-```
-
-After approval, verify with the Security Advisor readback and a normal auth smoke. Do not change OAuth providers, manual linking, Site URL, redirect allowlist, or password policy settings in the same action unless explicitly approved.
+The remaining warning is Supabase Auth leaked-password protection. It is intentionally accepted and cost-deferred while this project remains on the Free plan. Do not upgrade the plan or change Auth settings as part of this remediation.
 
 ## Unused Index Findings
 
