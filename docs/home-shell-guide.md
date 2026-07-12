@@ -59,7 +59,7 @@ The guild seal poem is protected. Do not alter wording, punctuation, line breaks
 
 Header behavior comes from `header.html` and `site.js`.
 
-The header brand shows only the Mōchirīī guild name beside the emblem. Keep game and regional context in page content, metadata, and the footer instead of adding a second header line.
+The header and footer brand blocks match: the prominent `Mōchirīī` guild name sits above the concise `Asia Pacific Guild` regional label. Keep the game name in metadata and approved supporting contexts instead of the brand subtitle.
 
 Current desktop navigation:
 

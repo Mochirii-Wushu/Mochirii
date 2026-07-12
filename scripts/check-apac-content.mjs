@@ -14,6 +14,7 @@ const expected = {
   footer: "An Asia Pacific Where Winds Meet guild, with events scheduled in Singapore Time (UTC+8).",
   join: "Mōchirīī welcomes all pretty new members across Asia Pacific or anywhere else in the world if you don't mind the ping.",
   displayTimezone: "Singapore Time (UTC+8)",
+  brandSubtitle: "Asia Pacific Guild",
 };
 
 function read(relativePath) {
@@ -152,8 +153,12 @@ assertIncludes("static footer", footerStatic, expected.footer);
 
 const headerComponent = read("apps/web/components/SiteHeader.tsx");
 const headerStatic = read("header.html");
-assert(!headerComponent.includes("brand-sub"), "the Next header brand must show only the guild name.");
-assert(!headerStatic.includes("brand-sub"), "the static header brand must show only the guild name.");
+assertIncludes("Next header brand", headerComponent, `<span className="brand-sub">${expected.brandSubtitle}</span>`);
+assertIncludes("static header brand", headerStatic, `<span class="brand-sub">${expected.brandSubtitle}</span>`);
+assertIncludes("Next footer brand", footerComponent, `<span className="brand-sub">${expected.brandSubtitle}</span>`);
+assertIncludes("static footer brand", footerStatic, `<span class="brand-sub">${expected.brandSubtitle}</span>`);
+assert(!headerComponent.includes("Where Winds Meet Guild"), "the Next header brand must use the concise regional label.");
+assert(!headerStatic.includes("Where Winds Meet Guild"), "the static header brand must use the concise regional label.");
 
 const scheduleHelper = read("apps/web/lib/guild-schedule.ts");
 assertIncludes("schedule helper", scheduleHelper, 'new Intl.DateTimeFormat("en-SG"');

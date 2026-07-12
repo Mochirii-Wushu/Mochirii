@@ -80,8 +80,8 @@ export function SiteFooter() {
                 sizes="56px"
               />
               <span className="brand-text">
-                <span className="footer-title">Mōchirīī</span>
-                <span className="footer-sub">A Where Winds Meet Guild</span>
+                <span className="brand-name">Mōchirīī</span>
+                <span className="brand-sub">Asia Pacific Guild</span>
               </span>
             </Link>
 
