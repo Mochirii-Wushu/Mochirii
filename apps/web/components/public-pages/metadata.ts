@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_ORIGIN } from "@/lib/public-urls";
+import { SITE_OG_LOCALE } from "@/lib/site-metadata";
 
 type PageKey =
   | "join"
@@ -126,6 +127,7 @@ export function metadataFor(page: PageKey): Metadata {
       title: meta.title,
       description: meta.description,
       url,
+      locale: SITE_OG_LOCALE,
       images: [meta.image],
     },
     twitter: {

@@ -80,15 +80,14 @@ export function SiteFooter() {
                 sizes="56px"
               />
               <span className="brand-text">
-                <span className="footer-title">Mōchirīī</span>
-                <span className="footer-sub">A Where Winds Meet Guild</span>
+                <span className="brand-name">Mōchirīī</span>
+                <span className="brand-sub">Asia Pacific Guild</span>
               </span>
             </Link>
 
             <div className="footer-brand-text">
               <p className="footer-desc">
-                Mōchirīī is a quiet Where Winds Meet guild: check event notes,
-                support each other, and bring lantern warmth to the hall.
+                An Asia Pacific Where Winds Meet guild, with events scheduled in Singapore Time (UTC+8).
               </p>
 
               <div className="footer-actions">

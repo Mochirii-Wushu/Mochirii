@@ -16,7 +16,8 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { SpotlightWinnerTitle } from "@/components/public-pages/SpotlightWinnerTitle";
 import { StaticImage } from "@/components/public-pages/common";
 import { monthlyScheduleDate } from "@/lib/guild-schedule";
-import { DISCORD_INVITE_URL } from "@/lib/public-urls";
+import { DISCORD_INVITE_URL, SITE_ORIGIN, SOCIAL_HOST } from "@/lib/public-urls";
+import { SITE_DESCRIPTION, SITE_LANGUAGE } from "@/lib/site-metadata";
 
 export const revalidate = 3600;
 
@@ -25,6 +26,41 @@ type GalleryData = typeof galleryData;
 type Bulletin = HomeData["bulletins"][number];
 type DoorTile = HomeData["tiles"][number];
 type GalleryAlbumItem = GalleryData["albums"][number]["items"][number];
+
+const organizationId = `${SITE_ORIGIN}/#organization`;
+const websiteId = `${SITE_ORIGIN}/#website`;
+const homeStructuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": websiteId,
+      url: `${SITE_ORIGIN}/`,
+      name: "Mōchirīī",
+      alternateName: "Mochirii",
+      description: SITE_DESCRIPTION,
+      inLanguage: SITE_LANGUAGE,
+      publisher: { "@id": organizationId },
+    },
+    {
+      "@type": "Organization",
+      "@id": organizationId,
+      url: `${SITE_ORIGIN}/`,
+      name: "Mōchirīī",
+      alternateName: "Mochirii",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_ORIGIN}/assets/img/brand/social-card.png`,
+      },
+      areaServed: "Asia Pacific",
+      sameAs: [SOCIAL_HOST],
+    },
+  ],
+};
+
+function serializeJsonLd(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
 
 async function OptionalBirthdaySplash({
   config,
@@ -282,6 +318,11 @@ export default function Home() {
 
   return (
     <>
+      <script
+        id="home-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(homeStructuredData) }}
+      />
       <BodyPageMarker page="home" />
       <OptionalBirthdaySplash config={homeData.celebrationSplash} />
       <header className="page-hero-shell" aria-label="Home hero">
@@ -317,6 +358,9 @@ export default function Home() {
             <section className="glass-card glass-card--strong glass-pad hero-intro">
               <p className="kicker" id="homeKicker">Jianghu Guild Hall</p>
               <h1 className="display-title" id="homeHeading">Mōchirīī</h1>
+              <p className="meta-text u-mt-10" id="homeSubtitle">
+                {homeData.hero.subtitle}
+              </p>
 
               <div id="heroDescriptor" className="prose-stack" aria-live="polite">
                 <Descriptor lines={heroDescriptor} />

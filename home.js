@@ -69,10 +69,12 @@
   function renderHero(hero) {
     const heroImg = $("#heroImage");
     const heroAtmos = $("#heroAtmosphere");
+    const subtitle = $("#homeSubtitle");
     const desc = $("#heroDescriptor");
     const badges = $("#heroBadges");
 
     if (heroImg && hero?.image) heroImg.src = hero.image;
+    setText(subtitle, hero?.subtitle ?? "");
 
     if (heroAtmos) {
       const a = String(hero?.atmosphereImage ?? "").trim();

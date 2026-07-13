@@ -106,7 +106,7 @@ export function SiteHeader() {
           </span>
           <span className="brand-text">
             <span className="brand-name">Mōchirīī</span>
-            <span className="brand-sub">Where Winds Meet Guild</span>
+            <span className="brand-sub">Asia Pacific Guild</span>
           </span>
         </Link>
 
@@ -316,7 +316,7 @@ export function SiteHeader() {
               </span>
               <span className="brand-text">
                 <span className="brand-name">Mōchirīī</span>
-                <span className="brand-sub">Where Winds Meet Guild</span>
+                <span className="brand-sub">Asia Pacific Guild</span>
               </span>
             </Link>
 

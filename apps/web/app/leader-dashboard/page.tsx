@@ -8,6 +8,7 @@ import { LeaderDashboard } from "@/components/member-workflow/LeaderDashboard";
 import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 import { SITE_ORIGIN } from "@/lib/public-urls";
+import { SITE_OG_LOCALE } from "@/lib/site-metadata";
 
 export const metadata: Metadata = {
   title: "Mōchirīī Leader Dashboard • Gallery Moderation",
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
     siteName: "Mōchirīī",
     title: "Mōchirīī Leader Dashboard • Gallery Moderation",
     description: "Review pending member gallery image submissions with Discord Moderator access.",
+    locale: SITE_OG_LOCALE,
     url: `${SITE_ORIGIN}/leader-dashboard`,
     images: ["/assets/img/gallery/hero.webp"],
   },

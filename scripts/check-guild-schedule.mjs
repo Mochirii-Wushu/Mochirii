@@ -101,6 +101,8 @@ function assertEqual(label, actual, expected) {
 }
 
 assertEqual("timezone label", schedule.timezone?.label, "UTC+8");
+assertEqual("timezone display label", schedule.timezone?.displayLabel, "Singapore Time (UTC+8)");
+assertEqual("timezone IANA zone", schedule.timezone?.ianaZone, "Asia/Singapore");
 assertEqual("timezone offset", offsetMinutes(), 480);
 assertEqual("Discord cover version", schedule.discordCoverVersion, "2026-06-10-event-panels");
 assertEqual("first Saturday before rollover", nextFirstSaturday(new Date("2026-06-03T12:00:00Z")), "2026-06-06");
@@ -111,6 +113,12 @@ assertEqual("spotlight current month first", firstDayOfMonth(new Date("2026-06-2
 const monthlyGathering = schedule.monthly?.gathering;
 if (!monthlyGathering) fail("monthly gathering is missing.");
 else {
+  assertEqual("monthly gathering title", monthlyGathering.title, "Monthly Guild Gathering");
+  assertEqual(
+    "monthly gathering description",
+    monthlyGathering.description,
+    "A monthly gathering where every member can discuss anything they'd like with the guild.",
+  );
   assertEqual("monthly gathering cover", monthlyGathering.discordCoverImage, "./assets/img/discord-events/monthly-gathering.png");
 }
 

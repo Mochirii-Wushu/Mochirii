@@ -1,5 +1,7 @@
 export type GuildScheduleData = {
   timezone?: {
+    displayLabel?: string;
+    ianaZone?: string;
     label?: string;
     offsetMinutes?: number;
   };
@@ -74,7 +76,11 @@ function offsetMinutes(schedule: GuildScheduleData): number {
 }
 
 export function scheduleTimezoneLabel(schedule: GuildScheduleData): string {
-  return String(schedule.timezone?.label || "UTC+8");
+  return String(schedule.timezone?.displayLabel || schedule.timezone?.label || "UTC+8");
+}
+
+function scheduleIanaZone(schedule: GuildScheduleData): string {
+  return String(schedule.timezone?.ianaZone || "Asia/Singapore");
 }
 
 function pad(value: number): string {
@@ -122,17 +128,26 @@ function parseTime(value: unknown): { hour: number; minute: number } {
   };
 }
 
-function formatScheduleTime(value: unknown): string {
+function formatScheduleTime(value: unknown, schedule: GuildScheduleData): string {
   const parsed = parseTime(value);
-  const period = parsed.hour >= 12 ? "PM" : "AM";
-  const hour = parsed.hour % 12 || 12;
-  const minutes = parsed.minute ? `:${pad(parsed.minute)}` : "";
-  return `${hour}${minutes} ${period}`;
+  const instant = new Date(
+    Date.UTC(2026, 0, 1, parsed.hour, parsed.minute) - offsetMinutes(schedule) * 60 * 1000,
+  );
+  const parts = new Intl.DateTimeFormat("en-SG", {
+    timeZone: scheduleIanaZone(schedule),
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).formatToParts(instant);
+  const hour = parts.find((part) => part.type === "hour")?.value || String(parsed.hour % 12 || 12);
+  const minute = parts.find((part) => part.type === "minute")?.value || pad(parsed.minute);
+  const period = (parts.find((part) => part.type === "dayPeriod")?.value || (parsed.hour >= 12 ? "PM" : "AM")).toUpperCase();
+  return `${hour}${minute === "00" ? "" : `:${minute}`} ${period}`;
 }
 
-function timeRangeText(startTime: unknown, endTime: unknown, fallback?: unknown): string {
-  const start = formatScheduleTime(startTime);
-  const end = formatScheduleTime(endTime);
+function timeRangeText(startTime: unknown, endTime: unknown, schedule: GuildScheduleData, fallback?: unknown): string {
+  const start = formatScheduleTime(startTime, schedule);
+  const end = formatScheduleTime(endTime, schedule);
   return start && end ? `${start} - ${end}` : String(fallback || "").trim();
 }
 
@@ -279,7 +294,7 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
       const startTime = item.startTime || "00:00";
       const endTime = item.endTime || "00:00";
       const endDate = eventEndDate(date, startTime, endTime);
-      const timeText = timeRangeText(startTime, endTime, item.time);
+      const timeText = timeRangeText(startTime, endTime, schedule, item.time);
 
       return [{
         id: item.id,
@@ -309,7 +324,7 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
       const title = occurrence?.title;
       if (!occurrence || !id || !title) return [];
 
-      const timeText = occurrence.timeText || timeRangeText(occurrence.startTime, occurrence.endTime);
+      const timeText = occurrence.timeText || timeRangeText(occurrence.startTime, occurrence.endTime, schedule);
       return [{
         ...occurrence,
         id,
@@ -317,7 +332,7 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
         startTime: occurrence.startTime || "00:00",
         endTime: occurrence.endTime || "00:00",
         timeText,
-        timezone: occurrence.timezone || timezone,
+        timezone,
         summary: occurrence.summary || [occurrence.dayText, timeText].filter(Boolean).join(" - "),
         image: occurrence.discordCoverImage || "",
         href: occurrence.href || occurrence.location,
