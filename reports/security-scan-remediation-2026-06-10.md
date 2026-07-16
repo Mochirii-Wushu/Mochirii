@@ -32,7 +32,7 @@ This pass resolves the confirmed `security.txt` gap reported by Cloudflare Secur
   - `mochirii.com` resolves to Vercel edge addresses through provider flattening.
   - `www.mochirii.com` resolves as a CNAME to `c4b58a30d23b9df3.vercel-dns-017.com`.
   - Cloudflare DNS dashboard shows `mochirii.com` and `www.mochirii.com` as DNS-only CNAME records to the Vercel target, with no DNS recommendations.
-- Cloudflare Security Insights dashboard last scan shown: June 10, 2026 10:15 AM. Visible findings included `Security.txt not configured`, `Dangling A Record detected`, and unrelated Velesari-zone findings that are out of scope for this Mochirii pass.
+- Cloudflare Security Insights dashboard last scan shown: June 10, 2026 10:15 AM. Visible findings included `Security.txt not configured`, `Dangling A Record detected`, and unrelated external-zone findings that are out of scope for this Mochirii pass.
 - Vercel dashboard shows production deployment Ready at commit `102192d Update Supabase JS dependency`; Firewall, Analytics, and Speed Insights surfaces are visible.
 - GitHub evidence:
   - No open PRs.

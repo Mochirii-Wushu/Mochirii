@@ -1,0 +1,55 @@
+{% assign catalog_url = routes.root_url %}
+{% comment %} release-safety:publication:start {% endcomment %}
+{% if settings.product_publication_approved %}
+  {% assign catalog_collection = collections['mochirii-cosmetics'] %}
+  {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+  {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
+    {% assign catalog_url = catalog_collection.url %}
+  {% endif %}
+{% endif %}
+{% comment %} release-safety:publication:end {% endcomment %}
+
+<section class="section page-banner">
+  <div class="section-inner section-head section-head--center">
+    <p class="eyebrow">Mochirii Cosmetics</p>
+    <h1>Page not found</h1>
+    <p class="section-intro">The page you requested is unavailable.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="empty-state empty-state--wide">
+      {% if settings.product_publication_approved %}
+        <h2>Continue shopping</h2>
+        <p>Search the store or return to the skin care collection.</p>
+        <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
+          <div class="field">
+            <label for="SearchInput-{{ section.id }}">Product name or ingredient</label>
+            <input
+              id="SearchInput-{{ section.id }}"
+              type="search"
+              name="q"
+              autocomplete="off"
+            >
+          </div>
+          <input type="hidden" name="type" value="product">
+          <input type="hidden" name="options[prefix]" value="last">
+          <button class="button" type="submit">Search</button>
+        </form>
+        <a class="button button--secondary" href="{{ catalog_url }}">Shop skin care</a>
+      {% else %}
+        <h2>Return to the storefront</h2>
+        <p>Product search remains unavailable while the catalogue is under review.</p>
+        <a class="button button--secondary" href="{{ routes.root_url }}">Storefront home</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "404",
+  "settings": []
+}
+{% endschema %}

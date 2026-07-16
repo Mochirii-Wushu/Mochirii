@@ -1,0 +1,15 @@
+.github/**
+catalog/**
+docs/**
+label-artwork/**
+private-evidence/**
+scripts/**
+node_modules/**
+.venv/**
+AGENTS.md
+README.md
+MIGRATION-MANIFEST.json
+.gitignore
+package.json
+package-lock.json
+*.zip

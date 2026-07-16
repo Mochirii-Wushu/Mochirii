@@ -1,0 +1,74 @@
+{% assign catalog_url = routes.root_url %}
+{% assign about_url = routes.root_url | append: 'pages/about' %}
+{% assign contact_url = routes.root_url | append: 'pages/contact' %}
+{% comment %} release-safety:publication:start {% endcomment %}
+{% if settings.product_publication_approved %}
+  {% assign ritual_collection = collections['mochirii-cosmetics'] %}
+  {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+  {% if ritual_collection != blank and ritual_collection.products_count > 0 %}
+    {% assign catalog_url = ritual_collection.url %}
+  {% endif %}
+{% endif %}
+{% comment %} release-safety:publication:end {% endcomment %}
+
+<header class="site-header">
+  {% if settings.storefront_mode_text != blank %}
+    <div class="store-mode-strip">
+      <div class="section-inner store-mode-strip__inner">
+        <span>{{ settings.storefront_mode_text }}</span>
+        <a href="https://mochirii.com" rel="noopener">Guild site</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="site-header__inner">
+    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }} skin care storefront home">
+      <span class="brand-mark brand-mark--image" aria-hidden="true">
+        <img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56" loading="eager">
+      </span>
+      <span class="brand-wording">
+        <span class="brand-text">{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }}</span>
+        <span class="brand-subtext">Skin Care</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary navigation">
+      {% if settings.product_publication_approved and section.settings.main_menu != blank and section.settings.main_menu.links.size > 0 %}
+        {% for link in section.settings.main_menu.links %}
+          <a href="{{ link.url }}" {% if link.current or link.active %}aria-current="page"{% endif %}>{{ link.title }}</a>
+        {% endfor %}
+      {% else %}
+        <a href="{{ routes.root_url }}" {% if template.name == 'index' %}aria-current="page"{% endif %}>Home</a>
+        {% if settings.product_publication_approved %}
+          <a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a>
+          <a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a>
+        {% endif %}
+        <a href="{{ about_url }}" {% if request.path == about_url or request.path contains 'pages/about' %}aria-current="page"{% endif %}>About</a>
+        <a href="{{ contact_url }}" {% if request.path == contact_url or request.path contains 'pages/contact' %}aria-current="page"{% endif %}>Contact</a>
+      {% endif %}
+      {% if settings.product_publication_approved %}
+        <a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a>
+      {% endif %}
+      {% comment %} release-safety:commerce:start {% endcomment %}
+      {% if settings.product_publication_approved and settings.checkout_enabled %}
+        <a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
+          Cart <span class="cart-count">{{ cart.item_count }}</span>
+        </a>
+      {% endif %}
+      {% comment %} release-safety:commerce:end {% endcomment %}
+    </nav>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main menu"
+    }
+  ]
+}
+{% endschema %}

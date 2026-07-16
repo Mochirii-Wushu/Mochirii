@@ -13,6 +13,8 @@
     "check": "node scripts/check-all.mjs",
     "check:accessibility-route-matrix": "node scripts/check-accessibility-route-matrix.mjs",
     "check:apac-content": "node scripts/check-apac-content.mjs",
+    "check:brand-boundaries": "node scripts/check-brand-boundaries.mjs",
+    "check:shopify-release-safety": "node apps/shopify-theme/scripts/check-release-safety.mjs",
     "check:browser-route-matrix": "node scripts/check-browser-route-matrix.mjs",
     "check:assets": "node scripts/check-assets.mjs",
     "check:apple-auth-readiness": "node scripts/check-apple-auth-readiness.mjs",

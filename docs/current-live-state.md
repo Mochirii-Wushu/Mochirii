@@ -117,11 +117,14 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Shopify Storefront
 
-- Shopify theme work lives in the nested repository `C:\Users\xtyty\Documents\Shopify Store\Velesari-Holdings`.
-- The deployable Shopify base branch is `shopify-theme`, not the outer launch-ops folder.
-- Active Shopify release packet: `Anthyphera/Velesari-Holdings` PR #44, `codex/product-label-artwork-system` into `shopify-theme`, currently draft and clean as of the 2026-06-19 ledger pass.
+- Public Shopify theme source lives in `apps/shopify-theme`.
+- The private transition checkout and its mixed repository pointers were retired
+  from this public state during the 2026-07-16 repository separation.
+- The import boundary and exclusions are recorded in
+  `docs/shopify-theme-migration-2026-07-16.md`.
 - Shopify storefront must remain password-gated until a separate launch approval.
-- Product/source work must preserve Selfnamed source data, the 2.2x markup rule, lightweight placeholder imagery, and the existing launch guardrails documented in the Shopify theme repo.
+- Private product, source, pricing, sample, and compliance evidence remains
+  authoritative outside this public repository.
 
 ## Vercel Observability
 

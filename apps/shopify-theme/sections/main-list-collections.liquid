@@ -1,0 +1,91 @@
+{% comment %} release-safety:publication:start {% endcomment %}
+{% if settings.product_publication_approved %}
+<section class="section page-banner">
+  <div class="section-inner section-head section-head--center">
+    <p class="eyebrow">Collections</p>
+    <h1>{{ section.settings.heading }}</h1>
+    <p class="section-intro">{{ section.settings.intro }}</p>
+  </div>
+</section>
+
+<section class="section section-soft">
+  <div class="section-inner">
+    {% assign catalog_collection = collections['mochirii-cosmetics'] %}
+    {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+    {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
+      {% assign catalog_url = catalog_collection.url %}
+    {% endif %}
+
+    <div class="collection-grid collection-grid--four">
+      {% assign routine_handles = 'cleanse-tone,hydrate-barrier,brighten-smooth,age-support-nourish' | split: ',' %}
+      {% assign routine_titles = 'Cleanse & Tone,Hydrate & Barrier,Brighten & Smooth,Age-Support & Nourish' | split: ',' %}
+      {% for routine_handle in routine_handles %}
+        {% assign routine_collection = collections[routine_handle] %}
+        {% assign routine_title = routine_titles[forloop.index0] %}
+        {% assign routine_url = catalog_url %}
+        {% if routine_collection != blank %}
+          {% assign routine_url = routine_collection.url %}
+        {% endif %}
+        {% assign routine_image = routine_collection.image %}
+        {% if routine_image == blank and routine_collection.products_count > 0 %}
+          {% assign routine_image = routine_collection.products.first.featured_image %}
+        {% endif %}
+
+        <article class="collection-card">
+          <a class="collection-card__image" href="{{ routine_url }}" aria-label="{{ routine_title | escape }}">
+            {% if routine_image != blank %}
+              {% assign routine_alt = routine_image.alt | default: routine_title %}
+              {{ routine_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: routine_alt, sizes: '(min-width: 1080px) 25vw, (min-width: 720px) 50vw, 100vw' }}
+            {% else %}
+              <span class="media-placeholder">
+                <span>{{ routine_title }}</span>
+                <small>Product image unavailable.</small>
+              </span>
+            {% endif %}
+          </a>
+          <div class="collection-card__body">
+            <p class="product-card__line">Routine collection</p>
+            <h2><a href="{{ routine_url }}">{{ routine_title }}</a></h2>
+            {% if routine_collection != blank and routine_collection.description != blank %}
+              <div class="rte">{{ routine_collection.description }}</div>
+            {% endif %}
+            {% if routine_collection != blank %}
+              <p class="collection-count">{{ routine_collection.products_count }} products</p>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% else %}
+  <section class="section page-banner">
+    <div class="section-inner section-head section-head--center">
+      <p class="eyebrow">Mochirii Cosmetics</p>
+      <h1>Collections unavailable</h1>
+      <p class="section-intro">Collection information remains unpublished until its separate review is complete.</p>
+      <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
+    </div>
+  </section>
+{% endif %}
+{% comment %} release-safety:publication:end {% endcomment %}
+
+{% schema %}
+{
+  "name": "Collections list",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by routine."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introduction",
+      "default": "Cleanse and tone, hydrate and support the barrier, brighten and smooth, or nourish age-support routines."
+    }
+  ]
+}
+{% endschema %}

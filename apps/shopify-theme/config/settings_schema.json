@@ -1,0 +1,108 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Mochirii Cosmetics",
+    "theme_version": "0.4.0",
+    "theme_author": "Mochirii Cosmetics",
+    "theme_documentation_url": "https://mochirii.com",
+    "theme_support_url": "https://mochirii.com"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "text",
+        "id": "brand_display_name",
+        "label": "Public brand name",
+        "default": "Mochirii Cosmetics"
+      },
+      {
+        "type": "text",
+        "id": "corporate_display_name",
+        "label": "Verified corporate/legal name",
+        "info": "Leave blank until the exact legal entity name is approved for public use."
+      }
+    ]
+  },
+  {
+    "name": "Search and social",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "social_share_image",
+        "label": "Social sharing image"
+      }
+    ]
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "Background",
+        "default": "#f7f8f5"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text",
+        "default": "#13231d"
+      },
+      {
+        "type": "color",
+        "id": "accent_color",
+        "label": "Accent",
+        "default": "#1f6b58"
+      }
+    ]
+  },
+  {
+    "name": "Storefront copy",
+    "settings": [
+      {
+        "type": "text",
+        "id": "storefront_mode_text",
+        "label": "Storefront mode text",
+        "default": "Mochirii Cosmetics skin care"
+      },
+      {
+        "type": "text",
+        "id": "empty_catalog_heading",
+        "label": "Empty catalog heading",
+        "default": "The collection is being prepared."
+      },
+      {
+        "type": "textarea",
+        "id": "empty_catalog_body",
+        "label": "Empty catalog body",
+        "default": "Mochirii Cosmetics products will appear here when their details and imagery are complete."
+      },
+      {
+        "type": "textarea",
+        "id": "footer_summary",
+        "label": "Footer summary",
+        "default": "Skin care arranged by routine, with product details close at hand."
+      }
+    ]
+  },
+  {
+    "name": "Launch controls",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "product_publication_approved",
+        "label": "Publish approved product information",
+        "info": "Enable only after the separate product, asset, regulatory, and legal review is complete.",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "checkout_enabled",
+        "label": "Enable approved commerce",
+        "info": "Effective only when product publication is also approved. Enable only after the separate commerce launch approval.",
+        "default": false
+      }
+    ]
+  }
+]

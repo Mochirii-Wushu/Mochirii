@@ -67,12 +67,13 @@ Keep Mochi Social Alpha Preview boundaries intact: tester-password first, no-rea
 
 ## Shopify Queue
 
-- Theme repository: `C:\Users\xtyty\Documents\Shopify Store\Velesari-Holdings`.
-- GitHub repository: `Anthyphera/Velesari-Holdings`.
-- Deployable base branch: `shopify-theme`.
-- Open PR: #44 draft, clean, `codex/product-label-artwork-system` into `shopify-theme`.
+- Public theme source: `apps/shopify-theme`.
+- The former mixed-repository queue and PR pointer are retired; the preserved
+  checkpoint remains outside the public repository.
 - Storefront stays password-gated.
-- Product work must preserve Selfnamed source truth, 2.2x markup, launch-surface restrictions, lightweight wuxia/beauty placeholders, and no payment/activation actions without explicit approval.
+- Product work must preserve private manufacturing-partner source truth, the
+  approved pricing policy, launch-surface restrictions, and the prohibition on
+  payment or activation actions without explicit approval.
 
 ## Release Ladder
 
@@ -107,7 +108,7 @@ For Shopify packets:
 
 - JSON and section-schema parse checks
 - route hardcode scan
-- Selfnamed/source and 2.2x markup audit
+- private catalog-evidence and pricing-policy audit
 - placeholder image audit
 - `git diff --check`
 - `bun x @shopify/cli@latest theme check`
@@ -123,4 +124,5 @@ Reject or rebuild any branch that reverts:
 - Supabase CORS/security posture, signed URL DTO privacy, or service-role-only boundaries;
 - Discord command names, confirmation gates, or preview-first provider mutation rules;
 - Mochi Social tester-password/no-real-value alpha posture;
-- Shopify password gating, Selfnamed product truth, 2.2x markup, or launch restrictions.
+- Shopify password gating, private product/source truth, approved pricing
+  policy, or launch restrictions.

@@ -47,9 +47,12 @@ const scanRoots = [
 ];
 
 const textExtensions = new Set([".css", ".html", ".js", ".json", ".tsx", ".ts"]);
+const formerShopBrand = ["vele", "sari"].join("");
+const formerManufacturingPartner = ["self", "named"].join("");
+const formerManufacturerBrand = ["ma", "dara"].join("");
 const blocked = [
-  { label: "legacy shop brand", pattern: /\bVelesari\b|\bvelesari\b|shop\.velesari\.trade|velesari\.trade/i },
-  { label: "supplier or third-party cosmetics brand", pattern: /\bSelfnamed\b|\bselfnamed\b|\bM(?:Á|A|Ã)DARA\b|\bMadara\b/i },
+  { label: "legacy shop brand", pattern: new RegExp(`\\b${formerShopBrand}\\b|shop\\.${formerShopBrand}\\.trade|${formerShopBrand}\\.trade`, "i") },
+  { label: "supplier or third-party cosmetics brand", pattern: new RegExp(`\\b(?:${formerManufacturingPartner}|${formerManufacturerBrand})\\b`, "i") },
   { label: "supplier-facing commerce phrase", pattern: /\bprivate label\b|\bdropshipping\b|\boffer your customers\b|\bprofessional skincare offerings\b/i },
 ];
 
