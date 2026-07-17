@@ -1,15 +1,18 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "migrationId": "mochirii-shopify-theme-reconciliation-2026-07-17",
   "snapshotDate": "2026-07-17",
   "candidateStatus": "sanitized-review-candidate-not-published",
-  "sourceState": "sanitized-current-working-snapshot-with-deliberate-exclusions",
+  "sourceState": "sanitized-post-snapshot-main-reconciliation-with-deliberate-exclusions",
   "preservation": {
-    "status": "verified-current-working-snapshot",
-    "scope": "current source working tree preserved in a verified encrypted snapshot outside this public repository",
-    "sourceSnapshotVerified": true,
-    "restorationTest": "not-claimed-for-current-snapshot",
-    "sourceMayHaveChangedAfterSnapshot": true
+    "status": "verified-current-post-merge-snapshot-and-git-bundles",
+    "scope": "current clean post-merge source state preserved in a verified encrypted snapshot and verified Git bundles outside this public repository",
+    "currentSnapshotVerified": true,
+    "sourceQuiescenceVerified": true,
+    "encryptedArchiveRoundTripVerified": true,
+    "gitBundlesVerified": true,
+    "fullDisposableCloneRestorationTest": "not-claimed",
+    "sourceMayHaveChangedAfterReview": true
   },
   "signature": {
     "status": "unsigned",
@@ -20,10 +23,18 @@
     "note": "this import does not remove prior objects from existing public history or provider-managed references"
   },
   "selection": {
-    "currentCheckoutReconciled": true,
+    "postSnapshotMainReconciled": true,
     "privateDeltaPreservedExternally": true,
     "intentionalSourceParity": false,
-    "note": "runtime and pure generic tooling were selected while provider workflows private evidence and unsafe source defaults remain excluded"
+    "note": "runtime and pure generic tooling were selected through the post-snapshot main integration while provider workflows private evidence and unsafe source defaults remain excluded"
+  },
+  "sourceReconciliation": {
+    "status": "reviewed-through-post-snapshot-filter-hardening",
+    "recordedDate": "2026-07-17",
+    "integrationState": "clean-main-aligned-with-canonical-remote",
+    "runtimeWarningFallback": "represented-with-stricter-fail-closed-copy",
+    "structuredFilterHelper": "represented-as-sanitized-pure-exact-20-contract",
+    "privateContractOrchestration": "excluded-and-replaced-by-public-release-safety-guards"
   },
   "includedRoots": [
     "assets",
@@ -48,11 +59,11 @@
     "files": [
       {
         "path": "apps/shopify-theme/scripts/lib/shopify-filter-metafield-csv.mjs",
-        "sha256": "8cb441090a5c2610a55d19fe635db62388f5237d238fbd073c5d1f77de7efc22"
+        "sha256": "d2e9ba18c75df5f2fc2e4fb97a5f55936d39bb0bb7daa6eed5d44db9072ad3df"
       },
       {
         "path": "apps/shopify-theme/scripts/shopify-filter-metafield-csv.test.mjs",
-        "sha256": "53885b67a6ad810b74ea7ff9361290b411664b712d6e549499d6e2b927fab983"
+        "sha256": "aedd2f4328df0c2e022ecbf572f7c668a90762b741f6105d927af84fa066e76d"
       }
     ]
   },

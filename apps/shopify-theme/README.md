@@ -22,12 +22,15 @@ state, checkout activation, theme publication, product changes, domains,
 payments, orders, and paid applications remain separate provider-side actions
 and are never performed by repository CI.
 
-The migration manifest records the 2026-07-17 current working snapshot after a
-sanitized reconciliation. It covers the selected runtime and pure generic CSV
-tooling, but deliberately does not claim byte parity with private evidence or
-provider workflows. It is unsigned because no approved signing identity was
-available. Existing public history was not rewritten by this import and remains
-a separate review and remediation gate.
+The migration manifest records the 2026-07-17 sanitized reconciliation through
+the post-merge source integration. That clean source state is preserved in a
+verified encrypted snapshot with a successful private-archive round trip and
+verified Git bundles outside this repository. A complete restoration in a
+fresh disposable clone is not claimed. The manifest covers the selected runtime
+and pure generic CSV/tooling contract, but deliberately does not claim byte
+parity with private evidence or provider workflows. It is unsigned because no
+approved signing identity was available. Existing public history was not
+rewritten by this import and remains a separate review and remediation gate.
 
 ## Validate locally
 
@@ -41,5 +44,7 @@ git diff --check
 `theme:package` creates a local ignored archive. It does not upload or publish
 the theme. `check:release-safety` fails if publication, commerce, legal-name,
 internal-product-data, gift-card, warning-copy, or structured-data safeguards
-regress. The generic CSV helper is pure validation/serialization code: it does
-not read private files, write output, or call Shopify.
+regress. The generic CSV helper is pure validation/serialization code. Its
+synthetic exact-20 contract maps reviewed titles to current handles and emits
+only the two structured list-metafield values; it does not read private files,
+write output, or call Shopify.

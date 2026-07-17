@@ -120,8 +120,11 @@ This is the short source-of-truth index for the current Mochirii production post
 - Public Shopify theme source lives in `apps/shopify-theme`.
 - The private transition checkout and its mixed repository pointers were retired
   from this public state during the 2026-07-16 repository separation. Its
-  verified 2026-07-17 working snapshot was then sanitized and reconciled
-  without changing the source checkout or any provider.
+  verified pre-merge 2026-07-17 working snapshot and the later clean
+  structured-filter integration were then sanitized and reconciled without
+  changing the source checkout or any provider. The later clean state now also
+  has a verified encrypted snapshot, encrypted-archive round trip, and verified
+  Git bundles; a full fresh-clone restoration is not claimed.
 - The import boundary, current reconciliation, and deliberate exclusions are
   recorded in `docs/shopify-theme-migration-2026-07-16.md`.
 - Shopify storefront must remain password-gated until a separate launch approval.

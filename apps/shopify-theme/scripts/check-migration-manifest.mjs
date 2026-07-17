@@ -20,8 +20,8 @@ function walk(directory) {
   });
 }
 
-if (manifest.schemaVersion !== 3) {
-  failures.push("schemaVersion must be 3");
+if (manifest.schemaVersion !== 4) {
+  failures.push("schemaVersion must be 4");
 }
 const migrationIdMatch = /^mochirii-shopify-theme-(?:import|reconciliation)-(\d{4}-\d{2}-\d{2})$/.exec(
   manifest.migrationId ?? "",
@@ -34,19 +34,30 @@ if (!migrationIdMatch) {
 if (manifest.candidateStatus !== "sanitized-review-candidate-not-published") {
   failures.push("candidateStatus must remain fail-closed");
 }
-if (manifest.sourceState !== "sanitized-current-working-snapshot-with-deliberate-exclusions") {
-  failures.push("sourceState must identify the current sanitized snapshot and deliberate exclusions");
+if (manifest.sourceState !== "sanitized-post-snapshot-main-reconciliation-with-deliberate-exclusions") {
+  failures.push("sourceState must identify the post-snapshot source reconciliation and deliberate exclusions");
 }
-if (manifest.preservation?.status !== "verified-current-working-snapshot" ||
-    manifest.preservation?.sourceSnapshotVerified !== true ||
-    manifest.preservation?.restorationTest !== "not-claimed-for-current-snapshot" ||
-    manifest.preservation?.sourceMayHaveChangedAfterSnapshot !== true) {
-  failures.push("preservation must describe the verified current snapshot without overstating restoration or perpetual currency");
+if (manifest.preservation?.status !== "verified-current-post-merge-snapshot-and-git-bundles" ||
+    manifest.preservation?.currentSnapshotVerified !== true ||
+    manifest.preservation?.sourceQuiescenceVerified !== true ||
+    manifest.preservation?.encryptedArchiveRoundTripVerified !== true ||
+    manifest.preservation?.gitBundlesVerified !== true ||
+    manifest.preservation?.fullDisposableCloneRestorationTest !== "not-claimed" ||
+    manifest.preservation?.sourceMayHaveChangedAfterReview !== true) {
+  failures.push("preservation must record the verified post-merge snapshot and bundles without claiming a full disposable-clone restoration");
 }
-if (manifest.selection?.currentCheckoutReconciled !== true ||
+if (manifest.selection?.postSnapshotMainReconciled !== true ||
     manifest.selection?.privateDeltaPreservedExternally !== true ||
     manifest.selection?.intentionalSourceParity !== false) {
-  failures.push("selection must record current reconciliation private preservation and deliberate non-parity");
+  failures.push("selection must record post-snapshot reconciliation private preservation and deliberate non-parity");
+}
+if (manifest.sourceReconciliation?.status !== "reviewed-through-post-snapshot-filter-hardening" ||
+    manifest.sourceReconciliation?.recordedDate !== manifest.snapshotDate ||
+    manifest.sourceReconciliation?.integrationState !== "clean-main-aligned-with-canonical-remote" ||
+    manifest.sourceReconciliation?.runtimeWarningFallback !== "represented-with-stricter-fail-closed-copy" ||
+    manifest.sourceReconciliation?.structuredFilterHelper !== "represented-as-sanitized-pure-exact-20-contract" ||
+    manifest.sourceReconciliation?.privateContractOrchestration !== "excluded-and-replaced-by-public-release-safety-guards") {
+  failures.push("sourceReconciliation must record the complete sanitized disposition of the post-snapshot integration");
 }
 if (manifest.signature?.status !== "unsigned") {
   failures.push("signature status must truthfully remain unsigned until an approved identity signs it");

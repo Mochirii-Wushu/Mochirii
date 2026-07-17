@@ -251,6 +251,29 @@ if (product.includes("No additional product-specific warnings are listed")) {
   failures.push("sections/main-product.liquid: must not infer that an empty warning field means no additional warnings");
 }
 
+const filterMetafieldTool = read("scripts/lib/shopify-filter-metafield-csv.mjs");
+for (const token of [
+  "SHOPIFY_FILTER_METAFIELD_DEFINITIONS",
+  "buildShopifyFilterMetafieldInputs",
+  "Exactly 20 manifest products are required",
+  "skin_type_options",
+  "concern_options",
+  "list.single_line_text_field",
+]) {
+  requireText("scripts/lib/shopify-filter-metafield-csv.mjs", filterMetafieldTool, token);
+}
+for (const [label, pattern] of [
+  ["filesystem access", /(?:node:fs|from ["']fs["'])/i],
+  ["child-process execution", /(?:node:child_process|child_process)/i],
+  ["environment access", /process[.]env/i],
+  ["network access", /\bfetch\s*[(]|https?:\/\//i],
+  ["provider mutation operation", /\b(?:mutation|adminApi|graphql|productUpdate)\b/i],
+]) {
+  if (pattern.test(filterMetafieldTool)) {
+    failures.push(`scripts/lib/shopify-filter-metafield-csv.mjs: generic tooling contains ${label}`);
+  }
+}
+
 const giftCard = read("templates/gift_card.liquid");
 for (const token of [
   commerceStart,

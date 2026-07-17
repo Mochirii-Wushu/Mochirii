@@ -1,10 +1,28 @@
+export const SHOPIFY_FILTER_METAFIELD_DEFINITIONS = Object.freeze([
+  Object.freeze({
+    key: "skin_type_options",
+    namespace: "custom",
+    sourceField: "skinTypes",
+    rowSourceField: "skinTypeOptions",
+    type: "list.single_line_text_field",
+  }),
+  Object.freeze({
+    key: "concern_options",
+    namespace: "custom",
+    sourceField: "concerns",
+    rowSourceField: "concernOptions",
+    type: "list.single_line_text_field",
+  }),
+]);
+
 export const SHOPIFY_FILTER_METAFIELD_UPDATE_HEADERS = Object.freeze([
   "URL handle",
   "Title",
   "Option1 name",
   "Option1 value",
-  "product.metafields.custom.concern_options",
-  "product.metafields.custom.skin_type_options",
+  ...SHOPIFY_FILTER_METAFIELD_DEFINITIONS.map(
+    ({ key, namespace }) => `product.metafields.${namespace}.${key}`,
+  ),
 ]);
 
 function requireString(value, field) {
@@ -20,8 +38,10 @@ function requireString(value, field) {
   return value;
 }
 
-function serializeList(value, field) {
-  if (!Array.isArray(value)) throw new Error(`${field} must be an array`);
+function requireList(value, field) {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new Error(`${field} must be a non-empty array`);
+  }
   const items = value.map((item, index) => {
     const text = requireString(item, `${field}[${index}]`);
     if (/[;\r\n]/.test(text)) {
@@ -32,11 +52,70 @@ function serializeList(value, field) {
   if (new Set(items).size !== items.length) {
     throw new Error(`${field} contains duplicate values`);
   }
-  return JSON.stringify(items);
+  return items;
+}
+
+function indexUnique(items, key, label) {
+  if (!Array.isArray(items)) throw new Error(`${label}s must be an array`);
+  const result = new Map();
+  for (const item of items) {
+    const value = requireString(item?.[key], `${label}.${key}`);
+    if (result.has(value)) throw new Error(`Duplicate ${label} ${key}: ${value}`);
+    result.set(value, item);
+  }
+  return result;
+}
+
+export function buildShopifyFilterMetafieldInputs({
+  manifestProducts,
+  currentHandleProducts,
+}) {
+  if (!Array.isArray(manifestProducts) || manifestProducts.length !== 20) {
+    throw new Error("Exactly 20 manifest products are required");
+  }
+  if (!Array.isArray(currentHandleProducts) || currentHandleProducts.length !== 20) {
+    throw new Error("Exactly 20 current-handle products are required");
+  }
+
+  const currentHandleByTitle = indexUnique(
+    currentHandleProducts,
+    "title",
+    "current-handle product",
+  );
+  const seenTitles = new Set();
+  const seenHandles = new Set();
+
+  return manifestProducts.map((product) => {
+    const title = requireString(product?.title, "manifest product title");
+    if (seenTitles.has(title)) throw new Error(`Duplicate manifest product title: ${title}`);
+    seenTitles.add(title);
+
+    const current = currentHandleByTitle.get(title);
+    if (!current) throw new Error(`Missing current Shopify handle for ${title}`);
+    const handle = requireString(current.currentHandle, `${title}.currentHandle`);
+    if (seenHandles.has(handle)) throw new Error(`Duplicate current Shopify handle: ${handle}`);
+    seenHandles.add(handle);
+
+    return {
+      handle,
+      title,
+      metafields: SHOPIFY_FILTER_METAFIELD_DEFINITIONS.map((definition) => ({
+        key: definition.key,
+        namespace: definition.namespace,
+        type: definition.type,
+        value: JSON.stringify(
+          requireList(product[definition.sourceField], `${title}.${definition.sourceField}`),
+        ),
+      })),
+    };
+  });
 }
 
 function escapeCsvField(value) {
   const text = String(value ?? "");
+  if (/^[=+\-@]/u.test(text)) {
+    throw new Error("CSV fields cannot begin with a spreadsheet formula marker");
+  }
   if (!/[",\r\n]/.test(text) && text.trim() === text) return text;
   return `"${text.replaceAll('"', '""')}"`;
 }
@@ -53,20 +132,21 @@ export function buildShopifyFilterMetafieldRows(products) {
     if (seenHandles.has(handle)) throw new Error(`Duplicate product handle: ${handle}`);
     seenHandles.add(handle);
 
-    return {
+    const row = {
       "URL handle": handle,
       Title: requireString(product.title, `${label}.title`),
       "Option1 name": requireString(product.option1Name, `${label}.option1Name`),
       "Option1 value": requireString(product.option1Value, `${label}.option1Value`),
-      "product.metafields.custom.concern_options": serializeList(
-        product.concernOptions,
-        `${label}.concernOptions`,
-      ),
-      "product.metafields.custom.skin_type_options": serializeList(
-        product.skinTypeOptions,
-        `${label}.skinTypeOptions`,
-      ),
     };
+    for (const definition of SHOPIFY_FILTER_METAFIELD_DEFINITIONS) {
+      row[`product.metafields.${definition.namespace}.${definition.key}`] = JSON.stringify(
+        requireList(
+          product[definition.rowSourceField],
+          `${label}.${definition.rowSourceField}`,
+        ),
+      );
+    }
+    return row;
   });
 }
 
