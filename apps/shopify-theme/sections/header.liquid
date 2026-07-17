@@ -10,6 +10,10 @@
   {% endif %}
 {% endif %}
 {% comment %} release-safety:publication:end {% endcomment %}
+{% assign primary_menu = section.settings.main_menu %}
+{% if primary_menu == blank %}
+  {% assign primary_menu = linklists['main-menu'] %}
+{% endif %}
 
 <header class="site-header">
   {% if settings.storefront_mode_text != blank %}
@@ -32,31 +36,19 @@
       </span>
     </a>
 
-    <nav class="site-nav" aria-label="Primary navigation">
-      {% if settings.product_publication_approved and section.settings.main_menu != blank and section.settings.main_menu.links.size > 0 %}
-        {% for link in section.settings.main_menu.links %}
-          <a href="{{ link.url }}" {% if link.current or link.active %}aria-current="page"{% endif %}>{{ link.title }}</a>
-        {% endfor %}
-      {% else %}
-        <a href="{{ routes.root_url }}" {% if template.name == 'index' %}aria-current="page"{% endif %}>Home</a>
-        {% if settings.product_publication_approved %}
-          <a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a>
-          <a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a>
-        {% endif %}
-        <a href="{{ about_url }}" {% if request.path == about_url or request.path contains 'pages/about' %}aria-current="page"{% endif %}>About</a>
-        <a href="{{ contact_url }}" {% if request.path == contact_url or request.path contains 'pages/contact' %}aria-current="page"{% endif %}>Contact</a>
-      {% endif %}
-      {% if settings.product_publication_approved %}
-        <a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a>
-      {% endif %}
-      {% comment %} release-safety:commerce:start {% endcomment %}
-      {% if settings.product_publication_approved and settings.checkout_enabled %}
-        <a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
-          Cart <span class="cart-count">{{ cart.item_count }}</span>
-        </a>
-      {% endif %}
-      {% comment %} release-safety:commerce:end {% endcomment %}
+    <nav class="site-nav site-nav--desktop" aria-label="Primary navigation">
+      {% render 'primary-navigation-links', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
     </nav>
+
+    <details class="mobile-menu">
+      <summary class="mobile-menu__summary" title="Open navigation">
+        <span class="visually-hidden">Open navigation</span>
+        <span class="mobile-menu__icon" aria-hidden="true">&#9776;</span>
+      </summary>
+      <nav class="mobile-menu__panel" aria-label="Mobile primary navigation">
+        {% render 'primary-navigation-links', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
+      </nav>
+    </details>
   </div>
 </header>
 

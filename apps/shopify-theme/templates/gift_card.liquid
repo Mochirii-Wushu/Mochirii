@@ -1,0 +1,115 @@
+{% layout none %}
+{% comment %} release-safety:commerce:start {% endcomment %}
+{% if settings.product_publication_approved and settings.checkout_enabled %}
+  {% assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics' %}
+  {% assign initial_value = gift_card.initial_value | money_without_trailing_zeros %}
+  {% assign initial_value_text = initial_value | strip_html %}
+
+  <!doctype html>
+  <html lang="{{ request.locale.iso_code | default: 'en' }}">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="format-detection" content="telephone=no">
+      <title>{{ initial_value_text }} gift card - {{ storefront_name }}</title>
+      <meta name="description" content="A {{ storefront_name }} gift card.">
+      {{ 'gift-card.css' | shopify_asset_url | stylesheet_tag }}
+      <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
+    </head>
+    <body>
+      <div class="wrap">
+        <header id="header" role="banner">
+          <a class="logo" href="{{ shop.url }}">{{ storefront_name }}</a>
+          <a class="shop-url" href="{{ shop.url }}">{{ shop.url | remove: 'https://' | remove: 'http://' }}</a>
+        </header>
+
+        <main role="main">
+          <div id="gift-card-outer-container" {% if gift_card.expired or gift_card.enabled != true %}class="disabled"{% endif %}>
+            <div id="gift-card-inner-container">
+              <header id="gift-card-header">
+                <h1>Your {{ storefront_name }} gift card</h1>
+                {% unless gift_card.enabled %}<span class="tag">Disabled</span>{% endunless %}
+                {% if gift_card.expired and gift_card.enabled %}
+                  <span class="tag">Expired {{ gift_card.expires_on | date: '%B %d, %Y' }}</span>
+                {% elsif gift_card.expires_on and gift_card.enabled %}
+                  <span class="tag light">Expires {{ gift_card.expires_on | date: '%B %d, %Y' }}</span>
+                {% endif %}
+              </header>
+
+              <div id="gift-card-holder">
+                <div id="gift-card">
+                  <img src="{{ 'gift-card/card.jpg' | shopify_asset_url }}" alt="" width="586" height="330">
+                  {% assign initial_value_size = initial_value | size %}
+                  <div id="gift-card-amount" class="{% if initial_value_size > 6 %}medium{% endif %}">
+                    {% if gift_card.balance != gift_card.initial_value %}
+                      <span class="tooltip-container">
+                        <span class="tooltip-label">{{ gift_card.balance | money }} <small>remaining</small></span>
+                        <span class="tooltip-triangle"></span>
+                      </span>
+                    {% endif %}
+                    <strong>{{ initial_value }}</strong>
+                  </div>
+                  {% assign code_size = gift_card.code | format_code | size %}
+                  <div id="gift-card-code-outer" class="{% if code_size <= 25 %}large{% elsif code_size <= 30 %}medium{% else %}small{% endif %}">
+                    <div id="gift-card-code-inner">
+                      <strong id="gift-card-code-digits">{{ gift_card.code | format_code }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="gift-card-instructions">
+                <p>Enter this code at checkout to redeem the gift card.</p>
+              </div>
+              <div id="qr-code" aria-label="Gift card QR code"></div>
+              <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                  new QRCode(document.getElementById('qr-code'), {
+                    text: {{ gift_card.qr_identifier | json }},
+                    width: 120,
+                    height: 120
+                  });
+                });
+              </script>
+              <div id="gift-card-actions">
+                <a class="btn center" href="{{ shop.url }}">Shop Mochirii Cosmetics</a>
+                <button class="action-link left" type="button" onclick="window.print()">Print</button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {% if gift_card.pass_url %}
+          <footer role="contentinfo">
+            <a href="{{ gift_card.pass_url }}">
+              <img id="apple-wallet-badge" src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}" width="120" height="40" alt="Add to Apple Wallet">
+            </a>
+          </footer>
+        {% endif %}
+      </div>
+    </body>
+  </html>
+{% else %}
+  <!doctype html>
+  <html lang="{{ request.locale.iso_code | default: 'en' }}">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="robots" content="noindex, nofollow">
+      <title>Gift cards unavailable - Mochirii Cosmetics</title>
+      {{ 'mochirii-theme.css' | asset_url | stylesheet_tag }}
+    </head>
+    <body>
+      <main class="section">
+        <div class="section-inner section-inner-narrow">
+          <div class="empty-state empty-state--wide">
+            <h1>Gift cards unavailable</h1>
+            <p>Gift-card display and redemption remain disabled until separate publication and commerce approvals are complete.</p>
+            <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
+          </div>
+        </div>
+      </main>
+    </body>
+  </html>
+{% endif %}
+{% comment %} release-safety:commerce:end {% endcomment %}

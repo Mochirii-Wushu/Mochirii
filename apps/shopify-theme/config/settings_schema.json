@@ -31,6 +31,12 @@
         "type": "image_picker",
         "id": "social_share_image",
         "label": "Social sharing image"
+      },
+      {
+        "type": "textarea",
+        "id": "default_meta_description",
+        "label": "Default search description",
+        "default": "Mochirii Cosmetics skin care for simple daily routines, organized by cleanse, hydration, brightening, and age-support steps."
       }
     ]
   },

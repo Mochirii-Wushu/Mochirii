@@ -1,6 +1,6 @@
 {% liquid
   assign seo_title = seo_title_override | default: page_title | default: shop.name
-  assign seo_description = seo_description_override | default: page_description | default: shop.description | strip_html | strip_newlines | escape
+  assign seo_description = seo_description_override | default: page_description | default: settings.default_meta_description | default: shop.description | strip_html | strip_newlines | escape
   assign social_image = settings.social_share_image
   if request.page_type != 'product' and request.page_type != 'collection'
     assign social_image = page_image
@@ -22,6 +22,10 @@
   if social_image == blank
     assign social_image = settings.social_share_image
   endif
+  if social_image != blank
+    assign social_image_width = social_image.width | at_most: 1200
+    assign social_image_height = social_image_width | divided_by: social_image.aspect_ratio | round
+  endif
 %}
 
 <link rel="canonical" href="{{ canonical_url }}">
@@ -33,9 +37,9 @@
   <meta property="og:description" content="{{ seo_description }}">
 {% endif %}
 {% if social_image != blank %}
-  <meta property="og:image" content="{{ social_image | image_url: width: 1200 }}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="628">
+  <meta property="og:image" content="{{ social_image | image_url: width: social_image_width }}">
+  <meta property="og:image:width" content="{{ social_image_width }}">
+  <meta property="og:image:height" content="{{ social_image_height }}">
 {% endif %}
 <meta name="twitter:card" content="{% if social_image != blank %}summary_large_image{% else %}summary{% endif %}">
 <meta name="twitter:title" content="{{ seo_title | escape }}">
@@ -43,5 +47,5 @@
   <meta name="twitter:description" content="{{ seo_description }}">
 {% endif %}
 {% if social_image != blank %}
-  <meta name="twitter:image" content="{{ social_image | image_url: width: 1200 }}">
+  <meta name="twitter:image" content="{{ social_image | image_url: width: social_image_width }}">
 {% endif %}

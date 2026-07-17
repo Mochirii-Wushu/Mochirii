@@ -20,18 +20,33 @@ function walk(directory) {
   });
 }
 
-if (manifest.schemaVersion !== 2) {
-  failures.push("schemaVersion must be 2");
+if (manifest.schemaVersion !== 3) {
+  failures.push("schemaVersion must be 3");
 }
-if (!/^mochirii-shopify-theme-import-\d{4}-\d{2}-\d{2}$/.test(manifest.migrationId ?? "")) {
+const migrationIdMatch = /^mochirii-shopify-theme-(?:import|reconciliation)-(\d{4}-\d{2}-\d{2})$/.exec(
+  manifest.migrationId ?? "",
+);
+if (!migrationIdMatch) {
   failures.push("migrationId must be a non-provider operational label");
+} else if (manifest.snapshotDate !== migrationIdMatch[1]) {
+  failures.push("snapshotDate must match the migrationId date");
 }
 if (manifest.candidateStatus !== "sanitized-review-candidate-not-published") {
   failures.push("candidateStatus must remain fail-closed");
 }
-if (manifest.preservation?.status !== "verified-point-in-time-not-current" ||
-    manifest.preservation?.sourceMayHaveChangedAfterSeal !== true) {
-  failures.push("preservation must be described as point-in-time and not current");
+if (manifest.sourceState !== "sanitized-current-working-snapshot-with-deliberate-exclusions") {
+  failures.push("sourceState must identify the current sanitized snapshot and deliberate exclusions");
+}
+if (manifest.preservation?.status !== "verified-current-working-snapshot" ||
+    manifest.preservation?.sourceSnapshotVerified !== true ||
+    manifest.preservation?.restorationTest !== "not-claimed-for-current-snapshot" ||
+    manifest.preservation?.sourceMayHaveChangedAfterSnapshot !== true) {
+  failures.push("preservation must describe the verified current snapshot without overstating restoration or perpetual currency");
+}
+if (manifest.selection?.currentCheckoutReconciled !== true ||
+    manifest.selection?.privateDeltaPreservedExternally !== true ||
+    manifest.selection?.intentionalSourceParity !== false) {
+  failures.push("selection must record current reconciliation private preservation and deliberate non-parity");
 }
 if (manifest.signature?.status !== "unsigned") {
   failures.push("signature status must truthfully remain unsigned until an approved identity signs it");
@@ -50,7 +65,21 @@ if (/\b[0-9a-f]{40}\b/i.test(serializedManifest)) {
   failures.push("manifest must not contain raw Git object IDs");
 }
 
-const actualFiles = manifest.includedRoots
+const expectedRoots = [
+  "assets",
+  "blocks",
+  "config",
+  "layout",
+  "locales",
+  "sections",
+  "snippets",
+  "templates",
+];
+if (JSON.stringify(manifest.includedRoots) !== JSON.stringify(expectedRoots)) {
+  failures.push("includedRoots must contain the complete reviewed runtime boundary in canonical order");
+}
+
+const actualFiles = expectedRoots
   .flatMap((root) => walk(path.join(appRoot, root)))
   .map(normalize)
   .sort();
@@ -58,6 +87,16 @@ const manifestFiles = manifest.files.map((entry) => entry.path).sort();
 
 if (new Set(manifestFiles).size !== manifestFiles.length) {
   failures.push("manifest contains duplicate file paths");
+}
+
+const expectedGenericTooling = [
+  "apps/shopify-theme/scripts/lib/shopify-filter-metafield-csv.mjs",
+  "apps/shopify-theme/scripts/shopify-filter-metafield-csv.test.mjs",
+];
+const genericToolingFiles = manifest.genericTooling?.files ?? [];
+if (manifest.genericTooling?.status !== "sanitized-pure-functions-only" ||
+    JSON.stringify(genericToolingFiles.map((entry) => entry.path).sort()) !== JSON.stringify(expectedGenericTooling)) {
+  failures.push("genericTooling must contain exactly the reviewed pure filter-metafield helper and its test");
 }
 if (JSON.stringify(actualFiles) !== JSON.stringify(manifestFiles)) {
   failures.push("manifest file set does not match the imported runtime roots");
@@ -76,6 +115,18 @@ for (const entry of manifest.files) {
   const digest = createHash("sha256").update(readFileSync(absolute)).digest("hex");
   if (digest !== entry.sha256) {
     failures.push(`${entry.path}: SHA-256 mismatch`);
+  }
+}
+
+for (const entry of genericToolingFiles) {
+  if (!expectedGenericTooling.includes(entry.path) || !/^[0-9a-f]{64}$/.test(entry.sha256 ?? "")) {
+    failures.push(`${entry.path}: invalid generic-tooling manifest entry`);
+    continue;
+  }
+  const absolute = path.join(repoRoot, entry.path);
+  const digest = createHash("sha256").update(readFileSync(absolute)).digest("hex");
+  if (digest !== entry.sha256) {
+    failures.push(`${entry.path}: generic-tooling SHA-256 mismatch`);
   }
 }
 

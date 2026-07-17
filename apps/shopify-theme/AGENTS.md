@@ -6,6 +6,8 @@
 - Never add supplier records, costs, source or mockup identifiers, samples,
   counsel material, admin exports, credentials, private evidence, or internal
   launch ledgers.
+- Public operator tooling must remain pure and generic: no real product facts,
+  source identifiers, private paths, provider reads/writes, or mutation calls.
 - Keep `product_publication_approved` and `checkout_enabled` false, and keep the
   corporate/legal name blank. Product publication, password removal, checkout
   or payment activation, orders, product mutations, domains, and paid resources

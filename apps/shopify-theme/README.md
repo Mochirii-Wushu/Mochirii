@@ -22,8 +22,10 @@ state, checkout activation, theme publication, product changes, domains,
 payments, orders, and paid applications remain separate provider-side actions
 and are never performed by repository CI.
 
-The migration manifest records a verified point-in-time snapshot, not current
-source parity. It is unsigned because no approved signing identity was
+The migration manifest records the 2026-07-17 current working snapshot after a
+sanitized reconciliation. It covers the selected runtime and pure generic CSV
+tooling, but deliberately does not claim byte parity with private evidence or
+provider workflows. It is unsigned because no approved signing identity was
 available. Existing public history was not rewritten by this import and remains
 a separate review and remediation gate.
 
@@ -38,4 +40,6 @@ git diff --check
 
 `theme:package` creates a local ignored archive. It does not upload or publish
 the theme. `check:release-safety` fails if publication, commerce, legal-name,
-internal-product-data, or structured-data safeguards regress.
+internal-product-data, gift-card, warning-copy, or structured-data safeguards
+regress. The generic CSV helper is pure validation/serialization code: it does
+not read private files, write output, or call Shopify.

@@ -196,9 +196,27 @@ requireText(
   "{% if settings.product_publication_approved and settings.checkout_enabled %}",
 );
 const header = read("sections/header.liquid");
+for (const token of [
+  "site-nav--desktop",
+  "mobile-menu__summary",
+  "mobile-menu__panel",
+  "primary-navigation-links",
+]) {
+  requireText("sections/header.liquid", header, token);
+}
+const themeStyles = read("assets/mochirii-theme.css");
+for (const token of [
+  ".site-nav--desktop",
+  ".mobile-menu__summary",
+  ".mobile-menu__panel",
+  "@media (max-width: 960px)",
+]) {
+  requireText("assets/mochirii-theme.css", themeStyles, token);
+}
+const primaryNavigation = read("snippets/primary-navigation-links.liquid");
 requireText(
-  "sections/header.liquid",
-  header,
+  "snippets/primary-navigation-links.liquid",
+  primaryNavigation,
   "{% if settings.product_publication_approved and settings.checkout_enabled %}",
 );
 const footer = read("sections/footer.liquid");
@@ -221,6 +239,35 @@ for (const forbiddenField of ['"offers"', '"brand"', '"sku"', '"price"']) {
   if (productStructuredData.toLowerCase().includes(forbiddenField)) {
     failures.push(`snippets/structured-data.liquid: minimal Product JSON-LD must not contain ${forbiddenField}`);
   }
+}
+
+const product = read("sections/main-product.liquid");
+requireText(
+  "sections/main-product.liquid",
+  product,
+  "Warning information is not available on this page. Review the product label before use.",
+);
+if (product.includes("No additional product-specific warnings are listed")) {
+  failures.push("sections/main-product.liquid: must not infer that an empty warning field means no additional warnings");
+}
+
+const giftCard = read("templates/gift_card.liquid");
+for (const token of [
+  commerceStart,
+  commerceEnd,
+  "settings.product_publication_approved and settings.checkout_enabled",
+  '<meta name="robots" content="noindex, nofollow">',
+]) {
+  requireText("templates/gift_card.liquid", giftCard, token);
+}
+
+const seoMeta = read("snippets/seo-meta.liquid");
+for (const token of [
+  "settings.default_meta_description",
+  "social_image_width",
+  "social_image_height",
+]) {
+  requireText("snippets/seo-meta.liquid", seoMeta, token);
 }
 
 if (failures.length) {

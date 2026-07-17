@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#071610">
     {% assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics' %}
     {% assign public_page_title = page_title %}
-    {% assign public_page_description = page_description %}
+    {% assign public_page_description = page_description | default: settings.default_meta_description %}
     {% unless settings.product_publication_approved %}
       {% case request.page_type %}
         {% when 'product', 'collection', 'list-collections', 'search', 'cart' %}

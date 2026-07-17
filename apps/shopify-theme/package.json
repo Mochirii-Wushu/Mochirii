@@ -8,16 +8,18 @@
     "npm": ">=10 <11"
   },
   "scripts": {
-    "check": "npm run scan:brand-boundaries && npm run check:migration-manifest && npm run check:release-safety && npm run check:sbom && npm run check:theme-js && npm run theme:check",
+    "check": "npm run scan:brand-boundaries && npm run check:migration-manifest && npm run check:release-safety && npm run check:generic-tooling && npm run check:sbom && npm run check:theme-js && npm run theme:check",
     "scan:brand-boundaries": "node ../../scripts/check-brand-boundaries.mjs",
+    "generate:migration-manifest": "node scripts/generate-migration-manifest.mjs",
     "check:migration-manifest": "node scripts/check-migration-manifest.mjs",
     "check:release-safety": "node scripts/check-release-safety.mjs",
+    "check:generic-tooling": "node --test scripts/shopify-filter-metafield-csv.test.mjs",
     "check:sbom": "node scripts/check-sbom.mjs",
     "check:theme-js": "node --check assets/mochirii-theme.js",
     "theme:check": "shopify theme check",
     "theme:package": "shopify theme package"
   },
   "devDependencies": {
-    "@shopify/cli": "4.5.0"
+    "@shopify/cli": "4.5.1"
   }
 }

@@ -171,7 +171,7 @@
         </details>
       {% endif %}
       {% if usage_directions != blank %}
-        <details {% if product.description == blank %}open{% endif %}>
+        <details {% if product.description == blank or description_needs_review %}open{% endif %}>
           <summary>How to use</summary>
           <p>{{ usage_directions | metafield_text }}</p>
         </details>
@@ -182,12 +182,14 @@
           <p>{{ ingredients_inci | metafield_text }}</p>
         </details>
       {% endif %}
-      {% if warnings != blank %}
-        <details>
-          <summary>Warnings</summary>
+      <details>
+        <summary>Warnings</summary>
+        {% if warnings != blank %}
           <p>{{ warnings | metafield_text }}</p>
-        </details>
-      {% endif %}
+        {% else %}
+          <p>Warning information is not available on this page. Review the product label before use.</p>
+        {% endif %}
+      </details>
       {% if country_of_origin != blank or certifications != blank %}
         <details>
           <summary>Origin and certifications</summary>
