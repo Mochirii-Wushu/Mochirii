@@ -15,10 +15,18 @@ function walk(directory) {
   });
 }
 
+const textExtensions = new Set([".css", ".js", ".json", ".liquid", ".md"]);
+
+function contentForDigest(absolute) {
+  const content = readFileSync(absolute);
+  if (!textExtensions.has(path.extname(absolute))) return content;
+  return content.toString("utf8").replace(/\r\n?/gu, "\n");
+}
+
 function entryFor(absolute) {
   return {
     path: path.relative(repoRoot, absolute).split(path.sep).join("/"),
-    sha256: createHash("sha256").update(readFileSync(absolute)).digest("hex"),
+    sha256: createHash("sha256").update(contentForDigest(absolute)).digest("hex"),
   };
 }
 

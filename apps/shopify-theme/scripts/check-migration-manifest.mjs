@@ -20,6 +20,14 @@ function walk(directory) {
   });
 }
 
+const textExtensions = new Set([".css", ".js", ".json", ".liquid", ".md"]);
+
+function contentForDigest(absolute) {
+  const content = readFileSync(absolute);
+  if (!textExtensions.has(path.extname(absolute))) return content;
+  return content.toString("utf8").replace(/\r\n?/gu, "\n");
+}
+
 if (manifest.schemaVersion !== 6) {
   failures.push("schemaVersion must be 6");
 }
@@ -140,7 +148,7 @@ for (const entry of manifest.files) {
     failures.push(`${entry.path}: sha256 must be a lowercase 64-character digest`);
     continue;
   }
-  const digest = createHash("sha256").update(readFileSync(absolute)).digest("hex");
+  const digest = createHash("sha256").update(contentForDigest(absolute)).digest("hex");
   if (digest !== entry.sha256) {
     failures.push(`${entry.path}: SHA-256 mismatch`);
   }
@@ -152,7 +160,7 @@ for (const entry of genericToolingFiles) {
     continue;
   }
   const absolute = path.join(repoRoot, entry.path);
-  const digest = createHash("sha256").update(readFileSync(absolute)).digest("hex");
+  const digest = createHash("sha256").update(contentForDigest(absolute)).digest("hex");
   if (digest !== entry.sha256) {
     failures.push(`${entry.path}: generic-tooling SHA-256 mismatch`);
   }
@@ -164,7 +172,7 @@ for (const entry of approvedPublicCopyFiles) {
     continue;
   }
   const absolute = path.join(repoRoot, entry.path);
-  const digest = createHash("sha256").update(readFileSync(absolute)).digest("hex");
+  const digest = createHash("sha256").update(contentForDigest(absolute)).digest("hex");
   if (digest !== entry.sha256) {
     failures.push(`${entry.path}: approved-public-copy SHA-256 mismatch`);
   }
