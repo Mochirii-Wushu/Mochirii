@@ -32,3 +32,6 @@ supabase/functions/.env
 supabase/functions/.env.*
 !supabase/functions/.env.example
 .vercel
+
+# Local provider evidence and rollback exports. Durable runbooks belong in docs/.
+.artifacts/operations/

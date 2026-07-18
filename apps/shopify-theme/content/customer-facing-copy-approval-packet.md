@@ -9,8 +9,9 @@ Store: `shop.mochirii.com`
 ## Approval Boundary
 
 The exact machine-readable contract is
-[`approved-customer-copy.json`](./approved-customer-copy.json). This packet and
-that contract authorize no provider mutation by themselves.
+[`approved-customer-copy.json`](./approved-customer-copy.json). The owner
+approved the exact shared-record boundary below on 2026-07-18. Theme
+publication and commerce activation remain unauthorized.
 
 Approve only these shared Shopify record updates:
 
@@ -25,6 +26,21 @@ Do not change titles, handles, SKUs, options, variants, prices, inventory,
 images, alt text, metafields, product status, sales channels, markets,
 fulfillment, payments, customer accounts, checkout, password protection, the
 live theme, or the automated privacy policy.
+
+## Applied Readback
+
+The approved packet was applied through one authenticated Shopify Admin writer
+on 2026-07-18. Provider readback confirmed:
+
+- homepage SEO matches the contract;
+- the About and Contact bodies and SEO fields match the contract;
+- all five collection descriptions and SEO fields match the contract;
+- all twenty product descriptions and SEO fields match the contract;
+- the return, shipping, and terms policy presentation edits match the packet;
+- Shopify's privacy policy remains enabled and automated;
+- the customer-copy QA theme remains unpublished; and
+- no title, handle, SKU, price, media, inventory, market, channel, fulfillment,
+  password-protection, payment, or theme-publication setting was changed.
 
 ## Theme Copy
 

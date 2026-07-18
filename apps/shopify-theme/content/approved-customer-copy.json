@@ -7,7 +7,7 @@
     "scope": "customer-copy-packet",
     "preparedOn": "2026-07-18",
     "themeQaAuthorized": true,
-    "sharedRecordMutationAuthorized": false,
+    "sharedRecordMutationAuthorized": true,
     "themePublicationAuthorized": false,
     "commerceAuthorized": false
   },
