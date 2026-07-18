@@ -1,12 +1,12 @@
 {
-  "schemaVersion": 4,
-  "migrationId": "mochirii-shopify-theme-reconciliation-2026-07-17",
-  "snapshotDate": "2026-07-17",
+  "schemaVersion": 5,
+  "migrationId": "mochirii-shopify-theme-reconciliation-2026-07-18",
+  "snapshotDate": "2026-07-18",
   "candidateStatus": "sanitized-review-candidate-not-published",
-  "sourceState": "sanitized-post-snapshot-main-reconciliation-with-deliberate-exclusions",
+  "sourceState": "sanitized-approved-copy-reconciliation-with-deliberate-exclusions",
   "preservation": {
-    "status": "verified-current-post-merge-snapshot-and-git-bundles",
-    "scope": "current clean post-merge source state preserved in a verified encrypted snapshot and verified Git bundles outside this public repository",
+    "status": "verified-approved-copy-worktree-snapshot-and-git-bundles",
+    "scope": "approved copy-only source work preserved in a verified encrypted worktree snapshot and remote Git with verified Git bundles outside this public repository",
     "currentSnapshotVerified": true,
     "sourceQuiescenceVerified": true,
     "encryptedArchiveRoundTripVerified": true,
@@ -24,16 +24,18 @@
   },
   "selection": {
     "postSnapshotMainReconciled": true,
+    "approvedCustomerCopyReconciled": true,
     "privateDeltaPreservedExternally": true,
     "intentionalSourceParity": false,
-    "note": "runtime and pure generic tooling were selected through the post-snapshot main integration while provider workflows private evidence and unsafe source defaults remain excluded"
+    "note": "runtime approved public copy and pure generic tooling were selected while provider workflows private evidence catalog evidence and unsafe source defaults remain excluded"
   },
   "sourceReconciliation": {
-    "status": "reviewed-through-post-snapshot-filter-hardening",
-    "recordedDate": "2026-07-17",
-    "integrationState": "clean-main-aligned-with-canonical-remote",
+    "status": "reviewed-through-approved-customer-copy",
+    "recordedDate": "2026-07-18",
+    "integrationState": "copy-only-source-review-clean-and-remote-aligned",
     "runtimeWarningFallback": "represented-with-stricter-fail-closed-copy",
     "structuredFilterHelper": "represented-as-sanitized-pure-exact-20-contract",
+    "approvedCustomerCopy": "represented-as-sanitized-public-copy-contract-and-fail-closed-runtime",
     "privateContractOrchestration": "excluded-and-replaced-by-public-release-safety-guards"
   },
   "includedRoots": [
@@ -48,7 +50,7 @@
   ],
   "excludedCategories": [
     "mixed source history and provider metadata",
-    "catalog and supplier evidence",
+    "catalog and supplier evidence except the sanitized approved public-copy contract",
     "costs source identifiers and sample records",
     "legal reviews admin exports and launch ledgers",
     "label production private-evidence tooling and provider mutation workflows",
@@ -62,8 +64,29 @@
         "sha256": "d2e9ba18c75df5f2fc2e4fb97a5f55936d39bb0bb7daa6eed5d44db9072ad3df"
       },
       {
+        "path": "apps/shopify-theme/scripts/lib/shopify-product-copy-csv.mjs",
+        "sha256": "0ce6d7d3dec059845b365a19e73e8da36ffe8a06f74c5fb985131af39d855127"
+      },
+      {
         "path": "apps/shopify-theme/scripts/shopify-filter-metafield-csv.test.mjs",
         "sha256": "aedd2f4328df0c2e022ecbf572f7c668a90762b741f6105d927af84fa066e76d"
+      },
+      {
+        "path": "apps/shopify-theme/scripts/shopify-product-copy-csv.test.mjs",
+        "sha256": "047c5523a6e2fe1fe55c873d29328badd24afd47a30145cf7722effa58abd1b2"
+      }
+    ]
+  },
+  "approvedPublicCopy": {
+    "status": "sanitized-copy-only-not-published",
+    "sourceReview": "https://github.com/Mochirii-Wushu/mochirii-shopify-theme/pull/9",
+    "publicationAuthorized": false,
+    "providerMutationAuthorized": false,
+    "commerceAuthorized": false,
+    "files": [
+      {
+        "path": "apps/shopify-theme/content/approved-customer-copy.json",
+        "sha256": "095cf2ccc2228ce8992f5d09fc559cfbf715aff01ec7d2bb3927566676e4379d"
       }
     ]
   },
@@ -90,11 +113,11 @@
     },
     {
       "path": "apps/shopify-theme/config/settings_data.json",
-      "sha256": "34c9555fbdf33567c583e4566e6fd1cd40d5ae1f7ef7d4d1b7350f798e747231"
+      "sha256": "8b22f612909f80ca95816b08fd07da1ea8deb7fec9d2ef40f7654b3fd767cda7"
     },
     {
       "path": "apps/shopify-theme/config/settings_schema.json",
-      "sha256": "a23afb1650af5e8a7f6122ce00dcc72ea0ca6dad1b49a63da89a1c0f4e599227"
+      "sha256": "dcfa0d9771e80fa2e0803a1f2e4bb6e1fbdb9e949efbad59e93b8370729866b1"
     },
     {
       "path": "apps/shopify-theme/layout/password.liquid",
@@ -106,23 +129,23 @@
     },
     {
       "path": "apps/shopify-theme/locales/en.default.json",
-      "sha256": "bd295a16178f9eec3e1ff69709ac113644fddfaa5b461f1302b46774869c7c4a"
+      "sha256": "0a1117951177c46181642a459e5a06aabb40b5e7d9b6981f4fcd8bb7ab28b774"
     },
     {
       "path": "apps/shopify-theme/sections/footer.liquid",
-      "sha256": "15891799a701ced440f76bc689f041d6122198af3647d83cacf6d3374db63bb1"
+      "sha256": "d78c284013a3b5af4b4c7206079f766f09c693c10c9575fe316f655a57c481ce"
     },
     {
       "path": "apps/shopify-theme/sections/header.liquid",
-      "sha256": "292c1eed369afe99a2e06683ef110d55eea2a737c218beebb6b489a30ab8181b"
+      "sha256": "69933ee47cd0a1d095e28d138f14ffcc966e4ab5562fd285a595a65a28948f9e"
     },
     {
       "path": "apps/shopify-theme/sections/main-404.liquid",
-      "sha256": "429b6fa9486fa8a66df9ed103b16e310dcd0f450bd57933a63a6429b69f98509"
+      "sha256": "d489c99846f99770a49b77551eabf0380b2796bd501b4a8c8d85fb9d56f74273"
     },
     {
       "path": "apps/shopify-theme/sections/main-cart.liquid",
-      "sha256": "f23867a8ea4dc83b0cc4d482a20c053af4250ba7f74500f60b7c76181fe6d9ee"
+      "sha256": "5c4fb036e8484027ec555af2dc18836e8a522874b6b3d112d1cd34731f5871f4"
     },
     {
       "path": "apps/shopify-theme/sections/main-collection.liquid",
@@ -130,27 +153,27 @@
     },
     {
       "path": "apps/shopify-theme/sections/main-index.liquid",
-      "sha256": "7826315a34d2f024da164fd3bc57f404c9c45de918fae76effe9c90ac4abe701"
+      "sha256": "d2f45a722c9906be86874dd41d7b775522174a1af9608543c75726d1de5f01bf"
     },
     {
       "path": "apps/shopify-theme/sections/main-list-collections.liquid",
-      "sha256": "d5f58b17a311d52a05b4d99e02a79b3a4ba868a34eefd5cd6f7faab77b4ad170"
+      "sha256": "6b69fa2bb4760573871d2d482c5c8ee061a63d883c93db529ef216bae864409d"
     },
     {
       "path": "apps/shopify-theme/sections/main-page.liquid",
-      "sha256": "2b1de07840b34a4ad8b5bb1c12f4bdb7ac2642d9c3276c456851ea431f0d4948"
+      "sha256": "794ee1a79f25bc6af7d6df55723ce63d765d1e06a67b1c49736560203cd703c4"
     },
     {
       "path": "apps/shopify-theme/sections/main-password.liquid",
-      "sha256": "198a69bbc6348d7d35665f0e39bd57ff8a7f066a57ff754b9ff922af77ba0f74"
+      "sha256": "4ef4159a93c2dbc69917a382e92068b29bbf39b44fead777396326ebe41f7c92"
     },
     {
       "path": "apps/shopify-theme/sections/main-product.liquid",
-      "sha256": "27fa3bd2fb3e4025ffea58293ff37e4264cab26c9890bca96875d4097a738ec8"
+      "sha256": "132774a0f0009effe29748a87d7afbf026d1b1956dcdff70f3b9219d50576eb9"
     },
     {
       "path": "apps/shopify-theme/sections/main-search.liquid",
-      "sha256": "d8f7d03eabcebcf2ea39a97ac0140b0aac50e658218bfaf3be52171aaec8615b"
+      "sha256": "be8dcd8e1e78e64ca12a5e254ddcaa84c72fd36c2f57a7628d2d051b139e84df"
     },
     {
       "path": "apps/shopify-theme/snippets/primary-navigation-links.liquid",
@@ -158,7 +181,7 @@
     },
     {
       "path": "apps/shopify-theme/snippets/product-card.liquid",
-      "sha256": "df2dea9d4dff36aab011dd49847a1ca03099ac68e8485ab31a0dfd1694dc4e0c"
+      "sha256": "9625e10d10b3606a2beb65d35a1ff64e7d01192779a4ac9c72d5df6bbf6f8a18"
     },
     {
       "path": "apps/shopify-theme/snippets/seo-meta.liquid",

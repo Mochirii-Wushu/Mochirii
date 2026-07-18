@@ -1,6 +1,7 @@
 # Repository Guidance
 
-- This repository has two deployable surfaces after cutover: `apps/web` is the live Vercel/Next.js production app for `https://mochirii.com`, and the root static HTML/CSS/vanilla JavaScript GitHub Pages files remain rollback/reference material. Do not add additional frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
+- `Mochirii-Wushu/Mochirii` is the exclusive repository for all Mochirii website and storefront work. Never place Mochirii code, content, assets, configuration, deployments, or operational identifiers in another brand repository; never import another brand's material here.
+- This repository has two `mochirii.com` website surfaces after cutover: `apps/web` is the live Vercel/Next.js production app, and the root static HTML/CSS/vanilla JavaScript files remain rollback/reference material. `apps/shopify-theme` is a third, isolated storefront-theme surface that is packaged separately and never deployed by the website workflows. Do not add additional frameworks, bundlers, a CMS, or dependencies unless explicitly requested.
 - Root `assets/` and `data/` remain the editable content source for now while the rollback surface is retained. Mirror them to `apps/web/public/` with `npm run sync:next-public` and verify with `npm run check:next-public-sync`.
 - Use one scoped branch per task. Do not edit `main` directly, and avoid broad refactors during content or feature work.
 - For GitHub, Supabase, Vercel, Discord, Meta, Enjin, Fly, CSP, browser-evidence, or provider-adjacent work, follow `docs/integration-operations-runbook.md` and keep provider mutations explicitly approval-gated.

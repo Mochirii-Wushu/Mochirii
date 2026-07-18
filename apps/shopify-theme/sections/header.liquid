@@ -20,19 +20,19 @@
     <div class="store-mode-strip">
       <div class="section-inner store-mode-strip__inner">
         <span>{{ settings.storefront_mode_text }}</span>
-        <a href="https://mochirii.com" rel="noopener">Guild site</a>
+        <a href="https://mochirii.com" rel="noopener">Mochirii Home</a>
       </div>
     </div>
   {% endif %}
 
   <div class="site-header__inner">
-    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }} skin care storefront home">
+    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }} skincare storefront home">
       <span class="brand-mark brand-mark--image" aria-hidden="true">
         <img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56" loading="eager">
       </span>
       <span class="brand-wording">
         <span class="brand-text">{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }}</span>
-        <span class="brand-subtext">Skin Care</span>
+        <span class="brand-subtext">Skincare</span>
       </span>
     </a>
 

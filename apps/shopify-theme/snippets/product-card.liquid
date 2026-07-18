@@ -3,7 +3,7 @@
 {% assign tags_normalized = product.tags | join: ',' | downcase %}
 {% assign line_label = product.metafields.custom.routine_step | metafield_text | strip %}
 {% if line_label == blank %}
-  {% assign line_label = product.type | default: 'Skin care' %}
+  {% assign line_label = product.type | default: 'Skincare' %}
 {% endif %}
 {% assign card_loading = image_loading | default: 'lazy' %}
 {% assign card_fetchpriority = image_fetchpriority | default: 'auto' %}
@@ -55,7 +55,7 @@
         </p>
       {% endif %}
       {% comment %} release-safety:commerce:end {% endcomment %}
-      <a class="text-link product-card__cta" href="{{ product.url }}">View product</a>
+      <a class="text-link product-card__cta" href="{{ product.url }}">See details</a>
     </div>
   </div>
 </article>

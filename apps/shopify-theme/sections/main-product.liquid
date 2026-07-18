@@ -91,7 +91,7 @@
   <div class="product-details">
     <div class="product-title-block">
       <div class="product-kicker">
-        <span>{{ routine_step | metafield_text | default: product.type | default: 'Skin care' }}</span>
+        <span>{{ routine_step | metafield_text | default: product.type | default: 'Skincare' }}</span>
         {% comment %} release-safety:commerce:start {% endcomment %}
         {% if settings.checkout_enabled %}
           <span data-product-availability>{% if selected_variant.available %}Available{% else %}Unavailable{% endif %}</span>
@@ -113,7 +113,7 @@
           <div><dt>Size</dt><dd>{{ volume | metafield_text }}</dd></div>
         {% endif %}
         {% if skin_type != blank %}
-          <div><dt>Suitable for</dt><dd>{{ skin_type | metafield_text }}</dd></div>
+          <div><dt>Skin types</dt><dd>{{ skin_type | metafield_text }}</dd></div>
         {% endif %}
         {% if key_ingredients != blank %}
           <div><dt>Key ingredients</dt><dd>{{ key_ingredients | metafield_text }}</dd></div>
@@ -166,7 +166,7 @@
     <div class="product-accordions" aria-label="Product information">
       {% if product.description != blank and description_needs_review == false %}
         <details open>
-          <summary>Description</summary>
+          <summary>About this formula</summary>
           <div class="rte product-description">{{ product.description }}</div>
         </details>
       {% endif %}
@@ -199,7 +199,7 @@
       {% endif %}
       {% if aroma != blank or replenishment_interval != blank %}
         <details>
-          <summary>More details</summary>
+          <summary>Routine details</summary>
           {% if aroma != blank %}<p><strong>Aroma:</strong> {{ aroma | metafield_text }}</p>{% endif %}
           {% if replenishment_interval != blank %}<p><strong>Replenishment:</strong> {{ replenishment_interval | metafield_text }}</p>{% endif %}
         </details>
@@ -208,9 +208,9 @@
         <details>
           <summary>Shipping and returns</summary>
           <p>
-            {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping policy</a>{% endif %}
+            {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping &amp; delivery</a>{% endif %}
             {% if shop.shipping_policy != blank and shop.refund_policy != blank %} &middot; {% endif %}
-            {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Refund policy</a>{% endif %}
+            {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Returns &amp; refunds</a>{% endif %}
           </p>
         </details>
       {% endif %}
@@ -220,10 +220,10 @@
       <div class="product-recommendations">
         <div class="section-head section-head--split">
           <div>
-            <p class="eyebrow">Same routine</p>
+            <p class="eyebrow">Build the routine</p>
             <h2>{{ routine_collection.title }}</h2>
           </div>
-          <a class="text-link" href="{{ routine_collection.url }}">View collection</a>
+          <a class="text-link" href="{{ routine_collection.url }}">Explore this routine</a>
         </div>
         <div class="product-grid product-grid--compact" role="list">
           {% for related_product in routine_collection.products limit: 5 %}

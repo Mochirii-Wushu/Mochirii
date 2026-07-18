@@ -262,6 +262,20 @@ for (const token of [
 ]) {
   requireText("scripts/lib/shopify-filter-metafield-csv.mjs", filterMetafieldTool, token);
 }
+const productCopyTool = read("scripts/lib/shopify-product-copy-csv.mjs");
+for (const token of [
+  "SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS",
+  "buildShopifyProductCopyRows",
+  "serializeShopifyProductCopyRows",
+  "Exactly 20 approved public-copy products are required",
+  "does not match the approved copy-only columns",
+]) {
+  requireText("scripts/lib/shopify-product-copy-csv.mjs", productCopyTool, token);
+}
+const genericTools = [
+  ["scripts/lib/shopify-filter-metafield-csv.mjs", filterMetafieldTool],
+  ["scripts/lib/shopify-product-copy-csv.mjs", productCopyTool],
+];
 for (const [label, pattern] of [
   ["filesystem access", /(?:node:fs|from ["']fs["'])/i],
   ["child-process execution", /(?:node:child_process|child_process)/i],
@@ -269,8 +283,10 @@ for (const [label, pattern] of [
   ["network access", /\bfetch\s*[(]|https?:\/\//i],
   ["provider mutation operation", /\b(?:mutation|adminApi|graphql|productUpdate)\b/i],
 ]) {
-  if (pattern.test(filterMetafieldTool)) {
-    failures.push(`scripts/lib/shopify-filter-metafield-csv.mjs: generic tooling contains ${label}`);
+  for (const [relativePath, source] of genericTools) {
+    if (pattern.test(source)) {
+      failures.push(`${relativePath}: generic tooling contains ${label}`);
+    }
   }
 }
 

@@ -19,7 +19,7 @@
     {% if cart.item_count == 0 %}
       <div class="empty-state empty-state--wide">
         <h2>{{ 'cart.empty' | t }}</h2>
-        <a class="button" href="{{ catalog_url }}">Shop skin care</a>
+        <a class="button" href="{{ catalog_url }}">Shop skincare</a>
       </div>
     {% else %}
       <form action="{{ routes.cart_url }}" method="post" class="cart-form">
@@ -53,12 +53,12 @@
             <span>{{ 'cart.subtotal' | t }}</span>
             <strong>{{ cart.total_price | money }}</strong>
           </div>
-          <p class="cart-note">Shipping and taxes are calculated before purchase.</p>
+          <p class="cart-note">Shipping and taxes are shown before payment.</p>
           {% if shop.shipping_policy != blank or shop.refund_policy != blank %}
             <p class="cart-note">
-              {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping policy</a>{% endif %}
+              {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping &amp; delivery</a>{% endif %}
               {% if shop.shipping_policy != blank and shop.refund_policy != blank %} &middot; {% endif %}
-              {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Refund policy</a>{% endif %}
+              {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Returns &amp; refunds</a>{% endif %}
             </p>
           {% endif %}
           <div class="cart-summary__actions">

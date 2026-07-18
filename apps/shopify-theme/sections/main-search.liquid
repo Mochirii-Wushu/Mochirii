@@ -3,10 +3,10 @@
 <section class="section page-banner">
   <div class="section-inner section-head section-head--center">
     <p class="eyebrow">Mochirii Cosmetics</p>
-    <h1>Search products</h1>
+    <h1>Search skincare</h1>
     <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
       <div class="field">
-        <label for="SearchInput-{{ section.id }}">Product name or ingredient</label>
+        <label for="SearchInput-{{ section.id }}">Product or ingredient</label>
         <input
           id="SearchInput-{{ section.id }}"
           type="search"
@@ -44,8 +44,8 @@
           {% endif %}
         {% else %}
           <div class="empty-state empty-state--wide">
-            <h2>No products found</h2>
-            <p>Try a shorter product name or ingredient.</p>
+            <h2>No matching products</h2>
+            <p>Check the spelling or try a broader product or ingredient name.</p>
           </div>
         {% endif %}
       {% endpaginate %}

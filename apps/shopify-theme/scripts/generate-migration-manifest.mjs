@@ -29,12 +29,17 @@ manifest.files = manifest.includedRoots
 
 manifest.genericTooling.files = [
   "scripts/lib/shopify-filter-metafield-csv.mjs",
+  "scripts/lib/shopify-product-copy-csv.mjs",
   "scripts/shopify-filter-metafield-csv.test.mjs",
+  "scripts/shopify-product-copy-csv.test.mjs",
 ]
   .map((relativePath) => entryFor(path.join(appRoot, relativePath)))
   .sort((left, right) => left.path.localeCompare(right.path));
 
+manifest.approvedPublicCopy.files = ["content/approved-customer-copy.json"]
+  .map((relativePath) => entryFor(path.join(appRoot, relativePath)));
+
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 console.log(
-  `Updated migration manifest for ${manifest.files.length} runtime files and ${manifest.genericTooling.files.length} generic tooling files.`,
+  `Updated migration manifest for ${manifest.files.length} runtime files, ${manifest.genericTooling.files.length} generic tooling files, and ${manifest.approvedPublicCopy.files.length} approved public-copy file.`,
 );

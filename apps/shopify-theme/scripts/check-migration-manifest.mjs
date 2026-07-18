@@ -20,8 +20,8 @@ function walk(directory) {
   });
 }
 
-if (manifest.schemaVersion !== 4) {
-  failures.push("schemaVersion must be 4");
+if (manifest.schemaVersion !== 5) {
+  failures.push("schemaVersion must be 5");
 }
 const migrationIdMatch = /^mochirii-shopify-theme-(?:import|reconciliation)-(\d{4}-\d{2}-\d{2})$/.exec(
   manifest.migrationId ?? "",
@@ -34,28 +34,30 @@ if (!migrationIdMatch) {
 if (manifest.candidateStatus !== "sanitized-review-candidate-not-published") {
   failures.push("candidateStatus must remain fail-closed");
 }
-if (manifest.sourceState !== "sanitized-post-snapshot-main-reconciliation-with-deliberate-exclusions") {
-  failures.push("sourceState must identify the post-snapshot source reconciliation and deliberate exclusions");
+if (manifest.sourceState !== "sanitized-approved-copy-reconciliation-with-deliberate-exclusions") {
+  failures.push("sourceState must identify the approved-copy reconciliation and deliberate exclusions");
 }
-if (manifest.preservation?.status !== "verified-current-post-merge-snapshot-and-git-bundles" ||
+if (manifest.preservation?.status !== "verified-approved-copy-worktree-snapshot-and-git-bundles" ||
     manifest.preservation?.currentSnapshotVerified !== true ||
     manifest.preservation?.sourceQuiescenceVerified !== true ||
     manifest.preservation?.encryptedArchiveRoundTripVerified !== true ||
     manifest.preservation?.gitBundlesVerified !== true ||
     manifest.preservation?.fullDisposableCloneRestorationTest !== "not-claimed" ||
     manifest.preservation?.sourceMayHaveChangedAfterReview !== true) {
-  failures.push("preservation must record the verified post-merge snapshot and bundles without claiming a full disposable-clone restoration");
+  failures.push("preservation must record the verified approved-copy worktree snapshot and bundles without claiming a full disposable-clone restoration");
 }
 if (manifest.selection?.postSnapshotMainReconciled !== true ||
+    manifest.selection?.approvedCustomerCopyReconciled !== true ||
     manifest.selection?.privateDeltaPreservedExternally !== true ||
     manifest.selection?.intentionalSourceParity !== false) {
   failures.push("selection must record post-snapshot reconciliation private preservation and deliberate non-parity");
 }
-if (manifest.sourceReconciliation?.status !== "reviewed-through-post-snapshot-filter-hardening" ||
+if (manifest.sourceReconciliation?.status !== "reviewed-through-approved-customer-copy" ||
     manifest.sourceReconciliation?.recordedDate !== manifest.snapshotDate ||
-    manifest.sourceReconciliation?.integrationState !== "clean-main-aligned-with-canonical-remote" ||
+    manifest.sourceReconciliation?.integrationState !== "copy-only-source-review-clean-and-remote-aligned" ||
     manifest.sourceReconciliation?.runtimeWarningFallback !== "represented-with-stricter-fail-closed-copy" ||
     manifest.sourceReconciliation?.structuredFilterHelper !== "represented-as-sanitized-pure-exact-20-contract" ||
+    manifest.sourceReconciliation?.approvedCustomerCopy !== "represented-as-sanitized-public-copy-contract-and-fail-closed-runtime" ||
     manifest.sourceReconciliation?.privateContractOrchestration !== "excluded-and-replaced-by-public-release-safety-guards") {
   failures.push("sourceReconciliation must record the complete sanitized disposition of the post-snapshot integration");
 }
@@ -102,12 +104,27 @@ if (new Set(manifestFiles).size !== manifestFiles.length) {
 
 const expectedGenericTooling = [
   "apps/shopify-theme/scripts/lib/shopify-filter-metafield-csv.mjs",
+  "apps/shopify-theme/scripts/lib/shopify-product-copy-csv.mjs",
   "apps/shopify-theme/scripts/shopify-filter-metafield-csv.test.mjs",
+  "apps/shopify-theme/scripts/shopify-product-copy-csv.test.mjs",
 ];
 const genericToolingFiles = manifest.genericTooling?.files ?? [];
 if (manifest.genericTooling?.status !== "sanitized-pure-functions-only" ||
     JSON.stringify(genericToolingFiles.map((entry) => entry.path).sort()) !== JSON.stringify(expectedGenericTooling)) {
-  failures.push("genericTooling must contain exactly the reviewed pure filter-metafield helper and its test");
+  failures.push("genericTooling must contain exactly the reviewed pure filter-metafield and product-copy helpers and tests");
+}
+
+const expectedApprovedPublicCopy = [
+  "apps/shopify-theme/content/approved-customer-copy.json",
+];
+const approvedPublicCopyFiles = manifest.approvedPublicCopy?.files ?? [];
+if (manifest.approvedPublicCopy?.status !== "sanitized-copy-only-not-published" ||
+    manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/mochirii-shopify-theme/pull/9" ||
+    manifest.approvedPublicCopy?.publicationAuthorized !== false ||
+    manifest.approvedPublicCopy?.providerMutationAuthorized !== false ||
+    manifest.approvedPublicCopy?.commerceAuthorized !== false ||
+    JSON.stringify(approvedPublicCopyFiles.map((entry) => entry.path).sort()) !== JSON.stringify(expectedApprovedPublicCopy)) {
+  failures.push("approvedPublicCopy must contain only the sanitized copy contract with all publication and commerce authority disabled");
 }
 if (JSON.stringify(actualFiles) !== JSON.stringify(manifestFiles)) {
   failures.push("manifest file set does not match the imported runtime roots");
@@ -141,10 +158,22 @@ for (const entry of genericToolingFiles) {
   }
 }
 
+for (const entry of approvedPublicCopyFiles) {
+  if (!expectedApprovedPublicCopy.includes(entry.path) || !/^[0-9a-f]{64}$/.test(entry.sha256 ?? "")) {
+    failures.push(`${entry.path}: invalid approved-public-copy manifest entry`);
+    continue;
+  }
+  const absolute = path.join(repoRoot, entry.path);
+  const digest = createHash("sha256").update(readFileSync(absolute)).digest("hex");
+  if (digest !== entry.sha256) {
+    failures.push(`${entry.path}: approved-public-copy SHA-256 mismatch`);
+  }
+}
+
 if (failures.length) {
   console.error("Migration manifest check failed.");
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
 
-console.log(`Migration manifest OK (${manifest.files.length} runtime files).`);
+console.log(`Migration manifest OK (${manifest.files.length} runtime files, ${genericToolingFiles.length} generic tooling files, ${approvedPublicCopyFiles.length} approved public-copy file).`);

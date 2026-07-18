@@ -1,5 +1,6 @@
 .github/**
 catalog/**
+content/**
 docs/**
 label-artwork/**
 private-evidence/**

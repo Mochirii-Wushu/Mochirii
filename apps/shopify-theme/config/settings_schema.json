@@ -36,7 +36,7 @@
         "type": "textarea",
         "id": "default_meta_description",
         "label": "Default search description",
-        "default": "Mochirii Cosmetics skin care for simple daily routines, organized by cleanse, hydration, brightening, and age-support steps."
+        "default": "Shop Mochirii Cosmetics skincare by routine step, with ingredients, directions, skin types, and product details for every formula."
       }
     ]
   },
@@ -70,25 +70,25 @@
         "type": "text",
         "id": "storefront_mode_text",
         "label": "Storefront mode text",
-        "default": "Mochirii Cosmetics skin care"
+        "default": "Skincare, step by step"
       },
       {
         "type": "text",
         "id": "empty_catalog_heading",
         "label": "Empty catalog heading",
-        "default": "The collection is being prepared."
+        "default": "No products match these filters."
       },
       {
         "type": "textarea",
         "id": "empty_catalog_body",
         "label": "Empty catalog body",
-        "default": "Mochirii Cosmetics products will appear here when their details and imagery are complete."
+        "default": "Clear a filter or browse the full collection."
       },
       {
         "type": "textarea",
         "id": "footer_summary",
         "label": "Footer summary",
-        "default": "Skin care arranged by routine, with product details close at hand."
+        "default": "Skincare organized by routine step, skin type, and formula."
       }
     ]
   },

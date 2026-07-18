@@ -2,7 +2,7 @@
 {% if settings.product_publication_approved %}
 <section class="section page-banner">
   <div class="section-inner section-head section-head--center">
-    <p class="eyebrow">Collections</p>
+    <p class="eyebrow">Skincare routines</p>
     <h1>{{ section.settings.heading }}</h1>
     <p class="section-intro">{{ section.settings.intro }}</p>
   </div>
@@ -44,7 +44,7 @@
             {% endif %}
           </a>
           <div class="collection-card__body">
-            <p class="product-card__line">Routine collection</p>
+            <p class="product-card__line">Routine step</p>
             <h2><a href="{{ routine_url }}">{{ routine_title }}</a></h2>
             {% if routine_collection != blank and routine_collection.description != blank %}
               <div class="rte">{{ routine_collection.description }}</div>
@@ -78,13 +78,13 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Shop by routine."
+      "default": "Choose your routine"
     },
     {
       "type": "textarea",
       "id": "intro",
       "label": "Introduction",
-      "default": "Cleanse and tone, hydrate and support the barrier, brighten and smooth, or nourish age-support routines."
+      "default": "Shop cleansing, hydration, brightening, and nourishing care by routine step."
     }
   ]
 }

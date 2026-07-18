@@ -13,7 +13,7 @@
   <div class="section-inner section-head section-head--center">
     <p class="eyebrow">Mochirii Cosmetics</p>
     <h1>Page not found</h1>
-    <p class="section-intro">The page you requested is unavailable.</p>
+    <p class="section-intro">We couldn't find the page you were looking for.</p>
   </div>
 </section>
 
@@ -21,11 +21,11 @@
   <div class="section-inner">
     <div class="empty-state empty-state--wide">
       {% if settings.product_publication_approved %}
-        <h2>Continue shopping</h2>
-        <p>Search the store or return to the skin care collection.</p>
+        <h2>Explore the collection</h2>
+        <p>Search by product or ingredient, or return to all skincare.</p>
         <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
           <div class="field">
-            <label for="SearchInput-{{ section.id }}">Product name or ingredient</label>
+          <label for="SearchInput-{{ section.id }}">Product or ingredient</label>
             <input
               id="SearchInput-{{ section.id }}"
               type="search"
@@ -37,7 +37,7 @@
           <input type="hidden" name="options[prefix]" value="last">
           <button class="button" type="submit">Search</button>
         </form>
-        <a class="button button--secondary" href="{{ catalog_url }}">Shop skin care</a>
+        <a class="button button--secondary" href="{{ catalog_url }}">Shop skincare</a>
       {% else %}
         <h2>Return to the storefront</h2>
         <p>Product search remains unavailable while the catalogue is under review.</p>
