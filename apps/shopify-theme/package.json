@@ -1,19 +1,20 @@
 {
   "name": "mochirii-shopify-theme",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "packageManager": "npm@10.9.8",
   "engines": {
     "node": "22.x",
     "npm": ">=10 <11"
   },
   "scripts": {
-    "check": "npm run scan:brand-boundaries && npm run check:migration-manifest && npm run check:release-safety && npm run check:approved-copy && npm run check:generic-tooling && npm run check:sbom && npm run check:theme-js && npm run theme:check",
+    "check": "npm run scan:brand-boundaries && npm run check:migration-manifest && npm run check:release-safety && npm run check:approved-copy && npm run check:customer-facing-copy && npm run check:generic-tooling && npm run check:sbom && npm run check:theme-js && npm run theme:check",
     "scan:brand-boundaries": "node ../../scripts/check-brand-boundaries.mjs",
     "generate:migration-manifest": "node scripts/generate-migration-manifest.mjs",
     "check:migration-manifest": "node scripts/check-migration-manifest.mjs",
     "check:release-safety": "node scripts/check-release-safety.mjs",
     "check:approved-copy": "node scripts/check-approved-customer-copy.mjs",
+    "check:customer-facing-copy": "node scripts/check-customer-facing-copy.mjs",
     "check:generic-tooling": "node --test scripts/shopify-filter-metafield-csv.test.mjs scripts/shopify-product-copy-csv.test.mjs",
     "check:sbom": "node scripts/check-sbom.mjs",
     "check:theme-js": "node --check assets/mochirii-theme.js",

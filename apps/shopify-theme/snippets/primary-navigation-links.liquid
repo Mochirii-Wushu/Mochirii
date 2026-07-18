@@ -1,23 +1,15 @@
-{% if settings.product_publication_approved and primary_menu != blank and primary_menu.links.size > 0 %}
+{% if primary_menu != blank and primary_menu.links.size > 0 %}
   {% for link in primary_menu.links %}
     <a href="{{ link.url }}" {% if link.current or link.active %}aria-current="page"{% endif %}>{{ link.title }}</a>
   {% endfor %}
 {% else %}
   <a href="{{ routes.root_url }}" {% if template.name == 'index' %}aria-current="page"{% endif %}>Home</a>
-  {% if settings.product_publication_approved %}
-    <a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a>
-    <a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a>
-  {% endif %}
+  <a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a>
+  <a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a>
   <a href="{{ about_url }}" {% if request.path == about_url or request.path contains 'pages/about' %}aria-current="page"{% endif %}>About</a>
   <a href="{{ contact_url }}" {% if request.path == contact_url or request.path contains 'pages/contact' %}aria-current="page"{% endif %}>Contact</a>
 {% endif %}
-{% if settings.product_publication_approved %}
-  <a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a>
-{% endif %}
-{% comment %} release-safety:commerce:start {% endcomment %}
-{% if settings.product_publication_approved and settings.checkout_enabled %}
-  <a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
-    Cart <span class="cart-count">{{ cart.item_count }}</span>
-  </a>
-{% endif %}
-{% comment %} release-safety:commerce:end {% endcomment %}
+<a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a>
+<a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
+  Cart <span class="cart-count">{{ cart.item_count }}</span>
+</a>

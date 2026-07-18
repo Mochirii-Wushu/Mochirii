@@ -1,27 +1,19 @@
 {% liquid
-  assign seo_title = seo_title_override | default: page_title | default: shop.name
+  assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics'
+  assign seo_title = seo_title_override | default: page_title | default: storefront_name
   assign seo_title = seo_title | replace: '&amp;', '&'
-  assign seo_description = seo_description_override | default: page_description | default: settings.default_meta_description | default: shop.description | strip_html | strip_newlines | escape
-  assign social_image = settings.social_share_image
-  if request.page_type != 'product' and request.page_type != 'collection'
-    assign social_image = page_image
+  assign seo_description = seo_description_override | default: page_description | default: settings.default_meta_description | strip_html | strip_newlines | escape
+  assign social_image = page_image
+  if social_image == blank and request.page_type == 'product'
+    assign social_image = product.featured_media.preview_image
+  elsif social_image == blank and request.page_type == 'collection'
+    assign social_image = collection.image
   endif
-%}
-{% comment %} release-safety:publication:start {% endcomment %}
-{% liquid
-  if settings.product_publication_approved
-    assign social_image = page_image
-    if social_image == blank and request.page_type == 'product'
-      assign social_image = product.featured_media.preview_image
-    elsif social_image == blank and request.page_type == 'collection'
-      assign social_image = collection.image
-    endif
-  endif
-%}
-{% comment %} release-safety:publication:end {% endcomment %}
-{% liquid
   if social_image == blank
     assign social_image = settings.social_share_image
+  endif
+  if social_image == blank
+    assign social_image = collections['mochirii-cosmetics'].products.first.featured_media.preview_image
   endif
   if social_image != blank
     assign social_image_width = social_image.width | at_most: 1200
@@ -30,10 +22,10 @@
 %}
 
 <link rel="canonical" href="{{ canonical_url }}">
-<meta property="og:site_name" content="{{ settings.brand_display_name | default: shop.name | escape }}">
+<meta property="og:site_name" content="{{ storefront_name | escape }}">
 <meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:title" content="{{ seo_title | escape }}">
-<meta property="og:type" content="{% if request.page_type == 'product' and settings.product_publication_approved %}product{% else %}website{% endif %}">
+<meta property="og:type" content="{% if request.page_type == 'product' %}product{% else %}website{% endif %}">
 {% if seo_description != blank %}
   <meta property="og:description" content="{{ seo_description }}">
 {% endif %}

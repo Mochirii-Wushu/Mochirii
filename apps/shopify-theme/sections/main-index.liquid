@@ -1,5 +1,3 @@
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
 {% assign catalog_collection = collections['mochirii-cosmetics'] %}
 {% if section.settings.featured_collection != blank %}
   {% assign catalog_collection = section.settings.featured_collection %}
@@ -34,7 +32,7 @@
     <div class="button-row">
       {% assign primary_link = section.settings.primary_cta_link | default: catalog_url %}
       <a class="button" href="{{ primary_link }}">{{ section.settings.primary_cta_label }}</a>
-      <a class="button button--secondary" href="{{ routes.collections_url }}">Shop by routine</a>
+      <a class="button button--secondary" href="{{ routes.collections_url }}">Browse collections</a>
     </div>
   </div>
 </section>
@@ -43,7 +41,7 @@
   <div class="section-inner">
     <div class="section-head section-head--split">
       <div>
-        <p class="eyebrow">Featured formulas</p>
+        <p class="eyebrow">Featured skincare</p>
         <h2>{{ section.settings.featured_heading }}</h2>
       </div>
       <a class="text-link" href="{{ catalog_url }}">Shop all</a>
@@ -125,7 +123,7 @@
       <h2>{{ section.settings.standards_heading }}</h2>
       <p class="section-intro">{{ section.settings.standards_intro }}</p>
     </div>
-    <div class="proof-list" role="list" aria-label="Mochirii Cosmetics product standards">
+    <div class="proof-list" role="list" aria-label="Mochirii Cosmetics product details">
       <div role="listitem">
         <span>01</span>
         <h3>{{ section.settings.standard_one_heading }}</h3>
@@ -149,25 +147,12 @@
   <div class="section-inner policy-band__inner">
     <p>{{ section.settings.policy_note }}</p>
     {% if shop.shipping_policy != blank %}
-      <a href="{{ shop.shipping_policy.url }}">Shipping &amp; delivery</a>
+      <a href="{{ shop.shipping_policy.url }}">Shipping and delivery</a>
     {% elsif shop.refund_policy != blank %}
-      <a href="{{ shop.refund_policy.url }}">Returns &amp; refunds</a>
+      <a href="{{ shop.refund_policy.url }}">Returns and refunds</a>
     {% endif %}
   </div>
 </section>
-{% else %}
-  <section class="hero hero--storefront">
-    <div class="section-inner hero--storefront__content">
-      <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>Storefront in review</h1>
-      <p class="lede">Product information and commerce remain unpublished until their separate approvals are complete.</p>
-      <div class="button-row">
-        <a class="button button--secondary" href="{{ routes.root_url | append: 'pages/contact' }}">Contact</a>
-      </div>
-    </div>
-  </section>
-{% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% schema %}
 {
@@ -192,7 +177,7 @@
       "type": "text",
       "id": "hero_eyebrow",
       "label": "Hero eyebrow",
-      "default": "Build your routine"
+      "default": "Skincare by routine"
     },
     {
       "type": "text",
@@ -204,7 +189,7 @@
       "type": "textarea",
       "id": "hero_text",
       "label": "Hero text",
-      "default": "Shop cleansers, serums, moisturizers, and facial oils organized by routine step and skin type."
+      "default": "Find cleansers, serums, moisturizers, and facial oils for each step of your routine."
     },
     {
       "type": "text",
@@ -221,7 +206,7 @@
       "type": "text",
       "id": "featured_heading",
       "label": "Featured products heading",
-      "default": "Six formulas to start with"
+      "default": "Start your routine here"
     },
     {
       "type": "text",
@@ -233,55 +218,55 @@
       "type": "text",
       "id": "standards_heading",
       "label": "Standards heading",
-      "default": "Compare every formula"
+      "default": "See what fits your routine"
     },
     {
       "type": "textarea",
       "id": "standards_intro",
       "label": "Standards introduction",
-      "default": "Review skin types, ingredients, directions, and warnings on every product page."
+      "default": "Compare texture, skin suitability, key ingredients, directions, and full ingredient lists before you choose."
     },
     {
       "type": "text",
       "id": "standard_one_heading",
       "label": "First standard heading",
-      "default": "Exact product imagery"
+      "default": "Matching product images"
     },
     {
       "type": "textarea",
       "id": "standard_one_text",
       "label": "First standard text",
-      "default": "Product media shows the approved Mochirii package and matching formula."
+      "default": "Each gallery shows the Mochirii Cosmetics packaging for that product."
     },
     {
       "type": "text",
       "id": "standard_two_heading",
       "label": "Second standard heading",
-      "default": "Complete product details"
+      "default": "Ingredients and directions"
     },
     {
       "type": "textarea",
       "id": "standard_two_text",
       "label": "Second standard text",
-      "default": "Each page lists size, skin types, directions, full INCI, and warnings."
+      "default": "Find key ingredients, full INCI, size, skin suitability, and directions on every product page."
     },
     {
       "type": "text",
       "id": "standard_three_heading",
       "label": "Third standard heading",
-      "default": "Verified origin details"
+      "default": "Shopping details in one place"
     },
     {
       "type": "textarea",
       "id": "standard_three_text",
       "label": "Third standard text",
-      "default": "Origin and product-specific certifications appear only when they are verified for that formula."
+      "default": "Check warnings, origin, shipping, and returns before adding a product to your routine."
     },
     {
       "type": "textarea",
       "id": "policy_note",
       "label": "Policy note",
-      "default": "Review shipping and returns before ordering."
+      "default": "Shipping and return details are available before checkout."
     }
   ]
 }

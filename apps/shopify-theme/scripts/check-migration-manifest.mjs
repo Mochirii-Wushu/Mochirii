@@ -20,10 +20,10 @@ function walk(directory) {
   });
 }
 
-if (manifest.schemaVersion !== 5) {
-  failures.push("schemaVersion must be 5");
+if (manifest.schemaVersion !== 6) {
+  failures.push("schemaVersion must be 6");
 }
-const migrationIdMatch = /^mochirii-shopify-theme-(?:import|reconciliation)-(\d{4}-\d{2}-\d{2})$/.exec(
+const migrationIdMatch = /^mochirii-shopify-live-runtime-customer-copy-v2-(\d{4}-\d{2}-\d{2})$/.exec(
   manifest.migrationId ?? "",
 );
 if (!migrationIdMatch) {
@@ -31,11 +31,11 @@ if (!migrationIdMatch) {
 } else if (manifest.snapshotDate !== migrationIdMatch[1]) {
   failures.push("snapshotDate must match the migrationId date");
 }
-if (manifest.candidateStatus !== "sanitized-review-candidate-not-published") {
-  failures.push("candidateStatus must remain fail-closed");
+if (manifest.candidateStatus !== "live-runtime-reconciled-unpublished-copy-qa-not-published") {
+  failures.push("candidateStatus must identify unpublished customer-copy QA");
 }
-if (manifest.sourceState !== "sanitized-approved-copy-reconciliation-with-deliberate-exclusions") {
-  failures.push("sourceState must identify the approved-copy reconciliation and deliberate exclusions");
+if (manifest.sourceState !== "current-live-runtime-with-customer-copy-v2-and-deliberate-private-exclusions") {
+  failures.push("sourceState must identify the live-runtime customer-copy reconciliation and private exclusions");
 }
 if (manifest.preservation?.status !== "verified-approved-copy-worktree-snapshot-and-git-bundles" ||
     manifest.preservation?.currentSnapshotVerified !== true ||
@@ -47,18 +47,18 @@ if (manifest.preservation?.status !== "verified-approved-copy-worktree-snapshot-
   failures.push("preservation must record the verified approved-copy worktree snapshot and bundles without claiming a full disposable-clone restoration");
 }
 if (manifest.selection?.postSnapshotMainReconciled !== true ||
-    manifest.selection?.approvedCustomerCopyReconciled !== true ||
+    manifest.selection?.approvedCustomerCopyReconciled !== false ||
     manifest.selection?.privateDeltaPreservedExternally !== true ||
     manifest.selection?.intentionalSourceParity !== false) {
   failures.push("selection must record post-snapshot reconciliation private preservation and deliberate non-parity");
 }
-if (manifest.sourceReconciliation?.status !== "reviewed-through-approved-customer-copy" ||
+if (manifest.sourceReconciliation?.status !== "live-runtime-reconciled-customer-copy-v2-prepared" ||
     manifest.sourceReconciliation?.recordedDate !== manifest.snapshotDate ||
-    manifest.sourceReconciliation?.integrationState !== "copy-only-source-review-clean-and-remote-aligned" ||
-    manifest.sourceReconciliation?.runtimeWarningFallback !== "represented-with-stricter-fail-closed-copy" ||
+    manifest.sourceReconciliation?.integrationState !== "current-live-runtime-reconciled-with-unpublished-theme-qa-authorized" ||
+    manifest.sourceReconciliation?.runtimeWarningFallback !== "represented-with-customer-safe-fail-closed-copy" ||
     manifest.sourceReconciliation?.structuredFilterHelper !== "represented-as-sanitized-pure-exact-20-contract" ||
-    manifest.sourceReconciliation?.approvedCustomerCopy !== "represented-as-sanitized-public-copy-contract-and-fail-closed-runtime" ||
-    manifest.sourceReconciliation?.privateContractOrchestration !== "excluded-and-replaced-by-public-release-safety-guards") {
+    manifest.sourceReconciliation?.approvedCustomerCopy !== "represented-as-versioned-customer-copy-v2-contract-with-shared-record-mutation-disabled" ||
+    manifest.sourceReconciliation?.privateContractOrchestration !== "excluded-and-replaced-by-public-release-safety-and-customer-copy-guards") {
   failures.push("sourceReconciliation must record the complete sanitized disposition of the post-snapshot integration");
 }
 if (manifest.signature?.status !== "unsigned") {
@@ -118,8 +118,8 @@ const expectedApprovedPublicCopy = [
   "apps/shopify-theme/content/approved-customer-copy.json",
 ];
 const approvedPublicCopyFiles = manifest.approvedPublicCopy?.files ?? [];
-if (manifest.approvedPublicCopy?.status !== "sanitized-copy-only-not-published" ||
-    manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/mochirii-shopify-theme/pull/9" ||
+if (manifest.approvedPublicCopy?.status !== "customer-copy-v2-shared-record-approval-pending" ||
+    manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459" ||
     manifest.approvedPublicCopy?.publicationAuthorized !== false ||
     manifest.approvedPublicCopy?.providerMutationAuthorized !== false ||
     manifest.approvedPublicCopy?.commerceAuthorized !== false ||

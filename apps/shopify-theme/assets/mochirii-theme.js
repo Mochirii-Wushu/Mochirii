@@ -14,10 +14,10 @@
       const quantity = section.querySelector("[data-product-quantity]");
 
       if (price && option?.dataset.price) price.textContent = option.dataset.price;
-      if (availability) availability.textContent = available ? "Available" : "Unavailable";
+      if (availability) availability.textContent = available ? "In stock" : "Sold out";
       if (addButton) {
         addButton.disabled = !available;
-        addButton.textContent = available ? "Add to cart" : "Unavailable";
+        addButton.textContent = available ? "Add to cart" : "Sold out";
       }
       if (quantity) quantity.disabled = !available;
 

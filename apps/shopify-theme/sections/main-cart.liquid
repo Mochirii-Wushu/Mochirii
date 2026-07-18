@@ -1,6 +1,3 @@
-{% comment %} release-safety:publication:start {% endcomment %}
-{% comment %} release-safety:commerce:start {% endcomment %}
-{% if settings.product_publication_approved and settings.checkout_enabled %}
 {% assign catalog_collection = collections['mochirii-cosmetics'] %}
 {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
 {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
@@ -56,13 +53,17 @@
           <p class="cart-note">Shipping and taxes are shown before payment.</p>
           {% if shop.shipping_policy != blank or shop.refund_policy != blank %}
             <p class="cart-note">
-              {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping &amp; delivery</a>{% endif %}
+              {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping policy</a>{% endif %}
               {% if shop.shipping_policy != blank and shop.refund_policy != blank %} &middot; {% endif %}
-              {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Returns &amp; refunds</a>{% endif %}
+              {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Refund policy</a>{% endif %}
             </p>
           {% endif %}
           <div class="cart-summary__actions">
-            <button class="button" type="submit" name="checkout">Checkout</button>
+            {% if settings.checkout_enabled %}
+              <button class="button" type="submit" name="checkout">Checkout</button>
+            {% else %}
+              <button class="button" type="button" disabled="disabled">Checkout opens when the store launches.</button>
+            {% endif %}
             <button class="button button--secondary" type="submit" name="update">Update cart</button>
             <a class="button button--secondary" href="{{ catalog_url }}">Continue shopping</a>
           </div>
@@ -71,18 +72,6 @@
     {% endif %}
   </div>
 </section>
-{% else %}
-  <section class="section page-banner">
-    <div class="section-inner section-head section-head--center">
-      <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>Commerce unavailable</h1>
-      <p class="section-intro">Cart and checkout functions remain disabled until separate publication and commerce approvals are complete.</p>
-      <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
-    </div>
-  </section>
-{% endif %}
-{% comment %} release-safety:commerce:end {% endcomment %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% schema %}
 {

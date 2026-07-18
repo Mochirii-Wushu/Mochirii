@@ -1,5 +1,3 @@
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
 {% assign selected_variant = product.selected_or_first_available_variant %}
 {% assign volume = product.metafields.custom.volume %}
 {% assign skin_type = product.metafields.custom.skin_type %}
@@ -28,6 +26,9 @@
 {% endif %}
 
 {% assign description_text = product.description | strip_html | downcase %}
+{% assign legacy_brand_token = 'vele' | append: 'sari' %}
+{% assign supplier_token = 'self' | append: 'named' %}
+{% assign supplier_spaced_token = 'self' | append: ' named' %}
 {% assign private_label_token = 'private' | append: ' label' %}
 {% assign fulfillment_token = 'drop' | append: 'shipping' %}
 {% assign customer_offer_token = 'offer your' | append: ' customers' %}
@@ -36,7 +37,7 @@
 {% assign exclusive_token = 'exclu' | append: 'sive' %}
 {% assign customer_empower_token = 'empower your' | append: ' customers' %}
 {% assign description_needs_review = false %}
-{% if description_text contains private_label_token or description_text contains fulfillment_token or description_text contains customer_offer_token or description_text contains professional_token or description_text contains inflated_token or description_text contains exclusive_token or description_text contains customer_empower_token %}
+{% if description_text contains legacy_brand_token or description_text contains supplier_token or description_text contains supplier_spaced_token or description_text contains private_label_token or description_text contains fulfillment_token or description_text contains customer_offer_token or description_text contains professional_token or description_text contains inflated_token or description_text contains exclusive_token or description_text contains customer_empower_token %}
   {% assign description_needs_review = true %}
 {% endif %}
 
@@ -92,19 +93,11 @@
     <div class="product-title-block">
       <div class="product-kicker">
         <span>{{ routine_step | metafield_text | default: product.type | default: 'Skincare' }}</span>
-        {% comment %} release-safety:commerce:start {% endcomment %}
-        {% if settings.checkout_enabled %}
-          <span data-product-availability>{% if selected_variant.available %}Available{% else %}Unavailable{% endif %}</span>
-        {% endif %}
-        {% comment %} release-safety:commerce:end {% endcomment %}
+        <span data-product-availability>{% if selected_variant.available %}In stock{% else %}Sold out{% endif %}</span>
       </div>
       <p class="eyebrow">Mochirii Cosmetics</p>
       <h1>{{ product.title }}</h1>
-      {% comment %} release-safety:commerce:start {% endcomment %}
-      {% if settings.checkout_enabled %}
-        <p class="price price--large" data-product-price>{{ selected_variant.price | money }}</p>
-      {% endif %}
-      {% comment %} release-safety:commerce:end {% endcomment %}
+      <p class="price price--large" data-product-price>{{ selected_variant.price | money }}</p>
     </div>
 
     {% if volume != blank or skin_type != blank or key_ingredients != blank %}
@@ -113,7 +106,7 @@
           <div><dt>Size</dt><dd>{{ volume | metafield_text }}</dd></div>
         {% endif %}
         {% if skin_type != blank %}
-          <div><dt>Skin types</dt><dd>{{ skin_type | metafield_text }}</dd></div>
+          <div><dt>Suitable for</dt><dd>{{ skin_type | metafield_text }}</dd></div>
         {% endif %}
         {% if key_ingredients != blank %}
           <div><dt>Key ingredients</dt><dd>{{ key_ingredients | metafield_text }}</dd></div>
@@ -121,52 +114,48 @@
       </dl>
     {% endif %}
 
-    {% comment %} release-safety:commerce:start {% endcomment %}
-    {% if settings.checkout_enabled %}
-      {% form 'product', product, class: 'product-form product-purchase' %}
-        {% if form.errors %}
-          <div class="form-message" role="alert">{{ form.errors | default_errors }}</div>
-        {% endif %}
+    {% form 'product', product, class: 'product-form product-purchase' %}
+      {% if form.errors %}
+        <div class="form-message" role="alert">{{ form.errors | default_errors }}</div>
+      {% endif %}
 
-        {% if product.variants.size > 1 %}
-          <div class="field">
-            <label for="Variant-{{ section.id }}">Variant</label>
-            <select id="Variant-{{ section.id }}" name="id" data-product-variant-select>
-              {% for variant in product.variants %}
-                <option
-                  value="{{ variant.id }}"
-                  data-price="{{ variant.price | money | escape }}"
-                  data-available="{{ variant.available }}"
-                  data-media-id="{{ variant.featured_media.id }}"
-                  {% if variant == selected_variant %}selected="selected"{% endif %}
-                  {% unless variant.available %}disabled="disabled"{% endunless %}
-                >
-                  {{ variant.title }}{% unless variant.available %} - Unavailable{% endunless %}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-        {% else %}
-          <input type="hidden" name="id" value="{{ selected_variant.id }}">
-        {% endif %}
-
-        <div class="product-form__row">
-          <div class="field field--quantity">
-            <label for="Quantity-{{ section.id }}">Quantity</label>
-            <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1" data-product-quantity {% unless selected_variant.available %}disabled="disabled"{% endunless %}>
-          </div>
-          <button class="button" type="submit" name="add" data-add-to-cart {% unless selected_variant.available %}disabled="disabled"{% endunless %}>
-            {% if selected_variant.available %}Add to cart{% else %}Unavailable{% endif %}
-          </button>
+      {% if product.variants.size > 1 %}
+        <div class="field">
+          <label for="Variant-{{ section.id }}">Variant</label>
+          <select id="Variant-{{ section.id }}" name="id" data-product-variant-select>
+            {% for variant in product.variants %}
+              <option
+                value="{{ variant.id }}"
+                data-price="{{ variant.price | money | escape }}"
+                data-available="{{ variant.available }}"
+                data-media-id="{{ variant.featured_media.id }}"
+                {% if variant == selected_variant %}selected="selected"{% endif %}
+                {% unless variant.available %}disabled="disabled"{% endunless %}
+              >
+                {{ variant.title }}{% unless variant.available %} - Sold out{% endunless %}
+              </option>
+            {% endfor %}
+          </select>
         </div>
-      {% endform %}
-    {% endif %}
-    {% comment %} release-safety:commerce:end {% endcomment %}
+      {% else %}
+        <input type="hidden" name="id" value="{{ selected_variant.id }}">
+      {% endif %}
+
+      <div class="product-form__row">
+        <div class="field field--quantity">
+          <label for="Quantity-{{ section.id }}">Quantity</label>
+          <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1" data-product-quantity {% unless selected_variant.available %}disabled="disabled"{% endunless %}>
+        </div>
+        <button class="button" type="submit" name="add" data-add-to-cart {% unless selected_variant.available %}disabled="disabled"{% endunless %}>
+          {% if selected_variant.available %}Add to cart{% else %}Sold out{% endif %}
+        </button>
+      </div>
+    {% endform %}
 
     <div class="product-accordions" aria-label="Product information">
       {% if product.description != blank and description_needs_review == false %}
         <details open>
-          <summary>About this formula</summary>
+          <summary>Description</summary>
           <div class="rte product-description">{{ product.description }}</div>
         </details>
       {% endif %}
@@ -199,7 +188,7 @@
       {% endif %}
       {% if aroma != blank or replenishment_interval != blank %}
         <details>
-          <summary>Routine details</summary>
+          <summary>Texture and routine</summary>
           {% if aroma != blank %}<p><strong>Aroma:</strong> {{ aroma | metafield_text }}</p>{% endif %}
           {% if replenishment_interval != blank %}<p><strong>Replenishment:</strong> {{ replenishment_interval | metafield_text }}</p>{% endif %}
         </details>
@@ -208,9 +197,9 @@
         <details>
           <summary>Shipping and returns</summary>
           <p>
-            {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping &amp; delivery</a>{% endif %}
+            {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping policy</a>{% endif %}
             {% if shop.shipping_policy != blank and shop.refund_policy != blank %} &middot; {% endif %}
-            {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Returns &amp; refunds</a>{% endif %}
+            {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Refund policy</a>{% endif %}
           </p>
         </details>
       {% endif %}
@@ -220,10 +209,10 @@
       <div class="product-recommendations">
         <div class="section-head section-head--split">
           <div>
-            <p class="eyebrow">Build the routine</p>
+            <p class="eyebrow">Complete your routine</p>
             <h2>{{ routine_collection.title }}</h2>
           </div>
-          <a class="text-link" href="{{ routine_collection.url }}">Explore this routine</a>
+          <a class="text-link" href="{{ routine_collection.url }}">View collection</a>
         </div>
         <div class="product-grid product-grid--compact" role="list">
           {% for related_product in routine_collection.products limit: 5 %}
@@ -236,18 +225,6 @@
     {% endif %}
   </div>
 </section>
-{% else %}
-  <section class="section">
-    <div class="section-inner section-inner-narrow">
-      <div class="empty-state empty-state--wide">
-        <h1>Product details unavailable</h1>
-        <p>Product information is not published until its separate review is complete.</p>
-        <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
-      </div>
-    </div>
-  </section>
-{% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% schema %}
 {

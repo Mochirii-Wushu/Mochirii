@@ -1,5 +1,3 @@
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
 {% assign catalog_collection = collections['mochirii-cosmetics'] %}
 {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
 {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
@@ -105,8 +103,6 @@
                   </label>
                 {% endfor %}
               {% when 'price_range' %}
-                {% comment %} release-safety:commerce:start {% endcomment %}
-                {% if settings.checkout_enabled %}
                 <div class="price-filter">
                   <div class="field">
                     <label for="Filter-{{ filter.min_value.param_name | handle }}">Minimum</label>
@@ -133,8 +129,6 @@
                     >
                   </div>
                 </div>
-                {% endif %}
-                {% comment %} release-safety:commerce:end {% endcomment %}
             {% endcase %}
           </div>
         </details>
@@ -170,17 +164,6 @@
     {% endpaginate %}
   </div>
 </section>
-{% else %}
-  <section class="section page-banner">
-    <div class="section-inner section-head section-head--center">
-      <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>Catalogue unavailable</h1>
-      <p class="section-intro">Product and collection information remains unpublished until its separate review is complete.</p>
-      <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
-    </div>
-  </section>
-{% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% schema %}
 {

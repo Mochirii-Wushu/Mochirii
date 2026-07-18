@@ -1,5 +1,3 @@
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
 {% assign tags_normalized = product.tags | join: ',' | downcase %}
 {% assign line_label = product.metafields.custom.routine_step | metafield_text | strip %}
 {% if line_label == blank %}
@@ -25,13 +23,9 @@
       {% if tags_normalized contains 'new' %}
         <span class="badge">New</span>
       {% endif %}
-      {% comment %} release-safety:commerce:start {% endcomment %}
-      {% if settings.checkout_enabled %}
-        {% unless product.available %}
-          <span class="badge badge--muted">Unavailable</span>
-        {% endunless %}
-      {% endif %}
-      {% comment %} release-safety:commerce:end {% endcomment %}
+      {% unless product.available %}
+        <span class="badge badge--muted">Sold out</span>
+      {% endunless %}
     </span>
   </a>
 
@@ -44,20 +38,14 @@
       <p class="product-card__benefit">{{ card_benefit | truncate: 118 }}</p>
     {% endif %}
     <div class="product-card__meta">
-      {% comment %} release-safety:commerce:start {% endcomment %}
-      {% if settings.checkout_enabled %}
-        <p class="price">
-          {% if product.price_varies %}
-            From {{ product.price_min | money }}
-          {% else %}
-            {{ product.price | money }}
-          {% endif %}
-        </p>
-      {% endif %}
-      {% comment %} release-safety:commerce:end {% endcomment %}
-      <a class="text-link product-card__cta" href="{{ product.url }}">See details</a>
+      <p class="price">
+        {% if product.price_varies %}
+          From {{ product.price_min | money }}
+        {% else %}
+          {{ product.price | money }}
+        {% endif %}
+      </p>
+      <a class="text-link product-card__cta" href="{{ product.url }}">View product</a>
     </div>
   </div>
 </article>
-{% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}

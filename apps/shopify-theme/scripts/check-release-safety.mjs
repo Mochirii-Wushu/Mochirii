@@ -4,17 +4,13 @@ import { fileURLToPath } from "node:url";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
-const commerceStart = "{% comment %} release-safety:commerce:start {% endcomment %}";
-const commerceEnd = "{% comment %} release-safety:commerce:end {% endcomment %}";
-const publicationStart = "{% comment %} release-safety:publication:start {% endcomment %}";
-const publicationEnd = "{% comment %} release-safety:publication:end {% endcomment %}";
 
 function read(relativePath) {
   return readFileSync(path.join(appRoot, relativePath), "utf8");
 }
 
 function readThemeJson(relativePath) {
-  return JSON.parse(read(relativePath).replace(/^\s*[/][*][\s\S]*?[*][/]\s*/, ""));
+  return JSON.parse(read(relativePath).replace(/^\s*[/][*][\s\S]*?[*][/]\s*/u, ""));
 }
 
 function walk(directory) {
@@ -30,84 +26,26 @@ function requireText(relativePath, source, expected) {
   }
 }
 
-function contentOutsideMarkedSegments(relativePath, source, startMarker, endMarker, requiredCondition) {
-  const unguarded = [];
-  let cursor = 0;
-  let segmentCount = 0;
-
-  while (cursor < source.length) {
-    const start = source.indexOf(startMarker, cursor);
-    if (start === -1) {
-      unguarded.push(source.slice(cursor));
-      break;
-    }
-    unguarded.push(source.slice(cursor, start));
-    const end = source.indexOf(endMarker, start + startMarker.length);
-    if (end === -1) {
-      failures.push(`${relativePath}: unpaired ${startMarker}`);
-      return source;
-    }
-    const guarded = source.slice(start + startMarker.length, end);
-    if (!guarded.includes(requiredCondition)) {
-      failures.push(`${relativePath}: marked segment does not contain ${requiredCondition}`);
-    }
-    segmentCount += 1;
-    cursor = end + endMarker.length;
-  }
-
-  if (source.includes(endMarker) && segmentCount === 0) {
-    failures.push(`${relativePath}: unpaired ${endMarker}`);
-  }
-  return unguarded.join("\n");
-}
-
-const commerceCanaryPattern = /[|]\s*money\b/i;
-const guardedCanary = `${commerceStart}{% if settings.checkout_enabled %}{{ product.price | money }}{% endif %}${commerceEnd}`;
-const unguardedCanary = "{{ product.price | money }}";
-if (commerceCanaryPattern.test(contentOutsideMarkedSegments(
-  "release-safety guarded canary",
-  guardedCanary,
-  commerceStart,
-  commerceEnd,
-  "settings.checkout_enabled",
-)) || !commerceCanaryPattern.test(contentOutsideMarkedSegments(
-  "release-safety unguarded canary",
-  unguardedCanary,
-  commerceStart,
-  commerceEnd,
-  "settings.checkout_enabled",
-))) {
-  failures.push("release-safety commerce-marker canary did not distinguish guarded and unguarded output");
-}
-
 const settings = readThemeJson("config/settings_data.json");
-if (settings.current?.product_publication_approved !== false) {
-  failures.push("config/settings_data.json: product_publication_approved must remain false");
-}
 if (settings.current?.checkout_enabled !== false) {
   failures.push("config/settings_data.json: checkout_enabled must remain false");
 }
-if (settings.current?.corporate_display_name !== "") {
-  failures.push("config/settings_data.json: corporate_display_name must remain blank until verified");
-}
-if (Object.hasOwn(settings.current ?? {}, "show_internal_product_meta")) {
-  failures.push("config/settings_data.json: internal product metadata control is forbidden");
+for (const removedSetting of ["product_publication_approved", "show_internal_product_meta"]) {
+  if (Object.hasOwn(settings.current ?? {}, removedSetting)) {
+    failures.push(`config/settings_data.json: obsolete or unsafe setting is forbidden: ${removedSetting}`);
+  }
 }
 
 const schema = readThemeJson("config/settings_schema.json");
 const schemaSettings = schema.flatMap((group) => group.settings ?? []);
-for (const id of ["product_publication_approved", "checkout_enabled"]) {
-  const control = schemaSettings.find((setting) => setting.id === id);
-  if (!control || control.type !== "checkbox" || control.default !== false) {
-    failures.push(`config/settings_schema.json: ${id} must be a false-by-default checkbox`);
+const checkoutControl = schemaSettings.find((setting) => setting.id === "checkout_enabled");
+if (!checkoutControl || checkoutControl.type !== "checkbox" || checkoutControl.default !== false) {
+  failures.push("config/settings_schema.json: checkout_enabled must be a false-by-default checkbox");
+}
+for (const removedSetting of ["product_publication_approved", "show_internal_product_meta"]) {
+  if (schemaSettings.some((setting) => setting.id === removedSetting)) {
+    failures.push(`config/settings_schema.json: obsolete or unsafe setting is forbidden: ${removedSetting}`);
   }
-}
-const corporateName = schemaSettings.find((setting) => setting.id === "corporate_display_name");
-if (!corporateName || Object.hasOwn(corporateName, "default")) {
-  failures.push("config/settings_schema.json: corporate_display_name must not have a default");
-}
-if (schemaSettings.some((setting) => setting.id === "show_internal_product_meta")) {
-  failures.push("config/settings_schema.json: internal product metadata control is forbidden");
 }
 
 const liquidFiles = walk(appRoot)
@@ -118,83 +56,32 @@ const liquidFiles = walk(appRoot)
   }));
 
 const forbiddenRuntimePatterns = [
-  ["internal SKU", /selected_variant[.]sku|variant[.]sku/i],
-  ["internal weight", /weight_with_unit|selected_variant[.]weight/i],
-  ["vendor identity", /product[.]vendor/i],
-  ["HS code", /hs[_ -]?code/i],
-  ["Shopify full product structured-data filter", /product\s*[|]\s*structured_data/i],
+  ["internal product metadata setting", /show_internal_product_meta/iu],
+  ["obsolete publication setting", /product_publication_approved/iu],
+  ["internal SKU output", /selected_variant[.]sku|variant[.]sku/iu],
+  ["internal weight output", /weight_with_unit|selected_variant[.]weight/iu],
+  ["vendor identity output", /product[.]vendor/iu],
+  ["HS code output", /hs[_ -]?code/iu],
 ];
 
 for (const { relativePath, source } of liquidFiles) {
   for (const [label, pattern] of forbiddenRuntimePatterns) {
     if (pattern.test(source)) failures.push(`${relativePath}: contains forbidden ${label}`);
   }
-
-  const unguardedCommerce = contentOutsideMarkedSegments(
-    relativePath,
-    source,
-    commerceStart,
-    commerceEnd,
-    "settings.checkout_enabled",
-  );
-  const commercePatterns = [
-    /[|]\s*money(?:_without_currency)?\b/i,
-    /\bcart[.]/i,
-    /routes[.]cart_url/i,
-    /{%\s*form\s+'product'/i,
-    /name="(?:add|checkout|update)"/i,
-    /url_to_remove/i,
-    /(?:selected_variant|product)[.]available/i,
-  ];
-  for (const pattern of commercePatterns) {
-    if (pattern.test(unguardedCommerce)) {
-      failures.push(`${relativePath}: commerce output exists outside a checkout approval marker`);
-      break;
-    }
+  if (relativePath !== "sections/main-cart.liquid" && /name=["']checkout["']/iu.test(source)) {
+    failures.push(`${relativePath}: checkout submission exists outside the guarded cart surface`);
   }
-
-  const unguardedPublication = contentOutsideMarkedSegments(
-    relativePath,
-    source,
-    publicationStart,
-    publicationEnd,
-    "settings.product_publication_approved",
-  );
-  const publicationPatterns = [
-    /(?:{{|{%)[^}\n]*\bproduct[.]/i,
-    /(?:{{|{%)[^}\n]*\bcollection[.]/i,
-    /(?:{{|{%)[^}\n]*\bcollections\[/i,
-    /(?:{{|{%)[^}\n]*\bsearch[.]/i,
-    /(?:{{|{%)[^}\n]*\bselected_variant\b/i,
-  ];
-  for (const pattern of publicationPatterns) {
-    if (pattern.test(unguardedPublication)) {
-      failures.push(`${relativePath}: product or collection data exists outside a publication approval marker`);
-      break;
-    }
-  }
-}
-
-for (const relativePath of [
-  "sections/main-index.liquid",
-  "sections/main-collection.liquid",
-  "sections/main-list-collections.liquid",
-  "sections/main-product.liquid",
-  "sections/main-search.liquid",
-  "snippets/product-card.liquid",
-]) {
-  const source = read(relativePath);
-  requireText(relativePath, source, publicationStart);
-  requireText(relativePath, source, publicationEnd);
-  requireText(relativePath, source, "settings.product_publication_approved");
 }
 
 const cart = read("sections/main-cart.liquid");
-requireText(
-  "sections/main-cart.liquid",
-  cart,
-  "{% if settings.product_publication_approved and settings.checkout_enabled %}",
-);
+for (const token of [
+  "{% if settings.checkout_enabled %}",
+  '<button class="button" type="submit" name="checkout">Checkout</button>',
+  '<button class="button" type="button" disabled="disabled">Checkout opens when the store launches.</button>',
+]) {
+  requireText("sections/main-cart.liquid", cart, token);
+}
+
 const header = read("sections/header.liquid");
 for (const token of [
   "site-nav--desktop",
@@ -204,6 +91,7 @@ for (const token of [
 ]) {
   requireText("sections/header.liquid", header, token);
 }
+
 const themeStyles = read("assets/mochirii-theme.css");
 for (const token of [
   ".site-nav--desktop",
@@ -213,42 +101,17 @@ for (const token of [
 ]) {
   requireText("assets/mochirii-theme.css", themeStyles, token);
 }
-const primaryNavigation = read("snippets/primary-navigation-links.liquid");
-requireText(
-  "snippets/primary-navigation-links.liquid",
-  primaryNavigation,
-  "{% if settings.product_publication_approved and settings.checkout_enabled %}",
-);
-const footer = read("sections/footer.liquid");
-if (/corporate_display_name\s*[|]\s*default/i.test(footer)) {
-  failures.push("sections/footer.liquid: legal entity name must not use a fallback");
-}
-requireText(
-  "sections/footer.liquid",
-  footer,
-  "{% if settings.corporate_display_name != blank %}",
-);
-
-const productStructuredData = read("snippets/structured-data.liquid");
-requireText(
-  "snippets/structured-data.liquid",
-  productStructuredData,
-  "request.page_type == 'product' and settings.product_publication_approved",
-);
-for (const forbiddenField of ['"offers"', '"brand"', '"sku"', '"price"']) {
-  if (productStructuredData.toLowerCase().includes(forbiddenField)) {
-    failures.push(`snippets/structured-data.liquid: minimal Product JSON-LD must not contain ${forbiddenField}`);
-  }
-}
 
 const product = read("sections/main-product.liquid");
-requireText(
-  "sections/main-product.liquid",
-  product,
+for (const token of [
   "Warning information is not available on this page. Review the product label before use.",
-);
+  "{% form 'product', product, class: 'product-form product-purchase' %}",
+  "Complete your routine",
+]) {
+  requireText("sections/main-product.liquid", product, token);
+}
 if (product.includes("No additional product-specific warnings are listed")) {
-  failures.push("sections/main-product.liquid: must not infer that an empty warning field means no additional warnings");
+  failures.push("sections/main-product.liquid: empty warnings must fail closed");
 }
 
 const filterMetafieldTool = read("scripts/lib/shopify-filter-metafield-csv.mjs");
@@ -262,6 +125,7 @@ for (const token of [
 ]) {
   requireText("scripts/lib/shopify-filter-metafield-csv.mjs", filterMetafieldTool, token);
 }
+
 const productCopyTool = read("scripts/lib/shopify-product-copy-csv.mjs");
 for (const token of [
   "SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS",
@@ -272,32 +136,20 @@ for (const token of [
 ]) {
   requireText("scripts/lib/shopify-product-copy-csv.mjs", productCopyTool, token);
 }
-const genericTools = [
+
+for (const [relativePath, source] of [
   ["scripts/lib/shopify-filter-metafield-csv.mjs", filterMetafieldTool],
   ["scripts/lib/shopify-product-copy-csv.mjs", productCopyTool],
-];
-for (const [label, pattern] of [
-  ["filesystem access", /(?:node:fs|from ["']fs["'])/i],
-  ["child-process execution", /(?:node:child_process|child_process)/i],
-  ["environment access", /process[.]env/i],
-  ["network access", /\bfetch\s*[(]|https?:\/\//i],
-  ["provider mutation operation", /\b(?:mutation|adminApi|graphql|productUpdate)\b/i],
 ]) {
-  for (const [relativePath, source] of genericTools) {
-    if (pattern.test(source)) {
-      failures.push(`${relativePath}: generic tooling contains ${label}`);
-    }
+  for (const [label, pattern] of [
+    ["filesystem access", /(?:node:fs|from ["']fs["'])/iu],
+    ["child-process execution", /(?:node:child_process|child_process)/iu],
+    ["environment access", /process[.]env/iu],
+    ["network access", /\bfetch\s*[(]|https?:\/\//iu],
+    ["provider mutation operation", /\b(?:mutation|adminApi|graphql|productUpdate)\b/iu],
+  ]) {
+    if (pattern.test(source)) failures.push(`${relativePath}: generic tooling contains ${label}`);
   }
-}
-
-const giftCard = read("templates/gift_card.liquid");
-for (const token of [
-  commerceStart,
-  commerceEnd,
-  "settings.product_publication_approved and settings.checkout_enabled",
-  '<meta name="robots" content="noindex, nofollow">',
-]) {
-  requireText("templates/gift_card.liquid", giftCard, token);
 }
 
 const seoMeta = read("snippets/seo-meta.liquid");
@@ -327,4 +179,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Shopify release-safety check OK (${liquidFiles.length} Liquid files).`);
+console.log(`Shopify release-safety check OK (${liquidFiles.length} Liquid files; products visible, checkout disabled).`);

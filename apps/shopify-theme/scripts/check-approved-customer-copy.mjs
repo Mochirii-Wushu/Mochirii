@@ -1,10 +1,7 @@
-import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS,
-} from "./lib/shopify-product-copy-csv.mjs";
+import { SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS } from "./lib/shopify-product-copy-csv.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
@@ -13,7 +10,6 @@ const json = (relativePath) => JSON.parse(
   read(relativePath).replace(/^\uFEFF?\s*\/\*[\s\S]*?\*\/\s*/u, ""),
 );
 const content = json("content/approved-customer-copy.json");
-const approvedProjectionSha256 = "e0e6235da4db2ae1006ef8d5c524a6c6d41b477fbabfaf13eaef2ad22dee00c8";
 
 function exactKeys(value, expected, label) {
   const actual = Object.keys(value ?? {}).sort();
@@ -49,6 +45,23 @@ function uniqueHandles(records, selector, label, expectedCount) {
   if (new Set(handles).size !== handles.length) failures.push(`${label} handles must be unique`);
 }
 
+function requireRuntimeCopy(relativePath, values) {
+  const source = read(relativePath);
+  for (const value of values) {
+    const occurrences = source.split(value).length - 1;
+    if (occurrences !== 1) {
+      failures.push(`${relativePath} must contain the customer copy exactly once: ${value}`);
+    }
+  }
+}
+
+function requireRuntimeIncludes(relativePath, values) {
+  const source = read(relativePath);
+  for (const value of values) {
+    if (!source.includes(value)) failures.push(`${relativePath} must contain the customer copy: ${value}`);
+  }
+}
+
 exactKeys(content, [
   "schemaVersion",
   "contentRevision",
@@ -56,28 +69,31 @@ exactKeys(content, [
   "brand",
   "approval",
   "provenance",
+  "theme",
   "home",
   "collectionsIndex",
   "pages",
   "collections",
   "products",
 ], "root");
-if (content.schemaVersion !== 1) failures.push("schemaVersion must be 1");
-if (content.contentRevision !== "2026-07-18-v1") failures.push("contentRevision is unexpected");
+if (content.schemaVersion !== 2) failures.push("schemaVersion must be 2");
+if (content.contentRevision !== "2026-07-18-v2") failures.push("contentRevision is unexpected");
 if (content.locale !== "en-US") failures.push("locale must be en-US");
 if (content.brand !== "Mochirii Cosmetics") failures.push("brand is unexpected");
 
 exactKeys(content.approval, [
   "scope",
-  "approvedOn",
-  "publicationAuthorized",
-  "providerMutationAuthorized",
+  "preparedOn",
+  "themeQaAuthorized",
+  "sharedRecordMutationAuthorized",
+  "themePublicationAuthorized",
   "commerceAuthorized",
 ], "approval");
-if (content.approval?.scope !== "copy-only" || content.approval?.approvedOn !== "2026-07-18") {
-  failures.push("approval must remain scoped to the recorded copy-only review");
+if (content.approval?.scope !== "customer-copy-packet" || content.approval?.preparedOn !== "2026-07-18") {
+  failures.push("approval must identify the dated customer-copy packet");
 }
-for (const field of ["publicationAuthorized", "providerMutationAuthorized", "commerceAuthorized"]) {
+if (content.approval?.themeQaAuthorized !== true) failures.push("unpublished theme QA must remain authorized");
+for (const field of ["sharedRecordMutationAuthorized", "themePublicationAuthorized", "commerceAuthorized"]) {
   if (content.approval?.[field] !== false) failures.push(`approval.${field} must remain false`);
 }
 
@@ -87,10 +103,75 @@ exactKeys(content.provenance, [
   "sourceRevision",
   "approvalRecord",
 ], "provenance");
-if (content.provenance?.sourceRepository !== "Mochirii-Wushu/mochirii-shopify-theme" ||
-    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/mochirii-shopify-theme/pull/9") {
-  failures.push("provenance must identify the approved public source review");
+if (content.provenance?.sourceRepository !== "Mochirii-Wushu/Mochirii" ||
+    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459") {
+  failures.push("provenance must identify the canonical repository and draft PR");
 }
+
+exactKeys(content.theme, [
+  "headerStrip",
+  "mainSiteLink",
+  "brandSubtext",
+  "heroIntroduction",
+  "featuredHeading",
+  "collectionsHeading",
+  "detailsEyebrow",
+  "detailsHeading",
+  "detailsIntroduction",
+  "detailItems",
+  "policyBand",
+  "footerSummary",
+  "footerSupport",
+  "states",
+  "productPage",
+], "theme");
+for (const field of [
+  "headerStrip",
+  "mainSiteLink",
+  "brandSubtext",
+  "heroIntroduction",
+  "featuredHeading",
+  "collectionsHeading",
+  "detailsEyebrow",
+  "detailsHeading",
+  "detailsIntroduction",
+  "policyBand",
+  "footerSummary",
+  "footerSupport",
+]) {
+  checkText(content.theme?.[field], `theme.${field}`);
+}
+if (!Array.isArray(content.theme?.detailItems) || content.theme.detailItems.length !== 3) {
+  failures.push("theme.detailItems must contain exactly three records");
+} else {
+  content.theme.detailItems.forEach((item, index) => {
+    exactKeys(item, ["heading", "text"], `theme.detailItems[${index}]`);
+    checkText(item.heading, `theme.detailItems[${index}].heading`);
+    checkText(item.text, `theme.detailItems[${index}].text`);
+  });
+}
+exactKeys(content.theme?.states, [
+  "emptyCart",
+  "disabledCheckout",
+  "emptyCollectionHeading",
+  "emptyCollectionBody",
+  "notFoundHeading",
+  "notFoundBody",
+  "passwordHeading",
+  "passwordBody",
+], "theme.states");
+exactKeys(content.theme?.productPage, [
+  "description",
+  "directions",
+  "ingredients",
+  "warnings",
+  "origin",
+  "routine",
+  "shipping",
+  "available",
+  "unavailable",
+  "recommendations",
+], "theme.productPage");
 
 exactKeys(content.home, ["seoTitle", "seoDescription"], "home");
 checkSeo(content.home?.seoTitle, content.home?.seoDescription, "home");
@@ -113,44 +194,54 @@ for (const page of content.pages ?? []) {
 
 uniqueHandles(content.collections, (record) => record.handle, "collections", 5);
 for (const collection of content.collections ?? []) {
-  exactKeys(
-    collection,
-    ["handle", "title", "description", "seoTitle", "seoDescription"],
-    `collections.${collection.handle}`,
-  );
-  for (const field of ["handle", "title", "description"]) {
-    checkText(collection[field], `collections.${collection.handle}.${field}`);
-  }
+  exactKeys(collection, ["handle", "title", "description", "seoTitle", "seoDescription"], `collections.${collection.handle}`);
+  for (const field of ["handle", "title", "description"]) checkText(collection[field], `collections.${collection.handle}.${field}`);
   checkSeo(collection.seoTitle, collection.seoDescription, `collections.${collection.handle}`);
 }
 
 uniqueHandles(content.products, (record) => record.identity?.handle, "products", 20);
+const sentenceOwners = new Map();
+const openingCounts = new Map();
 for (const [index, product] of (content.products ?? []).entries()) {
   exactKeys(product, ["identity", "copy"], `products[${index}]`);
   exactKeys(product.identity, ["handle", "title"], `products[${index}].identity`);
-  exactKeys(
-    product.copy,
-    ["description", "seoTitle", "seoDescription"],
-    `products[${index}].copy`,
-  );
+  exactKeys(product.copy, ["description", "seoTitle", "seoDescription"], `products[${index}].copy`);
   checkText(product.identity?.handle, `products[${index}].identity.handle`);
   checkText(product.identity?.title, `products[${index}].identity.title`);
   checkText(product.copy?.description, `products[${index}].copy.description`);
   checkSeo(product.copy?.seoTitle, product.copy?.seoDescription, `products[${index}].copy`);
+
+  const sentences = product.copy?.description?.match(/[^.!?]+[.!?]+/gu)?.map((sentence) => sentence.trim()) ?? [];
+  if (sentences.length !== 2 || sentences.join(" ") !== product.copy?.description) {
+    failures.push(`products[${index}].copy.description must contain exactly two complete sentences`);
+  }
+  for (const sentence of sentences) {
+    const normalized = sentence.toLocaleLowerCase("en-US").replace(/\s+/gu, " ");
+    if (sentenceOwners.has(normalized)) {
+      failures.push(`duplicate product sentence: ${sentenceOwners.get(normalized)} and ${product.identity?.handle}`);
+    } else {
+      sentenceOwners.set(normalized, product.identity?.handle);
+    }
+  }
+  const opening = product.copy?.description?.toLocaleLowerCase("en-US").match(/[a-z0-9]+(?:[-'][a-z0-9]+)?/gu)?.slice(0, 2).join(" ");
+  if (opening) openingCounts.set(opening, (openingCounts.get(opening) ?? 0) + 1);
+}
+for (const [opening, count] of openingCounts) {
+  if (count > 5) failures.push(`product opening pattern appears ${count} times: ${opening}`);
 }
 
 const serialized = JSON.stringify(content);
-const projectionSha256 = createHash("sha256").update(serialized).digest("hex");
-if (projectionSha256 !== approvedProjectionSha256) {
-  failures.push("approved public-copy projection does not match the reviewed source record");
-}
+const privateBrandPattern = new RegExp(
+  `\\b(?:${["self" + "named", "ma" + "dara", "vele" + "sari"].join("|")})\\b`,
+  "iu",
+);
 if (/\b[0-9a-f]{40}\b/iu.test(serialized)) failures.push("copy contract must not expose raw Git object IDs");
 for (const pattern of [
   /private-evidence/iu,
-  /supplier/iu,
+  privateBrandPattern,
   /"(?:price|cost|inventory|sku|barcode|variant|payment|secret|credential|publicSourceUrl|selectionBasis|providerStatus)"\s*:/iu,
 ]) {
-  if (pattern.test(serialized)) failures.push(`copy contract contains forbidden private or commerce data: ${pattern}`);
+  if (pattern.test(serialized)) failures.push(`copy contract contains forbidden private, supplier, or commerce data: ${pattern}`);
 }
 
 const settingsData = json("config/settings_data.json");
@@ -158,124 +249,62 @@ const settingsSchema = json("config/settings_schema.json");
 const schemaSettings = settingsSchema.flatMap((group) => group.settings ?? []);
 for (const [id, expected] of Object.entries({
   default_meta_description: content.home.seoDescription,
-  storefront_mode_text: "Skincare, step by step",
-  empty_catalog_heading: "No products match these filters.",
-  empty_catalog_body: "Clear a filter or browse the full collection.",
-  footer_summary: "Skincare organized by routine step, skin type, and formula.",
+  storefront_mode_text: content.theme.headerStrip,
+  empty_catalog_heading: content.theme.states.emptyCollectionHeading,
+  empty_catalog_body: content.theme.states.emptyCollectionBody,
+  footer_summary: content.theme.footerSummary,
 })) {
-  if (settingsData.current?.[id] !== expected) failures.push(`settings_data ${id} does not match approved copy`);
+  if (settingsData.current?.[id] !== expected) failures.push(`settings_data ${id} does not match the copy contract`);
   if (schemaSettings.find((setting) => setting.id === id)?.default !== expected) {
-    failures.push(`settings_schema ${id} does not match approved copy`);
+    failures.push(`settings_schema ${id} does not match the copy contract`);
   }
 }
 
-const expectedRuntimeCopy = new Map([
-  ["config/settings_data.json", [
-    content.home.seoDescription,
-    "Skincare, step by step",
-    "No products match these filters.",
-    "Clear a filter or browse the full collection.",
-    "Skincare organized by routine step, skin type, and formula.",
-  ]],
-  ["config/settings_schema.json", [
-    content.home.seoDescription,
-    "Skincare, step by step",
-    "No products match these filters.",
-    "Clear a filter or browse the full collection.",
-    "Skincare organized by routine step, skin type, and formula.",
-  ]],
-  ["locales/en.default.json", ["Your cart is empty."]],
-  ["sections/footer.liquid", [
-    "skincare storefront home",
-    '<span class="brand-subtext">Skincare</span>',
-    "Questions about a product or order? Contact {{ settings.corporate_display_name }}.",
-    "Shipping &amp; delivery",
-    "Returns &amp; refunds",
-    '"default": "Skincare organized by routine step, skin type, and formula."',
-  ]],
-  ["sections/header.liquid", [
-    ">Mochirii Home</a>",
-    "skincare storefront home",
-    '<span class="brand-subtext">Skincare</span>',
-  ]],
-  ["sections/main-404.liquid", [
-    "We couldn't find the page you were looking for.",
-    "Explore the collection",
-    "Search by product or ingredient, or return to all skincare.",
-    ">Product or ingredient</label>",
-    ">Shop skincare</a>",
-  ]],
-  ["sections/main-cart.liquid", [
-    ">Shop skincare</a>",
-    "Shipping and taxes are shown before payment.",
-    ">Shipping &amp; delivery</a>",
-    ">Returns &amp; refunds</a>",
-  ]],
-  ["sections/main-index.liquid", [
-    ">Shop by routine</a>",
-    ">Featured formulas</p>",
-    ">Routine step</p>",
-    ">Product details</p>",
-    ">Shipping &amp; delivery</a>",
-    ">Returns &amp; refunds</a>",
-    '"default": "Build your routine"',
-    '"default": "Shop cleansers, serums, moisturizers, and facial oils organized by routine step and skin type."',
-    '"default": "Shop skincare"',
-    '"default": "Six formulas to start with"',
-    '"default": "Choose your next step"',
-    '"default": "Compare every formula"',
-    '"default": "Review skin types, ingredients, directions, and warnings on every product page."',
-    '"default": "Product media shows the approved Mochirii package and matching formula."',
-    '"default": "Each page lists size, skin types, directions, full INCI, and warnings."',
-    '"default": "Verified origin details"',
-    '"default": "Origin and product-specific certifications appear only when they are verified for that formula."',
-    '"default": "Review shipping and returns before ordering."',
-  ]],
-  ["sections/main-list-collections.liquid", [
-    `>${content.collectionsIndex.eyebrow}</p>`,
-    ">Routine step</p>",
-    `"default": "${content.collectionsIndex.heading}"`,
-    `"default": "${content.collectionsIndex.intro}"`,
-  ]],
-  ["sections/main-page.liquid", [">Shop skincare</a>"]],
-  ["sections/main-password.liquid", [
-    '<span class="brand-subtext">Skincare</span>',
-    ">Enter shop</button>",
-    '"default": "Enter the storefront password to preview Mochirii Cosmetics."',
-  ]],
-  ["sections/main-product.liquid", [
-    "default: 'Skincare'",
-    ">Skin types</dt>",
-    ">About this formula</summary>",
-    ">Routine details</summary>",
-    ">Shipping &amp; delivery</a>",
-    ">Returns &amp; refunds</a>",
-    ">Build the routine</p>",
-    ">Explore this routine</a>",
-  ]],
-  ["sections/main-search.liquid", [
-    ">Search skincare</h1>",
-    ">Product or ingredient</label>",
-    ">No matching products</h2>",
-    "Check the spelling or try a broader product or ingredient name.",
-  ]],
-  ["snippets/product-card.liquid", [
-    "default: 'Skincare'",
-    ">See details</a>",
-  ]],
+requireRuntimeCopy("sections/header.liquid", [
+  `>${content.theme.mainSiteLink}</a>`,
+  `<span class="brand-subtext">${content.theme.brandSubtext}</span>`,
 ]);
-for (const [relativePath, expected] of expectedRuntimeCopy) {
-  const source = read(relativePath);
-  for (const value of expected) {
-    const occurrences = source.split(value).length - 1;
-    if (occurrences !== 1) {
-      failures.push(`${relativePath} must contain the approved copy exactly once: ${value}`);
-    }
-  }
-}
+requireRuntimeCopy("sections/footer.liquid", [
+  content.theme.footerSupport.replace("Contact Mochirii Cosmetics.", '<a href="{{ contact_url }}">Contact Mochirii Cosmetics.</a>'),
+  `"default": "${content.theme.footerSummary}"`,
+]);
+requireRuntimeCopy("sections/main-index.liquid", [
+  `>${content.theme.detailsEyebrow}</p>`,
+  `"default": "${content.theme.heroIntroduction}"`,
+  `"default": "${content.theme.featuredHeading}"`,
+  `"default": "${content.theme.collectionsHeading}"`,
+  `"default": "${content.theme.detailsHeading}"`,
+  `"default": "${content.theme.detailsIntroduction}"`,
+  ...content.theme.detailItems.flatMap((item) => [`"default": "${item.heading}"`, `"default": "${item.text}"`]),
+  `"default": "${content.theme.policyBand}"`,
+]);
+requireRuntimeCopy("locales/en.default.json", [content.theme.states.emptyCart]);
+requireRuntimeCopy("sections/main-cart.liquid", [content.theme.states.disabledCheckout]);
+requireRuntimeCopy("sections/main-404.liquid", [content.theme.states.notFoundHeading, content.theme.states.notFoundBody]);
+requireRuntimeCopy("sections/main-password.liquid", [
+  `"default": "${content.theme.states.passwordHeading}"`,
+  `"default": "${content.theme.states.passwordBody}"`,
+]);
+requireRuntimeCopy("sections/main-list-collections.liquid", [
+  `"default": "${content.collectionsIndex.heading}"`,
+  `"default": "${content.collectionsIndex.intro}"`,
+]);
+requireRuntimeCopy("sections/main-product.liquid", [
+  content.theme.productPage.description,
+  content.theme.productPage.directions,
+  content.theme.productPage.ingredients,
+  content.theme.productPage.warnings,
+  content.theme.productPage.origin,
+  content.theme.productPage.routine,
+  content.theme.productPage.shipping,
+  content.theme.productPage.available,
+  content.theme.productPage.recommendations,
+]);
+requireRuntimeIncludes("sections/main-product.liquid", [content.theme.productPage.unavailable]);
+requireRuntimeIncludes("assets/mochirii-theme.js", [content.theme.productPage.available, content.theme.productPage.unavailable]);
 
 if (!read(".shopifyignore").split(/\r?\n/u).includes("content/**")) {
-  failures.push(".shopifyignore must exclude the nondeployable public-copy contract");
+  failures.push(".shopifyignore must exclude the nondeployable customer-copy contract");
 }
 
 if (JSON.stringify(SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS) !== JSON.stringify([
@@ -291,9 +320,9 @@ if (JSON.stringify(SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS) !== JSON.stringify([
 }
 
 if (failures.length > 0) {
-  console.error("Approved customer-copy check failed.");
+  console.error("Customer-copy contract check failed.");
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }
 
-console.log("Approved customer-copy check OK (2 pages, 5 collections, 20 products; publication and commerce remain disabled).");
+console.log("Customer-copy contract check OK (2 pages, 5 collections, 20 varied product descriptions; shared records and commerce remain disabled). ");

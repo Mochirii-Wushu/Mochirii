@@ -1,12 +1,10 @@
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
 <section class="section page-banner">
   <div class="section-inner section-head section-head--center">
     <p class="eyebrow">Mochirii Cosmetics</p>
-    <h1>Search skincare</h1>
+    <h1>Search products</h1>
     <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
       <div class="field">
-        <label for="SearchInput-{{ section.id }}">Product or ingredient</label>
+        <label for="SearchInput-{{ section.id }}">Product name or ingredient</label>
         <input
           id="SearchInput-{{ section.id }}"
           type="search"
@@ -44,25 +42,14 @@
           {% endif %}
         {% else %}
           <div class="empty-state empty-state--wide">
-            <h2>No matching products</h2>
-            <p>Check the spelling or try a broader product or ingredient name.</p>
+            <h2>No products found.</h2>
+            <p>Clear a filter or browse all skincare.</p>
           </div>
         {% endif %}
       {% endpaginate %}
     </div>
   </section>
 {% endif %}
-{% else %}
-  <section class="section page-banner">
-    <div class="section-inner section-head section-head--center">
-      <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>Product search unavailable</h1>
-      <p class="section-intro">Search remains disabled until product publication is separately approved.</p>
-      <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
-    </div>
-  </section>
-{% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% schema %}
 {

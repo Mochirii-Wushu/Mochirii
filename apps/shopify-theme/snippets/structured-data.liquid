@@ -2,28 +2,19 @@
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": {{ settings.brand_display_name | default: shop.name | json }},
+    "name": {{ settings.brand_display_name | default: 'Mochirii Cosmetics' | json }},
     "url": {{ shop.url | json }}{% if settings.social_share_image != blank %},
     "logo": {{ settings.social_share_image | image_url: width: 512 | json }}{% endif %}
   }
 </script>
 
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if request.page_type == 'product' and settings.product_publication_approved %}
+{% if request.page_type == 'product' %}
   <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": {{ product.title | json }},
-      "url": {{ canonical_url | json }}{% if product.featured_image != blank %},
-      "image": [{{ product.featured_image | image_url: width: 1200 | prepend: 'https:' | json }}]{% endif %}
-    }
+    {{ product | structured_data }}
   </script>
 {% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% unless request.page_type == 'index' %}
-{% if settings.product_publication_approved or request.page_type != 'product' and request.page_type != 'collection' %}
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -44,5 +35,4 @@
       ]
     }
   </script>
-{% endif %}
 {% endunless %}

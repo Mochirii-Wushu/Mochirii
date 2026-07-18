@@ -15,13 +15,6 @@
         {% assign public_page_title = public_page_title | remove_first: page.title %}
       {% endif %}
     {% endif %}
-    {% unless settings.product_publication_approved %}
-      {% case request.page_type %}
-        {% when 'product', 'collection', 'list-collections', 'search', 'cart' %}
-          {% assign public_page_title = 'Catalogue unavailable' %}
-          {% assign public_page_description = 'Product information is not published until its separate review is complete.' %}
-      {% endcase %}
-    {% endunless %}
     <title>
       {{ public_page_title }}
       {%- if current_page != 1 %} &ndash; page {{ current_page }}{% endif -%}

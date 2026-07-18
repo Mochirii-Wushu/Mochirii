@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Mochirii Cosmetics",
-    "theme_version": "0.4.0",
+    "theme_version": "0.5.0",
     "theme_author": "Mochirii Cosmetics",
     "theme_documentation_url": "https://mochirii.com",
     "theme_support_url": "https://mochirii.com"
@@ -19,8 +19,8 @@
       {
         "type": "text",
         "id": "corporate_display_name",
-        "label": "Verified corporate/legal name",
-        "info": "Leave blank until the exact legal entity name is approved for public use."
+        "label": "Corporate/legal name",
+        "default": "Mochirii Cosmetics"
       }
     ]
   },
@@ -36,7 +36,7 @@
         "type": "textarea",
         "id": "default_meta_description",
         "label": "Default search description",
-        "default": "Shop Mochirii Cosmetics skincare by routine step, with ingredients, directions, skin types, and product details for every formula."
+        "default": "Shop Mochirii Cosmetics skincare by routine, with ingredients, directions, skin suitability, and product details for every formula."
       }
     ]
   },
@@ -70,25 +70,25 @@
         "type": "text",
         "id": "storefront_mode_text",
         "label": "Storefront mode text",
-        "default": "Skincare, step by step"
+        "default": "Skincare by routine"
       },
       {
         "type": "text",
         "id": "empty_catalog_heading",
         "label": "Empty catalog heading",
-        "default": "No products match these filters."
+        "default": "No products found."
       },
       {
         "type": "textarea",
         "id": "empty_catalog_body",
         "label": "Empty catalog body",
-        "default": "Clear a filter or browse the full collection."
+        "default": "Clear a filter or browse all skincare."
       },
       {
         "type": "textarea",
         "id": "footer_summary",
         "label": "Footer summary",
-        "default": "Skincare organized by routine step, skin type, and formula."
+        "default": "Skincare for cleansing, hydrating, brightening, and nourishing routines."
       }
     ]
   },
@@ -97,16 +97,9 @@
     "settings": [
       {
         "type": "checkbox",
-        "id": "product_publication_approved",
-        "label": "Publish approved product information",
-        "info": "Enable only after the separate product, asset, regulatory, and legal review is complete.",
-        "default": false
-      },
-      {
-        "type": "checkbox",
         "id": "checkout_enabled",
-        "label": "Enable approved commerce",
-        "info": "Effective only when product publication is also approved. Enable only after the separate commerce launch approval.",
+        "label": "Enable checkout",
+        "info": "Enable only after payment setup and checkout testing are complete.",
         "default": false
       }
     ]

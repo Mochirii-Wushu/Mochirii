@@ -9,12 +9,14 @@
   launch ledgers.
 - Public operator tooling must remain pure and generic: no real product facts,
   source identifiers, private paths, provider reads/writes, or mutation calls.
-- Approved public copy may live under `content`, but it must remain excluded
-  from the packaged theme and may not imply publication, provider mutation, or
-  commerce approval.
-- Keep `product_publication_approved` and `checkout_enabled` false, and keep the
-  corporate/legal name blank. Product publication, password removal, checkout
-  or payment activation, orders, product mutations, domains, and paid resources
-  require separate explicit approval and must not be automated by CI.
+- Versioned customer-copy contracts may live under `content`, but they must
+  remain excluded from the packaged theme and may not imply shared-record
+  mutation, theme publication, or commerce approval.
+- Keep the twenty customer-approved products visible and keep
+  `checkout_enabled` false. Never add a public internal-metadata control or
+  restore the obsolete `product_publication_approved` gate. Password removal,
+  checkout or payment activation, orders, shared product/page/policy mutations,
+  domains, and paid resources require separate explicit approval and must not
+  be automated by CI.
 - Run `npm ci`, `npm run check`, `npm run theme:package`, and
   `git diff --check` before handoff.

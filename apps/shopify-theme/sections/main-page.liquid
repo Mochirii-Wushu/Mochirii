@@ -1,14 +1,9 @@
 {% assign page_handle_downcase = page.handle | downcase %}
-{% assign catalog_url = routes.root_url %}
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
-  {% assign catalog_collection = collections['mochirii-cosmetics'] %}
-  {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
-  {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
-    {% assign catalog_url = catalog_collection.url %}
-  {% endif %}
+{% assign catalog_collection = collections['mochirii-cosmetics'] %}
+{% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+{% if catalog_collection != blank and catalog_collection.products_count > 0 %}
+  {% assign catalog_url = catalog_collection.url %}
 {% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 
 {% if page_handle_downcase contains 'contact' %}
   <section class="section page-banner">
@@ -55,12 +50,8 @@
         <article class="page-panel rte prose">{{ page.content }}</article>
       {% else %}
         <div class="empty-state empty-state--wide">
-          <h2>This page is being prepared.</h2>
-          {% if settings.product_publication_approved %}
-            <a class="button button--secondary" href="{{ catalog_url }}">Shop skincare</a>
-          {% else %}
-            <a class="button button--secondary" href="{{ routes.root_url }}">Return to storefront</a>
-          {% endif %}
+          <h2>We couldn't display this page.</h2>
+          <a class="button button--secondary" href="{{ catalog_url }}">Browse all skincare</a>
         </div>
       {% endif %}
     </div>

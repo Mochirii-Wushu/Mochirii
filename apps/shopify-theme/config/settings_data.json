@@ -10,16 +10,15 @@
 {
   "current": {
     "brand_display_name": "Mochirii Cosmetics",
-    "corporate_display_name": "",
+    "corporate_display_name": "Mochirii Cosmetics",
     "background_color": "#f7f8f5",
     "text_color": "#13231d",
     "accent_color": "#1f6b58",
-    "default_meta_description": "Shop Mochirii Cosmetics skincare by routine step, with ingredients, directions, skin types, and product details for every formula.",
-    "storefront_mode_text": "Skincare, step by step",
-    "empty_catalog_heading": "No products match these filters.",
-    "empty_catalog_body": "Clear a filter or browse the full collection.",
-    "footer_summary": "Skincare organized by routine step, skin type, and formula.",
-    "product_publication_approved": false,
+    "default_meta_description": "Shop Mochirii Cosmetics skincare by routine, with ingredients, directions, skin suitability, and product details for every formula.",
+    "storefront_mode_text": "Skincare by routine",
+    "empty_catalog_heading": "No products found.",
+    "empty_catalog_body": "Clear a filter or browse all skincare.",
+    "footer_summary": "Skincare for cleansing, hydrating, brightening, and nourishing routines.",
     "checkout_enabled": false
   }
 }

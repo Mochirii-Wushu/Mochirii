@@ -1,15 +1,10 @@
-{% assign catalog_url = routes.root_url %}
+{% assign ritual_collection = collections['mochirii-cosmetics'] %}
+{% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
 {% assign about_url = routes.root_url | append: 'pages/about' %}
 {% assign contact_url = routes.root_url | append: 'pages/contact' %}
-{% comment %} release-safety:publication:start {% endcomment %}
-{% if settings.product_publication_approved %}
-  {% assign ritual_collection = collections['mochirii-cosmetics'] %}
-  {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
-  {% if ritual_collection != blank and ritual_collection.products_count > 0 %}
-    {% assign catalog_url = ritual_collection.url %}
-  {% endif %}
+{% if ritual_collection != blank and ritual_collection.products_count > 0 %}
+  {% assign catalog_url = ritual_collection.url %}
 {% endif %}
-{% comment %} release-safety:publication:end {% endcomment %}
 {% assign primary_menu = section.settings.main_menu %}
 {% if primary_menu == blank %}
   {% assign primary_menu = linklists['main-menu'] %}
@@ -20,7 +15,7 @@
     <div class="store-mode-strip">
       <div class="section-inner store-mode-strip__inner">
         <span>{{ settings.storefront_mode_text }}</span>
-        <a href="https://mochirii.com" rel="noopener">Mochirii Home</a>
+        <a href="https://mochirii.com" rel="noopener">Mochirii Guild</a>
       </div>
     </div>
   {% endif %}
