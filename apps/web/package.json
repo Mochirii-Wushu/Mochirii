@@ -76,6 +76,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "typescript": "^5",
-    "vercel": "55.0.0"
+    "vercel": "56.3.2"
   }
 }
