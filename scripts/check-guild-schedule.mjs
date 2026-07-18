@@ -3,7 +3,7 @@ import path from "node:path";
 import { siteUrl } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
-const schedule = JSON.parse(readFileSync(path.join(root, "data/guild-schedule.json"), "utf8"));
+const schedule = JSON.parse(readFileSync(path.join(root, "apps/web/public/data/guild-schedule.json"), "utf8"));
 const failures = [];
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 

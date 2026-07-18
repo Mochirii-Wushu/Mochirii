@@ -67,7 +67,7 @@ async function handleRequest(req: Request): Promise<Response> {
       {
         ok: false,
         error: "invalid_user_id",
-        message: "A valid Supabase user id is required.",
+        message: "A valid Member user ID is required.",
       },
       400,
     );

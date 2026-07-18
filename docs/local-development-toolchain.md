@@ -55,13 +55,16 @@ npm run build
 npm run vercel:build:local
 ```
 
-For root static browser smoke:
+For a production-like Next.js browser smoke:
 
 ```powershell
 npm run smoke:gallery:serve
 # In another terminal:
 npm run smoke:gallery
 ```
+
+This starts the canonical Next.js app; the retired root static server is no
+longer part of local development.
 
 ## Source Basis
 

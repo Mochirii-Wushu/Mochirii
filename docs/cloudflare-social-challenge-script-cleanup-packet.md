@@ -25,7 +25,7 @@ The 2026-07-07 upload deletion validation also found that cache-busted deleted m
 - Cloudflare Cache Rules: https://developers.cloudflare.com/cache/how-to/cache-rules/
 - Cloudflare Purge Cache: https://developers.cloudflare.com/cache/how-to/purge-cache/
 - Cloudflare Default Cache Behavior: https://developers.cloudflare.com/cache/concepts/default-cache-behavior/
-- Repo provider approval rules: `docs/integration-operations-runbook.md`
+- Repo provider approval rules: `docs/operations/integration-operations-runbook.md`
 
 ## Recommended Changes
 

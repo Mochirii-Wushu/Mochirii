@@ -25,6 +25,7 @@ const historicalAllowlist = new Set([
 
 const allowedPrefixes = [
   "reports/",
+  "docs/operations/",
 ];
 
 const oldResidues = [

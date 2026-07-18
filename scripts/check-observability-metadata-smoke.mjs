@@ -155,7 +155,7 @@ function checkProductionSmokeCoverage() {
 }
 
 function checkDocs() {
-  const deployment = read("docs/deployment.md");
+  const deployment = read("docs/operations/deployment.md");
   const currentState = read("docs/current-live-state.md");
   const readme = read("apps/web/README.md");
 

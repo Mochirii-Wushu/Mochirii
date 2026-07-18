@@ -32,11 +32,10 @@ const files = {
   pixelfedSocialSync: "supabase/functions/sync-pixelfed-social-account/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
-  deployment: "docs/deployment.md",
+  deployment: "docs/operations/deployment.md",
   appReadme: "apps/web/README.md",
   currentLiveState: "docs/current-live-state.md",
   securityPolicy: "SECURITY.md",
-  securityTxt: ".well-known/security.txt",
   appSecurityTxt: "apps/web/public/.well-known/security.txt",
   securityScanReport: "reports/security-scan-remediation-2026-06-10.md",
 };
@@ -99,8 +98,7 @@ const deployment = read(files.deployment);
 const appReadme = read(files.appReadme);
 const currentLiveState = read(files.currentLiveState);
 const securityPolicy = read(files.securityPolicy);
-const securityTxt = read(files.securityTxt);
-const appSecurityTxt = read(files.appSecurityTxt);
+const securityTxt = read(files.appSecurityTxt);
 const securityScanReport = read(files.securityScanReport);
 
 function assertNoCurrentReportOnlyClaim(label, text) {
@@ -515,7 +513,7 @@ assertMatches(
   "Access-Control-Allow-Origin",
   "Cloudflare remains DNS-only",
   "Supabase remains the authority",
-  "Discord event schedule source is `data/guild-schedule.json`",
+  "Discord event schedule source is `apps/web/public/data/guild-schedule.json`",
   "Vercel Web Analytics and Speed Insights",
 ].forEach((snippet) => assertIncludes("current live state docs", currentLiveState, snippet));
 
@@ -526,10 +524,6 @@ assertMatches(
   `Canonical: ${siteUrl("/.well-known/security.txt")}`,
   "Expires: 2027-06-10T00:00:00Z",
 ].forEach((snippet) => assertIncludes("security.txt", securityTxt, snippet));
-
-if (securityTxt !== appSecurityTxt) {
-  failures.push("security.txt: root rollback copy and Next public copy must match exactly.");
-}
 
 assertMatches(
   "security.txt",

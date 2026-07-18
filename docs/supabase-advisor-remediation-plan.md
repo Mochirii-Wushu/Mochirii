@@ -12,7 +12,7 @@ This packet records the linked Supabase advisor evidence and the protected-PR re
 - Supabase Row Level Security: https://supabase.com/docs/guides/database/postgres/row-level-security
 - Supabase explicit Data API grants changelog: https://supabase.com/changelog
 - Repo RLS summary: `supabase/README.md`
-- Operations approval rules: `docs/integration-operations-runbook.md`
+- Operations approval rules: `docs/operations/integration-operations-runbook.md`
 
 ## Current Advisor Evidence
 

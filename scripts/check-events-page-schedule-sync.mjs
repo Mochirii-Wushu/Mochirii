@@ -21,8 +21,8 @@ const eventsSource = readPublicPageExport(repoRoot, "EventsPage", failures).text
 const boardSource = readText("apps/web/components/public-pages/EventsBoard.tsx");
 const cssSource = readAppCss().replace(/\r\n/g, "\n");
 const scheduleSource = readText("apps/web/lib/guild-schedule.ts");
-const schedule = readJsonFile("data/guild-schedule.json");
-const legacyEvents = readJsonFile("data/events.json");
+const schedule = readJsonFile("apps/web/public/data/guild-schedule.json");
+const legacyEvents = readJsonFile("apps/web/public/data/events.json");
 
 if (!eventsSource) fail("EventsPage source block not found.");
 assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData)");

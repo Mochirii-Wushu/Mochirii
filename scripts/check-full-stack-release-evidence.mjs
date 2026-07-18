@@ -115,9 +115,9 @@ function inspectLocalReleaseSurface() {
 
   const requiredFiles = [
     "AGENTS.md",
-    "docs/deployment.md",
+    "docs/operations/deployment.md",
     "docs/current-live-state.md",
-    "docs/dns-cutover-readiness-and-rollback.md",
+    "docs/operations/history/dns-cutover-readiness-and-rollback.md",
     "docs/member-profiles-and-rank-roles.md",
     "docs/reaper-modmail-audit.md",
     "docs/mochi-pets-visual-polish.md",

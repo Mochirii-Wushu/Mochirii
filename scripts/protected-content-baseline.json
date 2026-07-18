@@ -4,7 +4,7 @@
   "fields": [
     {
       "id": "home.seal.verse",
-      "file": "data/home.json",
+      "file": "apps/web/public/data/home.json",
       "path": [
         "seal",
         "verse"
@@ -13,7 +13,7 @@
     },
     {
       "id": "recruitment.content.paragraphs",
-      "file": "data/recruitment.json",
+      "file": "apps/web/public/data/recruitment.json",
       "path": [
         "content",
         "paragraphs"
@@ -22,7 +22,7 @@
     },
     {
       "id": "recruitment.content.conclusion",
-      "file": "data/recruitment.json",
+      "file": "apps/web/public/data/recruitment.json",
       "path": [
         "content",
         "conclusion"
@@ -31,7 +31,7 @@
     },
     {
       "id": "twills.profile.bio",
-      "file": "data/twills.json",
+      "file": "apps/web/public/data/twills.json",
       "path": [
         "profile",
         "bio"

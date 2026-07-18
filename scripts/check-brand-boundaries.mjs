@@ -134,6 +134,7 @@ for (const relativePath of trackedFiles) {
   }
 
   const absolutePath = path.join(repoRoot, relativePath);
+  if (!existsSync(absolutePath)) continue;
   const extension = path.extname(relativePath).toLowerCase();
   const basename = path.basename(relativePath);
   if (!textExtensions.has(extension) && !extensionlessTextFiles.has(basename)) continue;

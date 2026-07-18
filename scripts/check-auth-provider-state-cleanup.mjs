@@ -23,7 +23,6 @@ const providerRegistry = read("apps/web/lib/supabase/auth-providers.ts");
 const verifyMemberAccess = read("supabase/functions/verify-member-access/index.ts");
 const reviewMemberVerification = read("supabase/functions/review-member-verification/index.ts");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
-const staticLeaderDashboard = read("leader-dashboard.js");
 const previewSmoke = read("scripts/smoke-member-verification-preview.mjs");
 const uuidPatternSnippet = "const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;";
 
@@ -121,12 +120,6 @@ assertIncludes(
   "Revoke",
   "redacted note",
 ].forEach((snippet) => assertIncludes("Leader Dashboard review surface", leaderDashboard, snippet));
-
-[
-  "reviewMemberVerification",
-  "data-member-verification-action",
-  "renderMemberVerificationResult",
-].forEach((snippet) => assertIncludes("static Leader Dashboard review surface", staticLeaderDashboard, snippet));
 
 [
   'import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";',

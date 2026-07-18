@@ -2,7 +2,9 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const dataDir = path.join(root, "data");
+const webPublicRoot = path.join(root, "apps", "web", "public");
+const dataDir = path.join(root, "apps", "web", "public", "data");
+const nextConfig = readFileSync(path.join(root, "apps", "web", "next.config.ts"), "utf8");
 
 const topLevelManifest = {
   "announcements.json": ["meta", "items"],
@@ -22,10 +24,10 @@ const topLevelManifest = {
 };
 
 const protectedPaths = new Set([
-  "data/home.json.seal.verse",
-  "data/recruitment.json.content.paragraphs",
-  "data/recruitment.json.content.conclusion",
-  "data/twills.json.profile.bio",
+  "apps/web/public/data/home.json.seal.verse",
+  "apps/web/public/data/recruitment.json.content.paragraphs",
+  "apps/web/public/data/recruitment.json.content.conclusion",
+  "apps/web/public/data/twills.json.profile.bio",
 ]);
 
 const requiredGalleryItemKeys = ["id", "src", "alt", "caption", "category", "tags", "full", "thumb", "galleryAddedAt"];
@@ -88,7 +90,7 @@ function isIsoUtc(value) {
 
 function pathExists(localPath) {
   const cleaned = String(localPath || "").replace(/^\.\//, "").split(/[?#]/)[0];
-  return cleaned && existsSync(path.join(root, cleaned));
+  return cleaned && existsSync(path.join(webPublicRoot, cleaned));
 }
 
 function validateTopLevel(fileName, data) {
@@ -154,8 +156,8 @@ function validateHref(filePath, valuePath, value) {
   }
 
   const target = text.replace(/^\.\//, "").split(/[?#]/)[0];
-  if (!existsSync(path.join(root, target))) {
-    addFailure(`${filePath}.${valuePath}: missing href target ${text}.`);
+  if (!nextConfig.includes(`["/${target}",`)) {
+    addFailure(`${filePath}.${valuePath}: missing Next redirect for ${text}.`);
   }
 }
 
@@ -173,7 +175,7 @@ function validateGenericValue(filePath, valuePath, key, value, parent) {
     const isAllowedGameNamePath =
       keyName === "title" ||
       valuePath.includes(".meta.") ||
-      fullPath === "data/home.json.hero.subtitle";
+      fullPath === "apps/web/public/data/home.json.hero.subtitle";
     if (/Where Winds Meet/i.test(value) && !isAllowedGameNamePath) {
       addFailure(`${fullPath}: visible body copy should not contain the exact game name outside allowed title/metadata contexts.`);
     }
@@ -213,7 +215,7 @@ function walkData(filePath, value, trail = [], parent = null) {
 }
 
 function validateGallery(data) {
-  const filePath = "data/gallery.json";
+  const filePath = "apps/web/public/data/gallery.json";
   const categories = Array.isArray(data.categories) ? data.categories : [];
   const categorySlugs = new Set();
   const itemIds = new Set();
@@ -332,7 +334,7 @@ function isTime24(value) {
 }
 
 function validateGuildSchedule(data) {
-  const filePath = "data/guild-schedule.json";
+  const filePath = "apps/web/public/data/guild-schedule.json";
   if (data?.timezone?.label !== "UTC+8") addFailure(`${filePath}.timezone.label: expected UTC+8.`);
   if (data?.timezone?.displayLabel !== "Singapore Time (UTC+8)") {
     addFailure(`${filePath}.timezone.displayLabel: expected Singapore Time (UTC+8).`);
@@ -380,7 +382,7 @@ function validateAllData() {
     .sort();
 
   files.forEach((fileName) => {
-    const filePath = `data/${fileName}`;
+    const filePath = `apps/web/public/data/${fileName}`;
     const data = readJson(filePath);
 
     validateTopLevel(fileName, data);

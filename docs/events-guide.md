@@ -16,11 +16,11 @@ Keep this page focused on times, RSVP notes, runs, and the rhythm of gathering.
 
 ## 2. Data Source
 
-- Events shell copy lives in `data/events.json`.
-- Rolling event timing and the live Next Events board live in `data/guild-schedule.json`.
+- Events shell copy lives in `apps/web/public/data/events.json`.
+- Rolling event timing and the live Next Events board live in `apps/web/public/data/guild-schedule.json`.
 - The live Next Events board is schedule-first: it renders one card per Discord/Reaper-managed event type from `websiteEventCardsFromSchedule`, using schedule-derived dates, Singapore Time (UTC+8), and `discordCoverImage` art.
-- `data/guild-schedule.json` keeps `timezone.label` as `UTC+8` and `offsetMinutes` as `480` for Discord and machine compatibility. Website rendering uses `timezone.displayLabel` (`Singapore Time (UTC+8)`) and `timezone.ianaZone` (`Asia/Singapore`).
-- `data/events.json` is page-shell copy only for the Next app: meta, hero, featured lead/bullets fallback, recurring intro, participation text, and fallback content.
+- `apps/web/public/data/guild-schedule.json` keeps `timezone.label` as `UTC+8` and `offsetMinutes` as `480` for Discord and machine compatibility. Website rendering uses `timezone.displayLabel` (`Singapore Time (UTC+8)`) and `timezone.ianaZone` (`Asia/Singapore`).
+- `apps/web/public/data/events.json` is page-shell copy only for the Next app: meta, hero, featured lead/bullets fallback, recurring intro, participation text, and fallback content.
 - Keep JSON valid: no trailing commas, comments, or unquoted keys.
 - Preserve the current schema unless the matching renderer is updated in the same scoped task.
 - Add only fields that `events.js` actually supports.
@@ -31,7 +31,7 @@ Current data shape:
 
 - `meta`: page kicker, title, intro, updated date, timezone label, badges, and hero image paths.
 - `featured`: featured-event lead, tag, fallback date, fallback time, fallback timezone, fallback title, fallback image, optional `href`, optional `linkLabel`, and `bullets`.
-- `upcoming`: legacy/fallback static event-board data for the rollback surface. It is not the live Next Events board authority.
+- `upcoming`: fallback event-board data. It is not the live schedule authority.
 - `recurring`: recurring-events intro and an `items` array with `title` and `summary`.
 - `participation`: participation blocks with `title` and `body`.
 
@@ -77,7 +77,7 @@ Filter behavior:
 - Buttons are real `button` elements.
 - Active state uses `aria-pressed`.
 - The event count updates in a polite live region.
-- The live Next event board renders the eight Discord/Reaper-managed schedule event types from `data/guild-schedule.json`.
+- The live Next event board renders the eight Discord/Reaper-managed schedule event types from `apps/web/public/data/guild-schedule.json`.
 - The live Next event board is a bounded scroll panel: filters and count stay visible, while the event-card results list scrolls internally.
 
 ## 5. Empty States
@@ -183,6 +183,6 @@ Use `npm run smoke:gallery` only as a general regression check when relevant to 
 
 Events work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`

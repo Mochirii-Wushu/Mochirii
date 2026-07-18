@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Reaper syncs the website schedule into Discord Scheduled Events after the website release is live. The source of truth is `data/guild-schedule.json`, mirrored to `apps/web/public/data/guild-schedule.json` and served at:
+Reaper syncs the website schedule into Discord Scheduled Events after the website release is live. The source of truth is `apps/web/public/data/guild-schedule.json`, mirrored to `apps/web/public/data/guild-schedule.json` and served at:
 
 ```text
 https://mochirii.com/data/guild-schedule.json
@@ -22,7 +22,7 @@ Rules:
 - The caller must have the configured Moderator role.
 - `apply` also requires Discord Create Events and Manage Events permissions.
 - Events are external scheduled events. Most Discord event locations point to `https://mochirii.com/events`, but schedule items may provide a Discord-specific location such as `Guild Base Pool`.
-- Event cover images come from `discordCoverImage` paths in `data/guild-schedule.json`, are mirrored under `apps/web/public/assets/`, and should stay at the 5:2 Discord cover ratio.
+- Event cover images come from `discordCoverImage` paths in `apps/web/public/data/guild-schedule.json`, are mirrored under `apps/web/public/assets/`, and should stay at the 5:2 Discord cover ratio.
 - Reaper records managed Discord event IDs in `discord_resources` with `managedBy: "reaper-event-sync"`.
 
 ## Schedule Rules
@@ -66,4 +66,4 @@ Do not run `apply` if preview shows duplicate creates, unexpected missing manage
 
 ## Rollback
 
-If the apply step creates incorrect Discord events, cancel or edit only the Reaper-managed events shown in the preview/apply output, then revert the website schedule branch or correct `data/guild-schedule.json` and redeploy. Do not delete unrelated Discord events. Duplicate removal is intentionally limited to IDs listed in `discordDuplicateEventIds`.
+If the apply step creates incorrect Discord events, cancel or edit only the Reaper-managed events shown in the preview/apply output, then revert the website schedule branch or correct `apps/web/public/data/guild-schedule.json` and redeploy. Do not delete unrelated Discord events. Duplicate removal is intentionally limited to IDs listed in `discordDuplicateEventIds`.

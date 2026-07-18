@@ -51,7 +51,7 @@ https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interaction
 
 ## Scheduled Events
 
-- Source of truth is `data/guild-schedule.json`, mirrored to `apps/web/public/data/guild-schedule.json`.
+- Source of truth is `apps/web/public/data/guild-schedule.json`, mirrored to `apps/web/public/data/guild-schedule.json`.
 - Event timezone remains `UTC+8` with `offsetMinutes: 480`.
 - Reaper manages 8 event types and 17 scheduled event instances.
 - Monthly Guild Raffle remains the single canonical recurring raffle event.

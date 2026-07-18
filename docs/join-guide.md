@@ -16,7 +16,7 @@ Keep this page practical. A visitor should understand how to enter Discord, what
 
 ## 2. Data Source
 
-- Join data lives in `data/join.json`.
+- Join data lives in `apps/web/public/data/join.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `join.js` changes in the same scoped task.
 - Add only fields that `join.js` actually supports.
@@ -62,7 +62,7 @@ Shared helper usage:
 
 ## 4. Newcomer Checklist
 
-The checklist lives in `data/join.json` under `checklist`.
+The checklist lives in `apps/web/public/data/join.json` under `checklist`.
 
 Current checklist item shape:
 
@@ -159,6 +159,6 @@ Use `npm run smoke:gallery` as a general regression check when relevant to the r
 
 Join work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`

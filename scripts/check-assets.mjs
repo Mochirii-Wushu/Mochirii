@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const assetRoot = path.join(root, "assets");
+const assetRoot = path.join(root, "apps", "web", "public", "assets");
 const largeThreshold = Number(process.env.ASSET_LARGE_BYTES || 1_000_000);
 const strict = process.env.STRICT_ASSETS === "1";
 const webpMagic = Buffer.from("RIFF");
@@ -60,4 +60,3 @@ if (strict && (fakeWebp.length || largeFiles.length)) {
 }
 
 console.log("Asset validation completed with warnings only.");
-

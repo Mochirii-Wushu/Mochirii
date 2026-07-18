@@ -47,7 +47,7 @@ This brief guides the Mochirii side of the Alpha Preview Ready visual pass. It i
 
 ## Gate Image
 
-- Source asset: `assets/img/mochi-pets/gate-arrival.webp`
+- Source asset: `apps/web/public/assets/img/mochi-pets/gate-arrival.webp`
 - Mirrored public asset: `apps/web/public/assets/img/mochi-pets/gate-arrival.webp`
 - Role: decorative left-panel Wushu arrival image for the tester-password gate.
 - Alt behavior: render with `alt=""` and `aria-hidden="true"` because nearby page copy carries the meaning.

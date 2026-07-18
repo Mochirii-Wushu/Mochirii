@@ -1,6 +1,6 @@
 import { readJsonFile } from "./lib/json.mjs";
 
-const file = "data/gallery.json";
+const file = "apps/web/public/data/gallery.json";
 const data = readJsonFile(file);
 const albums = Array.isArray(data.albums) ? data.albums : [];
 const isoUtcPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;

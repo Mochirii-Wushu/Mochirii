@@ -23,7 +23,7 @@ try {
     }
   });
 
-  await page.goto(`${baseUrl}/gallery.html`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}/gallery`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#galleryGrid .gallery-thumb img");
 
   const trigger = page.locator("#galleryGrid .gallery-thumb").first();

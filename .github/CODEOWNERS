@@ -1,0 +1,10 @@
+# Canonical ownership for Mochirii production surfaces.
+* @xartaiusx
+
+/apps/web/ @xartaiusx
+/apps/shopify-theme/ @xartaiusx
+/services/social/ @xartaiusx
+/supabase/ @xartaiusx
+/.github/ @xartaiusx
+/docs/integrations/ @xartaiusx
+/docs/operations/ @xartaiusx

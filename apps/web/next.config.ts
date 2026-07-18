@@ -12,6 +12,7 @@ const legacyHtmlRedirects = [
   ["/join.html", "/join"],
   ["/gallery.html", "/gallery"],
   ["/leaders.html", "/leaders"],
+  ["/tome.html", "/tome"],
   ["/ranks.html", "/ranks"],
   ["/events.html", "/events"],
   ["/announcements.html", "/announcements"],

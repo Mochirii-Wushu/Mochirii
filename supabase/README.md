@@ -4,7 +4,10 @@ Project ref: `deyvmtncimmcinldjyqe`
 
 Project URL: `https://deyvmtncimmcinldjyqe.supabase.co`
 
-This repository serves the live Vercel/Next.js production app from `apps/web`; the root static files remain rollback/reference material. Keep Supabase browser integration limited to public keys, keep privileged work in Edge Functions, and keep schema changes migration-based. Do not commit real secrets or `.env` files.
+This repository serves the live Vercel/Next.js production app from `apps/web`.
+Keep browser integration limited to public keys, privileged work in Edge
+Functions, and schema changes migration-based. Do not commit real secrets or
+`.env` files.
 
 ## Rules
 
@@ -465,7 +468,7 @@ The website does not assign Discord roles in this phase.
 
 `member_profiles` stores durable website account state:
 
-- Supabase user id
+- Member user ID
 - Discord identity fields
 - Discord role IDs returned by server-side verification
 - `has_required_discord_roles`

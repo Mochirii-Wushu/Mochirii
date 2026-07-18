@@ -17,7 +17,7 @@ Keep the page focused on contact clarity, calm support, and the people who help 
 
 ## 2. Data Source
 
-- Leaders data lives in `data/leaders.json`.
+- Leaders data lives in `apps/web/public/data/leaders.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `leaders.js` changes in the same scoped task.
 - Add only fields that `leaders.js` actually supports.
@@ -133,7 +133,7 @@ Image rules:
 - Alt text should describe the leader, avatar, role, or visual panel clearly.
 - Existing images should stay optimized WebP unless there is a clear scoped reason.
 - Do not add large unoptimized images.
-- Follow existing Leaders asset conventions under `assets/img/leaders/`.
+- Follow existing Leaders asset conventions under `apps/web/public/assets/img/leaders/`.
 - Do not add hero or panel alt text fields without renderer changes.
 
 ## 5. Tone Rules
@@ -232,6 +232,6 @@ Use `npm run smoke:gallery` as a general regression check if relevant to the rep
 
 Leaders work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`

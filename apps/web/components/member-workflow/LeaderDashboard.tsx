@@ -325,7 +325,7 @@ export function LeaderDashboard() {
     const reason = memberVerificationReason.trim();
 
     if (!UUID_RE.test(userId)) {
-      setMemberVerificationError("Enter a valid Supabase user id before reviewing member verification.");
+      setMemberVerificationError("Enter a valid Member user ID before reviewing member verification.");
       return;
     }
 
@@ -521,7 +521,7 @@ export function LeaderDashboard() {
   async function grantMochiAlphaAccess() {
     const userId = mochiAlphaUserId.trim();
     if (!userId) {
-      setMochiAlphaError("Enter a Supabase user id before granting alpha access.");
+      setMochiAlphaError("Enter a Member user ID before granting alpha access.");
       return;
     }
 
@@ -680,7 +680,7 @@ export function LeaderDashboard() {
 
       <div className="review-details">
         <label className="form-field">
-          <span>Supabase user id</span>
+          <span>Member user ID</span>
           <input
             value={memberVerificationUserId}
             onChange={(event) => setMemberVerificationUserId(event.target.value)}
@@ -819,7 +819,7 @@ export function LeaderDashboard() {
 
       <div className="review-details">
         <label className="form-field">
-          <span>Supabase user id</span>
+          <span>Member user ID</span>
           <input
             value={mochiAlphaUserId}
             onChange={(event) => setMochiAlphaUserId(event.target.value)}

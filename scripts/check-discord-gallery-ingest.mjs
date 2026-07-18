@@ -11,8 +11,6 @@ const files = {
   revokeMigration: "supabase/migrations/20260524115932_revoke_public_rls_auto_enable_execute.sql",
   previousGalleryMigration: "supabase/migrations/20260513081523_create_discord_role_gated_gallery_uploads.sql",
   readme: "supabase/README.md",
-  leaderDashboard: "leader-dashboard.js",
-  leaderDashboardHtml: "leader-dashboard.html",
 };
 
 const failures = [];
@@ -74,8 +72,6 @@ const sourceMigration = read(files.sourceMigration);
 const revokeMigration = read(files.revokeMigration);
 const previousGalleryMigration = read(files.previousGalleryMigration);
 const readme = read(files.readme);
-const leaderDashboard = read(files.leaderDashboard);
-const leaderDashboardHtml = read(files.leaderDashboardHtml);
 const authenticatedInsertGrant = previousGalleryMigration.match(
   /grant insert \(([\s\S]*?)\) on table public\.gallery_submissions to authenticated;/,
 )?.[1] || "";
@@ -254,18 +250,6 @@ assertNotMatches(
   "existing linked `member_profiles.discord_user_id`",
   "Discord uploads are idempotent by message/attachment ID.",
 ].forEach((snippet) => assertIncludes("supabase README", readme, snippet));
-
-[
-  'const sourceLabel = U.text(item.source, "website").toLowerCase() === "discord" ? "Discord" : "Website";',
-  '["Source", sourceLabel]',
-  "Discord message:",
-].forEach((snippet) => assertIncludes("leader dashboard", leaderDashboard, snippet));
-
-assertIncludes(
-  "leader dashboard html",
-  leaderDashboardHtml,
-  "./leader-dashboard.js?v=2026-06-instagram-gallery",
-);
 
 if (failures.length) {
   console.error("Discord gallery ingest validation failed.");

@@ -70,7 +70,7 @@ for (const panel of panels) {
   const buffer = await renderPanel(panel);
   hashes[panel.file] = sha256(buffer);
 
-  for (const base of ["assets/img/discord-events", "apps/web/public/assets/img/discord-events"]) {
+  for (const base of ["apps/web/public/assets/img/discord-events"]) {
     const outputDir = path.join(root, base);
     mkdirSync(outputDir, { recursive: true });
     writeFileSync(path.join(outputDir, panel.file), buffer);

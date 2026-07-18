@@ -30,11 +30,11 @@ Side pages should stay page-specific and should not duplicate:
 
 Current data sources:
 
-- Announcements: `data/announcements.json`
-- Raffles: `data/raffles.json`
-- Spotify: `data/spotify.json`
-- Spotlight: `data/spotlight.json`
-- Rolling dates and weekly schedule timing: `data/guild-schedule.json`
+- Announcements: `apps/web/public/data/announcements.json`
+- Raffles: `apps/web/public/data/raffles.json`
+- Spotify: `apps/web/public/data/spotify.json`
+- Spotlight: `apps/web/public/data/spotlight.json`
+- Rolling dates and weekly schedule timing: `apps/web/public/data/guild-schedule.json`
 
 For each file:
 
@@ -73,12 +73,12 @@ Current supported fields:
 
 How to add or update an announcement safely:
 
-- Edit `data/announcements.json`.
+- Edit `apps/web/public/data/announcements.json`.
 - Use `YYYY-MM-DD` for date-only values.
 - Use `pinned: true` only for notices that should sort above regular notices.
 - Keep summaries brief.
 - Use `details[]` for short supporting bullets.
-- The live Next Announcements page derives `weekly-schedule` details from `data/guild-schedule.json`; keep fallback JSON details aligned with that schedule.
+- The live Next Announcements page derives `weekly-schedule` details from `apps/web/public/data/guild-schedule.json`; keep fallback JSON details aligned with that schedule.
 - Use `tags[]` for short labels.
 - Do not add item-level links or images unless `announcements.js` is intentionally updated and validated.
 
@@ -119,11 +119,11 @@ Current supported fields:
 
 How to add or update a raffle safely:
 
-- Edit `data/raffles.json`.
+- Edit `apps/web/public/data/raffles.json`.
 - Keep `how[]`, `rules[]`, and `note[]` as plain text arrays.
 - Keep prize and draw details clear enough to understand without extra interpretation.
 - Use `thisMonth` for current raffle timing, prize, and note details.
-- If `thisMonth.scheduleId` is present, the live Next Raffles page derives the visible date from `data/guild-schedule.json`.
+- If `thisMonth.scheduleId` is present, the live Next Raffles page derives the visible date from `apps/web/public/data/guild-schedule.json`.
 - Use `links[]` only for supported label/href links.
 - Use relative links for site pages.
 - Use full `https://` links for external destinations.
@@ -209,7 +209,7 @@ Current supported fields:
 
 How to add or update Spotlight safely:
 
-- Edit `data/spotlight.json`.
+- Edit `apps/web/public/data/spotlight.json`.
 - Keep body text short and specific to the featured person or moment.
 - Use `highlights[]` for concise appreciation bullets.
 - Keep `spotlight.date` as a date-only value when possible.
@@ -328,7 +328,7 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 
 Side-page work must not alter:
 
-- `data/home.json` `seal.verse`
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/twills.json` `profile.bio`
+- `apps/web/public/data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/twills.json` `profile.bio`

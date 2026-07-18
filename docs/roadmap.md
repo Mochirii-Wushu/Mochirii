@@ -11,7 +11,7 @@ The site is currently a static HTML/CSS/vanilla JavaScript project with:
 - optimized gallery and non-gallery image assets
 - page-specific SEO/social metadata
 - keyboard-friendly navigation and gallery lightbox behavior
-- content mostly managed through `data/*.json`
+- content mostly managed through `apps/web/public/data/*.json`
 
 The stable post-audit baseline is tagged as `v0.1.0-site-baseline`.
 

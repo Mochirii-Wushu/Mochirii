@@ -62,12 +62,11 @@ const secretProtectedFunctions = [
 ];
 
 function readSupabasePublicConfig() {
-  const text = readFileSync(path.join(root, "supabase.js"), "utf8");
-  const url = text.match(/SUPABASE_URL\s*=\s*"([^"]+)"/)?.[1] || "";
-  const publishableKey = text.match(/SUPABASE_PUBLISHABLE_KEY\s*=\s*"([^"]+)"/)?.[1] || "";
+  const url = String(process.env.NEXT_PUBLIC_SUPABASE_URL || "");
+  const publishableKey = String(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "");
 
   if (!url || !publishableKey) {
-    throw new Error("Unable to read public Supabase URL and publishable key from supabase.js.");
+    throw new Error("Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY for the smoke process.");
   }
 
   if (!publishableKey.startsWith("sb_publishable_")) {

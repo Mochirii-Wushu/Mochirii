@@ -6,17 +6,17 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 
 ## 2. Data Source
 
-- Gallery data lives in `data/gallery.json`.
+- Gallery data lives in `apps/web/public/data/gallery.json`.
 - The current static Gallery source has 73 images in the `general` album.
-- Approved member and Discord submissions are added at runtime through Supabase signed URLs and are not written into `data/gallery.json`.
+- Approved member and Discord submissions are added at runtime through Supabase signed URLs and are not written into `apps/web/public/data/gallery.json`.
 - Do not change image paths unless assets are actually added, replaced, or removed in the same scoped task.
 - Captions and alt text should match visible image content.
 - Do not invent player identities, events, locations, or actions that are not visible or otherwise confirmed.
 
 ## 3. Image Paths
 
-- Thumbnail paths must use `assets/img/gallery/thumbs/`.
-- Full image paths must use the optimized full-size Gallery path, such as `assets/img/gallery/shot-01.webp`.
+- Thumbnail paths must use `apps/web/public/assets/img/gallery/thumbs/`.
+- Full image paths must use the optimized full-size Gallery path, such as `apps/web/public/assets/img/gallery/shot-01.webp`.
 - The grid uses thumbnails for page speed.
 - The lightbox opens full images.
 - Never let the lightbox open `/thumbs/` images.
@@ -38,7 +38,7 @@ Category rules:
 
 - Categories power the visible Gallery filters.
 - Every image needs a valid `category`.
-- Category labels and counts are generated from `data/gallery.json`.
+- Category labels and counts are generated from `apps/web/public/data/gallery.json`.
 - Do not hardcode category totals in HTML or JavaScript.
 - Keep category slugs lowercase and kebab-case if new categories are ever approved.
 
@@ -149,12 +149,12 @@ npm run check:production
 - Only the true page hero or route LCP image should use a priority preload.
 - Supporting cards, seals, gallery thumbnails, event board images, and repeated list images should stay lazy.
 - Keep explicit image `width`, `height`, and `sizes` values on high-impact media so Next can reserve stable layout space.
-- Do not compress, re-encode, replace, delete, externalize, or otherwise optimize `assets/audio/mochiriiiiii.mp3` without explicit approval.
+- Do not compress, re-encode, replace, delete, externalize, or otherwise optimize `apps/web/public/assets/audio/mochiriiiiii.mp3` without explicit approval.
 
 ## 14. Protected Content
 
 Gallery work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`

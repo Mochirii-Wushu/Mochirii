@@ -38,12 +38,12 @@ function extractStaticImageBlock(source, id) {
   return source.slice(start, end + 2);
 }
 
-const galleryData = JSON.parse(read("data/gallery.json"));
+const galleryData = JSON.parse(read("apps/web/public/data/gallery.json"));
 const galleryItems = (Array.isArray(galleryData.albums) ? galleryData.albums : []).flatMap((album) =>
   Array.isArray(album.items) ? album.items : [],
 );
 
-assert(galleryItems.length > 0, "data/gallery.json: expected at least one gallery item.");
+assert(galleryItems.length > 0, "apps/web/public/data/gallery.json: expected at least one gallery item.");
 
 for (const item of galleryItems) {
   const id = String(item.id || item.full || item.src || "gallery item");
@@ -55,13 +55,11 @@ for (const item of galleryItems) {
   assert(thumb !== full, `${id}: thumbnail and full image paths must be different.`);
 
   if (thumb) {
-    assertFileExists(`${id} thumbnail`, thumb);
-    assertFileExists(`${id} public thumbnail`, path.join("apps/web/public", thumb).split(path.sep).join("/"));
+    assertFileExists(`${id} thumbnail`, path.join("apps/web/public", thumb).split(path.sep).join("/"));
   }
 
   if (full) {
-    assertFileExists(`${id} full image`, full);
-    assertFileExists(`${id} public full image`, path.join("apps/web/public", full).split(path.sep).join("/"));
+    assertFileExists(`${id} full image`, path.join("apps/web/public", full).split(path.sep).join("/"));
   }
 }
 
@@ -77,9 +75,6 @@ const sharedPublicComponents = read("apps/web/components/public-pages/common.tsx
 const siteHeader = read("apps/web/components/SiteHeader.tsx");
 const siteFooter = read("apps/web/components/SiteFooter.tsx");
 const spotifyBrowser = read("apps/web/components/public-pages/SpotifyBrowser.tsx");
-const staticGallery = read("gallery.js");
-const staticGalleryHtml = read("gallery.html");
-const staticStyles = read("styles.css");
 const tokenStyles = read("apps/web/app/styles/tokens-base.css");
 const sidePagesGuide = read("docs/side-pages-guide.md");
 
@@ -149,7 +144,6 @@ assert(homePriorityCount === 1, `Home page should have exactly one priority imag
   'sizes="100vw"',
   'loading="eager"',
 ].forEach((snippet) => assertIncludes("responsive global background", rootLayout, snippet));
-assert(!staticStyles.includes("bg-photo__image"), "Responsive background styles must remain owned by the Next app.");
 assertIncludes("responsive global background styles", tokenStyles, ".bg-photo__image{");
 assertIncludes("responsive global background styles", tokenStyles, "object-fit:cover;");
 assert(!tokenStyles.includes('background:url("/assets/bg/wuxia-bg.webp")'), "Next background must not retain the full-size CSS request.");
@@ -194,27 +188,6 @@ assertIncludes("shared image LCP hint", sharedPublicComponents, "fetchPriority={
   "loading=\"lazy\"",
   "open.spotify.com",
 ].forEach((snippet) => assertIncludes("Spotify performance docs", sidePagesGuide, snippet));
-
-[
-  "const GALLERY_RENDER_BATCH_SIZE = 24;",
-  "const renderedItems = visibleItems.slice(0, renderLimit);",
-  "renderLimit = GALLERY_RENDER_BATCH_SIZE;",
-  "renderLimit = Math.min(renderLimit + GALLERY_RENDER_BATCH_SIZE, visibleItems.length);",
-  "renderGrid(grid, renderedItems);",
-].forEach((snippet) => assertIncludes("rollback Gallery media contract", staticGallery, snippet));
-
-[
-  'id="galleryLoadMoreRow"',
-  'id="galleryLoadMore"',
-  "Show more images",
-  "gallery.js?v=2026-06-media-performance",
-  "styles.css?v=2026-06-media-performance",
-].forEach((snippet) => assertIncludes("rollback Gallery markup", staticGalleryHtml, snippet));
-
-[
-  ".gallery-load-more-row",
-  ".gallery-load-more",
-].forEach((snippet) => assertIncludes("rollback Gallery styles", staticStyles, snippet));
 
 if (failures.length) {
   console.error("Media performance validation failed.");

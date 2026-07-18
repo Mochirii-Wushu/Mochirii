@@ -1,310 +1,127 @@
-# Mōchirīī — Guild Website  
-*Where Winds Meet*
+# Mochirii
 
-Official website for **Mōchirīī**, a community-focused guild for *Where Winds Meet*.  
-This site serves as the public hub for guild information, events, culture, and shared media.
+Canonical source repository for the Mochirii website, cosmetics storefront
+theme, hosted guild-social application, and shared backend.
 
-The project stays **static, fast, readable, and data-driven**, with a clear separation between structure, content, and behavior.
+## Production Surfaces
 
----
+| Path | Purpose | Hosted by |
+| --- | --- | --- |
+| `apps/web` | `mochirii.com` Next.js website | Vercel |
+| `apps/shopify-theme` | `shop.mochirii.com` storefront theme | Shopify |
+| `services/social` | `social.mochirii.com` application and image | DigitalOcean and Spaces |
+| `supabase` | Auth, database migrations, RLS, and Edge Functions | Supabase |
 
-## Repository Workspace
+GitHub is the source, review, CI, package, and delivery control plane. Production
+traffic, queues, schedules, media, authentication, and backups do not require a
+local workstation to remain online.
 
-The canonical checkout is `C:\Github Repo's\Mochirii Website\Website`.
-Mochirii Social and Mochi Pets remain independent sibling repositories; this
-repository connects to their hosted services through documented URLs and API
-contracts, not through a shared Git history or production filesystem.
-
----
-
-## Deployment Status
-
-- `https://mochirii.com` is the current production domain and is served by the Vercel-hosted Next.js app in `apps/web`.
-- `https://www.mochirii.com` redirects to `https://mochirii.com`.
-- `https://mochirii.vercel.app` remains a Vercel fallback/debug URL for the same app.
-- The root static GitHub Pages files and tracked `CNAME` remain rollback/reference material, not the current production surface.
-- GitHub Pages is a legacy rollback/reference surface only; as of 2026-07-02 its deploy job can time out while Vercel production remains healthy, so do not treat Pages as the live host without a separate approved retirement or rollback task.
-- See [`docs/deployment.md`](docs/deployment.md) for the authoritative deployment, Vercel dashboard, rollback, and public asset/data sync rules.
-
----
-
-## Goals
-
-- Provide a calm, welcoming entry point for new members
-- Keep expectations, culture, and coordination transparent
-- Allow non-technical contributors to update content safely via JSON
-- Avoid unnecessary frameworks, build steps, or process complexity
-- Keep the current Vercel/Next production app and root static rollback surface easy to validate
-
----
+Mochi Pets remains in the separate `xartaiusx/mochi-pets` repository. This
+repository owns its website doorway, browser bridge, and shared backend access;
+the game repository owns game source, assets, builds, and runtime manifests.
 
 ## Mochi Pets Closed Playtest
 
-Mochi Pets is a closed Mochirii playtest for approved guild members. Members enter one shared 3D guild room, create a curated character, meet Lirabao, and care for the guild pet together.
-
-The live page stays behind the tester password wall. The password opens the page, and Mochirii member sign-in is required for saved play. All playtest progress has no real value.
-
-Player-facing playtest wording lives in [`docs/mochi-pets-playtest-guide.md`](docs/mochi-pets-playtest-guide.md).
-The game/social naming boundary and cutover rules live in
-[`docs/mochi-pets-rename-manifest.md`](docs/mochi-pets-rename-manifest.md).
-
----
-
-## Mochirii Social Staging
-
-`social.mochirii.com` is the approved staging target for the guild social platform. It is hosted outside Vercel because the social runtime needs a persistent PHP/Laravel app, database, Redis, queue worker, scheduler, media storage, backups, and monitoring.
-
-The website repo owns only the member doorway, Supabase OAuth consent flow, `social_accounts` schema, and no-secret documentation. The staged social runtime remains admin-first, closed-registration, SSO-only, and federation-disabled until the separate first-login and moderation gates pass. Runtime source changes must move into a Mochirii-owned private fork or ops repo before further host edits.
-
-See [`docs/pixelfed-guild-social-adr.md`](docs/pixelfed-guild-social-adr.md), [`docs/pixelfed-oidc-spike.md`](docs/pixelfed-oidc-spike.md), [`docs/pixelfed-first-login-testing.md`](docs/pixelfed-first-login-testing.md), and [`docs/pixelfed-staging-ops.md`](docs/pixelfed-staging-ops.md).
-
----
-
-## Tech Stack
-
-- **HTML5** — semantic, accessible markup
-- **CSS** — handcrafted styles in `styles.css`
-- **Vanilla JavaScript** — page-scoped renderers only
-- **JSON** — all page content and copy
-- **Next.js / React** — production app under `apps/web`
-- **Vercel** — production hosting for `mochirii.com`
-- **GitHub Pages** — retained rollback/reference surface
-- **Supabase** — auth, membership, OAuth consent, database, storage, and Edge Functions
-- **DigitalOcean Droplet / Spaces** — staging social runtime and planned object media boundary
-
-The root static site stays dependency-light. The production app builds from `apps/web`.
-
----
-
-## Architecture Overview
-
-The site follows a strict separation of concerns:
-
-### 1. Markup (HTML)
-Each page’s `.html` file contains:
-- Structural layout only
-- Placeholder elements with stable IDs
-- No business logic
-- No styling rules
-- No page-specific JavaScript behavior
-
-Example:
-
-index.html
-join.html
-events.html
-
-
----
-
-### 2. Behavior (JavaScript)
-Each page has a matching JS file that:
-- Fetches its corresponding JSON file
-- Injects content into predefined placeholders
-- Handles page-local interactions only
-
-JavaScript files never:
-- Define layout
-- Control global navigation or footer
-- Contain hardcoded copy
-
-Example:
-
-home.js
-join.js
-
-
-Global behavior (header/footer mounting, shared interactions) lives in:
-
-site.js
-
-
----
-
-### 3. Content (JSON)
-All text, images, metadata, and lists live in JSON files.
-
-This allows:
-- Easy updates without touching HTML
-- Consistent spacing and rhythm
-- Safer editing by non-developers
-
-Example:
-
-data/home.json
-data/join.json
-data/gallery.json
-
-
----
-
-## Directory Structure
-
-
-/
-├─ index.html
-├─ join.html
-├─ events.html
-├─ styles.css
-├─ site.js
-├─ home.js
-├─ join.js
-│
-├─ data/
-│ ├─ home.json
-│ ├─ join.json
-│ ├─ gallery.json
-│
-├─ assets/
-│ ├─ img/
-│ │ ├─ hero/
-│ │ ├─ join/
-│ │ ├─ gallery/
-│ │ ├─ tiles/
-│ │ ├─ brand/
-│
-└─ README.md
-
-
----
-
-## Page Breakdown
-
-### Home (`index.html`)
-- Guild introduction
-- Hero section with badges
-- Featured bulletin + recent bulletins
-- Four Doors navigation
-- Member spotlight
-- Screenshot gallery with modal viewer
-- Guild seal (fully data-driven)
-
-Data source:
-
-data/home.json
-
-
----
-
-### Join (`join.html`)
-- Joining steps
-- Expectations & culture
-- Quick start links
-- Notes & clarifications
-
-Spacing and rhythm are controlled purely by CSS stack rules, not JS.
-
-Data source:
-
-data/join.json
-
-
----
-
-### Gallery / Album
-- Structured albums
-- Captioned images
-- Taggable items
-- Designed for future filtering or expansion
-
-Data source:
-
-data/gallery.json
-
-
----
-
-## Styling Philosophy
-
-- Global rhythm via reusable stack classes
-- Page-specific adjustments gated by `body[data-page="…"]`
-- No inline layout hacks
-- No JS-controlled spacing
-- Predictable vertical flow
-
-All styling lives in:
-
-styles.css
-
-
----
-
-## Accessibility
-
-- Semantic HTML landmarks
-- ARIA labels where appropriate
-- Keyboard-navigable modals
-- Meaningful alt text for all images
-- No essential content hidden behind JS
-
----
-
-## Content Editing Guidelines
-
-When updating content:
-
-- Edit **JSON only**
-- Do not add inline HTML inside JSON
-- Preserve array structures (`intro`, `cards`, `items`)
-- Images should be `.webp` where possible
-- Dates should be ISO-compatible when used programmatically
-
-If content fails to load, pages degrade gracefully.
-
-For detailed content, date, asset, gallery, link, tone, and PR validation conventions, see [`docs/content-guide.md`](docs/content-guide.md).
-
-For Home data, shared header/footer/nav behavior, script order, protected seal poem, and shell smoke-test conventions, see [`docs/home-shell-guide.md`](docs/home-shell-guide.md).
-
-For Join onboarding, checklist, link, tone, accessibility, and smoke-test conventions, see [`docs/join-guide.md`](docs/join-guide.md).
-
-For Events data, date, filter, accessibility, and smoke-test conventions, see [`docs/events-guide.md`](docs/events-guide.md).
-
-For Ranks data, hierarchy, image, tone, accessibility, and smoke-test conventions, see [`docs/ranks-guide.md`](docs/ranks-guide.md).
-
-For Leaders roster, profile-link, image, tone, accessibility, and smoke-test conventions, see [`docs/leaders-guide.md`](docs/leaders-guide.md).
-
-For Twills/Profile protected body text, contact detail, image, tone, accessibility, and smoke-test conventions, see [`docs/twills-guide.md`](docs/twills-guide.md).
-
-For Recruitment protected body/conclusion, audio, tone, accessibility, and smoke-test conventions, see [`docs/recruitment-guide.md`](docs/recruitment-guide.md).
-
-For Announcements, Raffles, Spotify, and Spotlight data, embed, link, tone, accessibility, and smoke-test conventions, see [`docs/side-pages-guide.md`](docs/side-pages-guide.md).
-
-For Gallery image, category, tag, caption, URL state, cache-query, and smoke-test conventions, see [`docs/gallery-guide.md`](docs/gallery-guide.md).
-
-For the Mochi Pets closed playtest, shared room, Lirabao care, tester access, and no-real-value boundaries, see [`docs/mochi-pets-playtest-guide.md`](docs/mochi-pets-playtest-guide.md).
-
-For future scoped branches and deferred ideas, see [`docs/roadmap.md`](docs/roadmap.md).
-
----
-
-## Development Notes
-
-- Root static files can still be opened directly in a browser or via static server for rollback/reference checks.
-- Production changes are validated through the Next app in `apps/web` and Vercel.
-- Use `git pull --rebase` (recommended) to keep history clean
-- This GitHub repository is currently public. Keep that state unless the owner separately approves making it private again. Production releases use protected merge to `main` with fresh required checks; if a future approved private-repo posture blocks Vercel Git checks, use the owner-approved manual Vercel CLI deploy path with Root Directory `apps/web`.
-- GitHub Pages/root static files remain available as rollback/reference material until a later stabilization task retires them.
-- Keep root `assets/` and `data/` as the editable content source for now; use `npm run sync:next-public` to mirror them into `apps/web/public/`.
-- Optional Lighthouse audits can be run manually from GitHub Actions using **Manual Lighthouse audit**; they are not required PR gates.
-
----
-
-## License & Use
-
-This site is purpose-built for the Mōchirīī guild.
-
-Content, branding, and structure are not intended for redistribution without permission.
-
-This repository is public for source visibility, but the Mochirii site content, branding, and structure are not open source for reuse. See [`COPYRIGHT.md`](COPYRIGHT.md) and [`NOTICE.md`](NOTICE.md).
-
----
-
-## Maintainers
-
-- Guild leadership
-- Design & architecture maintained in-house
-
-For structural changes, follow existing patterns.  
-Consistency matters more than novelty.
-
----
+Mochi Pets is a closed Mochirii playtest built around a shared 3D guild room.
+Approved testers can create a curated character, meet Lirabao, and care for the guild pet together.
+The tester password wall limits discovery, and member sign-in is required for saved play.
+Playtest items have no real value. See `docs/mochi-pets-playtest-guide.md` for the member-facing access guide.
+
+See [system architecture](docs/architecture.md) and
+[repository ownership](docs/operations/repository-ownership.md).
+
+## Repository Layout
+
+```text
+apps/
+  web/                 Live website application and canonical public assets/data
+  shopify-theme/       Storefront theme source
+services/
+  social/              Guild-social source and container definitions
+supabase/              Migrations and Edge Functions
+docs/
+  integrations/        No-secret hosted-provider contracts
+  operations/          Runbooks and dated release evidence
+.artifacts/operations/ Ignored local evidence and rollback exports
+scripts/               Repository validation and operator tooling
+```
+
+The old root static website was retired after cutover verification. Its exact
+last state is preserved by GitHub release `legacy-static-final-2026-07-18`.
+`apps/web/public/assets` and `apps/web/public/data` are the only editable website
+asset and content sources.
+
+## Development
+
+Use the pinned Node.js runtime:
+
+```powershell
+fnm use 22.23.1
+npm ci
+npm run toolchain:check
+npm run check
+```
+
+Website checks:
+
+```powershell
+Set-Location apps/web
+npm ci
+npm run toolchain:check
+npm run lint
+npm run build
+```
+
+Storefront checks:
+
+```powershell
+Set-Location apps/shopify-theme
+npm ci
+npm run check
+npm run theme:package
+```
+
+Social has its own PHP, Composer, Node, Docker, migration, worker, and image
+validation under `services/social`. Follow its local `AGENTS.md` and production
+runbook; never run a host deployment from an unreviewed checkout.
+
+## Delivery
+
+- Work on a focused branch and merge through protected pull requests.
+- `main` deploys the website through the existing Vercel Git integration.
+- Supabase integration applies only reviewed backend changes from `main`.
+- Storefront source merges do not publish a theme automatically.
+- Social production accepts only an approved immutable image digest through the
+  protected manual workflow.
+- Provider settings, secrets, theme publication, database migrations, and live
+  runtime changes remain scoped approval actions.
+
+The required `validate` context is produced by
+`.github/workflows/validate-static-site.yml`; its filename is retained for
+branch-protection continuity even though the job now validates the repository.
+
+## Security And Evidence
+
+- Store credentials only under the private `Mochi Creds` boundary or protected
+  provider secret stores. Never commit `.env` files, private keys, cookies,
+  signed URLs, customer data, supplier costs, or production state.
+- Keep durable no-secret Markdown in `docs/operations` or `docs/integrations`.
+- Keep screenshots, JSON readbacks, logs, exports, and generated archives under
+  ignored `.artifacts/operations`.
+- Preserve required open-source licenses and upstream attribution.
+- Keep ActivityPub federation disabled until its separate readiness packet is
+  approved.
+
+`npm run check:repository-boundaries` enforces current-tree brand and secret
+hygiene, generated-archive rejection, reviewed file-size limits, and a locked
+historical-residue baseline without rewriting public Git history.
+
+## Content And Product Guidance
+
+Route-specific guidance remains under `docs`. Protected website copy is guarded
+by exact hashes and must not be changed incidentally. Customer and guild-leader
+surfaces use Mochirii and product language; infrastructure and supplier names
+stay in internal code, required attribution, CI, and no-secret technical docs.
+
+Use [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), the root
+[AGENTS.md](AGENTS.md), and the nearest subdirectory `AGENTS.md` before changes.

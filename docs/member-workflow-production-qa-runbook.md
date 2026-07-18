@@ -39,7 +39,7 @@ Primary references:
 - Supabase Storage access control: <https://supabase.com/docs/guides/storage/security/access-control>
 - Supabase Edge Function secrets: <https://supabase.com/docs/guides/functions/secrets>
 - Vercel custom domains: <https://vercel.com/docs/domains/set-up-custom-domain>
-- DNS cutover runbook: [`docs/dns-cutover-readiness-and-rollback.md`](./dns-cutover-readiness-and-rollback.md)
+- Historical DNS cutover runbook: [`docs/operations/history/dns-cutover-readiness-and-rollback.md`](./operations/history/dns-cutover-readiness-and-rollback.md)
 - Moderation runbook: [`docs/member-gallery-moderation-runbook.md`](./member-gallery-moderation-runbook.md)
 - Cleanup plan: [`docs/member-gallery-cleanup-plan.md`](./member-gallery-cleanup-plan.md)
 
@@ -272,7 +272,7 @@ npm run smoke:gallery
 
 Known accepted warning:
 
-- `assets/audio/mochiriiiiii.mp3` is intentionally above the large-asset threshold.
+- `apps/web/public/assets/audio/mochiriiiiii.mp3` is intentionally above the large-asset threshold.
 
 ## Result Packet
 

@@ -17,7 +17,7 @@ Home should route visitors onward without duplicating:
 
 ## 2. Data Source
 
-- Home data lives in `data/home.json`.
+- Home data lives in `apps/web/public/data/home.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `home.js` changes in the same scoped task.
 - Add only fields that `home.js` actually supports.
@@ -37,8 +37,8 @@ Current Home data shape:
 
 Renderer notes:
 
-- `home.js` loads `data/home.json` through `MochiriiUtils.fetchJson()`.
-- The live Next Home page derives monthly gathering and raffle dates from `data/guild-schedule.json` when a bulletin has `scheduleId`.
+- `home.js` loads `apps/web/public/data/home.json` through `MochiriiUtils.fetchJson()`.
+- The live Next Home page derives monthly gathering and raffle dates from `apps/web/public/data/guild-schedule.json` when a bulletin has `scheduleId`.
 - The live Next Home page may replace the configured fallback spotlight title with the finalized monthly Discord poll winner name from `get-current-spotlight-winner`; the poll winner path is name-only and must not expose Discord handles, profile links, avatars, vote counts, or candidate lists.
 - Home descriptor strings render as paragraphs.
 - Home badges render as plain spans.
@@ -51,7 +51,7 @@ Renderer notes:
 
 The protected guild seal poem lives at:
 
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/home.json` `seal.verse`
 
 The guild seal poem is protected. Do not alter wording, punctuation, line breaks, spelling, capitalization, diacritics, order, or structure. Future edits may revise other non-seal Home fields only if needed, supported by `home.js`, and intentionally scoped. Any seal poem change requires explicit user approval.
 
@@ -142,7 +142,7 @@ Do not reorder scripts casually. `utils.js` should remain available before share
 - Home should feel clear, human, xianxia-inspired, and Mōchirīī-specific.
 - Cupcake warmth may appear lightly.
 - Do not overuse Cupcake language.
-- Keep the approved `data/home.json` `hero.subtitle` exactly `Asia Pacific • Where Winds Meet Guild`; this is the sole Home body-copy exception for the exact game name.
+- Keep the approved `apps/web/public/data/home.json` `hero.subtitle` exactly `Asia Pacific • Where Winds Meet Guild`; this is the sole Home body-copy exception for the exact game name.
 - Do not use `Where Winds Meet` elsewhere in regular visible Home body copy.
 - Keep functional labels clear.
 - Avoid generic AI-like language.
@@ -175,16 +175,16 @@ Home image behavior:
 - Hero image: `./assets/img/hero/hero.webp`
 - Background image: `./assets/bg/wuxia-bg.webp`
 - Seal image: `./assets/img/brand/emblem.webp`
-- Bulletin, door, spotlight, and Home gallery images render from `data/home.json`.
+- Bulletin, door, spotlight, and Home gallery images render from `apps/web/public/data/home.json`.
 - Home gallery thumbnails should use thumbnail paths where intended, and `full` should point to the full image used by the lightbox.
 
 Birthday splash toggle:
 
-- Deactivate the Home birthday splash by setting `data/home.json` `celebrationSplash.enabled` to `false`.
+- Deactivate the Home birthday splash by setting `apps/web/public/data/home.json` `celebrationSplash.enabled` to `false`.
 - Activate it by setting `celebrationSplash.enabled` to `true`.
 - Optional `startsAt` and `endsAt` values may use ISO-compatible date/time strings to limit the active window; leave them empty for no date window.
-- Keep the root source and the Next production copy synchronized: update `data/home.json`, then run `npm run sync:next-public` or make the matching change in `apps/web/public/data/home.json`.
-- After changing the toggle or copy, run `npm run check:home-celebration-splash` and `npm run check:next-public-sync`.
+- Update the canonical source at `apps/web/public/data/home.json`; do not create a root mirror.
+- After changing the toggle or copy, run `npm run check:home-celebration-splash`.
 
 Image expectations:
 
@@ -273,7 +273,7 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 
 Home/Shell work must not alter:
 
-- `data/home.json` `seal.verse`
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/twills.json` `profile.bio`
+- `apps/web/public/data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/twills.json` `profile.bio`
