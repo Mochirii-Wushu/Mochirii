@@ -224,7 +224,7 @@ requireIncludes("docs/mochirii-social-sync.md", syncDoc, [
 
 const upstreamDoc = read("docs/upstream-sync-policy.md");
 requireIncludes("docs/upstream-sync-policy.md", upstreamDoc, [
-  "fetch-only",
+  "Fetch the official source only",
   "https://github.com/pixelfed/pixelfed.git",
   "isolated temporary clone",
   "DISABLED",
@@ -351,6 +351,9 @@ requireIncludes("scripts/build-production-image.sh", productionImageBuild, [
 
 const validationWorkflow = readRepository(".github/workflows/validate-social.yml");
 requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
+  "name: validate-social",
+  "Detect Social changes",
+  "services/social",
   "permissions:\n  contents: read",
   "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
   "actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
@@ -362,6 +365,16 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",
   "anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610",
   "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+  "actions/attest@a1948c3f048ba23858d222213b7c278aabede763",
+]);
+
+const deploymentWorkflow = readRepository(".github/workflows/deploy-social-production.yml");
+requireIncludes(".github/workflows/deploy-social-production.yml", deploymentWorkflow, [
+  "environment: social-production",
+  "services/social/docker-compose.production.yml",
+  "repository=Mochirii-Wushu/Mochirii",
+  "DEPLOY social.mochirii.com",
+  "persist-credentials: false",
 ]);
 
 const productionDependencyGuard = read(

@@ -73,6 +73,9 @@ const extensionlessTextFiles = new Set([
   ".shopifyignore",
   "CNAME",
 ]);
+const reviewedLargeTextBudgets = new Map([
+  ["services/social/storage/app/cities.json", 13 * 1024 * 1024],
+]);
 const failures = [];
 
 function relative(filePath) {
@@ -138,9 +141,13 @@ for (const relativePath of trackedFiles) {
   const extension = path.extname(relativePath).toLowerCase();
   const basename = path.basename(relativePath);
   if (!textExtensions.has(extension) && !extensionlessTextFiles.has(basename)) continue;
-  if (statSync(absolutePath).size > 5 * 1024 * 1024) {
-    failures.push(`${relativePath}: text candidate exceeds the 5 MiB scan limit`);
-    continue;
+  const fileSize = statSync(absolutePath).size;
+  if (fileSize > 5 * 1024 * 1024) {
+    const reviewedBudget = reviewedLargeTextBudgets.get(relativePath);
+    if (reviewedBudget === undefined || fileSize > reviewedBudget) {
+      failures.push(`${relativePath}: text candidate exceeds its reviewed size budget`);
+      continue;
+    }
   }
 
   const lines = readFileSync(absolutePath, "utf8").split(/\r?\n/);

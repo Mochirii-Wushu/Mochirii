@@ -3,12 +3,22 @@ import path from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
+const repositoryRoot = path.resolve(root, "../..");
 const failures = [];
 
 function read(relativePath) {
   const fullPath = path.join(root, relativePath);
   if (!fs.existsSync(fullPath)) {
     failures.push(`Missing required file: ${relativePath}`);
+    return "";
+  }
+  return fs.readFileSync(fullPath, "utf8").replace(/\r\n/g, "\n");
+}
+
+function readRepository(relativePath) {
+  const fullPath = path.join(repositoryRoot, relativePath);
+  if (!fs.existsSync(fullPath)) {
+    failures.push(`Missing required repository file: ${relativePath}`);
     return "";
   }
   return fs.readFileSync(fullPath, "utf8").replace(/\r\n/g, "\n");
@@ -61,12 +71,14 @@ if ((compose.match(/image: \*app-image/g) || []).length !== 3) {
   failures.push(`${composePath} must use the immutable app image for all three app services`);
 }
 
-const deployWorkflowPath = ".github/workflows/deploy-production.yml";
-const deployWorkflow = read(deployWorkflowPath);
+const deployWorkflowPath = ".github/workflows/deploy-social-production.yml";
+const deployWorkflow = readRepository(deployWorkflowPath);
 requireIncludes(deployWorkflowPath, deployWorkflow, [
   "workflow_dispatch:",
   "environment: social-production",
-  "permissions:\n  contents: read\n  packages: read",
+  "permissions:",
+  "contents: read",
+  "packages: read",
   "persist-credentials: false",
   "DEPLOY social.mochirii.com",
   "MIGRATIONS APPROVED",
@@ -84,8 +96,8 @@ rejectIncludes(deployWorkflowPath, deployWorkflow, [
   "pull_request_target",
 ]);
 
-const onlineVerificationWorkflowPath = ".github/workflows/verify-online-hosting.yml";
-const onlineVerificationWorkflow = read(onlineVerificationWorkflowPath);
+const onlineVerificationWorkflowPath = ".github/workflows/verify-social-online-hosting.yml";
+const onlineVerificationWorkflow = readRepository(onlineVerificationWorkflowPath);
 requireIncludes(onlineVerificationWorkflowPath, onlineVerificationWorkflow, [
   "workflow_dispatch:",
   "environment: social-production",

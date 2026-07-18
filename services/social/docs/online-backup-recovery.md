@@ -21,9 +21,9 @@ class. Pruning validates every exact object name before deleting it. The
 versioned bucket lifecycle remains the provider-side second boundary.
 
 The Droplet stores only the encryption recipient. The matching identity belongs
-in a repository Actions secret and in one offline copy inside the approved
-credentials boundary. Backup, media, and temporary administrative Spaces keys
-remain separate.
+in a `social-recovery` environment secret and in one offline copy inside the
+approved credentials boundary. Backup, media, and temporary administrative
+Spaces keys remain separate.
 
 ## Host Settings
 
@@ -47,13 +47,11 @@ sudo /usr/local/sbin/mochirii-social-backup-enable
 
 ## GitHub Recovery
 
-This repository is private and its owner is on GitHub Free. GitHub does not
-make environment secrets, required reviewers, or wait timers available to
-private repositories on that plan. Store recovery credentials as repository
-Actions secrets and non-secret destinations as repository Actions variables.
-The `social-recovery` environment remains a deployment record and
-protected-branch restriction, but it must not be treated as a reviewer or
-secret boundary on the current plan.
+The canonical repository is public. Store recovery credentials only as
+`social-recovery` environment secrets and non-secret destinations as
+`social-recovery` environment variables. Restrict deployments to protected
+`main`, and retain any required-reviewer rule confirmed through GitHub provider
+readback. Repository-wide credentials are not the recovery boundary.
 
 The protected `Verify or restore Mochirii Social backup` workflow accepts one
 exact private object key. `validate-only` decrypts and restores it into an
@@ -67,9 +65,9 @@ database. A failed production restore stays in maintenance mode for a forward
 fix or another reviewed restore. Configuration files in the payload are not
 automatically applied during a database restore.
 
-The Free-plan control set is protected `main`, full-SHA-pinned actions,
-read-only workflow permissions, owner-controlled manual dispatch, exact typed
-confirmations, non-cancelling concurrency, strict host-key checking, and the
-Droplet forced command. Do not claim that GitHub reviewed a restore unless the
-repository moves to a plan that supports required reviewers for private
-environments and the reviewer rule is verified by provider readback.
+The control set is protected `main`, the protected `social-recovery`
+environment, full-SHA-pinned actions, read-only workflow permissions,
+owner-controlled manual dispatch, exact typed confirmations, non-cancelling
+concurrency, strict host-key checking, and the Droplet forced command. Do not
+claim that GitHub reviewed a restore unless the required-reviewer rule is
+verified by provider readback.

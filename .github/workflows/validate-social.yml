@@ -1,0 +1,285 @@
+name: Validate Mochirii Social
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+env:
+  PIXELFED_IMAGE: mochirii-pixelfed:production-check
+  REGISTRY_IMAGE: ghcr.io/mochirii-wushu/mochirii-pixelfed-ops
+
+jobs:
+  validate-social:
+    name: validate-social
+    runs-on: ubuntu-latest
+    outputs:
+      social_changed: ${{ steps.changes.outputs.changed }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Detect Social changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          changed=false
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ || ! "$(git cat-file -t "$BASE_SHA" 2>/dev/null)" == "commit" ]]; then
+            changed=true
+          elif ! git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- \
+            services/social \
+            .github/workflows/validate-social.yml \
+            .github/workflows/deploy-social-production.yml \
+            .github/workflows/recover-social-production.yml \
+            .github/workflows/verify-social-online-hosting.yml; then
+            changed=true
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          if [[ "$changed" == false ]]; then
+            echo "No Social-owned paths changed; the required context reports success without running Social tests."
+          fi
+
+      - name: Setup Node
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Install Social Node dependencies
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        run: npm ci
+
+      - name: Setup PHP
+        if: steps.changes.outputs.changed == 'true'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+          coverage: none
+
+      - name: Run Social readiness checks
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        run: npm run check:mochirii-ops
+
+      - name: Install Composer dependencies
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare test environment
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        run: |
+          cp .env.testing .env
+          php artisan key:generate
+
+      - name: Lint changed Social PHP files
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          changed_files=""
+          if [[ -n "$BASE_SHA" ]] && git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            changed_files="$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- 'services/social/**/*.php')"
+          fi
+          if [[ -z "$changed_files" ]]; then
+            changed_files="services/social/app/Services/AvatarUploadPolicy.php services/social/app/Jobs/AvatarPipeline/AvatarOptimize.php services/social/tests/Unit/AvatarUploadPolicyTest.php"
+          fi
+          for file in $changed_files; do
+            [[ -f "$file" ]] || continue
+            php -l "$file"
+          done
+
+      - name: Run targeted Social tests
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        run: php artisan test tests/Unit/AvatarUploadPolicyTest.php
+
+  production-image:
+    name: production-image
+    needs: validate-social
+    if: needs.validate-social.outputs.social_changed == 'true' && !(github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build production image
+        working-directory: services/social
+        env:
+          BUILD_CACHE_FROM: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache
+        run: bash scripts/build-production-image.sh
+
+      - name: Verify production Composer dependencies
+        run: >-
+          docker run --rm --entrypoint php
+          "$PIXELFED_IMAGE"
+          scripts/check-production-composer-dependencies.php
+
+      - name: Verify clean MariaDB migrations and workers
+        working-directory: services/social
+        run: bash scripts/check-clean-database-migrations.sh
+
+      - name: Generate production image SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: ${{ env.PIXELFED_IMAGE }}
+          format: spdx-json
+          output-file: pixelfed-sbom.spdx.json
+          upload-artifact: false
+
+      - name: Upload production image SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pixelfed-sbom-${{ github.sha }}
+          path: pixelfed-sbom.spdx.json
+          if-no-files-found: error
+
+      - name: Log out of GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io || true
+
+  publish-social-image:
+    name: publish-social-image
+    needs: validate-social
+    if: needs.validate-social.outputs.social_changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build production image
+        working-directory: services/social
+        env:
+          BUILD_CACHE_FROM: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache
+          BUILD_CACHE_TO: type=registry,ref=${{ env.REGISTRY_IMAGE }}:buildcache,mode=max
+        run: bash scripts/build-production-image.sh
+
+      - name: Verify production Composer dependencies
+        run: >-
+          docker run --rm --entrypoint php
+          "$PIXELFED_IMAGE"
+          scripts/check-production-composer-dependencies.php
+
+      - name: Verify clean MariaDB migrations and workers
+        working-directory: services/social
+        run: bash scripts/check-clean-database-migrations.sh
+
+      - name: Generate production image SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          image: ${{ env.PIXELFED_IMAGE }}
+          format: spdx-json
+          output-file: pixelfed-sbom.spdx.json
+          upload-artifact: false
+
+      - name: Publish immutable and main tags
+        id: publish
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          resolve_digest() {
+            local image_ref="$1"
+            local digest=""
+            for _ in {1..6}; do
+              digest="$(docker buildx imagetools inspect "$image_ref" 2>/dev/null | awk '/^Digest:/ { print $2; exit }')"
+              if [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+                printf '%s\n' "$digest"
+                return 0
+              fi
+              sleep 5
+            done
+            return 1
+          }
+
+          immutable_tag="$REGISTRY_IMAGE:$GITHUB_SHA"
+          main_tag="$REGISTRY_IMAGE:main"
+          docker tag "$PIXELFED_IMAGE" "$immutable_tag"
+          docker push "$immutable_tag"
+          digest="$(resolve_digest "$immutable_tag")"
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+
+          docker tag "$PIXELFED_IMAGE" "$main_tag"
+          docker push "$main_tag"
+          main_digest="$(resolve_digest "$main_tag")"
+          [[ "$main_digest" == "$digest" ]]
+
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Published \`$REGISTRY_IMAGE@$digest\`." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attest production image provenance
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: ${{ env.REGISTRY_IMAGE }}
+          subject-digest: ${{ steps.publish.outputs.digest }}
+          push-to-registry: true
+
+      - name: Attest production image SBOM
+        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
+        with:
+          subject-name: ${{ env.REGISTRY_IMAGE }}
+          subject-digest: ${{ steps.publish.outputs.digest }}
+          sbom-path: pixelfed-sbom.spdx.json
+          push-to-registry: true
+
+      - name: Upload production image SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pixelfed-sbom-${{ github.sha }}
+          path: pixelfed-sbom.spdx.json
+          if-no-files-found: error
+
+      - name: Log out of GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io || true

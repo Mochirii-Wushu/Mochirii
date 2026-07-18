@@ -3,12 +3,22 @@ import path from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
+const repositoryRoot = path.resolve(root, "../..");
 const failures = [];
 
 function read(relativePath) {
   const fullPath = path.join(root, relativePath);
   if (!fs.existsSync(fullPath)) {
     failures.push(`Missing required file: ${relativePath}`);
+    return "";
+  }
+  return fs.readFileSync(fullPath, "utf8").replace(/\r\n/g, "\n");
+}
+
+function readRepository(relativePath) {
+  const fullPath = path.join(repositoryRoot, relativePath);
+  if (!fs.existsSync(fullPath)) {
+    failures.push(`Missing required repository file: ${relativePath}`);
     return "";
   }
   return fs.readFileSync(fullPath, "utf8").replace(/\r\n/g, "\n");
@@ -61,8 +71,8 @@ requireIncludes(timerPath, timer, [
   "Persistent=true",
 ]);
 
-const workflowPath = ".github/workflows/recover-production-backup.yml";
-const workflow = read(workflowPath);
+const workflowPath = ".github/workflows/recover-social-production.yml";
+const workflow = readRepository(workflowPath);
 requireIncludes(workflowPath, workflow, [
   "workflow_dispatch:",
   "environment: social-recovery",
@@ -98,15 +108,13 @@ const runbookPath = "docs/online-backup-recovery.md";
 const runbook = read(runbookPath);
 const compactRunbook = runbook.replace(/\s+/g, " ");
 requireIncludes(runbookPath, compactRunbook, [
-  "private and its owner is on GitHub Free",
-  "repository Actions secrets",
-  "repository Actions variables",
-  "must not be treated as a reviewer or secret boundary",
+  "canonical repository is public",
+  "`social-recovery` environment secrets",
+  "`social-recovery` environment variables",
+  "protected `social-recovery` environment",
   "protected `main`",
 ]);
-rejectIncludes(runbookPath, runbook, [
-  "matching identity belongs in the protected GitHub `social-recovery` environment",
-]);
+rejectIncludes(runbookPath, runbook, ["repository Actions secrets"]);
 
 for (const [relativePath, text] of [
   [backupPath, backup],
