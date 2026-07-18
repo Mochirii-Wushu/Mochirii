@@ -303,6 +303,7 @@ for (const token of [
 const seoMeta = read("snippets/seo-meta.liquid");
 for (const token of [
   "settings.default_meta_description",
+  "seo_title | escape_once",
   "social_image_width",
   "social_image_height",
 ]) {
