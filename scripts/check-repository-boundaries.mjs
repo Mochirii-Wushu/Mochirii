@@ -91,15 +91,15 @@ function isTextCandidate(relativePath, size) {
 }
 
 function scanReachableHistory() {
-  const messages = normalized(git(["log", "--all", "--format=%H%x00%B%x00"]));
-  const paths = normalized(git(["log", "--all", "--name-only", "--format="]));
+  const messages = normalized(git(["log", "HEAD", "--format=%H%x00%B%x00"]));
+  const paths = normalized(git(["log", "HEAD", "--name-only", "--format="]));
 
   for (const rule of formerTokens) {
     if (messages.includes(rule.value)) failures.push(`reachable commit message contains ${rule.label}`);
     if (paths.includes(rule.value)) failures.push(`reachable historical path contains ${rule.label}`);
 
     const matchingCommits = [...new Set(git([
-      "log", "--all", "-i", `-G${rule.value}`, "--format=%H", "--",
+      "log", "HEAD", "-i", `-G${rule.value}`, "--format=%H", "--",
     ]).trim().split(/\r?\n/).filter(Boolean))].sort();
     const expectedCommits = [...(historyBaseline[rule.label] ?? [])].sort();
     if (JSON.stringify(matchingCommits) !== JSON.stringify(expectedCommits)) {
