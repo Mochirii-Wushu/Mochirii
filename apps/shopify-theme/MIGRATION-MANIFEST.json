@@ -125,7 +125,7 @@
     },
     {
       "path": "apps/shopify-theme/layout/theme.liquid",
-      "sha256": "224474c98a25010ae7796f661d89dd7e03c1f2f2f64b0eb57484e830e3bb9e5d"
+      "sha256": "31b52f40431f8270e33397a9cf1da8e3fec1fe5ff874b1eb2ab237a23ee2eabc"
     },
     {
       "path": "apps/shopify-theme/locales/en.default.json",

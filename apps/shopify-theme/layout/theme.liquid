@@ -7,6 +7,14 @@
     {% assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics' %}
     {% assign public_page_title = page_title %}
     {% assign public_page_description = page_description | default: settings.default_meta_description %}
+    {% if request.page_type == 'page' and page.title != blank %}
+      {% assign duplicated_page_title_prefix = page.title | append: page.title %}
+      {% assign duplicated_page_title_prefix_length = duplicated_page_title_prefix | size %}
+      {% assign rendered_page_title_prefix = public_page_title | slice: 0, duplicated_page_title_prefix_length %}
+      {% if rendered_page_title_prefix == duplicated_page_title_prefix %}
+        {% assign public_page_title = public_page_title | remove_first: page.title %}
+      {% endif %}
+    {% endif %}
     {% unless settings.product_publication_approved %}
       {% case request.page_type %}
         {% when 'product', 'collection', 'list-collections', 'search', 'cart' %}

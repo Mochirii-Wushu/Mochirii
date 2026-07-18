@@ -309,6 +309,16 @@ for (const token of [
   requireText("snippets/seo-meta.liquid", seoMeta, token);
 }
 
+const themeLayout = read("layout/theme.liquid");
+for (const token of [
+  "request.page_type == 'page'",
+  "page.title | append: page.title",
+  "public_page_title | slice: 0, duplicated_page_title_prefix_length",
+  "public_page_title | remove_first: page.title",
+]) {
+  requireText("layout/theme.liquid", themeLayout, token);
+}
+
 if (failures.length) {
   console.error("Shopify release-safety check failed.");
   failures.forEach((failure) => console.error(`- ${failure}`));
