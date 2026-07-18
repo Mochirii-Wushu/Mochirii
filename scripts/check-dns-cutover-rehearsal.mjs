@@ -24,7 +24,7 @@ const requiredRollbackFiles = [
 
 const requiredDocs = new Map([
   [
-    "docs/dns-cutover-readiness-and-rollback.md",
+    "docs/operations/history/dns-cutover-readiness-and-rollback.md",
     [
       "Do not cut over `mochirii.com` DNS until the current same-window checks pass",
       "Use only the exact DNS instructions shown in the final production-serving project's Domains dashboard",
@@ -82,7 +82,7 @@ const requiredDocs = new Map([
     ],
   ],
   [
-    "docs/dns-cutover-approval-packet.md",
+    "docs/operations/history/dns-cutover-approval-packet.md",
     [
       "Do not treat this template as approval",
       "Completed packets may include dashboard screenshots",
@@ -102,8 +102,8 @@ const requiredDocs = new Map([
 ]);
 
 const allowedCutoverFiles = new Set([
-  "docs/dns-cutover-approval-packet.md",
-  "docs/dns-cutover-readiness-and-rollback.md",
+  "docs/operations/history/dns-cutover-approval-packet.md",
+  "docs/operations/history/dns-cutover-readiness-and-rollback.md",
   "docs/live-member-cleanup-note.md",
   "docs/live-member-workflow-result-packet.md",
   "scripts/check-dns-cutover-final-readiness.mjs",

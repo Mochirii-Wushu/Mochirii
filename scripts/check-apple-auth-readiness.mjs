@@ -28,7 +28,7 @@ const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx"
 const providerLogo = read("apps/web/components/member-workflow/ProviderLogo.tsx");
 const multiProviderDoc = read("docs/multi-provider-login-and-verification.md");
 const supabaseReadme = read("supabase/README.md");
-const deploymentDoc = read("docs/deployment.md");
+const deploymentDoc = read("docs/operations/deployment.md");
 
 [
   '"check:apple-auth-readiness": "node scripts/check-apple-auth-readiness.mjs"',

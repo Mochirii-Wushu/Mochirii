@@ -35,20 +35,12 @@ function walkFiles(dir, extensions, results = []) {
   return results;
 }
 
-const homeData = readJson("data/home.json");
-const publicHomeData = readJson("apps/web/public/data/home.json");
+const homeData = readJson("apps/web/public/data/home.json");
 const page = read("apps/web/app/page.tsx");
 const component = read("apps/web/components/HomeBirthdaySplash.tsx");
 const appCss = readAppCss();
-const staticCss = read("styles.css");
-const staticHome = read("home.js");
 
 const splash = homeData.celebrationSplash;
-const publicSplash = publicHomeData.celebrationSplash;
-
-if (JSON.stringify(splash) !== JSON.stringify(publicSplash)) {
-  fail("Home celebration splash must be mirrored into apps/web/public/data/home.json.");
-}
 
 if (splash?.title !== "Happy Birthday Sinbell!!") fail("Home celebration splash title must match approved copy.");
 if (splash?.message !== "Mochi spirits love you!!") fail("Home celebration splash message must match approved copy.");
@@ -93,19 +85,7 @@ if (component.includes("sessionStorage")) {
   "animation:none!important",
 ].forEach((snippet) => {
   assertIncludes("Next CSS", appCss, snippet);
-  assertIncludes("rollback CSS", staticCss, snippet);
 });
-
-[
-  "renderCelebrationSplash",
-  "data?.celebrationSplash",
-  "birthday-splash",
-  "Escape",
-].forEach((snippet) => assertIncludes("rollback Home script", staticHome, snippet));
-
-if (staticHome.includes("sessionStorage")) {
-  fail("Rollback Home splash must not persist dismissal in sessionStorage; refresh should show the splash again.");
-}
 
 if (failures.length) {
   console.error(`Home celebration splash validation failed (${failures.length} issue${failures.length === 1 ? "" : "s"}).`);

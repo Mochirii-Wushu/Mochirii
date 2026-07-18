@@ -18,7 +18,7 @@ Keep the page focused on one profile. It can support warmth and contact clarity,
 
 ## 2. Data Source
 
-- Twills data lives in `data/twills.json`.
+- Twills data lives in `apps/web/public/data/twills.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `twills.js` changes in the same scoped task.
 - Add only fields that `twills.js` actually supports.
@@ -34,7 +34,7 @@ Current data shape:
 
 Renderer notes:
 
-- `twills.js` loads `data/twills.json` through `MochiriiUtils.fetchJson`.
+- `twills.js` loads `apps/web/public/data/twills.json` through `MochiriiUtils.fetchJson`.
 - Text renders with `textContent`; inline HTML and Markdown are not supported.
 - Badge strings render as plain spans, not links.
 - Hero and avatar alt text are fixed in `twills.js`; there are no data-driven alt fields.
@@ -44,7 +44,7 @@ Renderer notes:
 
 The protected Twills body text lives at:
 
-- File: `data/twills.json`
+- File: `apps/web/public/data/twills.json`
 - JSON key: `profile.bio`
 - Renderer: `twills.js` calls `renderBio($("#twillsBio"), data?.profile?.bio)`
 
@@ -143,7 +143,7 @@ Use `npm run smoke:gallery` as a general regression check when shared behavior c
 
 Twills work must not alter:
 
-- Twills protected body text: `data/twills.json` `profile.bio`
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- Twills protected body text: `apps/web/public/data/twills.json` `profile.bio`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`

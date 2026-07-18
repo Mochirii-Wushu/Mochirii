@@ -17,7 +17,7 @@ Keep this page focused on rule, custom, conduct, balance, respect, practice, and
 
 ## 2. Data Source
 
-- Tome data lives in `data/tome.json`.
+- Tome data lives in `apps/web/public/data/tome.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `tome.js` changes in the same scoped task.
 - Add only fields that `tome.js` actually supports.
@@ -52,11 +52,11 @@ Renderer limits:
 
 Protected content:
 
-- `data/home.json` `seal.verse` is protected and must not be altered.
-- `data/recruitment.json` `content.paragraphs` is protected and must not be altered.
-- `data/recruitment.json` `content.conclusion` is protected and must not be altered.
+- `apps/web/public/data/home.json` `seal.verse` is protected and must not be altered.
+- `apps/web/public/data/recruitment.json` `content.paragraphs` is protected and must not be altered.
+- `apps/web/public/data/recruitment.json` `content.conclusion` is protected and must not be altered.
 
-The current Tome implementation does not host or render the protected guild seal poem. The protected seal poem is in `data/home.json` `seal.verse`.
+The current Tome implementation does not host or render the protected guild seal poem. The protected seal poem is in `apps/web/public/data/home.json` `seal.verse`.
 
 Do not change protected verse wording, punctuation, line breaks, spelling, capitalization, diacritics, order, or placement.
 
@@ -154,7 +154,7 @@ Use `npm run smoke:gallery` as a general regression check when relevant to the r
 
 Tome work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`
 - any Tome-hosted protected verse documented in this guide

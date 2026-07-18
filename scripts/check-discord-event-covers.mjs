@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const schedule = JSON.parse(readFileSync(path.join(root, "data/guild-schedule.json"), "utf8"));
+const schedule = JSON.parse(readFileSync(path.join(root, "apps/web/public/data/guild-schedule.json"), "utf8"));
 const failures = [];
 
 const expectedCovers = [
@@ -72,11 +72,9 @@ for (const cover of expectedSorted) {
 
 for (const cover of configured) {
   if (!expectedSorted.includes(cover)) fail(`unexpected configured Discord event cover: ${cover}`);
-  const hashes = [];
-
-  for (const base of ["", "apps/web/public/"]) {
+  for (const base of ["apps/web/public/"]) {
     const file = path.join(root, base, cover);
-    const label = `${base || "root"}${cover}`;
+    const label = `${base}${cover}`;
     if (!existsSync(file)) {
       fail(`${label}: missing Discord event cover asset.`);
       continue;
@@ -97,14 +95,9 @@ for (const cover of configured) {
     }
 
     const hash = sha256(file);
-    hashes.push(hash);
     if (hash !== expectedHashes[cover]) {
       fail(`${label}: expected approved panel export hash ${expectedHashes[cover]}, received ${hash}.`);
     }
-  }
-
-  if (hashes.length === 2 && hashes[0] !== hashes[1]) {
-    fail(`${cover}: root and Next public mirror hashes do not match.`);
   }
 }
 

@@ -57,7 +57,7 @@ Passing local validators still does not perform or authorize cutover. A human GO
   },
   {
     name: "draft-dns-cutover-approval-packet.md",
-    source: "docs/dns-cutover-approval-packet.md",
+    source: "docs/operations/history/dns-cutover-approval-packet.md",
   },
 ];
 

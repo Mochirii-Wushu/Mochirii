@@ -5,11 +5,11 @@
 This is a static HTML/CSS/vanilla JavaScript site.
 
 - Page shells live in root `.html` files.
-- Page content lives mostly in `data/*.json`.
+- Page content lives mostly in `apps/web/public/data/*.json`.
 - Shared header and footer markup live in `header.html` and `footer.html`, then load through `site.js`.
 - Shared browser helpers live in `utils.js`; keep it loaded before `site.js` and page scripts.
 - For Home and shared shell conventions, see [`docs/home-shell-guide.md`](home-shell-guide.md).
-- Images, audio, icons, and Lottie placeholders live under `assets/`.
+- Images, audio, icons, and Lottie placeholders live under `apps/web/public/assets/`.
 
 Keep the static architecture unless a future task explicitly calls for a larger change.
 
@@ -41,7 +41,7 @@ Keep the static architecture unless a future task explicitly calls for a larger 
 
 ### Recruitment Audio Exception
 
-`assets/audio/mochiriiiiii.mp3` is intentionally above the normal large-asset warning threshold because the original Recruitment audio quality was restored at the user's request.
+`apps/web/public/assets/audio/mochiriiiiii.mp3` is intentionally above the normal large-asset warning threshold because the original Recruitment audio quality was restored at the user's request.
 
 Validation may warn that this file is over the large-asset threshold. Treat that warning as accepted unless the user explicitly reopens audio optimization. Do not re-encode, downsample, replace, or remove this MP3 in unrelated branches.
 
@@ -50,7 +50,7 @@ The restoration source of truth is [`reports/audio-original-restore.md`](../repo
 ## 5. Gallery Rules
 
 - For detailed Gallery maintenance conventions, see [`docs/gallery-guide.md`](gallery-guide.md).
-- Gallery grid images should use `assets/img/gallery/thumbs/`.
+- Gallery grid images should use `apps/web/public/assets/img/gallery/thumbs/`.
 - Lightbox/full images should use the optimized full gallery path, not `/thumbs/`.
 - Preserve `data-full` or the equivalent full-image field when editing gallery cards.
 - Regression check: opening a gallery item must not load a `/thumbs/` image in the lightbox.

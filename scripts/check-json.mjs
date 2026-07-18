@@ -3,7 +3,7 @@ import path from "node:path";
 import { readJsonFile } from "./lib/json.mjs";
 import { fromRoot, toRepoPath } from "./lib/repo-paths.mjs";
 
-const jsonDirs = ["data", "assets/lottie"];
+const jsonDirs = ["apps/web/public/data", "apps/web/public/assets/lottie"];
 let checked = 0;
 let failed = false;
 

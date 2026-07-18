@@ -8,6 +8,7 @@ const checks = [
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
   ["check:apac-content", ["node", "scripts/check-apac-content.mjs"]],
   ["check:brand-boundaries", ["node", "scripts/check-brand-boundaries.mjs"]],
+  ["check:repository-boundaries", ["node", "scripts/check-repository-boundaries.mjs"]],
   ["check:shopify-release-safety", ["node", "apps/shopify-theme/scripts/check-release-safety.mjs"]],
   ["check:code-cleanliness", ["node", "scripts/check-code-cleanliness.mjs"]],
   ["check:github-actions-security", ["node", "scripts/check-github-actions-security.mjs"]],
@@ -70,7 +71,6 @@ const checks = [
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
-  ["check:next-public-sync", ["node", "scripts/check-next-public-sync.mjs"]],
   ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],
 ];
 

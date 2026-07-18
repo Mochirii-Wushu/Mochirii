@@ -25,11 +25,6 @@ const files = {
   nextDashboardParts: "apps/web/components/member-workflow/LeaderDashboardParts.tsx",
   nextHelpers: "apps/web/lib/supabase/moderation.ts",
   nextUploads: "apps/web/lib/supabase/gallery-submissions.ts",
-  staticHelper: "supabase.js",
-  staticSubmitHtml: "gallery-submit.html",
-  staticSubmitJs: "gallery-submit.js",
-  staticDashboardHtml: "leader-dashboard.html",
-  staticDashboardJs: "leader-dashboard.js",
 };
 
 const failures = [];
@@ -91,11 +86,6 @@ const nextSubmit = read(files.nextSubmit);
 const nextDashboard = [read(files.nextDashboard), read(files.nextDashboardParts)].join("\n");
 const nextHelpers = read(files.nextHelpers);
 const nextUploads = read(files.nextUploads);
-const staticHelper = read(files.staticHelper);
-const staticSubmitHtml = read(files.staticSubmitHtml);
-const staticSubmitJs = read(files.staticSubmitJs);
-const staticDashboardHtml = read(files.staticDashboardHtml);
-const staticDashboardJs = read(files.staticDashboardJs);
 
 assertIncludes("package.json", packageJson, '"check:instagram-gallery-publishing"');
 assertIncludes("check-all", checkAll, "check:instagram-gallery-publishing");
@@ -329,33 +319,7 @@ assertNotMatches(
   "instagram_opt_in_copy_version",
 ].forEach((snippet) => assertIncludes("Next upload helper", nextUploads, snippet));
 
-[
-  "listInstagramPublishQueue",
-  "publishInstagramGallerySubmission",
-  "markInstagramGallerySubmissionShared",
-  "INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION",
-].forEach((snippet) => assertIncludes("static Supabase helper", staticHelper, snippet));
-
-[
-  "instagramOptIn",
-  "Allow Mōchirīī to share this image on our official Instagram if approved.",
-].forEach((snippet) => assertIncludes("static upload form", staticSubmitHtml, snippet));
-
-assertIncludes("static upload script", staticSubmitJs, "instagramOptIn: data.get(\"instagramOptIn\") === \"true\"");
-assertIncludes("static leader dashboard", staticDashboardHtml, "instagramQueuePanel");
-assertIncludes("static leader dashboard", staticDashboardJs, "publishInstagramGallerySubmission");
-assertIncludes("static leader dashboard", staticDashboardJs, "markInstagramGallerySubmissionShared");
-assertIncludes("static leader dashboard", staticDashboardJs, "Mark shared manually");
-assertIncludes("static leader dashboard", staticDashboardJs, "window.confirm");
-
-const browserFiles = [
-  ...walkFiles("apps/web").filter((file) => /\.(?:css|js|jsx|ts|tsx|html)$/i.test(file)),
-  "supabase.js",
-  "gallery-submit.js",
-  "leader-dashboard.js",
-  "gallery-submit.html",
-  "leader-dashboard.html",
-];
+const browserFiles = walkFiles("apps/web").filter((file) => /\.(?:css|js|jsx|ts|tsx|html)$/i.test(file));
 
 for (const file of browserFiles) {
   const source = readFileSync(path.join(root, file), "utf8");

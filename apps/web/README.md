@@ -1,8 +1,9 @@
 # Mochirii Next.js App
 
-This app is the live Vercel/Next.js production surface for Mochirii at `https://mochirii.com`. The existing root GitHub Pages static site remains intact as rollback/reference material.
+This app is the only live and editable `mochirii.com` website source. The retired
+root static site is preserved in GitHub release `legacy-static-final-2026-07-18`.
 
-For the current production, fallback, Vercel dashboard checklist, and rollback guardrails, see [`../../docs/deployment.md`](../../docs/deployment.md).
+For the current production, fallback, Vercel dashboard checklist, and rollback guardrails, see [`../../docs/operations/deployment.md`](../../docs/operations/deployment.md).
 
 ## Local Development
 
@@ -63,7 +64,7 @@ Do not commit `.vercel/`.
 
 Production CSP is enforced with `Content-Security-Policy`. It was promoted after a production browser pass found no report-only violations across Discord widgets, Spotify embeds, Supabase signed URLs, Vercel observability, auth, gallery, social handoff, and moderator surfaces. Any future third-party script, embed, image host, or API origin needs a scoped CSP review before launch. Keep nonce-based CSP tightening in a dedicated compatibility PR because Next.js nonce middleware makes pages dynamically rendered instead of static/prerendered.
 
-The RFC 9116 security contact file is served from `public/.well-known/security.txt` and should match the rollback copy at the repository root.
+The RFC 9116 security contact file is served from `public/.well-known/security.txt`.
 
 ## Vercel Observability
 
@@ -85,14 +86,8 @@ Analytics and Core Web Vitals data can take a few minutes, and enough real produ
 
 ## Public Assets And Data
 
-While the root static rollback surface remains available, root `assets/` and `data/` are the editable content source. The Next app reads copied files from `public/assets/` and `public/data/`.
-
-From the repository root, mirror and verify the copies with:
-
-```sh
-npm run sync:next-public
-npm run check:next-public-sync
-```
+`public/assets/` and `public/data/` are the canonical tracked media and content
+sources. Do not create root mirrors or reverse-sync scripts.
 
 ## Supabase Environment Variables
 
@@ -143,7 +138,7 @@ Player-facing copy should stay focused on the shared guild room, curated charact
 
 Shared `PageHero` routes should show their hero artwork as full-frame images in a stable `3 / 2` layout. The current standard is `object-fit: contain`, no crop, no tint/scrim/filter, and no intro-card overlap. Intro cards sit below the image with positive spacing while each page keeps its existing palette, glass styling, copy, image paths, metadata, and route behavior.
 
-Visual-only shell releases should verify Home and all shared routes at `360`, `390`, `768`, `1024`, and `1440` pixel widths before PR approval. Keep root `data/` and `apps/web/public/data/` synchronized when an approved root data correction is included.
+Visual-only shell releases should verify Home and all shared routes at `360`, `390`, `768`, `1024`, and `1440` pixel widths before PR approval.
 
 ## Migrated in Phase 1
 
@@ -267,7 +262,8 @@ cd ../..
 vercel build --prod --cwd apps/web
 ```
 
-Rollback plan: keep the root static auth/member files in place while the post-cutover stabilization window remains open. Any DNS, provider, or GitHub Pages rollback requires explicit owner approval and same-window evidence.
+Rollback uses the prior ready Vercel deployment. The archived static release is a
+restorable historical artifact, not a live hosting or authentication fallback.
 
 ## Accepted or Deferred Warnings
 
@@ -309,13 +305,13 @@ The Vercel fallback/debug URL is:
 https://mochirii.vercel.app
 ```
 
-Rollback/provider changes require explicit approval and a manual DNS/Vercel/Supabase checklist. See [`../../docs/dns-cutover-readiness-and-rollback.md`](../../docs/dns-cutover-readiness-and-rollback.md).
+Rollback/provider changes require explicit approval and the current deployment runbook. The former cutover packet is retained at [`../../docs/operations/history/dns-cutover-readiness-and-rollback.md`](../../docs/operations/history/dns-cutover-readiness-and-rollback.md) as historical evidence.
 
 ## Deferred
 
 - Server-side Supabase SSR/cookie behavior unless a route proves it needs server-side auth.
 - Backend/schema/RLS/Edge Function changes.
 - Vercel dashboard automation.
-- Retiring GitHub Pages/root static rollback artifacts.
+- Restoring the archived static release as a live hosting surface.
 
-See `docs/next-phase-3-auth-member-workflow.md` for the Phase 3 auth/member/gallery workflow migration plan.
+The completed Phase 3 migration plan is archived at `docs/operations/history/next-phase-3-auth-member-workflow.md`.

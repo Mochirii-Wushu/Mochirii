@@ -72,7 +72,7 @@ Approved sync flow:
 2. Pixelfed sends a server-to-server POST to the Edge Function with `sub`,
    Pixelfed local user id, username, `https://social.mochirii.com/...` profile
    URL, event, timestamp, and the shared sync secret header.
-3. The Edge Function verifies the secret, timestamp freshness, Supabase user id,
+3. The Edge Function verifies the secret, timestamp freshness, Member user ID,
    username shape, and profile URL boundary.
 4. The Edge Function upserts `public.social_accounts` with
    `provider = 'pixelfed'`, `status = 'active'`, and

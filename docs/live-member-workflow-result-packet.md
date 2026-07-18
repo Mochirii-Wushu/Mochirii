@@ -44,7 +44,7 @@ The result-packet checker reads a private local file and prints only pass/fail l
 Primary references:
 
 - Live member QA runbook: [`docs/member-workflow-production-qa-runbook.md`](./member-workflow-production-qa-runbook.md)
-- DNS approval packet: [`docs/dns-cutover-approval-packet.md`](./dns-cutover-approval-packet.md)
+- Historical DNS approval packet: [`docs/operations/history/dns-cutover-approval-packet.md`](./operations/history/dns-cutover-approval-packet.md)
 - Supabase Auth redirect URLs: <https://supabase.com/docs/guides/auth/redirect-urls>
 - Supabase Storage access control: <https://supabase.com/docs/guides/storage/security/access-control>
 - Supabase Edge Function secrets: <https://supabase.com/docs/guides/functions/secrets>

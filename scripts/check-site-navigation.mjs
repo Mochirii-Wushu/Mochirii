@@ -15,7 +15,7 @@ const socialPanel = read("apps/web/components/member-workflow/SocialHubPanel.tsx
 const socialPage = read("apps/web/app/social/page.tsx");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
 const currentState = read("docs/current-live-state.md");
-const runbook = read("docs/integration-operations-runbook.md");
+const runbook = read("docs/operations/integration-operations-runbook.md");
 
 const navGroups = between(navSource, "export const navGroups", "export const publicUtilityLinks");
 const publicUtilityLinks = between(navSource, "export const publicUtilityLinks", "export const accountWorkflowLinks");

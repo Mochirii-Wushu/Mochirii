@@ -1,4 +1,4 @@
-name: Validate static site
+name: Validate repository
 
 on:
   pull_request:

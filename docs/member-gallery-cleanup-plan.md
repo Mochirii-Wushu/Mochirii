@@ -42,7 +42,7 @@ The current website does not expose a retention scheduler or broad owner-facing 
 - Prefer moderation status changes before permanent deletion.
 - Keep the `member-gallery` bucket private.
 - Keep static Gallery data separate from member submissions.
-- Never edit `data/gallery.json` to hide or remove member uploads.
+- Never edit `apps/web/public/data/gallery.json` to hide or remove member uploads.
 - Never delete Storage objects directly from routine moderation.
 - Never delete Storage metadata with SQL.
 - Do not treat rejected cleanup as a durable moderation audit event; related rows use cascading foreign keys and may be removed with the submission row.

@@ -35,14 +35,10 @@ function assertAudioHasNoVisibleControls(label, text) {
 const recruitmentPage = readPublicPageExport(root, "RecruitmentPage", failures).text;
 const player = read("apps/web/components/public-pages/RecruitmentAudioPlayer.tsx");
 const appCss = readAppCss();
-const staticHtml = read("recruitment.html");
-const staticJs = read("recruitment.js");
-const staticCss = read("styles.css");
 const recruitmentGuide = read("docs/recruitment-guide.md");
-const recruitmentData = JSON.parse(read("data/recruitment.json"));
+const recruitmentData = JSON.parse(read("apps/web/public/data/recruitment.json"));
 
-assert(existsSync(path.join(root, "assets/audio/mochiriiiiii.mp3")), "Recruitment MP3 asset is missing.");
-assert(existsSync(path.join(root, "apps/web/public/assets/audio/mochiriiiiii.mp3")), "Mirrored Recruitment MP3 asset is missing.");
+assert(existsSync(path.join(root, "apps/web/public/assets/audio/mochiriiiiii.mp3")), "Recruitment MP3 asset is missing.");
 
 assertIncludes("Next Recruitment page", recruitmentPage, "RecruitmentAudioPlayer");
 assertIncludes("Next Recruitment page", recruitmentPage, "const audioSources = sources.map");
@@ -86,32 +82,8 @@ assertAudioHasNoVisibleControls("Next custom audio player", player);
   "@media (max-width:520px)",
 ].forEach((snippet) => {
   assertIncludes("Next Recruitment CSS", appCss, snippet);
-  assertIncludes("rollback Recruitment CSS", staticCss, snippet);
 });
 assert(!appCss.includes("max-content 42px"), "Next Recruitment CSS must not use the overlapping five-column audio layout.");
-assert(!staticCss.includes("max-content 42px"), "rollback Recruitment CSS must not use the overlapping five-column audio layout.");
-
-[
-  'id="recruitmentAudioPlayer"',
-  'data-custom-recruitment-audio-player="true"',
-  "data-audio-play",
-  "data-audio-seek",
-  "data-audio-time",
-  "data-audio-mute",
-  "data-audio-volume",
-  "recruitment-audio-volume-row",
-].forEach((snippet) => assertIncludes("rollback Recruitment markup", staticHtml, snippet));
-assertAudioHasNoVisibleControls("rollback Recruitment markup", staticHtml);
-
-[
-  "function configureAudioPlayer",
-  'audio.removeAttribute("controls")',
-  'audio.setAttribute("controlsList", "nodownload")',
-  "data-audio-play",
-  "data-audio-seek",
-  "data-audio-volume",
-  'player.addEventListener("contextmenu", (event) => event.preventDefault())',
-].forEach((snippet) => assertIncludes("rollback Recruitment script", staticJs, snippet));
 
 assertIncludes("Recruitment guide", recruitmentGuide, "custom themed audio player");
 assertIncludes("Recruitment guide", recruitmentGuide, "must not render native browser controls");

@@ -17,7 +17,7 @@ Keep the page focused on progression, service, and role meaning. A visitor shoul
 
 ## 2. Data Source
 
-- Ranks data lives in `data/ranks.json`.
+- Ranks data lives in `apps/web/public/data/ranks.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `ranks.js` changes in the same scoped task.
 - Add only fields that `ranks.js` actually supports.
@@ -105,7 +105,7 @@ Current image paths:
 
 Observed extra Ranks asset:
 
-- `./assets/img/ranks/ladder.webp` exists but is not currently referenced by `data/ranks.json`, `ranks.html`, or `ranks.js`.
+- `./assets/img/ranks/ladder.webp` exists but is not currently referenced by `apps/web/public/data/ranks.json`, `ranks.html`, or `ranks.js`.
 
 Alt text behavior:
 
@@ -121,7 +121,7 @@ Image rules:
 - Image paths must resolve.
 - Existing images should stay optimized WebP unless there is a clear scoped reason.
 - Do not add large unoptimized images.
-- Follow existing Ranks asset conventions under `assets/img/ranks/`.
+- Follow existing Ranks asset conventions under `apps/web/public/assets/img/ranks/`.
 - Do not add per-rank emblem, image, or alt text fields without renderer changes.
 
 ## 5. Tone Rules
@@ -219,6 +219,6 @@ Use `npm run smoke:gallery` as a general regression check if relevant to the rep
 
 Ranks work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/home.json` `seal.verse`

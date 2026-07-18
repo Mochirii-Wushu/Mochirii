@@ -14,7 +14,7 @@ Member Gallery moderation decides whether uploaded member images move from the p
 
 Moderation does not:
 
-- edit `data/gallery.json`
+- edit `apps/web/public/data/gallery.json`
 - publish static Gallery images
 - automatically publish images to Instagram
 - make the `member-gallery` Storage bucket public
@@ -99,7 +99,7 @@ After approval:
 - no static Gallery JSON is edited
 - no automatic Instagram publishing happens
 
-If an approved item needs later removal from the public feed, do not edit `data/gallery.json`. Use the moderation/admin path for changing the submission status, or escalate if that path is unavailable.
+If an approved item needs later removal from the public feed, do not edit `apps/web/public/data/gallery.json`. Use the moderation/admin path for changing the submission status, or escalate if that path is unavailable.
 
 ## 6. Instagram Queue
 

@@ -17,7 +17,7 @@ Keep the page focused on recruiting philosophy and participation. The protected 
 
 ## 2. Data Source
 
-- Recruitment data lives in `data/recruitment.json`.
+- Recruitment data lives in `apps/web/public/data/recruitment.json`.
 - Keep JSON valid.
 - Preserve the current schema unless `recruitment.js` changes in the same scoped task.
 - Add only fields that `recruitment.js` actually supports.
@@ -34,7 +34,7 @@ Current data shape:
 
 Renderer notes:
 
-- `recruitment.js` loads `data/recruitment.json` through `MochiriiUtils.fetchJson`.
+- `recruitment.js` loads `apps/web/public/data/recruitment.json` through `MochiriiUtils.fetchJson`.
 - `meta.updated` renders as month and year through `MochiriiUtils.formatDateUTC`.
 - Text renders with `textContent`; inline HTML and Markdown are not supported.
 - Badges render as plain spans, not links.
@@ -45,8 +45,8 @@ Renderer notes:
 
 The protected Recruitment fields are:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
 
 `recruitment.js` renders them with:
 
@@ -161,7 +161,7 @@ Use `npm run smoke:gallery` as a general regression check when shared behavior c
 
 Recruitment work must not alter:
 
-- `data/recruitment.json` `content.paragraphs`
-- `data/recruitment.json` `content.conclusion`
-- `data/twills.json` `profile.bio`
-- `data/home.json` `seal.verse`
+- `apps/web/public/data/recruitment.json` `content.paragraphs`
+- `apps/web/public/data/recruitment.json` `content.conclusion`
+- `apps/web/public/data/twills.json` `profile.bio`
+- `apps/web/public/data/home.json` `seal.verse`

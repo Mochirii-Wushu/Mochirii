@@ -99,7 +99,7 @@ provider.
 
 ## Moderator Review
 
-- Leader Dashboard includes a moderator-only Member Verification panel for approving, rejecting, or revoking non-Discord gallery access by Supabase user id.
+- Leader Dashboard includes a moderator-only Member Verification panel for approving, rejecting, or revoking non-Discord gallery access by Member user ID.
 - Moderators must use redacted notes only. Do not paste private messages, provider payloads, tokens, cookies, raw headers, or OAuth response bodies.
 - Activation evidence belongs in the private ignored `.local/multi-provider-login-activation-ledger.md` ledger, with status/counts only.
 - End-to-end approve/revoke proof belongs in Supabase Preview only. Use `npm run smoke:member-verification-preview` with `ALLOW_PREVIEW_MEMBER_VERIFICATION_SMOKE=true`; the script refuses the production project `deyvmtncimmcinldjyqe`.

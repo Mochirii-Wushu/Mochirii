@@ -1,6 +1,6 @@
 # Current Live State
 
-Last checked for this index: 2026-07-12.
+Last checked for this index: 2026-07-18.
 
 This is the short source-of-truth index for the current Mochirii production posture. Older files under `reports/` may describe historical report-only states, blocked dashboard steps, or pre-release checks; use this index and the linked active docs first.
 
@@ -11,17 +11,16 @@ This is the short source-of-truth index for the current Mochirii production post
 - Production branch: `main`.
 - Vercel fallback/debug URL: `https://mochirii.vercel.app`.
 - `https://www.mochirii.com` redirects to the apex domain.
-- Root static files and GitHub Pages remain rollback/reference material until a later stabilization task retires them.
-- Read-only GitHub Pages API on 2026-07-02 reported legacy root deployment for `mochirii.com` with status `errored`; the latest deploy built successfully but timed out in `deployment_queued`. Vercel production remained healthy, so treat this as a rollback-surface/settings cleanup item, not a live-site outage.
-- Deployment source of truth: `docs/deployment.md`.
+- The duplicate root static source is retired. Its exact final state is preserved
+  in release `legacy-static-final-2026-07-18`; website rollback uses a prior
+  ready Vercel deployment.
+- Deployment source of truth: `docs/operations/deployment.md`.
 - Resolve the current website release with `git fetch --prune origin` followed by
   `git rev-parse origin/main`; use `gh pr list --state open` and the protected
   check results on that commit instead of copying an undated SHA into this
   index.
 - Active website worktree on this workstation is
-  `C:\Github Repo's\Mochirii Website\Website`. The older Documents and
-  CodexWork paths are compatibility junctions into the canonical project root,
-  not separate worktrees.
+  `C:\Github Repo's\Mochirii Website\Website`.
 - Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii` as public. Keep this public state unless the owner separately approves making the repo private again.
 - Website closeout ledger for 2026-07-12: PR #433 documented the canonical
   credential boundary; PR #434 hardened GitHub Actions and Dependabot policy;
@@ -37,10 +36,9 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Data And Assets
 
-- Root `data/` and `assets/` remain the editable source while the static rollback surface is retained.
-- The Next app reads mirrored copies in `apps/web/public/data/` and `apps/web/public/assets/`.
-- Sync and verify with `npm run sync:next-public` and `npm run check:next-public-sync`.
-- The large `assets/audio/mochiriiiiii.mp3` warning is intentional and non-blocking unless the user separately approves audio optimization.
+- `apps/web/public/data/` and `apps/web/public/assets/` are the only editable
+  website content and media sources.
+- The large `apps/web/public/assets/audio/mochiriiiiii.mp3` warning is intentional and non-blocking unless the user separately approves audio optimization.
 
 ## Security And Headers
 
@@ -92,7 +90,7 @@ This is the short source-of-truth index for the current Mochirii production post
 
 - Supabase Edge Function `reaper-discord-interactions` handles Discord slash commands, buttons, gallery ingest, rank/event sync, native ModMail audit, and vote reminder interactions.
 - The separate Reaper Gateway worker handles only Discord member-join welcome DMs when a persistent host is running.
-- Discord event schedule source is `data/guild-schedule.json`; mirrored Next data must stay in sync.
+- Discord event schedule source is `apps/web/public/data/guild-schedule.json`.
 - Read-only source parity is guarded by `npm run check:discord-reaper-parity`.
 - Event sync is preview-first. `/sync-events mode:apply confirm:true` remains an owner-approved provider mutation.
 
@@ -145,9 +143,8 @@ This is the short source-of-truth index for the current Mochirii production post
    three-run mobile Lighthouse medians, current Vercel Speed Insights, route
    bundle analysis, CSS delivery, hydration, and Core Web Vitals. Do not change
    performance code without repeated route/device evidence.
-2. Audit retirement of the duplicated root GitHub Pages rollback surface.
-   Preserve rollback evidence and require separate approval before deleting
-   files or changing the Pages provider setting.
+2. Keep the archived static release restorable and do not recreate a duplicate
+   editable website source.
 3. Run a preview-only strict-CSP feasibility packet. Reject nonce-based CSP if
    forced dynamic rendering and lost static/CDN caching outweigh the benefit;
    keep experimental SRI evaluation-only.

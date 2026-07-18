@@ -245,7 +245,7 @@ Before inviting testers, verify on the approved target URL, usually ${normalizeP
 4. The iframe loads only after terms are accepted.
 5. The parent page sends MOCHI_PETS_AUTH with a short-lived Supabase access token only.
 6. Feedback submission writes to Supabase and appears in the leader audit panel.
-7. Leader dashboard can grant and revoke alpha access by Supabase user id.
+7. Leader dashboard can grant and revoke alpha access by Member user ID.
 8. No-real-value alpha messaging is visible on the tester page.
 9. Market, trade, funded-chain, cashout, and paid-asset UI are absent.
 

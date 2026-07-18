@@ -1,0 +1,259 @@
+# DNS Cutover Approval Packet Template
+
+> Historical cutover evidence. Do not use this packet for current deployment or
+> rollback; use `docs/operations/deployment.md`.
+
+This historical template defined the final human approval packet for the `mochirii.com` cutover from the GitHub Pages custom-domain surface to the Vercel/Next.js production site. As of 2026-06-07, `mochirii.com` is already serving the Vercel/Next.js app; keep this template only as rollback/reference material unless a future DNS migration explicitly reactivates it.
+
+Do not treat this template as approval. A completed packet must be reviewed during an approved window before any dashboard or DNS changes happen.
+
+Completed packets may include dashboard screenshots, exact DNS record values, operator names, account labels, rollback contacts, or private cleanup notes. Keep completed packets in a private operator location, not in this repository, unless every sensitive value has been redacted.
+
+The rehearsal helper fails if tracked filenames look like completed cutover packets, private evidence bundles, dashboard screenshots, or cutover-specific operator artifacts. That guard is only a backstop; operators should keep completed packets outside the repo from the start.
+
+## Source Rules
+
+- Vercel custom-domain records must come from the production-serving Vercel project's Domains dashboard or same-window `vercel domains inspect` output for the exact host.
+- Cloudflare remains authoritative DNS unless a future migration explicitly says otherwise.
+- Supabase Auth production redirects should use exact production paths for the final state.
+- Supabase Storage and gallery moderation must remain protected by RLS, private buckets, Edge Functions, and server-side secrets.
+- Discord OAuth callback remains the Supabase callback, not a Vercel or custom-domain callback.
+
+Primary references:
+
+- Historical DNS runbook: [`dns-cutover-readiness-and-rollback.md`](./dns-cutover-readiness-and-rollback.md)
+- Live member QA runbook: [`docs/member-workflow-production-qa-runbook.md`](./member-workflow-production-qa-runbook.md)
+- Vercel custom domains: <https://vercel.com/docs/domains/set-up-custom-domain>
+- Cloudflare DNS TTL behavior: <https://developers.cloudflare.com/dns/manage-dns-records/reference/ttl/>
+- Supabase Auth redirect URLs: <https://supabase.com/docs/guides/auth/redirect-urls>
+- Supabase Storage access control: <https://supabase.com/docs/guides/storage/security/access-control>
+- Supabase Edge Function secrets: <https://supabase.com/docs/guides/functions/secrets>
+
+## Packet Metadata
+
+```text
+Packet prepared by:
+Prepared at:
+Approval meeting/window:
+Cutover operator:
+Rollback owner:
+Communication channel:
+Decision: GO / NO-GO
+```
+
+## Required Same-Window Commands
+
+Run these before the approval decision:
+
+```sh
+DNS_CUTOVER_PRIVATE_PACKET_DIR=/absolute/private/directory npm --silent run prepare:dns-cutover-private-packets
+npm run check:dns-cutover-workstation
+npm run check:dns-cutover-rehearsal
+npm --silent run check:live-member-cleanup-note -- --note=/path/to/private/completed-cleanup-note.md
+npm --silent run check:live-member-workflow-result-packet -- --packet=/path/to/private/completed-live-member-result.md
+npm run check:cutover-validators
+npm --silent run check:dns-cutover-approval-packet -- --packet=/path/to/private/completed-packet.md
+npm run check
+git diff --check
+npm run check:production
+npm run check:dns-cutover-pr-readiness
+npm run smoke:vercel-production
+npm run smoke:supabase-edge-functions
+npm run smoke:supabase-auth-boundary
+npm run smoke:gallery-approved-feed
+LIVE_MEMBER_WORKFLOW_RESULT_PACKET=/path/to/private/completed-live-member-result.md DNS_CUTOVER_APPROVAL_PACKET=/path/to/private/completed-packet.md npm --silent run check:dns-cutover-final-readiness
+```
+
+If the same-window check runs on a machine without browser smoke support, record why and name the machine or CI check that supplied equivalent evidence.
+
+The approval-packet check reads a private local file and prints only pass/fail labels. It fails if the packet is tracked, if an in-repo packet path is not ignored by Git, if `Decision: GO` lacks required evidence, if D02 is not passed, if D03 is neither passed nor deferred with a rollback owner, or if obvious private identifiers, private Storage paths, secret values, or signed-URL values appear.
+
+The live-member cleanup-note check validates the private D03 artifact and cleanup handoff before the result packet copies only status-level cleanup text.
+
+The live-member result-packet check validates the private D02/D03 handoff before this final cutover packet records it as ready.
+
+The private packet preparation helper creates draft packet files outside the repository. It does not create completed evidence, does not authorize cutover, and does not print absolute paths.
+
+The PR-readiness helper is read-only. It verifies the local checkout matches draft PR #181, the merge state is clean, required GitHub/Vercel checks pass, and the matching Vercel preview deployment is Ready.
+
+The final-readiness helper is a read-only aggregator for the same-window commands and the two private packet validators. It includes the PR-readiness helper, fails closed when either private packet path is missing or invalid, and still does not perform or authorize DNS changes by itself.
+
+## Public State Evidence
+
+Record pass/fail only unless the value is already public and safe:
+
+```text
+Current custom domain still pre-cutover:
+Vercel production review URL healthy:
+Legacy .html redirects healthy:
+GitHub Pages rollback files present:
+Cloudflare nameservers still authoritative:
+ProtonMail records preserved:
+Known accepted warning only:
+```
+
+Accepted warning:
+
+- `assets/audio/mochiriiiiii.mp3` is intentionally above the asset-size warning threshold.
+
+## Vercel Dashboard Evidence
+
+Confirm in the production-serving project:
+
+```text
+Team/account:
+Project name:
+Project ID:
+Root Directory:
+Production Branch:
+Framework:
+Node.js version:
+Production env names present:
+Preview env names present:
+mochirii.com domain present/ready:
+www.mochirii.com domain present/ready or intentionally omitted:
+Exact apex DNS instruction captured privately:
+Exact www DNS instruction captured privately:
+Certificate status:
+```
+
+Do not copy secret values. Env names may be recorded; encrypted or raw env values must not be pasted into docs, PRs, issues, or chat.
+
+Stop if the dashboard project does not match the production-serving project from the runbook or if the dashboard DNS instructions do not match the same-window Vercel domain inspection.
+
+## Cloudflare Dashboard Evidence
+
+Capture before any approved DNS change:
+
+```text
+Account/zone:
+DNSSEC state:
+SSL/TLS mode:
+Apex web records captured privately:
+WWW web record captured privately:
+Mail records untouched:
+Verification TXT records untouched:
+Unrelated subdomains reviewed:
+Proxy setting for future Vercel web records:
+TTL plan:
+Rollback DNS records captured privately:
+```
+
+Do not touch MX, SPF/TXT, DKIM, DMARC, CAA, verification TXT, or unrelated subdomains during the website cutover.
+
+Stop if exact pre-change web records are not captured, if unrelated records are ambiguous, or if the planned Vercel web records are not DNS-only unless a tested reverse-proxy exception has been explicitly approved.
+
+## Supabase Evidence
+
+Confirm in the Supabase dashboard:
+
+```text
+Project ref:
+Project health:
+Site URL before change:
+Site URL planned after change:
+Redirect URLs include Vercel production/review URL:
+Redirect URLs include exact custom-domain production paths:
+Discord provider still enabled:
+Edge Function secret names/freshness checked:
+No raw secret values copied:
+```
+
+For live-member workflow:
+
+```text
+D02 live OAuth/account smoke: passed / failed
+D03 live upload/moderation smoke: passed / deferred
+If deferred, rollback owner:
+If D03 ran, cleanup status: complete / deferred by owner
+Live-member result packet validated:
+```
+
+Use `prepare:live-member-cleanup-note` before any D03 upload to create a repo-external private cleanup-note draft from [`docs/live-member-cleanup-note.md`](./live-member-cleanup-note.md) for submission IDs, Storage paths, cleanup ownership, and status-only public summaries. Do not copy private note values into this packet.
+
+Stop if D02 fails, if D03 is neither passed nor explicitly deferred with a rollback owner, if any service-role or secret key appears in browser/public output, or if signed URLs/private Storage paths are exposed outside the private operator note.
+
+## Discord Evidence
+
+Confirm in the Discord Developer Portal:
+
+```text
+Application:
+OAuth callback remains Supabase Auth callback:
+No callback changed to Vercel/custom domain:
+Bot/guild role assumptions still match the live-member QA runbook:
+```
+
+Expected callback:
+
+```text
+https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
+```
+
+Stop if the callback has drifted or if role assumptions cannot be reconciled with the test identities.
+
+## GitHub Pages Rollback Evidence
+
+Confirm before cutover:
+
+```text
+GitHub Pages status:
+GitHub Pages custom domain:
+Tracked CNAME still present:
+Root static files still present:
+Rollback DNS values captured privately:
+Rollback owner can restore DNS:
+```
+
+Do not remove the root static site, tracked `CNAME`, or GitHub Pages rollback path during the cutover window.
+
+## Go / No-Go Decision
+
+All items below must be true for `GO`:
+
+```text
+Same-window rehearsal and validation passed:
+Vercel dashboard project and DNS instructions confirmed:
+Cloudflare pre-change and rollback records captured:
+Supabase Auth redirect plan confirmed:
+Discord callback confirmed:
+D02 passed:
+D03 passed or explicitly deferred with rollback owner:
+Live-member result packet validated:
+Rollback owner and communication path confirmed:
+No secrets, tokens, private Storage paths, signed URLs, or private account identifiers exposed:
+```
+
+Mark `NO-GO` if any stop condition is triggered.
+
+## Post-Decision Notes
+
+For `GO`, record only safe public notes in PRs or docs:
+
+```text
+Cutover approved:
+Approved by:
+Window:
+Rollback owner:
+Live-member QA status:
+Cleanup status:
+```
+
+After the approved DNS change and Vercel verification, run:
+
+```sh
+npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect
+```
+
+Use the approved `www` decision from the packet: `redirect`, `serve`, or `skip`.
+
+For `NO-GO`, record:
+
+```text
+No-go reason:
+Next owner:
+Next review date:
+Current public surface remains:
+```
+
+Keep completed private packet details out of this repository unless they are fully redacted.

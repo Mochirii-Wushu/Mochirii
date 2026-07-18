@@ -142,8 +142,7 @@ async function liveDiscordRead(scheduleInstances) {
   console.log(`Live Discord scheduled event read OK (${matching.length} matching active managed-title events; values redacted).`);
 }
 
-const schedule = readJson("data/guild-schedule.json");
-const publicSchedule = readJson("apps/web/public/data/guild-schedule.json");
+const schedule = readJson("apps/web/public/data/guild-schedule.json");
 const reaper = [
   read("supabase/functions/reaper-discord-interactions/index.ts"),
   read("supabase/functions/_shared/discord-interaction-helpers.ts"),
@@ -153,7 +152,6 @@ const runbook = read("docs/reaper-event-sync-runbook.md");
 const runtimeChecklist = read("docs/reaper-runtime-health-checklist.md");
 const currentState = read("docs/current-live-state.md");
 
-assert(JSON.stringify(schedule) === JSON.stringify(publicSchedule), "data/guild-schedule.json must match apps/web/public/data/guild-schedule.json.");
 assert(schedule.timezone?.label === "UTC+8", "Guild schedule timezone label must remain UTC+8.");
 assert(schedule.timezone?.offsetMinutes === 480, "Guild schedule offset must remain 480 minutes.");
 assert(typeof schedule.discordCoverVersion === "string" && schedule.discordCoverVersion.length > 0, "Schedule must include a Discord cover cache-bust version.");
@@ -175,8 +173,7 @@ instances.forEach((event) => {
   assert(event.cover, `${event.key}: discordCoverImage is required.`);
   const coverPath = normalizeAssetPath(event.cover);
   assert(coverPath.startsWith("assets/img/discord-events/"), `${event.key}: cover must stay under assets/img/discord-events/.`);
-  assert(existsSync(path.join(root, coverPath)), `${event.key}: root cover asset missing: ${coverPath}.`);
-  assert(existsSync(path.join(root, "apps/web/public", coverPath)), `${event.key}: Next public cover asset missing: ${coverPath}.`);
+  assert(existsSync(path.join(root, "apps/web/public", coverPath)), `${event.key}: public cover asset missing: ${coverPath}.`);
 });
 
 const raffle = instances.find((event) => event.key === "monthly-raffle");
@@ -221,7 +218,7 @@ assert(raffle?.recurrenceRule?.by_n_weekday?.[0]?.day === 5, "Monthly raffle rec
 ].forEach((snippet) => assertIncludes("reaper runtime checklist", runtimeChecklist, snippet));
 
 [
-  "Discord event schedule source is `data/guild-schedule.json`",
+  "Discord event schedule source is `apps/web/public/data/guild-schedule.json`",
   "Event sync is preview-first",
   "owner-approved provider mutation",
 ].forEach((snippet) => assertIncludes("current live state", currentState, snippet));

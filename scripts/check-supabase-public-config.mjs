@@ -79,8 +79,7 @@ function isTextFile(file) {
 }
 
 function isBrowserFile(file) {
-  if (file.includes("/")) return false;
-  return /\.(?:html|js)$/i.test(file);
+  return file.startsWith("apps/web/") && /\.(?:js|jsx|ts|tsx)$/i.test(file);
 }
 
 function isEnvPath(file) {
@@ -136,19 +135,17 @@ function checkGitignore() {
   });
 }
 
-function checkSupabaseJs() {
-  const text = readText("supabase.js") || "";
-  if (!text.includes(`SUPABASE_PROJECT_REF = "${expectedProjectRef}"`)) {
-    failures.push("supabase.js: expected public Supabase project ref is missing.");
+function checkPublicUrlContract() {
+  const config = JSON.parse(readText("apps/web/config/public-urls.json") || "{}");
+  if (config.supabaseProjectRef !== expectedProjectRef) {
+    failures.push("apps/web/config/public-urls.json: expected public Supabase project ref is missing.");
   }
-  if (!text.includes(`SUPABASE_URL = "${expectedUrl}"`)) {
-    failures.push("supabase.js: expected public Supabase URL is missing.");
+  const browserConfig = readText("apps/web/lib/supabase/config.ts") || "";
+  if (!browserConfig.includes("process.env.NEXT_PUBLIC_SUPABASE_URL")) {
+    failures.push("apps/web/lib/supabase/config.ts: public URL must come from the hosted environment.");
   }
-  if (!/SUPABASE_PUBLISHABLE_KEY\s*=\s*"sb_publishable_[A-Za-z0-9_-]+"/.test(text)) {
-    failures.push("supabase.js: expected sb_publishable_ public key is missing.");
-  }
-  if (/SUPABASE_PUBLISHABLE_KEY\s*=\s*"sb_secret_/.test(text)) {
-    failures.push("supabase.js: publishable key must not use an sb_secret_ value.");
+  if (!browserConfig.includes("process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY")) {
+    failures.push("apps/web/lib/supabase/config.ts: publishable key must come from the hosted environment.");
   }
 }
 
@@ -190,7 +187,7 @@ const untrackedFiles = listUntrackedFiles();
 
 checkEnvFiles(trackedFiles, untrackedFiles);
 checkGitignore();
-checkSupabaseJs();
+checkPublicUrlContract();
 
 trackedFiles.filter((file) => existsSync(path.join(root, file))).filter(isTextFile).forEach((file) => {
   const text = readText(file);

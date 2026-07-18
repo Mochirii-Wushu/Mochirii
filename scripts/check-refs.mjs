@@ -2,19 +2,19 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
+const publicRoot = path.join(root, "apps", "web", "public");
 const ignoreDirs = new Set([
   ".git",
   ".lighthouseci",
   ".next",
   ".vercel",
-  "assets",
   "build",
   "coverage",
   "dist",
   "node_modules",
   "reports",
 ]);
-const sourceExt = new Set([".html", ".css", ".js", ".json"]);
+const sourceExt = new Set([".css", ".js", ".json", ".ts", ".tsx"]);
 const refs = [];
 
 function walk(dir) {
@@ -60,7 +60,6 @@ function addRef(file, lineNumber, raw) {
     ref.startsWith("./data/") ||
     ref.startsWith("data/") ||
     ref === "favicon.ico" ||
-    ref.endsWith(".html") ||
     ref.endsWith(".xml") ||
     ref.endsWith(".txt")
   ) {
@@ -72,7 +71,13 @@ const attrPattern = /\b(?:src|href|poster|content)=["']([^"']+)["']/gi;
 const localStringPattern = /["'`]((?:\.\/)?(?:assets|data)\/[^"'`()\s<>]+)["'`]/g;
 const cssUrlPattern = /url\(([^)]+)\)/gi;
 
-for (const file of walk(root)) {
+const scanRoots = [
+  path.join(root, "apps", "web", "app"),
+  path.join(root, "apps", "web", "components"),
+  path.join(root, "apps", "web", "public", "data"),
+];
+
+for (const file of scanRoots.flatMap((scanRoot) => walk(scanRoot))) {
   const relFile = path.relative(root, file).split(path.sep).join("/");
   const lines = readFileSync(file, "utf8").split(/\n/);
   lines.forEach((line, index) => {
@@ -91,7 +96,7 @@ for (const item of refs) {
   const key = `${item.file}:${item.lineNumber}:${item.ref}`;
   if (seen.has(key)) continue;
   seen.add(key);
-  if (!existsSync(path.join(root, item.ref))) missing.push(item);
+  if (!existsSync(path.join(publicRoot, item.ref))) missing.push(item);
 }
 
 if (missing.length) {

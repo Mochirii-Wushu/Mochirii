@@ -4,7 +4,7 @@
 
 ## Changed Surfaces
 
-- [ ] Root static GitHub Pages site
+- [ ] Canonical Next.js website (`apps/web`)
 - [ ] Next/Vercel app under `apps/web`
 - [ ] Supabase/auth/member workflow
 - [ ] Content/data/assets only

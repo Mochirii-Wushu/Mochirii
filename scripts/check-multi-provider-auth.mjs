@@ -41,11 +41,6 @@ const approvedGalleryFeed = read("supabase/functions/list-approved-gallery-submi
 const discordGalleryIngest = read("supabase/functions/submit-discord-gallery-image/index.ts");
 const galleryModeration = read("supabase/functions/_shared/gallery-moderation.ts");
 const reviewMemberVerification = read("supabase/functions/review-member-verification/index.ts");
-const staticSupabase = read("supabase.js");
-const staticAuth = read("auth.js");
-const staticGallerySubmit = read("gallery-submit.js");
-const staticLeaderDashboard = read("leader-dashboard.js");
-const staticLeaderDashboardHtml = read("leader-dashboard.html");
 
 [
   '"check:multi-provider-auth": "node scripts/check-multi-provider-auth.mjs"',
@@ -262,46 +257,6 @@ assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.
   "revoke",
   "member_verifications",
 ].forEach((snippet) => assertIncludes("review-member-verification", reviewMemberVerification, snippet));
-
-[
-  "enabledAuthProviders",
-  "signInWithProvider",
-  "verifyMemberAccess",
-  "reviewMemberVerification",
-  "review-member-verification",
-  "CONFIGURED_AUTH_PROVIDER_IDS",
-  'scopes: "profile_nickname profile_image"',
-].forEach((snippet) => assertIncludes("static Supabase helper", staticSupabase, snippet));
-
-[
-  "providerGrid",
-  "providerLogo",
-  "provider-logo--${id}",
-  "discord:",
-  "google:",
-  "twitch:",
-  "Choose a sign-in method",
-  "signInWithProvider",
-].forEach((snippet) => assertIncludes("static auth", staticAuth, snippet));
-
-[
-  "verifyMemberAccess",
-  "activeMemberAccess",
-  "Member verification",
-].forEach((snippet) => assertIncludes("static gallery submit", staticGallerySubmit, snippet));
-
-[
-  "memberVerificationPanel",
-  "memberVerificationUserId",
-  "data-member-verification-action=\"approve\"",
-  "Review Gallery Access",
-].forEach((snippet) => assertIncludes("static leader dashboard html", staticLeaderDashboardHtml, snippet));
-
-[
-  "reviewMemberVerification",
-  "data-member-verification-action",
-  "renderMemberVerificationResult",
-].forEach((snippet) => assertIncludes("static leader dashboard", staticLeaderDashboard, snippet));
 
 [
   "provider_token",
