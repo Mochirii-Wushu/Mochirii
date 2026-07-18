@@ -20,3 +20,6 @@ private keys, customer data, supplier costs, or private formula evidence.
   Functions, never a workstation process.
 
 Operational steps and dated evidence belong in `docs/operations`.
+
+See [Mochirii Social delivery](mochirii-social-delivery.md) for the private
+container, protected environment, deployment, and recovery contract.

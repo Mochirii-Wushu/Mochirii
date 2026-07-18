@@ -7,6 +7,9 @@ const root = process.cwd();
 const allowedEnvFiles = new Set([
   ".env.example",
   "apps/web/.env.example",
+  "services/social/.env.docker.example",
+  "services/social/.env.example",
+  "services/social/.env.testing",
   "supabase/functions/.env.example",
 ]);
 const expectedProjectRef = SUPABASE_PROJECT_REF;
@@ -91,6 +94,7 @@ function isPlaceholderValue(rawValue) {
   if (!value) return true;
   if (/^(?:true|false|null|undefined)$/i.test(value)) return true;
   if (/^(?:example|placeholder|redacted)$/i.test(value)) return true;
+  if (/^%[a-z](?:\\n)?$/i.test(value)) return true;
   if (/^[<[{]/.test(value)) return true;
   if (/^(?:<.*>|\[.*\])$/.test(value)) return true;
   if (/PASTE|REPLACE|SET_MANUALLY|set manually|never commit|\.\.\./i.test(value)) return true;

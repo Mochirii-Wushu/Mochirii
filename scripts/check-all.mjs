@@ -1,4 +1,10 @@
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { runCheckSuite } from "./lib/check-runner.mjs";
+
+const bundledNpmCli = join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
+const npmCli = process.env.npm_execpath || bundledNpmCli;
+const npmCommand = existsSync(npmCli) ? [process.execPath, npmCli] : ["npm"];
 
 const checks = [
   ["check:js", ["node", "scripts/check-js.mjs"]],
@@ -10,6 +16,7 @@ const checks = [
   ["check:brand-boundaries", ["node", "scripts/check-brand-boundaries.mjs"]],
   ["check:repository-boundaries", ["node", "scripts/check-repository-boundaries.mjs"]],
   ["check:shopify-release-safety", ["node", "apps/shopify-theme/scripts/check-release-safety.mjs"]],
+  ["check:social", [...npmCommand, "--prefix", "services/social", "run", "check:mochirii-ops"]],
   ["check:code-cleanliness", ["node", "scripts/check-code-cleanliness.mjs"]],
   ["check:github-actions-security", ["node", "scripts/check-github-actions-security.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],

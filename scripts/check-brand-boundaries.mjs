@@ -46,6 +46,10 @@ const forbiddenFilePatterns = [
   /(^|\/)(?:credentials?|secrets?)(?:\.[^/]+)?$/i,
   /\.(?:key|p12|pfx|pem)$/i,
 ];
+const allowedCredentialExamples = new Set([
+  "services/social/.env.docker.example",
+  "services/social/.env.testing",
+]);
 const textExtensions = new Set([
   ".css",
   ".html",
@@ -72,6 +76,9 @@ const extensionlessTextFiles = new Set([
   ".nvmrc",
   ".shopifyignore",
   "CNAME",
+]);
+const reviewedLargeTextBudgets = new Map([
+  ["services/social/storage/app/cities.json", 13 * 1024 * 1024],
 ]);
 const failures = [];
 
@@ -128,7 +135,11 @@ for (const relativePath of trackedFiles) {
     failures.push("tracked private-evidence or provider-output path is forbidden");
     continue;
   }
-  if (forbiddenFilePatterns.some((pattern) => pattern.test(relativePath)) && !relativePath.endsWith(".env.example")) {
+  if (
+    forbiddenFilePatterns.some((pattern) => pattern.test(relativePath))
+    && !relativePath.endsWith(".env.example")
+    && !allowedCredentialExamples.has(lowerPath)
+  ) {
     failures.push("tracked credential-shaped file path is forbidden");
     continue;
   }
@@ -138,9 +149,13 @@ for (const relativePath of trackedFiles) {
   const extension = path.extname(relativePath).toLowerCase();
   const basename = path.basename(relativePath);
   if (!textExtensions.has(extension) && !extensionlessTextFiles.has(basename)) continue;
-  if (statSync(absolutePath).size > 5 * 1024 * 1024) {
-    failures.push(`${relativePath}: text candidate exceeds the 5 MiB scan limit`);
-    continue;
+  const fileSize = statSync(absolutePath).size;
+  if (fileSize > 5 * 1024 * 1024) {
+    const reviewedBudget = reviewedLargeTextBudgets.get(relativePath);
+    if (reviewedBudget === undefined || fileSize > reviewedBudget) {
+      failures.push(`${relativePath}: text candidate exceeds its reviewed size budget`);
+      continue;
+    }
   }
 
   const lines = readFileSync(absolutePath, "utf8").split(/\r?\n/);
