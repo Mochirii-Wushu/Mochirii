@@ -313,6 +313,7 @@ if (dockerCompose.includes("mysql:9")) {
 if (dockerCompose.includes("./bootstrap/cache:/var/www/html/bootstrap/cache")) {
   failures.push("docker-compose.yml must keep image-owned bootstrap/cache isolated from the host");
 }
+
 const immutableImageReference = "image: ${PIXELFED_IMAGE:-mochirii-pixelfed:local}";
 if (dockerCompose.split(immutableImageReference).length - 1 !== 3) {
   failures.push("docker-compose.yml must apply PIXELFED_IMAGE to all three application services");
@@ -338,6 +339,7 @@ requireIncludes("scripts/check-clean-database-migrations.sh", cleanDatabaseCheck
 const dockerfile = read("Dockerfile");
 requireIncludes("Dockerfile", dockerfile, [
   "serversideup/php:8.4-fpm-nginx@sha256:519720d9ff5d50aad9eb83fac290746460dfc1346faa8fdb25c75d28a3feb2ab",
+  'org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii"',
   "COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/",
   "composer install --no-ansi --no-interaction --no-dev --optimize-autoloader",
   "php scripts/check-production-composer-dependencies.php",
