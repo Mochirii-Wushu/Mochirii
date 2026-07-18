@@ -46,6 +46,9 @@ const forbiddenFilePatterns = [
   /(^|\/)(?:credentials?|secrets?)(?:\.[^/]+)?$/i,
   /\.(?:key|p12|pfx|pem)$/i,
 ];
+const allowedCredentialExamples = new Set([
+  "services/social/.env.docker.example",
+]);
 const textExtensions = new Set([
   ".css",
   ".html",
@@ -131,7 +134,11 @@ for (const relativePath of trackedFiles) {
     failures.push("tracked private-evidence or provider-output path is forbidden");
     continue;
   }
-  if (forbiddenFilePatterns.some((pattern) => pattern.test(relativePath)) && !relativePath.endsWith(".env.example")) {
+  if (
+    forbiddenFilePatterns.some((pattern) => pattern.test(relativePath))
+    && !relativePath.endsWith(".env.example")
+    && !allowedCredentialExamples.has(lowerPath)
+  ) {
     failures.push("tracked credential-shaped file path is forbidden");
     continue;
   }
