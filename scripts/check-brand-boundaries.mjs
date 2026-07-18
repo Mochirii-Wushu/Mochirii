@@ -48,6 +48,7 @@ const forbiddenFilePatterns = [
 ];
 const allowedCredentialExamples = new Set([
   "services/social/.env.docker.example",
+  "services/social/.env.testing",
 ]);
 const textExtensions = new Set([
   ".css",

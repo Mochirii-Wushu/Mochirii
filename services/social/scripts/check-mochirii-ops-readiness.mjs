@@ -86,6 +86,12 @@ function requireIncludes(file, text, needles) {
   }
 }
 
+function requireRuntimeSourceFile(file) {
+  if (!fs.existsSync(path.join(root, file))) {
+    failures.push(`Missing required runtime source file: ${file}`);
+  }
+}
+
 function walkFiles(relativeDir) {
   const fullDir = path.join(root, relativeDir);
   if (!fs.existsSync(fullDir)) return [];
@@ -130,6 +136,19 @@ function isCanonicalRemote(remote) {
 
 for (const doc of requiredDocs) {
   read(doc);
+}
+
+for (const file of [
+  ".env.testing",
+  "bootstrap/cache/.gitignore",
+  "public/vendor/horizon/.gitignore",
+  "storage/app/bouncer/.gitignore",
+  "storage/app/bouncer/all.json",
+  "storage/app/public/avatars/.gitignore",
+  "storage/app/public/avatars/default.jpg",
+  "storage/app/public/avatars/default.png",
+]) {
+  requireRuntimeSourceFile(file);
 }
 
 for (const removedFile of ["funding.json", ".github/FUNDING.yml"]) {
