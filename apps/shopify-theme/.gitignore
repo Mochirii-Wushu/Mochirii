@@ -1,0 +1,10 @@
+.env
+.env.*
+*.local
+*.zip
+node_modules/
+private-evidence/
+.private-evidence/
+tmp/
+playwright-report/
+test-results/

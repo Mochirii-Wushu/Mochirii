@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#071610">
+    {% assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics' %}
+    {% assign public_page_title = page_title %}
+    {% assign public_page_description = page_description | default: settings.default_meta_description %}
+    {% if request.page_type == 'page' and page.title != blank %}
+      {% assign duplicated_page_title_prefix = page.title | append: page.title %}
+      {% assign duplicated_page_title_prefix_length = duplicated_page_title_prefix | size %}
+      {% assign rendered_page_title_prefix = public_page_title | slice: 0, duplicated_page_title_prefix_length %}
+      {% if rendered_page_title_prefix == duplicated_page_title_prefix %}
+        {% assign public_page_title = public_page_title | remove_first: page.title %}
+      {% endif %}
+    {% endif %}
+    <title>
+      {{ public_page_title }}
+      {%- if current_page != 1 %} &ndash; page {{ current_page }}{% endif -%}
+      {%- unless public_page_title contains storefront_name %} &ndash; {{ storefront_name }}{% endunless -%}
+    </title>
+    {% if public_page_description %}
+      <meta name="description" content="{{ public_page_description | escape }}">
+    {% endif %}
+    {% render 'seo-meta', seo_title_override: public_page_title, seo_description_override: public_page_description %}
+    {% render 'structured-data' %}
+    {{ 'mochirii-theme.css' | asset_url | stylesheet_tag }}
+    <style>
+      :root {
+        --cream-0: {{ settings.background_color | default: '#fffaf0' }};
+        --ink-0: {{ settings.text_color | default: '#061610' }};
+        --jade-0: {{ settings.accent_color | default: '#1f745f' }};
+      }
+    </style>
+    {{ content_for_header }}
+    <script src="{{ 'mochirii-theme.js' | asset_url }}" defer="defer"></script>
+  </head>
+  <body class="template-{{ template.name | handle }}">
+    <a class="skip-link" href="#MainContent">{{ 'general.accessibility.skip_to_content' | t }}</a>
+    {% section 'header' %}
+    <main id="MainContent" class="site-main" role="main" tabindex="-1">
+      {{ content_for_layout }}
+    </main>
+    {% section 'footer' %}
+  </body>
+</html>

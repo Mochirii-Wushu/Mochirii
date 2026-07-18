@@ -11,11 +11,14 @@ This report records the guild-site side of the one-brand Shopify launch pass.
 
 ## Blocked Terms
 
-- Old shop brand/domain terms: `Velesari`, `velesari`, `shop.velesari.trade`, `velesari.trade`.
-- Supplier or third-party cosmetics references: `Selfnamed`, `selfnamed`, `MÁDARA`, `Madara`.
+- Former shop-brand and domain terms covered by the repository boundary scanner.
+- Known manufacturing-partner identity and domain tokens assembled inside the
+  guard without embedding those identifiers in public content.
 - Supplier-facing phrases: `private label`, `dropshipping`, `offer your customers`, `professional skincare offerings`.
 
-Internal docs and reports are intentionally outside this guild-site customer-facing scan. They may retain private audit context as long as it is not rendered into the public website.
+The repository boundary scanner covers tracked docs and reports as well as
+customer-facing surfaces. Supplier-language rules retain their narrower public
+surface scope.
 
 ## Live Sample
 
@@ -32,4 +35,6 @@ Result: all returned `200` and no blocked shop/supplier terms were found in samp
 
 Status: `clean` for sampled public guild pages.
 
-Remaining Shopify storefront blockers live in the Shopify theme repo and Shopify Admin: product categories, routine collections, product-source mockup reconciliation, product descriptions/SEO/media alt text, visible mockup label artwork, About facts, and Contact facts.
+Remaining storefront blockers are tracked in private operational evidence.
+Public status is limited to the facts that catalog, media, policy, About, and
+Contact approval remain incomplete and the storefront must stay gated.

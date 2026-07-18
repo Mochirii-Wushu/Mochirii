@@ -1,0 +1,51 @@
+{% assign tags_normalized = product.tags | join: ',' | downcase %}
+{% assign line_label = product.metafields.custom.routine_step | metafield_text | strip %}
+{% if line_label == blank %}
+  {% assign line_label = product.type | default: 'Skincare' %}
+{% endif %}
+{% assign card_loading = image_loading | default: 'lazy' %}
+{% assign card_fetchpriority = image_fetchpriority | default: 'auto' %}
+{% assign card_benefit = product.metafields.custom.card_benefit | metafield_text | strip %}
+
+<article class="product-card" role="listitem">
+  <a class="product-card__image" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+    {% if product.featured_image %}
+      {% assign product_card_alt = product.featured_image.alt | default: product.title %}
+      {{ product.featured_image | image_url: width: 760 | image_tag: loading: card_loading, fetchpriority: card_fetchpriority, alt: product_card_alt, sizes: '(min-width: 1080px) 25vw, (min-width: 720px) 50vw, 100vw' }}
+    {% else %}
+      <span class="media-placeholder">
+        <span>{{ product.title }}</span>
+        <small>Product image unavailable.</small>
+      </span>
+    {% endif %}
+
+    <span class="product-card__badges" aria-label="Product status">
+      {% if tags_normalized contains 'new' %}
+        <span class="badge">New</span>
+      {% endif %}
+      {% unless product.available %}
+        <span class="badge badge--muted">Sold out</span>
+      {% endunless %}
+    </span>
+  </a>
+
+  <div class="product-card__body">
+    <p class="product-card__line">{{ line_label }}</p>
+    <h2 class="product-card__title">
+      <a href="{{ product.url }}">{{ product.title }}</a>
+    </h2>
+    {% if card_benefit != blank %}
+      <p class="product-card__benefit">{{ card_benefit | truncate: 118 }}</p>
+    {% endif %}
+    <div class="product-card__meta">
+      <p class="price">
+        {% if product.price_varies %}
+          From {{ product.price_min | money }}
+        {% else %}
+          {{ product.price | money }}
+        {% endif %}
+      </p>
+      <a class="text-link product-card__cta" href="{{ product.url }}">View product</a>
+    </div>
+  </div>
+</article>

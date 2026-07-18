@@ -1,0 +1,22 @@
+<div class="mochirii-note" {{ block.shopify_attributes }}>
+  {{ block.settings.text | escape }}
+</div>
+
+{% schema %}
+{
+  "name": "Mochirii Cosmetics note",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "See the product page for ingredients, directions, and warnings."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Mochirii Cosmetics note"
+    }
+  ]
+}
+{% endschema %}

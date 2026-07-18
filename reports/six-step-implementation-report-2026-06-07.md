@@ -103,31 +103,21 @@ PR #190 was handled after the React peer update from PR #192 made it safe to reb
 
 Completed as a verification and evidence pass. No Shopify publish, password removal, checkout, payment, order, domain, inventory, or product-data mutation was performed during this step.
 
-Shopify docs-only PR:
+The former mixed-repository PR pointer was retired during repository
+separation. Its preserved private checkpoint recorded passing Theme Check,
+brand-residue, and CodeQL validation.
 
-- PR: <https://github.com/Anthyphera/Velesari-Holdings/pull/39>
-- Branch: `codex/shopify-launch-qa-evidence`
-- Base: `shopify-theme`
-- Commit: `d2a1df8 Record Shopify launch QA blockers`
-- Status: draft
-- Checks: Theme Check, brand-residue, and CodeQL passed.
+Private storefront evidence confirmed that catalog taxonomy, collections,
+product media, and source reconciliation still required owner review. Exact
+dashboard paths, row counts, product lists, source identities, and media
+comparisons were moved to private evidence.
 
-Authenticated Shopify evidence:
+The public conclusions are limited to these points:
 
-- Active products filter showed `Select all 20 on page`.
-- Active products showed vendor `Mochirii` and inventory `Not tracked`.
-- Visible product table had no old brand, supplier-name, third-party cosmetics brand, `private label`, or `dropshipping` text.
-- `Mōchirīī Daily Care` exists with handle `mochirii-daily-care`.
-- `https://shop.mochirii.com/` redirects to `/password`.
-- `https://shop.velesari.trade/password` redirects to `https://shop.mochirii.com/password`.
-
-Shopify launch blockers:
-
-- Active products still show category `Uncategorized`.
-- Routine collections are not present yet: `routine-cleanse`, `routine-hydrate`, `routine-treat`, `routine-moisturize`, `routine-body`, `routine-hair`, and `routine-makeup`.
-- Old or unrelated admin collections still exist and need review: `Exfoliators`, `Body Care`, `Face Care`, `Skin Care Essentials`, `Hydrogen`, `Automated Collection`, `Home page`, `Small Home Supplies`, `Pet Cleanup`, `Cleaning Refills`, and `Household Essentials`.
-- Exact Selfnamed mockup comparison remains pending because the Selfnamed profile page redirected to an error page during this session.
-- About/contact placeholders remain launch blockers before password removal.
+- The storefront remained password-gated.
+- Catalog, media, About, and Contact approval remained incomplete.
+- No provider-side product, inventory, payment, checkout, or publication action
+  was authorized by this verification pass.
 
 Local Shopify checks:
 
@@ -204,5 +194,6 @@ GitHub checks on merged `main` commit `684d5f054f04242d24f4626107b6f1c1d394bd3f`
 - Register the updated Reaper command and run a non-live dry-run payload.
 - Confirm the official Instagram account, Meta app permissions, and Supabase `INSTAGRAM_*` secrets.
 - Approve one live Instagram test post only when ready.
-- Finish Shopify product categories, routine collections, old collection cleanup, exact Selfnamed image comparison, and placeholder About/Contact content before password removal.
+- Complete the private catalog, collection, product-media, About, and Contact
+  approval packet before password removal.
 - Decide later whether to close or refresh stale Vercel analytics PRs #178 and #180.

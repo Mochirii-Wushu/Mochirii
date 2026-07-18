@@ -1,0 +1,100 @@
+<footer class="site-footer">
+  {% assign contact_url = routes.root_url | append: 'pages/contact' %}
+  {% assign support_menu = section.settings.footer_menu %}
+  {% if support_menu == blank %}
+    {% assign support_menu = linklists['footer'] %}
+  {% endif %}
+  <div class="site-footer__inner">
+    <div class="site-footer__brand">
+      <a class="brand footer-brand" href="{{ routes.root_url }}" aria-label="{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }} skincare storefront home">
+        <span class="brand-mark brand-mark--image" aria-hidden="true">
+          <img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56" loading="lazy">
+        </span>
+        <span class="brand-wording">
+          <span class="brand-text">{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }}</span>
+          <span class="brand-subtext">Skincare</span>
+        </span>
+      </a>
+      <p class="footer-note">{{ section.settings.summary_text | default: settings.footer_summary }}</p>
+      <p class="footer-note footer-note--fine">Questions about a product or order? <a href="{{ contact_url }}">Contact Mochirii Cosmetics.</a></p>
+    </div>
+
+    <div class="footer-nav-groups">
+      <nav class="footer-links" aria-label="Footer navigation">
+        <h2>Support</h2>
+        {% assign has_privacy_choices = false %}
+        {% if support_menu != blank and support_menu.links.size > 0 %}
+          {% for link in support_menu.links %}
+            {% assign is_policy_link = false %}
+            {% assign support_link_url = link.url %}
+            {% if link.title == 'Your Privacy Choices' %}
+              {% assign has_privacy_choices = true %}
+              {% if support_link_url == blank %}
+                {% assign support_link_url = '/pages/data-sharing-opt-out' %}
+              {% endif %}
+            {% endif %}
+            {% if shop.shipping_policy != blank and link.url == shop.shipping_policy.url %}
+              {% assign is_policy_link = true %}
+            {% elsif shop.refund_policy != blank and link.url == shop.refund_policy.url %}
+              {% assign is_policy_link = true %}
+            {% elsif shop.privacy_policy != blank and link.url == shop.privacy_policy.url %}
+              {% assign is_policy_link = true %}
+            {% elsif shop.terms_of_service != blank and link.url == shop.terms_of_service.url %}
+              {% assign is_policy_link = true %}
+            {% endif %}
+            {% unless is_policy_link %}
+              <a href="{{ support_link_url }}">{{ link.title }}</a>
+            {% endunless %}
+          {% endfor %}
+        {% else %}
+          <a href="{{ contact_url }}">Contact</a>
+          <a href="https://mochirii.com" rel="noopener">Mochirii Guild</a>
+        {% endif %}
+        {% unless has_privacy_choices %}
+          <a href="/pages/data-sharing-opt-out">Your Privacy Choices</a>
+        {% endunless %}
+      </nav>
+
+      <nav class="footer-links" aria-label="Policy navigation">
+        <h2>Policies</h2>
+        {% if shop.shipping_policy != blank %}
+          <a href="{{ shop.shipping_policy.url }}">Shipping policy</a>
+        {% endif %}
+        {% if shop.refund_policy != blank %}
+          <a href="{{ shop.refund_policy.url }}">Refund policy</a>
+        {% endif %}
+        {% if shop.privacy_policy != blank %}
+          <a href="{{ shop.privacy_policy.url }}">Privacy policy</a>
+        {% endif %}
+        {% if shop.terms_of_service != blank %}
+          <a href="{{ shop.terms_of_service.url }}">Terms of service</a>
+        {% endif %}
+      </nav>
+    </div>
+  </div>
+
+  <div class="site-footer__bottom">
+    <div class="section-inner">
+      <p>&copy; {{ 'now' | date: '%Y' }} {{ settings.corporate_display_name | default: 'Mochirii Cosmetics' }}. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "summary_text",
+      "label": "Summary text",
+      "default": "Skincare for cleansing, hydrating, brightening, and nourishing routines."
+    },
+    {
+      "type": "link_list",
+      "id": "footer_menu",
+      "label": "Footer menu"
+    }
+  ]
+}
+{% endschema %}

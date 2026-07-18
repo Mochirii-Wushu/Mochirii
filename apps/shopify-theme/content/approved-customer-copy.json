@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 2,
+  "contentRevision": "2026-07-18-v2",
+  "locale": "en-US",
+  "brand": "Mochirii Cosmetics",
+  "approval": {
+    "scope": "customer-copy-packet",
+    "preparedOn": "2026-07-18",
+    "themeQaAuthorized": true,
+    "sharedRecordMutationAuthorized": true,
+    "themePublicationAuthorized": false,
+    "commerceAuthorized": false
+  },
+  "provenance": {
+    "sourceRepository": "Mochirii-Wushu/Mochirii",
+    "sourcePullRequest": "https://github.com/Mochirii-Wushu/Mochirii/pull/459",
+    "sourceRevision": "2026-07-18-v2",
+    "approvalRecord": "content/customer-facing-copy-approval-packet.md"
+  },
+  "theme": {
+    "headerStrip": "Skincare by routine",
+    "mainSiteLink": "Mochirii Guild",
+    "brandSubtext": "Skincare",
+    "heroIntroduction": "Find cleansers, serums, moisturizers, and facial oils for each step of your routine.",
+    "featuredHeading": "Start your routine here",
+    "collectionsHeading": "Choose your next step",
+    "detailsEyebrow": "Product details",
+    "detailsHeading": "See what fits your routine",
+    "detailsIntroduction": "Compare texture, skin suitability, key ingredients, directions, and full ingredient lists before you choose.",
+    "detailItems": [
+      {
+        "heading": "Matching product images",
+        "text": "Each gallery shows the Mochirii Cosmetics packaging for that product."
+      },
+      {
+        "heading": "Ingredients and directions",
+        "text": "Find key ingredients, full INCI, size, skin suitability, and directions on every product page."
+      },
+      {
+        "heading": "Shopping details in one place",
+        "text": "Check warnings, origin, shipping, and returns before adding a product to your routine."
+      }
+    ],
+    "policyBand": "Shipping and return details are available before checkout.",
+    "footerSummary": "Skincare for cleansing, hydrating, brightening, and nourishing routines.",
+    "footerSupport": "Questions about a product or order? Contact Mochirii Cosmetics.",
+    "states": {
+      "emptyCart": "Your cart is empty.",
+      "disabledCheckout": "Checkout opens when the store launches.",
+      "emptyCollectionHeading": "No products found.",
+      "emptyCollectionBody": "Clear a filter or browse all skincare.",
+      "notFoundHeading": "We couldn't find that page.",
+      "notFoundBody": "Search by product or ingredient, or browse all skincare.",
+      "passwordHeading": "The skincare shop is opening soon.",
+      "passwordBody": "Enter the password to preview the store."
+    },
+    "productPage": {
+      "description": "Description",
+      "directions": "How to use",
+      "ingredients": "Full ingredients (INCI)",
+      "warnings": "Warnings",
+      "origin": "Origin and certifications",
+      "routine": "Texture and routine",
+      "shipping": "Shipping and returns",
+      "available": "In stock",
+      "unavailable": "Sold out",
+      "recommendations": "Complete your routine"
+    }
+  },
+  "home": {
+    "seoTitle": "Mochirii Cosmetics | Skincare by Routine",
+    "seoDescription": "Shop Mochirii Cosmetics skincare by routine, with ingredients, directions, skin suitability, and product details for every formula."
+  },
+  "collectionsIndex": {
+    "eyebrow": "Skincare routines",
+    "heading": "Choose your next step",
+    "intro": "Browse skincare for cleansing, hydration, brightening, smoothing, and nourishment."
+  },
+  "pages": [
+    {
+      "handle": "about",
+      "title": "About",
+      "bodyHtml": "<p>Mochirii Cosmetics organizes skincare by routine step: cleansing, hydration, brightening, and nourishment. Compare products by skin suitability, ingredients, texture, and use to find what fits your routine.</p><p>Each product page brings together key ingredients, directions, the full INCI list, warnings, origin, and certifications.</p>",
+      "seoTitle": "About Mochirii Cosmetics | Skincare by Routine",
+      "seoDescription": "Learn how Mochirii Cosmetics organizes skincare formulas by routine step, skin type, ingredients, texture, and use."
+    },
+    {
+      "handle": "contact",
+      "title": "Contact",
+      "bodyHtml": "<p>Questions about a product, order, shipping, or returns? Send us a message using the form below.</p><p>Include your order number when asking about an order, or the product name when asking about skincare.</p>",
+      "seoTitle": "Contact Mochirii Cosmetics | Product & Order Help",
+      "seoDescription": "Contact Mochirii Cosmetics for help with a product, an order, or a store policy."
+    }
+  ],
+  "collections": [
+    {
+      "handle": "mochirii-cosmetics",
+      "title": "Mochirii Cosmetics",
+      "description": "Shop all 20 Mochirii Cosmetics formulas for cleansing, hydration, brightening, and nourishing care.",
+      "seoTitle": "Shop Skincare | Mochirii Cosmetics",
+      "seoDescription": "Shop all 20 Mochirii Cosmetics skincare formulas for cleansing, hydration, brightening, and nourishing care."
+    },
+    {
+      "handle": "cleanse-tone",
+      "title": "Cleanse & Tone",
+      "description": "Cleansers, makeup removers, and toner for the first steps of your skincare routine.",
+      "seoTitle": "Cleanse & Tone | Mochirii Cosmetics",
+      "seoDescription": "Shop Mochirii cleansers, makeup removers, and toner for the first steps of your skincare routine."
+    },
+    {
+      "handle": "hydrate-barrier",
+      "title": "Hydrate & Barrier",
+      "description": "Lightweight gels and daily moisturizers for soft, comfortable-feeling skin.",
+      "seoTitle": "Hydrate & Barrier | Mochirii Cosmetics",
+      "seoDescription": "Shop Mochirii gels and daily moisturizers for hydration and soft, comfortable-feeling skin."
+    },
+    {
+      "handle": "brighten-smooth",
+      "title": "Brighten & Smooth",
+      "description": "Explore serums, exfoliation, and eye care for a brighter, smoother-looking finish.",
+      "seoTitle": "Brighten & Smooth | Mochirii Cosmetics",
+      "seoDescription": "Shop Mochirii serums, exfoliation, and eye care for a brighter, smoother-looking finish."
+    },
+    {
+      "handle": "age-support-nourish",
+      "title": "Age-Support & Nourish",
+      "description": "Choose nourishing oils, creams, and serums for moisture, suppleness, and a smooth-looking finish.",
+      "seoTitle": "Age-Support & Nourish | Mochirii Cosmetics",
+      "seoDescription": "Shop Mochirii oils, creams, and serums for moisture, suppleness, and a smooth-looking finish."
+    }
+  ],
+  "products": [
+    {
+      "identity": {
+        "handle": "peptide-smoothing-serum",
+        "title": "Peptide Smoothing Serum"
+      },
+      "copy": {
+        "description": "For normal-to-dry skin, this fast-absorbing serum combines peptides, hyaluronic acid, aloe, and sodium PCA. The lightweight texture layers easily and leaves skin hydrated with a smoother-looking finish.",
+        "seoTitle": "Peptide Smoothing Serum | Mochirii Cosmetics",
+        "seoDescription": "A fast-absorbing peptide serum with hyaluronic acid, aloe, and sodium PCA for hydrated, smoother-looking normal-to-dry skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "natural-retinol-alternative-oil-serum",
+        "title": "Natural Retinol Alternative Oil Serum"
+      },
+      "copy": {
+        "description": "Made for dehydrated skin, this silky facial oil pairs a plant-derived retinol alternative with skin-softening oils. It leaves the complexion supple with a luminous-looking finish.",
+        "seoTitle": "Natural Retinol Alternative Oil Serum | Mochirii Cosmetics",
+        "seoDescription": "A silky facial oil with a plant-derived retinol alternative and skin-softening oils for supple, luminous-looking dehydrated skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "vitamin-c-serum",
+        "title": "Vitamin C Serum"
+      },
+      "copy": {
+        "description": "Vitamin C and vitamin E pair with hyaluronic acid and sodium PCA in this lightweight serum. It adds moisture while helping dull-looking skin appear brighter and more even.",
+        "seoTitle": "Vitamin C Serum | Mochirii Cosmetics",
+        "seoDescription": "A lightweight vitamin C and E serum with hyaluronic acid and sodium PCA for moisture and brighter, more even-looking skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "hyaluronic-day-cream",
+        "title": "Hyaluronic Day Cream"
+      },
+      "copy": {
+        "description": "Mature skin gets daily moisture from hyaluronic acid, shea butter, aloe, and betaine in this velvety cream. The complexion feels moisturized, smooth, and comfortable after application.",
+        "seoTitle": "Hyaluronic Day Cream | Mochirii Cosmetics",
+        "seoDescription": "A velvety day cream with hyaluronic acid, shea butter, aloe, and betaine for moisturized, smooth, comfortable mature skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "moisturising-day-cream",
+        "title": "Moisturising Day Cream"
+      },
+      "copy": {
+        "description": "Hyaluronic acid, aloe, and betaine give this everyday moisturizer its lightweight feel. It leaves skin comfortably moisturized and sits neatly beneath makeup.",
+        "seoTitle": "Moisturising Day Cream | Mochirii Cosmetics",
+        "seoDescription": "An everyday cream with hyaluronic acid, aloe, and betaine for comfortable moisture that sits neatly beneath makeup."
+      }
+    },
+    {
+      "identity": {
+        "handle": "double-hydration-boost-gel",
+        "title": "Double Hydration Boost Gel"
+      },
+      "copy": {
+        "description": "Lightweight hydration comes from hyaluronic acid, aloe, and sodium PCA in this gel for normal or mature skin. The formula adds moisture without a heavy finish.",
+        "seoTitle": "Double Hydration Boost Gel | Mochirii Cosmetics",
+        "seoDescription": "A lightweight gel with hyaluronic acid, aloe, and sodium PCA for comfortable hydration without a heavy finish."
+      }
+    },
+    {
+      "identity": {
+        "handle": "sensitive-skin-oil-to-milk-cleanser",
+        "title": "Sensitive Skin Oil-to-Milk Cleanser"
+      },
+      "copy": {
+        "description": "This oil-gel cleanser turns milky when water is added and lifts makeup and daily buildup. Plant oils leave sensitive or dehydrated skin soft after rinsing.",
+        "seoTitle": "Sensitive Skin Oil-to-Milk Cleanser | Mochirii Cosmetics",
+        "seoDescription": "A silky oil-to-milk cleanser that lifts makeup and buildup while leaving sensitive or dehydrated skin soft and nourished."
+      }
+    },
+    {
+      "identity": {
+        "handle": "biphasic-makeup-remover-fragrance-free",
+        "title": "BiPhasic Make-up Remover, Fragrance Free"
+      },
+      "copy": {
+        "description": "Oil and water phases lift makeup and daily residue in this fragrance-free remover. Aloe and hyaluronic acid leave skin clean and comfortable.",
+        "seoTitle": "BiPhasic Make-up Remover | Mochirii Cosmetics",
+        "seoDescription": "A fragrance-free two-phase makeup remover with aloe and hyaluronic acid for a clean, comfortable after-feel."
+      }
+    },
+    {
+      "identity": {
+        "handle": "collagen-night-cream",
+        "title": "Collagen Night Cream"
+      },
+      "copy": {
+        "description": "Cocoa butter, shea butter, aloe, and sodium PCA give this night cream its rich texture. By morning, dry or mature skin feels soft, moisturized, and plump.",
+        "seoTitle": "Collagen Night Cream | Mochirii Cosmetics",
+        "seoDescription": "A rich night cream with cocoa butter, shea butter, aloe, and sodium PCA for soft, moisturized, plump-feeling dry or mature skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "ceramide-barrier-night-cream",
+        "title": "Ceramide Barrier Night Cream"
+      },
+      "copy": {
+        "description": "Ceramides, hyaluronic acid, shea butter, and aloe support this rich evening moisturizer for normal-to-dry skin. It adds moisture and leaves skin soft by morning.",
+        "seoTitle": "Ceramide Barrier Night Cream | Mochirii Cosmetics",
+        "seoDescription": "A rich evening moisturizer with ceramides, hyaluronic acid, shea butter, and aloe for soft, moisturized normal-to-dry skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "niacinamide-gel-moisturiser",
+        "title": "Niacinamide Gel Moisturiser"
+      },
+      "copy": {
+        "description": "Niacinamide gives this gel moisturizer a simple place in routines for all skin types. The lightweight formula adds hydration and helps uneven-looking skin appear more balanced.",
+        "seoTitle": "Niacinamide Gel Moisturiser | Mochirii Cosmetics",
+        "seoDescription": "A lightweight niacinamide gel moisturizer for all skin types that adds hydration and supports more balanced-looking skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "gentle-cleansing-milk",
+        "title": "Gentle Cleansing Milk"
+      },
+      "copy": {
+        "description": "Shea butter and plant oils add slip to this silky cleansing milk for dry-feeling skin. It lifts makeup and daily buildup, then rinses away with a soft after-feel.",
+        "seoTitle": "Gentle Cleansing Milk | Mochirii Cosmetics",
+        "seoDescription": "A silky cleansing milk with shea butter and plant oils that lifts makeup and buildup while leaving dry-feeling skin soft."
+      }
+    },
+    {
+      "identity": {
+        "handle": "aha-exfoliating-concentrate",
+        "title": "AHA Exfoliating Concentrate"
+      },
+      "copy": {
+        "description": "Uneven or congested-looking skin can use this concentrated exfoliating step as directed. It lifts surface buildup and leaves a smoother-looking, refreshed finish.",
+        "seoTitle": "AHA Exfoliating Concentrate | Mochirii Cosmetics",
+        "seoDescription": "A concentrated exfoliating step for uneven or congested-looking skin and a smoother-looking, refreshed finish."
+      }
+    },
+    {
+      "identity": {
+        "handle": "all-in-one-facial-oil",
+        "title": "All-in-One Facial Oil"
+      },
+      "copy": {
+        "description": "Vitamin E enriches this blend of facial oils for dry or mature skin. Its rich texture leaves skin soft, supple, and nourished.",
+        "seoTitle": "All-in-One Facial Oil | Mochirii Cosmetics",
+        "seoDescription": "A rich blend of facial oils with vitamin E for soft, supple, comfortably nourished dry or mature skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "retinol-alternative-moisturiser",
+        "title": "Retinol Alternative Moisturiser"
+      },
+      "copy": {
+        "description": "Bidens pilosa extract provides the plant-derived retinol alternative in this silky moisturizer. Hyaluronic acid, aloe, sodium PCA, and plant oils leave skin smooth and moisturized.",
+        "seoTitle": "Retinol Alternative Moisturiser | Mochirii Cosmetics",
+        "seoDescription": "A silky moisturizer with Bidens pilosa extract, hyaluronic acid, aloe, sodium PCA, and plant oils for smooth, comfortable skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "hydrating-toner",
+        "title": "Hydrating Toner"
+      },
+      "copy": {
+        "description": "After cleansing, this lightweight toner clears away remaining residue. Hyaluronic acid leaves dry or mature skin refreshed and hydrated.",
+        "seoTitle": "Hydrating Toner | Mochirii Cosmetics",
+        "seoDescription": "A light hyaluronic acid toner that clears away the last traces of cleansing and leaves dry or mature skin comfortably hydrated."
+      }
+    },
+    {
+      "identity": {
+        "handle": "sensitive-face-body-cleanser",
+        "title": "Sensitive Face & Body Cleanser"
+      },
+      "copy": {
+        "description": "Sensitive-feeling or dehydrated skin gets a daily face-and-body cleanse with betaine and sodium PCA. Skin feels clean and comfortable rather than tight after rinsing.",
+        "seoTitle": "Sensitive Face & Body Cleanser | Mochirii Cosmetics",
+        "seoDescription": "A daily face and body cleanser with betaine and sodium PCA for sensitive-feeling or dehydrated skin."
+      }
+    },
+    {
+      "identity": {
+        "handle": "cleansing-foam",
+        "title": "Cleansing Foam"
+      },
+      "copy": {
+        "description": "Foam rinses away makeup residue and daily buildup with this cleanser for all skin types. Skin feels clean and comfortable after use.",
+        "seoTitle": "Cleansing Foam | Mochirii Cosmetics",
+        "seoDescription": "A foaming cleanser that rinses away makeup residue and daily buildup while leaving skin clean and comfortable."
+      }
+    },
+    {
+      "identity": {
+        "handle": "caffeine-gel-booster",
+        "title": "Caffeine Gel Booster"
+      },
+      "copy": {
+        "description": "Tired-looking skin, including the under-eye area, gets a lightweight layer of caffeine gel. The texture layers easily and leaves the complexion looking more rested.",
+        "seoTitle": "Caffeine Gel Booster | Mochirii Cosmetics",
+        "seoDescription": "A lightweight caffeine gel for tired-looking skin, including the under-eye area, with a gel texture that layers easily."
+      }
+    },
+    {
+      "identity": {
+        "handle": "smoothing-eye-cream",
+        "title": "Smoothing Eye Cream"
+      },
+      "copy": {
+        "description": "Hyaluronic acid, shea butter, and aloe give this eye cream its moisturizing texture. The formula helps tired-looking skin around the eyes appear smoother.",
+        "seoTitle": "Smoothing Eye Cream | Mochirii Cosmetics",
+        "seoDescription": "A soft eye cream with hyaluronic acid, shea butter, and aloe for a moisturized, smoother-looking eye area."
+      }
+    }
+  ]
+}

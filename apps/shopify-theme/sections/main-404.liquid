@@ -1,0 +1,44 @@
+{% assign catalog_collection = collections['mochirii-cosmetics'] %}
+{% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+{% if catalog_collection != blank and catalog_collection.products_count > 0 %}
+  {% assign catalog_url = catalog_collection.url %}
+{% endif %}
+
+<section class="section page-banner">
+  <div class="section-inner section-head section-head--center">
+    <p class="eyebrow">Mochirii Cosmetics</p>
+    <h1>We couldn't find that page.</h1>
+    <p class="section-intro">Search by product or ingredient, or browse all skincare.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="empty-state empty-state--wide">
+      <h2>Browse skincare</h2>
+      <p>Try a product name or ingredient below.</p>
+      <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
+        <div class="field">
+          <label for="SearchInput-{{ section.id }}">Product name or ingredient</label>
+          <input
+            id="SearchInput-{{ section.id }}"
+            type="search"
+            name="q"
+            autocomplete="off"
+          >
+        </div>
+        <input type="hidden" name="type" value="product">
+        <input type="hidden" name="options[prefix]" value="last">
+        <button class="button" type="submit">Search</button>
+      </form>
+      <a class="button button--secondary" href="{{ catalog_url }}">Browse all skincare</a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "404",
+  "settings": []
+}
+{% endschema %}

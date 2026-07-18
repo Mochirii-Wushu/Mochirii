@@ -1,0 +1,78 @@
+{% assign page_handle_downcase = page.handle | downcase %}
+{% assign catalog_collection = collections['mochirii-cosmetics'] %}
+{% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+{% if catalog_collection != blank and catalog_collection.products_count > 0 %}
+  {% assign catalog_url = catalog_collection.url %}
+{% endif %}
+
+{% if page_handle_downcase contains 'contact' %}
+  <section class="section page-banner">
+    <div class="section-inner section-head section-head--center">
+      <p class="eyebrow">Mochirii Cosmetics</p>
+      <h1>{{ page.title }}</h1>
+      {% if page.content != blank %}<div class="rte section-intro">{{ page.content }}</div>{% endif %}
+    </div>
+  </section>
+
+  <section class="section section-soft">
+    <div class="section-inner section-inner-narrow contact-panel">
+      {% form 'contact', class: 'contact-form' %}
+        {% if form.posted_successfully? %}<p class="form-message" role="status">Thank you. Your message has been sent.</p>{% endif %}
+        {% if form.errors %}<div class="form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
+        <div class="field">
+          <label for="ContactFormName-{{ section.id }}">Name</label>
+          <input id="ContactFormName-{{ section.id }}" type="text" name="contact[name]" autocomplete="name" value="{{ form.name | escape }}">
+        </div>
+        <div class="field">
+          <label for="ContactFormEmail-{{ section.id }}">Email</label>
+          <input id="ContactFormEmail-{{ section.id }}" type="email" name="contact[email]" autocomplete="email" autocorrect="off" autocapitalize="off" value="{{ form.email | escape }}" required>
+        </div>
+        <div class="field">
+          <label for="ContactFormMessage-{{ section.id }}">Message</label>
+          <textarea id="ContactFormMessage-{{ section.id }}" name="contact[body]" rows="6" required>{{ form.body }}</textarea>
+        </div>
+        <button class="button" type="submit">Send message</button>
+      {% endform %}
+    </div>
+  </section>
+{% else %}
+  <section class="section page-banner">
+    <div class="section-inner section-inner-narrow section-head">
+      <p class="eyebrow">{{ section.settings.eyebrow }}</p>
+      <h1>{{ page.title }}</h1>
+      {% if section.settings.intro != blank %}<p class="section-intro">{{ section.settings.intro }}</p>{% endif %}
+    </div>
+  </section>
+
+  <section class="section section-soft">
+    <div class="section-inner section-inner-narrow">
+      {% if page.content != blank %}
+        <article class="page-panel rte prose">{{ page.content }}</article>
+      {% else %}
+        <div class="empty-state empty-state--wide">
+          <h2>We couldn't display this page.</h2>
+          <a class="button button--secondary" href="{{ catalog_url }}">Browse all skincare</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Mochirii Cosmetics"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introduction"
+    }
+  ]
+}
+{% endschema %}

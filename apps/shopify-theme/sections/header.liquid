@@ -1,0 +1,61 @@
+{% assign ritual_collection = collections['mochirii-cosmetics'] %}
+{% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+{% assign about_url = routes.root_url | append: 'pages/about' %}
+{% assign contact_url = routes.root_url | append: 'pages/contact' %}
+{% if ritual_collection != blank and ritual_collection.products_count > 0 %}
+  {% assign catalog_url = ritual_collection.url %}
+{% endif %}
+{% assign primary_menu = section.settings.main_menu %}
+{% if primary_menu == blank %}
+  {% assign primary_menu = linklists['main-menu'] %}
+{% endif %}
+
+<header class="site-header">
+  {% if settings.storefront_mode_text != blank %}
+    <div class="store-mode-strip">
+      <div class="section-inner store-mode-strip__inner">
+        <span>{{ settings.storefront_mode_text }}</span>
+        <a href="https://mochirii.com" rel="noopener">Mochirii Guild</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="site-header__inner">
+    <a class="brand" href="{{ routes.root_url }}" aria-label="{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }} skincare storefront home">
+      <span class="brand-mark brand-mark--image" aria-hidden="true">
+        <img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56" loading="eager">
+      </span>
+      <span class="brand-wording">
+        <span class="brand-text">{{ settings.brand_display_name | default: 'Mochirii Cosmetics' }}</span>
+        <span class="brand-subtext">Skincare</span>
+      </span>
+    </a>
+
+    <nav class="site-nav site-nav--desktop" aria-label="Primary navigation">
+      {% render 'primary-navigation-links', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
+    </nav>
+
+    <details class="mobile-menu">
+      <summary class="mobile-menu__summary" title="Open navigation">
+        <span class="visually-hidden">Open navigation</span>
+        <span class="mobile-menu__icon" aria-hidden="true">&#9776;</span>
+      </summary>
+      <nav class="mobile-menu__panel" aria-label="Mobile primary navigation">
+        {% render 'primary-navigation-links', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
+      </nav>
+    </details>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main menu"
+    }
+  ]
+}
+{% endschema %}

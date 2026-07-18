@@ -11,7 +11,7 @@ This report records the implementation state for the cross-site release plan. It
 - GitHub protected branches: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
 - Shopify product categories: https://help.shopify.com/en/manual/products/details/product-category
 - Shopify collections: https://help.shopify.com/en/manual/products/collections
-- Selfnamed Shopify integration: https://help.selfnamed.com/en/articles/10009931-shopify-dropshipping-integration-manual
+- Manufacturing-partner integration guidance: retained in private evidence.
 - Plain language guidance: https://www.plainlanguage.gov/guidelines/
 
 ## Guild Repo State
@@ -64,31 +64,20 @@ Rules preserved:
 
 ## Shopify Track
 
-Status: source-of-truth evidence updated; product/admin blockers remain.
+Status: private source-of-truth evidence updated; storefront blockers remain.
 
 Shopify PR #39 was marked ready and squash-merged into `shopify-theme`. The Shopify theme repo was fast-forwarded to `ff39d1d`, and branch `codex/shopify-launch-blocker-cleanup` now records the latest execution evidence.
 
-Current read-only Shopify Admin evidence:
-
-- Products page filtered to `status:"active"` showed 20 active rows.
-- All 20 active rows still showed category `Uncategorized`.
-- Active product rows showed vendor `Mochirii`.
-- Main collection `Mōchirīī Daily Care` showed 20 products.
-- Routine collection handles were not visible in the Collections list.
-- Old or unrelated collections remain present but hidden from sales channels in the visible list.
-- Selfnamed `profile/my-products` opened in Chrome after the dashboard was made available. It showed 20 mockup images, but the visible supplier-side product set did not fully match Shopify's 20 active products.
-
-Selfnamed mismatch evidence:
-
-- Duplicate visible supplier-side entries: `Hydrating Serum` and `Sensitive Skin Oil-To-Milk Cleanser`.
-- Visible Selfnamed products not currently active in Shopify: `Keratin Intensive Rescue Hair Mask`, `Keratin Volume Boost Shampoo`, `Hydrating Serum`, and `Niacinamide Gel Moisturiser`.
-- Shopify active products not visible in the Selfnamed extract: `Natural Retinol Alternative Oil Serum`, `Vitamin C Serum`, `Moisturising Day Cream`, `Anti-Age Night Cream`, `Anti-Age Day Cream`, and `Peptide Anti-Aging Serum`.
+The detailed read-only administrative review is retained in private evidence.
+It contains the source identity, portal paths, row counts, product lists,
+collection details, media comparisons, and reconciliation findings. None of
+those operational details belongs in this public report.
 
 Required owner/dashboard work remains:
 
-- Assign accurate product categories.
-- Create and populate routine collections.
-- Reconcile the Selfnamed visible product set against Shopify's active catalog, then compare every active product image against the approved Selfnamed source mockup.
+- Complete private catalog taxonomy and collection review.
+- Reconcile the approved catalog and product media against private
+  manufacturing-partner evidence.
 - Replace About and Contact placeholders with owner-provided facts.
 - Keep old collections hidden or redirected without deleting them unless separately approved.
 
@@ -120,4 +109,5 @@ No live side-effect actions were taken in this pass:
 2. Real Instagram Supabase secret values.
 3. Owner-provided About fields: founder name, founding year, founder image, and quote.
 4. Owner-provided Contact fields: public support email, response window, order-help note, and press/partnership contact.
-5. Owner decision on whether Shopify's current active set or the visible Selfnamed `My Products` set is the intended source-of-truth catalog.
+5. Owner approval of the canonical catalog using the private reconciliation
+   packet.

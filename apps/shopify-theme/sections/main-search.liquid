@@ -1,0 +1,59 @@
+<section class="section page-banner">
+  <div class="section-inner section-head section-head--center">
+    <p class="eyebrow">Mochirii Cosmetics</p>
+    <h1>Search products</h1>
+    <form class="search-form" action="{{ routes.search_url }}" method="get" role="search">
+      <div class="field">
+        <label for="SearchInput-{{ section.id }}">Product name or ingredient</label>
+        <input
+          id="SearchInput-{{ section.id }}"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          autocomplete="off"
+        >
+      </div>
+      <input type="hidden" name="type" value="product">
+      <input type="hidden" name="options[prefix]" value="last">
+      <button class="button" type="submit">Search</button>
+    </form>
+  </div>
+</section>
+
+{% if search.performed %}
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-head section-head--split">
+        <h2>{{ search.results_count }} {% if search.results_count == 1 %}result{% else %}results{% endif %}</h2>
+        <a class="text-link" href="{{ routes.all_products_collection_url }}">Shop all</a>
+      </div>
+
+      {% paginate search.results by 24 %}
+        {% if search.results_count > 0 %}
+          <div class="product-grid" role="list" aria-label="Product search results">
+            {% for item in search.results %}
+              {% if item.object_type == 'product' %}
+                {% render 'product-card', product: item %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% if paginate.pages > 1 %}
+            <nav class="pagination" aria-label="Search pagination">{{ paginate | default_pagination }}</nav>
+          {% endif %}
+        {% else %}
+          <div class="empty-state empty-state--wide">
+            <h2>No products found.</h2>
+            <p>Clear a filter or browse all skincare.</p>
+          </div>
+        {% endif %}
+      {% endpaginate %}
+    </div>
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Search",
+  "settings": []
+}
+{% endschema %}
