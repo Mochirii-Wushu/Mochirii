@@ -185,7 +185,7 @@
     },
     {
       "path": "apps/shopify-theme/snippets/seo-meta.liquid",
-      "sha256": "787df6581f94f9a27c0656db34dd5f62b4c4953a91f5c67e7a335a602c08bcda"
+      "sha256": "fb3d1206fe985a0c12936cb96ffaa7a965b912a6e8ba435d35df505683217653"
     },
     {
       "path": "apps/shopify-theme/snippets/structured-data.liquid",
