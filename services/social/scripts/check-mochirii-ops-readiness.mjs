@@ -124,6 +124,10 @@ function gitRemote(args) {
   }
 }
 
+function isCanonicalRemote(remote) {
+  return /github\.com[:/]Mochirii-Wushu\/Mochirii(?:\.git)?\/?$/i.test(remote);
+}
+
 for (const doc of requiredDocs) {
   read(doc);
 }
@@ -199,11 +203,11 @@ for (const token of staleReadmeMarketing) {
 
 const originFetch = gitRemote(["get-url", "origin"]);
 const originPush = gitRemote(["get-url", "--push", "origin"]);
-if (!originFetch.includes("Mochirii-Wushu/Mochirii.git")) {
-  failures.push(`origin fetch URL must point at the canonical repository, got: ${originFetch}`);
+if (!isCanonicalRemote(originFetch)) {
+  failures.push("origin fetch URL must point at the canonical repository");
 }
-if (!originPush.includes("Mochirii-Wushu/Mochirii.git")) {
-  failures.push(`origin push URL must point at the canonical repository, got: ${originPush}`);
+if (!isCanonicalRemote(originPush)) {
+  failures.push("origin push URL must point at the canonical repository");
 }
 
 const sourceSnapshot = read("SOURCE-SNAPSHOT.md");
