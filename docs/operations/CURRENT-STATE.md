@@ -131,8 +131,10 @@ generated archives belong only in ignored `.artifacts/operations`.
 - The prepayment readiness branch working tree passes the clean lockfile
   install, complete repository check, Shopify theme check and package,
   release-safety guards, JavaScript syntax, Theme Check with zero offenses,
-  and `git diff --check`. Reviewed-commit and protected-CI acceptance remain
-  pending until the branch is published for review.
+  and `git diff --check`. Draft pull request `#480` has a clean required-check
+  rollup; Supabase Preview reported Skipped for this theme/docs-only change and
+  did not block GitHub's clean merge-state result. The pull request remains
+  unmerged.
   The optional local toolchain audit found Docker Desktop's Linux engine was
   not running; no system service or provider state was changed to work around
   that workstation-only limitation.
