@@ -42,6 +42,9 @@ asset and data sources.
 - PR #476 updated reviewed GitHub Action pins and merged as
   `69479d7`.
 - PR #477 updated compatible website dependencies and merged as `bb60097`.
+- PR #478 completed the consolidation closeout documentation and made
+  `validate-theme` an always-reporting path-aware check; it merged as
+  `b0c117e855375a2b1a1a7ff2110c2d60f6733015`.
 - Mochi Pets PR #27 published the scoped workspace path and ownership update;
   its current `main` is `0f9fcc17a6da466ac66548da856b704d05150ce1`.
 
@@ -65,6 +68,11 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 - Production serving, queues, schedules, authentication, media, releases, and
   backups do not depend on the local workstation.
 
+GitHub protects `main` with strict required checks for `validate`,
+`validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
+`Supabase Preview`. The latest closeout readback found no open canonical pull
+requests, Dependabot alerts, code-scanning alerts, or secret-scanning alerts.
+
 ## Social Release
 
 - The canonical private GHCR package is
@@ -77,6 +85,8 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   boundaries, and federation-disabled posture passed the hosted verification.
 - Post-deletion online verification run `29665954934` passed the same runtime,
   Spaces, website, Supabase, Reaper, and Discord boundaries.
+- Final current-`main` online verification run `29666572246` passed after the
+  consolidation closeout and ruleset update.
 - Residual transitive Vue 2 advisory findings are tracked in issue #475 and are
   accepted only as a temporary compatibility risk. No open Dependabot alert is
   left without that explicit disposition.
