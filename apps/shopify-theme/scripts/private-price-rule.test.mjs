@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import {
   calculateRetailPriceUsd,
@@ -14,27 +15,63 @@ const expectedProducts = Array.from({ length: 20 }, (_, index) => ({
   title: `Example Product ${index + 1}`,
 }));
 
+function digest(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+const connectedAccountPlanRecordSha256 = digest("sanitized-connected-account-plan-record");
+const catalogSnapshotSha256 = digest("authenticated-manufacturing-partner-us-usd-catalog-snapshot");
+
+function catalogRecords() {
+  return expectedProducts.map((product, index) => ({
+    handle: product.handle,
+    formula_identity_sha256: digest(`formula:${product.handle}`),
+    source_catalog_record_sha256: digest(`catalog-source-record:${product.handle}`),
+    base_price_usd: `${10 + index}.01`,
+  }));
+}
+
 function ledger() {
+  const records = catalogRecords();
   return {
-    schema_version: 1,
+    schema_version: 2,
     captured_at: "2026-07-19T12:00:00.000Z",
     market: "US",
     currency: "USD",
     basis: {
-      connected_account_plan_confirmed: true,
-      current_catalog_confirmed: true,
+      connected_account_plan_record_sha256: connectedAccountPlanRecordSha256,
       shipping_included: false,
       tax_included: false,
       optional_services_included: false,
       ambiguity_resolved: true,
     },
-    variants: expectedProducts.map((product, index) => {
-      const base = `${10 + index}.01`;
+    catalog_readback: {
+      schema_version: 1,
+      captured_at: "2026-07-19T12:00:00.000Z",
+      provider: "manufacturing-partner",
+      market: "US",
+      currency: "USD",
+      readback_source: "authenticated-manufacturing-partner-connected-account",
+      authentication_evidence_sha256: digest("authenticated-session-evidence"),
+      connected_account_plan_record_sha256: connectedAccountPlanRecordSha256,
+      snapshot_artifact:
+        ".artifacts/operations/shopify/2026-07-19/private-pricing/manufacturing-partner-usd-catalog.json",
+      snapshot_sha256: catalogSnapshotSha256,
+      snapshot_format: "canonical-json",
+      snapshot_record_count: 20,
+      record_hash_scope: "provider-record-including-formula-plan-and-base-price",
+      records,
+    },
+    variants: records.map((record, index) => {
+      const base = record.base_price_usd;
       return {
-        handle: product.handle,
+        handle: record.handle,
         product_id: `gid://shopify/Product/${1001 + index}`,
         variant_id: `gid://shopify/ProductVariant/${2001 + index}`,
         exact_mapping_confirmed: true,
+        formula_identity_sha256: record.formula_identity_sha256,
+        source_catalog_record_sha256: record.source_catalog_record_sha256,
+        catalog_snapshot_sha256: catalogSnapshotSha256,
         base_price_usd: base,
         shopify_cost_per_item_usd: base,
         retail_price_usd: calculateRetailPriceUsd(base),
@@ -86,7 +123,7 @@ test("uses exact decimal ROUND_HALF_UP behavior without binary floating point", 
   assert.equal(calculateRetailPriceUsd("10.03"), "22.07");
 });
 
-test("accepts exact public identities bound to a fresh authenticated Shopify readback", () => {
+test("accepts costs bound to fresh authenticated partner and commerce readbacks", () => {
   const sourceLedger = ledger();
   const result = verify(sourceLedger);
   assert.equal(result.ok, true);
@@ -94,6 +131,10 @@ test("accepts exact public identities bound to a fresh authenticated Shopify rea
   assert.deepEqual(PRICE_GATE_POLICY, {
     expected_variant_count: 20,
     maximum_capture_age_hours: 24,
+    catalog_provider: "manufacturing-partner",
+    catalog_readback_source: "authenticated-manufacturing-partner-connected-account",
+    catalog_snapshot_format: "canonical-json",
+    catalog_record_hash_scope: "provider-record-including-formula-plan-and-base-price",
     shopify_readback_source: "authenticated-shopify-admin",
   });
 });
@@ -108,7 +149,113 @@ test("fails closed for an ambiguous basis or stale ledger and readback captures"
   assert.equal(result.ok, false);
   assert.equal(result.issues.includes("ledger.ambiguity"), true);
   assert.equal(result.issues.includes("ledger.capture-freshness"), true);
+  assert.equal(result.issues.includes("catalog-readback.capture-freshness"), true);
   assert.equal(result.issues.includes("shopify-readback.capture-freshness"), true);
+});
+
+test("rejects legacy boolean-only and placeholder catalog provenance", () => {
+  const legacyLedger = ledger();
+  legacyLedger.schema_version = 1;
+  delete legacyLedger.catalog_readback;
+  legacyLedger.basis = {
+    connected_account_plan_confirmed: true,
+    current_catalog_confirmed: true,
+    shipping_included: false,
+    tax_included: false,
+    optional_services_included: false,
+    ambiguity_resolved: true,
+  };
+  assert.equal(verify(legacyLedger).issues.includes("ledger.contract"), true);
+
+  const inventedLedger = ledger();
+  inventedLedger.catalog_readback.authentication_evidence_sha256 = "a".repeat(64);
+  inventedLedger.catalog_readback.snapshot_sha256 = "b".repeat(64);
+  inventedLedger.basis.connected_account_plan_record_sha256 = "c".repeat(64);
+  inventedLedger.catalog_readback.connected_account_plan_record_sha256 = "c".repeat(64);
+  inventedLedger.catalog_readback.records[0].formula_identity_sha256 = "d".repeat(64);
+  inventedLedger.catalog_readback.records[0].source_catalog_record_sha256 = "e".repeat(64);
+  inventedLedger.variants[0].formula_identity_sha256 = "d".repeat(64);
+  inventedLedger.variants[0].source_catalog_record_sha256 = "e".repeat(64);
+  inventedLedger.variants.forEach((variant) => {
+    variant.catalog_snapshot_sha256 = "b".repeat(64);
+  });
+  const inventedResult = verify(inventedLedger, shopifyReadback(inventedLedger));
+  for (const category of [
+    "ledger.account-plan-record",
+    "catalog-readback.authentication-evidence",
+    "catalog-readback.account-plan-record",
+    "catalog-readback.snapshot",
+    "catalog-readback.record.formula-identity",
+    "catalog-readback.record.source-record",
+    "variant.formula-identity",
+    "variant.source-record",
+    "variant.catalog-snapshot",
+  ]) {
+    assert.equal(inventedResult.issues.includes(category), true);
+  }
+
+  const reusedHashLedger = ledger();
+  const reusedHash = digest("one-invented-record-reused-for-all-provenance");
+  reusedHashLedger.basis.connected_account_plan_record_sha256 = reusedHash;
+  reusedHashLedger.catalog_readback.authentication_evidence_sha256 = reusedHash;
+  reusedHashLedger.catalog_readback.connected_account_plan_record_sha256 = reusedHash;
+  reusedHashLedger.catalog_readback.snapshot_sha256 = reusedHash;
+  reusedHashLedger.variants.forEach((variant) => {
+    variant.catalog_snapshot_sha256 = reusedHash;
+  });
+  const reusedHashResult = verify(reusedHashLedger, shopifyReadback(reusedHashLedger));
+  assert.equal(
+    reusedHashResult.issues.includes("catalog-readback.provenance-hash-separation"),
+    true,
+  );
+});
+
+test("rejects unauthenticated, wrong-market, stale, or capture-after-ledger catalogs", () => {
+  const sourceLedger = ledger();
+  sourceLedger.catalog_readback.readback_source = "operator-entered-public-catalog";
+  sourceLedger.catalog_readback.market = "CA";
+  sourceLedger.catalog_readback.captured_at = "2026-07-19T12:01:00.000Z";
+  const result = verify(sourceLedger, shopifyReadback(sourceLedger));
+  assert.equal(result.issues.includes("catalog-readback.source"), true);
+  assert.equal(result.issues.includes("catalog-readback.market-currency"), true);
+  assert.equal(result.issues.includes("catalog-readback.capture-order"), true);
+
+  const staleLedger = ledger();
+  staleLedger.catalog_readback.captured_at = "2026-07-18T11:59:59.000Z";
+  const staleResult = verify(staleLedger, shopifyReadback(staleLedger));
+  assert.equal(staleResult.issues.includes("catalog-readback.capture-freshness"), true);
+});
+
+test("rejects mismatched plan, snapshot, formula, source record, and source base price", () => {
+  const sourceLedger = ledger();
+  sourceLedger.catalog_readback.connected_account_plan_record_sha256 = digest("different-account-plan");
+  sourceLedger.variants[0].catalog_snapshot_sha256 = digest("different-snapshot");
+  sourceLedger.variants[1].formula_identity_sha256 = digest("different-formula");
+  sourceLedger.variants[2].source_catalog_record_sha256 = digest("different-source-record");
+  sourceLedger.catalog_readback.records[3].base_price_usd = "88.88";
+  const result = verify(sourceLedger, shopifyReadback(sourceLedger));
+  for (const category of [
+    "ledger-catalog.account-plan-parity",
+    "variant.catalog-snapshot-parity",
+    "variant.catalog-formula-parity",
+    "variant.catalog-source-record-parity",
+    "variant.catalog-base-price-parity",
+  ]) {
+    assert.equal(result.issues.includes(category), true);
+  }
+});
+
+test("rejects an untrusted catalog artifact identity and duplicate source records", () => {
+  const sourceLedger = ledger();
+  sourceLedger.catalog_readback.snapshot_artifact =
+    ".artifacts/operations/shopify/../private-pricing/invented.json";
+  sourceLedger.catalog_readback.records[1].source_catalog_record_sha256 =
+    sourceLedger.catalog_readback.records[0].source_catalog_record_sha256;
+  sourceLedger.variants[1].source_catalog_record_sha256 =
+    sourceLedger.catalog_readback.records[1].source_catalog_record_sha256;
+  const result = verify(sourceLedger, shopifyReadback(sourceLedger));
+  assert.equal(result.issues.includes("catalog-readback.snapshot"), true);
+  assert.equal(result.issues.includes("catalog-readback.record.source-record"), true);
 });
 
 test("rejects aesthetic pricing, cost mismatch, compare-at values, and uncertain mappings", () => {
@@ -181,8 +328,12 @@ test("redacted output never contains handles, Shopify IDs, costs, or retail amou
   const serialized = JSON.stringify(redacted);
   assert.equal(serialized.includes("example-product-1"), false);
   assert.equal(serialized.includes("gid://shopify"), false);
+  assert.equal(serialized.includes(connectedAccountPlanRecordSha256), false);
+  assert.equal(serialized.includes(catalogSnapshotSha256), false);
+  assert.equal(serialized.includes("manufacturing-partner-usd-catalog.json"), false);
   assert.equal(serialized.includes("10.01"), false);
   assert.equal(serialized.includes("21.99"), false);
+  assert.equal(redacted.schema_version, 2);
   assert.deepEqual(redacted.failures, [
     { category: "ledger-readback.commerce-parity", count: 1 },
     { category: "variant.price-rule", count: 1 },

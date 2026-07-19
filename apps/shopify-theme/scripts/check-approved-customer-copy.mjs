@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { approvedCustomerCopyLanguageIssues } from "./lib/launch-content-contracts.mjs";
 import { SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS } from "./lib/shopify-product-copy-csv.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -209,17 +210,15 @@ for (const [opening, count] of openingCounts) {
 }
 
 const serialized = JSON.stringify(content);
-const privateBrandPattern = new RegExp(
-  `\\b(?:${["self" + "named", "ma" + "dara", "vele" + "sari"].join("|")})\\b`,
-  "iu",
-);
 if (/\b[0-9a-f]{40}\b/iu.test(serialized)) failures.push("copy contract must not expose raw Git object IDs");
 for (const pattern of [
   /private-evidence/iu,
-  privateBrandPattern,
   /"(?:price|cost|inventory|sku|barcode|variant|payment|secret|credential|publicSourceUrl|selectionBasis|providerStatus)"\s*:/iu,
 ]) {
   if (pattern.test(serialized)) failures.push(`copy contract contains forbidden private, supplier, or commerce data: ${pattern}`);
+}
+for (const issue of approvedCustomerCopyLanguageIssues(content)) {
+  failures.push(`${issue.surface} contains disallowed customer-language category: ${issue.category}`);
 }
 
 const settingsData = json("config/settings_data.json");
@@ -243,7 +242,10 @@ requireRuntimeCopy("sections/header.liquid", [
 ]);
 requireRuntimeCopy("sections/footer.liquid", [
   `>Visit ${content.theme.mainSiteLink}</a>`,
-  content.theme.footerSupport.replace("Contact Mochirii Cosmetics.", '<a href="{{ contact_page.url }}">Contact Mochirii Cosmetics.</a>'),
+  content.theme.footerSupport.replace(
+    "Contact Mochirii Cosmetics.",
+    '<a href="{{ contact_page.url | escape }}">Contact Mochirii Cosmetics.</a>',
+  ),
   `"default": "${content.theme.footerSummary}"`,
 ]);
 requireRuntimeCopy("sections/main-index.liquid", [

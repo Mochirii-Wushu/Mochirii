@@ -16,14 +16,14 @@
     {% if cart.item_count == 0 %}
       <div class="empty-state empty-state--wide">
         <h2>{{ 'cart.empty' | t }}</h2>
-        <a class="button" href="{{ catalog_url }}">Shop skincare</a>
+        <a class="button" href="{{ catalog_url | escape }}">Shop skincare</a>
       </div>
     {% else %}
-      <form action="{{ routes.cart_url }}" method="post" class="cart-form">
+      <form action="{{ routes.cart_url | escape }}" method="post" class="cart-form">
         <div class="cart-lines" role="list" aria-label="Cart items">
           {% for item in cart.items %}
             <div class="cart-line" role="listitem">
-              <a class="cart-line__image" href="{{ item.url }}" aria-label="{{ item.product.title | escape }}">
+              <a class="cart-line__image" href="{{ item.url | escape }}" aria-label="{{ item.product.title | escape }}">
                 {% if item.image %}
                   {% assign cart_image_alt = item.image.alt | strip %}
                   {{ item.image | image_url: width: 240 | image_tag: loading: 'lazy', alt: cart_image_alt, sizes: '104px' }}
@@ -32,13 +32,13 @@
                 {% endif %}
               </a>
               <div class="cart-line__details">
-                <h2 class="product-card__title"><a href="{{ item.url }}">{{ item.product.title }}</a></h2>
-                {% unless item.product.has_only_default_variant %}<p>{{ item.variant.title }}</p>{% endunless %}
-                <a class="text-link" href="{{ item.url_to_remove }}">Remove</a>
+                <h2 class="product-card__title"><a href="{{ item.url | escape }}">{{ item.product.title | escape }}</a></h2>
+                {% unless item.product.has_only_default_variant %}<p>{{ item.variant.title | escape }}</p>{% endunless %}
+                <a class="text-link" href="{{ item.url_to_remove | escape }}">Remove</a>
               </div>
               <div class="field">
-                <label for="updates_{{ item.key }}">Quantity</label>
-                <input id="updates_{{ item.key }}" type="number" name="updates[]" value="{{ item.quantity }}" min="0">
+                <label for="updates_{{ item.key | escape }}">Quantity</label>
+                <input id="updates_{{ item.key | escape }}" type="number" name="updates[]" value="{{ item.quantity }}" min="0">
               </div>
               <p class="price">{{ item.final_line_price | money }}</p>
             </div>
@@ -53,9 +53,9 @@
           <p class="cart-note">Shipping and taxes are shown before payment.</p>
           {% if shop.shipping_policy != blank or shop.refund_policy != blank %}
             <p class="cart-note">
-              {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping policy</a>{% endif %}
+              {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url | escape }}">Shipping policy</a>{% endif %}
               {% if shop.shipping_policy != blank and shop.refund_policy != blank %} &middot; {% endif %}
-              {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Refund policy</a>{% endif %}
+              {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url | escape }}">Refund policy</a>{% endif %}
             </p>
           {% endif %}
           <div class="cart-summary__actions">
@@ -65,7 +65,7 @@
               <button class="button" type="button" disabled="disabled">Checkout opens when the store launches.</button>
             {% endif %}
             <button class="button button--secondary" type="submit" name="update">Update cart</button>
-            <a class="button button--secondary" href="{{ catalog_url }}">Continue shopping</a>
+            <a class="button button--secondary" href="{{ catalog_url | escape }}">Continue shopping</a>
           </div>
         </div>
       </form>

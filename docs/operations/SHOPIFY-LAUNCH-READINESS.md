@@ -2,8 +2,9 @@
 
 Updated: 2026-07-19 PDT
 
-Status: **BLOCKED — the launch foundation is reconciled; scoped product,
-storefront, provider, and external-evidence gates remain**
+Status: **BLOCKED — the launch foundation and independently reviewed local
+source hardening are reconciled; accountable human review, exact-commit
+revalidation, scoped product/storefront evidence, and provider gates remain**
 
 This no-secret decision ledger is the single launch-control record for
 shop.mochirii.com. It turns the approved opening-readiness plan into explicit,
@@ -82,10 +83,20 @@ may point to a sanitized capture ID, but not to secret-bearing output.
 
 The canonical Mochirii emblem design is the universal visual mark for the guild
 site, storefront, and product logo/label review. The source reference is
-`apps/web/public/assets/img/brand/emblem.webp`; the storefront derivative at
-`apps/shopify-theme/assets/mochirii-emblem.webp` may differ in dimensions and
-encoding but must preserve the same design. Product labels, outer boxes and
-customer-facing media must be reviewed visually against that canonical emblem.
+`apps/web/public/assets/img/brand/emblem.webp` (1024 by 1024 pixels; SHA-256
+`ED9FE4C522BC2B0D1C2072C1C098F241EE52F0CEEC0307CB531CE440E730BB60`).
+The storefront derivative at
+`apps/shopify-theme/assets/mochirii-emblem.webp` (224 by 224 pixels; SHA-256
+`AD96D3428572404D9F5C1D7387669B5680920079CDF8CC637FDEBFA217D00DF4`)
+may differ in dimensions and encoding but must preserve the same design. The
+ignored 1024 by 1024 label-production PNG records 600 pixels per inch and SHA-256
+`7392F30FC1F91221F4FE707CC48CE6C1F1C95D460DDCF798447A0F7857E25313`;
+its decoded RGBA pixels exactly match the canonical WebP (decoded-pixel
+SHA-256 `F5A54927590B1640D535612FE253F22C43C6946EAFD0B267888F0D50A6E01076`).
+The theme uses the storefront derivative for its header, footer, password,
+gift-card and controlled structured-data brand surfaces and uses the matching
+favicon assets. Product labels, outer boxes and customer-facing media must
+still be reviewed visually against the canonical emblem.
 
 The commerce wordmark is exactly **Mochirii Cosmetics**. Do not substitute the
 guild-style diacritic spelling or another company name on labels, storefront
@@ -261,6 +272,48 @@ If a purported prepayment test would enable checkout or payments, create a
 checkout/order, place a manual fulfillment order, send a customer message, or
 incur a charge, stop and move it to the separately approved Gate F matrix.
 
+The aggregate prepayment gate is intentionally stricter than a checklist. It
+requires a clean `main` checkout at the evidenced merge commit and tree,
+required checks on that merge commit (with `Supabase Preview` permitted to be
+`Skipped` only when the repository runbook permits it), and a candidate ZIP
+whose complete runtime file set and digests match the source manifest. Product
+review evidence is tied to the exact v3 contract and per-SKU facts, formula,
+variant, emblem, wordmark and role-keyed media identities. A deterministic
+Shopify Admin GraphQL 2026-07 projection additionally requires exact title,
+serialized description, SEO, all controlled metafields, collections, ordered
+media, alt text, original-media hash and applicable emblem/wordmark parity.
+The associated formula, label, box, media, authentication, account-plan and
+catalog hashes must resolve to real untracked files in the ignored operations
+boundary through the private artifact index, and image evidence must actually
+decode with valid dimensions. The bundle, every evidence envelope, candidate
+ZIP and each standalone private configuration artifact must also be ignored
+and untracked. Launch pages,
+mandatory-name exceptions and six search-result expectations are tied to their
+versioned source contracts. Fresh rendered observations use the configured
+privacy opt-out route. Shipping binds the supplier/carrier matrix to a hashed
+authenticated Shopify Admin rate-table export, requires a contiguous
+`[minimum, maximum)` schedule beginning at zero with an open-ended final tier,
+and verifies just-below, at and just-above observations for every positive
+threshold. The representative carts, unsupported-region cases and recorded
+PO-box behavior must show exact positive USD supplier-to-store rate parity and
+no free-shipping threshold. The approved exact
+retail-price rule additionally requires a fresh
+authenticated private US/USD catalog snapshot and exact formula/source-record
+linkage; costs and raw evidence remain outside public Git.
+
+The versioned provider-surface contract pins the universal emblem and exact
+wordmark, primary customer domain, home and collections-index presentation,
+pages, five collection identities, navigation, controlled filters, customer
+settings, policies, notification presentation and sender requirements. Its
+provider-ready mode requires an ignored readback bound to the exact candidate
+theme and package. Every private rendered body is tied to its route/content
+hash and scanned through the same entity-decoding and inline-markup-aware
+Mochirii language policy. Accountable detected-name attestations must map
+one-to-one to exact route-specific mandatory exceptions, including previously
+unknown manufacturer, certifier, carrier or privacy names. The real dedicated
+hero, featured products, five rendered collection bodies/media/memberships,
+five policies, three notifications and sender authentication remain Pending.
+
 ## Non-Payment Readiness Checklist
 
 All items in this section must be Ready before payment setup begins.
@@ -302,14 +355,14 @@ All items in this section must be Ready before payment setup begins.
 
 | ID | Required decision | Accountable role | Status |
 | --- | --- | --- | --- |
-| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the prior PR #480 head passed local and required checks, but the revised implementation is not yet committed, human-reviewed, merged or revalidated at its final source-bound commit |
-| QA-02 | Verify all twenty PDPs expose the reviewed facts without generic warning or other evidence fallbacks | Theme engineer plus product evidence custodian | Blocked — all 20 rendered required field groups, but 15 use the generic warning fallback |
-| QA-03 | Verify five collections, filters, ingredient search, misspellings, sold-out state, cart, contact form, policies, privacy choices and branded 404 | Theme engineer | Blocked — baseline provider smokes passed for the named routes and exact/zero-result search, but misspellings, sold-out and server-error paths remain Pending; branch changes are not on the candidate theme |
+| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the final local clean-install checkpoint passed 145 adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme Check across 45 files with zero offenses, exact packaging and independent P0-P2 review; the foundation PR head passed required checks, but the downstream source remains local and must pass again on focused reviewed commits after the foundation merge |
+| QA-02 | Verify all twenty PDPs expose the reviewed facts without generic warning or other evidence fallbacks | Theme engineer plus product evidence custodian | Blocked — the local source removes generic fact, INCI and warning fallbacks, but the 2026-07-18 candidate baseline still rendered a generic warning on 15 PDPs; all twenty fact records and the revised candidate rendering remain Pending |
+| QA-03 | Verify five collections, filters, ingredient search, misspellings, sold-out state, cart, contact form, policies, privacy choices and branded 404 | Theme engineer | Blocked — the source now pins reviewed expected sets for `moisturizer`, `moisturiser`, `niacinimide`, `hyaluronic`, `retinol` and `cleanser`, plus a zero-result fixture; candidate readbacks, configured Privacy Choices parity, sold-out and server-error observations remain Pending because the branch is not on the candidate theme |
 | QA-04 | Pass keyboard, screen-reader announcements, 200 percent zoom, focus order, error handling, contrast and touch navigation at 360x800, 390x844, 768x1024 and 1440x900 | Theme engineer | Blocked — viewport, overflow, broken-image and code-level contrast checks passed; assistive-technology and 200 percent zoom acceptance remain Pending |
 | QA-05 | Run authenticated-preview Lighthouse checks for home, collection, PDP and cart; resolve confirmed LCP-priority and unnecessary-script problems | Theme engineer | Blocked — branch removes unnecessary eager/high product-card images; authenticated Lighthouse evidence remains Pending |
 | QA-06 | Verify canonical URLs, metadata, Product and Breadcrumb structured data, social cards, sitemap and password-safe robots behavior | Theme engineer plus Shopify operator | Blocked — all 20 PDP canonicals and JSON-LD parsed, and representative home, collection and PDP metadata and social cards passed; sitemap, password-safe robots and branch-candidate acceptance remain Pending |
 | QA-07 | Capture fresh provider readbacks and a restorable export of the current live theme plus the existing candidate theme before the checkout-disabled candidate upload; capture scoped shared records/settings separately when their own mutation packet is approved | Shopify operator | Blocked — live/candidate theme IDs and sanitized settings were read back, but no approved rollback export packet was created |
-| QA-08 | Record exact candidate theme 141514408011, human-reviewed merged commit, source tree, package artifact and rollback theme in the private release packet | Shopify operator plus theme engineer | Blocked — draft PR #480, candidate 141514408011, rollback theme 141422395467 and local package Mochirii Cosmetics-0.5.0.zip (SHA-256 3E35DDE232F6B49B411396DBFDD8E26D578310FB65D941E914E5581BDACB0C17) are recorded; PR #480 has no accountable human review, is not merged, and the package is not bound to merged main |
+| QA-08 | Record exact candidate theme 141514408011, human-reviewed merged commit, source tree, package artifact and rollback theme in the private release packet | Shopify operator plus theme engineer | Blocked — draft PR #480, candidate 141514408011, rollback theme 141422395467 and provisional local package Mochirii Cosmetics-0.6.0.zip (SHA-256 DBB772F5AA07ADED833E27F9CE435DE8DB0CA60A087D6ABFC54E6EE939C9806F; 75,251 bytes) are recorded; PR #480 has no accountable human review, is not merged, and this package is explicitly non-final, unuploaded and not bound to merged main |
 | QA-09 | Upload only the exact merged-source package to unpublished candidate theme 141514408011 with checkout_enabled false, preserve Draft status, and verify the source binding, route matrix, disabled checkout and no out-of-scope shared-record changes | Shopify operator plus theme engineer | Blocked — the staging boundary is authorized, but the reviewed merged package, rollback capture, upload and post-write readback remain Pending |
 
 ## Approval Gates
@@ -335,7 +388,9 @@ The revised launch plan authorizes exactly one prepayment staging class: upload
 the reviewed package built from merged `main` to existing unpublished candidate
 theme `141514408011` for `shop.mochirii.com`. The upload may occur before the
 product and operational gates become Ready so candidate QA can proceed, but it
-cannot make any launch gate Ready by itself.
+cannot make any launch gate Ready by itself. QA-09 may therefore be performed
+early only under the entry conditions below; Gate E still cannot become Ready
+until Gate D is Ready and QA-07 through QA-09 all pass.
 
 - **Entry:** PR #480 or its scoped successor has accountable human review, is
   merged through protected `main`, required checks are green at the merge

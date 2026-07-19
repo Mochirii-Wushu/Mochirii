@@ -8,7 +8,7 @@
   <div class="section-inner collection-header__grid">
     <div>
       <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>{{ collection.title }}</h1>
+      <h1>{{ collection.title | escape }}</h1>
       {% if collection.description != blank %}
         <div class="rte lede">{{ collection.description }}</div>
       {% endif %}
@@ -23,9 +23,9 @@
 <section class="section section-soft">
   <div class="section-inner">
     <nav class="category-pills category-pills--compact" aria-label="Collection navigation">
-      <a href="{{ catalog_url }}">Shop all</a>
-      <a href="{{ routes.collections_url }}">Collections</a>
-      <span aria-current="page">{{ collection.title }}</span>
+      <a href="{{ catalog_url | escape }}">Shop all</a>
+      <a href="{{ routes.collections_url | escape }}">Collections</a>
+      <span aria-current="page">{{ collection.title | escape }}</span>
     </nav>
   </div>
 </section>
@@ -34,10 +34,10 @@
   <div class="section-inner">
     {% assign active_filter_count = 0 %}
     {% for filter in collection.filters %}
-      {% assign filter_key = filter.label | handle %}
+      {% assign filter_contract = filter.param_name | append: '|' | append: filter.type %}
       {% assign is_allowed_filter = false %}
-      {% case filter_key %}
-        {% when 'availability', 'price', 'product-type', 'skin-needs', 'skin-type', 'appearance-concerns', 'routine-step', 'key-ingredients' %}
+      {% case filter_contract %}
+        {% when 'filter.v.availability|boolean', 'filter.v.price|price_range', 'filter.p.m.custom.product_type|list', 'filter.p.m.custom.skin_type|list', 'filter.p.m.custom.appearance_concerns|list', 'filter.p.m.custom.routine_step|list', 'filter.p.m.custom.key_ingredients|list' %}
           {% assign is_allowed_filter = true %}
       {% endcase %}
       {% if is_allowed_filter %}
@@ -50,11 +50,11 @@
       {% endif %}
     {% endfor %}
 
-    <form id="shop-filters" class="collection-controls" method="get" action="{{ collection.url }}">
+    <form id="shop-filters" class="collection-controls" method="get" action="{{ collection.url | escape }}">
       <div class="field collection-sort">
-        <label for="SortBy-{{ section.id }}">Sort</label>
+        <label for="SortBy-{{ section.id | escape }}">Sort</label>
         {% assign current_sort = collection.sort_by | default: collection.default_sort_by %}
-        <select id="SortBy-{{ section.id }}" name="sort_by">
+        <select id="SortBy-{{ section.id | escape }}" name="sort_by">
           {% for option in collection.sort_options %}
             <option value="{{ option.value | escape }}" {% if option.value == current_sort %}selected="selected"{% endif %}>{{ option.name | escape }}</option>
           {% endfor %}
@@ -62,10 +62,10 @@
       </div>
 
       {% for filter in collection.filters %}
-        {% assign filter_key = filter.label | handle %}
+        {% assign filter_contract = filter.param_name | append: '|' | append: filter.type %}
         {% assign is_allowed_filter = false %}
-        {% case filter_key %}
-          {% when 'availability', 'price', 'product-type', 'skin-needs', 'skin-type', 'appearance-concerns', 'routine-step', 'key-ingredients' %}
+        {% case filter_contract %}
+          {% when 'filter.v.availability|boolean', 'filter.v.price|price_range', 'filter.p.m.custom.product_type|list', 'filter.p.m.custom.skin_type|list', 'filter.p.m.custom.appearance_concerns|list', 'filter.p.m.custom.routine_step|list', 'filter.p.m.custom.key_ingredients|list' %}
             {% assign is_allowed_filter = true %}
         {% endcase %}
         {% if is_allowed_filter %}
@@ -78,12 +78,12 @@
             {% case filter.type %}
               {% when 'boolean' %}
                 {% if filter.true_value %}
-                  <label class="filter-option" for="Filter-{{ filter.param_name | handle }}-true">
+                  <label class="filter-option" for="Filter-{{ filter.param_name | handle | escape }}-true">
                     <input
-                      id="Filter-{{ filter.param_name | handle }}-true"
+                      id="Filter-{{ filter.param_name | handle | escape }}-true"
                       type="checkbox"
-                      name="{{ filter.param_name }}"
-                      value="{{ filter.true_value.value }}"
+                      name="{{ filter.param_name | escape }}"
+                      value="{{ filter.true_value.value | escape }}"
                       {% if filter.true_value.active %}checked="checked"{% endif %}
                       {% if filter.true_value.count == 0 and filter.true_value.active == false %}disabled="disabled"{% endif %}
                     >
@@ -91,12 +91,12 @@
                   </label>
                 {% endif %}
                 {% if filter.false_value %}
-                  <label class="filter-option" for="Filter-{{ filter.param_name | handle }}-false">
+                  <label class="filter-option" for="Filter-{{ filter.param_name | handle | escape }}-false">
                     <input
-                      id="Filter-{{ filter.param_name | handle }}-false"
+                      id="Filter-{{ filter.param_name | handle | escape }}-false"
                       type="checkbox"
-                      name="{{ filter.param_name }}"
-                      value="{{ filter.false_value.value }}"
+                      name="{{ filter.param_name | escape }}"
+                      value="{{ filter.false_value.value | escape }}"
                       {% if filter.false_value.active %}checked="checked"{% endif %}
                       {% if filter.false_value.count == 0 and filter.false_value.active == false %}disabled="disabled"{% endif %}
                     >
@@ -105,12 +105,12 @@
                 {% endif %}
               {% when 'list' %}
                 {% for value in filter.values %}
-                  <label class="filter-option" for="Filter-{{ filter.param_name | handle }}-{{ forloop.index }}">
+                  <label class="filter-option" for="Filter-{{ filter.param_name | handle | escape }}-{{ forloop.index }}">
                     <input
-                      id="Filter-{{ filter.param_name | handle }}-{{ forloop.index }}"
+                      id="Filter-{{ filter.param_name | handle | escape }}-{{ forloop.index }}"
                       type="checkbox"
-                      name="{{ value.param_name }}"
-                      value="{{ value.value }}"
+                      name="{{ value.param_name | escape }}"
+                      value="{{ value.value | escape }}"
                       {% if value.active %}checked="checked"{% endif %}
                       {% if value.count == 0 and value.active == false %}disabled="disabled"{% endif %}
                     >
@@ -120,28 +120,28 @@
               {% when 'price_range' %}
                 <div class="price-filter">
                   <div class="field">
-                    <label for="Filter-{{ filter.min_value.param_name | handle }}">Minimum</label>
+                    <label for="Filter-{{ filter.min_value.param_name | handle | escape }}">Minimum</label>
                     <input
-                      id="Filter-{{ filter.min_value.param_name | handle }}"
+                      id="Filter-{{ filter.min_value.param_name | handle | escape }}"
                       type="number"
-                      name="{{ filter.min_value.param_name }}"
-                      value="{% if filter.min_value.value %}{{ filter.min_value.value | money_without_currency | replace: ',', '' }}{% endif %}"
+                      name="{{ filter.min_value.param_name | escape }}"
+                      value="{% if filter.min_value.value %}{{ filter.min_value.value | money_without_currency | replace: ',', '' | escape }}{% endif %}"
                       min="0"
                       step="0.01"
-                      max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                      max="{{ filter.range_max | money_without_currency | replace: ',', '' | escape }}"
                       inputmode="decimal"
                     >
                   </div>
                   <div class="field">
-                    <label for="Filter-{{ filter.max_value.param_name | handle }}">Maximum</label>
+                    <label for="Filter-{{ filter.max_value.param_name | handle | escape }}">Maximum</label>
                     <input
-                      id="Filter-{{ filter.max_value.param_name | handle }}"
+                      id="Filter-{{ filter.max_value.param_name | handle | escape }}"
                       type="number"
-                      name="{{ filter.max_value.param_name }}"
-                      value="{% if filter.max_value.value %}{{ filter.max_value.value | money_without_currency | replace: ',', '' }}{% endif %}"
+                      name="{{ filter.max_value.param_name | escape }}"
+                      value="{% if filter.max_value.value %}{{ filter.max_value.value | money_without_currency | replace: ',', '' | escape }}{% endif %}"
                       min="0"
                       step="0.01"
-                      max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                      max="{{ filter.range_max | money_without_currency | replace: ',', '' | escape }}"
                       inputmode="decimal"
                     >
                   </div>
@@ -154,7 +154,7 @@
 
       <div class="collection-controls__actions">
         <button class="button" type="submit">Apply</button>
-        {% if active_filter_count > 0 %}<a class="text-link" href="{{ collection.url }}">Clear filters</a>{% endif %}
+        {% if active_filter_count > 0 %}<a class="text-link" href="{{ collection.url | escape }}">Clear filters</a>{% endif %}
       </div>
     </form>
 
@@ -170,9 +170,9 @@
         {% endif %}
       {% else %}
         <div class="empty-state empty-state--wide">
-          <h2>{{ settings.empty_catalog_heading }}</h2>
-          <p>{{ settings.empty_catalog_body }}</p>
-          <a class="button button--secondary" href="{{ catalog_url }}">Shop all</a>
+          <h2>{{ settings.empty_catalog_heading | escape }}</h2>
+          <p>{{ settings.empty_catalog_body | escape }}</p>
+          <a class="button button--secondary" href="{{ catalog_url | escape }}">Shop all</a>
         </div>
       {% endif %}
     {% endpaginate %}

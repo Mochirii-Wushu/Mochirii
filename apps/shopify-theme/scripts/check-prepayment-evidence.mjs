@@ -62,9 +62,10 @@ if (!result.ok) {
 const publicContractChecks = [
   ["product-facts", path.join(appRoot, "scripts", "check-product-facts.mjs"), "--require-complete"],
   ["launch-content", path.join(appRoot, "scripts", "check-launch-content-contracts.mjs"), "--require-launch-ready"],
+  ["provider-surfaces", path.join(appRoot, "scripts", "check-provider-surfaces.mjs"), null],
 ];
 for (const [gate, script, argument] of publicContractChecks) {
-  const check = spawnSync(process.execPath, [script, argument], {
+  const check = spawnSync(process.execPath, argument === null ? [script] : [script, argument], {
     cwd: appRoot,
     encoding: "utf8",
     windowsHide: true,

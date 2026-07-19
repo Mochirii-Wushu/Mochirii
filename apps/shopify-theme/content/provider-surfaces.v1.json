@@ -1,0 +1,483 @@
+{
+  "$schema": "./provider-surfaces.v1.schema.json",
+  "schema_version": 1,
+  "revision": "2026-07-19-v1",
+  "locale": "en-US",
+  "brand": "Mochirii Cosmetics",
+  "market": "US",
+  "currency": "USD",
+  "brand_identity": {
+    "canonical_reference": {
+      "asset_path": "apps/web/public/assets/img/brand/emblem.webp",
+      "sha256": "ed9fe4c522bc2b0d1c2072c1c098f241ee52f0ceec0307cb531ce440e730bb60"
+    },
+    "storefront_derivative": {
+      "asset_path": "apps/shopify-theme/assets/mochirii-emblem.webp",
+      "sha256": "ad96d3428572404d9f5c1d7387669b5680920079cdf8cc637fdebfa217d00df4",
+      "format": "webp",
+      "width": 224,
+      "height": 224,
+      "relationship": "reviewed-storefront-rendering-of-canonical-emblem"
+    },
+    "theme_bindings": [
+      {
+        "order": 1,
+        "surface": "storefront-header-logo",
+        "source_path": "sections/header.liquid",
+        "relation": "logo",
+        "media_type": "image/webp",
+        "sizes": "56x56"
+      },
+      {
+        "order": 2,
+        "surface": "storefront-footer-logo",
+        "source_path": "sections/footer.liquid",
+        "relation": "logo",
+        "media_type": "image/webp",
+        "sizes": "56x56"
+      },
+      {
+        "order": 3,
+        "surface": "password-page-logo",
+        "source_path": "sections/main-password.liquid",
+        "relation": "logo",
+        "media_type": "image/webp",
+        "sizes": "56x56"
+      },
+      {
+        "order": 4,
+        "surface": "gift-card-logo",
+        "source_path": "templates/gift_card.liquid",
+        "relation": "logo",
+        "media_type": "image/webp",
+        "sizes": "56x56"
+      },
+      {
+        "order": 5,
+        "surface": "structured-data-logo",
+        "source_path": "snippets/structured-data.liquid",
+        "relation": "logo",
+        "media_type": "image/webp",
+        "sizes": null
+      },
+      {
+        "order": 6,
+        "surface": "storefront-favicon",
+        "source_path": "layout/theme.liquid",
+        "relation": "icon",
+        "media_type": "image/webp",
+        "sizes": "224x224"
+      },
+      {
+        "order": 7,
+        "surface": "password-favicon",
+        "source_path": "layout/password.liquid",
+        "relation": "icon",
+        "media_type": "image/webp",
+        "sizes": "224x224"
+      }
+    ],
+    "provider_logo_expectations": [
+      {
+        "order": 1,
+        "surface": "brand-logo",
+        "requirement": "match-when-configurable",
+        "expected_asset_sha256": "ad96d3428572404d9f5c1d7387669b5680920079cdf8cc637fdebfa217d00df4"
+      },
+      {
+        "order": 2,
+        "surface": "checkout-logo",
+        "requirement": "match-when-configurable",
+        "expected_asset_sha256": "ad96d3428572404d9f5c1d7387669b5680920079cdf8cc637fdebfa217d00df4"
+      },
+      {
+        "order": 3,
+        "surface": "customer-account-logo",
+        "requirement": "match-when-configurable",
+        "expected_asset_sha256": "ad96d3428572404d9f5c1d7387669b5680920079cdf8cc637fdebfa217d00df4"
+      }
+    ]
+  },
+  "homepage": {
+    "expected": {
+      "featured_collection_handle": "mochirii-cosmetics",
+      "seo_title": "Mochirii Cosmetics | Skincare by Routine",
+      "seo_description": "Shop Mochirii Cosmetics skincare by routine, with ingredients, directions, skin suitability, and product details for every formula.",
+      "temporary_hero_fallback_asset_path": "assets/mochirii-page-password.webp",
+      "temporary_hero_fallback_sha256": "05289a0d2887d3ce1c7b7e2e7343379392ce89da5afac8082faf896a0ae39d82",
+      "temporary_hero_fallback_alt": "Abstract green Mochirii Cosmetics artwork.",
+      "hero_media_approval_status": "pending",
+      "approved_hero_image_sha256": null,
+      "approved_hero_image_alt": null,
+      "featured_products_approval_status": "pending",
+      "approved_featured_product_handles": null,
+      "hero_eyebrow": "Skincare by routine",
+      "hero_heading": "Mochirii Cosmetics",
+      "hero_text": "Find cleansers, serums, moisturizers, and facial oils for each step of your routine.",
+      "primary_cta_label": "Shop skincare",
+      "primary_cta_destination": "/collections/mochirii-cosmetics",
+      "featured_heading": "Start your routine here",
+      "collections_heading": "Choose your next step",
+      "standards_heading": "See what fits your routine",
+      "standards_intro": "Compare texture, skin suitability, key ingredients, directions, and full ingredient lists before you choose.",
+      "standard_one_heading": "Matching product images",
+      "standard_one_text": "Each gallery shows the Mochirii Cosmetics packaging for that product.",
+      "standard_two_heading": "Ingredients and directions",
+      "standard_two_text": "Find key ingredients, full INCI, size, skin suitability, and directions on every product page.",
+      "standard_three_heading": "Shopping details in one place",
+      "standard_three_text": "Check warnings, origin, shipping, and returns before adding a product to your routine.",
+      "policy_note": "Shipping and return details are available before checkout."
+    },
+    "expected_sha256": "de782e8f773fd682f1d54d510d695188084c2e91349988ef1e8e04bc885c3cb0"
+  },
+  "collections_index": {
+    "expected": {
+      "eyebrow": "Skincare routines",
+      "heading": "Choose your next step",
+      "intro": "Browse skincare for cleansing, hydration, brightening, smoothing, and moisture support."
+    },
+    "expected_sha256": "40dc56d952807f65cc6dca1c55cd317da8bd6f0aa5ad1ed5c363671e91b0caa6"
+  },
+  "pages": {
+    "section_settings": {
+      "eyebrow": "Mochirii Cosmetics",
+      "intro": null
+    },
+    "items": [
+      {
+        "order": 1,
+        "handle": "about",
+        "route": "/pages/about",
+        "title": "About",
+        "seo_title": "About Mochirii Cosmetics | Skincare by Routine",
+        "seo_description": "Learn how Mochirii Cosmetics organizes skincare formulas by routine step, skin type, ingredients, texture, and use.",
+        "approved_seo_sha256": "cec72a3ee617c9da5b4875b16937c77e3ba5caa3d1e899d496f6061562e796ec",
+        "content_source": "content/approved-customer-copy.json#pages/about/bodyHtml",
+        "approved_content_sha256": "bf2a3d9642208fda587736b5f20d19bf00e112342306e64ef7343e16e086e68f"
+      },
+      {
+        "order": 2,
+        "handle": "contact",
+        "route": "/pages/contact",
+        "title": "Contact",
+        "seo_title": "Contact Mochirii Cosmetics | Product & Order Help",
+        "seo_description": "Contact Mochirii Cosmetics for help with a product, an order, or a store policy.",
+        "approved_seo_sha256": "2cb38f038eba20de92b19ba41b5071eb68a7d998b1c1de9bcbce880c50e2ebd7",
+        "content_source": "content/approved-customer-copy.json#pages/contact/bodyHtml",
+        "approved_content_sha256": "5376fcd1a8a78f64db4bf2518baad753761da1ea3e025d472b34c4b1f4b75879"
+      },
+      {
+        "order": 3,
+        "handle": "faq",
+        "route": "/pages/faq",
+        "title": "Frequently Asked Questions",
+        "seo_title": "Frequently Asked Questions | Mochirii Cosmetics",
+        "seo_description": "Find where to review product details, ingredients, directions, shipping, returns, and ways to contact Mochirii Cosmetics.",
+        "approved_seo_sha256": "4b87711c0ef35492e1ea724f1a5e477ba211e3ec72e858c2cbd3979d1f70011d",
+        "content_source": "content/launch-pages.v1.json#pages/faq/body_html",
+        "approved_content_sha256": "6e732bed69c706469058ad0ea39ebf622fc747b2da0e4721e8f89b18bce8a132"
+      },
+      {
+        "order": 4,
+        "handle": "ingredients-standards",
+        "route": "/pages/ingredients-standards",
+        "title": "Ingredients & Standards",
+        "seo_title": "Ingredients & Standards | Mochirii Cosmetics",
+        "seo_description": "Learn how Mochirii Cosmetics presents product-specific ingredients, directions, warnings, origin, and verified certification wording.",
+        "approved_seo_sha256": "dca959fcb2f7bf78adff3c6da7cbae7ae8afaaf0ca4a8f2a23af16b361bbe1f1",
+        "content_source": "content/launch-pages.v1.json#pages/ingredients-standards/body_html",
+        "approved_content_sha256": "3f8f32cbd6bb4e818f77a8400fe758c7f261c8cd5bdedd675daa1185b539b069"
+      },
+      {
+        "order": 5,
+        "handle": "accessibility",
+        "route": "/pages/accessibility",
+        "title": "Accessibility",
+        "seo_title": "Accessibility | Mochirii Cosmetics",
+        "seo_description": "Read the Mochirii Cosmetics accessibility approach and learn how to report a storefront access or usability barrier.",
+        "approved_seo_sha256": "ea3a71ffaad0ee6fa8e95c883feb1b3a13b5c8c63961b2b01fb4c4e8a9076618",
+        "content_source": "content/launch-pages.v1.json#pages/accessibility/body_html",
+        "approved_content_sha256": "e6b9d5df8244249f2e767b83bf4c9b4cd1f3050af9d35caf3b0d16d95aa2faea"
+      }
+    ]
+  },
+  "collections": {
+    "items": [
+      {
+        "order": 1,
+        "handle": "mochirii-cosmetics",
+        "route": "/collections/mochirii-cosmetics",
+        "title": "Mochirii Cosmetics",
+        "seo_title": "Shop Skincare | Mochirii Cosmetics",
+        "seo_description": "Shop all 20 Mochirii Cosmetics skincare formulas for cleansing, hydration, brightening, and moisture support.",
+        "approved_seo_sha256": "0dc5f0766b901943728d939d9913a4386e1b28252bd3c96ccc25b914a3491663",
+        "description_source": "content/approved-customer-copy.json#collections/mochirii-cosmetics/description",
+        "approved_description_sha256": "bb53132ab0f26b80b59f478ad0eef0c456335f2e84080be0f07361f8218df543",
+        "rendered_html_approval_status": "pending",
+        "approved_rendered_html_sha256": null,
+        "media_approval_status": "pending",
+        "approved_image_sha256": null,
+        "approved_image_alt": null,
+        "membership_approval_status": "pending",
+        "approved_product_handles": null
+      },
+      {
+        "order": 2,
+        "handle": "cleanse-tone",
+        "route": "/collections/cleanse-tone",
+        "title": "Cleanse & Tone",
+        "seo_title": "Cleanse & Tone | Mochirii Cosmetics",
+        "seo_description": "Shop Mochirii cleansers, makeup removers, and toner for the first steps of your skincare routine.",
+        "approved_seo_sha256": "069e5216e153ffbb27482358e79a53a93c83d04d309e5bbf2d0af04831087e52",
+        "description_source": "content/approved-customer-copy.json#collections/cleanse-tone/description",
+        "approved_description_sha256": "652188fdd6519c3a6e464d002151f87b24eefab8387c5c78f6f1b608a7427a03",
+        "rendered_html_approval_status": "pending",
+        "approved_rendered_html_sha256": null,
+        "media_approval_status": "pending",
+        "approved_image_sha256": null,
+        "approved_image_alt": null,
+        "membership_approval_status": "pending",
+        "approved_product_handles": null
+      },
+      {
+        "order": 3,
+        "handle": "hydrate-barrier",
+        "route": "/collections/hydrate-barrier",
+        "title": "Hydrate & Barrier",
+        "seo_title": "Hydrate & Barrier | Mochirii Cosmetics",
+        "seo_description": "Shop Mochirii gels and daily moisturizers for hydration and soft, comfortable-feeling skin.",
+        "approved_seo_sha256": "fbd7ba3a450ef60869856884767d120a1a3b6437af87ea3a196db0c60f9a180f",
+        "description_source": "content/approved-customer-copy.json#collections/hydrate-barrier/description",
+        "approved_description_sha256": "1a1c898c5784280c7a8628a9ea44b9c0f937c4491da6785d49a9aebda746c25c",
+        "rendered_html_approval_status": "pending",
+        "approved_rendered_html_sha256": null,
+        "media_approval_status": "pending",
+        "approved_image_sha256": null,
+        "approved_image_alt": null,
+        "membership_approval_status": "pending",
+        "approved_product_handles": null
+      },
+      {
+        "order": 4,
+        "handle": "brighten-smooth",
+        "route": "/collections/brighten-smooth",
+        "title": "Brighten & Smooth",
+        "seo_title": "Brighten & Smooth | Mochirii Cosmetics",
+        "seo_description": "Shop Mochirii serums, exfoliation, and eye care for a brighter, smoother-looking finish.",
+        "approved_seo_sha256": "b66936ec34460c9f75024ac6e3cf50bdefda94bede12f80ca1e641899b45e288",
+        "description_source": "content/approved-customer-copy.json#collections/brighten-smooth/description",
+        "approved_description_sha256": "389f533ab383c9531c885f0b21c8d65812ebf619271fa8fcb5c892e6b203b004",
+        "rendered_html_approval_status": "pending",
+        "approved_rendered_html_sha256": null,
+        "media_approval_status": "pending",
+        "approved_image_sha256": null,
+        "approved_image_alt": null,
+        "membership_approval_status": "pending",
+        "approved_product_handles": null
+      },
+      {
+        "order": 5,
+        "handle": "age-support-nourish",
+        "route": "/collections/age-support-nourish",
+        "title": "Age-Support & Nourish",
+        "seo_title": "Age-Support & Nourish | Mochirii Cosmetics",
+        "seo_description": "Shop Mochirii oils, creams, and serums for moisture, suppleness, and a smooth-looking finish.",
+        "approved_seo_sha256": "242fd37cf2b1a6e0f96123df9c9928749dda0fc7ad5d2e960f7cac20f67c2af3",
+        "description_source": "content/approved-customer-copy.json#collections/age-support-nourish/description",
+        "approved_description_sha256": "73ce5bdebed5408b20e7f5476af44d660a25e1d3eab35beb31f1feb26e2ec41f",
+        "rendered_html_approval_status": "pending",
+        "approved_rendered_html_sha256": null,
+        "media_approval_status": "pending",
+        "approved_image_sha256": null,
+        "approved_image_alt": null,
+        "membership_approval_status": "pending",
+        "approved_product_handles": null
+      }
+    ]
+  },
+  "navigation": {
+    "header": [
+      { "order": 1, "label": "Shop", "destination": "/collections/mochirii-cosmetics", "children": [] },
+      { "order": 2, "label": "Product type", "destination": "/collections/mochirii-cosmetics#shop-filters", "children": [] },
+      { "order": 3, "label": "Skin needs", "destination": "/collections/mochirii-cosmetics#shop-filters", "children": [] },
+      { "order": 4, "label": "Routine", "destination": "/collections#routine-collections", "children": [] },
+      { "order": 5, "label": "About", "destination": "/pages/about", "children": [] },
+      { "order": 6, "label": "Help", "destination": "/pages/faq", "children": [] },
+      { "order": 7, "label": "Search", "destination": "/search", "children": [] },
+      { "order": 8, "label": "Cart", "destination": "/cart", "children": [] }
+    ],
+    "footer_groups": [
+      {
+        "order": 1,
+        "identity": "guild-link",
+        "heading": null,
+        "links": [
+          { "order": 1, "label": "Visit Mochirii Guild", "destination": "https://mochirii.com", "children": [] }
+        ]
+      },
+      {
+        "order": 2,
+        "identity": "support",
+        "heading": "Support",
+        "links": [
+          { "order": 1, "label": "Contact", "destination": "/pages/contact", "children": [] },
+          { "order": 2, "label": "FAQ", "destination": "/pages/faq", "children": [] },
+          { "order": 3, "label": "About", "destination": "/pages/about", "children": [] },
+          { "order": 4, "label": "Ingredients & Standards", "destination": "/pages/ingredients-standards", "children": [] },
+          { "order": 5, "label": "Accessibility", "destination": "/pages/accessibility", "children": [] }
+        ]
+      },
+      {
+        "order": 3,
+        "identity": "policies",
+        "heading": "Policies",
+        "links": [
+          { "order": 1, "label": "Shipping", "destination": "/policies/shipping-policy", "children": [] },
+          { "order": 2, "label": "Returns", "destination": "/policies/refund-policy", "children": [] },
+          { "order": 3, "label": "Privacy", "destination": "/policies/privacy-policy", "children": [] },
+          { "order": 4, "label": "Terms", "destination": "/policies/terms-of-service", "children": [] },
+          { "order": 5, "label": "Privacy Choices", "destination": "/pages/data-sharing-opt-out", "children": [] }
+        ]
+      }
+    ],
+    "expected_sha256": "0a19276087ca652116a9538542a8ff3768bdb07c4777801e1342b5628eaba4ea"
+  },
+  "search_and_filters": {
+    "filters": [
+      { "order": 1, "label": "Product type", "param_name": "filter.p.m.custom.product_type", "type": "list" },
+      { "order": 2, "label": "Skin needs", "param_name": "filter.p.m.custom.appearance_concerns", "type": "list" },
+      { "order": 3, "label": "Skin type", "param_name": "filter.p.m.custom.skin_type", "type": "list" },
+      { "order": 4, "label": "Routine step", "param_name": "filter.p.m.custom.routine_step", "type": "list" },
+      { "order": 5, "label": "Key ingredients", "param_name": "filter.p.m.custom.key_ingredients", "type": "list" },
+      { "order": 6, "label": "Availability", "param_name": "filter.v.availability", "type": "boolean" },
+      { "order": 7, "label": "Price", "param_name": "filter.v.price", "type": "price_range" }
+    ],
+    "forbidden_filter_params": [
+      "filter.p.vendor"
+    ],
+    "expected_sha256": "5ab9daba561d4423f0c0b05be4a2a03e7166e03ba72a9ebb1d90bea2391317f3"
+  },
+  "policies": {
+    "items": [
+      {
+        "order": 1,
+        "identity": "shipping-policy",
+        "customer_label": "Shipping",
+        "route": "/policies/shipping-policy",
+        "expected_title": "Shipping policy",
+        "approval_status": "pending",
+        "approved_content_sha256": null
+      },
+      {
+        "order": 2,
+        "identity": "refund-policy",
+        "customer_label": "Returns",
+        "route": "/policies/refund-policy",
+        "expected_title": "Refund policy",
+        "approval_status": "pending",
+        "approved_content_sha256": null
+      },
+      {
+        "order": 3,
+        "identity": "privacy-policy",
+        "customer_label": "Privacy",
+        "route": "/policies/privacy-policy",
+        "expected_title": "Privacy policy",
+        "approval_status": "pending",
+        "approved_content_sha256": null
+      },
+      {
+        "order": 4,
+        "identity": "terms-of-service",
+        "customer_label": "Terms",
+        "route": "/policies/terms-of-service",
+        "expected_title": "Terms of service",
+        "approval_status": "pending",
+        "approved_content_sha256": null
+      },
+      {
+        "order": 5,
+        "identity": "privacy-choices",
+        "customer_label": "Privacy Choices",
+        "route": "/pages/data-sharing-opt-out",
+        "expected_title": "Privacy Choices",
+        "approval_status": "pending",
+        "approved_content_sha256": null
+      }
+    ]
+  },
+  "settings": {
+    "expected": {
+      "checkout_enabled": false,
+      "gift_cards_enabled": false,
+      "gift_cards_listed": false,
+      "gift_card_route": "/products/gift-card",
+      "gift_card_route_http_status": 404,
+      "customer_accounts": "optional",
+      "privacy_choices_enabled": true,
+      "privacy_choices_menu_visible": true,
+      "privacy_choices_route": "/pages/data-sharing-opt-out",
+      "password_protection_enabled": true,
+      "candidate_theme_admin_status": "Draft",
+      "candidate_theme_published": false,
+      "background_color": "#f7f8f5",
+      "text_color": "#13231d",
+      "accent_color": "#1f6b58",
+      "default_meta_description": "Shop Mochirii Cosmetics skincare by routine, with ingredients, directions, skin suitability, and product details for every formula.",
+      "storefront_mode_text": "Skincare by routine",
+      "empty_catalog_heading": "No products found.",
+      "empty_catalog_body": "Clear a filter or browse all skincare.",
+      "footer_summary": "Cleansers, hydrating products, brightening products, and moisturizers for daily skincare routines.",
+      "footer_section_summary": "Cleansers, hydrating products, brightening products, and moisturizers for daily skincare routines.",
+      "header_main_menu_handle": "main-menu",
+      "footer_menu_handle": "footer",
+      "password_eyebrow": "Mochirii Cosmetics",
+      "password_heading": "The skincare shop is opening soon.",
+      "password_intro": "Enter the password to preview the store.",
+      "social_share_image_setting": "blank-theme-fallback",
+      "social_share_image_fallback_sha256": "05289a0d2887d3ce1c7b7e2e7343379392ce89da5afac8082faf896a0ae39d82",
+      "primary_customer_domain": "shop.mochirii.com",
+      "primary_customer_url": "https://shop.mochirii.com",
+      "shop_name": "Mochirii Cosmetics",
+      "currency": "USD"
+    },
+    "expected_sha256": "f0d796c0b0eeb35306017466b7b4cba11c15a13d19826b62bf9532d4380d4c88"
+  },
+  "notifications": {
+    "sender_presentation": {
+      "display_name": "Mochirii Cosmetics",
+      "approval_status": "pending",
+      "approved_sender_address_sha256": null,
+      "approved_sender_domain_sha256": null
+    },
+    "items": [
+      {
+        "order": 1,
+        "identity": "order-confirmation",
+        "customer_label": "Order confirmation",
+        "approval_status": "pending",
+        "approved_subject": null,
+        "approved_subject_sha256": null,
+        "approved_body_sha256": null
+      },
+      {
+        "order": 2,
+        "identity": "shipping-confirmation",
+        "customer_label": "Shipping confirmation",
+        "approval_status": "pending",
+        "approved_subject": null,
+        "approved_subject_sha256": null,
+        "approved_body_sha256": null
+      },
+      {
+        "order": 3,
+        "identity": "delivery-confirmation",
+        "customer_label": "Delivery confirmation",
+        "approval_status": "pending",
+        "approved_subject": null,
+        "approved_subject_sha256": null,
+        "approved_body_sha256": null
+      }
+    ]
+  }
+}

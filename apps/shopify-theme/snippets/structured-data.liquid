@@ -19,7 +19,7 @@
   {% assign structured_usage_amount = structured_usage.amount | strip %}
   {% assign structured_usage_timing = structured_usage.routine_timing %}
   {% assign structured_usage_rinse = structured_usage.rinse_behavior | strip %}
-  {% assign structured_key_ingredients = product.metafields.custom.key_ingredients.value %}
+  {% assign structured_key_ingredient_details = product.metafields.custom.key_ingredient_details.value %}
   {% assign structured_warnings = product.metafields.custom.warnings.value %}
   {% assign structured_warning_text = structured_warnings.text | strip %}
   {% assign structured_warning_incompatibilities = structured_warnings.incompatibilities %}
@@ -34,7 +34,7 @@
     {% assign structured_show_certifications = true %}
   {% endif %}
   {% assign structured_has_additional_properties = false %}
-  {% if structured_volume != blank or structured_usage_text != blank or structured_usage_frequency != blank or structured_usage_amount != blank or structured_usage_timing != blank or structured_usage_rinse != blank or structured_key_ingredients != blank or structured_show_warnings or structured_show_certifications %}
+  {% if structured_volume != blank or structured_usage_text != blank or structured_usage_frequency != blank or structured_usage_amount != blank or structured_usage_timing != blank or structured_usage_rinse != blank or structured_key_ingredient_details != blank or structured_show_warnings or structured_show_certifications %}
     {% assign structured_has_additional_properties = true %}
   {% endif %}
   {% assign price_currency = cart.currency.iso_code | default: shop.currency %}
@@ -123,7 +123,7 @@
           }
           {% assign structured_property_rendered = true %}
         {% endif %}
-        {% for ingredient in structured_key_ingredients %}
+        {% for ingredient in structured_key_ingredient_details %}
           {% assign structured_ingredient_name = ingredient.name | strip %}
           {% assign structured_ingredient_role = ingredient.cosmetic_role | strip %}
           {% if structured_ingredient_name != blank and structured_ingredient_role != blank %}

@@ -1,6 +1,6 @@
 {% layout none %}
 
-{% assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics' %}
+{% assign storefront_name = 'Mochirii Cosmetics' %}
 {% assign initial_value = gift_card.initial_value | money_without_trailing_zeros %}
 {% assign initial_value_text = initial_value | strip_html %}
 

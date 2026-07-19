@@ -122,18 +122,61 @@ generated archives belong only in ignored `.artifacts/operations`.
   and is not authorization for a future history rewrite.
 - The canonical Mochirii emblem design is universal across the guild site,
   storefront and product label/media review. The exact commerce wordmark is
-  **Mochirii Cosmetics**. A 2026-07-19 read-only candidate review found a
+  **Mochirii Cosmetics**. The 1024-pixel canonical WebP, 224-pixel storefront
+  derivative and ignored 600-pixels-per-inch label PNG have recorded SHA-256
+  identities; the label PNG and canonical WebP have identical decoded RGBA
+  pixels. The theme applies the storefront derivative to its header, footer,
+  password, gift-card, controlled structured-data and favicon surfaces. A
+  2026-07-19 read-only candidate review found a
   different minimalist mark on representative Peptide Smoothing Serum
   packaging while the header used the canonical emblem, so that SKU currently
   fails parity. No physical label or other image is accepted by the source
   declaration: an emblem or wordmark mismatch blocks the affected SKU, and all
   twenty require label artwork, mockup/media, physical-label and box review.
+- The local v3 product-facts and prepayment-evidence contracts remain
+  fail-closed: zero products are Complete, nineteen are Pending and Peptide
+  Smoothing Serum is Blocked. Complete records require controlled product type,
+  filterable ingredient names with separate reviewed ingredient roles,
+  structured and numerically consistent dual-unit net contents, plain-text
+  safety, distinct controlled front/technical-panel/outer-box media, and exact
+  rendered readback. Prepayment completion additionally requires a clean
+  evidenced merge commit, merge-commit checks, full source-manifest/package
+  digest parity, exact per-SKU fact/formula/product/variant identities, exact
+  authenticated Shopify title/description/SEO/metafield/collection/media/alt
+  projection parity, and real ignored and untracked artifact bindings for
+  formulas, labels, boxes, media, catalog authentication, account plan and
+  catalog snapshot. Image evidence must decode with valid dimensions; a file
+  signature alone is insufficient. The bundle, every evidence envelope, theme
+  package and standalone private configuration artifact must also remain
+  ignored and untracked. The gate additionally requires source-bound launch
+  pages and a mandatory-name register, six reviewed spelling/typo search sets,
+  the configured privacy route, and an approved contiguous-US supplier/carrier
+  matrix tied to the complete authenticated Shopify weight-tier configuration.
+  Every tier must be contiguous, the final tier open-ended, and each positive
+  threshold must pass just-below, at and just-above observations with exact
+  positive USD rate parity; unsupported-address and PO-box outcomes remain
+  explicit. Product/safety/MoCRA/claims records, operational runbooks and
+  authenticated gift-card suppression are also required. Synthetic contract
+  tests do not make any real SKU or provider gate Ready.
+- The versioned provider-surface contract now pins the Mochirii emblem and
+  wordmark, primary customer domain, home and collections-index presentation,
+  pages, five collection identities, navigation, controlled filters, customer
+  settings, policies, notification presentation and sender requirements. Its
+  provider-ready mode requires an ignored exact readback tied to the candidate
+  theme and package. Private rendered bodies are bound to route/content hashes
+  and scanned for encoded or markup-split third-party, system, mood-only,
+  unsupported-claim and inconsistent-brand language. Accountable detected-name
+  attestations must map one-to-one to route-specific mandatory exceptions.
+  Dedicated hero media, featured products, all five rendered collection
+  bodies/media/memberships, five policies, three notifications and sender
+  authentication remain Pending; no provider state was changed.
 - The ledger contains exactly the twenty products in approved customer-copy
   contract `2026-07-18-v2` and the 2026-07-18 authenticated read-only Shopify
   readback. All twenty are Active with USD prices, but inventory is not tracked
   and each says Shop location is its single fulfilling location. Nonblank SKUs
-  and physical weights were confirmed, while fifteen PDPs still render the
-  generic warning fallback. These facts do
+  and physical weights were confirmed, while that baseline rendered a generic
+  warning fallback on fifteen PDPs. The local source has since removed generic
+  fact, INCI and warning fallbacks, but has not been uploaded. These facts do
   not clear product evidence, labels, formula/INCI, warnings, safety, MoCRA,
   claims, variants, fulfillment, privacy, tax, or launch operations.
 - Non-payment provider blockers include the Basic development-store state,
@@ -144,14 +187,25 @@ generated archives belong only in ignored `.artifacts/operations`.
 - All twenty release dispositions remain blocked until their evidence and
   provider fields are reviewed. Unknown private or external facts are recorded
   as Pending rather than inferred.
-- The prior prepayment-readiness PR #480 head passed the clean lockfile install,
-  complete repository check, Shopify theme check and package, release-safety
-  guards, JavaScript syntax, Theme Check with zero offenses, and
-  `git diff --check`. It also had a clean required-check rollup; Supabase Preview
-  reported Skipped for that theme/docs-only head and did not block GitHub's
-  clean merge-state result. The revised implementation must be revalidated at
-  its final commit. The pull request has no accountable human review and
-  remains draft and unmerged.
+- The focused foundation revision on draft PR #480 passed the clean lockfile
+  install, complete repository check, Shopify theme check and package,
+  release-safety guards, JavaScript syntax, Theme Check with zero offenses,
+  `git diff --check`, and all fresh required remote checks on 2026-07-19;
+  Supabase Preview reported Skipped without blocking the check rollup. The pull
+  request has no accountable human review and remains draft and unmerged. The
+  downstream product and storefront implementation is preserved locally. An
+  independent code review identified and the local source remediated archive,
+  freshness, source-copy, search, privacy, shipping, price-provenance,
+  SKU-identity, media, quantity, wordmark, escaping and mobile-navigation
+  false-pass paths. The final local clean-install validation passed 145
+  adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme
+  Check across 45 files with zero offenses, and exact packaging. The resulting
+  provisional 0.6.0 package has SHA-256
+  `DBB772F5AA07ADED833E27F9CE435DE8DB0CA60A087D6ABFC54E6EE939C9806F`
+  and size 75,251 bytes.
+  This is technical validation, not accountable human review, merge or
+  provider acceptance; each focused source-bound commit must pass again after
+  the foundation merge.
   The optional local toolchain audit found Docker Desktop's Linux engine was
   not running; no system service or provider state was changed to work around
   that workstation-only limitation.

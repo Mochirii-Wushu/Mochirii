@@ -20,7 +20,7 @@
 {% assign usage_amount = usage_directions.amount | strip %}
 {% assign usage_timing = usage_directions.routine_timing %}
 {% assign usage_rinse_behavior = usage_directions.rinse_behavior | strip %}
-{% assign key_ingredients = product.metafields.custom.key_ingredients.value %}
+{% assign key_ingredient_details = product.metafields.custom.key_ingredient_details.value %}
 {% assign ingredients_inci = product.metafields.custom.ingredients_inci.value | strip %}
 {% assign warnings = product.metafields.custom.warnings.value %}
 {% assign warning_text = warnings.text | strip %}
@@ -44,13 +44,13 @@
 
 <nav class="breadcrumbs section-inner" aria-label="Breadcrumb">
   <ol role="list">
-    <li><a href="{{ routes.root_url }}">Home</a></li>
-    <li><a href="{{ catalog_url }}">Shop</a></li>
-    <li aria-current="page">{{ product.title }}</li>
+    <li><a href="{{ routes.root_url | escape }}">Home</a></li>
+    <li><a href="{{ catalog_url | escape }}">Shop</a></li>
+    <li aria-current="page">{{ product.title | escape }}</li>
   </ol>
 </nav>
 
-<section class="product-layout section-inner" data-product-section data-product-url="{{ product.url }}">
+<section class="product-layout section-inner" data-product-section data-product-url="{{ product.url | escape }}">
   <div class="product-gallery">
     {% if product.media.size > 0 %}
       <div class="product-media-list" tabindex="0" aria-label="Product media carousel">
@@ -67,7 +67,7 @@
               {{ media.preview_image | image_url: width: 1400 | image_tag: loading: 'lazy', alt: product_media_alt, sizes: '(min-width: 1080px) 48vw, 100vw' }}
             {% endif %}
             {% unless media.media_type == 'image' %}
-              <span class="media-type-badge">{{ media.media_type | replace: '_', ' ' }}</span>
+              <span class="media-type-badge">{{ media.media_type | replace: '_', ' ' | escape }}</span>
             {% endunless %}
           </div>
         {% endfor %}
@@ -91,7 +91,7 @@
     {% else %}
       <div class="product-media product-media--empty">
         <span class="media-placeholder">
-          <span>{{ product.title }}</span>
+          <span>{{ product.title | escape }}</span>
           <small>Product image unavailable.</small>
         </span>
       </div>
@@ -101,20 +101,20 @@
   <div class="product-details">
     <div class="product-title-block">
       <div class="product-kicker">
-        {% if routine_step != blank %}<span>{{ routine_step }}</span>{% endif %}
+        {% if routine_step != blank %}<span>{{ routine_step | escape }}</span>{% endif %}
         <span data-product-availability>{% if selected_variant.available %}In stock{% else %}Out of stock{% endif %}</span>
       </div>
       <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>{{ product.title }}</h1>
+      <h1>{{ product.title | escape }}</h1>
       {% if functional_identity != blank %}
-        <p class="product-functional-identity">{{ functional_identity }}</p>
+        <p class="product-functional-identity">{{ functional_identity | escape }}</p>
       {% endif %}
       {% if card_benefit != blank %}
-        <p class="product-primary-benefit">{{ card_benefit }}</p>
+        <p class="product-primary-benefit">{{ card_benefit | escape }}</p>
       {% endif %}
       <div class="product-purchase-summary">
         <p class="price price--large" data-product-price>{{ selected_variant.price | money }}</p>
-        {% if volume_display != blank %}<p class="product-size"><span>Size</span> {{ volume_display }}</p>{% endif %}
+        {% if volume_display != blank %}<p class="product-size"><span>Size</span> {{ volume_display | escape }}</p>{% endif %}
       </div>
       <p class="visually-hidden" data-product-variant-status aria-live="polite" aria-atomic="true"></p>
     </div>
@@ -137,7 +137,7 @@
                 {% if variant == selected_variant %}selected="selected"{% endif %}
                 {% unless variant.available %}disabled="disabled"{% endunless %}
               >
-                {{ variant.title }}{% unless variant.available %} - Out of stock{% endunless %}
+                {{ variant.title | escape }}{% unless variant.available %} - Out of stock{% endunless %}
               </option>
             {% endfor %}
           </select>
@@ -162,7 +162,7 @@
         <details open>
           <summary>What it does</summary>
           <ul class="product-fact-list">
-            {% for benefit in benefits limit: 3 %}<li>{{ benefit }}</li>{% endfor %}
+            {% for benefit in benefits limit: 3 %}<li>{{ benefit | escape }}</li>{% endfor %}
           </ul>
         </details>
       {% endif %}
@@ -173,13 +173,13 @@
             {% if skin_types != blank %}
               <div>
                 <dt>Skin type</dt>
-                <dd>{{ skin_types | join: ', ' }}</dd>
+                <dd>{{ skin_types | join: ', ' | escape }}</dd>
               </div>
             {% endif %}
             {% if appearance_concerns != blank %}
               <div>
                 <dt>Appearance concerns</dt>
-                <dd>{{ appearance_concerns | join: ', ' }}</dd>
+                <dd>{{ appearance_concerns | join: ', ' | escape }}</dd>
               </div>
             {% endif %}
           </dl>
@@ -188,24 +188,24 @@
       {% if usage_text != blank or usage_frequency != blank or usage_amount != blank or usage_timing != blank or usage_rinse_behavior != blank %}
         <details {% if benefits == blank and skin_types == blank and appearance_concerns == blank %}open{% endif %}>
           <summary>How to use</summary>
-          {% if usage_text != blank %}<p>{{ usage_text | newline_to_br }}</p>{% endif %}
+          {% if usage_text != blank %}<p>{{ usage_text | escape | newline_to_br }}</p>{% endif %}
           <dl class="product-detail-list">
-            {% if usage_frequency != blank %}<div><dt>Frequency</dt><dd>{{ usage_frequency }}</dd></div>{% endif %}
-            {% if usage_amount != blank %}<div><dt>Amount</dt><dd>{{ usage_amount }}</dd></div>{% endif %}
-            {% if usage_timing != blank %}<div><dt>Routine timing</dt><dd>{{ usage_timing | join: ', ' }}</dd></div>{% endif %}
-            {% if usage_rinse_behavior != blank %}<div><dt>Rinse behavior</dt><dd>{{ usage_rinse_behavior }}</dd></div>{% endif %}
+            {% if usage_frequency != blank %}<div><dt>Frequency</dt><dd>{{ usage_frequency | escape }}</dd></div>{% endif %}
+            {% if usage_amount != blank %}<div><dt>Amount</dt><dd>{{ usage_amount | escape }}</dd></div>{% endif %}
+            {% if usage_timing != blank %}<div><dt>Routine timing</dt><dd>{{ usage_timing | join: ', ' | escape }}</dd></div>{% endif %}
+            {% if usage_rinse_behavior != blank %}<div><dt>Rinse behavior</dt><dd>{{ usage_rinse_behavior | escape }}</dd></div>{% endif %}
           </dl>
         </details>
       {% endif %}
-      {% if key_ingredients != blank %}
+      {% if key_ingredient_details != blank %}
         <details>
           <summary>Key ingredients</summary>
           <ul class="product-fact-list">
-            {% for ingredient in key_ingredients %}
+            {% for ingredient in key_ingredient_details %}
               {% assign ingredient_name = ingredient.name | strip %}
               {% assign ingredient_role = ingredient.cosmetic_role | strip %}
               {% if ingredient_name != blank and ingredient_role != blank %}
-                <li><strong>{{ ingredient_name }}</strong> — {{ ingredient_role }}</li>
+                <li><strong>{{ ingredient_name | escape }}</strong> — {{ ingredient_role | escape }}</li>
               {% endif %}
             {% endfor %}
           </ul>
@@ -214,16 +214,16 @@
       {% if ingredients_inci != blank %}
         <details>
           <summary>Full ingredients (INCI)</summary>
-          <p>{{ ingredients_inci }}</p>
+          <p>{{ ingredients_inci | escape }}</p>
         </details>
       {% endif %}
       {% if show_warnings %}
         <details>
           <summary>Warnings and compatibility</summary>
-          <p>{{ warning_text | newline_to_br }}</p>
+          <p>{{ warning_text | escape | newline_to_br }}</p>
           {% if warning_incompatibilities != blank %}
             <ul class="product-fact-list">
-              {% for incompatibility in warning_incompatibilities %}<li>{{ incompatibility }}</li>{% endfor %}
+              {% for incompatibility in warning_incompatibilities %}<li>{{ incompatibility | escape }}</li>{% endfor %}
             </ul>
           {% endif %}
         </details>
@@ -232,9 +232,9 @@
         <details>
           <summary>Texture, finish, and fragrance</summary>
           <dl class="product-detail-list">
-            {% if texture != blank %}<div><dt>Texture</dt><dd>{{ texture }}</dd></div>{% endif %}
-            {% if finish != blank %}<div><dt>Finish</dt><dd>{{ finish }}</dd></div>{% endif %}
-            {% if fragrance_status != blank %}<div><dt>Fragrance</dt><dd>{{ fragrance_status }}</dd></div>{% endif %}
+            {% if texture != blank %}<div><dt>Texture</dt><dd>{{ texture | escape }}</dd></div>{% endif %}
+            {% if finish != blank %}<div><dt>Finish</dt><dd>{{ finish | escape }}</dd></div>{% endif %}
+            {% if fragrance_status != blank %}<div><dt>Fragrance</dt><dd>{{ fragrance_status | escape }}</dd></div>{% endif %}
           </dl>
         </details>
       {% endif %}
@@ -242,9 +242,9 @@
         <details>
           <summary>Origin, package, and certifications</summary>
           <dl class="product-detail-list">
-            {% if country_of_origin != blank %}<div><dt>Country of manufacture</dt><dd>{{ country_of_origin }}</dd></div>{% endif %}
-            {% if package_details != blank %}<div><dt>Package</dt><dd>{{ package_details | newline_to_br }}</dd></div>{% endif %}
-            {% if show_certifications %}<div><dt>Product certifications</dt><dd>{{ certification_items | join: ', ' }}</dd></div>{% endif %}
+            {% if country_of_origin != blank %}<div><dt>Country of manufacture</dt><dd>{{ country_of_origin | escape }}</dd></div>{% endif %}
+            {% if package_details != blank %}<div><dt>Package</dt><dd>{{ package_details | escape | newline_to_br }}</dd></div>{% endif %}
+            {% if show_certifications %}<div><dt>Product certifications</dt><dd>{{ certification_items | join: ', ' | escape }}</dd></div>{% endif %}
           </dl>
         </details>
       {% endif %}
@@ -252,9 +252,9 @@
         <details>
           <summary>Shipping, returns, and help</summary>
           <ul class="product-service-links">
-            {% if shop.shipping_policy != blank %}<li><a href="{{ shop.shipping_policy.url }}">Shipping</a></li>{% endif %}
-            {% if shop.refund_policy != blank %}<li><a href="{{ shop.refund_policy.url }}">Returns</a></li>{% endif %}
-            {% if faq_page != blank %}<li><a href="{{ faq_page.url }}">Frequently asked questions</a></li>{% endif %}
+            {% if shop.shipping_policy != blank %}<li><a href="{{ shop.shipping_policy.url | escape }}">Shipping</a></li>{% endif %}
+            {% if shop.refund_policy != blank %}<li><a href="{{ shop.refund_policy.url | escape }}">Returns</a></li>{% endif %}
+            {% if faq_page != blank %}<li><a href="{{ faq_page.url | escape }}">Frequently asked questions</a></li>{% endif %}
           </ul>
         </details>
       {% endif %}
@@ -270,7 +270,7 @@
           <p class="eyebrow">Build your routine</p>
           <h2 id="RoutineCompanions-{{ section.id }}">Mochirii routine companions</h2>
         </div>
-        <a class="text-link" href="{{ catalog_url }}">Shop skincare</a>
+        <a class="text-link" href="{{ catalog_url | escape }}">Shop skincare</a>
       </div>
       <div class="product-grid product-grid--compact" role="list" aria-label="Mochirii Cosmetics routine companions">
         {% for related_product in complementary_products limit: 4 %}

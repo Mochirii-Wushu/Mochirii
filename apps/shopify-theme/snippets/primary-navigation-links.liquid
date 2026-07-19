@@ -1,30 +1,101 @@
 {% assign navigation_id = navigation_id | default: 'primary-navigation' %}
+{% assign required_navigation_labels = 'Shop|Product type|Skin needs|Routine|About|Help' | split: '|' %}
 <ul class="site-nav__list" role="list">
-  {% if primary_menu != blank and primary_menu.links.size > 0 %}
-    {% for link in primary_menu.links %}
-      <li class="site-nav__item{% if link.links.size > 0 %} site-nav__item--has-children{% endif %}">
-        {% capture submenu_id %}{{ navigation_id }}-submenu-{{ forloop.index }}{% endcapture %}
-        <span class="site-nav__link-row">
-          <a href="{{ link.url }}" {% if link.current %}aria-current="page"{% endif %}>{{ link.title }}</a>
-          {% if link.links.size > 0 %}
-            <button
-              class="site-nav__toggle"
-              type="button"
-              aria-expanded="false"
-              aria-controls="{{ submenu_id }}"
-              aria-label="Toggle {{ link.title | escape }} submenu"
-              data-navigation-toggle
-            ><span aria-hidden="true">&#9662;</span></button>
-          {% endif %}
-        </span>
-        {% if link.links.size > 0 %}
-          <ul id="{{ submenu_id }}" class="site-nav__sublist" role="list" aria-label="{{ link.title | escape }} submenu">
-            {% for child_link in link.links %}
-              <li class="site-nav__item{% if child_link.links.size > 0 %} site-nav__item--has-children{% endif %}">
-                {% capture child_submenu_id %}{{ navigation_id }}-submenu-{{ forloop.parentloop.index }}-{{ forloop.index }}{% endcapture %}
+  {% for required_label in required_navigation_labels %}
+    {% assign required_handle = required_label | handleize %}
+    {% assign required_url = catalog_url %}
+    {% assign required_current = false %}
+    {% case required_handle %}
+      {% when 'shop' %}
+        {% if template.name == 'collection' or template.name == 'product' %}{% assign required_current = true %}{% endif %}
+      {% when 'product-type' %}
+        {% assign required_url = product_type_url %}
+      {% when 'skin-needs' %}
+        {% assign required_url = skin_needs_url %}
+      {% when 'routine' %}
+        {% assign required_url = routine_url %}
+        {% if template.name == 'list-collections' %}{% assign required_current = true %}{% endif %}
+      {% when 'about' %}
+        {% assign required_url = about_url %}
+        {% if request.path == about_url %}{% assign required_current = true %}{% endif %}
+      {% when 'help' %}
+        {% assign required_url = help_url %}
+        {% if request.path == help_url %}{% assign required_current = true %}{% endif %}
+    {% endcase %}
+
+    {% assign matching_menu_link = blank %}
+    {% if primary_menu != blank and primary_menu.links.size > 0 %}
+      {% for configured_link in primary_menu.links %}
+        {% assign configured_handle = configured_link.title | handleize %}
+        {% if configured_handle == required_handle %}
+          {% assign matching_menu_link = configured_link %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% assign allowed_child_count = 0 %}
+    {% if matching_menu_link != blank %}
+      {% for child_link in matching_menu_link.links %}
+        {% assign child_url_prefix = child_link.url | slice: 0 %}
+        {% assign child_url_protocol_relative = child_link.url | slice: 0, 2 %}
+        {% assign child_url_encoded = child_link.url | url_encode | upcase %}
+        {% assign child_url_safe = false %}
+        {% if child_url_prefix == '/' and child_url_protocol_relative != '//' %}
+          {% unless child_url_encoded contains '%5C' %}{% assign child_url_safe = true %}{% endunless %}
+        {% endif %}
+        {% if child_url_safe %}
+          {% assign allowed_child_count = allowed_child_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if required_url != blank %}
+    <li class="site-nav__item{% if allowed_child_count > 0 %} site-nav__item--has-children{% endif %}">
+      {% capture submenu_id %}{{ navigation_id }}-submenu-{{ required_handle }}{% endcapture %}
+      <span class="site-nav__link-row">
+        <a href="{{ required_url | escape }}" {% if required_current %}aria-current="page"{% endif %}>{{ required_label | escape }}</a>
+        {% if allowed_child_count > 0 %}
+          <button
+            class="site-nav__toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="{{ submenu_id }}"
+            aria-label="Toggle {{ required_label | escape }} submenu"
+            data-navigation-toggle
+          ><span aria-hidden="true">&#9662;</span></button>
+        {% endif %}
+      </span>
+      {% if allowed_child_count > 0 %}
+        <ul id="{{ submenu_id }}" class="site-nav__sublist" role="list" aria-label="{{ required_label | escape }} submenu">
+          {% for child_link in matching_menu_link.links %}
+            {% assign child_url_prefix = child_link.url | slice: 0 %}
+            {% assign child_url_protocol_relative = child_link.url | slice: 0, 2 %}
+            {% assign child_url_encoded = child_link.url | url_encode | upcase %}
+            {% assign child_url_safe = false %}
+            {% if child_url_prefix == '/' and child_url_protocol_relative != '//' %}
+              {% unless child_url_encoded contains '%5C' %}{% assign child_url_safe = true %}{% endunless %}
+            {% endif %}
+            {% if child_url_safe %}
+              {% assign allowed_grandchild_count = 0 %}
+              {% for grandchild_link in child_link.links %}
+                {% assign grandchild_url_prefix = grandchild_link.url | slice: 0 %}
+                {% assign grandchild_url_protocol_relative = grandchild_link.url | slice: 0, 2 %}
+                {% assign grandchild_url_encoded = grandchild_link.url | url_encode | upcase %}
+                {% assign grandchild_url_safe = false %}
+                {% if grandchild_url_prefix == '/' and grandchild_url_protocol_relative != '//' %}
+                  {% unless grandchild_url_encoded contains '%5C' %}{% assign grandchild_url_safe = true %}{% endunless %}
+                {% endif %}
+                {% if grandchild_url_safe %}
+                  {% assign allowed_grandchild_count = allowed_grandchild_count | plus: 1 %}
+                {% endif %}
+              {% endfor %}
+
+              <li class="site-nav__item{% if allowed_grandchild_count > 0 %} site-nav__item--has-children{% endif %}">
+                {% capture child_submenu_id %}{{ navigation_id }}-submenu-{{ required_handle }}-{{ forloop.index }}{% endcapture %}
                 <span class="site-nav__link-row">
-                  <a href="{{ child_link.url }}" {% if child_link.current %}aria-current="page"{% endif %}>{{ child_link.title }}</a>
-                  {% if child_link.links.size > 0 %}
+                  <a href="{{ child_link.url | escape }}" {% if child_link.current %}aria-current="page"{% endif %}>{{ child_link.title | escape }}</a>
+                  {% if allowed_grandchild_count > 0 %}
                     <button
                       class="site-nav__toggle"
                       type="button"
@@ -35,35 +106,38 @@
                     ><span aria-hidden="true">&#9656;</span></button>
                   {% endif %}
                 </span>
-                {% if child_link.links.size > 0 %}
+                {% if allowed_grandchild_count > 0 %}
                   <ul id="{{ child_submenu_id }}" class="site-nav__sublist site-nav__sublist--nested" role="list" aria-label="{{ child_link.title | escape }} submenu">
                     {% for grandchild_link in child_link.links %}
-                      <li class="site-nav__item">
-                        <span class="site-nav__link-row">
-                          <a href="{{ grandchild_link.url }}" {% if grandchild_link.current %}aria-current="page"{% endif %}>{{ grandchild_link.title }}</a>
-                        </span>
-                      </li>
+                      {% assign grandchild_url_prefix = grandchild_link.url | slice: 0 %}
+                      {% assign grandchild_url_protocol_relative = grandchild_link.url | slice: 0, 2 %}
+                      {% assign grandchild_url_encoded = grandchild_link.url | url_encode | upcase %}
+                      {% assign grandchild_url_safe = false %}
+                      {% if grandchild_url_prefix == '/' and grandchild_url_protocol_relative != '//' %}
+                        {% unless grandchild_url_encoded contains '%5C' %}{% assign grandchild_url_safe = true %}{% endunless %}
+                      {% endif %}
+                      {% if grandchild_url_safe %}
+                        <li class="site-nav__item">
+                          <span class="site-nav__link-row">
+                            <a href="{{ grandchild_link.url | escape }}" {% if grandchild_link.current %}aria-current="page"{% endif %}>{{ grandchild_link.title | escape }}</a>
+                          </span>
+                        </li>
+                      {% endif %}
                     {% endfor %}
                   </ul>
                 {% endif %}
               </li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      </li>
-    {% endfor %}
-  {% else %}
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a></span></li>
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ product_type_url }}">Product type</a></span></li>
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ skin_needs_url }}">Skin needs</a></span></li>
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routine_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Routine</a></span></li>
-    {% if about_url != blank %}<li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ about_url }}" {% if request.path == about_url %}aria-current="page"{% endif %}>About</a></span></li>{% endif %}
-    {% if help_url != blank %}<li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ help_url }}" {% if request.path == help_url %}aria-current="page"{% endif %}>Help</a></span></li>{% endif %}
-  {% endif %}
-  <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a></span></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </li>
+    {% endif %}
+  {% endfor %}
+  <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.search_url | escape }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a></span></li>
   <li class="site-nav__item">
     <span class="site-nav__link-row">
-      <a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
+      <a class="site-nav__cart" href="{{ routes.cart_url | escape }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
         Cart <span class="cart-count">{{ cart.item_count }}</span>
       </a>
     </span>

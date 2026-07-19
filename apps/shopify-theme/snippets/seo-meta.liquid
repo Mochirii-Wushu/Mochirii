@@ -1,5 +1,5 @@
 {% liquid
-  assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics'
+  assign storefront_name = 'Mochirii Cosmetics'
   assign seo_title = seo_title_override | default: page_title | default: storefront_name
   assign seo_title = seo_title | replace: '&amp;', '&'
   if request.page_type == 'product'

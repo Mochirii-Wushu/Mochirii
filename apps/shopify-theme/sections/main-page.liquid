@@ -9,7 +9,7 @@
   <section class="section page-banner">
     <div class="section-inner section-head section-head--center">
       <p class="eyebrow">Mochirii Cosmetics</p>
-      <h1>{{ page.title }}</h1>
+      <h1>{{ page.title | escape }}</h1>
       {% if page.content != blank %}<div class="rte section-intro">{{ page.content }}</div>{% endif %}
     </div>
   </section>
@@ -71,7 +71,7 @@
             data-contact-field
             data-error-id="ContactFormMessageError-{{ section.id }}"
             {% if form.errors contains 'body' %}aria-invalid="true" aria-describedby="ContactFormMessageError-{{ section.id }}"{% endif %}
-          >{{ form.body }}</textarea>
+          >{{ form.body | escape }}</textarea>
           <p id="ContactFormMessageError-{{ section.id }}" class="field-error" data-contact-field-error {% unless form.errors contains 'body' %}hidden{% endunless %}>
             {% if form.errors contains 'body' %}<span class="visually-hidden">Error:</span> Message {{ form.errors.messages['body'] }}{% endif %}
           </p>
@@ -83,9 +83,9 @@
 {% else %}
   <section class="section page-banner">
     <div class="section-inner section-inner-narrow section-head">
-      <p class="eyebrow">{{ section.settings.eyebrow }}</p>
-      <h1>{{ page.title }}</h1>
-      {% if section.settings.intro != blank %}<p class="section-intro">{{ section.settings.intro }}</p>{% endif %}
+      <p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      <h1>{{ page.title | escape }}</h1>
+      {% if section.settings.intro != blank %}<p class="section-intro">{{ section.settings.intro | escape }}</p>{% endif %}
     </div>
   </section>
 
@@ -96,7 +96,7 @@
       {% else %}
         <div class="empty-state empty-state--wide">
           <h2>We couldn't display this page.</h2>
-          <a class="button button--secondary" href="{{ catalog_url }}">Browse all skincare</a>
+          <a class="button button--secondary" href="{{ catalog_url | escape }}">Browse all skincare</a>
         </div>
       {% endif %}
     </div>

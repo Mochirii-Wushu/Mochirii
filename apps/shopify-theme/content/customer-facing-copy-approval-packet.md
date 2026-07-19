@@ -68,7 +68,7 @@ The following wording is already staged on unpublished theme `141514408011`:
 - Featured heading: `Start your routine here`
 - Collections heading: `Choose your next step`
 - Product-detail section: `See what fits your routine`
-- Footer: `Skincare for cleansing, hydrating, brightening, and nourishing routines.`
+- Footer: `Cleansers, hydrating products, brightening products, and moisturizers for daily skincare routines.`
 - Empty cart: `Your cart is empty.`
 - Disabled checkout: `Checkout opens when the store launches.`
 - Password page: `The skincare shop is opening soon.` / `Enter the password to preview the store.`
@@ -85,7 +85,7 @@ The theme remains unpublished. Checkout remains disabled.
 ### About
 
 > Mochirii Cosmetics organizes skincare by routine step: cleansing, hydration,
-> brightening, and nourishment. Compare products by skin suitability,
+> brightening, and moisture support. Compare products by skin suitability,
 > ingredients, texture, and use to find what fits your routine.
 >
 > Each product page brings together key ingredients, directions, the full INCI
@@ -109,7 +109,7 @@ The theme remains unpublished. Checkout remains disabled.
 
 | Collection | Description |
 | --- | --- |
-| Mochirii Cosmetics | Shop all 20 Mochirii Cosmetics formulas for cleansing, hydration, brightening, and nourishing care. |
+| Mochirii Cosmetics | Shop all 20 Mochirii Cosmetics formulas for cleansing, hydration, brightening, and moisture support. |
 | Cleanse & Tone | Cleansers, makeup removers, and toner for the first steps of your skincare routine. |
 | Hydrate & Barrier | Lightweight gels and daily moisturizers for soft, comfortable-feeling skin. |
 | Brighten & Smooth | Explore serums, exfoliation, and eye care for a brighter, smoother-looking finish. |

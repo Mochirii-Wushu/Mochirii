@@ -4,16 +4,40 @@ const LEDGER_KEYS = Object.freeze([
   "market",
   "currency",
   "basis",
+  "catalog_readback",
   "variants",
 ]);
 
 const BASIS_KEYS = Object.freeze([
-  "connected_account_plan_confirmed",
-  "current_catalog_confirmed",
+  "connected_account_plan_record_sha256",
   "shipping_included",
   "tax_included",
   "optional_services_included",
   "ambiguity_resolved",
+]);
+
+const CATALOG_READBACK_KEYS = Object.freeze([
+  "schema_version",
+  "captured_at",
+  "provider",
+  "market",
+  "currency",
+  "readback_source",
+  "authentication_evidence_sha256",
+  "connected_account_plan_record_sha256",
+  "snapshot_artifact",
+  "snapshot_sha256",
+  "snapshot_format",
+  "snapshot_record_count",
+  "record_hash_scope",
+  "records",
+]);
+
+const CATALOG_RECORD_KEYS = Object.freeze([
+  "handle",
+  "formula_identity_sha256",
+  "source_catalog_record_sha256",
+  "base_price_usd",
 ]);
 
 const LEDGER_VARIANT_KEYS = Object.freeze([
@@ -21,6 +45,9 @@ const LEDGER_VARIANT_KEYS = Object.freeze([
   "product_id",
   "variant_id",
   "exact_mapping_confirmed",
+  "formula_identity_sha256",
+  "source_catalog_record_sha256",
+  "catalog_snapshot_sha256",
   "base_price_usd",
   "shopify_cost_per_item_usd",
   "retail_price_usd",
@@ -50,6 +77,10 @@ const HANDLE_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const PRODUCT_ID_PATTERN = /^gid:\/\/shopify\/Product\/[1-9]\d*$/u;
 const VARIANT_ID_PATTERN = /^gid:\/\/shopify\/ProductVariant\/[1-9]\d*$/u;
 const USD_PATTERN = /^(?:0|[1-9]\d*)\.\d{2}$/u;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const PLACEHOLDER_SHA256_PATTERN = /^([a-f0-9])\1{63}$/u;
+const SNAPSHOT_ARTIFACT_PATTERN =
+  /^\.artifacts\/operations\/shopify\/[a-zA-Z0-9][a-zA-Z0-9._/-]*\.json$/u;
 
 export const PRICE_RULE = Object.freeze({
   multiplier: "2.20",
@@ -62,6 +93,10 @@ export const PRICE_RULE = Object.freeze({
 export const PRICE_GATE_POLICY = Object.freeze({
   expected_variant_count: 20,
   maximum_capture_age_hours: 24,
+  catalog_provider: "manufacturing-partner",
+  catalog_readback_source: "authenticated-manufacturing-partner-connected-account",
+  catalog_snapshot_format: "canonical-json",
+  catalog_record_hash_scope: "provider-record-including-formula-plan-and-base-price",
   shopify_readback_source: "authenticated-shopify-admin",
 });
 
@@ -132,6 +167,17 @@ function validateCaptureTime(value, category, now, issues) {
   const maximumAge = PRICE_GATE_POLICY.maximum_capture_age_hours * 60 * 60 * 1000;
   if (captured > now || now - captured > maximumAge) add(issues, `${category}.capture-freshness`);
   return value;
+}
+
+function validEvidenceSha256(value) {
+  return typeof value === "string" && SHA256_PATTERN.test(value) &&
+    !PLACEHOLDER_SHA256_PATTERN.test(value);
+}
+
+function validSnapshotArtifact(value) {
+  return typeof value === "string" && value.length <= 512 &&
+    SNAPSHOT_ARTIFACT_PATTERN.test(value) &&
+    !value.includes("//") && !value.includes("/./") && !value.includes("/../");
 }
 
 function expectedHandleSet(expectedProducts, issues) {
@@ -206,22 +252,112 @@ export function verifyPrivatePriceLedger(ledger, shopifyReadback, options = {}) 
   const ledgerCapturedAt = ledgerContractValid
     ? validateCaptureTime(ledger.captured_at, "ledger", now, issues)
     : null;
+  const catalogContractValid = ledgerContractValid && exactKeys(
+    ledger.catalog_readback,
+    CATALOG_READBACK_KEYS,
+  );
+  if (ledgerContractValid && !catalogContractValid) add(issues, "catalog-readback.contract");
+  const catalogCapturedAt = catalogContractValid
+    ? validateCaptureTime(ledger.catalog_readback.captured_at, "catalog-readback", now, issues)
+    : null;
   const readbackCapturedAt = readbackContractValid
     ? validateCaptureTime(shopifyReadback.captured_at, "shopify-readback", now, issues)
     : null;
 
   if (ledgerContractValid) {
-    if (ledger.schema_version !== 1) add(issues, "ledger.schema-version");
+    if (ledger.schema_version !== 2) add(issues, "ledger.schema-version");
     if (ledger.market !== "US" || ledger.currency !== "USD") add(issues, "ledger.market-currency");
     if (!exactKeys(ledger.basis, BASIS_KEYS)) {
       add(issues, "ledger.basis-contract");
     } else {
-      if (ledger.basis.connected_account_plan_confirmed !== true) add(issues, "ledger.account-plan");
-      if (ledger.basis.current_catalog_confirmed !== true) add(issues, "ledger.current-catalog");
+      if (!validEvidenceSha256(ledger.basis.connected_account_plan_record_sha256)) {
+        add(issues, "ledger.account-plan-record");
+      }
       if (ledger.basis.shipping_included !== false) add(issues, "ledger.shipping-exclusion");
       if (ledger.basis.tax_included !== false) add(issues, "ledger.tax-exclusion");
       if (ledger.basis.optional_services_included !== false) add(issues, "ledger.optional-services-exclusion");
       if (ledger.basis.ambiguity_resolved !== true) add(issues, "ledger.ambiguity");
+    }
+  }
+
+  const catalogRecords = catalogContractValid && Array.isArray(ledger.catalog_readback.records)
+    ? ledger.catalog_readback.records
+    : [];
+  const catalogByHandle = new Map();
+  if (catalogContractValid) {
+    const catalog = ledger.catalog_readback;
+    if (catalog.schema_version !== 1) add(issues, "catalog-readback.schema-version");
+    if (catalog.provider !== PRICE_GATE_POLICY.catalog_provider ||
+        catalog.readback_source !== PRICE_GATE_POLICY.catalog_readback_source) {
+      add(issues, "catalog-readback.source");
+    }
+    if (catalog.market !== "US" || catalog.currency !== "USD" ||
+        catalog.market !== ledger.market || catalog.currency !== ledger.currency) {
+      add(issues, "catalog-readback.market-currency");
+    }
+    if (!validEvidenceSha256(catalog.authentication_evidence_sha256)) {
+      add(issues, "catalog-readback.authentication-evidence");
+    }
+    if (!validEvidenceSha256(catalog.connected_account_plan_record_sha256)) {
+      add(issues, "catalog-readback.account-plan-record");
+    } else if (catalog.connected_account_plan_record_sha256 !==
+        ledger.basis?.connected_account_plan_record_sha256) {
+      add(issues, "ledger-catalog.account-plan-parity");
+    }
+    if (!validSnapshotArtifact(catalog.snapshot_artifact) ||
+        !validEvidenceSha256(catalog.snapshot_sha256) ||
+        catalog.snapshot_format !== PRICE_GATE_POLICY.catalog_snapshot_format) {
+      add(issues, "catalog-readback.snapshot");
+    }
+    const topLevelProvenanceHashes = [
+      catalog.authentication_evidence_sha256,
+      catalog.connected_account_plan_record_sha256,
+      catalog.snapshot_sha256,
+    ].filter(validEvidenceSha256);
+    if (new Set(topLevelProvenanceHashes).size !== topLevelProvenanceHashes.length) {
+      add(issues, "catalog-readback.provenance-hash-separation");
+    }
+    if (catalog.record_hash_scope !== PRICE_GATE_POLICY.catalog_record_hash_scope) {
+      add(issues, "catalog-readback.record-hash-scope");
+    }
+    if (catalog.snapshot_record_count !== PRICE_GATE_POLICY.expected_variant_count ||
+        catalog.snapshot_record_count !== catalogRecords.length) {
+      add(issues, "catalog-readback.records.exact-count");
+    }
+    if (catalogCapturedAt && ledgerCapturedAt &&
+        Date.parse(catalogCapturedAt) > Date.parse(ledgerCapturedAt)) {
+      add(issues, "catalog-readback.capture-order");
+    }
+
+    exactHandleSet(catalogRecords, expectedHandles, issues, "catalog-readback.records");
+    const sourceRecordHashes = new Set();
+    for (const record of catalogRecords) {
+      if (!exactKeys(record, CATALOG_RECORD_KEYS)) {
+        add(issues, "catalog-readback.record.contract");
+        continue;
+      }
+      if (typeof record.handle !== "string" || !HANDLE_PATTERN.test(record.handle)) {
+        add(issues, "catalog-readback.record.handle");
+      }
+      if (!validEvidenceSha256(record.formula_identity_sha256)) {
+        add(issues, "catalog-readback.record.formula-identity");
+      }
+      if (!validEvidenceSha256(record.source_catalog_record_sha256) ||
+          sourceRecordHashes.has(record.source_catalog_record_sha256) ||
+          topLevelProvenanceHashes.includes(record.source_catalog_record_sha256) ||
+          record.source_catalog_record_sha256 === record.formula_identity_sha256) {
+        add(issues, "catalog-readback.record.source-record");
+      } else {
+        sourceRecordHashes.add(record.source_catalog_record_sha256);
+      }
+      if (!USD_PATTERN.test(record.base_price_usd ?? "") || record.base_price_usd === "0.00") {
+        add(issues, "catalog-readback.record.base-price-format");
+      }
+      if (typeof record.handle === "string" && catalogByHandle.has(record.handle)) {
+        add(issues, "catalog-readback.record.duplicate-handle");
+      } else if (typeof record.handle === "string") {
+        catalogByHandle.set(record.handle, record);
+      }
     }
   }
 
@@ -259,6 +395,34 @@ export function verifyPrivatePriceLedger(ledger, shopifyReadback, options = {}) 
     validateIdentity(variant, ledgerProductIds, ledgerVariantIds, issues, "variant");
     ledgerIdentities.add(identityKey(variant));
     if (variant.exact_mapping_confirmed !== true) add(issues, "variant.mapping");
+    if (!validEvidenceSha256(variant.formula_identity_sha256)) {
+      add(issues, "variant.formula-identity");
+    }
+    if (!validEvidenceSha256(variant.source_catalog_record_sha256)) {
+      add(issues, "variant.source-record");
+    }
+    if (!validEvidenceSha256(variant.catalog_snapshot_sha256)) {
+      add(issues, "variant.catalog-snapshot");
+    }
+
+    const catalogRecord = catalogByHandle.get(variant.handle);
+    if (!catalogRecord) {
+      add(issues, "variant.catalog-record");
+    } else {
+      if (variant.formula_identity_sha256 !== catalogRecord.formula_identity_sha256) {
+        add(issues, "variant.catalog-formula-parity");
+      }
+      if (variant.source_catalog_record_sha256 !== catalogRecord.source_catalog_record_sha256) {
+        add(issues, "variant.catalog-source-record-parity");
+      }
+      if (variant.base_price_usd !== catalogRecord.base_price_usd) {
+        add(issues, "variant.catalog-base-price-parity");
+      }
+    }
+    if (catalogContractValid &&
+        variant.catalog_snapshot_sha256 !== ledger.catalog_readback.snapshot_sha256) {
+      add(issues, "variant.catalog-snapshot-parity");
+    }
 
     let expectedRetail;
     try {
@@ -324,6 +488,7 @@ export function verifyPrivatePriceLedger(ledger, shopifyReadback, options = {}) 
     issues,
     summary: {
       active_variant_count: readbackVariants.filter((variant) => variant?.status === "active").length,
+      catalog_readback_captured_at: catalogCapturedAt,
       ledger_captured_at: ledgerCapturedAt,
       shopify_readback_captured_at: readbackCapturedAt,
     },
@@ -334,9 +499,10 @@ export function redactedPriceVerification(result) {
   const counts = new Map();
   for (const category of result.issues ?? []) counts.set(category, (counts.get(category) ?? 0) + 1);
   return {
-    schema_version: 1,
+    schema_version: 2,
     rule: "exact-2.20x-round-half-up",
     status: result.ok ? "pass" : "fail",
+    catalog_readback_captured_at: result.summary?.catalog_readback_captured_at ?? null,
     ledger_captured_at: result.summary?.ledger_captured_at ?? null,
     shopify_readback_captured_at: result.summary?.shopify_readback_captured_at ?? null,
     active_variant_count: result.summary?.active_variant_count ?? 0,

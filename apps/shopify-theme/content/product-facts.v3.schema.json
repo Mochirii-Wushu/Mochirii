@@ -106,10 +106,11 @@
         "product_fields": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["handle", "title", "description", "seo_title", "seo_description"],
+          "required": ["handle", "title", "vendor", "description", "seo_title", "seo_description"],
           "properties": {
             "handle": { "$ref": "#/$defs/product_field_mapping" },
             "title": { "$ref": "#/$defs/product_field_mapping" },
+            "vendor": { "$ref": "#/$defs/product_field_mapping" },
             "description": { "$ref": "#/$defs/product_field_mapping" },
             "seo_title": { "$ref": "#/$defs/product_field_mapping" },
             "seo_description": { "$ref": "#/$defs/product_field_mapping" }
@@ -122,11 +123,13 @@
             "functional_identity",
             "card_benefit",
             "benefits",
+            "product_type",
             "skin_type",
             "appearance_concerns",
             "routine_step",
             "usage_directions",
             "key_ingredients",
+            "key_ingredient_details",
             "ingredients_inci",
             "warnings",
             "texture",
@@ -142,11 +145,13 @@
             "functional_identity": { "$ref": "#/$defs/metafield_mapping" },
             "card_benefit": { "$ref": "#/$defs/metafield_mapping" },
             "benefits": { "$ref": "#/$defs/metafield_mapping" },
+            "product_type": { "$ref": "#/$defs/metafield_mapping" },
             "skin_type": { "$ref": "#/$defs/metafield_mapping" },
             "appearance_concerns": { "$ref": "#/$defs/metafield_mapping" },
             "routine_step": { "$ref": "#/$defs/metafield_mapping" },
             "usage_directions": { "$ref": "#/$defs/metafield_mapping" },
             "key_ingredients": { "$ref": "#/$defs/metafield_mapping" },
+            "key_ingredient_details": { "$ref": "#/$defs/metafield_mapping" },
             "ingredients_inci": { "$ref": "#/$defs/metafield_mapping" },
             "warnings": { "$ref": "#/$defs/metafield_mapping" },
             "texture": { "$ref": "#/$defs/metafield_mapping" },
@@ -162,8 +167,37 @@
         "native_fields": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["collection_handles", "media"],
+          "required": ["variant_presentation", "collection_handles", "media"],
           "properties": {
+            "variant_presentation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "has_only_default_variant",
+                "title",
+                "selected_options",
+                "readback"
+              ],
+              "properties": {
+                "source": { "const": "$single_default_variant" },
+                "has_only_default_variant": { "const": true },
+                "title": { "const": "Default Title" },
+                "selected_options": {
+                  "const": [{ "name": "Title", "value": "Default Title" }]
+                },
+                "readback": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["has_only_default_variant", "title", "selected_options"],
+                  "properties": {
+                    "has_only_default_variant": { "const": "product.hasOnlyDefaultVariant" },
+                    "title": { "const": "product.variants.nodes[0].title" },
+                    "selected_options": { "const": "product.variants.nodes[0].selectedOptions" }
+                  }
+                }
+              }
+            },
             "collection_handles": { "$ref": "#/$defs/product_field_mapping" },
             "media": {
               "type": "object",
@@ -181,14 +215,44 @@
         }
       }
     },
+    "plain_text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!.*[<>\\u0000-\\u001f\\u007f-\\u009f\\u202a-\\u202e\\u2066-\\u2069\\ufeff]).+$"
+    },
     "review_state": { "enum": ["pending", "approved", "failed"] },
     "product": {
       "type": "object",
       "additionalProperties": false,
       "required": ["handle", "public_title", "review_status", "review", "facts"],
+      "allOf": [
+        {
+          "if": {
+            "properties": { "review_status": { "const": "complete" } },
+            "required": ["review_status"]
+          },
+          "then": {
+            "properties": {
+              "facts": {
+                "type": "object",
+                "properties": {
+                  "media": {
+                    "minItems": 3,
+                    "contains": {
+                      "type": "object",
+                      "properties": { "role": { "const": "outer-box" } },
+                      "required": ["role"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "properties": {
         "handle": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        "public_title": { "type": "string", "minLength": 1 },
+        "public_title": { "$ref": "#/$defs/plain_text" },
         "review_status": { "enum": ["pending", "complete", "blocked"] },
         "review": {
           "type": "object",
@@ -237,11 +301,13 @@
         "seo_description",
         "card_benefit",
         "benefits",
+        "product_type",
         "skin_type",
         "appearance_concerns",
         "routine_step",
         "usage_directions",
         "key_ingredients",
+        "key_ingredient_details",
         "ingredients_inci",
         "warnings",
         "texture",
@@ -256,39 +322,50 @@
         "media"
       ],
       "properties": {
-        "functional_identity": { "type": "string", "minLength": 1 },
-        "description": { "type": "string", "minLength": 1 },
-        "seo_title": { "type": "string", "minLength": 1, "maxLength": 70 },
-        "seo_description": { "type": "string", "minLength": 1, "maxLength": 160 },
-        "card_benefit": { "type": "string", "minLength": 1 },
+        "functional_identity": { "$ref": "#/$defs/plain_text" },
+        "description": { "$ref": "#/$defs/plain_text" },
+        "seo_title": {
+          "allOf": [
+            { "$ref": "#/$defs/plain_text" },
+            { "maxLength": 70 }
+          ]
+        },
+        "seo_description": {
+          "allOf": [
+            { "$ref": "#/$defs/plain_text" },
+            { "maxLength": 160 }
+          ]
+        },
+        "card_benefit": { "$ref": "#/$defs/plain_text" },
         "benefits": {
           "type": "array",
           "minItems": 1,
           "maxItems": 3,
           "uniqueItems": true,
-          "items": { "type": "string", "minLength": 1 }
+          "items": { "$ref": "#/$defs/plain_text" }
         },
+        "product_type": { "$ref": "#/$defs/plain_text" },
         "skin_type": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string", "minLength": 1 }
+          "items": { "$ref": "#/$defs/plain_text" }
         },
         "appearance_concerns": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string", "minLength": 1 }
+          "items": { "$ref": "#/$defs/plain_text" }
         },
-        "routine_step": { "type": "string", "minLength": 1 },
+        "routine_step": { "$ref": "#/$defs/plain_text" },
         "usage_directions": {
           "type": "object",
           "additionalProperties": false,
           "required": ["text", "frequency", "amount", "routine_timing", "rinse_behavior"],
           "properties": {
-            "text": { "type": "string", "minLength": 1 },
-            "frequency": { "type": "string", "minLength": 1 },
-            "amount": { "type": "string", "minLength": 1 },
+            "text": { "$ref": "#/$defs/plain_text" },
+            "frequency": { "$ref": "#/$defs/plain_text" },
+            "amount": { "$ref": "#/$defs/plain_text" },
             "routine_timing": {
               "type": "array",
               "minItems": 1,
@@ -302,36 +379,47 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
+          "items": { "$ref": "#/$defs/plain_text" }
+        },
+        "key_ingredient_details": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
           "items": {
             "type": "object",
             "additionalProperties": false,
             "required": ["name", "cosmetic_role"],
             "properties": {
-              "name": { "type": "string", "minLength": 1 },
-              "cosmetic_role": { "type": "string", "minLength": 1 }
+              "name": { "$ref": "#/$defs/plain_text" },
+              "cosmetic_role": { "$ref": "#/$defs/plain_text" }
             }
           }
         },
-        "ingredients_inci": { "type": "string", "minLength": 1 },
+        "ingredients_inci": { "$ref": "#/$defs/plain_text" },
         "warnings": {
           "type": "object",
           "additionalProperties": false,
           "required": ["review_result", "text", "incompatibilities"],
           "properties": {
             "review_result": { "enum": ["label-matched", "approved-none"] },
-            "text": { "type": ["string", "null"] },
+            "text": {
+              "oneOf": [
+                { "type": "null" },
+                { "$ref": "#/$defs/plain_text" }
+              ]
+            },
             "incompatibilities": {
               "type": "array",
               "uniqueItems": true,
-              "items": { "type": "string", "minLength": 1 }
+              "items": { "$ref": "#/$defs/plain_text" }
             }
           }
         },
-        "texture": { "type": "string", "minLength": 1 },
-        "finish": { "type": "string", "minLength": 1 },
-        "fragrance_status": { "type": "string", "minLength": 1 },
-        "country_of_origin": { "type": "string", "minLength": 1 },
-        "package_details": { "type": "string", "minLength": 1 },
+        "texture": { "$ref": "#/$defs/plain_text" },
+        "finish": { "$ref": "#/$defs/plain_text" },
+        "fragrance_status": { "$ref": "#/$defs/plain_text" },
+        "country_of_origin": { "$ref": "#/$defs/plain_text" },
+        "package_details": { "$ref": "#/$defs/plain_text" },
         "certifications": {
           "type": "object",
           "additionalProperties": false,
@@ -341,7 +429,7 @@
             "items": {
               "type": "array",
               "uniqueItems": true,
-              "items": { "type": "string", "minLength": 1 }
+              "items": { "$ref": "#/$defs/plain_text" }
             }
           }
         },
@@ -350,15 +438,32 @@
           "additionalProperties": false,
           "required": ["us_customary", "metric", "display"],
           "properties": {
-            "us_customary": { "type": "string", "minLength": 1 },
-            "metric": { "type": "string", "minLength": 1 },
-            "display": { "type": "string", "minLength": 1 }
+            "us_customary": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "unit"],
+              "properties": {
+                "value": { "type": "number", "exclusiveMinimum": 0 },
+                "unit": { "enum": ["fl oz", "oz"] }
+              }
+            },
+            "metric": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "unit"],
+              "properties": {
+                "value": { "type": "number", "exclusiveMinimum": 0 },
+                "unit": { "enum": ["mL", "g"] }
+              }
+            },
+            "display": { "$ref": "#/$defs/plain_text" }
           }
         },
         "collection_handles": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
+          "contains": { "const": "mochirii-cosmetics" },
           "items": { "type": "string", "minLength": 1 }
         },
         "complementary_products": {
@@ -370,6 +475,18 @@
         "media": {
           "type": "array",
           "minItems": 2,
+          "prefixItems": [
+            {
+              "allOf": [
+                { "$ref": "#/$defs/facts/properties/media/items" },
+                {
+                  "type": "object",
+                  "required": ["role"],
+                  "properties": { "role": { "const": "front" } }
+                }
+              ]
+            }
+          ],
           "allOf": [
             { "contains": { "type": "object", "properties": { "role": { "const": "front" } }, "required": ["role"] } },
             { "contains": { "type": "object", "properties": { "role": { "const": "technical-panel" } }, "required": ["role"] } }
@@ -377,11 +494,32 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["role", "public_reference", "alt_text", "approved_unit_match"],
+            "required": [
+              "role",
+              "public_reference",
+              "asset_sha256",
+              "alt_text",
+              "brand_mark_expectation",
+              "approved_unit_match"
+            ],
             "properties": {
               "role": { "enum": ["front", "technical-panel", "outer-box", "texture", "scale", "use"] },
-              "public_reference": { "type": "string", "minLength": 1 },
-              "alt_text": { "type": "string", "minLength": 1 },
+              "public_reference": {
+                "type": "string",
+                "pattern": "^/(?!/)(?:[A-Za-z0-9][A-Za-z0-9._~-]*/)*[A-Za-z0-9][A-Za-z0-9._~-]*\\.(?:avif|jpe?g|png|webp)$"
+              },
+              "asset_sha256": { "type": "string", "pattern": "^(?!([a-f0-9])\\1{63}$)[a-f0-9]{64}$" },
+              "alt_text": { "$ref": "#/$defs/plain_text" },
+              "brand_mark_expectation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["emblem", "wordmark", "other_brand_absent"],
+                "properties": {
+                  "emblem": { "const": "required" },
+                  "wordmark": { "const": "required" },
+                  "other_brand_absent": { "const": "required" }
+                }
+              },
               "approved_unit_match": { "const": true }
             }
           }

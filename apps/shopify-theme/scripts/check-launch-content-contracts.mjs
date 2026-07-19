@@ -6,6 +6,7 @@ import {
   summarizeContractIssues,
   validateLaunchPagesContract,
   validateMandatoryNameExceptions,
+  validateStorefrontSearchExpectations,
 } from "./lib/launch-content-contracts.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -16,10 +17,16 @@ const launchPages = readJson("content/launch-pages.v1.json");
 const launchPagesSchema = readJson("content/launch-pages.v1.schema.json");
 const exceptions = readJson("content/mandatory-name-exceptions.v1.json");
 const exceptionsSchema = readJson("content/mandatory-name-exceptions.v1.schema.json");
+const productFacts = readJson("content/product-facts.v3.json");
+const searchExpectations = readJson("content/storefront-search-expectations.v1.json");
+const searchExpectationsSchema = readJson("content/storefront-search-expectations.v1.schema.json");
 
 const issues = [
   ...validateLaunchPagesContract(launchPages, { requireLaunchReady }).issues,
   ...validateMandatoryNameExceptions(exceptions, { requireLaunchReady }).issues,
+  ...validateStorefrontSearchExpectations(searchExpectations, {
+    productFactsRevision: productFacts.revision,
+  }).issues,
 ];
 
 const launchPageSchemaText = JSON.stringify(launchPagesSchema.$defs?.page ?? {});
@@ -37,6 +44,13 @@ if (exceptionsSchema.$schema !== "https://json-schema.org/draft/2020-12/schema" 
     JSON.stringify(schemaExceptionKeys) !== JSON.stringify([...MANDATORY_NAME_EXCEPTION_KEYS].sort())) {
   issues.push({ route: "name-exceptions", category: "schema.structure" });
 }
+if (searchExpectationsSchema.$schema !== "https://json-schema.org/draft/2020-12/schema" ||
+    searchExpectationsSchema.$id !==
+      "https://mochirii.com/contracts/storefront-search-expectations.v1.schema.json" ||
+    searchExpectationsSchema.properties?.queries?.minItems !== 6 ||
+    searchExpectationsSchema.properties?.queries?.maxItems !== 6) {
+  issues.push({ route: "search-expectations", category: "schema.structure" });
+}
 
 if (!readFileSync(path.join(appRoot, ".shopifyignore"), "utf8").split(/\r?\n/u).includes("content/**")) {
   issues.push({ route: "theme-package", category: "content-exclusion.missing" });
@@ -53,5 +67,5 @@ if (issues.length > 0) {
 if (requireLaunchReady) {
   console.log("Customer-facing launch gate OK (three pages applied and read back; mandatory-name review complete). ");
 } else {
-  console.log("Launch-content contract integrity OK (three pages prepared; provider authority absent; mandatory-name review pending). ");
+  console.log("Launch-content contract integrity OK (three pages and six reviewed search expectations prepared; provider authority absent; mandatory-name review pending). ");
 }

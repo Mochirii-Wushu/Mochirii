@@ -8,23 +8,6 @@
     "theme_support_url": "https://mochirii.com"
   },
   {
-    "name": "Brand",
-    "settings": [
-      {
-        "type": "text",
-        "id": "brand_display_name",
-        "label": "Public brand name",
-        "default": "Mochirii Cosmetics"
-      },
-      {
-        "type": "text",
-        "id": "corporate_display_name",
-        "label": "Corporate/legal name",
-        "default": "Mochirii Cosmetics"
-      }
-    ]
-  },
-  {
     "name": "Search and social",
     "settings": [
       {
@@ -88,7 +71,7 @@
         "type": "textarea",
         "id": "footer_summary",
         "label": "Footer summary",
-        "default": "Skincare for cleansing, hydrating, brightening, and nourishing routines."
+        "default": "Cleansers, hydrating products, brightening products, and moisturizers for daily skincare routines."
       }
     ]
   },

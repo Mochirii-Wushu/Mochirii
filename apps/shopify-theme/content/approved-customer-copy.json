@@ -34,7 +34,7 @@
       }
     ],
     "policyBand": "Shipping and return details are available before checkout.",
-    "footerSummary": "Skincare for cleansing, hydrating, brightening, and nourishing routines.",
+    "footerSummary": "Cleansers, hydrating products, brightening products, and moisturizers for daily skincare routines.",
     "footerSupport": "Questions about a product or order? Contact Mochirii Cosmetics.",
     "states": {
       "emptyCart": "Your cart is empty.",
@@ -66,13 +66,13 @@
   "collectionsIndex": {
     "eyebrow": "Skincare routines",
     "heading": "Choose your next step",
-    "intro": "Browse skincare for cleansing, hydration, brightening, smoothing, and nourishment."
+    "intro": "Browse skincare for cleansing, hydration, brightening, smoothing, and moisture support."
   },
   "pages": [
     {
       "handle": "about",
       "title": "About",
-      "bodyHtml": "<p>Mochirii Cosmetics organizes skincare by routine step: cleansing, hydration, brightening, and nourishment. Compare products by skin suitability, ingredients, texture, and use to find what fits your routine.</p><p>Each product page brings together key ingredients, directions, the full INCI list, warnings, origin, and certifications.</p>",
+      "bodyHtml": "<p>Mochirii Cosmetics organizes skincare by routine step: cleansing, hydration, brightening, and moisture support. Compare products by skin suitability, ingredients, texture, and use to find what fits your routine.</p><p>Each product page brings together key ingredients, directions, the full INCI list, warnings, origin, and certifications.</p>",
       "seoTitle": "About Mochirii Cosmetics | Skincare by Routine",
       "seoDescription": "Learn how Mochirii Cosmetics organizes skincare formulas by routine step, skin type, ingredients, texture, and use."
     },
@@ -88,9 +88,9 @@
     {
       "handle": "mochirii-cosmetics",
       "title": "Mochirii Cosmetics",
-      "description": "Shop all 20 Mochirii Cosmetics formulas for cleansing, hydration, brightening, and nourishing care.",
+      "description": "Shop all 20 Mochirii Cosmetics formulas for cleansing, hydration, brightening, and moisture support.",
       "seoTitle": "Shop Skincare | Mochirii Cosmetics",
-      "seoDescription": "Shop all 20 Mochirii Cosmetics skincare formulas for cleansing, hydration, brightening, and nourishing care."
+      "seoDescription": "Shop all 20 Mochirii Cosmetics skincare formulas for cleansing, hydration, brightening, and moisture support."
     },
     {
       "handle": "cleanse-tone",

@@ -6,13 +6,13 @@
 {% assign volume_display = volume_facts.display | strip %}
 
 <article class="product-card" role="listitem">
-  <a class="product-card__image" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
+  <a class="product-card__image" href="{{ product.url | escape }}" aria-label="{{ product.title | escape }}">
     {% if product.featured_image %}
       {% assign product_card_alt = product.featured_image.alt | strip %}
       {{ product.featured_image | image_url: width: 760 | image_tag: loading: card_loading, fetchpriority: card_fetchpriority, alt: product_card_alt, sizes: '(min-width: 1080px) 25vw, (min-width: 720px) 50vw, 100vw' }}
     {% else %}
       <span class="media-placeholder">
-        <span>{{ product.title }}</span>
+        <span>{{ product.title | escape }}</span>
         <small>Product image unavailable.</small>
       </span>
     {% endif %}
@@ -25,14 +25,14 @@
   </a>
 
   <div class="product-card__body">
-    {% if line_label != blank %}<p class="product-card__line">{{ line_label }}</p>{% endif %}
+    {% if line_label != blank %}<p class="product-card__line">{{ line_label | escape }}</p>{% endif %}
     <h2 class="product-card__title">
-      <a href="{{ product.url }}">{{ product.title }}</a>
+      <a href="{{ product.url | escape }}">{{ product.title | escape }}</a>
     </h2>
     {% if card_benefit != blank %}
-      <p class="product-card__benefit">{{ card_benefit | truncate: 118 }}</p>
+      <p class="product-card__benefit">{{ card_benefit | truncate: 118 | escape }}</p>
     {% endif %}
-    {% if volume_display != blank %}<p class="product-card__size">{{ volume_display }}</p>{% endif %}
+    {% if volume_display != blank %}<p class="product-card__size">{{ volume_display | escape }}</p>{% endif %}
     <div class="product-card__meta">
       <div class="product-card__price-status">
         <p class="price">
@@ -44,7 +44,7 @@
         </p>
         <p class="product-card__availability">{% if product.available %}In stock{% else %}Out of stock{% endif %}</p>
       </div>
-      <a class="text-link product-card__cta" href="{{ product.url }}">View product</a>
+      <a class="text-link product-card__cta" href="{{ product.url | escape }}">View product</a>
     </div>
   </div>
 </article>

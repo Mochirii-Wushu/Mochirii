@@ -1,7 +1,7 @@
 {
   "$schema": "./product-facts.v3.schema.json",
   "schema_version": 3,
-  "revision": "2026-07-19-v3-scaffold",
+  "revision": "2026-07-19-v3-discovery-contract",
   "locale": "en-US",
   "brand": "Mochirii Cosmetics",
   "market": {
@@ -32,6 +32,11 @@
         "source": "public_title",
         "write_target": "product.title",
         "readback": "product.title"
+      },
+      "vendor": {
+        "source": "$brand",
+        "write_target": "product.vendor",
+        "readback": "product.vendor"
       },
       "description": {
         "source": "facts.description",
@@ -71,6 +76,13 @@
         "type": "list.single_line_text_field",
         "readback": "product.metafields.custom.benefits"
       },
+      "product_type": {
+        "source": "facts.product_type",
+        "namespace": "custom",
+        "key": "product_type",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.product_type"
+      },
       "skin_type": {
         "source": "facts.skin_type",
         "namespace": "custom",
@@ -103,8 +115,15 @@
         "source": "facts.key_ingredients",
         "namespace": "custom",
         "key": "key_ingredients",
-        "type": "json",
+        "type": "list.single_line_text_field",
         "readback": "product.metafields.custom.key_ingredients"
+      },
+      "key_ingredient_details": {
+        "source": "facts.key_ingredient_details",
+        "namespace": "custom",
+        "key": "key_ingredient_details",
+        "type": "json",
+        "readback": "product.metafields.custom.key_ingredient_details"
       },
       "ingredients_inci": {
         "source": "facts.ingredients_inci",
@@ -178,6 +197,22 @@
       }
     },
     "native_fields": {
+      "variant_presentation": {
+        "source": "$single_default_variant",
+        "has_only_default_variant": true,
+        "title": "Default Title",
+        "selected_options": [
+          {
+            "name": "Title",
+            "value": "Default Title"
+          }
+        ],
+        "readback": {
+          "has_only_default_variant": "product.hasOnlyDefaultVariant",
+          "title": "product.variants.nodes[0].title",
+          "selected_options": "product.variants.nodes[0].selectedOptions"
+        }
+      },
       "collection_handles": {
         "source": "facts.collection_handles",
         "write_target": "product.collections[].handle",

@@ -27,13 +27,13 @@
     {% endif %}
   </div>
   <div class="section-inner hero--storefront__content">
-    <p class="eyebrow">{{ section.settings.hero_eyebrow }}</p>
-    <h1>{{ section.settings.hero_heading }}</h1>
-    <p class="lede">{{ section.settings.hero_text }}</p>
+    <p class="eyebrow">{{ section.settings.hero_eyebrow | escape }}</p>
+    <h1>{{ section.settings.hero_heading | escape }}</h1>
+    <p class="lede">{{ section.settings.hero_text | escape }}</p>
     <div class="button-row">
       {% assign primary_link = section.settings.primary_cta_link | default: catalog_url %}
-      <a class="button" href="{{ primary_link }}">{{ section.settings.primary_cta_label }}</a>
-      <a class="button button--secondary" href="{{ routes.collections_url }}">Browse collections</a>
+      <a class="button" href="{{ primary_link | escape }}">{{ section.settings.primary_cta_label | escape }}</a>
+      <a class="button button--secondary" href="{{ routes.collections_url | escape }}">Browse collections</a>
     </div>
   </div>
 </section>
@@ -45,25 +45,25 @@
         <p class="eyebrow">Find your products</p>
         <h2 id="ProductDiscoveryHeading-{{ section.id }}">Shop by product, skin need, or routine step</h2>
       </div>
-      <a class="text-link" href="{{ catalog_url }}">Shop all skincare</a>
+      <a class="text-link" href="{{ catalog_url | escape }}">Shop all skincare</a>
     </div>
     <ul class="discovery-grid" role="list">
       <li>
-        <a class="discovery-card" href="{{ product_type_url }}">
+        <a class="discovery-card" href="{{ product_type_url | escape }}">
           <span>Product type</span>
           <strong>Compare skincare formats</strong>
           <small>Use product filters to compare cleansers, serums, moisturizers, facial oils, eye care, and exfoliating products.</small>
         </a>
       </li>
       <li>
-        <a class="discovery-card" href="{{ skin_needs_url }}">
+        <a class="discovery-card" href="{{ skin_needs_url | escape }}">
           <span>Skin needs</span>
           <strong>Filter by skin type and appearance concern</strong>
           <small>Narrow the catalog by skin suitability and appearance concern.</small>
         </a>
       </li>
       <li>
-        <a class="discovery-card" href="{{ routine_url }}">
+        <a class="discovery-card" href="{{ routine_url | escape }}">
           <span>Routine</span>
           <strong>Choose products by routine step</strong>
           <small>Browse cleansing products, hydrating serums, moisturizers, and facial oils by routine step.</small>
@@ -78,9 +78,9 @@
     <div class="section-head section-head--split">
       <div>
         <p class="eyebrow">Featured skincare</p>
-        <h2>{{ section.settings.featured_heading }}</h2>
+        <h2>{{ section.settings.featured_heading | escape }}</h2>
       </div>
-      <a class="text-link" href="{{ catalog_url }}">Shop all</a>
+      <a class="text-link" href="{{ catalog_url | escape }}">Shop all</a>
     </div>
 
     {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
@@ -91,8 +91,8 @@
       </div>
     {% else %}
       <div class="empty-state empty-state--wide">
-        <h2>{{ settings.empty_catalog_heading }}</h2>
-        <p>{{ settings.empty_catalog_body }}</p>
+        <h2>{{ settings.empty_catalog_heading | escape }}</h2>
+        <p>{{ settings.empty_catalog_body | escape }}</p>
       </div>
     {% endif %}
   </div>
@@ -102,7 +102,7 @@
   <div class="section-inner">
     <div class="section-head">
       <p class="eyebrow">Shop by routine</p>
-      <h2>{{ section.settings.collections_heading }}</h2>
+      <h2>{{ section.settings.collections_heading | escape }}</h2>
     </div>
 
     <div class="collection-grid collection-grid--four">
@@ -118,20 +118,20 @@
         {% assign routine_image = routine_collection.image %}
 
         <article class="collection-card">
-          <a class="collection-card__image" href="{{ routine_url }}" aria-label="{{ routine_title | escape }}">
+          <a class="collection-card__image" href="{{ routine_url | escape }}" aria-label="{{ routine_title | escape }}">
             {% if routine_image != blank %}
               {% assign routine_alt = routine_image.alt | strip %}
               {{ routine_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: routine_alt, sizes: '(min-width: 1080px) 25vw, (min-width: 720px) 50vw, 100vw' }}
             {% else %}
               <span class="media-placeholder">
-                <span>{{ routine_title }}</span>
+                <span>{{ routine_title | escape }}</span>
                 <small>Product image unavailable.</small>
               </span>
             {% endif %}
           </a>
           <div class="collection-card__body">
             <p class="product-card__line">Routine step</p>
-            <h3><a href="{{ routine_url }}">{{ routine_title }}</a></h3>
+            <h3><a href="{{ routine_url | escape }}">{{ routine_title | escape }}</a></h3>
             {% if routine_collection != blank and routine_collection.description != blank %}
               <div class="rte">{{ routine_collection.description }}</div>
             {% endif %}
@@ -149,24 +149,24 @@
   <div class="section-inner proof-grid">
     <div class="proof-copy">
       <p class="eyebrow">Product details</p>
-      <h2>{{ section.settings.standards_heading }}</h2>
-      <p class="section-intro">{{ section.settings.standards_intro }}</p>
+      <h2>{{ section.settings.standards_heading | escape }}</h2>
+      <p class="section-intro">{{ section.settings.standards_intro | escape }}</p>
     </div>
     <div class="proof-list" role="list" aria-label="Mochirii Cosmetics product details">
       <div role="listitem">
         <span>01</span>
-        <h3>{{ section.settings.standard_one_heading }}</h3>
-        <p>{{ section.settings.standard_one_text }}</p>
+        <h3>{{ section.settings.standard_one_heading | escape }}</h3>
+        <p>{{ section.settings.standard_one_text | escape }}</p>
       </div>
       <div role="listitem">
         <span>02</span>
-        <h3>{{ section.settings.standard_two_heading }}</h3>
-        <p>{{ section.settings.standard_two_text }}</p>
+        <h3>{{ section.settings.standard_two_heading | escape }}</h3>
+        <p>{{ section.settings.standard_two_text | escape }}</p>
       </div>
       <div role="listitem">
         <span>03</span>
-        <h3>{{ section.settings.standard_three_heading }}</h3>
-        <p>{{ section.settings.standard_three_text }}</p>
+        <h3>{{ section.settings.standard_three_heading | escape }}</h3>
+        <p>{{ section.settings.standard_three_text | escape }}</p>
       </div>
     </div>
   </div>
@@ -177,28 +177,28 @@
     <div class="section-head">
       <p class="eyebrow">Before you order</p>
       <h2 id="StoreReassuranceHeading-{{ section.id }}">Shipping, returns, and product support</h2>
-      <p class="section-intro">{{ section.settings.policy_note }}</p>
+      <p class="section-intro">{{ section.settings.policy_note | escape }}</p>
     </div>
     <div class="reassurance-grid">
       {% if shop.shipping_policy != blank %}
         <article>
           <h3>Shipping</h3>
           <p>Review available destinations, costs, processing, and delivery estimates.</p>
-          <a class="text-link" href="{{ shop.shipping_policy.url }}">Read shipping details</a>
+          <a class="text-link" href="{{ shop.shipping_policy.url | escape }}">Read shipping details</a>
         </article>
       {% endif %}
       {% if shop.refund_policy != blank %}
         <article>
           <h3>Returns</h3>
           <p>Check return eligibility, time limits, and instructions before ordering.</p>
-          <a class="text-link" href="{{ shop.refund_policy.url }}">Read return details</a>
+          <a class="text-link" href="{{ shop.refund_policy.url | escape }}">Read return details</a>
         </article>
       {% endif %}
       {% if contact_page != blank %}
         <article>
           <h3>Product support</h3>
           <p>Ask Mochirii Cosmetics about product information or an existing order.</p>
-          <a class="text-link" href="{{ contact_page.url }}">Contact Mochirii Cosmetics</a>
+          <a class="text-link" href="{{ contact_page.url | escape }}">Contact Mochirii Cosmetics</a>
         </article>
       {% endif %}
     </div>

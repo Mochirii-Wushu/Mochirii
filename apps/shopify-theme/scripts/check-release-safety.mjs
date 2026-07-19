@@ -35,6 +35,11 @@ for (const removedSetting of ["product_publication_approved", "show_internal_pro
     failures.push(`config/settings_data.json: obsolete or unsafe setting is forbidden: ${removedSetting}`);
   }
 }
+for (const immutableWordmarkSetting of ["brand_display_name", "corporate_display_name"]) {
+  if (Object.hasOwn(settings.current ?? {}, immutableWordmarkSetting)) {
+    failures.push(`config/settings_data.json: immutable Mochirii Cosmetics wordmark cannot be a setting: ${immutableWordmarkSetting}`);
+  }
+}
 
 const schema = readThemeJson("config/settings_schema.json");
 const schemaSettings = schema.flatMap((group) => group.settings ?? []);
@@ -45,6 +50,11 @@ if (!checkoutControl || checkoutControl.type !== "checkbox" || checkoutControl.d
 for (const removedSetting of ["product_publication_approved", "show_internal_product_meta"]) {
   if (schemaSettings.some((setting) => setting.id === removedSetting)) {
     failures.push(`config/settings_schema.json: obsolete or unsafe setting is forbidden: ${removedSetting}`);
+  }
+}
+for (const immutableWordmarkSetting of ["brand_display_name", "corporate_display_name"]) {
+  if (schemaSettings.some((setting) => setting.id === immutableWordmarkSetting)) {
+    failures.push(`config/settings_schema.json: immutable Mochirii Cosmetics wordmark cannot be editable: ${immutableWordmarkSetting}`);
   }
 }
 
@@ -62,6 +72,7 @@ const forbiddenRuntimePatterns = [
   ["internal weight output", /weight_with_unit|selected_variant[.]weight/iu],
   ["vendor identity output", /product[.]vendor/iu],
   ["HS code output", /hs[_ -]?code/iu],
+  ["editable storefront wordmark", /settings[.](?:brand_display_name|corporate_display_name)/u],
 ];
 
 for (const { relativePath, source } of liquidFiles) {
@@ -88,6 +99,11 @@ for (const token of [
   "mobile-menu__summary",
   "mobile-menu__panel",
   "primary-navigation-links",
+  "settings.storefront_mode_text | escape",
+  'aria-label="Mochirii Cosmetics skincare storefront home"',
+  '<span class="brand-text">Mochirii Cosmetics</span>',
+  "{% assign about_url = about_page.url %}",
+  "{% assign help_url = faq_page.url %}",
 ]) {
   requireText("sections/header.liquid", header, token);
 }
@@ -100,6 +116,9 @@ for (const token of [
   ".site-nav__toggle",
   ".mobile-menu__summary",
   ".mobile-menu__panel",
+  "max-height: calc(100dvh - 6rem);",
+  "overflow-y: auto;",
+  "overscroll-behavior: contain;",
   '.field [aria-invalid="true"]',
   "@media (max-width: 960px)",
 ]) {
@@ -121,7 +140,7 @@ for (const token of [
   "product.metafields.custom.appearance_concerns.value",
   "product.metafields.custom.routine_step",
   "product.metafields.custom.usage_directions",
-  "product.metafields.custom.key_ingredients.value",
+  "product.metafields.custom.key_ingredient_details.value",
   "product.metafields.custom.ingredients_inci",
   "product.metafields.custom.warnings",
   "product.metafields.custom.texture",
@@ -164,6 +183,13 @@ for (const token of [
   'field.setAttribute("aria-describedby", error.id)',
   'form.querySelector("[data-contact-error-summary]")',
   'document.querySelectorAll("[data-navigation-toggle]")',
+  'submenu.querySelectorAll("[data-navigation-toggle]")',
+  'mobileMenu.addEventListener("toggle"',
+  'mobileMenu.open = false',
+  "const samePageHashTarget = (link) =>",
+  'document.addEventListener("click", (event) =>',
+  'target.setAttribute("tabindex", "-1")',
+  "target.focus()",
 ]) {
   requireText("assets/mochirii-theme.js", themeScript, token);
 }
@@ -181,11 +207,21 @@ for (const token of [
 const primaryNavigation = read("snippets/primary-navigation-links.liquid");
 for (const token of [
   'class="site-nav__list"',
-  "link.links.size > 0",
-  "child_link.links.size > 0",
+  "required_navigation_labels = 'Shop|Product type|Skin needs|Routine|About|Help'",
+  "matching_menu_link",
+  "{% if required_url != blank %}",
+  "child_url_prefix == '/'",
+  "child_url_protocol_relative != '//'",
+  "child_url_encoded contains '%5C'",
+  "grandchild_url_prefix == '/'",
+  "grandchild_url_protocol_relative != '//'",
+  "grandchild_url_encoded contains '%5C'",
   "grandchild_link",
   "data-navigation-toggle",
   'aria-expanded="false"',
+  "{{ required_label | escape }}",
+  "{{ child_link.title | escape }}",
+  "{{ grandchild_link.title | escape }}",
 ]) {
   requireText("snippets/primary-navigation-links.liquid", primaryNavigation, token);
 }
@@ -200,11 +236,67 @@ for (const token of [
 if (themeStyles.includes(".site-nav__item:hover > .site-nav__sublist")) {
   failures.push("assets/mochirii-theme.css: disclosure state must exclusively control desktop nested navigation");
 }
+if (/(?:^|\n)\.mobile-menu__panel\s+\.site-nav__toggle\s*\{[^}]*display:\s*none/iu.test(themeStyles)) {
+  failures.push("assets/mochirii-theme.css: mobile navigation disclosure controls must remain visible when JavaScript is available");
+}
+for (const token of [
+  ".mobile-menu__panel .site-nav__toggle {\n  display: inline-flex;",
+  "html:not(.theme-js-ready) .mobile-menu__panel .site-nav__sublist",
+]) {
+  requireText("assets/mochirii-theme.css", themeStyles, token);
+}
 
 const footer = read("sections/footer.liquid");
 requireText("sections/footer.liquid", footer, "{% if link.url != blank %}");
+for (const token of [
+  '>Contact</a>',
+  '>FAQ</a>',
+  '>Shipping</a>',
+  '>Returns</a>',
+  '>About</a>',
+  '>Ingredients &amp; Standards</a>',
+  '>Accessibility</a>',
+  '>Privacy</a>',
+  '>Terms</a>',
+  '>Privacy Choices</a>',
+  "privacy_choices_url",
+  "privacy_url_encoded contains '%5C'",
+  "privacy_url_downcase contains '%5c'",
+  "section.settings.summary_text | default: settings.footer_summary | escape",
+  "Mochirii Cosmetics. All rights reserved.",
+  "contact_page.url | escape }}\">Contact Mochirii Cosmetics.",
+  "{% if contact_page != blank %}<a href=\"{{ contact_page.url | escape }}\">Contact</a>{% endif %}",
+  "{% if shop.shipping_policy != blank %}<a href=\"{{ shop.shipping_policy.url | escape }}\">Shipping</a>{% endif %}",
+]) {
+  requireText("sections/footer.liquid", footer, token);
+}
 if (footer.includes("/pages/data-sharing-opt-out")) {
   failures.push("sections/footer.liquid: privacy choices must come from a configured provider menu link");
+}
+if (/default:\s*["']\/(?:pages|policies)\//u.test(footer)) {
+  failures.push("sections/footer.liquid: missing provider pages or policies must be omitted, not linked to synthetic routes");
+}
+
+for (const token of [
+  "usage_text | escape | newline_to_br",
+  "warning_text | escape | newline_to_br",
+  "package_details | escape | newline_to_br",
+  "ingredient_name | escape",
+  "ingredient_role | escape",
+  "ingredients_inci | escape",
+  "certification_items | join: ', ' | escape",
+]) {
+  requireText("sections/main-product.liquid", product, token);
+}
+
+const productCard = read("snippets/product-card.liquid");
+for (const token of [
+  "line_label | escape",
+  "product.title | escape",
+  "card_benefit | truncate: 118 | escape",
+  "volume_display | escape",
+]) {
+  requireText("snippets/product-card.liquid", productCard, token);
 }
 
 const structuredData = read("snippets/structured-data.liquid");
@@ -220,7 +312,7 @@ for (const token of [
   "structured_usage.amount",
   "structured_usage.routine_timing",
   "structured_usage.rinse_behavior",
-  "product.metafields.custom.key_ingredients.value",
+  "product.metafields.custom.key_ingredient_details.value",
   "ingredient.name",
   "ingredient.cosmetic_role",
   "structured_warnings.review_result == 'label-matched'",
@@ -259,8 +351,19 @@ for (const [label, pattern] of [
 const collection = read("sections/main-collection.liquid");
 for (const token of [
   '<form id="shop-filters"',
-  "'availability', 'price', 'product-type', 'skin-needs', 'skin-type', 'appearance-concerns', 'routine-step', 'key-ingredients'",
+  "'filter.v.availability|boolean', 'filter.v.price|price_range', 'filter.p.m.custom.product_type|list', 'filter.p.m.custom.skin_type|list', 'filter.p.m.custom.appearance_concerns|list', 'filter.p.m.custom.routine_step|list', 'filter.p.m.custom.key_ingredients|list'",
   'step="0.01"',
+  'action="{{ collection.url | escape }}"',
+  'name="{{ filter.param_name | escape }}"',
+  'value="{{ filter.true_value.value | escape }}"',
+  'value="{{ filter.false_value.value | escape }}"',
+  'name="{{ value.param_name | escape }}"',
+  'value="{{ value.value | escape }}"',
+  "collection.title | escape",
+  "settings.empty_catalog_heading | escape",
+  "settings.empty_catalog_body | escape",
+  "catalog_url | escape",
+  "money_without_currency | replace: ',', '' | escape",
 ]) {
   requireText("sections/main-collection.liquid", collection, token);
 }
@@ -275,6 +378,7 @@ const giftCard = read("templates/gift_card.liquid");
 if (/(?:apple_wallet|add_to_wallet|wallet_pass)/iu.test(giftCard)) {
   failures.push("templates/gift_card.liquid: wallet-provider surfaces must remain absent");
 }
+requireText("templates/gift_card.liquid", giftCard, "assign storefront_name = 'Mochirii Cosmetics'");
 
 for (const relativePath of ["sections/main-index.liquid", "sections/main-collection.liquid"]) {
   const source = read(relativePath);
@@ -342,6 +446,7 @@ for (const [relativePath, source] of [
 
 const seoMeta = read("snippets/seo-meta.liquid");
 for (const token of [
+  "assign storefront_name = 'Mochirii Cosmetics'",
   "settings.default_meta_description",
   "seo_title | replace: '&amp;', '&'",
   "seo_title | escape",
@@ -369,6 +474,7 @@ if (!/if request[.]page_type == 'product'[\s\S]*?assign seo_description = produc
 
 const themeLayout = read("layout/theme.liquid");
 for (const token of [
+  "assign storefront_name = 'Mochirii Cosmetics'",
   "request.page_type == 'product'",
   "product.metafields.custom.card_benefit.value",
   "request.page_type == 'page'",
@@ -377,6 +483,46 @@ for (const token of [
   "public_page_title | remove_first: page.title",
 ]) {
   requireText("layout/theme.liquid", themeLayout, token);
+}
+
+const passwordLayout = read("layout/password.liquid");
+for (const token of [
+  'lang="{{ request.locale.iso_code | escape }}"',
+  "<title>Mochirii Cosmetics</title>",
+  "settings.background_color | default: '#fffaf0' | escape",
+  "settings.text_color | default: '#061610' | escape",
+  "settings.accent_color | default: '#1f745f' | escape",
+]) {
+  requireText("layout/password.liquid", passwordLayout, token);
+}
+
+const passwordSection = read("sections/main-password.liquid");
+for (const token of [
+  'aria-label="Mochirii Cosmetics storefront home"',
+  '<span class="brand-text">Mochirii Cosmetics</span>',
+  "section.settings.eyebrow | escape",
+  "section.settings.heading | escape",
+  "section.settings.intro | escape",
+  "section.id | escape",
+  "The password did not match. Try again.",
+]) {
+  requireText("sections/main-password.liquid", passwordSection, token);
+}
+if (/form[.]errors\s*[|]\s*default_errors/u.test(passwordSection)) {
+  failures.push("sections/main-password.liquid: password errors must use controlled Mochirii copy");
+}
+
+const productFactsContract = read("scripts/lib/product-facts-contract.mjs");
+for (const token of [
+  "normalizeLanguageForPolicy",
+  "prohibitedMoodPattern",
+  "metricConversionIsWithinLabelTolerance",
+  "publicMediaReferencePattern",
+  "media.duplicate-role",
+  "media.duplicate-reference",
+  "media.missing-outer-box",
+]) {
+  requireText("scripts/lib/product-facts-contract.mjs", productFactsContract, token);
 }
 if (!/if request[.]page_type == 'product'[\s\S]*?assign public_page_description = product[.]metafields[.]custom[.]card_benefit[.]value [|] strip[\s\S]*?else[\s\S]*?assign public_page_description = page_description [|] default: settings[.]default_meta_description/u.test(themeLayout)) {
   failures.push("layout/theme.liquid: product meta description must use controlled card_benefit without a page_description fallback");
