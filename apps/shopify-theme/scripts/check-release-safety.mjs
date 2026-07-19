@@ -95,8 +95,12 @@ for (const token of [
 const themeStyles = read("assets/mochirii-theme.css");
 for (const token of [
   ".site-nav--desktop",
+  ".site-nav__sublist",
+  ".site-nav__item--expanded > .site-nav__sublist",
+  ".site-nav__toggle",
   ".mobile-menu__summary",
   ".mobile-menu__panel",
+  '.field [aria-invalid="true"]',
   "@media (max-width: 960px)",
 ]) {
   requireText("assets/mochirii-theme.css", themeStyles, token);
@@ -106,6 +110,7 @@ const product = read("sections/main-product.liquid");
 for (const token of [
   "Warning information is not available on this page. Review the product label before use.",
   "{% form 'product', product, class: 'product-form product-purchase' %}",
+  'data-product-variant-status aria-live="polite" aria-atomic="true"',
   "Complete your routine",
 ]) {
   requireText("sections/main-product.liquid", product, token);
@@ -113,6 +118,70 @@ for (const token of [
 if (product.includes("No additional product-specific warnings are listed")) {
   failures.push("sections/main-product.liquid: empty warnings must fail closed");
 }
+
+const themeScript = read("assets/mochirii-theme.js");
+for (const token of [
+  "variantStatus.textContent",
+  'field.setAttribute("aria-invalid", "true")',
+  'field.setAttribute("aria-describedby", error.id)',
+  'form.querySelector("[data-contact-error-summary]")',
+  'document.querySelectorAll("[data-navigation-toggle]")',
+]) {
+  requireText("assets/mochirii-theme.js", themeScript, token);
+}
+
+const contactPage = read("sections/main-page.liquid");
+for (const token of [
+  "data-contact-error-summary",
+  "data-contact-field",
+  'aria-invalid="true" aria-describedby=',
+  "data-contact-field-error",
+]) {
+  requireText("sections/main-page.liquid", contactPage, token);
+}
+
+const primaryNavigation = read("snippets/primary-navigation-links.liquid");
+for (const token of [
+  'class="site-nav__list"',
+  "link.links.size > 0",
+  "child_link.links.size > 0",
+  "grandchild_link",
+  "data-navigation-toggle",
+  'aria-expanded="false"',
+]) {
+  requireText("snippets/primary-navigation-links.liquid", primaryNavigation, token);
+}
+
+for (const token of [
+  "navigation_id: 'desktop-primary'",
+  "navigation_id: 'mobile-primary'",
+]) {
+  requireText("sections/header.liquid", header, token);
+}
+
+if (themeStyles.includes(".site-nav__item:hover > .site-nav__sublist")) {
+  failures.push("assets/mochirii-theme.css: disclosure state must exclusively control desktop nested navigation");
+}
+
+const footer = read("sections/footer.liquid");
+requireText("sections/footer.liquid", footer, "{% if link.url != blank %}");
+if (footer.includes("/pages/data-sharing-opt-out")) {
+  failures.push("sections/footer.liquid: privacy choices must come from a configured provider menu link");
+}
+
+for (const relativePath of ["sections/main-index.liquid", "sections/main-collection.liquid"]) {
+  const source = read(relativePath);
+  if (/render 'product-card'[^\n]*(?:image_loading|image_fetchpriority)/u.test(source)) {
+    failures.push(`${relativePath}: below-fold product cards must not be forced eager or high-priority`);
+  }
+}
+
+const search = read("sections/main-search.liquid");
+requireText(
+  "sections/main-search.liquid",
+  search,
+  "Try another product name or ingredient, or browse all skincare.",
+);
 
 const filterMetafieldTool = read("scripts/lib/shopify-filter-metafield-csv.mjs");
 for (const token of [

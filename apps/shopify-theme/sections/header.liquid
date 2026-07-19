@@ -32,7 +32,7 @@
     </a>
 
     <nav class="site-nav site-nav--desktop" aria-label="Primary navigation">
-      {% render 'primary-navigation-links', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
+      {% render 'primary-navigation-links', navigation_id: 'desktop-primary', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
     </nav>
 
     <details class="mobile-menu">
@@ -41,7 +41,7 @@
         <span class="mobile-menu__icon" aria-hidden="true">&#9776;</span>
       </summary>
       <nav class="mobile-menu__panel" aria-label="Mobile primary navigation">
-        {% render 'primary-navigation-links', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
+        {% render 'primary-navigation-links', navigation_id: 'mobile-primary', primary_menu: primary_menu, catalog_url: catalog_url, about_url: about_url, contact_url: contact_url %}
       </nav>
     </details>
   </div>

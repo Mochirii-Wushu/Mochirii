@@ -98,6 +98,7 @@
       <p class="eyebrow">Mochirii Cosmetics</p>
       <h1>{{ product.title }}</h1>
       <p class="price price--large" data-product-price>{{ selected_variant.price | money }}</p>
+      <p class="visually-hidden" data-product-variant-status aria-live="polite" aria-atomic="true"></p>
     </div>
 
     {% if volume != blank or skin_type != blank or key_ingredients != blank %}

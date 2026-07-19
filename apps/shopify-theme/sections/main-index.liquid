@@ -50,11 +50,7 @@
     {% if catalog_collection != blank and catalog_collection.products_count > 0 %}
       <div class="product-grid product-grid--featured" role="list" aria-label="Featured Mochirii Cosmetics products">
         {% for product in catalog_collection.products limit: 6 %}
-          {% if forloop.index <= 2 %}
-            {% render 'product-card', product: product, image_loading: 'eager', image_fetchpriority: 'high' %}
-          {% else %}
-            {% render 'product-card', product: product %}
-          {% endif %}
+          {% render 'product-card', product: product %}
         {% endfor %}
       </div>
     {% else %}

@@ -18,18 +18,63 @@
     <div class="section-inner section-inner-narrow contact-panel">
       {% form 'contact', class: 'contact-form' %}
         {% if form.posted_successfully? %}<p class="form-message" role="status">Thank you. Your message has been sent.</p>{% endif %}
-        {% if form.errors %}<div class="form-message" role="alert">{{ form.errors | default_errors }}</div>{% endif %}
+        {% if form.errors %}
+          <div class="form-message" role="alert" tabindex="-1" data-contact-error-summary>
+            <p><strong>Please correct the highlighted fields.</strong></p>
+            {{ form.errors | default_errors }}
+          </div>
+        {% endif %}
         <div class="field">
           <label for="ContactFormName-{{ section.id }}">Name</label>
-          <input id="ContactFormName-{{ section.id }}" type="text" name="contact[name]" autocomplete="name" value="{{ form.name | escape }}">
+          <input
+            id="ContactFormName-{{ section.id }}"
+            type="text"
+            name="contact[name]"
+            autocomplete="name"
+            value="{{ form.name | escape }}"
+            data-contact-field
+            data-error-id="ContactFormNameError-{{ section.id }}"
+            {% if form.errors contains 'name' %}aria-invalid="true" aria-describedby="ContactFormNameError-{{ section.id }}"{% endif %}
+          >
+          <p id="ContactFormNameError-{{ section.id }}" class="field-error" data-contact-field-error {% unless form.errors contains 'name' %}hidden{% endunless %}>
+            {% if form.errors contains 'name' %}<span class="visually-hidden">Error:</span> Name {{ form.errors.messages['name'] }}{% endif %}
+          </p>
         </div>
         <div class="field">
           <label for="ContactFormEmail-{{ section.id }}">Email</label>
-          <input id="ContactFormEmail-{{ section.id }}" type="email" name="contact[email]" autocomplete="email" autocorrect="off" autocapitalize="off" value="{{ form.email | escape }}" required>
+          <input
+            id="ContactFormEmail-{{ section.id }}"
+            type="email"
+            name="contact[email]"
+            autocomplete="email"
+            autocorrect="off"
+            autocapitalize="off"
+            value="{{ form.email | escape }}"
+            required
+            aria-required="true"
+            data-contact-field
+            data-error-id="ContactFormEmailError-{{ section.id }}"
+            {% if form.errors contains 'email' %}aria-invalid="true" aria-describedby="ContactFormEmailError-{{ section.id }}"{% endif %}
+          >
+          <p id="ContactFormEmailError-{{ section.id }}" class="field-error" data-contact-field-error {% unless form.errors contains 'email' %}hidden{% endunless %}>
+            {% if form.errors contains 'email' %}<span class="visually-hidden">Error:</span> Email {{ form.errors.messages['email'] }}{% endif %}
+          </p>
         </div>
         <div class="field">
           <label for="ContactFormMessage-{{ section.id }}">Message</label>
-          <textarea id="ContactFormMessage-{{ section.id }}" name="contact[body]" rows="6" required>{{ form.body }}</textarea>
+          <textarea
+            id="ContactFormMessage-{{ section.id }}"
+            name="contact[body]"
+            rows="6"
+            required
+            aria-required="true"
+            data-contact-field
+            data-error-id="ContactFormMessageError-{{ section.id }}"
+            {% if form.errors contains 'body' %}aria-invalid="true" aria-describedby="ContactFormMessageError-{{ section.id }}"{% endif %}
+          >{{ form.body }}</textarea>
+          <p id="ContactFormMessageError-{{ section.id }}" class="field-error" data-contact-field-error {% unless form.errors contains 'body' %}hidden{% endunless %}>
+            {% if form.errors contains 'body' %}<span class="visually-hidden">Error:</span> Message {{ form.errors.messages['body'] }}{% endif %}
+          </p>
         </div>
         <button class="button" type="submit">Send message</button>
       {% endform %}

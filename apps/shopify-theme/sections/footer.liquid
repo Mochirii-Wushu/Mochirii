@@ -22,17 +22,9 @@
     <div class="footer-nav-groups">
       <nav class="footer-links" aria-label="Footer navigation">
         <h2>Support</h2>
-        {% assign has_privacy_choices = false %}
         {% if support_menu != blank and support_menu.links.size > 0 %}
           {% for link in support_menu.links %}
             {% assign is_policy_link = false %}
-            {% assign support_link_url = link.url %}
-            {% if link.title == 'Your Privacy Choices' %}
-              {% assign has_privacy_choices = true %}
-              {% if support_link_url == blank %}
-                {% assign support_link_url = '/pages/data-sharing-opt-out' %}
-              {% endif %}
-            {% endif %}
             {% if shop.shipping_policy != blank and link.url == shop.shipping_policy.url %}
               {% assign is_policy_link = true %}
             {% elsif shop.refund_policy != blank and link.url == shop.refund_policy.url %}
@@ -43,16 +35,15 @@
               {% assign is_policy_link = true %}
             {% endif %}
             {% unless is_policy_link %}
-              <a href="{{ support_link_url }}">{{ link.title }}</a>
+              {% if link.url != blank %}
+                <a href="{{ link.url }}">{{ link.title }}</a>
+              {% endif %}
             {% endunless %}
           {% endfor %}
         {% else %}
           <a href="{{ contact_url }}">Contact</a>
           <a href="https://mochirii.com" rel="noopener">Mochirii Guild</a>
         {% endif %}
-        {% unless has_privacy_choices %}
-          <a href="/pages/data-sharing-opt-out">Your Privacy Choices</a>
-        {% endunless %}
       </nav>
 
       <nav class="footer-links" aria-label="Policy navigation">

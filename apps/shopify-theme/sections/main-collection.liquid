@@ -144,11 +144,7 @@
       {% if collection.products_count > 0 %}
         <div id="collection-products" class="product-grid" role="list">
           {% for product in collection.products %}
-            {% if forloop.index <= 2 %}
-              {% render 'product-card', product: product, image_loading: 'eager', image_fetchpriority: 'high' %}
-            {% else %}
-              {% render 'product-card', product: product %}
-            {% endif %}
+            {% render 'product-card', product: product %}
           {% endfor %}
         </div>
         {% if paginate.pages > 1 %}

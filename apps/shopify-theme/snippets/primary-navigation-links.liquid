@@ -1,15 +1,70 @@
-{% if primary_menu != blank and primary_menu.links.size > 0 %}
-  {% for link in primary_menu.links %}
-    <a href="{{ link.url }}" {% if link.current or link.active %}aria-current="page"{% endif %}>{{ link.title }}</a>
-  {% endfor %}
-{% else %}
-  <a href="{{ routes.root_url }}" {% if template.name == 'index' %}aria-current="page"{% endif %}>Home</a>
-  <a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a>
-  <a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a>
-  <a href="{{ about_url }}" {% if request.path == about_url or request.path contains 'pages/about' %}aria-current="page"{% endif %}>About</a>
-  <a href="{{ contact_url }}" {% if request.path == contact_url or request.path contains 'pages/contact' %}aria-current="page"{% endif %}>Contact</a>
-{% endif %}
-<a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a>
-<a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
-  Cart <span class="cart-count">{{ cart.item_count }}</span>
-</a>
+{% assign navigation_id = navigation_id | default: 'primary-navigation' %}
+<ul class="site-nav__list" role="list">
+  {% if primary_menu != blank and primary_menu.links.size > 0 %}
+    {% for link in primary_menu.links %}
+      <li class="site-nav__item{% if link.links.size > 0 %} site-nav__item--has-children{% endif %}">
+        {% capture submenu_id %}{{ navigation_id }}-submenu-{{ forloop.index }}{% endcapture %}
+        <span class="site-nav__link-row">
+          <a href="{{ link.url }}" {% if link.current %}aria-current="page"{% endif %}>{{ link.title }}</a>
+          {% if link.links.size > 0 %}
+            <button
+              class="site-nav__toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="{{ submenu_id }}"
+              aria-label="Toggle {{ link.title | escape }} submenu"
+              data-navigation-toggle
+            ><span aria-hidden="true">&#9662;</span></button>
+          {% endif %}
+        </span>
+        {% if link.links.size > 0 %}
+          <ul id="{{ submenu_id }}" class="site-nav__sublist" role="list" aria-label="{{ link.title | escape }} submenu">
+            {% for child_link in link.links %}
+              <li class="site-nav__item{% if child_link.links.size > 0 %} site-nav__item--has-children{% endif %}">
+                {% capture child_submenu_id %}{{ navigation_id }}-submenu-{{ forloop.parentloop.index }}-{{ forloop.index }}{% endcapture %}
+                <span class="site-nav__link-row">
+                  <a href="{{ child_link.url }}" {% if child_link.current %}aria-current="page"{% endif %}>{{ child_link.title }}</a>
+                  {% if child_link.links.size > 0 %}
+                    <button
+                      class="site-nav__toggle"
+                      type="button"
+                      aria-expanded="false"
+                      aria-controls="{{ child_submenu_id }}"
+                      aria-label="Toggle {{ child_link.title | escape }} submenu"
+                      data-navigation-toggle
+                    ><span aria-hidden="true">&#9656;</span></button>
+                  {% endif %}
+                </span>
+                {% if child_link.links.size > 0 %}
+                  <ul id="{{ child_submenu_id }}" class="site-nav__sublist site-nav__sublist--nested" role="list" aria-label="{{ child_link.title | escape }} submenu">
+                    {% for grandchild_link in child_link.links %}
+                      <li class="site-nav__item">
+                        <span class="site-nav__link-row">
+                          <a href="{{ grandchild_link.url }}" {% if grandchild_link.current %}aria-current="page"{% endif %}>{{ grandchild_link.title }}</a>
+                        </span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  {% else %}
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.root_url }}" {% if template.name == 'index' %}aria-current="page"{% endif %}>Home</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ about_url }}" {% if request.path == about_url or request.path contains 'pages/about' %}aria-current="page"{% endif %}>About</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ contact_url }}" {% if request.path == contact_url or request.path contains 'pages/contact' %}aria-current="page"{% endif %}>Contact</a></span></li>
+  {% endif %}
+  <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a></span></li>
+  <li class="site-nav__item">
+    <span class="site-nav__link-row">
+      <a class="site-nav__cart" href="{{ routes.cart_url }}" aria-label="Cart{% if cart.item_count > 0 %}, {{ cart.item_count }} items{% endif %}" {% if template.name == 'cart' %}aria-current="page"{% endif %}>
+        Cart <span class="cart-count">{{ cart.item_count }}</span>
+      </a>
+    </span>
+  </li>
+</ul>

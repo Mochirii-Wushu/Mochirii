@@ -107,10 +107,49 @@ Durable no-secret runbooks belong in `docs/operations`. Provider contracts
 belong in `docs/integrations`. Screenshots, logs, JSON readbacks, exports, and
 generated archives belong only in ignored `.artifacts/operations`.
 
+## Shopify Opening Readiness
+
+- [`SHOPIFY-LAUNCH-READINESS.md`](./SHOPIFY-LAUNCH-READINESS.md) is the
+  canonical no-secret decision ledger for the United States-only storefront
+  opening and its 72-hour low-promotion soft launch.
+- The ledger contains exactly the twenty products in approved customer-copy
+  contract `2026-07-18-v2` and the 2026-07-18 authenticated read-only Shopify
+  readback. All twenty are Active with USD prices, but inventory is not tracked
+  and each says Shop location is its single fulfilling location. Nonblank SKUs
+  and physical weights were confirmed, while fifteen PDPs still render the
+  generic warning fallback. These facts do
+  not clear product evidence, labels, formula/INCI, warnings, safety, MoCRA,
+  claims, variants, fulfillment, privacy, tax, or launch operations.
+- Non-payment provider blockers include the Basic development-store state,
+  United States tax set to Not collecting, untracked inventory, unresolved
+  physical-weight correctness and fulfillment locations, EUR-denominated US
+  shipping-profile tiers in admin, and an unbranded notification sender. No
+  provider setting was changed.
+- All twenty release dispositions remain blocked until their evidence and
+  provider fields are reviewed. Unknown private or external facts are recorded
+  as Pending rather than inferred.
+- The prepayment readiness branch working tree passes the clean lockfile
+  install, complete repository check, Shopify theme check and package,
+  release-safety guards, JavaScript syntax, Theme Check with zero offenses,
+  and `git diff --check`. Reviewed-commit and protected-CI acceptance remain
+  pending until the branch is published for review.
+  The optional local toolchain audit found Docker Desktop's Linux engine was
+  not running; no system service or provider state was changed to work around
+  that workstation-only limitation.
+- Payment setup and payment/order-lifecycle testing are intentionally the final
+  readiness phase. They do not begin until every non-payment gate is Ready and
+  the owner gives exact approval for that provider action.
+- Storefront password protection and disabled checkout remain in effect, and
+  theme `141514408011` remains unpublished. Publication, password removal,
+  purchases, real orders, and public launch remain separately approval-gated.
+
 ## Deferred
 
 - Mochi Pets dependency pull requests and game runtime development.
-- Shopify payment setup, password removal, physical samples, and public launch.
+- Shopify product-evidence review, physical samples, remaining operational and
+  provider validation, approved change packets, rollback exports, final
+  payment setup, password removal, and public launch under the
+  opening-readiness ledger.
 - ActivityPub federation.
 - Cloudflare, DNS, Spaces, Droplet-size, and unrelated provider changes.
 - Unused Supabase index removal and paid leaked-password protection.
