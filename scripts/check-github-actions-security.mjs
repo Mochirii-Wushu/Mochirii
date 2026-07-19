@@ -8,6 +8,10 @@ const workflowFiles = readdirSync(workflowsDir)
 
 const failures = [];
 const fullSha = /^[0-9a-f]{40}$/;
+const alwaysReportingWorkflows = new Map([
+  ["validate-shopify-theme.yml", "validate-theme"],
+  ["validate-social.yml", "validate-social"],
+]);
 
 function stepBlock(lines, usesIndex) {
   let end = lines.length;
@@ -27,6 +31,23 @@ for (const name of workflowFiles) {
 
   if (!text.includes("permissions:\n  contents: read")) {
     failures.push(`${file}: workflow must declare top-level contents: read permissions.`);
+  }
+
+  const requiredContext = alwaysReportingWorkflows.get(name);
+  if (requiredContext) {
+    const triggerBlock = text.split(/^permissions:/m, 1)[0];
+    if (/^\s+paths(?:-ignore)?:/m.test(triggerBlock)) {
+      failures.push(`${file}: required checks must not use event-level path filters.`);
+    }
+    if (!new RegExp(`^  ${requiredContext}:\\n    name: ${requiredContext}$`, "m").test(text)) {
+      failures.push(`${file}: must report the stable ${requiredContext} job name.`);
+    }
+    if (!/^\s+id:\s*changes\s*$/m.test(text) ||
+        !text.includes("github.event.pull_request.base.sha || github.event.before") ||
+        !text.includes("git diff --quiet") ||
+        !text.includes("steps.changes.outputs.changed == 'true'")) {
+      failures.push(`${file}: must detect owned-path changes inside an always-reporting job.`);
+    }
   }
 
   lines.forEach((line, index) => {

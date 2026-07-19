@@ -2,23 +2,18 @@ name: Validate Shopify theme
 
 on:
   pull_request:
-    paths:
-      - "apps/shopify-theme/**"
-      - "scripts/check-brand-boundaries.mjs"
-      - ".github/workflows/validate-shopify-theme.yml"
+    branches:
+      - main
   push:
     branches:
       - main
-    paths:
-      - "apps/shopify-theme/**"
-      - "scripts/check-brand-boundaries.mjs"
-      - ".github/workflows/validate-shopify-theme.yml"
 
 permissions:
   contents: read
 
 jobs:
   validate-theme:
+    name: validate-theme
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,9 +23,33 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          fetch-depth: 0
           persist-credentials: false
 
+      - name: Detect theme changes
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        working-directory: .
+        run: |
+          set -Eeuo pipefail
+          changed=false
+          if [[ -z "$BASE_SHA" || "$BASE_SHA" =~ ^0+$ || ! "$(git cat-file -t "$BASE_SHA" 2>/dev/null)" == "commit" ]]; then
+            changed=true
+          elif ! git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- \
+            apps/shopify-theme \
+            scripts/check-brand-boundaries.mjs \
+            .github/workflows/validate-shopify-theme.yml; then
+            changed=true
+          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          if [[ "$changed" == false ]]; then
+            echo "No theme-owned paths changed; the required context reports success without running theme tests."
+          fi
+
       - name: Set up Node
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: .node-version
@@ -38,10 +57,13 @@ jobs:
           cache-dependency-path: apps/shopify-theme/package-lock.json
 
       - name: Install locked dependencies
+        if: steps.changes.outputs.changed == 'true'
         run: npm ci
 
       - name: Validate theme and repository boundaries
+        if: steps.changes.outputs.changed == 'true'
         run: npm run check
 
       - name: Package theme without publishing
+        if: steps.changes.outputs.changed == 'true'
         run: npm run theme:package
