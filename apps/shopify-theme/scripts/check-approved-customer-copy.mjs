@@ -67,7 +67,6 @@ exactKeys(content, [
   "contentRevision",
   "locale",
   "brand",
-  "approval",
   "provenance",
   "theme",
   "home",
@@ -81,33 +80,17 @@ if (content.contentRevision !== "2026-07-18-v2") failures.push("contentRevision 
 if (content.locale !== "en-US") failures.push("locale must be en-US");
 if (content.brand !== "Mochirii Cosmetics") failures.push("brand is unexpected");
 
-exactKeys(content.approval, [
-  "scope",
-  "preparedOn",
-  "themeQaAuthorized",
-  "sharedRecordMutationAuthorized",
-  "themePublicationAuthorized",
-  "commerceAuthorized",
-], "approval");
-if (content.approval?.scope !== "customer-copy-packet" || content.approval?.preparedOn !== "2026-07-18") {
-  failures.push("approval must identify the dated customer-copy packet");
-}
-for (const field of ["themeQaAuthorized", "sharedRecordMutationAuthorized"]) {
-  if (content.approval?.[field] !== true) failures.push(`approval.${field} must be true`);
-}
-for (const field of ["themePublicationAuthorized", "commerceAuthorized"]) {
-  if (content.approval?.[field] !== false) failures.push(`approval.${field} must remain false`);
-}
-
 exactKeys(content.provenance, [
   "sourceRepository",
   "sourcePullRequest",
   "sourceRevision",
-  "approvalRecord",
+  "providerWriteHistory",
 ], "provenance");
 if (content.provenance?.sourceRepository !== "Mochirii-Wushu/Mochirii" ||
-    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459") {
-  failures.push("provenance must identify the canonical repository and draft PR");
+    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459" ||
+    content.provenance?.sourceRevision !== "2026-07-18-v2" ||
+    content.provenance?.providerWriteHistory !== "content/customer-facing-copy-approval-packet.md") {
+  failures.push("provenance must identify the immutable public content source and separate provider-write history");
 }
 
 exactKeys(content.theme, [
@@ -327,4 +310,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log("Customer-copy contract check OK (2 pages, 5 collections, 20 varied product descriptions; shared records applied, theme publication and commerce disabled). ");
+console.log("Customer-copy contract check OK (content-only v2: 2 pages, 5 collections, 20 varied product descriptions; no reusable provider authority). ");

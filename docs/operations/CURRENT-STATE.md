@@ -1,6 +1,6 @@
 # Current Mochirii State
 
-Updated: 2026-07-18 PDT
+Updated: 2026-07-19 PDT
 
 This no-secret file records the current hosted and repository state. Update it
 after a completed release or ownership change; do not place credentials,
@@ -112,6 +112,22 @@ generated archives belong only in ignored `.artifacts/operations`.
 - [`SHOPIFY-LAUNCH-READINESS.md`](./SHOPIFY-LAUNCH-READINESS.md) is the
   canonical no-secret decision ledger for the United States-only storefront
   opening and its 72-hour low-promotion soft launch.
+- Customer-copy revision `2026-07-18-v2` is now recorded as immutable public
+  content, separate from its consumed provider-write approval and verified
+  2026-07-18 readback history. The shared-copy write is Applied, not Pending;
+  no current provider-write, publication or commerce authority follows from
+  that history.
+- Existing reachable public Git history was reviewed on 2026-07-19 and
+  accepted without rewriting. That disposition does not remove prior objects
+  and is not authorization for a future history rewrite.
+- The canonical Mochirii emblem design is universal across the guild site,
+  storefront and product label/media review. The exact commerce wordmark is
+  **Mochirii Cosmetics**. A 2026-07-19 read-only candidate review found a
+  different minimalist mark on representative Peptide Smoothing Serum
+  packaging while the header used the canonical emblem, so that SKU currently
+  fails parity. No physical label or other image is accepted by the source
+  declaration: an emblem or wordmark mismatch blocks the affected SKU, and all
+  twenty require label artwork, mockup/media, physical-label and box review.
 - The ledger contains exactly the twenty products in approved customer-copy
   contract `2026-07-18-v2` and the 2026-07-18 authenticated read-only Shopify
   readback. All twenty are Active with USD prices, but inventory is not tracked
@@ -128,16 +144,29 @@ generated archives belong only in ignored `.artifacts/operations`.
 - All twenty release dispositions remain blocked until their evidence and
   provider fields are reviewed. Unknown private or external facts are recorded
   as Pending rather than inferred.
-- The prepayment readiness branch working tree passes the clean lockfile
-  install, complete repository check, Shopify theme check and package,
-  release-safety guards, JavaScript syntax, Theme Check with zero offenses,
-  and `git diff --check`. Draft pull request `#480` has a clean required-check
-  rollup; Supabase Preview reported Skipped for this theme/docs-only change and
-  did not block GitHub's clean merge-state result. The pull request remains
-  unmerged.
+- The reconciled foundation revision passed the clean lockfile install,
+  complete repository check, Shopify theme check and package, release-safety
+  guards, JavaScript syntax, Theme Check with zero offenses, and
+  `git diff --check` locally on 2026-07-19. The prior PR #480 head also had a
+  clean required-check rollup; Supabase Preview reported Skipped for that
+  theme/docs-only head and did not block GitHub's clean merge-state result. The
+  updated PR head still requires remote checks and accountable human review,
+  and downstream product and storefront packages require validation at their
+  own final source-bound commits. The pull request remains draft and unmerged.
   The optional local toolchain audit found Docker Desktop's Linux engine was
   not running; no system service or provider state was changed to work around
   that workstation-only limitation.
+- The revised plan authorizes a single reversible upload of the exact
+  human-reviewed, merged-main package to unpublished candidate theme
+  `141514408011` while `checkout_enabled` stays false. The required rollback
+  capture, merged source/package binding, upload and post-write readback are
+  still Pending. This boundary does not authorize a repeat upload, shared
+  record changes, theme publication, checkout, password removal or commerce.
+- Prepayment acceptance now covers configuration and candidate-storefront
+  evidence only. End-to-end checkout quotations, payments, order creation,
+  inventory decrement, notifications, cancellation, refunds, fulfillment and
+  payouts remain payment-dependent Gate F tests and cannot be inferred from a
+  prepayment readback.
 - Payment setup and payment/order-lifecycle testing are intentionally the final
   readiness phase. They do not begin until every non-payment gate is Ready and
   the owner gives exact approval for that provider action.

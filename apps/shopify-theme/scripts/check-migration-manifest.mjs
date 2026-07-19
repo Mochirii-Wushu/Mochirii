@@ -55,25 +55,28 @@ if (manifest.preservation?.status !== "verified-approved-copy-worktree-snapshot-
   failures.push("preservation must record the verified approved-copy worktree snapshot and bundles without claiming a full disposable-clone restoration");
 }
 if (manifest.selection?.postSnapshotMainReconciled !== true ||
-    manifest.selection?.approvedCustomerCopyReconciled !== false ||
+    manifest.selection?.approvedCustomerCopyReconciled !== true ||
     manifest.selection?.privateDeltaPreservedExternally !== true ||
     manifest.selection?.intentionalSourceParity !== false) {
   failures.push("selection must record post-snapshot reconciliation private preservation and deliberate non-parity");
 }
-if (manifest.sourceReconciliation?.status !== "live-runtime-reconciled-customer-copy-v2-prepared" ||
+if (manifest.sourceReconciliation?.status !== "live-runtime-reconciled-customer-copy-v2-applied" ||
     manifest.sourceReconciliation?.recordedDate !== manifest.snapshotDate ||
-    manifest.sourceReconciliation?.integrationState !== "current-live-runtime-reconciled-with-unpublished-theme-qa-authorized" ||
+    manifest.sourceReconciliation?.integrationState !== "current-live-runtime-reconciled-with-unpublished-theme-qa-staged" ||
     manifest.sourceReconciliation?.runtimeWarningFallback !== "represented-with-customer-safe-fail-closed-copy" ||
     manifest.sourceReconciliation?.structuredFilterHelper !== "represented-as-sanitized-pure-exact-20-contract" ||
-    manifest.sourceReconciliation?.approvedCustomerCopy !== "represented-as-versioned-customer-copy-v2-contract-with-shared-record-mutation-disabled" ||
+    manifest.sourceReconciliation?.approvedCustomerCopy !== "represented-as-content-only-versioned-customer-copy-v2-contract" ||
+    manifest.sourceReconciliation?.providerWriteHistory !== "recorded-separately-as-applied-readback-with-consumed-approval" ||
     manifest.sourceReconciliation?.privateContractOrchestration !== "excluded-and-replaced-by-public-release-safety-and-customer-copy-guards") {
   failures.push("sourceReconciliation must record the complete sanitized disposition of the post-snapshot integration");
 }
 if (manifest.signature?.status !== "unsigned") {
   failures.push("signature status must truthfully remain unsigned until an approved identity signs it");
 }
-if (manifest.publicHistory?.status !== "not-rewritten-review-required") {
-  failures.push("public history must remain an explicit unresolved review gate");
+if (manifest.publicHistory?.status !== "reviewed-accepted-no-rewrite" ||
+    manifest.publicHistory?.reviewedDate !== "2026-07-19" ||
+    manifest.publicHistory?.disposition !== "existing public history accepted without rewriting") {
+  failures.push("public history must record the reviewed no-rewrite disposition");
 }
 
 const serializedManifest = JSON.stringify(manifest);
@@ -126,13 +129,17 @@ const expectedApprovedPublicCopy = [
   "apps/shopify-theme/content/approved-customer-copy.json",
 ];
 const approvedPublicCopyFiles = manifest.approvedPublicCopy?.files ?? [];
-if (manifest.approvedPublicCopy?.status !== "customer-copy-v2-shared-record-approval-pending" ||
+if (manifest.approvedPublicCopy?.status !== "customer-copy-v2-content-locked-provider-write-applied" ||
     manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459" ||
+    manifest.approvedPublicCopy?.providerWriteHistory?.record !== "apps/shopify-theme/content/customer-facing-copy-approval-packet.md" ||
+    manifest.approvedPublicCopy?.providerWriteHistory?.status !== "applied-readback-verified" ||
+    manifest.approvedPublicCopy?.providerWriteHistory?.appliedDate !== manifest.snapshotDate ||
+    manifest.approvedPublicCopy?.providerWriteHistory?.approvalReusable !== false ||
     manifest.approvedPublicCopy?.publicationAuthorized !== false ||
     manifest.approvedPublicCopy?.providerMutationAuthorized !== false ||
     manifest.approvedPublicCopy?.commerceAuthorized !== false ||
     JSON.stringify(approvedPublicCopyFiles.map((entry) => entry.path).sort()) !== JSON.stringify(expectedApprovedPublicCopy)) {
-  failures.push("approvedPublicCopy must contain only the sanitized copy contract with all publication and commerce authority disabled");
+  failures.push("approvedPublicCopy must separate immutable content from consumed provider-write history and keep new mutation publication and commerce authority disabled");
 }
 if (JSON.stringify(actualFiles) !== JSON.stringify(manifestFiles)) {
   failures.push("manifest file set does not match the imported runtime roots");

@@ -3,19 +3,11 @@
   "contentRevision": "2026-07-18-v2",
   "locale": "en-US",
   "brand": "Mochirii Cosmetics",
-  "approval": {
-    "scope": "customer-copy-packet",
-    "preparedOn": "2026-07-18",
-    "themeQaAuthorized": true,
-    "sharedRecordMutationAuthorized": true,
-    "themePublicationAuthorized": false,
-    "commerceAuthorized": false
-  },
   "provenance": {
     "sourceRepository": "Mochirii-Wushu/Mochirii",
     "sourcePullRequest": "https://github.com/Mochirii-Wushu/Mochirii/pull/459",
     "sourceRevision": "2026-07-18-v2",
-    "approvalRecord": "content/customer-facing-copy-approval-packet.md"
+    "providerWriteHistory": "content/customer-facing-copy-approval-packet.md"
   },
   "theme": {
     "headerStrip": "Skincare by routine",

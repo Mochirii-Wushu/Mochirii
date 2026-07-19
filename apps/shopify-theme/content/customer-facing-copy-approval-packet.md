@@ -1,4 +1,4 @@
-# Mochirii Customer-Facing Copy Approval Packet
+# Mochirii Customer-Facing Copy Provider-Write History
 
 Date: 2026-07-18
 
@@ -6,14 +6,20 @@ Revision: `2026-07-18-v2`
 
 Store: `shop.mochirii.com`
 
-## Approval Boundary
+## Record Boundary
 
 The exact machine-readable contract is
-[`approved-customer-copy.json`](./approved-customer-copy.json). The owner
-approved the exact shared-record boundary below on 2026-07-18. Theme
-publication and commerce activation remain unauthorized.
+[`approved-customer-copy.json`](./approved-customer-copy.json). That file is
+the immutable public-copy artifact for revision `2026-07-18-v2`; it contains no
+provider-write, publication, or commerce authorization. This separate file is
+the dated approval and applied-readback history for the one shared-record write
+completed on 2026-07-18. Its consumed approval cannot authorize a later write.
 
-Approve only these shared Shopify record updates:
+The owner approved the exact historical shared-record boundary below on
+2026-07-18. Theme publication and commerce activation were not authorized and
+remain unauthorized.
+
+The consumed approval permitted only these shared Shopify record updates:
 
 - homepage SEO title and description;
 - About and Contact page body and SEO copy;
@@ -22,10 +28,10 @@ Approve only these shared Shopify record updates:
 - presentation-only edits to the return, shipping, and terms policies listed
   below.
 
-Do not change titles, handles, SKUs, options, variants, prices, inventory,
-images, alt text, metafields, product status, sales channels, markets,
-fulfillment, payments, customer accounts, checkout, password protection, the
-live theme, or the automated privacy policy.
+It did not permit changes to titles, handles, SKUs, options, variants, prices,
+inventory, images, alt text, metafields, product status, sales channels,
+markets, fulfillment, payments, customer accounts, checkout, password
+protection, the live theme, or the automated privacy policy.
 
 ## Applied Readback
 
@@ -41,6 +47,15 @@ on 2026-07-18. Provider readback confirmed:
 - the customer-copy QA theme remains unpublished; and
 - no title, handle, SKU, price, media, inventory, market, channel, fulfillment,
   password-protection, payment, or theme-publication setting was changed.
+
+Current disposition:
+
+| Surface | Historical result | Current authority |
+| --- | --- | --- |
+| Public-copy revision `2026-07-18-v2` | Content locked in the public contract | A new revision and approval are required to change it |
+| Approved shared Shopify records | Applied and read back on 2026-07-18 | The historical approval is consumed; no further provider write is authorized |
+| Unpublished theme QA | The v2 wording was staged on the named draft theme | Checkout-disabled candidate staging is governed by the current launch ledger |
+| Theme publication, checkout, payments, password removal, orders | Not performed | Unauthorized |
 
 ## Theme Copy
 
@@ -226,6 +241,9 @@ No change. Keep Shopify's automated privacy policy enabled so its legal text
 continues tracking active Shopify settings and templates. Its legal/template
 language is an explicit exception to the editorial copy guard.
 
-## Exact Approval Phrase
+## Historical Exact Approval Phrase
+
+The following phrase is retained only as the audit record for the write applied
+on 2026-07-18. It is not reusable authorization.
 
 `Approve customer-facing shared-copy packet 2026-07-18-v2: update exactly the homepage SEO, two pages, five collections, twenty product description/SEO records, and three policy presentation edits listed here; keep the automated privacy policy unchanged; do not change any other Shopify record or publish a theme.`

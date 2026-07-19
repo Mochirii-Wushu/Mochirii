@@ -1,9 +1,9 @@
 # Shopify Opening Readiness
 
-Updated: 2026-07-18 PDT
+Updated: 2026-07-19 PDT
 
-Status: **BLOCKED — scoped source remediations are implemented; technical,
-external, and provider gates remain**
+Status: **BLOCKED — the launch foundation is reconciled; scoped product,
+storefront, provider, and external-evidence gates remain**
 
 This no-secret decision ledger is the single launch-control record for
 shop.mochirii.com. It turns the approved opening-readiness plan into explicit,
@@ -16,13 +16,23 @@ Current release boundary:
 - launch pattern: 72-hour low-promotion public soft launch;
 - assortment: exactly the twenty products in
   apps/shopify-theme/content/approved-customer-copy.json;
+- customer-copy revision `2026-07-18-v2` is a content-only public artifact;
+  its consumed provider-write approval and verified 2026-07-18 readback are
+  recorded separately in
+  apps/shopify-theme/content/customer-facing-copy-approval-packet.md;
 - candidate theme: unpublished theme 141514408011;
 - checkout_enabled remains false;
 - storefront password protection remains enabled;
+- the revised launch plan authorizes one reversible, checkout-disabled upload
+  of the exact reviewed package built from merged source to unpublished
+  candidate theme 141514408011 after the rollback capture and stop conditions
+  below are satisfied; this is prepayment staging, not publication or commerce
+  approval;
 - payment setup and payment testing are intentionally the final readiness
   phase and are not authorized by this document; and
 - theme publication, password removal, real orders, purchases, and provider
-  mutations still require the exact approval described below.
+  mutations outside the candidate-staging boundary still require the exact
+  approval described below.
 
 ## Status And Evidence Rules
 
@@ -52,6 +62,44 @@ detail, or credential here.
 Generated Shopify readbacks, screenshots, logs, exports, and rollback captures
 belong in the ignored .artifacts/operations/shopify boundary. A public status
 may point to a sanitized capture ID, but not to secret-bearing output.
+
+## Reconciliation Decisions
+
+- Existing reachable public Git history was reviewed on 2026-07-19 and
+  accepted without rewriting. The decision does not claim deletion from
+  commits, pull-request references, caches, backups, or clones, and it is not
+  authorization for a future rewrite.
+- Public-copy revision `2026-07-18-v2` is immutable content. Provider-write
+  approval and readback history are a separate audit record. The 2026-07-18
+  shared-record write is Applied and read back, not Pending; its exact approval
+  was consumed and cannot be reused.
+- No current authorization follows from that historical write. Product facts,
+  labels, formula/INCI, warnings, media, prices, inventory, fulfillment, tax,
+  privacy, publication, checkout, payments, orders, password removal, and
+  launch retain their own gates below.
+
+## Universal Brand Identity Gate
+
+The canonical Mochirii emblem design is the universal visual mark for the guild
+site, storefront, and product logo/label review. The source reference is
+`apps/web/public/assets/img/brand/emblem.webp`; the storefront derivative at
+`apps/shopify-theme/assets/mochirii-emblem.webp` may differ in dimensions and
+encoding but must preserve the same design. Product labels, outer boxes and
+customer-facing media must be reviewed visually against that canonical emblem.
+
+The commerce wordmark is exactly **Mochirii Cosmetics**. Do not substitute the
+guild-style diacritic spelling or another company name on labels, storefront
+merchandising, metadata, support or commerce correspondence. A missing,
+redrawn, substituted or materially altered emblem, or any product wordmark
+other than **Mochirii Cosmetics**, blocks that SKU until the approved sellable
+unit and its media match. No label or product image is marked Ready by this
+repository statement. A 2026-07-19 read-only candidate review found that the
+Peptide Smoothing Serum package shown in representative storefront media uses
+a different minimalist mark while the storefront header uses the canonical
+emblem. That is a current parity failure for the SKU, not proof about the other
+products. Peptide Smoothing Serum is blocked on correction and all twenty
+remain Pending until label artwork, storefront mockups/media, physical labels
+and outer boxes receive SKU-specific visual review.
 
 ## Ownership And Approval
 
@@ -157,7 +205,7 @@ readiness.
 
 | # | Product identity | Physical sample | Label/formula | INCI | Directions | Warnings decision | Origin/certs | Responsible person | Safety substantiation | MoCRA registration/listing/exemption | Claims/counsel | Provider readback | Release disposition |
 | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Peptide Smoothing Serum (peptide-smoothing-serum) | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Active; $48.99 USD; inventory untracked; generic warning fallback | Blocked |
+| 1 | Peptide Smoothing Serum (peptide-smoothing-serum) | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Active; $48.99 USD; inventory untracked; generic warning fallback; representative package mark differs from canonical emblem | Blocked |
 | 2 | Natural Retinol Alternative Oil Serum (natural-retinol-alternative-oil-serum) | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Active; $50.99 USD; inventory untracked; generic warning fallback | Blocked |
 | 3 | Vitamin C Serum (vitamin-c-serum) | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Active; $47.99 USD; inventory untracked; generic warning fallback | Blocked |
 | 4 | Hyaluronic Day Cream (hyaluronic-day-cream) | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Pending | Active; $50.99 USD; inventory untracked; generic warning fallback | Blocked |
@@ -183,6 +231,36 @@ A SKU becomes **Ready** only when every evidence cell is Ready or N/A
 open claim, label, safety, channel, inventory, or fulfillment conflict remains.
 The release is fail-closed: all twenty SKU rows must be Ready.
 
+## Prepayment And Payment-Dependent Acceptance
+
+Prepayment acceptance proves configuration and customer presentation without
+enabling checkout, configuring a payment provider, creating an order, or
+incurring a charge. It includes:
+
+- exact twenty-SKU facts, media, variant mapping, channel, weight, inventory
+  source, location, and fulfillment-route readbacks;
+- USD contiguous-US shipping-zone, eligibility, weight-tier, processing, and
+  transit configuration compared with the approved private matrix, including
+  a provider rate-preview tool when it does not create a checkout or order;
+- reviewed tax/nexus decisions and the resulting configuration readback,
+  without treating a platform estimate as legal advice;
+- privacy, consent, apps, domains, account security, notification-template,
+  sender-domain, support, policy, and operational review; and
+- the source-bound unpublished candidate-theme route, cart-disabled,
+  accessibility, performance, metadata, search, filter, error, and rollback
+  acceptance defined below.
+
+Payment-dependent acceptance begins only in Gate F. It includes end-to-end
+checkout address quotation, final tax and shipping calculations, successful
+and declined payment behavior, inventory decrement, order creation,
+notifications, cancellation, refund, fulfillment handoff, payout, and any
+low-value real transaction. A prepayment configuration readback must not be
+reported as proof of these payment-dependent behaviors.
+
+If a purported prepayment test would enable checkout or payments, create a
+checkout/order, place a manual fulfillment order, send a customer message, or
+incur a charge, stop and move it to the separately approved Gate F matrix.
+
 ## Non-Payment Readiness Checklist
 
 All items in this section must be Ready before payment setup begins.
@@ -191,12 +269,12 @@ All items in this section must be Ready before payment setup begins.
 
 | ID | Required decision | Accountable role | Status |
 | --- | --- | --- | --- |
-| PC-01 | Reconcile each shipped sample, primary label and outer packaging to the corresponding ledger row | Product evidence custodian | Pending |
+| PC-01 | Reconcile each shipped sample, primary label and outer packaging to the corresponding ledger row, canonical Mochirii emblem and exact Mochirii Cosmetics commerce wordmark | Product evidence custodian | Pending |
 | PC-02 | Confirm actual formula, full INCI, directions, warning text or documented none-required decision, size and origin/certification display for every SKU | Product evidence custodian plus compliance reviewer | Pending |
 | PC-03 | Confirm responsible-person contact and safety-substantiation record for every SKU | Compliance reviewer | Pending |
 | PC-04 | Record applicable facility-registration evidence and each product/formula listing, exemption, renewal and change-reporting disposition under MoCRA | Compliance reviewer | Pending |
 | PC-05 | Review cosmetic-versus-drug classification and every express or implied storefront, packaging, review, social and promotional claim | Qualified cosmetics counsel or compliance reviewer | Pending |
-| PC-06 | Confirm the provider page, variant and media exactly match the approved physical unit for all twenty SKUs | Shopify operator plus product evidence custodian | Pending |
+| PC-06 | Confirm the provider page, variant and media exactly match the approved physical unit, canonical emblem and exact Mochirii Cosmetics wordmark for all twenty SKUs | Shopify operator plus product evidence custodian | Pending |
 
 ### Commerce And Fulfillment
 
@@ -204,7 +282,7 @@ All items in this section must be Ready before payment setup begins.
 | --- | --- | --- | --- |
 | CF-01 | Read back exactly twenty intended active products and their provider SKU/variant identifiers, prices, USD currency, inventory and channel status | Shopify operator | Blocked — 20 Active products, USD prices, nonblank SKUs and weights were confirmed; inventory remains untracked and final variant release disposition is Pending |
 | CF-02 | Verify inventory source of truth, location assignment, oversell policy, package weights and fulfillment workflow | Fulfillment owner | Blocked — all 20 have weights but report inventory untracked and Shop location fulfillment; supplier routing, oversell behavior and placeholder/test locations require review |
-| CF-03 | Test US shipping profiles, rates, processing and transit promises with representative supported and unsupported addresses | Shopify operator plus fulfillment owner | Blocked — US profile tiers were visible in EUR; checkout address testing is deferred with checkout disabled |
+| CF-03 | Verify the prepayment USD shipping configuration, contiguous-US eligibility, weight tiers, processing and transit promises against representative supported and unsupported addresses without creating a checkout or order; reserve end-to-end checkout quotation for Gate F | Shopify operator plus fulfillment owner | Blocked — US profile tiers were visible in EUR; prepayment configuration parity and the later Gate F checkout test are both unproven |
 | CF-04 | Document reviewed US tax registrations, nexus and collection configuration; do not treat Shopify estimates as legal advice | Store owner plus tax professional | Blocked — Shopify reports United States Not collecting |
 | CF-05 | Reconcile shipping, return, cancellation, damaged, incorrect, incomplete and carrier-lost promises to the real operating process | Fulfillment owner plus counsel | Pending |
 | CF-06 | Verify customer-facing support routes, coverage, response ownership and order-number handling without exposing personal contacts | Support owner | Blocked — contact route works, but branded sender, coverage ownership and escalation evidence remain Pending |
@@ -224,14 +302,15 @@ All items in this section must be Ready before payment setup begins.
 
 | ID | Required decision | Accountable role | Status |
 | --- | --- | --- | --- |
-| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Ready — all local commands passed, and draft PR #480 has a clean required-check rollup; Supabase Preview reported Skipped for this theme/docs-only change without blocking the GitHub merge-state check |
+| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the reconciled foundation passed local checks on 2026-07-19, but the updated PR head still requires remote checks, accountable human review and a protected merge; downstream product and storefront packages must be validated again at their own final source-bound commits |
 | QA-02 | Verify all twenty PDPs expose the reviewed facts without generic warning or other evidence fallbacks | Theme engineer plus product evidence custodian | Blocked — all 20 rendered required field groups, but 15 use the generic warning fallback |
 | QA-03 | Verify five collections, filters, ingredient search, misspellings, sold-out state, cart, contact form, policies, privacy choices and branded 404 | Theme engineer | Blocked — baseline provider smokes passed for the named routes and exact/zero-result search, but misspellings, sold-out and server-error paths remain Pending; branch changes are not on the candidate theme |
 | QA-04 | Pass keyboard, screen-reader announcements, 200 percent zoom, focus order, error handling, contrast and touch navigation at 360x800, 390x844, 768x1024 and 1440x900 | Theme engineer | Blocked — viewport, overflow, broken-image and code-level contrast checks passed; assistive-technology and 200 percent zoom acceptance remain Pending |
 | QA-05 | Run authenticated-preview Lighthouse checks for home, collection, PDP and cart; resolve confirmed LCP-priority and unnecessary-script problems | Theme engineer | Blocked — branch removes unnecessary eager/high product-card images; authenticated Lighthouse evidence remains Pending |
 | QA-06 | Verify canonical URLs, metadata, Product and Breadcrumb structured data, social cards, sitemap and password-safe robots behavior | Theme engineer plus Shopify operator | Blocked — all 20 PDP canonicals and JSON-LD parsed, and representative home, collection and PDP metadata and social cards passed; sitemap, password-safe robots and branch-candidate acceptance remain Pending |
-| QA-07 | Capture fresh provider readbacks and a rollback export of the current live theme and all records/settings in the approved mutation packet | Shopify operator | Blocked — live/candidate theme IDs and sanitized settings were read back, but no approved rollback export packet was created |
-| QA-08 | Record exact candidate theme 141514408011, reviewed commit, package artifact and rollback theme in the private release packet | Shopify operator plus theme engineer | Blocked — draft PR #480, candidate 141514408011, rollback theme 141422395467 and local package Mochirii Cosmetics-0.5.0.zip (SHA-256 3E35DDE232F6B49B411396DBFDD8E26D578310FB65D941E914E5581BDACB0C17) are recorded; the approved private rollback packet remains Pending |
+| QA-07 | Capture fresh provider readbacks and a restorable export of the current live theme plus the existing candidate theme before the checkout-disabled candidate upload; capture scoped shared records/settings separately when their own mutation packet is approved | Shopify operator | Blocked — live/candidate theme IDs and sanitized settings were read back, but no approved rollback export packet was created |
+| QA-08 | Record exact candidate theme 141514408011, human-reviewed merged commit, source tree, package artifact and rollback theme in the private release packet | Shopify operator plus theme engineer | Blocked — draft PR #480, candidate 141514408011, rollback theme 141422395467 and local package Mochirii Cosmetics-0.5.0.zip (SHA-256 3E35DDE232F6B49B411396DBFDD8E26D578310FB65D941E914E5581BDACB0C17) are recorded; PR #480 has no accountable human review, is not merged, and the package is not bound to merged main |
+| QA-09 | Upload only the exact merged-source package to unpublished candidate theme 141514408011 with checkout_enabled false, preserve Draft status, and verify the source binding, route matrix, disabled checkout and no out-of-scope shared-record changes | Shopify operator plus theme engineer | Blocked — the staging boundary is authorized, but the reviewed merged package, rollback capture, upload and post-write readback remain Pending |
 
 ## Approval Gates
 
@@ -241,7 +320,7 @@ All items in this section must be Ready before payment setup begins.
 | B — Non-payment commerce | Gate A Ready | CF-01 through CF-07 Ready | Blocked |
 | C — Privacy and safety operations | Gate A Ready | PS-01 through PS-05 Ready | Blocked |
 | D — Theme and storefront QA | Gates A through C Ready | QA-01 through QA-06 Ready on the candidate commit and theme | Blocked |
-| E — Release and rollback preparation | Gate D Ready | QA-07 and QA-08 Ready; exact provider-change packet approved | Blocked |
+| E — Release and rollback preparation | Gate D Ready | QA-07 through QA-09 Ready; every out-of-scope provider change separately approved | Blocked |
 | F — Final payment setup and order lifecycle | Every non-payment gate Ready | Payment verification and required test-order matrix pass; test mode disabled | Intentionally deferred final phase |
 | G — Public soft launch | Gate F Ready | Exact publication/password-removal approval and successful release smoke | Blocked |
 
@@ -250,24 +329,64 @@ authorization. Every provider mutation packet must name the exact store,
 record or setting, intended value, writer, rollback capture, verification, and
 stop condition.
 
+## Checkout-Disabled Candidate Staging Boundary
+
+The revised launch plan authorizes exactly one prepayment staging class: upload
+the reviewed package built from merged `main` to existing unpublished candidate
+theme `141514408011` for `shop.mochirii.com`. The upload may occur before the
+product and operational gates become Ready so candidate QA can proceed, but it
+cannot make any launch gate Ready by itself. QA-09 may therefore be performed
+early only under the entry conditions below; Gate E still cannot become Ready
+until Gate D is Ready and QA-07 through QA-09 all pass.
+
+- **Entry:** PR #480 or its scoped successor has accountable human review, is
+  merged through protected `main`, required checks are green at the merge
+  commit, and a new package is built from that merged source with its commit,
+  tree and SHA-256 recorded privately.
+- **Before state:** theme `141514408011` is Draft; the current candidate and
+  live-theme exports are restorable; storefront password protection is on;
+  `checkout_enabled` is false; and the current live theme is identified without
+  changing it.
+- **Allowed write:** one authenticated Shopify operator replaces only the code
+  and bundled settings of theme `141514408011` with the exact package. No
+  product, variant, price, inventory, location, market, shipping, tax, policy,
+  menu, app, notification, domain, payment, password, order, or live-theme
+  record is in scope.
+- **Required after state:** theme `141514408011` remains Draft,
+  `checkout_enabled` remains false, password protection and the live theme are
+  unchanged, and the candidate readback matches the source-bound package.
+- **Verification:** record sanitized theme identity/status and source binding;
+  verify disabled checkout and run the candidate route, search/filter, cart,
+  accessibility, performance, metadata, structured-data, error and responsive
+  matrices. Evidence remains private or under ignored `.artifacts/operations`.
+- **Rollback:** restore the captured pre-write candidate export to theme
+  `141514408011`; never publish, delete a theme, alter the live theme, or delete
+  provider records as rollback.
+- **Stop conditions:** stop before writing if review, merge, required checks,
+  source/package binding, exports, target identity, Draft status, or
+  checkout-disabled proof is missing; stop on an unexpected permission or
+  broader-write prompt; roll back if the target becomes publishable/live,
+  checkout is exposed, source parity fails, or an out-of-scope record changes.
+
+This staging authorization does not cover a repeat upload after a failed or
+superseded package. A new exact packet is required for another write. It also
+does not authorize human review, merge approval, shared-record mutation,
+publication, checkout, payment setup, orders, password removal, or launch.
+
 ## Final Payment Phase Boundary
 
 Do not begin payment setup until Gates A through E are Ready and the store
 owner gives an exact approval naming the store and payment action. That final
-phase must:
+phase uses this separate payment-dependent checklist:
 
-1. confirm account security and two-step authentication without recording
-   secrets or identity documents in Git;
-2. complete the payment-provider business and bank verification privately;
-3. confirm USD, statement descriptor, payout status, fraud controls and any
-   reserve or hold;
-4. keep the storefront password enabled and use an unpublished candidate
-   theme during testing;
-5. run successful, declined and gateway-failure test cases through inventory,
-   shipping, taxes, notifications, cancellation, refund and fulfillment;
-6. disable test mode and record a sanitized provider readback; and
-7. perform a low-value real capture, payout or refund only after a separate
-   approval that names the purchase and maximum cost.
+| ID | Payment-dependent acceptance | Current disposition |
+| --- | --- | --- |
+| PF-01 | Confirm account security and two-step authentication, then complete plan, payment-provider business and bank verification privately without recording secrets or identity documents in Git | Intentionally deferred |
+| PF-02 | With the password still enabled and the candidate unpublished, verify representative supported and unsupported checkout addresses, shipping quotations and final tax calculations against the approved matrices | Intentionally deferred |
+| PF-03 | Verify USD, statement descriptor, payout status, fraud controls and any reserve or hold; run successful, declined and gateway-failure payment cases | Intentionally deferred |
+| PF-04 | Carry the test matrix through inventory decrement, order creation, customer notifications, cancellation, refund and integrated fulfillment handoff | Intentionally deferred |
+| PF-05 | Disable test mode and record a sanitized provider readback proving the final non-test configuration | Intentionally deferred |
+| PF-06 | Perform a low-value real capture, payout or refund only after a separate approval that names the purchase and maximum cost | Intentionally deferred — separate cost approval required |
 
 Theme checkout remains disabled until the final payment phase is verified and
 an approved source change sets checkout_enabled to true.

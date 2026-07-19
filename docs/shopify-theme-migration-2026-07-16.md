@@ -1,6 +1,6 @@
 # Shopify theme repository separation and reconciliation
 
-Initial separation: 2026-07-16. Current reconciliation: 2026-07-17.
+Initial separation: 2026-07-16. Current reconciliation: 2026-07-19.
 
 The public Shopify theme candidate was first selected from a sealed local
 snapshot and imported into `apps/shopify-theme`. On 2026-07-17, the source
@@ -19,6 +19,20 @@ public surface. It deliberately does not claim byte parity with the private
 source because private evidence, provider operations, and unsafe launch
 defaults are excluded.
 
+Customer-copy revision `2026-07-18-v2` is represented by a content-only,
+immutable public artifact. Its one provider-write approval and verified
+2026-07-18 readback are retained separately in the provider-write history. The
+historical approval is consumed: it does not authorize another shared-record
+write, theme publication, checkout, payments, password removal, or commerce.
+
+The storefront emblem is a resized/encoded derivative of the canonical
+Mochirii emblem at `apps/web/public/assets/img/brand/emblem.webp`; the emblem
+design is universal across the guild site, storefront, and product label/media
+review. Commerce surfaces use the exact wordmark **Mochirii Cosmetics**. This
+source relationship does not prove that any physical product label, box, or
+media matches: each SKU remains blocked until evidence review confirms both
+the emblem and wordmark on the approved sellable unit.
+
 ## Included or reconciled
 
 - Storefront runtime files under `assets`, `blocks`, `config`, `layout`,
@@ -27,8 +41,11 @@ defaults are excluded.
   and configured-menu output still behind publication and commerce approval.
 - Search/social metadata fallback and image dimensions without exposing
   unpublished product or collection images.
-- Support-menu and privacy-choice navigation while the verified legal entity
-  name remains blank and has no public fallback.
+- Support-menu and privacy-choice navigation. The storefront presentation
+  setting and first-party footer fallback both use `Mochirii Cosmetics`; that
+  display value is not evidence of Mochirii's legal entity name and does not
+  replace any required manufacturer, distributor, privacy, carrier, or
+  transactional disclosure.
 - A gift-card template whose value, code, QR data, balance, and redemption UI
   render only when both publication and commerce are approved. The default
   state is noindexed and unavailable.
@@ -70,11 +87,16 @@ defaults are excluded.
   evidence/label artifacts, caches, virtual environments, and dependency
   directories.
 
-The public candidate keeps `product_publication_approved` and
-`checkout_enabled` false and the corporate/legal name blank. These repository
-controls do not prove provider-side password, product, market, payment, or theme
-state. Publication, password removal, product mutation, checkout activation,
-payments, domains, orders, and paid resources remain separately approval-gated.
+The obsolete `product_publication_approved` control is absent. The public
+candidate keeps `checkout_enabled` false and uses `Mochirii Cosmetics` as its
+first-party corporate display value. That display setting does not assert a
+verified legal business identity. These repository controls do not prove
+provider-side password, product, market, payment, or theme state. A
+source-bound package may be uploaded only to the named unpublished candidate
+under the checkout-disabled staging boundary in
+`docs/operations/SHOPIFY-LAUNCH-READINESS.md`. Publication, password removal,
+shared product mutation, checkout activation, payments, domains, orders, and
+paid resources remain separately approval-gated.
 
 The current clean post-merge source snapshot, encrypted archive round trip, and
 Git bundles are verified. This document does not claim that a complete
@@ -84,4 +106,6 @@ signing identity was available.
 
 This sanitized tree does not remove objects from earlier public commits,
 pull-request references, caches, backups, or old clones. Public-history review
-and any approved targeted rewrite remain a separate blocking operation.
+was completed on 2026-07-19, and the existing state was accepted without a
+rewrite. That disposition does not claim that prior objects disappeared and
+does not authorize a future history rewrite.

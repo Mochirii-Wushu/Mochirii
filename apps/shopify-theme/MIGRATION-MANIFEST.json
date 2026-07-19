@@ -19,23 +19,26 @@
     "reason": "no approved signing identity was available"
   },
   "publicHistory": {
-    "status": "not-rewritten-review-required",
-    "note": "this import does not remove prior objects from existing public history or provider-managed references"
+    "status": "reviewed-accepted-no-rewrite",
+    "reviewedDate": "2026-07-19",
+    "disposition": "existing public history accepted without rewriting",
+    "note": "this review does not remove prior objects from existing public history provider-managed references caches backups or existing clones"
   },
   "selection": {
     "postSnapshotMainReconciled": true,
-    "approvedCustomerCopyReconciled": false,
+    "approvedCustomerCopyReconciled": true,
     "privateDeltaPreservedExternally": true,
     "intentionalSourceParity": false,
-    "note": "current live runtime and the exact customer-copy v2 packet are represented while shared-record mutation remains pending exact approval and private provider evidence remains excluded"
+    "note": "current live runtime the content-only customer-copy v2 contract and its separate applied provider-readback history are represented while new provider writes publication and commerce remain unauthorized and private provider evidence remains excluded"
   },
   "sourceReconciliation": {
-    "status": "live-runtime-reconciled-customer-copy-v2-prepared",
+    "status": "live-runtime-reconciled-customer-copy-v2-applied",
     "recordedDate": "2026-07-18",
-    "integrationState": "current-live-runtime-reconciled-with-unpublished-theme-qa-authorized",
+    "integrationState": "current-live-runtime-reconciled-with-unpublished-theme-qa-staged",
     "runtimeWarningFallback": "represented-with-customer-safe-fail-closed-copy",
     "structuredFilterHelper": "represented-as-sanitized-pure-exact-20-contract",
-    "approvedCustomerCopy": "represented-as-versioned-customer-copy-v2-contract-with-shared-record-mutation-disabled",
+    "approvedCustomerCopy": "represented-as-content-only-versioned-customer-copy-v2-contract",
+    "providerWriteHistory": "recorded-separately-as-applied-readback-with-consumed-approval",
     "privateContractOrchestration": "excluded-and-replaced-by-public-release-safety-and-customer-copy-guards"
   },
   "includedRoots": [
@@ -78,15 +81,21 @@
     ]
   },
   "approvedPublicCopy": {
-    "status": "customer-copy-v2-shared-record-approval-pending",
+    "status": "customer-copy-v2-content-locked-provider-write-applied",
     "sourceReview": "https://github.com/Mochirii-Wushu/Mochirii/pull/459",
+    "providerWriteHistory": {
+      "record": "apps/shopify-theme/content/customer-facing-copy-approval-packet.md",
+      "status": "applied-readback-verified",
+      "appliedDate": "2026-07-18",
+      "approvalReusable": false
+    },
     "publicationAuthorized": false,
     "providerMutationAuthorized": false,
     "commerceAuthorized": false,
     "files": [
       {
         "path": "apps/shopify-theme/content/approved-customer-copy.json",
-        "sha256": "47de1b9e92c0741a91bee230588ec16657596e55f31485743b8b1172acb91812"
+        "sha256": "38ca59fed5d04a1b044559dc55fad16bc1dcb24b6cee62dbe72bb8293be2b4a5"
       }
     ]
   },
