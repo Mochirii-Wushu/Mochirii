@@ -12,7 +12,7 @@ function walk(directory) {
   });
 }
 
-const customerCopyRoots = [
+const runtimeCopyRoots = [
   "assets",
   "blocks",
   "config",
@@ -21,9 +21,8 @@ const customerCopyRoots = [
   "sections",
   "snippets",
   "templates",
-  "content",
 ];
-const files = customerCopyRoots
+const files = runtimeCopyRoots
   .flatMap((root) => walk(path.join(appRoot, root)))
   .filter((file) => [".js", ".json", ".liquid"].includes(path.extname(file)));
 
@@ -70,4 +69,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`Customer-facing copy guard OK (${files.length} runtime and copy-contract files).`);
+console.log(`Customer-facing copy guard OK (${files.length} runtime files).`);

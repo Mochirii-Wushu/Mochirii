@@ -25,7 +25,7 @@
             <div class="cart-line" role="listitem">
               <a class="cart-line__image" href="{{ item.url }}" aria-label="{{ item.product.title | escape }}">
                 {% if item.image %}
-                  {% assign cart_image_alt = item.image.alt | default: item.product.title %}
+                  {% assign cart_image_alt = item.image.alt | strip %}
                   {{ item.image | image_url: width: 240 | image_tag: loading: 'lazy', alt: cart_image_alt, sizes: '104px' }}
                 {% else %}
                   <span>Image unavailable</span>

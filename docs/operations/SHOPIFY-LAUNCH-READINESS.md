@@ -302,7 +302,7 @@ All items in this section must be Ready before payment setup begins.
 
 | ID | Required decision | Accountable role | Status |
 | --- | --- | --- | --- |
-| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the reconciled foundation passed local checks on 2026-07-19, but the updated PR head still requires remote checks, accountable human review and a protected merge; downstream product and storefront packages must be validated again at their own final source-bound commits |
+| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the prior PR #480 head passed local and required checks, but the revised implementation is not yet committed, human-reviewed, merged or revalidated at its final source-bound commit |
 | QA-02 | Verify all twenty PDPs expose the reviewed facts without generic warning or other evidence fallbacks | Theme engineer plus product evidence custodian | Blocked — all 20 rendered required field groups, but 15 use the generic warning fallback |
 | QA-03 | Verify five collections, filters, ingredient search, misspellings, sold-out state, cart, contact form, policies, privacy choices and branded 404 | Theme engineer | Blocked — baseline provider smokes passed for the named routes and exact/zero-result search, but misspellings, sold-out and server-error paths remain Pending; branch changes are not on the candidate theme |
 | QA-04 | Pass keyboard, screen-reader announcements, 200 percent zoom, focus order, error handling, contrast and touch navigation at 360x800, 390x844, 768x1024 and 1440x900 | Theme engineer | Blocked — viewport, overflow, broken-image and code-level contrast checks passed; assistive-technology and 200 percent zoom acceptance remain Pending |
@@ -335,9 +335,7 @@ The revised launch plan authorizes exactly one prepayment staging class: upload
 the reviewed package built from merged `main` to existing unpublished candidate
 theme `141514408011` for `shop.mochirii.com`. The upload may occur before the
 product and operational gates become Ready so candidate QA can proceed, but it
-cannot make any launch gate Ready by itself. QA-09 may therefore be performed
-early only under the entry conditions below; Gate E still cannot become Ready
-until Gate D is Ready and QA-07 through QA-09 all pass.
+cannot make any launch gate Ready by itself.
 
 - **Entry:** PR #480 or its scoped successor has accountable human review, is
   merged through protected `main`, required checks are green at the merge

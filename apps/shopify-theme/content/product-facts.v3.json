@@ -1,0 +1,478 @@
+{
+  "$schema": "./product-facts.v3.schema.json",
+  "schema_version": 3,
+  "revision": "2026-07-19-v3-scaffold",
+  "locale": "en-US",
+  "brand": "Mochirii Cosmetics",
+  "market": {
+    "country": "US",
+    "currency": "USD"
+  },
+  "brand_mark": {
+    "reference_version": "2026-07-19",
+    "canonical_emblem": {
+      "asset_path": "apps/web/public/assets/img/brand/emblem.webp",
+      "sha256": "ed9fe4c522bc2b0d1c2072c1c098f241ee52f0ceec0307cb531ce440e730bb60"
+    },
+    "storefront_derivative": {
+      "asset_path": "apps/shopify-theme/assets/mochirii-emblem.webp",
+      "sha256": "ad96d3428572404d9f5c1d7387669b5680920079cdf8cc637fdebfa217d00df4"
+    },
+    "wordmark": "Mochirii Cosmetics"
+  },
+  "shopify_publication": {
+    "schema_version": 1,
+    "product_fields": {
+      "handle": {
+        "source": "handle",
+        "write_target": "product.handle",
+        "readback": "product.handle"
+      },
+      "title": {
+        "source": "public_title",
+        "write_target": "product.title",
+        "readback": "product.title"
+      },
+      "description": {
+        "source": "facts.description",
+        "write_target": "product.description_html",
+        "readback": "product.description_html"
+      },
+      "seo_title": {
+        "source": "facts.seo_title",
+        "write_target": "product.seo.title",
+        "readback": "product.seo.title"
+      },
+      "seo_description": {
+        "source": "facts.seo_description",
+        "write_target": "product.seo.description",
+        "readback": "product.seo.description"
+      }
+    },
+    "metafields": {
+      "functional_identity": {
+        "source": "facts.functional_identity",
+        "namespace": "custom",
+        "key": "functional_identity",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.functional_identity"
+      },
+      "card_benefit": {
+        "source": "facts.card_benefit",
+        "namespace": "custom",
+        "key": "card_benefit",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.card_benefit"
+      },
+      "benefits": {
+        "source": "facts.benefits",
+        "namespace": "custom",
+        "key": "benefits",
+        "type": "list.single_line_text_field",
+        "readback": "product.metafields.custom.benefits"
+      },
+      "skin_type": {
+        "source": "facts.skin_type",
+        "namespace": "custom",
+        "key": "skin_type",
+        "type": "list.single_line_text_field",
+        "readback": "product.metafields.custom.skin_type"
+      },
+      "appearance_concerns": {
+        "source": "facts.appearance_concerns",
+        "namespace": "custom",
+        "key": "appearance_concerns",
+        "type": "list.single_line_text_field",
+        "readback": "product.metafields.custom.appearance_concerns"
+      },
+      "routine_step": {
+        "source": "facts.routine_step",
+        "namespace": "custom",
+        "key": "routine_step",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.routine_step"
+      },
+      "usage_directions": {
+        "source": "facts.usage_directions",
+        "namespace": "custom",
+        "key": "usage_directions",
+        "type": "json",
+        "readback": "product.metafields.custom.usage_directions"
+      },
+      "key_ingredients": {
+        "source": "facts.key_ingredients",
+        "namespace": "custom",
+        "key": "key_ingredients",
+        "type": "json",
+        "readback": "product.metafields.custom.key_ingredients"
+      },
+      "ingredients_inci": {
+        "source": "facts.ingredients_inci",
+        "namespace": "custom",
+        "key": "ingredients_inci",
+        "type": "multi_line_text_field",
+        "readback": "product.metafields.custom.ingredients_inci"
+      },
+      "warnings": {
+        "source": "facts.warnings",
+        "namespace": "custom",
+        "key": "warnings",
+        "type": "json",
+        "readback": "product.metafields.custom.warnings"
+      },
+      "texture": {
+        "source": "facts.texture",
+        "namespace": "custom",
+        "key": "texture",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.texture"
+      },
+      "finish": {
+        "source": "facts.finish",
+        "namespace": "custom",
+        "key": "finish",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.finish"
+      },
+      "fragrance_status": {
+        "source": "facts.fragrance_status",
+        "namespace": "custom",
+        "key": "fragrance_status",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.fragrance_status"
+      },
+      "country_of_origin": {
+        "source": "facts.country_of_origin",
+        "namespace": "custom",
+        "key": "country_of_origin",
+        "type": "single_line_text_field",
+        "readback": "product.metafields.custom.country_of_origin"
+      },
+      "package_details": {
+        "source": "facts.package_details",
+        "namespace": "custom",
+        "key": "package_details",
+        "type": "multi_line_text_field",
+        "readback": "product.metafields.custom.package_details"
+      },
+      "certifications": {
+        "source": "facts.certifications",
+        "namespace": "custom",
+        "key": "certifications",
+        "type": "json",
+        "readback": "product.metafields.custom.certifications"
+      },
+      "volume": {
+        "source": "facts.volume",
+        "namespace": "custom",
+        "key": "volume",
+        "type": "json",
+        "readback": "product.metafields.custom.volume"
+      },
+      "complementary_products": {
+        "source": "facts.complementary_products",
+        "namespace": "custom",
+        "key": "complementary_products",
+        "type": "list.product_reference",
+        "readback": "product.metafields.custom.complementary_products"
+      }
+    },
+    "native_fields": {
+      "collection_handles": {
+        "source": "facts.collection_handles",
+        "write_target": "product.collections[].handle",
+        "readback": "product.collections[].handle"
+      },
+      "media": {
+        "source": "facts.media",
+        "media_source": "facts.media[].public_reference",
+        "alt_text_source": "facts.media[].alt_text",
+        "write_target": "product.media[].original_source",
+        "readback": "product.media[]"
+      }
+    }
+  },
+  "status": "pending-review",
+  "products": [
+    {
+      "handle": "peptide-smoothing-serum",
+      "public_title": "Peptide Smoothing Serum",
+      "review_status": "blocked",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "failed", "emblem_matches": false, "wordmark_matches": true },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "natural-retinol-alternative-oil-serum",
+      "public_title": "Natural Retinol Alternative Oil Serum",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "vitamin-c-serum",
+      "public_title": "Vitamin C Serum",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "hyaluronic-day-cream",
+      "public_title": "Hyaluronic Day Cream",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "moisturising-day-cream",
+      "public_title": "Moisturising Day Cream",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "double-hydration-boost-gel",
+      "public_title": "Double Hydration Boost Gel",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "sensitive-skin-oil-to-milk-cleanser",
+      "public_title": "Sensitive Skin Oil-to-Milk Cleanser",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "biphasic-makeup-remover-fragrance-free",
+      "public_title": "BiPhasic Make-up Remover, Fragrance Free",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "collagen-night-cream",
+      "public_title": "Collagen Night Cream",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "ceramide-barrier-night-cream",
+      "public_title": "Ceramide Barrier Night Cream",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "niacinamide-gel-moisturiser",
+      "public_title": "Niacinamide Gel Moisturiser",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "gentle-cleansing-milk",
+      "public_title": "Gentle Cleansing Milk",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "aha-exfoliating-concentrate",
+      "public_title": "AHA Exfoliating Concentrate",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "all-in-one-facial-oil",
+      "public_title": "All-in-One Facial Oil",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "retinol-alternative-moisturiser",
+      "public_title": "Retinol Alternative Moisturiser",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "hydrating-toner",
+      "public_title": "Hydrating Toner",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "sensitive-face-body-cleanser",
+      "public_title": "Sensitive Face & Body Cleanser",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "cleansing-foam",
+      "public_title": "Cleansing Foam",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "caffeine-gel-booster",
+      "public_title": "Caffeine Gel Booster",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    },
+    {
+      "handle": "smoothing-eye-cream",
+      "public_title": "Smoothing Eye Cream",
+      "review_status": "pending",
+      "review": {
+        "formula_mapping": "pending",
+        "front_label": "pending",
+        "technical_panel": "pending",
+        "outer_box": "pending",
+        "brand_mark": { "status": "pending", "emblem_matches": null, "wordmark_matches": null },
+        "media_unit_match": "pending"
+      },
+      "facts": null
+    }
+  ]
+}

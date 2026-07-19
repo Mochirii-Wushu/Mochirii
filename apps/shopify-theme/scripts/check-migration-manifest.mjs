@@ -63,7 +63,7 @@ if (manifest.selection?.postSnapshotMainReconciled !== true ||
 if (manifest.sourceReconciliation?.status !== "live-runtime-reconciled-customer-copy-v2-applied" ||
     manifest.sourceReconciliation?.recordedDate !== manifest.snapshotDate ||
     manifest.sourceReconciliation?.integrationState !== "current-live-runtime-reconciled-with-unpublished-theme-qa-staged" ||
-    manifest.sourceReconciliation?.runtimeWarningFallback !== "represented-with-customer-safe-fail-closed-copy" ||
+    manifest.sourceReconciliation?.runtimeWarningPolicy !== "represented-as-label-matched-text-or-approved-omission" ||
     manifest.sourceReconciliation?.structuredFilterHelper !== "represented-as-sanitized-pure-exact-20-contract" ||
     manifest.sourceReconciliation?.approvedCustomerCopy !== "represented-as-content-only-versioned-customer-copy-v2-contract" ||
     manifest.sourceReconciliation?.providerWriteHistory !== "recorded-separately-as-applied-readback-with-consumed-approval" ||

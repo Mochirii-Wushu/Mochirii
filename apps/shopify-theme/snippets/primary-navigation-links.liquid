@@ -53,11 +53,12 @@
       </li>
     {% endfor %}
   {% else %}
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.root_url }}" {% if template.name == 'index' %}aria-current="page"{% endif %}>Home</a></span></li>
     <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ catalog_url }}" {% if template.name == 'collection' or template.name == 'product' %}aria-current="page"{% endif %}>Shop</a></span></li>
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.collections_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Collections</a></span></li>
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ about_url }}" {% if request.path == about_url or request.path contains 'pages/about' %}aria-current="page"{% endif %}>About</a></span></li>
-    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ contact_url }}" {% if request.path == contact_url or request.path contains 'pages/contact' %}aria-current="page"{% endif %}>Contact</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ product_type_url }}">Product type</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ skin_needs_url }}">Skin needs</a></span></li>
+    <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routine_url }}" {% if template.name == 'list-collections' %}aria-current="page"{% endif %}>Routine</a></span></li>
+    {% if about_url != blank %}<li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ about_url }}" {% if request.path == about_url %}aria-current="page"{% endif %}>About</a></span></li>{% endif %}
+    {% if help_url != blank %}<li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ help_url }}" {% if request.path == help_url %}aria-current="page"{% endif %}>Help</a></span></li>{% endif %}
   {% endif %}
   <li class="site-nav__item"><span class="site-nav__link-row"><a href="{{ routes.search_url }}" {% if template.name == 'search' %}aria-current="page"{% endif %}>Search</a></span></li>
   <li class="site-nav__item">

@@ -6,7 +6,7 @@
   </div>
 </section>
 
-<section class="section section-soft">
+<section class="section section-soft" id="routine-collections">
   <div class="section-inner">
     {% assign catalog_collection = collections['mochirii-cosmetics'] %}
     {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
@@ -25,14 +25,11 @@
           {% assign routine_url = routine_collection.url %}
         {% endif %}
         {% assign routine_image = routine_collection.image %}
-        {% if routine_image == blank and routine_collection.products_count > 0 %}
-          {% assign routine_image = routine_collection.products.first.featured_image %}
-        {% endif %}
 
         <article class="collection-card">
           <a class="collection-card__image" href="{{ routine_url }}" aria-label="{{ routine_title | escape }}">
             {% if routine_image != blank %}
-              {% assign routine_alt = routine_image.alt | default: routine_title %}
+              {% assign routine_alt = routine_image.alt | strip %}
               {{ routine_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: routine_alt, sizes: '(min-width: 1080px) 25vw, (min-width: 720px) 50vw, 100vw' }}
             {% else %}
               <span class="media-placeholder">

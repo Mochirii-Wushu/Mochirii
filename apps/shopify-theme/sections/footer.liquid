@@ -1,5 +1,9 @@
 <footer class="site-footer">
-  {% assign contact_url = routes.root_url | append: 'pages/contact' %}
+  {% assign contact_page = pages['contact'] %}
+  {% assign faq_page = pages['faq'] %}
+  {% assign about_page = pages['about'] %}
+  {% assign ingredients_page = pages['ingredients-standards'] %}
+  {% assign accessibility_page = pages['accessibility'] %}
   {% assign support_menu = section.settings.footer_menu %}
   {% if support_menu == blank %}
     {% assign support_menu = linklists['footer'] %}
@@ -16,7 +20,8 @@
         </span>
       </a>
       <p class="footer-note">{{ section.settings.summary_text | default: settings.footer_summary }}</p>
-      <p class="footer-note footer-note--fine">Questions about a product or order? <a href="{{ contact_url }}">Contact Mochirii Cosmetics.</a></p>
+      {% if contact_page != blank %}<p class="footer-note footer-note--fine">Questions about a product or order? <a href="{{ contact_page.url }}">Contact Mochirii Cosmetics.</a></p>{% endif %}
+      <a class="footer-guild-link" href="https://mochirii.com" rel="noopener noreferrer">Visit Mochirii Guild</a>
     </div>
 
     <div class="footer-nav-groups">
@@ -41,24 +46,27 @@
             {% endunless %}
           {% endfor %}
         {% else %}
-          <a href="{{ contact_url }}">Contact</a>
-          <a href="https://mochirii.com" rel="noopener">Mochirii Guild</a>
+          {% if contact_page != blank %}<a href="{{ contact_page.url }}">Contact</a>{% endif %}
+          {% if faq_page != blank %}<a href="{{ faq_page.url }}">Frequently asked questions</a>{% endif %}
+          {% if about_page != blank %}<a href="{{ about_page.url }}">About</a>{% endif %}
+          {% if ingredients_page != blank %}<a href="{{ ingredients_page.url }}">Ingredients &amp; Standards</a>{% endif %}
+          {% if accessibility_page != blank %}<a href="{{ accessibility_page.url }}">Accessibility</a>{% endif %}
         {% endif %}
       </nav>
 
       <nav class="footer-links" aria-label="Policy navigation">
         <h2>Policies</h2>
         {% if shop.shipping_policy != blank %}
-          <a href="{{ shop.shipping_policy.url }}">Shipping policy</a>
+          <a href="{{ shop.shipping_policy.url }}">Shipping</a>
         {% endif %}
         {% if shop.refund_policy != blank %}
-          <a href="{{ shop.refund_policy.url }}">Refund policy</a>
+          <a href="{{ shop.refund_policy.url }}">Returns</a>
         {% endif %}
         {% if shop.privacy_policy != blank %}
-          <a href="{{ shop.privacy_policy.url }}">Privacy policy</a>
+          <a href="{{ shop.privacy_policy.url }}">Privacy</a>
         {% endif %}
         {% if shop.terms_of_service != blank %}
-          <a href="{{ shop.terms_of_service.url }}">Terms of service</a>
+          <a href="{{ shop.terms_of_service.url }}">Terms</a>
         {% endif %}
       </nav>
     </div>

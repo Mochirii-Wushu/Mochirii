@@ -149,8 +149,9 @@ textarea:focus-visible,
   display: flex;
   min-height: 38px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: var(--space-4);
+  text-align: center;
 }
 
 .store-mode-strip a {
@@ -405,7 +406,7 @@ textarea:focus-visible,
 
 .mobile-menu__panel .site-nav__sublist {
   position: static;
-  display: grid;
+  display: none;
   width: 100%;
   min-width: 0;
   max-width: none;
@@ -416,6 +417,10 @@ textarea:focus-visible,
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.mobile-menu__panel .site-nav__item--expanded > .site-nav__sublist {
+  display: grid;
 }
 
 .mobile-menu__panel .site-nav__toggle {
@@ -985,6 +990,26 @@ input[disabled] {
   gap: var(--space-3);
 }
 
+.product-card__size,
+.product-card__availability {
+  margin: 0;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.product-card__size {
+  min-height: 1.5em;
+}
+
+.product-card__availability {
+  color: var(--ink-2);
+}
+
+.product-card__price-status {
+  display: grid;
+  gap: 2px;
+}
+
 .price {
   margin: 0;
   color: var(--ink-0);
@@ -1125,7 +1150,32 @@ input[disabled] {
 
 .product-layout {
   align-items: start;
-  padding-block: var(--space-20);
+  padding-block: var(--space-10) var(--space-20);
+}
+
+.breadcrumbs {
+  padding-top: var(--space-6);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumbs li:not(:last-child)::after {
+  margin-left: var(--space-2);
+  content: "/";
+}
+
+.breadcrumbs a {
+  color: var(--jade-0);
+  text-underline-offset: 3px;
 }
 
 .product-gallery {
@@ -1301,6 +1351,43 @@ input[disabled] {
 
 .product-title-block {
   gap: var(--space-3);
+}
+
+.product-functional-identity,
+.product-primary-benefit {
+  max-width: 62ch;
+  margin: 0;
+}
+
+.product-functional-identity {
+  color: var(--ink-1);
+  font-size: var(--text-lg);
+  font-weight: 750;
+}
+
+.product-primary-benefit {
+  color: var(--ink-2);
+  font-size: var(--text-lg);
+}
+
+.product-purchase-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3) var(--space-5);
+}
+
+.product-size {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.product-size span {
+  margin-right: var(--space-2);
+  color: var(--jade-0);
+  font-size: var(--text-xs);
+  font-weight: 850;
+  text-transform: uppercase;
 }
 
 .product-kicker {
@@ -1488,6 +1575,44 @@ input[disabled] {
 .product-accordions details > :not(summary) {
   padding: 0 var(--space-5) var(--space-5);
   color: var(--ink-2);
+}
+
+.product-fact-list,
+.product-service-links {
+  margin-block: 0;
+  padding-left: calc(var(--space-5) + var(--space-2));
+}
+
+.product-fact-list li + li,
+.product-service-links li + li {
+  margin-top: var(--space-2);
+}
+
+.product-service-links a {
+  color: var(--jade-0);
+  font-weight: 750;
+  text-underline-offset: 3px;
+}
+
+.product-detail-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.product-detail-list div {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.product-detail-list dt {
+  color: var(--ink-1);
+  font-size: var(--text-sm);
+  font-weight: 850;
+}
+
+.product-detail-list dd {
+  margin: 0;
 }
 
 .product-info-grid {
@@ -1731,6 +1856,77 @@ input[disabled] {
   border-color: rgba(255, 255, 255, 0.62);
   background: transparent;
   color: #ffffff;
+}
+
+.discovery-grid,
+.reassurance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.discovery-grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.discovery-grid li {
+  min-height: 100%;
+}
+
+.discovery-card,
+.reassurance-grid article {
+  min-height: 100%;
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius-1);
+  background: var(--surface-0);
+  box-shadow: 0 16px 38px rgba(18, 42, 32, 0.08);
+}
+
+.discovery-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  color: var(--ink-0);
+  text-decoration: none;
+}
+
+.discovery-card:hover,
+.discovery-card:focus-visible {
+  border-color: var(--jade-0);
+}
+
+.discovery-card span {
+  color: var(--jade-0);
+  font-size: var(--text-xs);
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.discovery-card strong {
+  font-size: var(--text-lg);
+}
+
+.discovery-card small {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+}
+
+.store-reassurance {
+  background: var(--cream-1);
+}
+
+.reassurance-grid article {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.reassurance-grid p {
+  color: var(--ink-2);
 }
 
 .hero-showcase {
@@ -2036,9 +2232,8 @@ input[disabled] {
 }
 
 .product-recommendations {
-  display: grid;
-  gap: var(--space-2);
-  padding-top: var(--space-6);
+  display: block;
+  padding-block: var(--space-16);
   border-top: 1px solid var(--line-0);
 }
 
@@ -2145,6 +2340,17 @@ input[disabled] {
   color: rgba(255, 250, 240, 0.54);
 }
 
+.footer-guild-link {
+  width: fit-content;
+  color: rgba(255, 250, 240, 0.56);
+  font-size: var(--text-sm);
+  text-underline-offset: 3px;
+}
+
+.footer-guild-link:hover {
+  color: var(--gold-1);
+}
+
 .footer-nav-groups {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2205,7 +2411,9 @@ input[disabled] {
   .value-grid,
   .ritual-grid,
   .routine-visual-grid,
-  .product-quick-facts {
+  .product-quick-facts,
+  .discovery-grid,
+  .reassurance-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2333,7 +2541,9 @@ input[disabled] {
   .footer-nav-groups,
   .ingredient-grid,
   .contact-grid,
-  .review-state {
+  .review-state,
+  .discovery-grid,
+  .reassurance-grid {
     grid-template-columns: 1fr;
   }
 

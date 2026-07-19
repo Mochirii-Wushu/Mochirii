@@ -1,52 +1,61 @@
 {% assign selected_variant = product.selected_or_first_available_variant %}
-{% assign volume = product.metafields.custom.volume %}
-{% assign skin_type = product.metafields.custom.skin_type %}
-{% assign key_ingredients = product.metafields.custom.key_ingredients %}
-{% assign aroma = product.metafields.custom.aroma %}
-{% assign usage_directions = product.metafields.custom.usage_directions %}
-{% assign ingredients_inci = product.metafields.custom.ingredients_inci %}
-{% if ingredients_inci == blank %}
-  {% assign ingredients_inci = product.metafields.custom.materials %}
+{% assign catalog_collection = collections['mochirii-cosmetics'] %}
+{% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
+{% if catalog_collection != blank and catalog_collection.products_count > 0 %}
+  {% assign catalog_url = catalog_collection.url %}
 {% endif %}
-{% assign warnings = product.metafields.custom.warnings %}
-{% assign country_of_origin = product.metafields.custom.country_of_origin %}
-{% assign certifications = product.metafields.custom.certifications %}
-{% assign routine_step = product.metafields.custom.routine_step %}
-{% assign replenishment_interval = product.metafields.custom.replenishment_interval %}
+{% assign faq_page = pages['faq'] %}
 
-{% assign routine_collection = blank %}
-{% for product_collection in product.collections %}
-  {% if product_collection.handle == 'cleanse-tone' or product_collection.handle == 'hydrate-barrier' or product_collection.handle == 'brighten-smooth' or product_collection.handle == 'age-support-nourish' %}
-    {% assign routine_collection = product_collection %}
-    {% break %}
-  {% endif %}
-{% endfor %}
-{% if routine_collection == blank %}
-  {% assign routine_collection = collections['mochirii-cosmetics'] %}
+{% assign functional_identity = product.metafields.custom.functional_identity.value | strip %}
+{% assign card_benefit = product.metafields.custom.card_benefit.value | strip %}
+{% assign benefits = product.metafields.custom.benefits.value %}
+{% assign volume_facts = product.metafields.custom.volume.value %}
+{% assign volume_display = volume_facts.display | strip %}
+{% assign skin_types = product.metafields.custom.skin_type.value %}
+{% assign appearance_concerns = product.metafields.custom.appearance_concerns.value %}
+{% assign routine_step = product.metafields.custom.routine_step.value | strip %}
+{% assign usage_directions = product.metafields.custom.usage_directions.value %}
+{% assign usage_text = usage_directions.text | strip %}
+{% assign usage_frequency = usage_directions.frequency | strip %}
+{% assign usage_amount = usage_directions.amount | strip %}
+{% assign usage_timing = usage_directions.routine_timing %}
+{% assign usage_rinse_behavior = usage_directions.rinse_behavior | strip %}
+{% assign key_ingredients = product.metafields.custom.key_ingredients.value %}
+{% assign ingredients_inci = product.metafields.custom.ingredients_inci.value | strip %}
+{% assign warnings = product.metafields.custom.warnings.value %}
+{% assign warning_text = warnings.text | strip %}
+{% assign warning_incompatibilities = warnings.incompatibilities %}
+{% assign show_warnings = false %}
+{% if warnings.review_result == 'label-matched' and warning_text != blank %}
+  {% assign show_warnings = true %}
 {% endif %}
+{% assign texture = product.metafields.custom.texture.value | strip %}
+{% assign finish = product.metafields.custom.finish.value | strip %}
+{% assign fragrance_status = product.metafields.custom.fragrance_status.value | strip %}
+{% assign country_of_origin = product.metafields.custom.country_of_origin.value | strip %}
+{% assign package_details = product.metafields.custom.package_details.value | strip %}
+{% assign certifications = product.metafields.custom.certifications.value %}
+{% assign certification_items = certifications.items %}
+{% assign show_certifications = false %}
+{% if certifications.review_result == 'verified-wording' and certification_items != blank %}
+  {% assign show_certifications = true %}
+{% endif %}
+{% assign complementary_products = product.metafields.custom.complementary_products.value %}
 
-{% assign description_text = product.description | strip_html | downcase %}
-{% assign legacy_brand_token = 'vele' | append: 'sari' %}
-{% assign supplier_token = 'self' | append: 'named' %}
-{% assign supplier_spaced_token = 'self' | append: ' named' %}
-{% assign private_label_token = 'private' | append: ' label' %}
-{% assign fulfillment_token = 'drop' | append: 'shipping' %}
-{% assign customer_offer_token = 'offer your' | append: ' customers' %}
-{% assign professional_token = 'professional' | append: ' skincare' %}
-{% assign inflated_token = 'ultimate' | append: ' solution' %}
-{% assign exclusive_token = 'exclu' | append: 'sive' %}
-{% assign customer_empower_token = 'empower your' | append: ' customers' %}
-{% assign description_needs_review = false %}
-{% if description_text contains legacy_brand_token or description_text contains supplier_token or description_text contains supplier_spaced_token or description_text contains private_label_token or description_text contains fulfillment_token or description_text contains customer_offer_token or description_text contains professional_token or description_text contains inflated_token or description_text contains exclusive_token or description_text contains customer_empower_token %}
-  {% assign description_needs_review = true %}
-{% endif %}
+<nav class="breadcrumbs section-inner" aria-label="Breadcrumb">
+  <ol role="list">
+    <li><a href="{{ routes.root_url }}">Home</a></li>
+    <li><a href="{{ catalog_url }}">Shop</a></li>
+    <li aria-current="page">{{ product.title }}</li>
+  </ol>
+</nav>
 
 <section class="product-layout section-inner" data-product-section data-product-url="{{ product.url }}">
   <div class="product-gallery">
     {% if product.media.size > 0 %}
       <div class="product-media-list" tabindex="0" aria-label="Product media carousel">
         {% for media in product.media limit: 6 %}
-          {% assign product_media_alt = media.alt | default: product.title %}
+          {% assign product_media_alt = media.alt | strip %}
           <div
             id="ProductMedia-{{ section.id }}-{{ forloop.index }}"
             class="product-media"
@@ -73,7 +82,7 @@
               data-media-id="{{ media.id }}"
               aria-label="View {{ product.title | escape }} media {{ forloop.index }}"
             >
-              {% assign thumbnail_alt = media.alt | default: product.title %}
+              {% assign thumbnail_alt = media.alt | strip %}
               {{ media.preview_image | image_url: width: 260 | image_tag: loading: 'lazy', alt: thumbnail_alt, sizes: '120px' }}
             </a>
           {% endfor %}
@@ -92,32 +101,27 @@
   <div class="product-details">
     <div class="product-title-block">
       <div class="product-kicker">
-        <span>{{ routine_step | metafield_text | default: product.type | default: 'Skincare' }}</span>
-        <span data-product-availability>{% if selected_variant.available %}In stock{% else %}Sold out{% endif %}</span>
+        {% if routine_step != blank %}<span>{{ routine_step }}</span>{% endif %}
+        <span data-product-availability>{% if selected_variant.available %}In stock{% else %}Out of stock{% endif %}</span>
       </div>
       <p class="eyebrow">Mochirii Cosmetics</p>
       <h1>{{ product.title }}</h1>
-      <p class="price price--large" data-product-price>{{ selected_variant.price | money }}</p>
+      {% if functional_identity != blank %}
+        <p class="product-functional-identity">{{ functional_identity }}</p>
+      {% endif %}
+      {% if card_benefit != blank %}
+        <p class="product-primary-benefit">{{ card_benefit }}</p>
+      {% endif %}
+      <div class="product-purchase-summary">
+        <p class="price price--large" data-product-price>{{ selected_variant.price | money }}</p>
+        {% if volume_display != blank %}<p class="product-size"><span>Size</span> {{ volume_display }}</p>{% endif %}
+      </div>
       <p class="visually-hidden" data-product-variant-status aria-live="polite" aria-atomic="true"></p>
     </div>
 
-    {% if volume != blank or skin_type != blank or key_ingredients != blank %}
-      <dl class="product-quick-facts" aria-label="Product quick facts">
-        {% if volume != blank %}
-          <div><dt>Size</dt><dd>{{ volume | metafield_text }}</dd></div>
-        {% endif %}
-        {% if skin_type != blank %}
-          <div><dt>Suitable for</dt><dd>{{ skin_type | metafield_text }}</dd></div>
-        {% endif %}
-        {% if key_ingredients != blank %}
-          <div><dt>Key ingredients</dt><dd>{{ key_ingredients | metafield_text }}</dd></div>
-        {% endif %}
-      </dl>
-    {% endif %}
-
     {% form 'product', product, class: 'product-form product-purchase' %}
       {% if form.errors %}
-        <div class="form-message" role="alert">{{ form.errors | default_errors }}</div>
+        <div class="form-message" role="alert">We could not add this product. Review your selection and try again.</div>
       {% endif %}
 
       {% if product.variants.size > 1 %}
@@ -133,7 +137,7 @@
                 {% if variant == selected_variant %}selected="selected"{% endif %}
                 {% unless variant.available %}disabled="disabled"{% endunless %}
               >
-                {{ variant.title }}{% unless variant.available %} - Sold out{% endunless %}
+                {{ variant.title }}{% unless variant.available %} - Out of stock{% endunless %}
               </option>
             {% endfor %}
           </select>
@@ -148,84 +152,136 @@
           <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1" data-product-quantity {% unless selected_variant.available %}disabled="disabled"{% endunless %}>
         </div>
         <button class="button" type="submit" name="add" data-add-to-cart {% unless selected_variant.available %}disabled="disabled"{% endunless %}>
-          {% if selected_variant.available %}Add to cart{% else %}Sold out{% endif %}
+          {% if selected_variant.available %}Add to cart{% else %}Out of stock{% endif %}
         </button>
       </div>
     {% endform %}
 
     <div class="product-accordions" aria-label="Product information">
-      {% if product.description != blank and description_needs_review == false %}
+      {% if benefits != blank %}
         <details open>
-          <summary>Description</summary>
-          <div class="rte product-description">{{ product.description }}</div>
+          <summary>What it does</summary>
+          <ul class="product-fact-list">
+            {% for benefit in benefits limit: 3 %}<li>{{ benefit }}</li>{% endfor %}
+          </ul>
         </details>
       {% endif %}
-      {% if usage_directions != blank %}
-        <details {% if product.description == blank or description_needs_review %}open{% endif %}>
+      {% if skin_types != blank or appearance_concerns != blank %}
+        <details {% if benefits == blank %}open{% endif %}>
+          <summary>Best for</summary>
+          <dl class="product-detail-list">
+            {% if skin_types != blank %}
+              <div>
+                <dt>Skin type</dt>
+                <dd>{{ skin_types | join: ', ' }}</dd>
+              </div>
+            {% endif %}
+            {% if appearance_concerns != blank %}
+              <div>
+                <dt>Appearance concerns</dt>
+                <dd>{{ appearance_concerns | join: ', ' }}</dd>
+              </div>
+            {% endif %}
+          </dl>
+        </details>
+      {% endif %}
+      {% if usage_text != blank or usage_frequency != blank or usage_amount != blank or usage_timing != blank or usage_rinse_behavior != blank %}
+        <details {% if benefits == blank and skin_types == blank and appearance_concerns == blank %}open{% endif %}>
           <summary>How to use</summary>
-          <p>{{ usage_directions | metafield_text }}</p>
+          {% if usage_text != blank %}<p>{{ usage_text | newline_to_br }}</p>{% endif %}
+          <dl class="product-detail-list">
+            {% if usage_frequency != blank %}<div><dt>Frequency</dt><dd>{{ usage_frequency }}</dd></div>{% endif %}
+            {% if usage_amount != blank %}<div><dt>Amount</dt><dd>{{ usage_amount }}</dd></div>{% endif %}
+            {% if usage_timing != blank %}<div><dt>Routine timing</dt><dd>{{ usage_timing | join: ', ' }}</dd></div>{% endif %}
+            {% if usage_rinse_behavior != blank %}<div><dt>Rinse behavior</dt><dd>{{ usage_rinse_behavior }}</dd></div>{% endif %}
+          </dl>
+        </details>
+      {% endif %}
+      {% if key_ingredients != blank %}
+        <details>
+          <summary>Key ingredients</summary>
+          <ul class="product-fact-list">
+            {% for ingredient in key_ingredients %}
+              {% assign ingredient_name = ingredient.name | strip %}
+              {% assign ingredient_role = ingredient.cosmetic_role | strip %}
+              {% if ingredient_name != blank and ingredient_role != blank %}
+                <li><strong>{{ ingredient_name }}</strong> — {{ ingredient_role }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
         </details>
       {% endif %}
       {% if ingredients_inci != blank %}
         <details>
           <summary>Full ingredients (INCI)</summary>
-          <p>{{ ingredients_inci | metafield_text }}</p>
+          <p>{{ ingredients_inci }}</p>
         </details>
       {% endif %}
-      <details>
-        <summary>Warnings</summary>
-        {% if warnings != blank %}
-          <p>{{ warnings | metafield_text }}</p>
-        {% else %}
-          <p>Warning information is not available on this page. Review the product label before use.</p>
-        {% endif %}
-      </details>
-      {% if country_of_origin != blank or certifications != blank %}
+      {% if show_warnings %}
         <details>
-          <summary>Origin and certifications</summary>
-          {% if country_of_origin != blank %}<p><strong>Origin:</strong> {{ country_of_origin | metafield_text }}</p>{% endif %}
-          {% if certifications != blank %}<p><strong>Product certifications:</strong> {{ certifications | metafield_text }}</p>{% endif %}
+          <summary>Warnings and compatibility</summary>
+          <p>{{ warning_text | newline_to_br }}</p>
+          {% if warning_incompatibilities != blank %}
+            <ul class="product-fact-list">
+              {% for incompatibility in warning_incompatibilities %}<li>{{ incompatibility }}</li>{% endfor %}
+            </ul>
+          {% endif %}
         </details>
       {% endif %}
-      {% if aroma != blank or replenishment_interval != blank %}
+      {% if texture != blank or finish != blank or fragrance_status != blank %}
         <details>
-          <summary>Texture and routine</summary>
-          {% if aroma != blank %}<p><strong>Aroma:</strong> {{ aroma | metafield_text }}</p>{% endif %}
-          {% if replenishment_interval != blank %}<p><strong>Replenishment:</strong> {{ replenishment_interval | metafield_text }}</p>{% endif %}
+          <summary>Texture, finish, and fragrance</summary>
+          <dl class="product-detail-list">
+            {% if texture != blank %}<div><dt>Texture</dt><dd>{{ texture }}</dd></div>{% endif %}
+            {% if finish != blank %}<div><dt>Finish</dt><dd>{{ finish }}</dd></div>{% endif %}
+            {% if fragrance_status != blank %}<div><dt>Fragrance</dt><dd>{{ fragrance_status }}</dd></div>{% endif %}
+          </dl>
         </details>
       {% endif %}
-      {% if shop.shipping_policy != blank or shop.refund_policy != blank %}
+      {% if country_of_origin != blank or package_details != blank or show_certifications %}
         <details>
-          <summary>Shipping and returns</summary>
-          <p>
-            {% if shop.shipping_policy != blank %}<a href="{{ shop.shipping_policy.url }}">Shipping policy</a>{% endif %}
-            {% if shop.shipping_policy != blank and shop.refund_policy != blank %} &middot; {% endif %}
-            {% if shop.refund_policy != blank %}<a href="{{ shop.refund_policy.url }}">Refund policy</a>{% endif %}
-          </p>
+          <summary>Origin, package, and certifications</summary>
+          <dl class="product-detail-list">
+            {% if country_of_origin != blank %}<div><dt>Country of manufacture</dt><dd>{{ country_of_origin }}</dd></div>{% endif %}
+            {% if package_details != blank %}<div><dt>Package</dt><dd>{{ package_details | newline_to_br }}</dd></div>{% endif %}
+            {% if show_certifications %}<div><dt>Product certifications</dt><dd>{{ certification_items | join: ', ' }}</dd></div>{% endif %}
+          </dl>
+        </details>
+      {% endif %}
+      {% if shop.shipping_policy != blank or shop.refund_policy != blank or faq_page != blank %}
+        <details>
+          <summary>Shipping, returns, and help</summary>
+          <ul class="product-service-links">
+            {% if shop.shipping_policy != blank %}<li><a href="{{ shop.shipping_policy.url }}">Shipping</a></li>{% endif %}
+            {% if shop.refund_policy != blank %}<li><a href="{{ shop.refund_policy.url }}">Returns</a></li>{% endif %}
+            {% if faq_page != blank %}<li><a href="{{ faq_page.url }}">Frequently asked questions</a></li>{% endif %}
+          </ul>
         </details>
       {% endif %}
     </div>
-
-    {% if routine_collection != blank and routine_collection.products_count > 1 %}
-      <div class="product-recommendations">
-        <div class="section-head section-head--split">
-          <div>
-            <p class="eyebrow">Complete your routine</p>
-            <h2>{{ routine_collection.title }}</h2>
-          </div>
-          <a class="text-link" href="{{ routine_collection.url }}">View collection</a>
-        </div>
-        <div class="product-grid product-grid--compact" role="list">
-          {% for related_product in routine_collection.products limit: 5 %}
-            {% unless related_product.id == product.id %}
-              {% render 'product-card', product: related_product %}
-            {% endunless %}
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %}
   </div>
 </section>
+
+{% if complementary_products != blank %}
+  <section class="section section-soft product-recommendations" aria-labelledby="RoutineCompanions-{{ section.id }}">
+    <div class="section-inner">
+      <div class="section-head section-head--split">
+        <div>
+          <p class="eyebrow">Build your routine</p>
+          <h2 id="RoutineCompanions-{{ section.id }}">Mochirii routine companions</h2>
+        </div>
+        <a class="text-link" href="{{ catalog_url }}">Shop skincare</a>
+      </div>
+      <div class="product-grid product-grid--compact" role="list" aria-label="Mochirii Cosmetics routine companions">
+        {% for related_product in complementary_products limit: 4 %}
+          {% unless related_product.id == product.id %}
+            {% render 'product-card', product: related_product %}
+          {% endunless %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
 
 {% schema %}
 {

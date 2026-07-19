@@ -13,17 +13,17 @@
       const variantStatus = section.querySelector("[data-product-variant-status]");
       const addButton = section.querySelector("[data-add-to-cart]");
       const quantity = section.querySelector("[data-product-quantity]");
-      const availabilityText = available ? "In stock" : "Sold out";
+      const availabilityText = available ? "In stock" : "Out of stock";
 
       if (price && option?.dataset.price) price.textContent = option.dataset.price;
       if (availability) availability.textContent = availabilityText;
       if (addButton) {
         addButton.disabled = !available;
-        addButton.textContent = available ? "Add to cart" : "Sold out";
+        addButton.textContent = available ? "Add to cart" : "Out of stock";
       }
       if (quantity) quantity.disabled = !available;
       if (variantStatus && option) {
-        const variantName = option.textContent.trim().replace(/\s+/g, " ").replace(/\s+-\s+Sold out$/, "");
+        const variantName = option.textContent.trim().replace(/\s+/g, " ").replace(/\s+-\s+Out of stock$/, "");
         const variantPrice = option.dataset.price ? ` Price ${option.dataset.price}.` : "";
         variantStatus.textContent = `${variantName}.${variantPrice} ${availabilityText}.`;
       }
@@ -116,6 +116,16 @@
       event.stopPropagation();
       setExpanded(false);
       toggle.focus();
+    });
+  }
+
+  for (const mobileMenu of document.querySelectorAll(".mobile-menu")) {
+    const summary = mobileMenu.querySelector(".mobile-menu__summary");
+    mobileMenu.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !mobileMenu.open) return;
+      event.preventDefault();
+      mobileMenu.open = false;
+      summary?.focus();
     });
   }
 })();

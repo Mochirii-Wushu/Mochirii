@@ -108,15 +108,53 @@ for (const token of [
 
 const product = read("sections/main-product.liquid");
 for (const token of [
-  "Warning information is not available on this page. Review the product label before use.",
   "{% form 'product', product, class: 'product-form product-purchase' %}",
   'data-product-variant-status aria-live="polite" aria-atomic="true"',
-  "Complete your routine",
+  "warnings.review_result == 'label-matched'",
+  "{% if show_warnings %}",
+  "certifications.review_result == 'verified-wording'",
+  "{% if show_certifications %}",
+  "product.metafields.custom.functional_identity",
+  "product.metafields.custom.card_benefit",
+  "product.metafields.custom.benefits.value",
+  "product.metafields.custom.skin_type.value",
+  "product.metafields.custom.appearance_concerns.value",
+  "product.metafields.custom.routine_step",
+  "product.metafields.custom.usage_directions",
+  "product.metafields.custom.key_ingredients.value",
+  "product.metafields.custom.ingredients_inci",
+  "product.metafields.custom.warnings",
+  "product.metafields.custom.texture",
+  "product.metafields.custom.finish",
+  "product.metafields.custom.fragrance_status",
+  "product.metafields.custom.country_of_origin",
+  "product.metafields.custom.package_details",
+  "product.metafields.custom.certifications.value",
+  "product.metafields.custom.complementary_products.value",
+  "product.metafields.custom.volume",
+  "volume_facts.display",
+  "usage_directions.text",
+  "usage_directions.frequency",
+  "usage_directions.amount",
+  "usage_directions.routine_timing",
+  "usage_directions.rinse_behavior",
+  "ingredient.name",
+  "ingredient.cosmetic_role",
+  "warning_incompatibilities",
+  "certification_items",
+  "Mochirii routine companions",
 ]) {
   requireText("sections/main-product.liquid", product, token);
 }
-if (product.includes("No additional product-specific warnings are listed")) {
-  failures.push("sections/main-product.liquid: empty warnings must fail closed");
+for (const [label, pattern] of [
+  ["generic warning fallback", /Warning information is not available|No additional product-specific warnings are listed/iu],
+  ["unreviewed materials fallback", /custom[.]materials/iu],
+  ["uncontrolled product type", /product[.]type/iu],
+  ["uncontrolled product tags", /product[.]tags/iu],
+  ["vendor-managed product description", /product[.]description/iu],
+  ["vendor identity", /product[.]vendor/iu],
+]) {
+  if (pattern.test(product)) failures.push(`sections/main-product.liquid: contains ${label}`);
 }
 
 const themeScript = read("assets/mochirii-theme.js");
@@ -169,10 +207,91 @@ if (footer.includes("/pages/data-sharing-opt-out")) {
   failures.push("sections/footer.liquid: privacy choices must come from a configured provider menu link");
 }
 
+const structuredData = read("snippets/structured-data.liquid");
+for (const token of [
+  '"@type": "Product"',
+  '"@type": "Brand"',
+  '"name": "Mochirii Cosmetics"',
+  "product.metafields.custom.card_benefit",
+  "product.metafields.custom.volume",
+  "structured_volume_facts.display",
+  "product.metafields.custom.usage_directions.value",
+  "structured_usage.frequency",
+  "structured_usage.amount",
+  "structured_usage.routine_timing",
+  "structured_usage.rinse_behavior",
+  "product.metafields.custom.key_ingredients.value",
+  "ingredient.name",
+  "ingredient.cosmetic_role",
+  "structured_warnings.review_result == 'label-matched'",
+  "structured_certifications.review_result == 'verified-wording'",
+  '"additionalProperty"',
+  '"priceCurrency"',
+  '"availability"',
+]) {
+  requireText("snippets/structured-data.liquid", structuredData, token);
+}
+for (const [label, pattern] of [
+  ["automatic product structured data", /product\s*[|]\s*structured_data/iu],
+  ["vendor identity", /product[.]vendor/iu],
+  ["vendor-managed product description", /product[.]description/iu],
+  ["unreviewed materials fallback", /custom[.]materials/iu],
+]) {
+  if (pattern.test(structuredData)) failures.push(`snippets/structured-data.liquid: contains ${label}`);
+}
+
+const home = read("sections/main-index.liquid");
+requireText("sections/main-index.liquid", home, "'mochirii-page-password.webp' | asset_url");
+for (const token of [
+  "hero_image != blank and hero_alt != blank",
+  'alt="Abstract green Mochirii Cosmetics artwork."',
+  "Hero image alt text (required when image is set)",
+]) {
+  requireText("sections/main-index.liquid", home, token);
+}
+for (const [label, pattern] of [
+  ["automatic first-product hero fallback", /hero_product|collections[.]all[.]products[.]first|catalog_collection[.]products[.]first/iu],
+  ["forced bestseller claim", /\bbestsellers?\b/iu],
+]) {
+  if (pattern.test(home)) failures.push(`sections/main-index.liquid: contains ${label}`);
+}
+
+const collection = read("sections/main-collection.liquid");
+for (const token of [
+  '<form id="shop-filters"',
+  "'availability', 'price', 'product-type', 'skin-needs', 'skin-type', 'appearance-concerns', 'routine-step', 'key-ingredients'",
+  'step="0.01"',
+]) {
+  requireText("sections/main-collection.liquid", collection, token);
+}
+if ((collection.match(/step="0[.]01"/gu) ?? []).length !== 2) {
+  failures.push("sections/main-collection.liquid: both price filter inputs must use cent precision");
+}
+if (/\bvendor\b/iu.test(collection)) {
+  failures.push("sections/main-collection.liquid: Vendor filter or output is forbidden");
+}
+
+const giftCard = read("templates/gift_card.liquid");
+if (/(?:apple_wallet|add_to_wallet|wallet_pass)/iu.test(giftCard)) {
+  failures.push("templates/gift_card.liquid: wallet-provider surfaces must remain absent");
+}
+
 for (const relativePath of ["sections/main-index.liquid", "sections/main-collection.liquid"]) {
   const source = read(relativePath);
   if (/render 'product-card'[^\n]*(?:image_loading|image_fetchpriority)/u.test(source)) {
     failures.push(`${relativePath}: below-fold product cards must not be forced eager or high-priority`);
+  }
+}
+
+for (const relativePath of [
+  "sections/main-cart.liquid",
+  "sections/main-index.liquid",
+  "sections/main-product.liquid",
+  "snippets/product-card.liquid",
+]) {
+  const source = read(relativePath);
+  if (/[.]alt\s*[|]\s*default\s*:/iu.test(source)) {
+    failures.push(`${relativePath}: media alt text must not fall back to a product or collection title`);
   }
 }
 
@@ -226,20 +345,52 @@ for (const token of [
   "settings.default_meta_description",
   "seo_title | replace: '&amp;', '&'",
   "seo_title | escape",
+  "product.metafields.custom.card_benefit.value",
+  "assign social_image = settings.social_share_image",
+  "'mochirii-page-password.webp' | asset_url",
+  "assign social_image_url",
   "social_image_width",
   "social_image_height",
 ]) {
   requireText("snippets/seo-meta.liquid", seoMeta, token);
 }
+for (const [label, pattern] of [
+  ["automatic product social image", /product[.]featured_(?:media|image)/iu],
+  ["automatic collection social image", /collection[.]image/iu],
+  ["automatic page social image", /\bpage_image\b/iu],
+  ["automatic first-product social image", /products[.]first/iu],
+  ["vendor-managed product description", /product[.]description/iu],
+]) {
+  if (pattern.test(seoMeta)) failures.push(`snippets/seo-meta.liquid: contains ${label}`);
+}
+if (!/if request[.]page_type == 'product'[\s\S]*?assign seo_description = product[.]metafields[.]custom[.]card_benefit[.]value[\s\S]*?else[\s\S]*?assign seo_description = seo_description_override [|] default: page_description/u.test(seoMeta)) {
+  failures.push("snippets/seo-meta.liquid: product descriptions must use controlled card_benefit while non-product pages retain their normal SEO source");
+}
 
 const themeLayout = read("layout/theme.liquid");
 for (const token of [
+  "request.page_type == 'product'",
+  "product.metafields.custom.card_benefit.value",
   "request.page_type == 'page'",
   "page.title | append: page.title",
   "public_page_title | slice: 0, duplicated_page_title_prefix_length",
   "public_page_title | remove_first: page.title",
 ]) {
   requireText("layout/theme.liquid", themeLayout, token);
+}
+if (!/if request[.]page_type == 'product'[\s\S]*?assign public_page_description = product[.]metafields[.]custom[.]card_benefit[.]value [|] strip[\s\S]*?else[\s\S]*?assign public_page_description = page_description [|] default: settings[.]default_meta_description/u.test(themeLayout)) {
+  failures.push("layout/theme.liquid: product meta description must use controlled card_benefit without a page_description fallback");
+}
+
+const customerCopyCheck = read("scripts/check-customer-facing-copy.mjs");
+for (const token of [
+  "const runtimeCopyRoots = [",
+  "Customer-facing copy guard OK (${files.length} runtime files).",
+]) {
+  requireText("scripts/check-customer-facing-copy.mjs", customerCopyCheck, token);
+}
+if (/runtimeCopyRoots\s*=\s*\[[\s\S]*?["']content["']/u.test(customerCopyCheck)) {
+  failures.push("scripts/check-customer-facing-copy.mjs: broad runtime scan must not inspect evidence-reviewed content contracts");
 }
 
 if (failures.length) {

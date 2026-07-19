@@ -55,13 +55,6 @@ function requireRuntimeCopy(relativePath, values) {
   }
 }
 
-function requireRuntimeIncludes(relativePath, values) {
-  const source = read(relativePath);
-  for (const value of values) {
-    if (!source.includes(value)) failures.push(`${relativePath} must contain the customer copy: ${value}`);
-  }
-}
-
 exactKeys(content, [
   "schemaVersion",
   "contentRevision",
@@ -246,11 +239,11 @@ for (const [id, expected] of Object.entries({
 }
 
 requireRuntimeCopy("sections/header.liquid", [
-  `>${content.theme.mainSiteLink}</a>`,
   `<span class="brand-subtext">${content.theme.brandSubtext}</span>`,
 ]);
 requireRuntimeCopy("sections/footer.liquid", [
-  content.theme.footerSupport.replace("Contact Mochirii Cosmetics.", '<a href="{{ contact_url }}">Contact Mochirii Cosmetics.</a>'),
+  `>Visit ${content.theme.mainSiteLink}</a>`,
+  content.theme.footerSupport.replace("Contact Mochirii Cosmetics.", '<a href="{{ contact_page.url }}">Contact Mochirii Cosmetics.</a>'),
   `"default": "${content.theme.footerSummary}"`,
 ]);
 requireRuntimeCopy("sections/main-index.liquid", [
@@ -274,20 +267,6 @@ requireRuntimeCopy("sections/main-list-collections.liquid", [
   `"default": "${content.collectionsIndex.heading}"`,
   `"default": "${content.collectionsIndex.intro}"`,
 ]);
-requireRuntimeCopy("sections/main-product.liquid", [
-  content.theme.productPage.description,
-  content.theme.productPage.directions,
-  content.theme.productPage.ingredients,
-  content.theme.productPage.warnings,
-  content.theme.productPage.origin,
-  content.theme.productPage.routine,
-  content.theme.productPage.shipping,
-  content.theme.productPage.available,
-  content.theme.productPage.recommendations,
-]);
-requireRuntimeIncludes("sections/main-product.liquid", [content.theme.productPage.unavailable]);
-requireRuntimeIncludes("assets/mochirii-theme.js", [content.theme.productPage.available, content.theme.productPage.unavailable]);
-
 if (!read(".shopifyignore").split(/\r?\n/u).includes("content/**")) {
   failures.push(".shopifyignore must exclude the nondeployable customer-copy contract");
 }

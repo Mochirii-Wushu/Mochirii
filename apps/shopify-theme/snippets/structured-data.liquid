@@ -1,16 +1,172 @@
+{% assign emblem_url = 'mochirii-emblem.webp' | asset_url | prepend: 'https:' %}
 <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": {{ settings.brand_display_name | default: 'Mochirii Cosmetics' | json }},
-    "url": {{ shop.url | json }}{% if settings.social_share_image != blank %},
-    "logo": {{ settings.social_share_image | image_url: width: 512 | json }}{% endif %}
+    "name": "Mochirii Cosmetics",
+    "url": {{ shop.url | json }},
+    "logo": {{ emblem_url | json }}
   }
 </script>
 
 {% if request.page_type == 'product' %}
+  {% assign structured_benefit = product.metafields.custom.card_benefit.value | strip %}
+  {% assign structured_volume_facts = product.metafields.custom.volume.value %}
+  {% assign structured_volume = structured_volume_facts.display | strip %}
+  {% assign structured_usage = product.metafields.custom.usage_directions.value %}
+  {% assign structured_usage_text = structured_usage.text | strip %}
+  {% assign structured_usage_frequency = structured_usage.frequency | strip %}
+  {% assign structured_usage_amount = structured_usage.amount | strip %}
+  {% assign structured_usage_timing = structured_usage.routine_timing %}
+  {% assign structured_usage_rinse = structured_usage.rinse_behavior | strip %}
+  {% assign structured_key_ingredients = product.metafields.custom.key_ingredients.value %}
+  {% assign structured_warnings = product.metafields.custom.warnings.value %}
+  {% assign structured_warning_text = structured_warnings.text | strip %}
+  {% assign structured_warning_incompatibilities = structured_warnings.incompatibilities %}
+  {% assign structured_show_warnings = false %}
+  {% if structured_warnings.review_result == 'label-matched' and structured_warning_text != blank %}
+    {% assign structured_show_warnings = true %}
+  {% endif %}
+  {% assign structured_certifications = product.metafields.custom.certifications.value %}
+  {% assign structured_certification_items = structured_certifications.items %}
+  {% assign structured_show_certifications = false %}
+  {% if structured_certifications.review_result == 'verified-wording' and structured_certification_items != blank %}
+    {% assign structured_show_certifications = true %}
+  {% endif %}
+  {% assign structured_has_additional_properties = false %}
+  {% if structured_volume != blank or structured_usage_text != blank or structured_usage_frequency != blank or structured_usage_amount != blank or structured_usage_timing != blank or structured_usage_rinse != blank or structured_key_ingredients != blank or structured_show_warnings or structured_show_certifications %}
+    {% assign structured_has_additional_properties = true %}
+  {% endif %}
+  {% assign price_currency = cart.currency.iso_code | default: shop.currency %}
   <script type="application/ld+json">
-    {{ product | structured_data }}
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": {{ product.title | json }},
+      "url": {{ canonical_url | json }},
+      "brand": {
+        "@type": "Brand",
+        "name": "Mochirii Cosmetics"
+      }{% if structured_benefit != blank %},
+      "description": {{ structured_benefit | json }}{% endif %}{% if structured_volume != blank %},
+      "size": {{ structured_volume | json }}{% endif %}{% if product.images.size > 0 %},
+      "image": [
+        {% for product_image in product.images limit: 10 %}
+          {% assign structured_image_url = product_image | image_url: width: 1800 | prepend: 'https:' %}
+          {{ structured_image_url | json }}{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]{% endif %},
+      "offers": [
+        {% for variant in product.variants %}
+          {% capture offer_url %}{{ canonical_url }}?variant={{ variant.id }}{% endcapture %}
+          {
+            "@type": "Offer",
+            "url": {{ offer_url | json }},
+            "priceCurrency": {{ price_currency | json }},
+            "price": {{ variant.price | divided_by: 100.0 | json }},
+            "availability": "https://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}"
+          }{% unless forloop.last %},{% endunless %}
+        {% endfor %}
+      ]{% if structured_has_additional_properties %},
+      "additionalProperty": [
+        {% assign structured_property_rendered = false %}
+        {% if structured_volume != blank %}
+          {
+            "@type": "PropertyValue",
+            "name": "Size",
+            "value": {{ structured_volume | json }}
+          }
+          {% assign structured_property_rendered = true %}
+        {% endif %}
+        {% if structured_usage_text != blank %}
+          {% if structured_property_rendered %},{% endif %}
+          {
+            "@type": "PropertyValue",
+            "name": "Directions",
+            "value": {{ structured_usage_text | json }}
+          }
+          {% assign structured_property_rendered = true %}
+        {% endif %}
+        {% if structured_usage_frequency != blank %}
+          {% if structured_property_rendered %},{% endif %}
+          {
+            "@type": "PropertyValue",
+            "name": "Frequency",
+            "value": {{ structured_usage_frequency | json }}
+          }
+          {% assign structured_property_rendered = true %}
+        {% endif %}
+        {% if structured_usage_amount != blank %}
+          {% if structured_property_rendered %},{% endif %}
+          {
+            "@type": "PropertyValue",
+            "name": "Amount",
+            "value": {{ structured_usage_amount | json }}
+          }
+          {% assign structured_property_rendered = true %}
+        {% endif %}
+        {% if structured_usage_timing != blank %}
+          {% if structured_property_rendered %},{% endif %}
+          {
+            "@type": "PropertyValue",
+            "name": "Routine timing",
+            "value": {{ structured_usage_timing | join: ', ' | json }}
+          }
+          {% assign structured_property_rendered = true %}
+        {% endif %}
+        {% if structured_usage_rinse != blank %}
+          {% if structured_property_rendered %},{% endif %}
+          {
+            "@type": "PropertyValue",
+            "name": "Rinse behavior",
+            "value": {{ structured_usage_rinse | json }}
+          }
+          {% assign structured_property_rendered = true %}
+        {% endif %}
+        {% for ingredient in structured_key_ingredients %}
+          {% assign structured_ingredient_name = ingredient.name | strip %}
+          {% assign structured_ingredient_role = ingredient.cosmetic_role | strip %}
+          {% if structured_ingredient_name != blank and structured_ingredient_role != blank %}
+            {% if structured_property_rendered %},{% endif %}
+            {
+              "@type": "PropertyValue",
+              "name": {{ structured_ingredient_name | json }},
+              "value": {{ structured_ingredient_role | json }}
+            }
+            {% assign structured_property_rendered = true %}
+          {% endif %}
+        {% endfor %}
+        {% if structured_show_warnings %}
+          {% if structured_property_rendered %},{% endif %}
+          {
+            "@type": "PropertyValue",
+            "name": "Warnings",
+            "value": {{ structured_warning_text | json }}
+          }
+          {% assign structured_property_rendered = true %}
+          {% for incompatibility in structured_warning_incompatibilities %}
+            {% if structured_property_rendered %},{% endif %}
+            {
+              "@type": "PropertyValue",
+              "name": "Compatibility",
+              "value": {{ incompatibility | json }}
+            }
+            {% assign structured_property_rendered = true %}
+          {% endfor %}
+        {% endif %}
+        {% if structured_show_certifications %}
+          {% for certification in structured_certification_items %}
+            {% if structured_property_rendered %},{% endif %}
+            {
+              "@type": "PropertyValue",
+              "name": "Certification",
+              "value": {{ certification | json }}
+            }
+            {% assign structured_property_rendered = true %}
+          {% endfor %}
+        {% endif %}
+      ]{% endif %}
+    }
   </script>
 {% endif %}
 

@@ -34,15 +34,23 @@
   <div class="section-inner">
     {% assign active_filter_count = 0 %}
     {% for filter in collection.filters %}
-      {% assign active_filter_count = active_filter_count | plus: filter.active_values.size %}
-      {% if filter.type == 'price_range' %}
-        {% if filter.min_value.value or filter.max_value.value %}
-          {% assign active_filter_count = active_filter_count | plus: 1 %}
+      {% assign filter_key = filter.label | handle %}
+      {% assign is_allowed_filter = false %}
+      {% case filter_key %}
+        {% when 'availability', 'price', 'product-type', 'skin-needs', 'skin-type', 'appearance-concerns', 'routine-step', 'key-ingredients' %}
+          {% assign is_allowed_filter = true %}
+      {% endcase %}
+      {% if is_allowed_filter %}
+        {% assign active_filter_count = active_filter_count | plus: filter.active_values.size %}
+        {% if filter.type == 'price_range' %}
+          {% if filter.min_value.value or filter.max_value.value %}
+            {% assign active_filter_count = active_filter_count | plus: 1 %}
+          {% endif %}
         {% endif %}
       {% endif %}
     {% endfor %}
 
-    <form class="collection-controls" method="get" action="{{ collection.url }}">
+    <form id="shop-filters" class="collection-controls" method="get" action="{{ collection.url }}">
       <div class="field collection-sort">
         <label for="SortBy-{{ section.id }}">Sort</label>
         {% assign current_sort = collection.sort_by | default: collection.default_sort_by %}
@@ -54,7 +62,14 @@
       </div>
 
       {% for filter in collection.filters %}
-        <details class="collection-filter">
+        {% assign filter_key = filter.label | handle %}
+        {% assign is_allowed_filter = false %}
+        {% case filter_key %}
+          {% when 'availability', 'price', 'product-type', 'skin-needs', 'skin-type', 'appearance-concerns', 'routine-step', 'key-ingredients' %}
+            {% assign is_allowed_filter = true %}
+        {% endcase %}
+        {% if is_allowed_filter %}
+          <details class="collection-filter">
           <summary>
             {{ filter.label | escape }}
             {% if filter.active_values.size > 0 %}<span>({{ filter.active_values.size }})</span>{% endif %}
@@ -112,6 +127,7 @@
                       name="{{ filter.min_value.param_name }}"
                       value="{% if filter.min_value.value %}{{ filter.min_value.value | money_without_currency | replace: ',', '' }}{% endif %}"
                       min="0"
+                      step="0.01"
                       max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
                       inputmode="decimal"
                     >
@@ -124,6 +140,7 @@
                       name="{{ filter.max_value.param_name }}"
                       value="{% if filter.max_value.value %}{{ filter.max_value.value | money_without_currency | replace: ',', '' }}{% endif %}"
                       min="0"
+                      step="0.01"
                       max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
                       inputmode="decimal"
                     >
@@ -131,7 +148,8 @@
                 </div>
             {% endcase %}
           </div>
-        </details>
+          </details>
+        {% endif %}
       {% endfor %}
 
       <div class="collection-controls__actions">

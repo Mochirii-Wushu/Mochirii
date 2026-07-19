@@ -144,15 +144,14 @@ generated archives belong only in ignored `.artifacts/operations`.
 - All twenty release dispositions remain blocked until their evidence and
   provider fields are reviewed. Unknown private or external facts are recorded
   as Pending rather than inferred.
-- The reconciled foundation revision passed the clean lockfile install,
+- The prior prepayment-readiness PR #480 head passed the clean lockfile install,
   complete repository check, Shopify theme check and package, release-safety
   guards, JavaScript syntax, Theme Check with zero offenses, and
-  `git diff --check` locally on 2026-07-19. The prior PR #480 head also had a
-  clean required-check rollup; Supabase Preview reported Skipped for that
-  theme/docs-only head and did not block GitHub's clean merge-state result. The
-  updated PR head still requires remote checks and accountable human review,
-  and downstream product and storefront packages require validation at their
-  own final source-bound commits. The pull request remains draft and unmerged.
+  `git diff --check`. It also had a clean required-check rollup; Supabase Preview
+  reported Skipped for that theme/docs-only head and did not block GitHub's
+  clean merge-state result. The revised implementation must be revalidated at
+  its final commit. The pull request has no accountable human review and
+  remains draft and unmerged.
   The optional local toolchain audit found Docker Desktop's Linux engine was
   not running; no system service or provider state was changed to work around
   that workstation-only limitation.

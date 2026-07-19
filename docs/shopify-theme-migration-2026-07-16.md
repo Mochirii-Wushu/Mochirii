@@ -49,8 +49,11 @@ the emblem and wordmark on the approved sellable unit.
 - A gift-card template whose value, code, QR data, balance, and redemption UI
   render only when both publication and commerce are approved. The default
   state is noindexed and unavailable.
-- A missing-warning state that tells visitors to review the label instead of
-  inferring that an empty field means no additional warnings.
+- Warning presentation remains fail-closed. The theme reads the structured
+  warning review object, renders the exact text and reviewed incompatibilities
+  only when `review_result` is `label-matched`, and omits the section when the
+  disposition is `approved-none`. Missing or malformed warning facts do not
+  produce invented fallback copy.
 - The current locked Shopify CLI patch release and deterministic SPDX 2.3 SBOM
   input metadata.
 - A pure, side-effect-free filter-metafield CSV helper and synthetic tests. The
