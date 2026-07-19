@@ -64,7 +64,11 @@ This is the short source-of-truth index for the current Mochirii production post
 ## Mochi Pets Runtime
 
 - Runtime target: `https://mochi-pets-game.fly.dev`.
-- Source recovery status on 2026-07-05: the standalone `xartaiusx/mochi-pets` repository is current on `main` at `0b3a023d8c252e6c67b7e469f932e9f533caea36`, after PR #14 finalized the Mochi Pets rename readiness and PRs #10, #11, #12, and #13 merged green low-risk dependency updates. PRs #7, #8, and #9 were closed/deferred for CI-platform, RPGJS compatibility, or Node-contract risk.
+- The standalone `xartaiusx/mochi-pets` repository remains the game source and
+  is current on `main` at `0f9fcc17a6da466ac66548da856b704d05150ce1`.
+  PR #27 added the reciprocal workspace and ownership contract without changing
+  the game runtime. Its nine dependency pull requests remain deferred to a
+  dedicated game-maintenance pass.
 - Current local verification for the recovered runtime source: Node `24.17.0`; `npm run unity:verify` passed after Unity `6000.5.x` import/build preparation, and the repo keeps the active contract on Mochi Pets naming, `/games/mochi-pets`, `MOCHI_PETS_*` bridge events, and `mochi-pets-*` Supabase Edge Function names.
 - Current blocker: Fly hosted runtime deployment and load/smoke beyond read-only health checks still require explicit approval. Do not treat the local Unity/WebGL proof as alpha playtest readiness until the hosted contract is intentionally promoted and verified.
 - Current hosted readback from this workstation: `https://mochi-pets-game.fly.dev/healthz` returns 200. Do not change Fly secrets, scaling, deploys, or hosted smoke/load checks until the user approves the exact runtime action.
@@ -77,9 +81,16 @@ This is the short source-of-truth index for the current Mochirii production post
 - Identity boundary: Supabase OAuth Server and `/oauth/consent` remain the website consent doorway; Discord remains guild verification, not the social identity authority.
 - Website boundary: header dropdown/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only a noindex handoff route that redirects signed-in members and gives signed-out visitors login/help options.
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
-- Source control: Pixelfed staging source is tracked in the private Mochirii ops repo at `C:\Github Repo's\Mochirii Website\Mochirii Social`; do not commit host `.env`, DB/Redis state, media, backups, cache files, or host-private notes.
-- Pixelfed ops release ledger for 2026-07-12: PR #37 documented the canonical credential boundary and merged to `main`; resolve the current remote commit with `git fetch --prune origin` and `git rev-parse origin/main` from the canonical ops worktree.
-- Pixelfed ops repository evidence on 2026-07-05: `origin` points at the private Mochirii ops repo, `upstream` fetch points at `pixelfed/pixelfed`, and upstream push is disabled.
+- Source control: `services/social` in `Mochirii-Wushu/Mochirii` is the sole
+  Social application source. Do not commit host `.env`, DB/Redis state, media,
+  backups, cache files, host IPs, or host-private evidence.
+- PR #461 imported the reviewed sanitized current tree and established
+  path-aware Social validation, private immutable GHCR delivery, SBOM,
+  protected deployment, recovery, and hosted verification workflows.
+- The deployed canonical image digest is
+  `sha256:1fd27c8f76595595912e6f12f1677c7f108aa50f64b38a85089006b47ad395f1`.
+  Protected deploy run `29664673632` and online verification run `29664734313`
+  passed for the existing Droplet and Spaces-backed runtime.
 - Account sync gate completed for admin-first testing on 2026-07-05: the linked admin lands in the Mochirii Social app, Pixelfed has one local admin user, and Supabase `public.social_accounts` has exactly one active `provider = 'pixelfed'` row with `federation_enabled = false` and a profile URL under `https://social.mochirii.com`.
 - Avatar upload gate completed for admin-first testing on 2026-07-05: the live profile image flow accepts JPEG/JPG/PNG/WebP avatars up to 100 MB, advertises Mochirii automatic optimization, generates 640px primary and 320px thumbnail derivatives, uses Spaces-backed URLs, and no longer shows the old 2 MB avatar limit. Owner browser validation confirmed a profile image upload succeeded after PR #13 deployed.
 - Remaining media gap: DigitalOcean Spaces is configured as the primary S3-compatible media disk and a Laravel storage write/read/delete smoke passed on 2026-07-05. Broad member upload testing is still blocked until signed-in post-image upload validation proves downscale, thumbnail, EXIF/GPS stripping, oversized rejection, MIME/signature spoof rejection, delete cleanup, queue retry visibility, and local original/temp cleanup. The staged post upload policy remains large friendly uploads with hard caps, optimized derivatives, and no long-term original retention.
@@ -115,14 +126,9 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## Shopify Storefront
 
-- Public Shopify theme source lives in `apps/shopify-theme`.
-- The private transition checkout and its mixed repository pointers were retired
-  from this public state during the 2026-07-16 repository separation. Its
-  verified pre-merge 2026-07-17 working snapshot and the later clean
-  structured-filter integration were then sanitized and reconciled without
-  changing the source checkout or any provider. The later clean state now also
-  has a verified encrypted snapshot, encrypted-archive round trip, and verified
-  Git bundles; a full fresh-clone restoration is not claimed.
+- `apps/shopify-theme` is the sole Shopify theme source. The superseded private
+  repository was captured as a mirror clone, verified `--all` bundle, and
+  encrypted recovery archive before retirement.
 - The import boundary, current reconciliation, and deliberate exclusions are
   recorded in `docs/shopify-theme-migration-2026-07-16.md`.
 - Shopify storefront must remain password-gated until a separate launch approval.

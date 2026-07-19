@@ -49,6 +49,8 @@ bundles. Environment deployment branches are restricted to protected `main`.
   Droplet or Spaces, never in GitHub artifacts or on a required workstation.
 - ActivityPub remains disabled.
 
-The superseded source repositories may be deleted only after a canonical image
-has been published, the Droplet has pulled and run its exact digest, rollback is
-verified, and encrypted repository backups have passed a disposable restore.
+The superseded Shopify and Social source repositories were deleted on
+2026-07-18 only after the canonical image was published and deployed, the
+Droplet and Spaces boundaries passed hosted verification, and both encrypted
+repository backups passed disposable restore checks. Workflow run
+`29665954934` reverified the hosted runtime after deletion.
