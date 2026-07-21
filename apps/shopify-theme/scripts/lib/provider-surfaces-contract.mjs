@@ -694,7 +694,7 @@ export function validateProviderSurfacesContract(contract) {
   return { issues };
 }
 
-const EMBLEM_SOURCE_TOKENS = Object.freeze({
+const EMBLEM_SOURCE_MARKERS = Object.freeze({
   "storefront-header-logo": `<img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56"`,
   "storefront-footer-logo": `<img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56"`,
   "password-page-logo": `<img src="{{ 'mochirii-emblem.webp' | asset_url }}" alt="" width="56" height="56"`,
@@ -751,7 +751,7 @@ export function validateProviderSurfaceSourceBindings(contract, sources) {
   for (const binding of contract?.brand_identity?.theme_bindings ?? []) {
     requireSourceToken(
       sourceText(sources, binding.source_path),
-      EMBLEM_SOURCE_TOKENS[binding.surface],
+      EMBLEM_SOURCE_MARKERS[binding.surface],
       issues,
       "brand-identity",
       `source.${binding.surface}`,
