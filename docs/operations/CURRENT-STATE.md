@@ -193,19 +193,22 @@ generated archives belong only in ignored `.artifacts/operations`.
   `git diff --check`, and all fresh required remote checks on 2026-07-19;
   Supabase Preview reported Skipped without blocking the check rollup. The pull
   request has no accountable human review and remains draft and unmerged. The
-  downstream product and storefront implementation is preserved locally. An
+  downstream product and storefront implementation is now reconciled on a
+  local, unpushed branch based on the exact PR #480 head. An
   independent code review identified and the local source remediated archive,
   freshness, source-copy, search, privacy, shipping, price-provenance,
   SKU-identity, media, quantity, wordmark, escaping and mobile-navigation
   false-pass paths. The final local clean-install validation passed 145
   adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme
-  Check across 45 files with zero offenses, and exact packaging. The resulting
+  Check across 45 files with zero offenses, exact packaging, and the complete
+  repository check. The resulting
   provisional 0.6.0 package has SHA-256
-  `DBB772F5AA07ADED833E27F9CE435DE8DB0CA60A087D6ABFC54E6EE939C9806F`
+  `0A3681C59C6AFE0BDBF909ED38F911A4DF489E8F1C79C3609B123B48AB64CFAB`
   and size 75,251 bytes.
   This is technical validation, not accountable human review, merge or
-  provider acceptance; each focused source-bound commit must pass again after
-  the foundation merge.
+  provider acceptance. Remote required checks must run after an approved push,
+  and a merged-main package must be rebuilt and rebound before candidate
+  staging.
   The optional local toolchain audit found Docker Desktop's Linux engine was
   not running; no system service or provider state was changed to work around
   that workstation-only limitation.

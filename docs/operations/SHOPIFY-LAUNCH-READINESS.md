@@ -3,8 +3,9 @@
 Updated: 2026-07-19 PDT
 
 Status: **BLOCKED — the launch foundation and independently reviewed local
-source hardening are reconciled; accountable human review, exact-commit
-revalidation, scoped product/storefront evidence, and provider gates remain**
+source hardening are reconciled and locally revalidated; accountable human
+review, remote required checks, scoped product/storefront evidence, and
+provider gates remain**
 
 This no-secret decision ledger is the single launch-control record for
 shop.mochirii.com. It turns the approved opening-readiness plan into explicit,
@@ -355,7 +356,7 @@ All items in this section must be Ready before payment setup begins.
 
 | ID | Required decision | Accountable role | Status |
 | --- | --- | --- | --- |
-| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the final local clean-install checkpoint passed 145 adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme Check across 45 files with zero offenses, exact packaging and independent P0-P2 review; the foundation PR head passed required checks, but the downstream source remains local and must pass again on focused reviewed commits after the foundation merge |
+| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the reconciled local branch based on the exact PR #480 head passed clean lockfile installs, the complete repository check, 145 adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme Check across 45 files with zero offenses, exact packaging and independent P0-P2 review on 2026-07-20; it remains local and unpushed, so accountable human review, remote required checks, protected merge, and a rebuilt merged-main package remain Pending |
 | QA-02 | Verify all twenty PDPs expose the reviewed facts without generic warning or other evidence fallbacks | Theme engineer plus product evidence custodian | Blocked — the local source removes generic fact, INCI and warning fallbacks, but the 2026-07-18 candidate baseline still rendered a generic warning on 15 PDPs; all twenty fact records and the revised candidate rendering remain Pending |
 | QA-03 | Verify five collections, filters, ingredient search, misspellings, sold-out state, cart, contact form, policies, privacy choices and branded 404 | Theme engineer | Blocked — the source now pins reviewed expected sets for `moisturizer`, `moisturiser`, `niacinimide`, `hyaluronic`, `retinol` and `cleanser`, plus a zero-result fixture; candidate readbacks, configured Privacy Choices parity, sold-out and server-error observations remain Pending because the branch is not on the candidate theme |
 | QA-04 | Pass keyboard, screen-reader announcements, 200 percent zoom, focus order, error handling, contrast and touch navigation at 360x800, 390x844, 768x1024 and 1440x900 | Theme engineer | Blocked — viewport, overflow, broken-image and code-level contrast checks passed; assistive-technology and 200 percent zoom acceptance remain Pending |
