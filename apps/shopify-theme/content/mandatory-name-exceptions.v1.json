@@ -1,0 +1,28 @@
+{
+  "$schema": "./mandatory-name-exceptions.v1.schema.json",
+  "schema_version": 1,
+  "revision": "2026-07-19-v1",
+  "locale": "en-US",
+  "brand": "Mochirii Cosmetics",
+  "status": "pending-review",
+  "required_rendered_route_categories": [
+    "home",
+    "collections",
+    "products",
+    "search-and-filters",
+    "cart",
+    "contact",
+    "policies-and-privacy",
+    "accounts",
+    "errors",
+    "password",
+    "notifications"
+  ],
+  "rendered_review": {
+    "status": "pending",
+    "reviewer": null,
+    "review_date": null,
+    "reviewed_route_categories": []
+  },
+  "entries": []
+}

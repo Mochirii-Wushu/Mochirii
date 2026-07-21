@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { approvedCustomerCopyLanguageIssues } from "./lib/launch-content-contracts.mjs";
 import { SHOPIFY_PRODUCT_COPY_UPDATE_HEADERS } from "./lib/shopify-product-copy-csv.mjs";
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,19 +56,11 @@ function requireRuntimeCopy(relativePath, values) {
   }
 }
 
-function requireRuntimeIncludes(relativePath, values) {
-  const source = read(relativePath);
-  for (const value of values) {
-    if (!source.includes(value)) failures.push(`${relativePath} must contain the customer copy: ${value}`);
-  }
-}
-
 exactKeys(content, [
   "schemaVersion",
   "contentRevision",
   "locale",
   "brand",
-  "approval",
   "provenance",
   "theme",
   "home",
@@ -81,33 +74,17 @@ if (content.contentRevision !== "2026-07-18-v2") failures.push("contentRevision 
 if (content.locale !== "en-US") failures.push("locale must be en-US");
 if (content.brand !== "Mochirii Cosmetics") failures.push("brand is unexpected");
 
-exactKeys(content.approval, [
-  "scope",
-  "preparedOn",
-  "themeQaAuthorized",
-  "sharedRecordMutationAuthorized",
-  "themePublicationAuthorized",
-  "commerceAuthorized",
-], "approval");
-if (content.approval?.scope !== "customer-copy-packet" || content.approval?.preparedOn !== "2026-07-18") {
-  failures.push("approval must identify the dated customer-copy packet");
-}
-for (const field of ["themeQaAuthorized", "sharedRecordMutationAuthorized"]) {
-  if (content.approval?.[field] !== true) failures.push(`approval.${field} must be true`);
-}
-for (const field of ["themePublicationAuthorized", "commerceAuthorized"]) {
-  if (content.approval?.[field] !== false) failures.push(`approval.${field} must remain false`);
-}
-
 exactKeys(content.provenance, [
   "sourceRepository",
   "sourcePullRequest",
   "sourceRevision",
-  "approvalRecord",
+  "providerWriteHistory",
 ], "provenance");
 if (content.provenance?.sourceRepository !== "Mochirii-Wushu/Mochirii" ||
-    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459") {
-  failures.push("provenance must identify the canonical repository and draft PR");
+    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459" ||
+    content.provenance?.sourceRevision !== "2026-07-18-v2" ||
+    content.provenance?.providerWriteHistory !== "content/customer-facing-copy-approval-packet.md") {
+  failures.push("provenance must identify the immutable public content source and separate provider-write history");
 }
 
 exactKeys(content.theme, [
@@ -233,17 +210,15 @@ for (const [opening, count] of openingCounts) {
 }
 
 const serialized = JSON.stringify(content);
-const privateBrandPattern = new RegExp(
-  `\\b(?:${["self" + "named", "ma" + "dara", "vele" + "sari"].join("|")})\\b`,
-  "iu",
-);
 if (/\b[0-9a-f]{40}\b/iu.test(serialized)) failures.push("copy contract must not expose raw Git object IDs");
 for (const pattern of [
   /private-evidence/iu,
-  privateBrandPattern,
   /"(?:price|cost|inventory|sku|barcode|variant|payment|secret|credential|publicSourceUrl|selectionBasis|providerStatus)"\s*:/iu,
 ]) {
   if (pattern.test(serialized)) failures.push(`copy contract contains forbidden private, supplier, or commerce data: ${pattern}`);
+}
+for (const issue of approvedCustomerCopyLanguageIssues(content)) {
+  failures.push(`${issue.surface} contains disallowed customer-language category: ${issue.category}`);
 }
 
 const settingsData = json("config/settings_data.json");
@@ -263,11 +238,14 @@ for (const [id, expected] of Object.entries({
 }
 
 requireRuntimeCopy("sections/header.liquid", [
-  `>${content.theme.mainSiteLink}</a>`,
   `<span class="brand-subtext">${content.theme.brandSubtext}</span>`,
 ]);
 requireRuntimeCopy("sections/footer.liquid", [
-  content.theme.footerSupport.replace("Contact Mochirii Cosmetics.", '<a href="{{ contact_url }}">Contact Mochirii Cosmetics.</a>'),
+  `>Visit ${content.theme.mainSiteLink}</a>`,
+  content.theme.footerSupport.replace(
+    "Contact Mochirii Cosmetics.",
+    '<a href="{{ contact_page.url | escape }}">Contact Mochirii Cosmetics.</a>',
+  ),
   `"default": "${content.theme.footerSummary}"`,
 ]);
 requireRuntimeCopy("sections/main-index.liquid", [
@@ -291,20 +269,6 @@ requireRuntimeCopy("sections/main-list-collections.liquid", [
   `"default": "${content.collectionsIndex.heading}"`,
   `"default": "${content.collectionsIndex.intro}"`,
 ]);
-requireRuntimeCopy("sections/main-product.liquid", [
-  content.theme.productPage.description,
-  content.theme.productPage.directions,
-  content.theme.productPage.ingredients,
-  content.theme.productPage.warnings,
-  content.theme.productPage.origin,
-  content.theme.productPage.routine,
-  content.theme.productPage.shipping,
-  content.theme.productPage.available,
-  content.theme.productPage.recommendations,
-]);
-requireRuntimeIncludes("sections/main-product.liquid", [content.theme.productPage.unavailable]);
-requireRuntimeIncludes("assets/mochirii-theme.js", [content.theme.productPage.available, content.theme.productPage.unavailable]);
-
 if (!read(".shopifyignore").split(/\r?\n/u).includes("content/**")) {
   failures.push(".shopifyignore must exclude the nondeployable customer-copy contract");
 }
@@ -327,4 +291,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log("Customer-copy contract check OK (2 pages, 5 collections, 20 varied product descriptions; shared records applied, theme publication and commerce disabled). ");
+console.log("Customer-copy contract check OK (content-only v2: 2 pages, 5 collections, 20 varied product descriptions; no reusable provider authority). ");

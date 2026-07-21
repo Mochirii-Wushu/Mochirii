@@ -4,9 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#071610">
-    {% assign storefront_name = settings.brand_display_name | default: 'Mochirii Cosmetics' %}
+    <link rel="icon" type="image/webp" sizes="224x224" href="{{ 'mochirii-emblem.webp' | asset_url }}">
+    {% assign storefront_name = 'Mochirii Cosmetics' %}
     {% assign public_page_title = page_title %}
-    {% assign public_page_description = page_description | default: settings.default_meta_description %}
+    {% if request.page_type == 'product' %}
+      {% assign public_page_description = product.metafields.custom.card_benefit.value | strip %}
+    {% else %}
+      {% assign public_page_description = page_description | default: settings.default_meta_description %}
+    {% endif %}
     {% if request.page_type == 'page' and page.title != blank %}
       {% assign duplicated_page_title_prefix = page.title | append: page.title %}
       {% assign duplicated_page_title_prefix_length = duplicated_page_title_prefix | size %}
@@ -16,9 +21,9 @@
       {% endif %}
     {% endif %}
     <title>
-      {{ public_page_title }}
+      {{ public_page_title | escape }}
       {%- if current_page != 1 %} &ndash; page {{ current_page }}{% endif -%}
-      {%- unless public_page_title contains storefront_name %} &ndash; {{ storefront_name }}{% endunless -%}
+      {%- unless public_page_title contains storefront_name %} &ndash; Mochirii Cosmetics{% endunless -%}
     </title>
     {% if public_page_description %}
       <meta name="description" content="{{ public_page_description | escape }}">
@@ -28,9 +33,9 @@
     {{ 'mochirii-theme.css' | asset_url | stylesheet_tag }}
     <style>
       :root {
-        --cream-0: {{ settings.background_color | default: '#fffaf0' }};
-        --ink-0: {{ settings.text_color | default: '#061610' }};
-        --jade-0: {{ settings.accent_color | default: '#1f745f' }};
+        --cream-0: {{ settings.background_color | default: '#fffaf0' | escape }};
+        --ink-0: {{ settings.text_color | default: '#061610' | escape }};
+        --jade-0: {{ settings.accent_color | default: '#1f745f' | escape }};
       }
     </style>
     {{ content_for_header }}

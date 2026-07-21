@@ -1,0 +1,530 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mochirii.com/contracts/product-facts.v3.schema.json",
+  "title": "Mochirii Cosmetics product facts v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "revision",
+    "locale",
+    "brand",
+    "market",
+    "brand_mark",
+    "shopify_publication",
+    "status",
+    "products"
+  ],
+  "properties": {
+    "$schema": { "const": "./product-facts.v3.schema.json" },
+    "schema_version": { "const": 3 },
+    "revision": { "type": "string", "minLength": 1 },
+    "locale": { "const": "en-US" },
+    "brand": { "const": "Mochirii Cosmetics" },
+    "market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["country", "currency"],
+      "properties": {
+        "country": { "const": "US" },
+        "currency": { "const": "USD" }
+      }
+    },
+    "brand_mark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference_version", "canonical_emblem", "storefront_derivative", "wordmark"],
+      "properties": {
+        "reference_version": { "type": "string", "minLength": 1 },
+        "canonical_emblem": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_path", "sha256"],
+          "properties": {
+            "asset_path": { "const": "apps/web/public/assets/img/brand/emblem.webp" },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "storefront_derivative": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_path", "sha256"],
+          "properties": {
+            "asset_path": { "const": "apps/shopify-theme/assets/mochirii-emblem.webp" },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "wordmark": { "const": "Mochirii Cosmetics" }
+      }
+    },
+    "shopify_publication": { "$ref": "#/$defs/shopify_publication" },
+    "status": { "enum": ["pending-review", "complete"] },
+    "products": {
+      "type": "array",
+      "minItems": 20,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/product" }
+    }
+  },
+  "$defs": {
+    "product_field_mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "write_target", "readback"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "write_target": { "type": "string", "minLength": 1 },
+        "readback": { "type": "string", "minLength": 1 }
+      }
+    },
+    "metafield_mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "namespace", "key", "type", "readback"],
+      "properties": {
+        "source": { "type": "string", "pattern": "^facts[.]" },
+        "namespace": { "const": "custom" },
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "type": {
+          "enum": [
+            "single_line_text_field",
+            "multi_line_text_field",
+            "list.single_line_text_field",
+            "json",
+            "list.product_reference"
+          ]
+        },
+        "readback": { "type": "string", "pattern": "^product[.]metafields[.]custom[.]" }
+      }
+    },
+    "shopify_publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "product_fields", "metafields", "native_fields"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "product_fields": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["handle", "title", "vendor", "description", "seo_title", "seo_description"],
+          "properties": {
+            "handle": { "$ref": "#/$defs/product_field_mapping" },
+            "title": { "$ref": "#/$defs/product_field_mapping" },
+            "vendor": { "$ref": "#/$defs/product_field_mapping" },
+            "description": { "$ref": "#/$defs/product_field_mapping" },
+            "seo_title": { "$ref": "#/$defs/product_field_mapping" },
+            "seo_description": { "$ref": "#/$defs/product_field_mapping" }
+          }
+        },
+        "metafields": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "functional_identity",
+            "card_benefit",
+            "benefits",
+            "product_type",
+            "skin_type",
+            "appearance_concerns",
+            "routine_step",
+            "usage_directions",
+            "key_ingredients",
+            "key_ingredient_details",
+            "ingredients_inci",
+            "warnings",
+            "texture",
+            "finish",
+            "fragrance_status",
+            "country_of_origin",
+            "package_details",
+            "certifications",
+            "volume",
+            "complementary_products"
+          ],
+          "properties": {
+            "functional_identity": { "$ref": "#/$defs/metafield_mapping" },
+            "card_benefit": { "$ref": "#/$defs/metafield_mapping" },
+            "benefits": { "$ref": "#/$defs/metafield_mapping" },
+            "product_type": { "$ref": "#/$defs/metafield_mapping" },
+            "skin_type": { "$ref": "#/$defs/metafield_mapping" },
+            "appearance_concerns": { "$ref": "#/$defs/metafield_mapping" },
+            "routine_step": { "$ref": "#/$defs/metafield_mapping" },
+            "usage_directions": { "$ref": "#/$defs/metafield_mapping" },
+            "key_ingredients": { "$ref": "#/$defs/metafield_mapping" },
+            "key_ingredient_details": { "$ref": "#/$defs/metafield_mapping" },
+            "ingredients_inci": { "$ref": "#/$defs/metafield_mapping" },
+            "warnings": { "$ref": "#/$defs/metafield_mapping" },
+            "texture": { "$ref": "#/$defs/metafield_mapping" },
+            "finish": { "$ref": "#/$defs/metafield_mapping" },
+            "fragrance_status": { "$ref": "#/$defs/metafield_mapping" },
+            "country_of_origin": { "$ref": "#/$defs/metafield_mapping" },
+            "package_details": { "$ref": "#/$defs/metafield_mapping" },
+            "certifications": { "$ref": "#/$defs/metafield_mapping" },
+            "volume": { "$ref": "#/$defs/metafield_mapping" },
+            "complementary_products": { "$ref": "#/$defs/metafield_mapping" }
+          }
+        },
+        "native_fields": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["variant_presentation", "collection_handles", "media"],
+          "properties": {
+            "variant_presentation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "has_only_default_variant",
+                "title",
+                "selected_options",
+                "readback"
+              ],
+              "properties": {
+                "source": { "const": "$single_default_variant" },
+                "has_only_default_variant": { "const": true },
+                "title": { "const": "Default Title" },
+                "selected_options": {
+                  "const": [{ "name": "Title", "value": "Default Title" }]
+                },
+                "readback": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["has_only_default_variant", "title", "selected_options"],
+                  "properties": {
+                    "has_only_default_variant": { "const": "product.hasOnlyDefaultVariant" },
+                    "title": { "const": "product.variants.nodes[0].title" },
+                    "selected_options": { "const": "product.variants.nodes[0].selectedOptions" }
+                  }
+                }
+              }
+            },
+            "collection_handles": { "$ref": "#/$defs/product_field_mapping" },
+            "media": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "media_source", "alt_text_source", "write_target", "readback"],
+              "properties": {
+                "source": { "const": "facts.media" },
+                "media_source": { "const": "facts.media[].public_reference" },
+                "alt_text_source": { "const": "facts.media[].alt_text" },
+                "write_target": { "const": "product.media[].original_source" },
+                "readback": { "const": "product.media[]" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "plain_text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!.*[<>\\u0000-\\u001f\\u007f-\\u009f\\u202a-\\u202e\\u2066-\\u2069\\ufeff]).+$"
+    },
+    "review_state": { "enum": ["pending", "approved", "failed"] },
+    "product": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["handle", "public_title", "review_status", "review", "facts"],
+      "allOf": [
+        {
+          "if": {
+            "properties": { "review_status": { "const": "complete" } },
+            "required": ["review_status"]
+          },
+          "then": {
+            "properties": {
+              "facts": {
+                "type": "object",
+                "properties": {
+                  "media": {
+                    "minItems": 3,
+                    "contains": {
+                      "type": "object",
+                      "properties": { "role": { "const": "outer-box" } },
+                      "required": ["role"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "handle": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "public_title": { "$ref": "#/$defs/plain_text" },
+        "review_status": { "enum": ["pending", "complete", "blocked"] },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "formula_mapping",
+            "front_label",
+            "technical_panel",
+            "outer_box",
+            "brand_mark",
+            "media_unit_match"
+          ],
+          "properties": {
+            "formula_mapping": { "$ref": "#/$defs/review_state" },
+            "front_label": { "$ref": "#/$defs/review_state" },
+            "technical_panel": { "$ref": "#/$defs/review_state" },
+            "outer_box": { "$ref": "#/$defs/review_state" },
+            "media_unit_match": { "$ref": "#/$defs/review_state" },
+            "brand_mark": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["status", "emblem_matches", "wordmark_matches"],
+              "properties": {
+                "status": { "$ref": "#/$defs/review_state" },
+                "emblem_matches": { "type": ["boolean", "null"] },
+                "wordmark_matches": { "type": ["boolean", "null"] }
+              }
+            }
+          }
+        },
+        "facts": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/facts" }
+          ]
+        }
+      }
+    },
+    "facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "functional_identity",
+        "description",
+        "seo_title",
+        "seo_description",
+        "card_benefit",
+        "benefits",
+        "product_type",
+        "skin_type",
+        "appearance_concerns",
+        "routine_step",
+        "usage_directions",
+        "key_ingredients",
+        "key_ingredient_details",
+        "ingredients_inci",
+        "warnings",
+        "texture",
+        "finish",
+        "fragrance_status",
+        "country_of_origin",
+        "package_details",
+        "certifications",
+        "volume",
+        "collection_handles",
+        "complementary_products",
+        "media"
+      ],
+      "properties": {
+        "functional_identity": { "$ref": "#/$defs/plain_text" },
+        "description": { "$ref": "#/$defs/plain_text" },
+        "seo_title": {
+          "allOf": [
+            { "$ref": "#/$defs/plain_text" },
+            { "maxLength": 70 }
+          ]
+        },
+        "seo_description": {
+          "allOf": [
+            { "$ref": "#/$defs/plain_text" },
+            { "maxLength": 160 }
+          ]
+        },
+        "card_benefit": { "$ref": "#/$defs/plain_text" },
+        "benefits": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/plain_text" }
+        },
+        "product_type": { "$ref": "#/$defs/plain_text" },
+        "skin_type": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/plain_text" }
+        },
+        "appearance_concerns": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/plain_text" }
+        },
+        "routine_step": { "$ref": "#/$defs/plain_text" },
+        "usage_directions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text", "frequency", "amount", "routine_timing", "rinse_behavior"],
+          "properties": {
+            "text": { "$ref": "#/$defs/plain_text" },
+            "frequency": { "$ref": "#/$defs/plain_text" },
+            "amount": { "$ref": "#/$defs/plain_text" },
+            "routine_timing": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "enum": ["AM", "PM", "As needed"] }
+            },
+            "rinse_behavior": { "enum": ["Rinse", "No rinse"] }
+          }
+        },
+        "key_ingredients": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/plain_text" }
+        },
+        "key_ingredient_details": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "cosmetic_role"],
+            "properties": {
+              "name": { "$ref": "#/$defs/plain_text" },
+              "cosmetic_role": { "$ref": "#/$defs/plain_text" }
+            }
+          }
+        },
+        "ingredients_inci": { "$ref": "#/$defs/plain_text" },
+        "warnings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["review_result", "text", "incompatibilities"],
+          "properties": {
+            "review_result": { "enum": ["label-matched", "approved-none"] },
+            "text": {
+              "oneOf": [
+                { "type": "null" },
+                { "$ref": "#/$defs/plain_text" }
+              ]
+            },
+            "incompatibilities": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/plain_text" }
+            }
+          }
+        },
+        "texture": { "$ref": "#/$defs/plain_text" },
+        "finish": { "$ref": "#/$defs/plain_text" },
+        "fragrance_status": { "$ref": "#/$defs/plain_text" },
+        "country_of_origin": { "$ref": "#/$defs/plain_text" },
+        "package_details": { "$ref": "#/$defs/plain_text" },
+        "certifications": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["review_result", "items"],
+          "properties": {
+            "review_result": { "enum": ["verified-wording", "approved-none"] },
+            "items": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/plain_text" }
+            }
+          }
+        },
+        "volume": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["us_customary", "metric", "display"],
+          "properties": {
+            "us_customary": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "unit"],
+              "properties": {
+                "value": { "type": "number", "exclusiveMinimum": 0 },
+                "unit": { "enum": ["fl oz", "oz"] }
+              }
+            },
+            "metric": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["value", "unit"],
+              "properties": {
+                "value": { "type": "number", "exclusiveMinimum": 0 },
+                "unit": { "enum": ["mL", "g"] }
+              }
+            },
+            "display": { "$ref": "#/$defs/plain_text" }
+          }
+        },
+        "collection_handles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "contains": { "const": "mochirii-cosmetics" },
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "complementary_products": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "media": {
+          "type": "array",
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "allOf": [
+                { "$ref": "#/$defs/facts/properties/media/items" },
+                {
+                  "type": "object",
+                  "required": ["role"],
+                  "properties": { "role": { "const": "front" } }
+                }
+              ]
+            }
+          ],
+          "allOf": [
+            { "contains": { "type": "object", "properties": { "role": { "const": "front" } }, "required": ["role"] } },
+            { "contains": { "type": "object", "properties": { "role": { "const": "technical-panel" } }, "required": ["role"] } }
+          ],
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "public_reference",
+              "asset_sha256",
+              "alt_text",
+              "brand_mark_expectation",
+              "approved_unit_match"
+            ],
+            "properties": {
+              "role": { "enum": ["front", "technical-panel", "outer-box", "texture", "scale", "use"] },
+              "public_reference": {
+                "type": "string",
+                "pattern": "^/(?!/)(?:[A-Za-z0-9][A-Za-z0-9._~-]*/)*[A-Za-z0-9][A-Za-z0-9._~-]*\\.(?:avif|jpe?g|png|webp)$"
+              },
+              "asset_sha256": { "type": "string", "pattern": "^(?!([a-f0-9])\\1{63}$)[a-f0-9]{64}$" },
+              "alt_text": { "$ref": "#/$defs/plain_text" },
+              "brand_mark_expectation": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["emblem", "wordmark", "other_brand_absent"],
+                "properties": {
+                  "emblem": { "const": "required" },
+                  "wordmark": { "const": "required" },
+                  "other_brand_absent": { "const": "required" }
+                }
+              },
+              "approved_unit_match": { "const": true }
+            }
+          }
+        }
+      }
+    }
+  }
+}

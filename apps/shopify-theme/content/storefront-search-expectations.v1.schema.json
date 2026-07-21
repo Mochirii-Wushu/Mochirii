@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mochirii.com/contracts/storefront-search-expectations.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "revision",
+    "product_facts_revision",
+    "locale",
+    "brand",
+    "status",
+    "queries"
+  ],
+  "properties": {
+    "$schema": { "const": "./storefront-search-expectations.v1.schema.json" },
+    "schema_version": { "const": 1 },
+    "revision": { "type": "string", "minLength": 1 },
+    "product_facts_revision": { "type": "string", "minLength": 1 },
+    "locale": { "const": "en-US" },
+    "brand": { "const": "Mochirii Cosmetics" },
+    "status": { "const": "prepared" },
+    "queries": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["query", "review_basis", "expected_handles"],
+        "properties": {
+          "query": { "type": "string", "minLength": 1 },
+          "review_basis": { "type": "string", "minLength": 1 },
+          "expected_handles": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
+          }
+        }
+      }
+    }
+  }
+}

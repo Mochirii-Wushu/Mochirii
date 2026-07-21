@@ -1,0 +1,37 @@
+{
+  "$schema": "./launch-pages.v1.schema.json",
+  "schema_version": 1,
+  "revision": "2026-07-19-v1",
+  "locale": "en-US",
+  "brand": "Mochirii Cosmetics",
+  "status": "prepared-not-applied",
+  "lifecycle": {
+    "preparation_status": "prepared",
+    "application_status": "not-applied",
+    "readback_status": "not-verified",
+    "provider_write_authority": false
+  },
+  "pages": [
+    {
+      "handle": "faq",
+      "title": "Frequently Asked Questions",
+      "body_html": "<h2>Product information</h2><p>Each product page presents the product identity, size, directions, complete ingredient list, warnings when applicable, texture, finish, fragrance status, and origin for that item.</p><p>Browse by product type, skin need, or routine step, then compare the Best for, How to use, and Key ingredients sections on each product page.</p><h2>Shipping and returns</h2><p>Review <a href=\"/policies/shipping-policy\">Shipping</a> and <a href=\"/policies/refund-policy\">Returns</a> for the current information that applies before ordering.</p><h2>Help</h2><p>For a product or order question, <a href=\"/pages/contact\">contact Mochirii Cosmetics</a>.</p>",
+      "seo_title": "Frequently Asked Questions | Mochirii Cosmetics",
+      "seo_description": "Find where to review product details, ingredients, directions, shipping, returns, and ways to contact Mochirii Cosmetics."
+    },
+    {
+      "handle": "ingredients-standards",
+      "title": "Ingredients & Standards",
+      "body_html": "<h2>Product-specific information</h2><p>Ingredients, directions, warnings, size, origin, and certification wording are reviewed for each product. Refer to the individual product page and the packaging received for the details that apply to that item.</p><h2>Ingredient lists</h2><p>The Complete INCI section on each product page presents ingredient names in the reviewed order for that formula. Ingredient information may differ between products, so check the product page and package before use.</p><h2>Claims and certifications</h2><p>Formula-specific certification wording appears only when it has been verified for that product. A statement shown for one product does not automatically apply to another.</p><h2>Questions</h2><p>Review How to use and Warnings on the product page. For an ingredient or usage question, <a href=\"/pages/contact\">contact Mochirii Cosmetics</a>.</p>",
+      "seo_title": "Ingredients & Standards | Mochirii Cosmetics",
+      "seo_description": "Learn how Mochirii Cosmetics presents product-specific ingredients, directions, warnings, origin, and verified certification wording."
+    },
+    {
+      "handle": "accessibility",
+      "title": "Accessibility",
+      "body_html": "<h2>Accessibility approach</h2><p>Our storefront accessibility review covers keyboard navigation, visible focus, text reflow at increased zoom, touch controls, page headings, image descriptions, and screen-reader labels.</p><h2>Report a barrier</h2><p>If content or a control is difficult to use, <a href=\"/pages/contact\">contact Mochirii Cosmetics</a>. Include the page address and a description of the problem. You may also include your device, browser, or assistive technology if that information is useful to your report.</p><h2>Product information</h2><p>Product pages present key details in text, including directions, complete ingredients, and warnings when applicable.</p>",
+      "seo_title": "Accessibility | Mochirii Cosmetics",
+      "seo_description": "Read the Mochirii Cosmetics accessibility approach and learn how to report a storefront access or usability barrier."
+    }
+  ]
+}

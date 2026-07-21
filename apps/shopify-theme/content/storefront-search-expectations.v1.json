@@ -1,0 +1,67 @@
+{
+  "$schema": "./storefront-search-expectations.v1.schema.json",
+  "schema_version": 1,
+  "revision": "2026-07-19-v1",
+  "product_facts_revision": "2026-07-19-v3-discovery-contract",
+  "locale": "en-US",
+  "brand": "Mochirii Cosmetics",
+  "status": "prepared",
+  "queries": [
+    {
+      "query": "moisturizer",
+      "review_basis": "US spelling synonym for the controlled moisturizer and cream product identities",
+      "expected_handles": [
+        "hyaluronic-day-cream",
+        "moisturising-day-cream",
+        "collagen-night-cream",
+        "ceramide-barrier-night-cream",
+        "niacinamide-gel-moisturiser",
+        "retinol-alternative-moisturiser"
+      ]
+    },
+    {
+      "query": "moisturiser",
+      "review_basis": "UK spelling synonym for the same controlled moisturizer and cream product identities",
+      "expected_handles": [
+        "hyaluronic-day-cream",
+        "moisturising-day-cream",
+        "collagen-night-cream",
+        "ceramide-barrier-night-cream",
+        "niacinamide-gel-moisturiser",
+        "retinol-alternative-moisturiser"
+      ]
+    },
+    {
+      "query": "niacinimide",
+      "review_basis": "Common misspelling mapped to the controlled niacinamide product identity",
+      "expected_handles": [
+        "niacinamide-gel-moisturiser"
+      ]
+    },
+    {
+      "query": "hyaluronic",
+      "review_basis": "Controlled product title contains hyaluronic",
+      "expected_handles": [
+        "hyaluronic-day-cream"
+      ]
+    },
+    {
+      "query": "retinol",
+      "review_basis": "Controlled product titles contain retinol alternative",
+      "expected_handles": [
+        "natural-retinol-alternative-oil-serum",
+        "retinol-alternative-moisturiser"
+      ]
+    },
+    {
+      "query": "cleanser",
+      "review_basis": "Controlled cleanser and cleansing product identities",
+      "expected_handles": [
+        "sensitive-skin-oil-to-milk-cleanser",
+        "gentle-cleansing-milk",
+        "sensitive-face-body-cleanser",
+        "cleansing-foam"
+      ]
+    }
+  ]
+}
