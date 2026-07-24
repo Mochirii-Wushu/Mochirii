@@ -71,15 +71,17 @@ jobs:
         run: |
           set -Eeuo pipefail
           npm run production
-          asset_status="$(git status --porcelain=v1 --untracked-files=all -- \
+          git diff --exit-code -- \
             public/css \
             public/js \
-            public/mix-manifest.json)"
-          if [[ -n "$asset_status" ]]; then
-            printf '%s\n' "$asset_status"
-            echo "Social production assets do not match the committed source and lockfile." >&2
-            exit 1
-          fi
+            public/mix-manifest.json
+          test -z "$(git ls-files --others --exclude-standard -- \
+            public/css \
+            public/js \
+            public/mix-manifest.json)" || {
+              echo "Social production assets include uncommitted generated files." >&2
+              exit 1
+            }
 
       - name: Setup PHP
         if: steps.changes.outputs.changed == 'true'
