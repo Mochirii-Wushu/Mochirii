@@ -212,6 +212,7 @@ if (composerJson.require?.php !== "^8.3|^8.4" || composerJson.config?.platform?.
 const gitAttributes = read(".gitattributes");
 requireIncludes(".gitattributes", gitAttributes, [
   "public/**/*.js text eol=lf -diff",
+  "public/**/*.js.LICENSE.txt text eol=lf -diff",
   "public/**/*.json text eol=lf -diff",
   "public/**/*.css text eol=lf -diff",
 ]);
