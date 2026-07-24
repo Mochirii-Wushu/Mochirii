@@ -124,6 +124,7 @@ updates:
       - dependency-name: mariadb
         update-types:
           - version-update:semver-major
+          - version-update:semver-minor
       - dependency-name: redis
         update-types:
           - version-update:semver-major
