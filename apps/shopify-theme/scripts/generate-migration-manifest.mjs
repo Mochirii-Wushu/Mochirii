@@ -47,7 +47,22 @@ manifest.genericTooling.files = [
 manifest.approvedPublicCopy.files = ["content/approved-customer-copy.json"]
   .map((relativePath) => entryFor(path.join(appRoot, relativePath)));
 
+manifest.publicLaunchContracts.files = [
+  "content/launch-pages.v1.json",
+  "content/launch-pages.v1.schema.json",
+  "content/mandatory-name-exceptions.v1.json",
+  "content/mandatory-name-exceptions.v1.schema.json",
+  "content/product-facts.v3.json",
+  "content/product-facts.v3.schema.json",
+  "content/provider-surfaces.v1.json",
+  "content/provider-surfaces.v1.schema.json",
+  "content/storefront-search-expectations.v1.json",
+  "content/storefront-search-expectations.v1.schema.json",
+]
+  .map((relativePath) => entryFor(path.join(appRoot, relativePath)))
+  .sort((left, right) => left.path.localeCompare(right.path));
+
 writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 console.log(
-  `Updated migration manifest for ${manifest.files.length} runtime files, ${manifest.genericTooling.files.length} generic tooling files, and ${manifest.approvedPublicCopy.files.length} approved public-copy file.`,
+  `Updated migration manifest for ${manifest.files.length} runtime files, ${manifest.genericTooling.files.length} generic tooling files, ${manifest.approvedPublicCopy.files.length} approved public-copy file, and ${manifest.publicLaunchContracts.files.length} public launch-contract files.`,
 );

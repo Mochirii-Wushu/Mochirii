@@ -1,12 +1,12 @@
 <section class="section page-banner">
   <div class="section-inner section-head section-head--center">
-    <p class="eyebrow">Collections</p>
-    <h1>{{ section.settings.heading }}</h1>
-    <p class="section-intro">{{ section.settings.intro }}</p>
+    <p class="eyebrow">Skincare routines</p>
+    <h1>{{ section.settings.heading | escape }}</h1>
+    <p class="section-intro">{{ section.settings.intro | escape }}</p>
   </div>
 </section>
 
-<section class="section section-soft">
+<section class="section section-soft" id="routine-collections">
   <div class="section-inner">
     {% assign catalog_collection = collections['mochirii-cosmetics'] %}
     {% assign catalog_url = routes.all_products_collection_url | default: '/collections/all' %}
@@ -25,25 +25,22 @@
           {% assign routine_url = routine_collection.url %}
         {% endif %}
         {% assign routine_image = routine_collection.image %}
-        {% if routine_image == blank and routine_collection.products_count > 0 %}
-          {% assign routine_image = routine_collection.products.first.featured_image %}
-        {% endif %}
 
         <article class="collection-card">
-          <a class="collection-card__image" href="{{ routine_url }}" aria-label="{{ routine_title | escape }}">
+          <a class="collection-card__image" href="{{ routine_url | escape }}" aria-label="{{ routine_title | escape }}">
             {% if routine_image != blank %}
-              {% assign routine_alt = routine_image.alt | default: routine_title %}
+              {% assign routine_alt = routine_image.alt | strip %}
               {{ routine_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: routine_alt, sizes: '(min-width: 1080px) 25vw, (min-width: 720px) 50vw, 100vw' }}
             {% else %}
               <span class="media-placeholder">
-                <span>{{ routine_title }}</span>
+                <span>{{ routine_title | escape }}</span>
                 <small>Product image unavailable.</small>
               </span>
             {% endif %}
           </a>
           <div class="collection-card__body">
             <p class="product-card__line">Routine step</p>
-            <h2><a href="{{ routine_url }}">{{ routine_title }}</a></h2>
+            <h2><a href="{{ routine_url | escape }}">{{ routine_title | escape }}</a></h2>
             {% if routine_collection != blank and routine_collection.description != blank %}
               <div class="rte">{{ routine_collection.description }}</div>
             {% endif %}
@@ -71,7 +68,7 @@
       "type": "textarea",
       "id": "intro",
       "label": "Introduction",
-      "default": "Browse skincare for cleansing, hydration, brightening, smoothing, and nourishment."
+      "default": "Browse skincare for cleansing, hydration, brightening, smoothing, and moisture support."
     }
   ]
 }

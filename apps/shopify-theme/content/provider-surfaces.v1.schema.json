@@ -1,0 +1,576 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mochirii.com/contracts/provider-surfaces.v1.schema.json",
+  "title": "Mochirii Cosmetics provider-surface expectations v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "revision",
+    "locale",
+    "brand",
+    "market",
+    "currency",
+    "brand_identity",
+    "homepage",
+    "collections_index",
+    "pages",
+    "collections",
+    "navigation",
+    "search_and_filters",
+    "policies",
+    "settings",
+    "notifications"
+  ],
+  "properties": {
+    "$schema": { "const": "./provider-surfaces.v1.schema.json" },
+    "schema_version": { "const": 1 },
+    "revision": { "type": "string", "minLength": 1 },
+    "locale": { "const": "en-US" },
+    "brand": { "const": "Mochirii Cosmetics" },
+    "market": { "const": "US" },
+    "currency": { "const": "USD" },
+    "brand_identity": { "$ref": "#/$defs/brand_identity" },
+    "homepage": { "$ref": "#/$defs/homepage" },
+    "collections_index": { "$ref": "#/$defs/collections_index" },
+    "pages": { "$ref": "#/$defs/pages" },
+    "collections": { "$ref": "#/$defs/collections" },
+    "navigation": { "$ref": "#/$defs/navigation" },
+    "search_and_filters": { "$ref": "#/$defs/search_and_filters" },
+    "policies": { "$ref": "#/$defs/policies" },
+    "settings": { "$ref": "#/$defs/settings" },
+    "notifications": { "$ref": "#/$defs/notifications" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^(?!([a-f0-9])\\1{63}$)[a-f0-9]{64}$" },
+    "nullable_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+    "product_handle": {
+      "enum": [
+        "peptide-smoothing-serum",
+        "natural-retinol-alternative-oil-serum",
+        "vitamin-c-serum",
+        "hyaluronic-day-cream",
+        "moisturising-day-cream",
+        "double-hydration-boost-gel",
+        "sensitive-skin-oil-to-milk-cleanser",
+        "biphasic-makeup-remover-fragrance-free",
+        "collagen-night-cream",
+        "ceramide-barrier-night-cream",
+        "niacinamide-gel-moisturiser",
+        "gentle-cleansing-milk",
+        "aha-exfoliating-concentrate",
+        "all-in-one-facial-oil",
+        "retinol-alternative-moisturiser",
+        "hydrating-toner",
+        "sensitive-face-body-cleanser",
+        "cleansing-foam",
+        "caffeine-gel-booster",
+        "smoothing-eye-cream"
+      ]
+    },
+    "navigation_link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "label", "destination", "children"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "destination": { "type": "string", "minLength": 1 },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/navigation_link" } }
+      }
+    },
+    "footer_group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "identity", "heading", "links"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "identity": { "type": "string", "minLength": 1 },
+        "heading": { "type": ["string", "null"] },
+        "links": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/navigation_link" } }
+      }
+    },
+    "theme_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "surface", "source_path", "relation", "media_type", "sizes"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "surface": { "enum": ["storefront-header-logo", "storefront-footer-logo", "password-page-logo", "gift-card-logo", "structured-data-logo", "storefront-favicon", "password-favicon"] },
+        "source_path": { "enum": ["sections/header.liquid", "sections/footer.liquid", "sections/main-password.liquid", "templates/gift_card.liquid", "snippets/structured-data.liquid", "layout/theme.liquid", "layout/password.liquid"] },
+        "relation": { "enum": ["logo", "icon"] },
+        "media_type": { "const": "image/webp" },
+        "sizes": { "type": ["string", "null"] }
+      }
+    },
+    "provider_logo_expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "surface", "requirement", "expected_asset_sha256"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "surface": { "enum": ["brand-logo", "checkout-logo", "customer-account-logo"] },
+        "requirement": { "const": "match-when-configurable" },
+        "expected_asset_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "brand_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical_reference", "storefront_derivative", "theme_bindings", "provider_logo_expectations"],
+      "properties": {
+        "canonical_reference": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_path", "sha256"],
+          "properties": {
+            "asset_path": { "const": "apps/web/public/assets/img/brand/emblem.webp" },
+            "sha256": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "storefront_derivative": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["asset_path", "sha256", "format", "width", "height", "relationship"],
+          "properties": {
+            "asset_path": { "const": "apps/shopify-theme/assets/mochirii-emblem.webp" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "format": { "const": "webp" },
+            "width": { "const": 224 },
+            "height": { "const": 224 },
+            "relationship": { "const": "reviewed-storefront-rendering-of-canonical-emblem" }
+          }
+        },
+        "theme_bindings": { "type": "array", "minItems": 7, "maxItems": 7, "items": { "$ref": "#/$defs/theme_binding" } },
+        "provider_logo_expectations": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/provider_logo_expectation" } }
+      }
+    },
+    "homepage_expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "featured_collection_handle",
+        "seo_title",
+        "seo_description",
+        "temporary_hero_fallback_asset_path",
+        "temporary_hero_fallback_sha256",
+        "temporary_hero_fallback_alt",
+        "hero_media_approval_status",
+        "approved_hero_image_sha256",
+        "approved_hero_image_alt",
+        "featured_products_approval_status",
+        "approved_featured_product_handles",
+        "hero_eyebrow",
+        "hero_heading",
+        "hero_text",
+        "primary_cta_label",
+        "primary_cta_destination",
+        "featured_heading",
+        "collections_heading",
+        "standards_heading",
+        "standards_intro",
+        "standard_one_heading",
+        "standard_one_text",
+        "standard_two_heading",
+        "standard_two_text",
+        "standard_three_heading",
+        "standard_three_text",
+        "policy_note"
+      ],
+      "properties": {
+        "featured_collection_handle": { "type": "string", "minLength": 1 },
+        "seo_title": { "type": "string", "minLength": 1 },
+        "seo_description": { "type": "string", "minLength": 1 },
+        "temporary_hero_fallback_asset_path": { "type": "string", "minLength": 1 },
+        "temporary_hero_fallback_sha256": { "$ref": "#/$defs/sha256" },
+        "temporary_hero_fallback_alt": { "type": "string", "minLength": 1 },
+        "hero_media_approval_status": { "enum": ["pending", "approved"] },
+        "approved_hero_image_sha256": { "$ref": "#/$defs/nullable_sha256" },
+        "approved_hero_image_alt": { "type": ["string", "null"] },
+        "featured_products_approval_status": { "enum": ["pending", "approved"] },
+        "approved_featured_product_handles": {
+          "oneOf": [
+            { "type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": { "$ref": "#/$defs/product_handle" } },
+            { "type": "null" }
+          ]
+        },
+        "hero_eyebrow": { "type": "string", "minLength": 1 },
+        "hero_heading": { "type": "string", "minLength": 1 },
+        "hero_text": { "type": "string", "minLength": 1 },
+        "primary_cta_label": { "type": "string", "minLength": 1 },
+        "primary_cta_destination": { "type": "string", "pattern": "^/" },
+        "featured_heading": { "type": "string", "minLength": 1 },
+        "collections_heading": { "type": "string", "minLength": 1 },
+        "standards_heading": { "type": "string", "minLength": 1 },
+        "standards_intro": { "type": "string", "minLength": 1 },
+        "standard_one_heading": { "type": "string", "minLength": 1 },
+        "standard_one_text": { "type": "string", "minLength": 1 },
+        "standard_two_heading": { "type": "string", "minLength": 1 },
+        "standard_two_text": { "type": "string", "minLength": 1 },
+        "standard_three_heading": { "type": "string", "minLength": 1 },
+        "standard_three_text": { "type": "string", "minLength": 1 },
+        "policy_note": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "hero_media_approval_status": { "const": "pending" } }, "required": ["hero_media_approval_status"] },
+          "then": { "properties": { "approved_hero_image_sha256": { "type": "null" }, "approved_hero_image_alt": { "type": "null" } } },
+          "else": {
+            "properties": {
+              "approved_hero_image_sha256": { "allOf": [{ "$ref": "#/$defs/sha256" }, { "not": { "const": "05289a0d2887d3ce1c7b7e2e7343379392ce89da5afac8082faf896a0ae39d82" } }] },
+              "approved_hero_image_alt": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "featured_products_approval_status": { "const": "pending" } }, "required": ["featured_products_approval_status"] },
+          "then": { "properties": { "approved_featured_product_handles": { "type": "null" } } },
+          "else": { "properties": { "approved_featured_product_handles": { "type": "array", "minItems": 6, "maxItems": 6, "uniqueItems": true, "items": { "$ref": "#/$defs/product_handle" } } } }
+        }
+      ]
+    },
+    "homepage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected", "expected_sha256"],
+      "properties": {
+        "expected": { "$ref": "#/$defs/homepage_expected" },
+        "expected_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "collections_index_expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eyebrow", "heading", "intro"],
+      "properties": {
+        "eyebrow": { "type": "string", "minLength": 1 },
+        "heading": { "type": "string", "minLength": 1 },
+        "intro": { "type": "string", "minLength": 1 }
+      }
+    },
+    "collections_index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected", "expected_sha256"],
+      "properties": {
+        "expected": { "$ref": "#/$defs/collections_index_expected" },
+        "expected_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "page_expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "handle", "route", "title", "seo_title", "seo_description", "approved_seo_sha256", "content_source", "approved_content_sha256"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "handle": { "type": "string", "minLength": 1 },
+        "route": { "type": "string", "pattern": "^/pages/" },
+        "title": { "type": "string", "minLength": 1 },
+        "seo_title": { "type": "string", "minLength": 1 },
+        "seo_description": { "type": "string", "minLength": 1 },
+        "approved_seo_sha256": { "$ref": "#/$defs/sha256" },
+        "content_source": { "type": "string", "minLength": 1 },
+        "approved_content_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "pages": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section_settings", "items"],
+      "properties": {
+        "section_settings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["eyebrow", "intro"],
+          "properties": {
+            "eyebrow": { "type": "string", "minLength": 1 },
+            "intro": { "type": ["string", "null"] }
+          }
+        },
+        "items": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/page_expectation" } }
+      }
+    },
+    "collection_expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "handle",
+        "route",
+        "title",
+        "seo_title",
+        "seo_description",
+        "approved_seo_sha256",
+        "description_source",
+        "approved_description_sha256",
+        "rendered_html_approval_status",
+        "approved_rendered_html_sha256",
+        "media_approval_status",
+        "approved_image_sha256",
+        "approved_image_alt",
+        "membership_approval_status",
+        "approved_product_handles"
+      ],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "handle": { "type": "string", "minLength": 1 },
+        "route": { "type": "string", "pattern": "^/collections/" },
+        "title": { "type": "string", "minLength": 1 },
+        "seo_title": { "type": "string", "minLength": 1 },
+        "seo_description": { "type": "string", "minLength": 1 },
+        "approved_seo_sha256": { "$ref": "#/$defs/sha256" },
+        "description_source": { "type": "string", "minLength": 1 },
+        "approved_description_sha256": { "$ref": "#/$defs/sha256" },
+        "rendered_html_approval_status": { "enum": ["pending", "approved"] },
+        "approved_rendered_html_sha256": { "$ref": "#/$defs/nullable_sha256" },
+        "media_approval_status": { "enum": ["pending", "approved"] },
+        "approved_image_sha256": { "$ref": "#/$defs/nullable_sha256" },
+        "approved_image_alt": { "type": ["string", "null"] },
+        "membership_approval_status": { "enum": ["pending", "approved"] },
+        "approved_product_handles": {
+          "oneOf": [
+            { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/product_handle" } },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "rendered_html_approval_status": { "const": "pending" } }, "required": ["rendered_html_approval_status"] },
+          "then": { "properties": { "approved_rendered_html_sha256": { "type": "null" } } },
+          "else": { "properties": { "approved_rendered_html_sha256": { "$ref": "#/$defs/sha256" } } }
+        },
+        {
+          "if": { "properties": { "media_approval_status": { "const": "pending" } }, "required": ["media_approval_status"] },
+          "then": { "properties": { "approved_image_sha256": { "type": "null" }, "approved_image_alt": { "type": "null" } } },
+          "else": { "properties": { "approved_image_sha256": { "$ref": "#/$defs/sha256" }, "approved_image_alt": { "type": "string", "minLength": 1 } } }
+        },
+        {
+          "if": { "properties": { "membership_approval_status": { "const": "pending" } }, "required": ["membership_approval_status"] },
+          "then": { "properties": { "approved_product_handles": { "type": "null" } } },
+          "else": { "properties": { "approved_product_handles": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/product_handle" } } } }
+        }
+      ]
+    },
+    "collections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/collection_expectation" } }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["header", "footer_groups", "expected_sha256"],
+      "properties": {
+        "header": { "type": "array", "minItems": 8, "maxItems": 8, "items": { "$ref": "#/$defs/navigation_link" } },
+        "footer_groups": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/footer_group" } },
+        "expected_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "label", "param_name", "type"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "param_name": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["list", "boolean", "price_range"] }
+      }
+    },
+    "search_and_filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filters", "forbidden_filter_params", "expected_sha256"],
+      "properties": {
+        "filters": { "type": "array", "minItems": 7, "maxItems": 7, "items": { "$ref": "#/$defs/filter" } },
+        "forbidden_filter_params": { "const": ["filter.p.vendor"] },
+        "expected_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "identity", "customer_label", "route", "expected_title", "approval_status", "approved_content_sha256"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "identity": { "type": "string", "minLength": 1 },
+        "customer_label": { "type": "string", "minLength": 1 },
+        "route": { "type": "string", "pattern": "^/" },
+        "expected_title": { "type": "string", "minLength": 1 },
+        "approval_status": { "enum": ["pending", "approved"] },
+        "approved_content_sha256": { "$ref": "#/$defs/nullable_sha256" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "approval_status": { "const": "pending" } }, "required": ["approval_status"] },
+          "then": { "properties": { "approved_content_sha256": { "type": "null" } } },
+          "else": { "properties": { "approved_content_sha256": { "$ref": "#/$defs/sha256" } } }
+        }
+      ]
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": { "type": "array", "minItems": 5, "maxItems": 5, "items": { "$ref": "#/$defs/policy" } }
+      }
+    },
+    "settings_values": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkout_enabled",
+        "gift_cards_enabled",
+        "gift_cards_listed",
+        "gift_card_route",
+        "gift_card_route_http_status",
+        "customer_accounts",
+        "privacy_choices_enabled",
+        "privacy_choices_menu_visible",
+        "privacy_choices_route",
+        "password_protection_enabled",
+        "candidate_theme_admin_status",
+        "candidate_theme_published",
+        "background_color",
+        "text_color",
+        "accent_color",
+        "default_meta_description",
+        "storefront_mode_text",
+        "empty_catalog_heading",
+        "empty_catalog_body",
+        "footer_summary",
+        "footer_section_summary",
+        "header_main_menu_handle",
+        "footer_menu_handle",
+        "password_eyebrow",
+        "password_heading",
+        "password_intro",
+        "social_share_image_setting",
+        "social_share_image_fallback_sha256",
+        "primary_customer_domain",
+        "primary_customer_url",
+        "shop_name",
+        "currency"
+      ],
+      "properties": {
+        "checkout_enabled": { "const": false },
+        "gift_cards_enabled": { "const": false },
+        "gift_cards_listed": { "const": false },
+        "gift_card_route": { "const": "/products/gift-card" },
+        "gift_card_route_http_status": { "const": 404 },
+        "customer_accounts": { "const": "optional" },
+        "privacy_choices_enabled": { "const": true },
+        "privacy_choices_menu_visible": { "const": true },
+        "privacy_choices_route": { "const": "/pages/data-sharing-opt-out" },
+        "password_protection_enabled": { "const": true },
+        "candidate_theme_admin_status": { "const": "Draft" },
+        "candidate_theme_published": { "const": false },
+        "background_color": { "const": "#f7f8f5" },
+        "text_color": { "const": "#13231d" },
+        "accent_color": { "const": "#1f6b58" },
+        "default_meta_description": { "type": "string", "minLength": 1 },
+        "storefront_mode_text": { "type": "string", "minLength": 1 },
+        "empty_catalog_heading": { "type": "string", "minLength": 1 },
+        "empty_catalog_body": { "type": "string", "minLength": 1 },
+        "footer_summary": { "type": "string", "minLength": 1 },
+        "footer_section_summary": { "type": "string", "minLength": 1 },
+        "header_main_menu_handle": { "const": "main-menu" },
+        "footer_menu_handle": { "const": "footer" },
+        "password_eyebrow": { "const": "Mochirii Cosmetics" },
+        "password_heading": { "type": "string", "minLength": 1 },
+        "password_intro": { "type": "string", "minLength": 1 },
+        "social_share_image_setting": { "const": "blank-theme-fallback" },
+        "social_share_image_fallback_sha256": { "$ref": "#/$defs/sha256" },
+        "primary_customer_domain": { "const": "shop.mochirii.com" },
+        "primary_customer_url": { "const": "https://shop.mochirii.com" },
+        "shop_name": { "const": "Mochirii Cosmetics" },
+        "currency": { "const": "USD" }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected", "expected_sha256"],
+      "properties": {
+        "expected": { "$ref": "#/$defs/settings_values" },
+        "expected_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "notification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "identity", "customer_label", "approval_status", "approved_subject", "approved_subject_sha256", "approved_body_sha256"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "identity": { "type": "string", "minLength": 1 },
+        "customer_label": { "type": "string", "minLength": 1 },
+        "approval_status": { "enum": ["pending", "approved"] },
+        "approved_subject": { "type": ["string", "null"] },
+        "approved_subject_sha256": { "$ref": "#/$defs/nullable_sha256" },
+        "approved_body_sha256": { "$ref": "#/$defs/nullable_sha256" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "approval_status": { "const": "pending" } }, "required": ["approval_status"] },
+          "then": {
+            "properties": {
+              "approved_subject": { "type": "null" },
+              "approved_subject_sha256": { "type": "null" },
+              "approved_body_sha256": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "approved_subject": { "type": "string", "minLength": 1 },
+              "approved_subject_sha256": { "$ref": "#/$defs/sha256" },
+              "approved_body_sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      ]
+    },
+    "notification_sender": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["display_name", "approval_status", "approved_sender_address_sha256", "approved_sender_domain_sha256"],
+      "properties": {
+        "display_name": { "const": "Mochirii Cosmetics" },
+        "approval_status": { "enum": ["pending", "approved"] },
+        "approved_sender_address_sha256": { "$ref": "#/$defs/nullable_sha256" },
+        "approved_sender_domain_sha256": { "$ref": "#/$defs/nullable_sha256" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "approval_status": { "const": "pending" } }, "required": ["approval_status"] },
+          "then": {
+            "properties": {
+              "approved_sender_address_sha256": { "type": "null" },
+              "approved_sender_domain_sha256": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "approved_sender_address_sha256": { "$ref": "#/$defs/sha256" },
+              "approved_sender_domain_sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      ]
+    },
+    "notifications": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sender_presentation", "items"],
+      "properties": {
+        "sender_presentation": { "$ref": "#/$defs/notification_sender" },
+        "items": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/notification" } }
+      }
+    }
+  }
+}
