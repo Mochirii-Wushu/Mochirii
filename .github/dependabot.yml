@@ -79,7 +79,7 @@ updates:
           - version-update:semver-major
       - dependency-name: webgl-media-editor
         versions:
-          - ">=0.3.1"
+          - ">=0.1.0"
       - dependency-name: webpack
         versions:
           - ">=5.109.0"
