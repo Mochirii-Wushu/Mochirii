@@ -64,6 +64,23 @@ jobs:
         working-directory: services/social
         run: npm ci
 
+      - name: Rebuild and verify committed Social assets
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm run production
+          asset_status="$(git status --porcelain=v1 --untracked-files=all -- \
+            public/css \
+            public/js \
+            public/mix-manifest.json)"
+          if [[ -n "$asset_status" ]]; then
+            printf '%s\n' "$asset_status"
+            echo "Social production assets do not match the committed source and lockfile." >&2
+            exit 1
+          fi
+
       - name: Setup PHP
         if: steps.changes.outputs.changed == 'true'
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
