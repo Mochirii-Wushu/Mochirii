@@ -8,7 +8,7 @@ x-app-env: &app-env
 
 services:
   db:
-    image: mariadb:11.4@sha256:a794d9eb009e20de605858a11f32f63b4075cbd197c650436f0e3b457e4caed7
+    image: mariadb:12.3@sha256:628f228f0fd5913a220438693576b29b6fe4dc1fa0a1298c0e98579fae28635f
     container_name: pixelfed-db
     restart: unless-stopped
     env_file:
