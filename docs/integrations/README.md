@@ -21,5 +21,9 @@ private keys, customer data, supplier costs, or private formula evidence.
 
 Operational steps and dated evidence belong in `docs/operations`.
 
+See [Hosted runtime ownership](hosted-runtime.json) and
+[the host-independence runbook](../operations/HOST-INDEPENDENCE.md) for the
+machine-checked offline-workstation boundary and its remaining readbacks.
+
 See [Mochirii Social delivery](mochirii-social-delivery.md) for the private
 container, protected environment, deployment, and recovery contract.

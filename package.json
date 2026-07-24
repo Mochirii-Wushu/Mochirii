@@ -42,6 +42,9 @@
     "check:full-stack-release-evidence": "node scripts/check-full-stack-release-evidence.mjs",
     "test:supabase-migration-list": "node scripts/test-supabase-migration-list.mjs",
     "check:guild-schedule": "node scripts/check-guild-schedule.mjs",
+    "check:host-independence": "node scripts/check-host-independence.mjs",
+    "gate:host-independence": "node scripts/check-host-independence.mjs --require-complete",
+    "check:hosted-public-boundaries": "node scripts/check-hosted-public-boundaries.mjs",
     "check:home-celebration-splash": "node scripts/check-home-celebration-splash.mjs",
     "check:header-auth-loading": "node scripts/check-header-auth-loading.mjs",
     "check:events-page-schedule-sync": "node scripts/check-events-page-schedule-sync.mjs",
@@ -126,7 +129,7 @@
     "test:vote-reminder": "deno test --allow-env --lock=deno.lock --frozen=true supabase/functions/_shared/vote-reminders_test.ts"
   },
   "devDependencies": {
-    "lighthouse": "12.6.1",
+    "lighthouse": "13.4.1",
     "playwright": "1.61.1",
     "supabase": "2.109.1"
   }

@@ -1,6 +1,6 @@
 # Current Mochirii State
 
-Updated: 2026-07-19 PDT
+Updated: 2026-07-24 PDT
 
 This no-secret file records the current hosted and repository state. Update it
 after a completed release or ownership change; do not place credentials,
@@ -65,8 +65,11 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   disabled. Theme `141514408011` remains unpublished.
 - `social.mochirii.com` remains on the single Singapore DigitalOcean Droplet
   with Spaces-backed media. Registration is closed and ActivityPub is disabled.
-- Production serving, queues, schedules, authentication, media, releases, and
-  backups do not depend on the local workstation.
+- Core customer serving, authentication, media, releases, Social queues, and
+  the two active Supabase spotlight schedules do not depend on the local
+  workstation. Complete auxiliary continuity remains Pending until the Reaper
+  Gateway worker's hosted supervisor and a current Social backup/restore drill
+  are read back; see [`HOST-INDEPENDENCE.md`](./HOST-INDEPENDENCE.md).
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
