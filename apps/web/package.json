@@ -23,12 +23,12 @@
     "verify:local": "npm run toolchain:check && npm run lint && npm run build && npm run check:client-bundle && npm run check:font-bundle && npm run check:route-css-bundle"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.110.7",
+    "@supabase/supabase-js": "^2.110.8",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "next": "16.2.11",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "overrides": {
     "@babel/core": "7.29.7",
