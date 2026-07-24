@@ -7,6 +7,7 @@ CHANGELOG.md export-ignore
 
 # Collapse diffs for generated files:
 public/**/*.js text eol=lf -diff
+public/**/*.js.LICENSE.txt text eol=lf -diff
 public/**/*.json text eol=lf -diff
 public/**/*.css text eol=lf -diff
 public/img/* binary -diff

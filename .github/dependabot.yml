@@ -77,6 +77,12 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+      - dependency-name: webgl-media-editor
+        versions:
+          - ">=0.1.0"
+      - dependency-name: webpack
+        versions:
+          - ">=5.109.0"
 
   - package-ecosystem: composer
     directory: /services/social
@@ -104,12 +110,23 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: "serversideup/php"
+        versions:
+          - ">=8.5"
 
   - package-ecosystem: docker-compose
     directory: /services/social
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: mariadb
+        update-types:
+          - version-update:semver-major
+      - dependency-name: redis
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /

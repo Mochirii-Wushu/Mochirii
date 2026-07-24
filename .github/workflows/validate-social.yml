@@ -64,6 +64,25 @@ jobs:
         working-directory: services/social
         run: npm ci
 
+      - name: Rebuild and verify committed Social assets
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: services/social
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm run production
+          git diff --exit-code -- \
+            public/css \
+            public/js \
+            public/mix-manifest.json
+          test -z "$(git ls-files --others --exclude-standard -- \
+            public/css \
+            public/js \
+            public/mix-manifest.json)" || {
+              echo "Social production assets include uncommitted generated files." >&2
+              exit 1
+            }
+
       - name: Setup PHP
         if: steps.changes.outputs.changed == 'true'
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2

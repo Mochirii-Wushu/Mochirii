@@ -212,6 +212,7 @@ if (composerJson.require?.php !== "^8.3|^8.4" || composerJson.config?.platform?.
 const gitAttributes = read(".gitattributes");
 requireIncludes(".gitattributes", gitAttributes, [
   "public/**/*.js text eol=lf -diff",
+  "public/**/*.js.LICENSE.txt text eol=lf -diff",
   "public/**/*.json text eol=lf -diff",
   "public/**/*.css text eol=lf -diff",
 ]);
@@ -403,6 +404,11 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "permissions:\n  contents: read",
   "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0",
+  "Rebuild and verify committed Social assets",
+  "npm run production",
+  "git diff --exit-code",
+  "git ls-files --others --exclude-standard",
+  "Social production assets include uncommitted generated files.",
   "shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2",
   "tools: composer:2.10.2",
   "persist-credentials: false",
