@@ -67,8 +67,8 @@ for (const name of workflowFiles) {
     if (action === "actions/setup-node" && !/^\s+node-version-file:\s*\.node-version\s*$/m.test(block)) {
       failures.push(`${file}:${index + 1}: setup-node must use the repository .node-version file.`);
     }
-    if (action === "denoland/setup-deno" && !/^\s+deno-version:\s*2\.9\.2\s*$/m.test(block)) {
-      failures.push(`${file}:${index + 1}: setup-deno must install exact Deno 2.9.2.`);
+    if (action === "denoland/setup-deno" && !/^\s+deno-version:\s*2\.9\.3\s*$/m.test(block)) {
+      failures.push(`${file}:${index + 1}: setup-deno must install exact Deno 2.9.3.`);
     }
   });
 }

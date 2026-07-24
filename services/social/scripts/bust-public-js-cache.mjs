@@ -5,6 +5,7 @@ import process from "node:process";
 
 const manifestPath = path.join(process.cwd(), "public/mix-manifest.json");
 const vendorPath = path.join(process.cwd(), "public/js/vendor.js");
+const vendorLicensePath = path.join(process.cwd(), "public/js/vendor.js.LICENSE.txt");
 const vendorKey = "/js/vendor.js";
 const suffix = "mochirii-vendor-syntaxfix1";
 const checkOnly = process.argv.includes("--check");
@@ -20,6 +21,20 @@ if (!fs.existsSync(manifestPath)) {
 
 if (!fs.existsSync(vendorPath)) {
   fail("public/js/vendor.js does not exist.");
+}
+
+if (!fs.existsSync(vendorLicensePath)) {
+  fail("public/js/vendor.js.LICENSE.txt does not exist.");
+}
+
+const vendorLicense = fs.readFileSync(vendorLicensePath, "utf8");
+const normalizedVendorLicense = vendorLicense
+  .replace(/\r\n/g, "\n")
+  .replace(/[ \t]+$/gm, "");
+if (vendorLicense !== normalizedVendorLicense) {
+  if (checkOnly) fail("public/js/vendor.js.LICENSE.txt is not normalized.");
+  fs.writeFileSync(vendorLicensePath, normalizedVendorLicense);
+  console.log("Normalized public/js/vendor.js.LICENSE.txt.");
 }
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));

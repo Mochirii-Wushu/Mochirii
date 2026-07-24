@@ -114,7 +114,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Do not edit `main` directly.
 - Release workflows use reviewed full-SHA action references, read-only minimum
   permissions, checkout with credential persistence disabled, Node `22.23.1`,
-  and Deno `2.9.2`. Repository-level `sha_pinning_required` remains a separate
+  and Deno `2.9.3`. Repository-level `sha_pinning_required` remains a separate
   approval-gated setting; do not change it as part of ordinary release work.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
 - Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.

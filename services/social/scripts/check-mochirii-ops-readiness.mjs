@@ -187,6 +187,27 @@ const packageJson = JSON.parse(read("package.json"));
 if (packageJson.name !== "mochirii-social-ops") {
   failures.push(`package.json name must be mochirii-social-ops, got: ${packageJson.name}`);
 }
+if (packageJson.devDependencies?.axios !== ">=1.18.1") {
+  failures.push("package.json must require axios >=1.18.1");
+}
+
+const packageLock = JSON.parse(read("package-lock.json"));
+if (packageLock.packages?.["node_modules/axios"]?.version !== "1.18.1") {
+  failures.push("package-lock.json must resolve axios 1.18.1");
+}
+
+const vendorLicense = read("public/js/vendor.js.LICENSE.txt");
+requireIncludes("public/js/vendor.js.LICENSE.txt", vendorLicense, [
+  "Axios v1.18.1 Copyright",
+]);
+if (vendorLicense.includes("Axios v1.18.0")) {
+  failures.push("public/js/vendor.js.LICENSE.txt contains the stale Axios 1.18.0 bundle");
+}
+
+const composerJson = JSON.parse(read("composer.json"));
+if (composerJson.require?.php !== "^8.3|^8.4" || composerJson.config?.platform?.php !== "8.3.0") {
+  failures.push("composer.json must resolve dependencies at the declared PHP 8.3 support floor");
+}
 
 const gitAttributes = read(".gitattributes");
 requireIncludes(".gitattributes", gitAttributes, [
@@ -357,7 +378,7 @@ requireIncludes("scripts/check-clean-database-migrations.sh", cleanDatabaseCheck
 
 const dockerfile = read("Dockerfile");
 requireIncludes("Dockerfile", dockerfile, [
-  "serversideup/php:8.4-fpm-nginx@sha256:519720d9ff5d50aad9eb83fac290746460dfc1346faa8fdb25c75d28a3feb2ab",
+  "serversideup/php:8.4-fpm-nginx@sha256:8eec7ce8d9d6a38bbc6f0f70ef439aab2279646bc01d74cbe538dbeada4da828",
   'org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii"',
   "COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/",
   "composer install --no-ansi --no-interaction --no-dev --optimize-autoloader",
@@ -380,9 +401,10 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "Detect Social changes",
   "services/social",
   "permissions:\n  contents: read",
-  "actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0",
+  "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0",
   "shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2",
+  "tools: composer:2.10.2",
   "persist-credentials: false",
   "packages: write",
   "docker login ghcr.io",

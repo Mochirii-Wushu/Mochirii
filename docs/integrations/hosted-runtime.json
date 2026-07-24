@@ -1,0 +1,119 @@
+{
+  "schema_version": 2,
+  "updated_date": "2026-07-24",
+  "scope": "No-secret hosted runtime ownership for the Mochirii customer and guild surfaces.",
+  "workstation": {
+    "role": "development_and_administration_only",
+    "core_customer_surfaces_production_dependency": false
+  },
+  "acceptance": {
+    "core_customer_surfaces_independent": true,
+    "complete_auxiliary_continuity_certified": false
+  },
+  "runtimes": [
+    {
+      "id": "website",
+      "provider": "Vercel",
+      "source": "apps/web",
+      "public_origins": ["https://mochirii.com"],
+      "continuity": "provider_managed",
+      "workstation_requirement": "none"
+    },
+    {
+      "id": "storefront",
+      "provider": "Shopify",
+      "source": "apps/shopify-theme",
+      "public_origins": ["https://shop.mochirii.com"],
+      "continuity": "provider_managed_password_protected",
+      "workstation_requirement": "none"
+    },
+    {
+      "id": "backend",
+      "provider": "Supabase",
+      "source": "supabase",
+      "public_origins": ["https://deyvmtncimmcinldjyqe.supabase.co"],
+      "continuity": "provider_managed",
+      "workstation_requirement": "none"
+    },
+    {
+      "id": "social",
+      "provider": "DigitalOcean, Cloudflare, Spaces, and GHCR",
+      "source": "services/social",
+      "public_origins": ["https://social.mochirii.com"],
+      "continuity": "droplet_supervised_containers",
+      "workstation_requirement": "none"
+    },
+    {
+      "id": "game",
+      "provider": "Fly.io",
+      "source": "connected repository: Mochi Pets",
+      "public_origins": ["https://mochi-pets-game.fly.dev"],
+      "continuity": "provider_managed_autostart",
+      "workstation_requirement": "none"
+    },
+    {
+      "id": "discord-interactions",
+      "provider": "Discord and Supabase Edge Functions",
+      "source": "supabase/functions/reaper-discord-interactions",
+      "public_origins": [
+        "https://discord.com",
+        "https://deyvmtncimmcinldjyqe.supabase.co"
+      ],
+      "continuity": "hosted_https_webhook",
+      "workstation_requirement": "none"
+    },
+    {
+      "id": "release-automation",
+      "provider": "GitHub-hosted Actions and GHCR",
+      "source": ".github/workflows",
+      "public_origins": ["https://github.com/Mochirii-Wushu/Mochirii"],
+      "continuity": "provider_managed",
+      "workstation_requirement": "none"
+    }
+  ],
+  "operational_readbacks": [
+    {
+      "id": "supabase-cron",
+      "kind": "managed_schedule",
+      "status": "verified",
+      "verified_date": "2026-07-24",
+      "evidence_ref": "docs/operations/HOSTED-RUNTIME-READBACK-2026-07-24.md",
+      "evidence": {
+        "provider_class": "managed_cloud",
+        "supervisor": "supabase_cron",
+        "enabled_required_schedules": 2,
+        "latest_required_executions_succeeded": true,
+        "vote_reminder_schedule_active": false
+      },
+      "summary": "Two active spotlight schedules were read back and their latest executions succeeded. The vote reminder schedule is not activated."
+    },
+    {
+      "id": "reaper-gateway-host",
+      "kind": "persistent_worker",
+      "status": "pending",
+      "required_evidence": [
+        "provider_class",
+        "supervisor",
+        "boot_policy",
+        "source_revision_present",
+        "health_signal_present",
+        "observed_healthy"
+      ],
+      "summary": "Record the hosted provider class, supervisor, boot policy, source revision, and health signal without host identifiers or secrets."
+    },
+    {
+      "id": "social-backup-recovery",
+      "kind": "backup_recovery",
+      "status": "pending",
+      "required_evidence": [
+        "provider_class",
+        "supervisor",
+        "timer_enabled",
+        "latest_encrypted_recovery_point_present",
+        "validate_only_restore_passed",
+        "observed_healthy"
+      ],
+      "summary": "Verify the Droplet backup timer, newest encrypted recovery point, and one isolated validate-only restore."
+    }
+  ]
+}

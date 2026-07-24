@@ -41,6 +41,76 @@ updates:
         update-types:
           - version-update:semver-major
 
+  - package-ecosystem: npm
+    directory: /apps/shopify-theme
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      theme-development-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: npm
+    directory: /services/social
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      social-production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      social-development-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: composer
+    directory: /services/social
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      social-composer-production-minor-and-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      social-composer-development-minor-and-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: docker
+    directory: /services/social
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker-compose
+    directory: /services/social
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
   - package-ecosystem: github-actions
     directory: /
     schedule:
