@@ -128,11 +128,12 @@ Current Next routes:
 
 Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
-## Mochi Pets Doorway
+## Mochi Pets Project Page
 
-`/games/mochi-pets` is the closed playtest doorway. The page stays behind the tester password wall, and saved play requires a signed-in approved Mochirii member account after the password unlock.
-
-Player-facing copy should stay focused on the shared guild room, curated character creation, Lirabao care, closed alpha access, and no real value. The page should show a playtest-paused message if the room is unavailable instead of opening an old fallback.
+`/games/mochi-pets` is a static, noindex future-project page. It has no playable
+build, tester gate, iframe, browser bridge, Supabase call, or game-runtime
+dependency. Keep status language factual and do not announce a release date
+until a reviewed build supports it.
 
 ## Current Visual Shell Standard
 
@@ -146,7 +147,7 @@ Visual-only shell releases should verify Home and all shared routes at `360`, `3
 - Existing `assets/` copied to `public/assets/`.
 - Existing `data/` copied to `public/data/`.
 - Existing `styles.css` copied into the Next app CSS surface; `app/mochirii.css` is now a compatibility aggregator while ordered global partials live under `app/styles/`.
-- Mochi Pets styles load from `app/games/mochi-pets/layout.tsx`; keep them out of the root layout so public routes do not receive game-only CSS.
+- Mochi Pets project-page styles load from `app/games/mochi-pets/layout.tsx`; keep them out of the root layout so other routes do not receive route-only CSS.
 - Shared header and footer converted to React components.
 - Homepage converted from `index.html` and `home.js` DOM mutation to React rendering.
 - Legacy `.html` redirects configured in `next.config.ts`.

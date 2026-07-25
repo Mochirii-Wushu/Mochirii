@@ -12,7 +12,6 @@ import {
 } from "react";
 import {
   navItemHidden,
-  navItemVisibleForPath,
   navKeyFromPath,
   SiteNavLink,
 } from "./site-header/header-navigation";
@@ -154,7 +153,7 @@ export function SiteHeader() {
                   hidden={!isOpen}
                   data-dropdown-menu
                 >
-                  {group.items.filter((item) => navItemVisibleForPath(item, activeKey) && !navItemHidden(item, authState)).map((item) => (
+                  {group.items.filter((item) => !navItemHidden(item, authState)).map((item) => (
                     <SiteNavLink
                       className="nav-item"
                       item={item}
@@ -336,7 +335,7 @@ export function SiteHeader() {
             {navGroups.map((group) => (
               <div className="mobile-group" key={group.id}>
                 <div className="mobile-group-title">{group.label}</div>
-                {group.items.filter((item) => navItemVisibleForPath(item, activeKey) && !navItemHidden(item, authState)).map((item) => (
+                {group.items.filter((item) => !navItemHidden(item, authState)).map((item) => (
                   <SiteNavLink
                     className="mobile-link"
                     item={item}

@@ -24,11 +24,6 @@ export function navItemHidden(item: NavItem, authState: HeaderAuthState) {
   return false;
 }
 
-export function navItemVisibleForPath(item: NavItem, activeKey: string) {
-  if (activeKey === "games/mochi-pets" && item.nav === "tome") return false;
-  return true;
-}
-
 export function SiteNavLink({
   item,
   activeKey,

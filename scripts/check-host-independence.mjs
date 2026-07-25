@@ -14,7 +14,6 @@ const requiredRuntimeIds = [
   "storefront",
   "backend",
   "social",
-  "game",
   "discord-interactions",
   "release-automation",
 ];
@@ -166,7 +165,6 @@ const expectedOrigins = new Map([
   ["storefront", ["https://shop.mochirii.com"]],
   ["backend", [`https://${publicUrls?.supabaseProjectRef}.supabase.co`]],
   ["social", [publicUrls?.socialHost]],
-  ["game", [publicUrls?.mochiPetsDefaultOrigin]],
   ["discord-interactions", ["https://discord.com", `https://${publicUrls?.supabaseProjectRef}.supabase.co`]],
   ["release-automation", ["https://github.com/Mochirii-Wushu/Mochirii"]],
 ]);

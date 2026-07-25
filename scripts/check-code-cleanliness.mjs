@@ -2,7 +2,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { collectRepoFiles, fromRoot, readText } from "./lib/repo-paths.mjs";
 import { appCssFiles } from "./lib/app-css.mjs";
 import {
-  MOCHI_PETS_DEFAULT_ORIGIN,
   SITE_ORIGIN,
   SOCIAL_HOST,
   SUPABASE_PROJECT_REF,
@@ -29,7 +28,6 @@ const sourceLineBudgets = [
 const publicLiteralValues = [
   SITE_ORIGIN,
   SOCIAL_HOST,
-  MOCHI_PETS_DEFAULT_ORIGIN,
   SUPABASE_PROJECT_REF,
 ];
 

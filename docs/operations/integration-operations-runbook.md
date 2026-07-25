@@ -34,14 +34,14 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Provider evidence: `npm run check:full-stack-release-evidence -- --providers --strict-provider`; add `--write` only after strict mode passes.
 - Supabase work: `npm run check:supabase-security-performance`, `npm run check:supabase-edge-types`, relevant Deno tests, migration list, linked advisors, and Supabase Preview evidence for PRs with `supabase/` changes.
 - Browser/accessibility/performance work: route matrix, accessibility route matrix, Lighthouse Home/Recruitment/Gallery, and focused Playwright smokes for authenticated or media flows.
-- CSP work: `npm run check:csp-inline-hardening -- --live --write`; do not remove inline allowances until Preview browser evidence covers Supabase, Spotify, Vercel telemetry, and Mochi Pets iframe/postMessage behavior.
+- CSP work: `npm run check:csp-inline-hardening -- --live --write`; do not remove inline allowances until Preview browser evidence covers Supabase, Spotify, and Vercel telemetry.
 
 ## Current Integration Expectations
 
 - Live app surface: Vercel/Next.js under `apps/web` for `https://mochirii.com`.
 - Vercel release policy: the GitHub website repository is currently public. Keep that visibility unless the owner separately approves changing it. Vercel Git checks that still point at the old private-organization plan limitation are stale until rerun or refreshed; do not use those stale statuses as current release evidence. If the owner later approves making the repo private again and Vercel Git checks become unavailable, use the documented protected/admin merge plus owner-approved manual Vercel CLI production deploy path with tokens scoped to child-process environment only.
 - Website/social split: `https://mochirii.com` is the public information site. Header Social should stay in the regular Guild dropdown, footer Social should hand off directly to `https://social.mochirii.com`, and the website `/social` route should stay noindex while redirecting signed-in members and offering signed-out login/help copy.
-- Game/social split: Mochi Pets is the guild game and Mochirii Social is the guild social platform. Follow `docs/mochi-pets-rename-manifest.md` for route, prefix, migration, and runtime-manifest cutover rules.
+- Future game/social split: `/games/mochi-pets` is a static Website status page and Mochirii Social is the hosted guild social platform. Any future game begins from a separately approved Unity project under `docs/mochi-pets-future-project.md`.
 - Historical static recovery: GitHub release `legacy-static-final-2026-07-18`; it is not an editable or live rollback surface.
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
 - Vercel project: production-serving `mochirii/mochirii` with root directory `apps/web`.

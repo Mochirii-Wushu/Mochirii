@@ -1,10 +1,11 @@
 # Hosted Runtime Independence
 
-The customer website, password-protected storefront, hosted backend, Social
-application, and connected game continue running when the development
-workstation is offline. Codex, Chrome, local worktrees, Docker Desktop, local
-CLIs, and the private credential boundary are development or administration
-tools only.
+The customer website, password-protected storefront, hosted backend, and Social
+application continue running when the development workstation is offline.
+The static Mochi Pets status page is served by the website and has no game
+runtime dependency. Codex, Chrome, local worktrees, Docker Desktop, local CLIs,
+and the private credential boundary are development or administration tools
+only.
 
 The machine-readable contract is
 [`docs/integrations/hosted-runtime.json`](../integrations/hosted-runtime.json).
@@ -16,10 +17,10 @@ verified.
 
 The GitHub-hosted weekly production check runs
 `npm run check:hosted-public-boundaries` without private credentials. It checks
-the Vercel website, Social, the Shopify password boundary, Fly health,
-fail-closed Supabase functions, and Discord's API boundary. A passing public
-check proves reachability and fail-closed behavior; it does not replace
-provider backups, restore drills, or internal process health.
+the Vercel website, Social, the Shopify password boundary, fail-closed Supabase
+functions, and Discord's API boundary. A passing public check proves
+reachability and fail-closed behavior; it does not replace provider backups,
+restore drills, or internal process health.
 
 ## Remaining readbacks
 

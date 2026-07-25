@@ -16,16 +16,10 @@ GitHub is the source, review, CI, package, and delivery control plane. Productio
 traffic, queues, schedules, media, authentication, and backups do not require a
 local workstation to remain online.
 
-Mochi Pets remains in the separate `xartaiusx/mochi-pets` repository. This
-repository owns its website doorway, browser bridge, and shared backend access;
-the game repository owns game source, assets, builds, and runtime manifests.
-
-## Mochi Pets Closed Playtest
-
-Mochi Pets is a closed Mochirii playtest built around a shared 3D guild room.
-Approved testers can create a curated character, meet Lirabao, and care for the guild pet together.
-The tester password wall limits discovery, and member sign-in is required for saved play.
-Playtest items have no real value. See `docs/mochi-pets-playtest-guide.md` for the member-facing access guide.
+The former Mochi Pets prototype and connected repository are retired.
+`/games/mochi-pets` remains a static, noindex status page hosted entirely by the
+website. A future game may begin later only as a fresh Unity project under the
+`Mochirii-Wushu` organization; see `docs/mochi-pets-future-project.md`.
 
 See [system architecture](docs/architecture.md) and
 [repository ownership](docs/operations/repository-ownership.md).

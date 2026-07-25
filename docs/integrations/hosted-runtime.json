@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "updated_date": "2026-07-24",
+  "updated_date": "2026-07-25",
   "scope": "No-secret hosted runtime ownership for the Mochirii customer and guild surfaces.",
   "workstation": {
     "role": "development_and_administration_only",
@@ -41,14 +41,6 @@
       "source": "services/social",
       "public_origins": ["https://social.mochirii.com"],
       "continuity": "droplet_supervised_containers",
-      "workstation_requirement": "none"
-    },
-    {
-      "id": "game",
-      "provider": "Fly.io",
-      "source": "connected repository: Mochi Pets",
-      "public_origins": ["https://mochi-pets-game.fly.dev"],
-      "continuity": "provider_managed_autostart",
       "workstation_requirement": "none"
     },
     {
