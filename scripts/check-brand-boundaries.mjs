@@ -8,11 +8,13 @@ const formerCompanyBrand = ["vele", "sari"].join("");
 const formerRepositoryOwner = ["anthy", "phera"].join("");
 const formerManufacturingPartner = ["self", "named"].join("");
 const formerManufacturerBrand = ["ma", "dara"].join("");
+const personalAccountIdentity = ["xart", "aiusx"].join("");
 const forbiddenTokens = [
   { label: "former company brand", value: formerCompanyBrand },
   { label: "former repository owner", value: formerRepositoryOwner },
   { label: "manufacturing-partner identity or domain", value: formerManufacturingPartner },
   { label: "manufacturer brand identity or domain", value: formerManufacturerBrand },
+  { label: "personal account identity", value: personalAccountIdentity },
 ];
 const forbiddenContentPatterns = [
   { label: "internal price multiplier", pattern: /\b2[.]2\s*(?:x|times)\b/i },
@@ -75,7 +77,12 @@ const extensionlessTextFiles = new Set([
   ".node-version",
   ".nvmrc",
   ".shopifyignore",
+  "artisan",
+  "Caddyfile",
   "CNAME",
+  "CODEOWNERS",
+  "Dockerfile",
+  "LICENSE",
 ]);
 const reviewedLargeTextBudgets = new Map([
   ["services/social/storage/app/cities.json", 13 * 1024 * 1024],
@@ -92,6 +99,12 @@ function normalized(value) {
 
 function shouldIgnore(relativePath) {
   return ignoredFiles.has(relativePath);
+}
+
+function isTextCandidate(relativePath) {
+  const extension = path.extname(relativePath).toLowerCase();
+  const basename = path.basename(relativePath);
+  return textExtensions.has(extension) || extensionlessTextFiles.has(basename);
 }
 
 function separationMetadataFailures(line) {
@@ -116,9 +129,20 @@ const trackedFiles = [...new Set(execFileSync(
 
 const sourceReferenceCanary = `sourceCheckpoint: "${"a".repeat(40)}"`;
 const providerIdentifierCanary = "deploymentId: preview-1234";
+const extensionlessGovernanceCanary = {
+  path: ".github/CODEOWNERS",
+  content: `* @${["xart", "aiusx"].join("")}`,
+};
 if (separationMetadataFailures(sourceReferenceCanary).length < 2 ||
     separationMetadataFailures(providerIdentifierCanary).length !== 1) {
   console.error("Brand boundary check failed: separation-metadata canary did not trigger.");
+  process.exit(1);
+}
+if (
+  !isTextCandidate(extensionlessGovernanceCanary.path)
+  || !forbiddenTokens.some((rule) => normalized(extensionlessGovernanceCanary.content).includes(rule.value))
+) {
+  console.error("Brand boundary check failed: extensionless governance canary was not scanned.");
   process.exit(1);
 }
 
@@ -146,9 +170,7 @@ for (const relativePath of trackedFiles) {
 
   const absolutePath = path.join(repoRoot, relativePath);
   if (!existsSync(absolutePath)) continue;
-  const extension = path.extname(relativePath).toLowerCase();
-  const basename = path.basename(relativePath);
-  if (!textExtensions.has(extension) && !extensionlessTextFiles.has(basename)) continue;
+  if (!isTextCandidate(relativePath)) continue;
   const fileSize = statSync(absolutePath).size;
   if (fileSize > 5 * 1024 * 1024) {
     const reviewedBudget = reviewedLargeTextBudgets.get(relativePath);

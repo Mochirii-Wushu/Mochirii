@@ -9,7 +9,7 @@ The repository-level Actions setting `sha_pinning_required` is currently
 
 - `Mochirii-Wushu/Mochirii`
 - `Mochirii-Wushu/mochirii-pixelfed-ops`
-- `xartaiusx/mochi-pets`
+- The retired Mochi Pets repository
 
 Website and Mochirii Social workflows already use reviewed full commit SHAs.
 Mochi Pets PR #22 pinned Checkout, Setup Node, and CodeQL to reviewed full
@@ -36,8 +36,12 @@ If a reviewed pinned workflow is unexpectedly blocked, change only
 `sha_pinning_required` back to `false`, capture the exact failing workflow and
 reference, fix it through a focused PR, and re-enable enforcement after checks.
 
-## Exact Approval
+## Sanitized Approval Record
+
+The historical approval wording below preserves the authorized scope while
+removing the retired repository's personal owner identifier under the current
+Mochirii-only documentation policy.
 
 ```text
-Approve changing only the GitHub Actions sha_pinning_required setting from false to true for Mochirii-Wushu/Mochirii, Mochirii-Wushu/mochirii-pixelfed-ops, and xartaiusx/mochi-pets, while leaving allowed_actions as all and leaving all other repository, Actions, ruleset, permission, secret, environment, and visibility settings unchanged.
+Approve changing only the GitHub Actions sha_pinning_required setting from false to true for the two named Mochirii-Wushu repositories above and the retired Mochi Pets repository, while leaving allowed_actions as all and leaving all other repository, Actions, ruleset, permission, secret, environment, and visibility settings unchanged.
 ```
