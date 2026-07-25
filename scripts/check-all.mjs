@@ -80,6 +80,7 @@ const checks = [
   ["check:spotlight-poll", ["node", "scripts/check-spotlight-poll.mjs"]],
   ["check:refs", ["node", "scripts/check-refs.mjs"]],
   ["check:assets", ["node", "scripts/check-assets.mjs"]],
+  ["check:universal-lightbox", ["node", "scripts/check-universal-lightbox.mjs"]],
   ["check:universal-hero-spacing", ["node", "scripts/check-universal-hero-spacing.mjs"]],
 ];
 

@@ -1,0 +1,248 @@
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { appCssFiles } from "./lib/app-css.mjs";
+
+const sharedCssPath = "apps/web/app/styles/shell-lightbox.css";
+const galleryCssPath = "apps/web/app/styles/public-gallery.css";
+const homePagePath = "apps/web/app/page.tsx";
+const galleryPagePath = "apps/web/app/gallery/page.tsx";
+const homeModalPath = "apps/web/components/HomeGalleryLightboxModal.tsx";
+const galleryBrowserPath = "apps/web/components/public-pages/GalleryBrowser.tsx";
+
+const sharedCss = readFileSync(sharedCssPath, "utf8").replace(/\r\n/g, "\n");
+const galleryCss = readFileSync(galleryCssPath, "utf8").replace(/\r\n/g, "\n");
+const homePage = readFileSync(homePagePath, "utf8").replace(/\r\n/g, "\n");
+const galleryPage = readFileSync(galleryPagePath, "utf8").replace(/\r\n/g, "\n");
+const homeModal = readFileSync(homeModalPath, "utf8").replace(/\r\n/g, "\n");
+const galleryBrowser = readFileSync(galleryBrowserPath, "utf8").replace(/\r\n/g, "\n");
+
+function fail(message) {
+  console.error(message);
+  process.exitCode = 1;
+}
+
+function expectIncludes(label, source, snippet, sourcePath) {
+  if (!source.includes(snippet)) fail(`${label} is missing from ${sourcePath}.`);
+}
+
+function normalizeSelector(selector) {
+  return selector
+    .replace(/\s+/g, " ")
+    .replace(/\s*,\s*/g, ",")
+    .trim();
+}
+
+function normalizeValue(value) {
+  return value.replace(/\s+/g, "").toLowerCase();
+}
+
+function declarationEntries(body) {
+  return body
+    .split(";")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const separator = line.indexOf(":");
+      if (separator === -1) return null;
+      return {
+        property: line.slice(0, separator).trim().toLowerCase(),
+        value: normalizeValue(line.slice(separator + 1)),
+      };
+    })
+    .filter(Boolean);
+}
+
+function declarationMap(body) {
+  return new Map(declarationEntries(body).map(({ property, value }) => [property, value]));
+}
+
+function parseRules(source) {
+  const withoutComments = source.replace(/\/\*[\s\S]*?\*\//g, "");
+  return [...withoutComments.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((match) => ({
+    selector: normalizeSelector(match[1]),
+    body: match[2],
+  }));
+}
+
+function discoverCssFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return discoverCssFiles(entryPath);
+    return entry.isFile() && entry.name.endsWith(".css")
+      ? [entryPath.replace(/\\/g, "/")]
+      : [];
+  });
+}
+
+const discoveredAppCssFiles = discoverCssFiles("apps/web/app").sort();
+const missingCssFiles = discoveredAppCssFiles.filter((file) => !appCssFiles.includes(file));
+const duplicateCssFiles = appCssFiles.filter((file, index) => appCssFiles.indexOf(file) !== index);
+if (missingCssFiles.length) fail(`Application CSS inventory is missing: ${missingCssFiles.join(", ")}.`);
+if (duplicateCssFiles.length) fail(`Application CSS inventory contains duplicates: ${duplicateCssFiles.join(", ")}.`);
+
+const sharedRules = parseRules(sharedCss);
+const stylesheetRules = new Map(
+  appCssFiles.map((file) => [
+    file,
+    parseRules(readFileSync(file, "utf8").replace(/\r\n/g, "\n")),
+  ]),
+);
+
+function findRule(rules, selector) {
+  const normalized = normalizeSelector(selector);
+  return rules.find((rule) => rule.selector === normalized);
+}
+
+function expectRuleContract(selector, expectedProperties) {
+  const rule = findRule(sharedRules, selector);
+  if (!rule) {
+    fail(`Universal lightbox selector ${selector} is missing from ${sharedCssPath}.`);
+    return;
+  }
+
+  const actual = declarationMap(rule.body);
+  for (const [property, expectedValue] of Object.entries(expectedProperties)) {
+    const normalizedExpected = normalizeValue(expectedValue);
+    if (actual.get(property) !== normalizedExpected) {
+      fail(
+        `${selector} must set ${property}:${expectedValue}; in ${sharedCssPath}.`,
+      );
+    }
+  }
+}
+
+function expectPropertySequence(selector, property, expectedValues) {
+  const rule = findRule(sharedRules, selector);
+  if (!rule) {
+    fail(`Universal lightbox selector ${selector} is missing from ${sharedCssPath}.`);
+    return;
+  }
+
+  const actual = declarationEntries(rule.body)
+    .filter((entry) => entry.property === property)
+    .map((entry) => entry.value);
+  const expected = expectedValues.map(normalizeValue);
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    fail(`${selector} must set ${property} in fallback order: ${expectedValues.join(" then ")}.`);
+  }
+}
+
+expectIncludes("Home shared lightbox import", homePage, 'import "./styles/shell-lightbox.css";', homePagePath);
+expectIncludes("Gallery shared lightbox import", galleryPage, 'import "../styles/shell-lightbox.css";', galleryPagePath);
+expectIncludes("Gallery visual treatment import", galleryPage, 'import "../styles/public-gallery.css";', galleryPagePath);
+expectIncludes("Home keyboard-scrollable lightbox card", homeModal, '<figure className="lightbox-card" tabIndex={0}>', homeModalPath);
+expectIncludes("Gallery keyboard-scrollable lightbox card", galleryBrowser, '<figure className="lightbox-card" tabIndex={0}>', galleryBrowserPath);
+
+expectRuleContract("#lightbox,#modalRoot", {
+  "--lightbox-shell-gap": "clamp(12px, 4vw, 24px)",
+  "--lightbox-close-size": "44px",
+  "--lightbox-control-gap": "8px",
+  "--lightbox-card-copy-reserve": "70px",
+  position: "fixed",
+  inset: "0",
+  "overscroll-behavior": "contain",
+});
+expectPropertySequence("#lightbox,#modalRoot", "height", ["100vh", "100dvh"]);
+
+expectRuleContract("#lightbox .lightbox-shell,#modalRoot .lightbox-shell", {
+  display: "grid",
+  "grid-template-columns": "minmax(0, 1160px)",
+  "grid-template-rows": "var(--lightbox-close-size) minmax(0, auto)",
+  "align-content": "center",
+  "justify-content": "center",
+  "justify-items": "center",
+  "row-gap": "var(--lightbox-control-gap)",
+  "overflow": "hidden",
+});
+expectPropertySequence("#lightbox .lightbox-shell,#modalRoot .lightbox-shell", "padding", [
+  "clamp(12px, 4vw, 24px)",
+  "var(--lightbox-inset-top) var(--lightbox-inset-right) var(--lightbox-inset-bottom) var(--lightbox-inset-left)",
+]);
+
+expectRuleContract(".lightbox-card", {
+  "grid-row": "2",
+  width: "min(100%, 1160px)",
+  "max-width": "100%",
+  "overflow-x": "hidden",
+  "overflow-y": "auto",
+  "overscroll-behavior": "contain",
+});
+expectPropertySequence(".lightbox-card", "max-height", [
+  "calc(100vh - 48px - var(--lightbox-close-size) - var(--lightbox-control-gap))",
+  "calc(100dvh - var(--lightbox-inset-top) - var(--lightbox-inset-bottom) - var(--lightbox-close-size) - var(--lightbox-control-gap))",
+]);
+expectRuleContract(".lightbox-img", {
+  width: "auto",
+  height: "auto",
+  "max-width": "100%",
+  "object-fit": "contain",
+  flex: "0 0 auto",
+});
+expectPropertySequence(".lightbox-img", "max-height", [
+  "min(82vh, calc(100vh - 48px - var(--lightbox-close-size) - var(--lightbox-control-gap) - var(--lightbox-card-copy-reserve)))",
+  "min(82dvh, calc(100dvh - var(--lightbox-inset-top) - var(--lightbox-inset-bottom) - var(--lightbox-close-size) - var(--lightbox-control-gap) - var(--lightbox-card-copy-reserve)))",
+]);
+expectRuleContract(".lightbox-caption", {
+  "box-sizing": "border-box",
+  width: "100%",
+  "max-width": "100%",
+  "min-width": "0",
+  "font-size": ".875rem",
+  "overflow-wrap": "anywhere",
+});
+expectRuleContract(".lightbox-close", {
+  position: "static",
+  "grid-row": "1",
+  "justify-self": "end",
+  "align-self": "center",
+  width: "var(--lightbox-close-size)",
+  height: "var(--lightbox-close-size)",
+});
+
+const galleryVisualProperties = {
+  card: new Set(["background", "border-color", "box-shadow"]),
+  img: new Set(),
+  caption: new Set(["color"]),
+  close: new Set(["background", "border-color", "box-shadow", "transition"]),
+  backdrop: new Set(["background", "backdrop-filter", "-webkit-backdrop-filter"]),
+  root: new Set(),
+  shell: new Set(),
+};
+
+function lightboxRuleKind(selector) {
+  if (/(?:#lightboxBackdrop\b|#modalBackdrop\b|\.lightbox-backdrop\b)/.test(selector)) return "backdrop";
+  if (/\.lightbox-card\b/.test(selector)) return "card";
+  if (/(?:#lightboxImg\b|#modalImage\b|\.lightbox-img\b)/.test(selector)) return "img";
+  if (/\.lightbox-caption\b/.test(selector)) return "caption";
+  if (/(?:#lightboxClose\b|#modalClose\b|\.lightbox-close\b)/.test(selector)) return "close";
+  if (/\.lightbox-shell\b/.test(selector)) return "shell";
+  if (/(?:#lightbox\b|#modalRoot\b)/.test(selector)) return "root";
+  return null;
+}
+
+for (const [file, rules] of stylesheetRules) {
+  if (file === sharedCssPath) continue;
+
+  for (const rule of rules) {
+    const { selector } = rule;
+    const kind = lightboxRuleKind(selector);
+    if (!kind) continue;
+
+    const allowed = file === galleryCssPath ? galleryVisualProperties[kind] : null;
+    for (const { property, value } of declarationEntries(rule.body)) {
+      const approvedHoverTransform = file === galleryCssPath
+        && kind === "close"
+        && property === "transform"
+        && /\.lightbox-close:(?:hover|focus-visible)\b/.test(selector)
+        && value === "translatey(-1px)";
+
+      if (!allowed?.has(property) && !approvedHoverTransform) {
+        fail(`Competing lightbox declaration outside ${sharedCssPath}: ${file} ${selector} sets ${property}.`);
+      }
+    }
+  }
+}
+
+if (process.exitCode) process.exit(process.exitCode);
+
+console.log("Universal lightbox validation OK.");

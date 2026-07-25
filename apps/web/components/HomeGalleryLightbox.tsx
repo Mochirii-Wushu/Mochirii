@@ -39,8 +39,8 @@ export function HomeGalleryLightbox({
     }, 0);
   }, []);
 
-  const openModal = (index: number) => {
-    lastFocusRef.current = document.activeElement as HTMLElement | null;
+  const openModal = (index: number, trigger: HTMLElement) => {
+    lastFocusRef.current = trigger;
     setOpenIndex(index);
   };
 
@@ -53,7 +53,7 @@ export function HomeGalleryLightbox({
             type="button"
             aria-label={`Open image: ${item.caption || item.alt || "Guild screenshot"}`}
             key={item.key}
-            onClick={() => openModal(index)}
+            onClick={(event) => openModal(index, event.currentTarget)}
           >
             <img
               className="home-thumb__img"

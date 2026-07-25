@@ -1,7 +1,9 @@
 import { readText } from "./repo-paths.mjs";
 
 export const appCssFiles = [
+  "apps/web/app/mochirii.css",
   "apps/web/app/styles/tokens-base.css",
+  "apps/web/app/styles/font-fallbacks.css",
   "apps/web/app/styles/shared-ui.css",
   "apps/web/app/styles/public-join.css",
   "apps/web/app/styles/public-events.css",
