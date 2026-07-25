@@ -16,8 +16,8 @@ env:
   REGISTRY_IMAGE: ghcr.io/mochirii-wushu/mochirii-pixelfed-ops
 
 jobs:
-  validate-social:
-    name: validate-social
+  validate-social-core:
+    name: validate-social-core
     runs-on: ubuntu-24.04
     outputs:
       social_changed: ${{ steps.changes.outputs.changed }}
@@ -135,8 +135,8 @@ jobs:
 
   validate-recovery-tools:
     name: recovery-tools-${{ matrix.architecture }}
-    needs: validate-social
-    if: needs.validate-social.outputs.social_changed == 'true'
+    needs: validate-social-core
+    if: needs.validate-social-core.outputs.social_changed == 'true'
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 10
     strategy:
@@ -194,9 +194,65 @@ jobs:
             --output "$test_directory/recovered" "$test_directory/payload.age"
           cmp --silent "$test_directory/payload" "$test_directory/recovered"
 
+          rclone_root=":local:$test_directory/rclone-local"
+          rclone_object="recovery-smoke.tar.age"
+          "$tools_directory/rclone" --config /dev/null --quiet \
+            copyto "$test_directory/payload.age" "$rclone_root/daily/$rclone_object"
+          "$tools_directory/rclone" --config /dev/null --quiet \
+            lsf --files-only "$rclone_root/daily" \
+            | grep -Fxq "$rclone_object"
+          cmp --silent \
+            "$test_directory/payload.age" \
+            "$test_directory/rclone-local/daily/$rclone_object"
+          "$tools_directory/rclone" --config /dev/null --quiet \
+            deletefile "$rclone_root/daily/$rclone_object"
+          test ! -e "$test_directory/rclone-local/daily/$rclone_object"
+
+  validate-social:
+    name: validate-social
+    needs: [validate-social-core, validate-recovery-tools]
+    if: always()
+    runs-on: ubuntu-24.04
+    outputs:
+      social_changed: ${{ steps.result.outputs.social_changed }}
+
+    steps:
+      - name: Report required Social validation result
+        id: result
+        env:
+          CORE_RESULT: ${{ needs.validate-social-core.result }}
+          RECOVERY_RESULT: ${{ needs.validate-recovery-tools.result }}
+          SOCIAL_CHANGED: ${{ needs.validate-social-core.outputs.social_changed }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$CORE_RESULT" == "success" ]] || {
+            echo "Social core validation did not succeed." >&2
+            exit 1
+          }
+          case "$SOCIAL_CHANGED" in
+            true)
+              [[ "$RECOVERY_RESULT" == "success" ]] || {
+                echo "Recovery-tool validation did not succeed for a Social change." >&2
+                exit 1
+              }
+              ;;
+            false)
+              [[ "$RECOVERY_RESULT" == "skipped" ]] || {
+                echo "Recovery-tool validation must be skipped when Social paths are unchanged." >&2
+                exit 1
+              }
+              ;;
+            *)
+              echo "Social change detection did not produce a valid result." >&2
+              exit 1
+              ;;
+          esac
+          echo "social_changed=$SOCIAL_CHANGED" >> "$GITHUB_OUTPUT"
+
   production-image:
     name: production-image
-    needs: [validate-social, validate-recovery-tools]
+    needs: validate-social
     if: needs.validate-social.outputs.social_changed == 'true' && !(github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -267,7 +323,7 @@ jobs:
 
   publish-social-image:
     name: publish-social-image
-    needs: [validate-social, validate-recovery-tools]
+    needs: validate-social
     if: needs.validate-social.outputs.social_changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30

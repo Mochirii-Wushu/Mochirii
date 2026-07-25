@@ -157,8 +157,11 @@ rejectIncludes(workflowPath, workflow, [
 const validationWorkflowPath = ".github/workflows/validate-social.yml";
 const validationWorkflow = readRepository(validationWorkflowPath);
 requireIncludes(validationWorkflowPath, validationWorkflow, [
+  "validate-social-core:",
+  "name: validate-social-core",
   "validate-recovery-tools:",
   "name: recovery-tools-${{ matrix.architecture }}",
+  "needs: validate-social-core",
   "runner: ubuntu-24.04",
   "runner: ubuntu-24.04-arm",
   "bash -n \\",
@@ -166,7 +169,18 @@ requireIncludes(validationWorkflowPath, validationWorkflow, [
   "bash services/social/scripts/install-pinned-recovery-tools.sh \"$tools_directory\"",
   '"$tools_directory/age-keygen" -y "$test_directory/identity"',
   "cmp --silent \"$test_directory/payload\" \"$test_directory/recovered\"",
-  "needs: [validate-social, validate-recovery-tools]",
+  'rclone_root=":local:$test_directory/rclone-local"',
+  'copyto "$test_directory/payload.age" "$rclone_root/daily/$rclone_object"',
+  'lsf --files-only "$rclone_root/daily"',
+  'deletefile "$rclone_root/daily/$rclone_object"',
+  "validate-social:",
+  "name: validate-social",
+  "needs: [validate-social-core, validate-recovery-tools]",
+  "if: always()",
+  '[[ "$CORE_RESULT" == "success" ]]',
+  '[[ "$RECOVERY_RESULT" == "success" ]]',
+  '[[ "$RECOVERY_RESULT" == "skipped" ]]',
+  "needs: validate-social",
 ]);
 
 const backupInstallerPath = "scripts/install-production-backups.sh";
@@ -198,6 +212,9 @@ requireIncludes(runbookPath, compactRunbook, [
   "protected `social-recovery` environment",
   "protected `main`",
   "native AMD64 and ARM64",
+  "no-network local backend",
+  "GitHub-hosted public-preview dependency",
+  "fails the required `validate-social` result closed",
   "does not install tools on the live Droplet",
 ]);
 rejectIncludes(runbookPath, runbook, ["repository Actions secrets"]);

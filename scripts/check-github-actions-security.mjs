@@ -47,6 +47,34 @@ function workflowJobs(lines) {
   }));
 }
 
+function hasExactRecoveryRunnerMatrix(jobText) {
+  const entries = [...jobText.matchAll(
+    /^\s+- architecture:\s*([^\s#]+)\s*\n\s+runner:\s*([^\s#]+)\s*$/gm,
+  )].map((match) => [match[1], match[2]]);
+  const architectureRows = jobText.match(/^\s+- architecture:/gm) ?? [];
+  const runnerRows = jobText.match(/^\s+runner:/gm) ?? [];
+  return architectureRows.length === 2 &&
+    runnerRows.length === 2 &&
+    JSON.stringify(entries) === JSON.stringify([
+      ["amd64", "ubuntu-24.04"],
+      ["arm64", "ubuntu-24.04-arm"],
+    ]);
+}
+
+const recoveryMatrixCanary = `
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+          - architecture: unreviewed
+            runner: unreviewed-runner
+`;
+if (hasExactRecoveryRunnerMatrix(recoveryMatrixCanary)) {
+  failures.push("Recovery runner-matrix policy canary did not reject an additional runner.");
+}
+
 let totalJobCount = 0;
 
 for (const name of workflowFiles) {
@@ -81,8 +109,7 @@ for (const name of workflowFiles) {
       name === "validate-social.yml" &&
       job.id === "validate-recovery-tools" &&
       value === "${{ matrix.runner }}" &&
-      jobText.includes("- architecture: amd64\n            runner: ubuntu-24.04") &&
-      jobText.includes("- architecture: arm64\n            runner: ubuntu-24.04-arm");
+      hasExactRecoveryRunnerMatrix(jobText);
     if (value.includes("self-hosted")) {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must not depend on a self-hosted runner.`);
     } else if (value === "ubuntu-latest") {
