@@ -8,6 +8,7 @@ const workflowFiles = readdirSync(workflowsDir)
 
 const failures = [];
 const fullSha = /^[0-9a-f]{40}$/;
+const buildkitImage = "moby/buildkit:v0.31.2@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec";
 const alwaysReportingWorkflows = new Map([
   ["validate-shopify-theme.yml", "validate-theme"],
   ["validate-social.yml", "validate-social"],
@@ -28,6 +29,8 @@ for (const name of workflowFiles) {
   const file = `.github/workflows/${name}`;
   const text = readFileSync(resolve(workflowsDir, name), "utf8").replaceAll("\r\n", "\n");
   const lines = text.split("\n");
+  let buildxStepCount = 0;
+  let sbomStepCount = 0;
 
   if (!text.includes("permissions:\n  contents: read")) {
     failures.push(`${file}: workflow must declare top-level contents: read permissions.`);
@@ -67,10 +70,31 @@ for (const name of workflowFiles) {
     if (action === "actions/setup-node" && !/^\s+node-version-file:\s*\.node-version\s*$/m.test(block)) {
       failures.push(`${file}:${index + 1}: setup-node must use the repository .node-version file.`);
     }
-    if (action === "denoland/setup-deno" && !/^\s+deno-version:\s*2\.9\.3\s*$/m.test(block)) {
-      failures.push(`${file}:${index + 1}: setup-deno must install exact Deno 2.9.3.`);
+    if (action === "denoland/setup-deno" && !/^\s+deno-version:\s*2\.9\.4\s*$/m.test(block)) {
+      failures.push(`${file}:${index + 1}: setup-deno must install exact Deno 2.9.4.`);
+    }
+    if (action === "docker/setup-buildx-action") {
+      buildxStepCount += 1;
+      if (!/^\s+version:\s*v0\.35\.0\s*$/m.test(block) ||
+          !/^\s+driver-opts:\s*\|\s*$/m.test(block) ||
+          !block.split("\n").some((line) => line.trim() === `image=${buildkitImage}`)) {
+        failures.push(`${file}:${index + 1}: setup-buildx must install Buildx v0.35.0 with the approved digest-pinned BuildKit v0.31.2 image.`);
+      }
+    }
+    if (action === "anchore/sbom-action") {
+      sbomStepCount += 1;
+      if (!/^\s+syft-version:\s*v1\.49\.0\s*$/m.test(block)) {
+        failures.push(`${file}:${index + 1}: sbom-action must install exact Syft v1.49.0.`);
+      }
     }
   });
+
+  if (name === "validate-social.yml" && buildxStepCount !== 2) {
+    failures.push(`${file}: must contain exactly two pinned setup-buildx steps (production-image and publish-social-image).`);
+  }
+  if (name === "validate-social.yml" && sbomStepCount !== 2) {
+    failures.push(`${file}: must contain exactly two pinned sbom-action steps (production-image and publish-social-image).`);
+  }
 }
 
 if (failures.length) {
