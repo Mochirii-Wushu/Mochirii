@@ -135,7 +135,6 @@ Notes:
 
 ## Verification Notes
 
-- GitHub CLI is authenticated as `xartaiusx`.
+- GitHub CLI is authenticated as a repository administrator account.
 - Supabase CLI `2.105.0` is available at `C:\Users\xtyty\.bun\install\cache\@supabase\cli-windows-x64@2.105.0@@@1\bin\supabase.exe`, but local CLI auth is not configured in this shell.
 - Because the CLI has no local Supabase access token, remote migration history was confirmed through the logged-in Supabase SQL Editor and guarded through local files.
-

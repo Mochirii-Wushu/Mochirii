@@ -5,7 +5,7 @@ Prepared: 2026-07-12 PDT
 ## Read-Only Finding
 
 The newly pinned CodeQL workflow exposed three open high-severity alerts in
-`xartaiusx/mochi-pets`:
+the retired Mochi Pets repository:
 
 - Alerts #2 and #3: `js/missing-rate-limiting` in
   `apps/game/src/entries/express.ts`.
