@@ -2,7 +2,6 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  MOCHI_PETS_DEFAULT_ORIGIN,
   SITE_ORIGIN,
   SOCIAL_HOST,
   SUPABASE_FUNCTIONS_URL,
@@ -47,12 +46,6 @@ const checks = [
     statuses: [200],
     finalPath: "/password",
     validate: (result) => expectHtml(result, /Mochirii Cosmetics/i),
-  },
-  {
-    label: "Mochi Pets hosted health",
-    url: `${MOCHI_PETS_DEFAULT_ORIGIN}/healthz`,
-    statuses: [200],
-    validate: (result) => expectJson(result, (body) => body?.ok === true),
   },
   {
     label: "Supabase Auth unsigned boundary",

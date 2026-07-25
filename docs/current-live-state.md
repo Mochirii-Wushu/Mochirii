@@ -55,24 +55,19 @@ This is the short source-of-truth index for the current Mochirii production post
 - Browser code uses only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
-- Supabase migration and function-list readback was refreshed on 2026-07-05 for project `deyvmtncimmcinldjyqe`; expected website, Reaper, Instagram, vote, spotlight, profile, Mochi Pets, and `sync-pixelfed-social-account` functions were active at that readback.
+- Supabase migration and function-list readback was refreshed on 2026-07-05 for project `deyvmtncimmcinldjyqe`; that historical readback included the now-retired game functions. Their source, registrations, and security checks remain temporarily quarantined until an exact provider packet removes the deployed functions and confirms the remote endpoints are absent.
 - The repository toolchain pins Supabase CLI `2.109.1`. Use the repo-local binary on Windows (`node_modules/.bin/supabase.cmd`) and run Supabase CLI calls serially to avoid telemetry-file `EPERM` races.
-- Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables, adds high-value foreign-key indexes, and defers Mochi Pets-specific advisor findings.
+- Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables and adds high-value foreign-key indexes. Applied game-schema history remains preserved until a separately approved retention migration is designed.
 - Supabase linked advisor snapshot on 2026-07-12: security advisors returned 14 findings (`13` service-only `rls_enabled_no_policy` info findings plus `1` leaked-password protection warning). The focused migration `20260712164503_service_only_default_deny_policies.sql` is the protected-preview remediation for the 13 service-only tables; production remains unchanged until that PR is approved and deployed. Leaked-password protection is intentionally cost-deferred while the project remains on Free. Performance `unused_index` findings remain observation-only. See `docs/supabase-advisor-remediation-plan.md`.
-- Mochi Pets route/function/table rename completed through PR #371 and the approved cutover window. Current website route posture is `/games/mochi-pets` active/noindex and the former game route retired as a normal 404 with no redirect.
+- The historical route/function/table rename remains preserved in applied migrations. `/games/mochi-pets` is now a static noindex future-project page; `/games/mochi-social` remains a normal 404 with no redirect.
 
-## Mochi Pets Runtime
+## Mochi Pets Future Project
 
-- Runtime target: `https://mochi-pets-game.fly.dev`.
-- The standalone `xartaiusx/mochi-pets` repository remains the game source and
-  is current on `main` at `0f9fcc17a6da466ac66548da856b704d05150ce1`.
-  PR #27 added the reciprocal workspace and ownership contract without changing
-  the game runtime. Its nine dependency pull requests remain deferred to a
-  dedicated game-maintenance pass.
-- Current local verification for the recovered runtime source: Node `24.17.0`; `npm run unity:verify` passed after Unity `6000.5.x` import/build preparation, and the repo keeps the active contract on Mochi Pets naming, `/games/mochi-pets`, `MOCHI_PETS_*` bridge events, and `mochi-pets-*` Supabase Edge Function names.
-- Current blocker: Fly hosted runtime deployment and load/smoke beyond read-only health checks still require explicit approval. Do not treat the local Unity/WebGL proof as alpha playtest readiness until the hosted contract is intentionally promoted and verified.
-- Current hosted readback from this workstation: `https://mochi-pets-game.fly.dev/healthz` returns 200. Do not change Fly secrets, scaling, deploys, or hosted smoke/load checks until the user approves the exact runtime action.
-- Website contract gate remains: `MOCHI_PETS_GAME_CONTRACT_URL=https://mochi-pets-game.fly.dev MOCHI_PETS_SITE_ORIGIN=https://mochirii.com npm run check:mochi-pets-game-contract` must pass before first tester/game-runtime readiness is claimed.
+- The customer-facing prototype, tester gate, iframe bridge, game URL configuration, and leader controls are retired. The static page has no game backend dependency.
+- `/games/mochi-pets` renders entirely from the Website deployment and states that no playable build or release date is available.
+- The approved retirement sequence deletes the former GitHub repository and local checkout only after the static page is production-verified.
+- Suspended Fly resources and any already-deployed Supabase functions, secrets, tables, or rows are not deleted by this source change. Security-reviewed function source remains in `supabase` until their inventory, retention, and removal are approved through a separate provider/data packet.
+- Any later implementation starts from a fresh Unity project and a new `Mochirii-Wushu` repository under `docs/mochi-pets-future-project.md`.
 
 ## Mochirii Social / Pixelfed
 

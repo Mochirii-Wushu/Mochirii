@@ -7,7 +7,8 @@
   signed-out fail-closed behavior unless the task explicitly changes them.
 - Keep secrets and privileged provider credentials out of browser code and
   `NEXT_PUBLIC_*` values.
-- The app owns the Mochi Pets website doorway and browser bridge, not game
-  source, assets, builds, or runtime manifests.
+- The app owns only the static `/games/mochi-pets` future-project page. It must
+  not depend on game source, builds, authentication, a browser bridge, or a
+  hosted game runtime.
 - Use Node `22.23.1`. Run `npm run toolchain:check`, `npm run lint`, and
   `npm run build` for app changes.

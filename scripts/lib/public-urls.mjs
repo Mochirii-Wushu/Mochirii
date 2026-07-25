@@ -7,15 +7,10 @@ const publicUrls = JSON.parse(readFileSync(resolve(root, "apps/web/config/public
 export const SITE_ORIGIN = publicUrls.siteOrigin;
 export const SOCIAL_HOST = publicUrls.socialHost;
 export const DISCORD_INVITE_URL = publicUrls.discordInviteUrl;
-export const MOCHI_PETS_DEFAULT_ORIGIN = publicUrls.mochiPetsDefaultOrigin;
 export const SUPABASE_PROJECT_REF = publicUrls.supabaseProjectRef;
 export const SUPABASE_PROJECT_URL = `https://${SUPABASE_PROJECT_REF}.supabase.co`;
 export const SUPABASE_AUTH_CALLBACK_URL = `${SUPABASE_PROJECT_URL}/auth/v1/callback`;
 export const SUPABASE_FUNCTIONS_URL = `${SUPABASE_PROJECT_URL}/functions/v1`;
-
-export function configuredMochiPetsOrigin(env = process.env) {
-  return (env.NEXT_PUBLIC_MOCHI_PETS_URL || MOCHI_PETS_DEFAULT_ORIGIN).replace(/\/+$/, "");
-}
 
 export function siteUrl(path = "") {
   return new URL(path || "/", SITE_ORIGIN).href.replace(/\/$/, path ? "" : "/");

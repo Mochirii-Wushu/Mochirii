@@ -180,18 +180,16 @@
   .footer-brand-link{gap:12px;}
   .footer-brand-text{min-width:0;}
 
-  /* Keep Guild / Culture / Updates horizontal on mobile via swipe row */
+  /* Reflow navigation without requiring horizontal scrolling at 320 CSS px. */
   .footer-cols{
-    display:flex;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:12px;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-x:contain;
-    padding-bottom:6px;
+    overflow:visible;
+    padding-bottom:0;
   }
   .footer-col{
-    flex:0 0 auto;
-    min-width:160px;
+    min-width:0;
   }
 
   .footer-nav{

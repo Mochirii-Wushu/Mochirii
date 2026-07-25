@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-05T18:27:45.243Z",
+  "checkedAt": "2026-07-25T11:37:21.730Z",
   "scope": "WCAG 2.2 AA-oriented accessibility route matrix for the Mochirii Vercel/Next app. This is a no-secret static pass that guards shell foundations, route workflow coverage, status messaging, forms, iframes, reduced motion, focus visibility, and protected noindex boundaries.",
   "shell": {
     "htmlLang": true,
@@ -20,10 +20,10 @@
     "totalRoutes": 20,
     "publicRoutes": 13,
     "protectedRoutes": 7,
-    "routesWithLiveRegions": 12,
-    "routesWithAlerts": 7,
-    "routesWithForms": 4,
-    "routesWithIframes": 3
+    "routesWithLiveRegions": 11,
+    "routesWithAlerts": 6,
+    "routesWithForms": 3,
+    "routesWithIframes": 2
   },
   "routes": [
     {
@@ -56,7 +56,7 @@
       "workflow": "website to Discord funnel",
       "files": [
         "apps/web/app/join/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/JoinPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -80,7 +80,7 @@
       "workflow": "community schedule",
       "files": [
         "apps/web/app/events/page.tsx",
-        "apps/web/components/public-pages/pages.tsx",
+        "apps/web/components/public-pages/route-pages/EventsPage.tsx",
         "apps/web/components/public-pages/EventsBoard.tsx"
       ],
       "mainTarget": true,
@@ -105,7 +105,7 @@
       "workflow": "media browsing",
       "files": [
         "apps/web/app/gallery/page.tsx",
-        "apps/web/components/public-pages/pages.tsx",
+        "apps/web/components/public-pages/route-pages/GalleryPage.tsx",
         "apps/web/components/public-pages/GalleryBrowser.tsx"
       ],
       "mainTarget": true,
@@ -130,7 +130,7 @@
       "workflow": "progression reference",
       "files": [
         "apps/web/app/ranks/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/RanksPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -154,7 +154,7 @@
       "workflow": "stewardship reference",
       "files": [
         "apps/web/app/leaders/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/LeadersPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -178,7 +178,7 @@
       "workflow": "conduct reference",
       "files": [
         "apps/web/app/tome/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/TomePage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -202,7 +202,7 @@
       "workflow": "recruiting copy",
       "files": [
         "apps/web/app/recruitment/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/RecruitmentPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -226,7 +226,7 @@
       "workflow": "updates",
       "files": [
         "apps/web/app/announcements/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/AnnouncementsPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -250,7 +250,7 @@
       "workflow": "giveaway reference",
       "files": [
         "apps/web/app/raffles/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/RafflesPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -274,7 +274,7 @@
       "workflow": "embedded playlists",
       "files": [
         "apps/web/app/spotify/page.tsx",
-        "apps/web/components/public-pages/pages.tsx",
+        "apps/web/components/public-pages/route-pages/SpotifyPage.tsx",
         "apps/web/components/public-pages/SpotifyBrowser.tsx"
       ],
       "mainTarget": true,
@@ -299,7 +299,7 @@
       "workflow": "member spotlight",
       "files": [
         "apps/web/app/spotlight/page.tsx",
-        "apps/web/components/public-pages/pages.tsx"
+        "apps/web/components/public-pages/route-pages/SpotlightPage.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": false,
@@ -323,7 +323,7 @@
       "workflow": "profile reference",
       "files": [
         "apps/web/app/twills/page.tsx",
-        "apps/web/components/public-pages/pages.tsx",
+        "apps/web/components/public-pages/route-pages/TwillsPage.tsx",
         "apps/web/components/public-pages/ProfileDisplay.tsx"
       ],
       "mainTarget": true,
@@ -472,14 +472,14 @@
       ],
       "mainTarget": true,
       "protectedNoindex": true,
-      "liveRegions": 3,
-      "statusRoles": 2,
-      "alerts": 4,
+      "liveRegions": 2,
+      "statusRoles": 0,
+      "alerts": 3,
       "forms": 0,
-      "labels": 11,
-      "inputs": 11,
-      "interactiveControls": 30,
-      "ariaLabels": 8,
+      "labels": 4,
+      "inputs": 4,
+      "interactiveControls": 11,
+      "ariaLabels": 2,
       "ariaDescribedBy": 0,
       "iframes": 0,
       "iframeTitles": 0,
@@ -488,36 +488,34 @@
     {
       "route": "/games/mochi-pets",
       "label": "Mochi Pets",
-      "type": "alpha",
-      "workflow": "tester game doorway",
+      "type": "future-project",
+      "workflow": "static project status",
       "files": [
-        "apps/web/app/games/mochi-pets/page.tsx",
-        "apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx",
-        "apps/web/components/mochi-pets/MochiPetsAlphaClient.tsx"
+        "apps/web/app/games/mochi-pets/page.tsx"
       ],
       "mainTarget": true,
       "protectedNoindex": true,
-      "liveRegions": 1,
-      "statusRoles": 1,
-      "alerts": 1,
-      "forms": 2,
-      "labels": 2,
-      "inputs": 2,
-      "interactiveControls": 6,
-      "ariaLabels": 5,
-      "ariaDescribedBy": 2,
-      "iframes": 1,
-      "iframeTitles": 1,
-      "hiddenDecorativeImages": 1
+      "liveRegions": 0,
+      "statusRoles": 0,
+      "alerts": 0,
+      "forms": 0,
+      "labels": 0,
+      "inputs": 0,
+      "interactiveControls": 0,
+      "ariaLabels": 1,
+      "ariaDescribedBy": 0,
+      "iframes": 0,
+      "iframeTitles": 0,
+      "hiddenDecorativeImages": 2
     }
   ],
   "manualBrowserMatrix": [
     "Keyboard tab order and Escape behavior for header dropdowns and mobile menu at 360x800, 375x812, 390x844, 414x896, 430x932, 1280x720, 1366x768, 1440x900, 1536x864, and 1920x1080.",
-    "Visible focus rings for nav, buttons, gallery thumbnails, forms, queue tabs, Spotify chips, and Mochi Pets gate controls.",
+    "Visible focus rings for nav, buttons, gallery thumbnails, forms, queue tabs, Spotify chips, and project-page links.",
     "Color contrast for muted text, status pills, form errors, badges, and glass panels in light and dark image areas.",
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
-    "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, leader queues, and Mochi Pets gate errors.",
-    "Iframe keyboard reachability and titles for Discord, Spotify, and Mochi Pets embeds."
+    "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, and leader queues.",
+    "Iframe keyboard reachability and titles for Discord and Spotify embeds."
   ],
   "warnings": [
     "/ranks: no route-specific live region found; confirm static-only page status remains intentional.",

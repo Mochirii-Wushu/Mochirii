@@ -114,7 +114,11 @@ The current live sign-in set is Discord, Google, Twitch, and Apple. Apple is act
 | Active | Discord, Google, Twitch, Apple | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`. Apple is active identity evidence and still requires moderator review for member-only privileges. |
 | Deferred | Facebook, Kakao, Spotify, Phone | Keep disabled and hidden from public activation until a scoped provider lane is reopened. |
 
-Social or phone sign-in through Supabase Auth proves account control only. It does not automatically prove guild membership, role ownership, alpha access, game access, or Enjin readiness. Discord remains the only automatic member verification path because guild membership and role checks happen server-side through `verify-discord-member` and `verify-member-access`.
+Social or phone sign-in through Supabase Auth proves account control only. It
+does not automatically prove guild membership, role ownership, gallery access,
+or moderator access. Discord remains the only automatic member verification
+path because guild membership and role checks happen server-side through
+`verify-discord-member` and `verify-member-access`.
 
 Non-Discord identities are synced as redacted evidence in `member_auth_identities` and become gallery-eligible only after moderator approval in `member_verifications`. See `docs/multi-provider-login-and-verification.md` for the setup packet.
 
@@ -166,8 +170,8 @@ and six-month rotation notes belong only under
 Do not commit or print Apple private key material, generated client secrets,
 OAuth payloads, cookies, token values, or digests of those values.
 Apple: active identity evidence only. It does not automatically prove guild
-membership, gallery eligibility, moderator status, Mochirii Social account
-creation, or game access. First activation testing should link Apple to the
+membership, gallery eligibility, moderator status, or Mochirii Social account
+creation. First activation testing should link Apple to the
 existing admin account from Account before testing signed-out Apple login.
 
 If Account identity linking shows `Manual linking is disabled`, the website is

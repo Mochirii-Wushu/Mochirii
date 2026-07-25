@@ -1,6 +1,6 @@
 # Current Mochirii State
 
-Updated: 2026-07-24 PDT
+Updated: 2026-07-25 PDT
 
 This no-secret file records the current hosted and repository state. Update it
 after a completed release or ownership change; do not place credentials,
@@ -16,9 +16,10 @@ provider exports, customer data, signed URLs, or mutable access details here.
 - `apps/shopify-theme` is the Shopify theme source.
 - `services/social` is the DigitalOcean-hosted Mochirii Social source.
 - `supabase` contains migrations and Edge Functions for the hosted backend.
-- `xartaiusx/mochi-pets` remains a separate connected game repository. The
-  website owns its doorway and shared contracts; the game repository owns game
-  source, assets, builds, and runtime manifests.
+- `/games/mochi-pets` is a static noindex future-project page with no browser
+  bridge, tester gate, or backend dependency. The former repository and local
+  checkout are retirement-only and are removed after the static page is
+  production-verified.
 
 The duplicate root static website is retired. Release
 `legacy-static-final-2026-07-18` contains its final restorable artifact;
@@ -45,8 +46,9 @@ asset and data sources.
 - PR #478 completed the consolidation closeout documentation and made
   `validate-theme` an always-reporting path-aware check; it merged as
   `b0c117e855375a2b1a1a7ff2110c2d60f6733015`.
-- Mochi Pets PR #27 published the scoped workspace path and ownership update;
-  its current `main` is `0f9fcc17a6da466ac66548da856b704d05150ce1`.
+- The former game repository's final observed default SHA before retirement is
+  `8c1d26dd497c54a5c205b8577194879a129fda50`. Deletion verification belongs in
+  the post-release record; this source commit does not claim provider deletion.
 
 The superseded Shopify and Social repositories were exported as mirror clones,
 verified `--all` bundles, and no-secret provider metadata. Their encrypted
@@ -101,7 +103,8 @@ The supported local workspace contains:
 ```text
 C:\Github Repo's\Mochirii Website\
   Website\      Canonical website, theme, Social, and Supabase repository
-  Mochi Pets\   Separate connected game repository
+  Mochirii-Social-Mobile\  First-party mobile client repository
+  Mochi Pets\   Retirement-only checkout pending deletion after page cutover
   Mochi Creds\  Private synchronized credential and recovery boundary
   AGENTS.md      Umbrella workspace guidance
 ```
@@ -235,7 +238,8 @@ generated archives belong only in ignored `.artifacts/operations`.
 
 ## Deferred
 
-- Mochi Pets dependency pull requests and game runtime development.
+- A future Mochi Pets implementation is deferred until a separately approved
+  fresh Unity project is created under `Mochirii-Wushu`.
 - Shopify product-evidence review, physical samples, remaining operational and
   provider validation, approved change packets, rollback exports, final
   payment setup, password removal, and public launch under the

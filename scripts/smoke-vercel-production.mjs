@@ -53,7 +53,7 @@ const bodyChecks = new Map([
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
-  ["/games/mochi-pets", /Mochi Pets|Closed alpha|tester password/i],
+  ["/games/mochi-pets", /Mochi Pets|new project planned|fresh Unity project/i],
 ]);
 
 const requestHeaders = {

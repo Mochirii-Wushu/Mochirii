@@ -175,7 +175,6 @@ assertMatches(
   "listGalleryReviewQueue",
   "moderateGallerySubmission",
   "reviewMemberVerification",
-  "manageMochiPetsAlphaAdmin",
 ].forEach((snippet) => assertIncludes("leader dashboard", leaderDashboard, snippet));
 
 [

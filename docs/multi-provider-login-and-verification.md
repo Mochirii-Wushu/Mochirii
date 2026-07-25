@@ -75,7 +75,7 @@ payloads, cookies, raw OAuth responses, or digests of those values.
 
 Apple is identity evidence only. It does not automatically prove Discord guild
 membership, role ownership, gallery upload eligibility, moderator access,
-Mochirii Social account creation, or any game access. First activation testing
+or Mochirii Social account creation. First activation testing
 must link Apple to the existing admin account from Account before testing
 signed-out Apple login, so the flow does not accidentally create a duplicate
 admin identity.
@@ -119,4 +119,4 @@ provider.
 
 ## Out Of Scope
 
-New website login methods do not grant Mochi Pets alpha access, Fly game access, Enjin wallet access, Enjin transactions, Fuel Tanks, cENJ funding, Discord role mutation, or Discord message-content access.
+New website login methods do not grant access to any future game, purchases, wallets, Discord role mutation, or Discord message-content access.

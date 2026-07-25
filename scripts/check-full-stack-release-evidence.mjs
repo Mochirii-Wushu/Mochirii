@@ -41,8 +41,6 @@ const report = {
   vercel: providerReads ? inspectVercel() : skippedSection("provider reads disabled"),
   supabase: providerReads ? inspectSupabase() : inspectSupabaseLocalOnly(),
   discordReaper: inspectDiscordReaper(),
-  mochiPets: inspectMochiPets(),
-  enjin: inspectEnjin(),
   codexAgents: inspectCodexAgents(),
   warnings,
   skipped,
@@ -99,10 +97,8 @@ function inspectLocalReleaseSurface() {
     "check:reaper-discord-interactions",
     "check:reaper-modmail-audit",
     "check:reaper-pending-verification",
-    "check:mochi-pets-alpha",
-    "check:mochi-pets-bridge-state",
+    "check:mochi-pets-static-page",
     "check:mochi-pets-edge-authority",
-    "check:mochi-pets-report-hygiene",
     "smoke:vercel-production",
     "smoke:supabase-edge-functions",
     "smoke:member-verification-preview",
@@ -120,7 +116,7 @@ function inspectLocalReleaseSurface() {
     "docs/operations/history/dns-cutover-readiness-and-rollback.md",
     "docs/member-profiles-and-rank-roles.md",
     "docs/reaper-modmail-audit.md",
-    "docs/mochi-pets-visual-polish.md",
+    "docs/mochi-pets-future-project.md",
     "supabase/config.toml",
     ".github/workflows/validate-static-site.yml",
     ".github/workflows/validate-next-app.yml",
@@ -337,55 +333,6 @@ function inspectDiscordReaper() {
   };
 }
 
-function inspectMochiPets() {
-  const previewReport = readJson(resolve(root, "reports/mochi-pets-preview-ready.json"));
-  const reportSummary = previewReport
-    ? {
-        ok: Boolean(previewReport.ok),
-        hostedChecksAllowed: Boolean(previewReport.hostedChecksAllowed),
-        browserGateMode: previewReport.browserGateMode || "",
-        gameUrlPresent: Boolean(previewReport.gameUrl),
-        siteOriginPresent: Boolean(previewReport.siteOrigin),
-        summary: previewReport.summary || null,
-      }
-    : null;
-  return {
-    status: previewReport ? "report-read" : "static-checked",
-    previewReadyReportPresent: Boolean(previewReport),
-    previewReadyReport: reportSummary,
-    packageScripts: {
-      alpha: hasPackageScript("check:mochi-pets-alpha"),
-      bridgeState: hasPackageScript("check:mochi-pets-bridge-state"),
-      edgeAuthority: hasPackageScript("check:mochi-pets-edge-authority"),
-      reportHygiene: hasPackageScript("check:mochi-pets-report-hygiene"),
-      gameContract: hasPackageScript("check:mochi-pets-game-contract"),
-    },
-    hostedFlyDeployRequiresSeparateApproval: true,
-  };
-}
-
-function inspectEnjin() {
-  const files = [
-    "docs/mochi-pets-visual-polish.md",
-    "scripts/check-mochi-pets-alpha.mjs",
-    "scripts/check-mochi-pets-edge-authority.mjs",
-  ];
-  const mentions = files
-    .filter((file) => existsSync(resolve(root, file)))
-    .map((file) => ({
-      file,
-      configuredPreviewStub: /configured-preview-stub/i.test(readFileSync(resolve(root, file), "utf8")),
-      fundedChainGate: /funded-chain|Fuel Tank|Wallet Daemon|cENJ/i.test(readFileSync(resolve(root, file), "utf8")),
-    }));
-
-  return {
-    status: "static-checked",
-    previewOnlyExpected: true,
-    fundedChainActionsAuthorized: false,
-    evidence: mentions,
-  };
-}
-
 function inspectCodexAgents() {
   return {
     status: "static-checked",
@@ -464,11 +411,6 @@ function checkWorkflowWhitespaceGate() {
     present: hasDiffCheck && hasRangeCheck,
     command: hasDiffCheck && hasRangeCheck ? "git diff --check BASE_SHA..HEAD_SHA" : "",
   };
-}
-
-function hasPackageScript(name) {
-  const packageJson = readJson(resolve(root, "package.json")) || {};
-  return Boolean(packageJson.scripts?.[name]);
 }
 
 function skippedSection(reason) {
@@ -636,14 +578,6 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - ModMail audit command registration script: ${data.discordReaper.modmailAudit.registerScript ? "present" : "missing"}
 - ModMail audit command: ${data.discordReaper.modmailAudit.command}
 - Gateway direct permission mutation expected here: ${data.discordReaper.gatewayAutomation.directDiscordMutationExpectedHere ? "yes" : "no"}
-
-## Mochi Pets, Fly, And Enjin
-
-- Mochi Pets preview report present: ${data.mochiPets.previewReadyReportPresent ? "yes" : "no"}
-- Mochi Pets hosted checks allowed in last report: ${data.mochiPets.previewReadyReport?.hostedChecksAllowed ? "yes" : "no/not checked"}
-- Fly deployment requires separate approval: ${data.mochiPets.hostedFlyDeployRequiresSeparateApproval ? "yes" : "no"}
-- Enjin preview-only expected: ${data.enjin.previewOnlyExpected ? "yes" : "no"}
-- Enjin funded-chain actions authorized: ${data.enjin.fundedChainActionsAuthorized ? "yes" : "no"}
 
 ## Warnings
 

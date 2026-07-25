@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, relative, resolve } from "node:path";
-import { MOCHI_PETS_DEFAULT_ORIGIN, SITE_ORIGIN } from "./lib/public-urls.mjs";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -25,7 +25,7 @@ const routeMatrix = [
   { route: "/leader-dashboard", surface: "moderation", features: ["Supabase moderation queues", "status messages"] },
   { route: "/spotify", surface: "Spotify", features: ["Spotify iframe embeds"] },
   { route: "/spotlight", surface: "spotlight", features: ["Supabase public spotlight endpoint"] },
-  { route: "/games/mochi-pets", surface: "Mochi Pets", features: ["Fly iframe", "postMessage bridge"] },
+  { route: "/games/mochi-pets", surface: "Mochi Pets", features: ["static project-status content"] },
   { route: "/tome", surface: "Tome", features: ["static conduct content"] },
 ];
 
@@ -54,9 +54,6 @@ if (sourceInventory.blockingHits.length) {
 if (!directiveHasSource(policy.directiveMap, "frame-src", "https://open.spotify.com")) {
   failures.push("CSP frame-src must explicitly allow Spotify embeds.");
 }
-if (!directiveHasSource(policy.directiveMap, "frame-src", MOCHI_PETS_DEFAULT_ORIGIN)) {
-  failures.push("CSP frame-src must explicitly allow the Mochi Pets game origin.");
-}
 if (
   !directiveHasSource(policy.directiveMap, "connect-src", "https://*.supabase.co") ||
   !directiveHasSource(policy.directiveMap, "connect-src", "wss://*.supabase.co")
@@ -77,8 +74,8 @@ const report = {
   nextSteps: [
     "Keep React inline style props at zero before any style-src unsafe-inline removal.",
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
-    "Keep Spotify and Mochi Pets iframe routes in the browser route sweep.",
-    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Pets postMessage behavior before tightening CSP.",
+    "Keep Spotify iframe routes in the browser route sweep.",
+    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, and Speed Insights before tightening CSP.",
     "Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.",
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions.",
   ],
@@ -147,8 +144,6 @@ function extractCspEntries(text) {
     failures.push("apps/web/next.config.ts: unable to locate contentSecurityPolicy array.");
     return [];
   }
-  const mochiPetsDefault =
-    text.match(/NEXT_PUBLIC_MOCHI_PETS_URL\s*\|\|\s*["']([^"']+)["']/)?.[1] || MOCHI_PETS_DEFAULT_ORIGIN;
   const entries = [];
   for (const rawLine of match[1].split(/\r?\n/)) {
     let line = rawLine.trim();
@@ -156,10 +151,7 @@ function extractCspEntries(text) {
     line = line.replace(/,\s*$/, "").trim();
     const quote = line[0];
     if (!["'", '"', "`"].includes(quote) || line[line.length - 1] !== quote) continue;
-    const entry = line
-      .slice(1, -1)
-      .replace(/\$\{mochiPetsOrigin\}/g, mochiPetsDefault)
-      .trim();
+    const entry = line.slice(1, -1).trim();
     if (entry) entries.push(entry);
   }
   return entries;

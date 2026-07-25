@@ -1,4 +1,3 @@
-import { type MochiPetsAlphaAdmin, type MochiPetsAlphaTester } from "@/lib/mochi-pets/alpha";
 import {
   text,
   type GalleryReviewQueue,
@@ -430,98 +429,6 @@ export function InstagramJobCard({
         </div>
       </div>
     </article>
-  );
-}
-
-export function AlphaTesterRow({
-  tester,
-  busy,
-  onRevoke,
-}: {
-  tester: MochiPetsAlphaTester;
-  busy: boolean;
-  onRevoke: (tester: MochiPetsAlphaTester) => void;
-}) {
-  const status = text(tester.status, "unknown").toLowerCase();
-  return (
-    <article className={`review-item review-item--${status}`} data-mochi-alpha-tester={tester.user_id || ""}>
-      <div className="review-details">
-        <div className="review-details__head">
-          <div>
-            <h3>{tester.user_id || "Unknown tester"}</h3>
-            <p className="muted">{tester.notes || "No leader note recorded."}</p>
-          </div>
-          <span className={`submission-status submission-status--${status}`}>{status}</span>
-        </div>
-        <dl className="review-meta">
-          {[
-            ["Updated", formatDate(tester.updated_at, "Not set")],
-            ["Created", formatDate(tester.created_at, "Not set")],
-            ["Invited by", tester.invited_by || "Not set"],
-          ].map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
-        {status === "active" ? (
-          <div className="auth-actions">
-            <button className="hero-cta" type="button" onClick={() => onRevoke(tester)} disabled={busy}>Revoke alpha access</button>
-          </div>
-        ) : null}
-      </div>
-    </article>
-  );
-}
-
-export function AlphaAuditPanel({ data }: { data: MochiPetsAlphaAdmin | null }) {
-  const audit = data?.audit || {};
-  const summary = audit.summary || {};
-  const recentLedger = Array.isArray(audit.recentLedger) ? audit.recentLedger : [];
-  const recentFeedback = Array.isArray(audit.recentFeedback) ? audit.recentFeedback : [];
-  const recentSharedPets = Array.isArray(audit.recentSharedPets) ? audit.recentSharedPets : [];
-  const cards = [
-    ["Active testers", summary.activeTesters],
-    ["Revoked testers", summary.revokedTesters],
-    ["Ledger events", summary.ledgerEvents],
-    ["Unity players", summary.unityPlayers],
-    ["Shared pet mirrors", summary.sharedPetSnapshots],
-    ["Feedback", summary.feedbackCount],
-    ["Chat messages", summary.chatMessages],
-  ];
-
-  return (
-    <>
-      <div className="moderation-summary" aria-label="Mochi Pets alpha audit summary">
-        {cards.map(([label, value]) => (
-          <div className="moderation-summary__card" key={label}>
-            <span>{label}</span>
-            <strong>{value == null ? "-" : Number(value || 0)}</strong>
-          </div>
-        ))}
-      </div>
-      <div className="review-list" aria-label="Recent Mochi Pets alpha audit rows">
-        <details className="review-storage" open>
-          <summary>Recent ledger events</summary>
-          {recentLedger.length ? recentLedger.map((event) => (
-            <code key={`${event.id}-${event.request_id}`}>{event.event_type || "event"} - {event.actor_id || "unknown"} - {formatDate(event.created_at, "Not set")}</code>
-          )) : <p className="muted">No alpha ledger events yet.</p>}
-        </details>
-        <details className="review-storage">
-          <summary>Recent shared Lirabao mirrors</summary>
-          {recentSharedPets.length ? recentSharedPets.map((snapshot) => (
-            <code key={`${snapshot.pet_key || "lirabao"}-${snapshot.revision || 0}`}>{snapshot.pet_key || "lirabao"} - r{snapshot.revision || 0} - {snapshot.room_key || "jade-lantern-room-alpha"}</code>
-          )) : <p className="muted">No shared pet mirror rows yet.</p>}
-        </details>
-        <details className="review-storage">
-          <summary>Recent alpha feedback</summary>
-          {recentFeedback.length ? recentFeedback.map((item) => (
-            <code key={item.id || item.created_at || "feedback"}>{item.category || "alpha"} - {String(item.message || "").slice(0, 160)}</code>
-          )) : <p className="muted">No alpha feedback yet.</p>}
-        </details>
-      </div>
-    </>
   );
 }
 

@@ -40,8 +40,8 @@ for (const href of forbiddenGroupHrefs) {
 
 assertIncludes("site navigation public URL config", navSource, `"@/lib/public-urls"`);
 assertIncludes("site navigation dropdown Social", navGroups, `href: SOCIAL_HOST, label: "Social", nav: "social-host", external: true`);
-assertIncludes("site navigation dropdown Mochi Pets", navGroups, `href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets", auth: "signed-in"`);
-assertIncludes("SiteHeader group auth filtering", header, "&& !navItemHidden(item, authState)");
+assertIncludes("site navigation dropdown Mochi Pets", navGroups, `href: "/games/mochi-pets", label: "Mochi Pets", nav: "games/mochi-pets"`);
+assertIncludes("SiteHeader group auth filtering", header, ".filter((item) => !navItemHidden(item, authState))");
 assertIncludes("SiteHeader deferred auth import", headerAuthState, 'import("./header-auth-runtime")');
 assertIncludes("SiteHeader moderator probe", headerAuthRuntime, "checkLeaderGalleryModerationAccess");
 assertIncludes("SiteHeader lazy moderator trigger", header, `void ensureModeratorAccess();`);
@@ -101,7 +101,7 @@ if (failures.length) {
 }
 
 console.log("Site navigation OK.");
-console.log("- Header Social and Mochi Pets live in the Guild dropdown only.");
+console.log("- Header Social and the public Mochi Pets project page live in the Guild dropdown only.");
 console.log("- Footer Social points to social.mochirii.com.");
 console.log("- /social redirects signed-in members and keeps signed-out help.");
 

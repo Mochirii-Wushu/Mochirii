@@ -25,7 +25,7 @@ const routes = [
   { route: "/account", label: "Account", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectAlert: true },
+  { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectNoIframe: true, expectNoForm: true },
 ];
 
 const viewports = [
@@ -71,6 +71,9 @@ const summary = {
   checks: matrix.length,
   statusOk: matrix.filter((entry) => entry.statusOk).length,
   noOverflow: matrix.filter((entry) => !entry.horizontalOverflow).length,
+  footerReflowPass: matrix.filter(
+    (entry) => !entry.footerReflow.horizontalOverflow && !entry.footerReflow.clippedColumns,
+  ).length,
   focusVisible: matrix.filter((entry) => entry.focus.visible).length,
   reducedMotionMatched: matrix.filter((entry) => entry.reducedMotion.matches).length,
   iframeTitlePass: matrix.filter((entry) => entry.iframes.total === entry.iframes.titled).length,
@@ -114,6 +117,7 @@ console.log("Browser route matrix OK.");
 console.log(`- Base URL: ${baseUrl}`);
 console.log(`- Checks: ${summary.checks}`);
 console.log(`- No horizontal overflow: ${summary.noOverflow}/${summary.checks}`);
+console.log(`- Footer reflow without clipping: ${summary.footerReflowPass}/${summary.checks}`);
 console.log(`- Visible focus reached: ${summary.focusVisible}/${summary.checks}`);
 console.log(`- Reduced motion matched: ${summary.reducedMotionMatched}/${summary.checks}`);
 if (warnings.length) console.log(`- Warnings documented: ${warnings.length}`);
@@ -187,6 +191,11 @@ async function inspectRoute(context, route, viewport) {
     const iframes = [...document.querySelectorAll("iframe")];
     const inputs = [...document.querySelectorAll("input, textarea, select")];
     const readabilityPanels = inspectReadabilityPanels(readabilitySelectors);
+    const footerColumns = document.querySelector(".footer-cols");
+    const footerBounds = footerColumns?.getBoundingClientRect();
+    const footerColumnBounds = footerColumns
+      ? [...footerColumns.children].map((element) => element.getBoundingClientRect())
+      : [];
     return {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
@@ -200,6 +209,17 @@ async function inspectRoute(context, route, viewport) {
       horizontalOverflow: Math.ceil(doc.scrollWidth) > Math.ceil(doc.clientWidth) + 1 || Math.ceil(body.scrollWidth) > Math.ceil(body.clientWidth) + 1,
       documentWidth: doc.scrollWidth,
       viewportWidth: doc.clientWidth,
+      footerReflow: {
+        present: Boolean(footerColumns),
+        horizontalOverflow: Boolean(
+          footerColumns && Math.ceil(footerColumns.scrollWidth) > Math.ceil(footerColumns.clientWidth) + 1
+        ),
+        clippedColumns: Boolean(
+          footerBounds && footerColumnBounds.some(
+            (bounds) => bounds.left < footerBounds.left - 1 || bounds.right > footerBounds.right + 1,
+          )
+        ),
+      },
       reducedMotion: { matches: window.matchMedia("(prefers-reduced-motion: reduce)").matches, animated },
       readabilityPanels,
     };
@@ -228,6 +248,7 @@ async function inspectRoute(context, route, viewport) {
     iframes: browserState.iframes || { total: 0, titled: 0 },
     horizontalOverflow: Boolean(browserState.horizontalOverflow),
     widths: { document: browserState.documentWidth || 0, viewport: browserState.viewportWidth || viewport.width },
+    footerReflow: browserState.footerReflow || { present: false, horizontalOverflow: true, clippedColumns: true },
     reducedMotion: browserState.reducedMotion || { matches: false, animated: [] },
     readabilityPanels: browserState.readabilityPanels || { required: false, total: 0, transparent: 0, samples: [] },
     focus,
@@ -290,9 +311,15 @@ function validateResult(route, result) {
   if (!result.statusOk) failures.push(`${label}: expected a successful route load, got status ${result.status}${result.gotoError ? ` (${result.gotoError})` : ""}.`);
   if (route.expectMain && !result.main) failures.push(`${label}: missing #main skip-link target.`);
   if (result.horizontalOverflow) failures.push(`${label}: horizontal overflow (${result.widths.document}px document vs ${result.widths.viewport}px viewport).`);
+  if (!result.footerReflow.present) failures.push(`${label}: footer navigation is missing.`);
+  if (result.footerReflow.horizontalOverflow || result.footerReflow.clippedColumns) {
+    failures.push(`${label}: footer navigation requires horizontal scrolling or clips a column.`);
+  }
   if (!result.focus.visible) failures.push(`${label}: keyboard tabbing did not reach a visible focus state.`);
   if (result.keyboardTrap.likelyTrap) failures.push(`${label}: keyboard tabbing appears trapped on one focus stop.`);
   if (result.iframes.total !== result.iframes.titled) failures.push(`${label}: iframe title coverage ${result.iframes.titled}/${result.iframes.total}.`);
+  if (route.expectNoIframe && result.iframes.total !== 0) failures.push(`${label}: static project page must not contain an iframe.`);
+  if (route.expectNoForm && result.forms !== 0) failures.push(`${label}: static project page must not contain a form.`);
   if (route.requireOpaquePanels?.length) {
     if (result.readabilityPanels.total === 0) failures.push(`${label}: no critical readability panels matched ${route.requireOpaquePanels.join(", ")}.`);
     if (result.readabilityPanels.transparent > 0) {
@@ -312,12 +339,13 @@ function renderMarkdown(report) {
   const rows = report.matrix
     .map((entry) => {
       const panels = entry.readabilityPanels?.required ? `${entry.readabilityPanels.total - entry.readabilityPanels.transparent}/${entry.readabilityPanels.total}` : "n/a";
-      return `| ${entry.route} | ${entry.viewport} | ${entry.status} | ${entry.main ? "yes" : "no"} | ${entry.horizontalOverflow ? "yes" : "no"} | ${entry.focus.visible ? "yes" : "no"} | ${entry.iframes.titled}/${entry.iframes.total} | ${panels} | ${entry.reducedMotion.matches ? "yes" : "no"} | ${entry.keyboardTrap.likelyTrap ? "yes" : "no"} |`;
+      const footerReflow = !entry.footerReflow.horizontalOverflow && !entry.footerReflow.clippedColumns;
+      return `| ${entry.route} | ${entry.viewport} | ${entry.status} | ${entry.main ? "yes" : "no"} | ${entry.horizontalOverflow ? "yes" : "no"} | ${footerReflow ? "yes" : "no"} | ${entry.focus.visible ? "yes" : "no"} | ${entry.iframes.titled}/${entry.iframes.total} | ${panels} | ${entry.reducedMotion.matches ? "yes" : "no"} | ${entry.keyboardTrap.likelyTrap ? "yes" : "no"} |`;
     })
     .join("\n");
   const warningsText = report.warnings.length ? report.warnings.map((warning) => `- ${warning}`).join("\n") : "- None";
   const failuresText = report.failures.length ? report.failures.map((failure) => `- ${failure}`).join("\n") : "- None";
-  return `# Browser Route Matrix\n\nGenerated: ${report.checkedAt}\n\nThis file is intentionally no-secret. It records clean-context Playwright browser evidence for key Mochirii routes without cookies, request headers, raw response headers, screenshots, or private form values.\n\n## Result\n\n- OK: ${report.ok ? "yes" : "no"}\n- Base URL: ${report.baseUrl}\n- Browser: ${report.browser}\n- Checks: ${report.summary.checks}\n- Viewports: ${report.viewports.map((viewport) => `${viewport.name} ${viewport.width}x${viewport.height}`).join(", ")}\n\n## Matrix\n\n| Route | Viewport | Status | Main | Overflow | Visible focus | Iframes titled | Opaque panels | Reduced motion | Trap |\n| --- | --- | ---: | --- | --- | --- | ---: | ---: | --- | --- |\n${rows}\n\n## Warnings\n\n${warningsText}\n\n## Failures\n\n${failuresText}\n`;
+  return `# Browser Route Matrix\n\nGenerated: ${report.checkedAt}\n\nThis file is intentionally no-secret. It records clean-context Playwright browser evidence for key Mochirii routes without cookies, request headers, raw response headers, screenshots, or private form values.\n\n## Result\n\n- OK: ${report.ok ? "yes" : "no"}\n- Base URL: ${report.baseUrl}\n- Browser: ${report.browser}\n- Checks: ${report.summary.checks}\n- Viewports: ${report.viewports.map((viewport) => `${viewport.name} ${viewport.width}x${viewport.height}`).join(", ")}\n\n## Matrix\n\n| Route | Viewport | Status | Main | Overflow | Footer reflow | Visible focus | Iframes titled | Opaque panels | Reduced motion | Trap |\n| --- | --- | ---: | --- | --- | --- | --- | ---: | ---: | --- | --- |\n${rows}\n\n## Warnings\n\n${warningsText}\n\n## Failures\n\n${failuresText}\n`;
 }
 
 function scanRenderedArtifact(label, text) {

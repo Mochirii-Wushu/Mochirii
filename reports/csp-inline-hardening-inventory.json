@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-03T14:46:43.203Z",
+  "checkedAt": "2026-07-25T11:37:21.731Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
@@ -17,8 +17,8 @@
       "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co",
       "font-src 'self' data:",
       "media-src 'self' data: blob:",
-      "frame-src 'self' https://discord.com https://open.spotify.com https://mochi-social-game.fly.dev",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com https://mochi-social-game.fly.dev",
+      "frame-src 'self' https://discord.com https://open.spotify.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
       "worker-src 'self' blob:",
       "upgrade-insecure-requests"
     ],
@@ -68,8 +68,7 @@
       "frame-src": [
         "'self'",
         "https://discord.com",
-        "https://open.spotify.com",
-        "https://mochi-social-game.fly.dev"
+        "https://open.spotify.com"
       ],
       "connect-src": [
         "'self'",
@@ -77,8 +76,7 @@
         "wss://*.supabase.co",
         "https://discord.com",
         "https://cdn.discordapp.com",
-        "https://vitals.vercel-insights.com",
-        "https://mochi-social-game.fly.dev"
+        "https://vitals.vercel-insights.com"
       ],
       "worker-src": [
         "'self'",
@@ -133,29 +131,6 @@
         ]
       },
       {
-        "origin": "https://mochi-social-game.fly.dev",
-        "allowedBy": [
-          "frame-src",
-          "connect-src"
-        ]
-      },
-      {
-        "origin": "https://mochirii.com",
-        "allowedBy": [
-          "default-src",
-          "base-uri",
-          "form-action",
-          "script-src",
-          "style-src",
-          "img-src",
-          "font-src",
-          "media-src",
-          "frame-src",
-          "connect-src",
-          "worker-src"
-        ]
-      },
-      {
         "origin": "https://open.spotify.com",
         "allowedBy": [
           "frame-src"
@@ -170,7 +145,7 @@
     ]
   },
   "sourceInventory": {
-    "scannedFiles": 68,
+    "scannedFiles": 112,
     "scannedRoots": [
       "apps/web/app",
       "apps/web/components",
@@ -187,14 +162,10 @@
       "iframeElement": {
         "label": "iframe element",
         "severity": "inventory",
-        "count": 3,
+        "count": 2,
         "files": [
           {
-            "file": "apps/web/components/mochi-social/MochiSocialAlphaClient.tsx",
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
+            "file": "apps/web/components/public-pages/route-pages/JoinPage.tsx",
             "count": 1
           },
           {
@@ -204,13 +175,8 @@
         ],
         "hits": [
           {
-            "file": "apps/web/components/mochi-social/MochiSocialAlphaClient.tsx",
-            "line": 222,
-            "count": 1
-          },
-          {
-            "file": "apps/web/components/public-pages/pages.tsx",
-            "line": 279,
+            "file": "apps/web/components/public-pages/route-pages/JoinPage.tsx",
+            "line": 72,
             "count": 1
           },
           {
@@ -223,9 +189,20 @@
       "scriptElement": {
         "label": "script element",
         "severity": "review",
-        "count": 0,
-        "files": [],
-        "hits": []
+        "count": 1,
+        "files": [
+          {
+            "file": "apps/web/app/page.tsx",
+            "count": 1
+          }
+        ],
+        "hits": [
+          {
+            "file": "apps/web/app/page.tsx",
+            "line": 321,
+            "count": 1
+          }
+        ]
       },
       "nextScriptImport": {
         "label": "next/script import",
@@ -237,9 +214,20 @@
       "dangerouslySetInnerHTML": {
         "label": "dangerouslySetInnerHTML",
         "severity": "block",
-        "count": 0,
-        "files": [],
-        "hits": []
+        "count": 1,
+        "files": [
+          {
+            "file": "apps/web/app/page.tsx",
+            "count": 1
+          }
+        ],
+        "hits": [
+          {
+            "file": "apps/web/app/page.tsx",
+            "line": 324,
+            "count": 1
+          }
+        ]
       },
       "srcDoc": {
         "label": "iframe srcDoc",
@@ -264,6 +252,15 @@
       }
     },
     "blockingHits": [],
+    "reviewedBlockingHits": [
+      {
+        "file": "apps/web/app/page.tsx",
+        "line": 324,
+        "count": 1,
+        "patternId": "dangerouslySetInnerHTML",
+        "label": "dangerouslySetInnerHTML"
+      }
+    ],
     "externalOrigins": [
       {
         "origin": "https://discord.com",
@@ -272,64 +269,21 @@
           "connect-src"
         ],
         "files": [
-          "apps/web/app/page.tsx",
-          "apps/web/components/SiteFooter.tsx",
-          "apps/web/components/SiteHeader.tsx",
-          "apps/web/components/member-workflow/AccountPanel.tsx",
-          "apps/web/components/public-pages/EventsBoard.tsx",
-          "apps/web/components/public-pages/pages.tsx"
+          "apps/web/components/public-pages/route-pages/JoinPage.tsx"
         ]
       },
       {
-        "origin": "https://mochi-social-game.fly.dev",
-        "allowedBy": [
-          "frame-src",
-          "connect-src"
-        ],
-        "files": [
-          "apps/web/app/games/mochi-social/page.tsx",
-          "apps/web/components/mochi-social/MochiSocialAlphaClient.tsx"
-        ]
-      },
-      {
-        "origin": "https://mochirii.com",
-        "allowedBy": [
-          "default-src",
-          "base-uri",
-          "form-action",
-          "script-src",
-          "style-src",
-          "img-src",
-          "font-src",
-          "media-src",
-          "frame-src",
-          "connect-src",
-          "worker-src"
-        ],
-        "files": [
-          "apps/web/app/account/page.tsx",
-          "apps/web/app/auth/page.tsx",
-          "apps/web/app/gallery-submit/page.tsx",
-          "apps/web/app/layout.tsx",
-          "apps/web/app/leader-dashboard/page.tsx",
-          "apps/web/components/public-pages/metadata.ts"
-        ]
-      },
-      {
-        "origin": "https://social.mochirii.com",
+        "origin": "https://schema.org",
         "allowedBy": [],
         "files": [
-          "apps/web/components/SiteFooter.tsx",
-          "apps/web/components/SiteHeader.tsx",
-          "apps/web/components/member-workflow/AccountPanel.tsx",
-          "apps/web/components/member-workflow/SocialHubPanel.tsx"
+          "apps/web/app/page.tsx"
         ]
       },
       {
         "origin": "https://www.instagram.com",
         "allowedBy": [],
         "files": [
-          "apps/web/components/member-workflow/LeaderDashboard.tsx"
+          "apps/web/components/member-workflow/LeaderDashboardParts.tsx"
         ]
       }
     ]
@@ -418,11 +372,10 @@
       ]
     },
     {
-      "route": "/games/mochi-social",
-      "surface": "Mochi Social",
+      "route": "/games/mochi-pets",
+      "surface": "Mochi Pets",
       "features": [
-        "Fly iframe",
-        "postMessage bridge"
+        "static project-status content"
       ]
     },
     {
@@ -440,13 +393,13 @@
   "nextSteps": [
     "Keep React inline style props at zero before any style-src unsafe-inline removal.",
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
-    "Keep Spotify and Mochi Social iframe routes in the browser route sweep.",
-    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, Speed Insights, and Mochi Social postMessage behavior before tightening CSP.",
+    "Keep Spotify iframe routes in the browser route sweep.",
+    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, and Speed Insights before tightening CSP.",
     "Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.",
     "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions."
   ],
   "warnings": [
-    "https://social.mochirii.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",
+    "https://schema.org appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",
     "https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening."
   ],
   "failures": []
