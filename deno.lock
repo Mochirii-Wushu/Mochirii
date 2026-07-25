@@ -1,8 +1,8 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@supabase/functions-js@*": "2.110.8",
-    "npm:@supabase/supabase-js@2": "2.110.8",
+    "jsr:@supabase/functions-js@2.110.8": "2.110.8",
+    "npm:@supabase/supabase-js@2.110.8": "2.110.8",
     "npm:lighthouse@13.4.1": "13.4.1_@opentelemetry+core@2.10.0__@opentelemetry+api@1.9.1",
     "npm:openai@^4.52.5": "4.104.0",
     "npm:playwright@1.61.1": "1.61.1",

@@ -144,13 +144,13 @@ assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
 
 [
   '"tweetnacl": "npm:tweetnacl@1.0.3"',
-  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2"',
-  '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js/edge-runtime.d.ts"',
+  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2.110.8"',
+  '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js@2.110.8/edge-runtime.d.ts"',
 ].forEach((snippet) => assertIncludes("import map", importMap, snippet));
 
 [
-  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2"',
-  '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js/edge-runtime.d.ts"',
+  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2.110.8"',
+  '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js@2.110.8/edge-runtime.d.ts"',
 ].forEach((snippet) => assertIncludes("member sync import map", memberSyncImportMap, snippet));
 
 [

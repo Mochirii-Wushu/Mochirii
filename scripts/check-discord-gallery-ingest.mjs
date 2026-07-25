@@ -81,9 +81,8 @@ assertIncludes("supabase config", config, "verify_jwt = false");
 assertIncludes("supabase config", config, 'import_map = "./functions/submit-discord-gallery-image/deno.json"');
 assertIncludes("supabase config", config, 'entrypoint = "./functions/submit-discord-gallery-image/index.ts"');
 
-assertIncludes("import map", importMap, '"@supabase/functions-js": "jsr:@supabase/functions-js@^2"');
-assertIncludes("import map", importMap, '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js/edge-runtime.d.ts"');
-assertIncludes("import map", importMap, '"@supabase/supabase-js": "npm:@supabase/supabase-js@2"');
+assertIncludes("import map", importMap, '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js@2.110.8/edge-runtime.d.ts"');
+assertIncludes("import map", importMap, '"@supabase/supabase-js": "npm:@supabase/supabase-js@2.110.8"');
 
 [
   'const MEMBER_GALLERY_BUCKET = "member-gallery";',

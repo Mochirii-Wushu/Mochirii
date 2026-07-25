@@ -76,8 +76,8 @@ assertIncludes("check-all", checkAll, "check:vote-reminder");
 ].forEach((snippet) => assertIncludes("supabase config", config, snippet));
 
 [
-  '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js/edge-runtime.d.ts"',
-  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2"',
+  '"@supabase/functions-js/edge-runtime.d.ts": "jsr:@supabase/functions-js@2.110.8/edge-runtime.d.ts"',
+  '"@supabase/supabase-js": "npm:@supabase/supabase-js@2.110.8"',
 ].forEach((snippet) => assertIncludes("send-vote-reminder import map", senderImportMap, snippet));
 
 [
