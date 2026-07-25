@@ -39,6 +39,11 @@ body[data-page="home"] .birthday-splash{
   display:grid;
   place-items:center;
   padding:clamp(18px, 4vw, 44px);
+  padding:
+    max(clamp(18px, 4vw, 44px), var(--safe-area-top))
+    max(clamp(18px, 4vw, 44px), var(--safe-area-right))
+    max(clamp(18px, 4vw, 44px), var(--safe-area-bottom))
+    max(clamp(18px, 4vw, 44px), var(--safe-area-left));
   background:
     radial-gradient(circle at 20% 20%, rgba(218,181,94,.20), transparent 28%),
     radial-gradient(circle at 82% 16%, rgba(222,151,177,.18), transparent 26%),

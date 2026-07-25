@@ -17,10 +17,10 @@
   --lightbox-close-size:44px;
   --lightbox-control-gap:8px;
   --lightbox-card-copy-reserve:70px;
-  --lightbox-inset-top:max(var(--lightbox-shell-gap), env(safe-area-inset-top, 0px));
-  --lightbox-inset-right:max(var(--lightbox-shell-gap), env(safe-area-inset-right, 0px));
-  --lightbox-inset-bottom:max(var(--lightbox-shell-gap), env(safe-area-inset-bottom, 0px));
-  --lightbox-inset-left:max(var(--lightbox-shell-gap), env(safe-area-inset-left, 0px));
+  --lightbox-inset-top:max(var(--lightbox-shell-gap), var(--safe-area-top));
+  --lightbox-inset-right:max(var(--lightbox-shell-gap), var(--safe-area-right));
+  --lightbox-inset-bottom:max(var(--lightbox-shell-gap), var(--safe-area-bottom));
+  --lightbox-inset-left:max(var(--lightbox-shell-gap), var(--safe-area-left));
   position:fixed;
   inset:0;
   height:100vh;

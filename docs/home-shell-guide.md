@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-Home/Shell covers the site's first impression, guild identity, entry paths to Join, Events, Gallery, Tome, Recruitment, Ranks, Leaders, and Twills/Profile, plus the shared header/footer/nav behavior, shared script load order, and public site foundation.
+Home/Shell covers the site's first impression, guild identity, entry paths to Join, Events, Gallery, Tome, Recruitment, Ranks, Leaders, and Twills/Profile, plus the shared App Router layout, header/footer/nav behavior, and public site foundation.
 
 Home should route visitors onward without duplicating:
 
@@ -19,8 +19,8 @@ Home should route visitors onward without duplicating:
 
 - Home data lives in `apps/web/public/data/home.json`.
 - Keep JSON valid.
-- Preserve the current schema unless `home.js` changes in the same scoped task.
-- Add only fields that `home.js` actually supports.
+- Preserve the current schema unless `apps/web/app/page.tsx` changes in the same scoped task.
+- Add only fields that the canonical Next Home route actually supports.
 - Keep Home copy concise and directional.
 - Keep functional labels plain.
 
@@ -37,15 +37,14 @@ Current Home data shape:
 
 Renderer notes:
 
-- `home.js` loads `apps/web/public/data/home.json` through `MochiriiUtils.fetchJson()`.
-- The live Next Home page derives monthly gathering and raffle dates from `apps/web/public/data/guild-schedule.json` when a bulletin has `scheduleId`.
-- The live Next Home page may replace the configured fallback spotlight title with the finalized monthly Discord poll winner name from `get-current-spotlight-winner`; the poll winner path is name-only and must not expose Discord handles, profile links, avatars, vote counts, or candidate lists.
-- Home descriptor strings render as paragraphs.
-- Home badges render as plain spans.
-- Bulletin dates render through `MochiriiUtils.formatDateUTC()`.
-- Door, bulletin, spotlight, and gallery media render from data fields.
+- `apps/web/app/page.tsx` imports `home.json`, `gallery.json`, and `guild-schedule.json` at build time and renders the canonical `/` route.
+- Monthly gathering and raffle dates come from `guild-schedule.json` when a bulletin has `scheduleId`.
+- `SpotlightWinnerTitle` may replace the configured fallback title with the finalized monthly Discord poll winner name from `get-current-spotlight-winner`; the path is name-only and must not expose Discord handles, profile links, avatars, vote counts, or candidate lists.
+- `HomeGallerySpotlight` and `HomeGalleryLightboxModal` own Screenshot Spotlight selection and dialog behavior.
+- Home descriptor strings render as paragraphs, badges render as plain spans, and bulletin dates use the UTC formatter in `page.tsx`.
+- Door, bulletin, spotlight, and gallery media render from controlled data fields through owned image components or elements.
 - Inline HTML and Markdown are not supported in Home JSON copy.
-- `home.js` does not support data-driven Home kicker, Home `h1`, primary CTA labels, section headings, metadata, header, footer, or navigation.
+- Home kicker, `h1`, primary CTA labels, section headings, metadata, header, footer, and navigation are component-owned rather than data-driven.
 
 ## 3. Protected Guild Seal Poem
 
@@ -53,11 +52,11 @@ The protected guild seal poem lives at:
 
 - `apps/web/public/data/home.json` `seal.verse`
 
-The guild seal poem is protected. Do not alter wording, punctuation, line breaks, spelling, capitalization, diacritics, order, or structure. Future edits may revise other non-seal Home fields only if needed, supported by `home.js`, and intentionally scoped. Any seal poem change requires explicit user approval.
+The guild seal poem is protected. Do not alter wording, punctuation, line breaks, spelling, capitalization, diacritics, order, or structure. Future edits may revise other non-seal Home fields only if needed, supported by the canonical Next Home route, and intentionally scoped. Any seal poem change requires explicit user approval.
 
 ## 4. Header / Navigation
 
-Header behavior comes from `header.html` and `site.js`.
+Header behavior comes from `apps/web/components/SiteHeader.tsx`, its focused helpers under `apps/web/components/site-header`, and controlled navigation data in `apps/web/lib/site-navigation.ts`.
 
 The header and footer brand blocks match: the prominent `Mōchirīī` guild name sits above the concise `Asia Pacific Guild` regional label. Keep the game name in metadata and approved supporting contexts instead of the brand subtitle.
 
@@ -93,7 +92,7 @@ The exact game name may remain in header brand text and shared shell metadata co
 
 ## 5. Footer
 
-Footer behavior comes from `footer.html` and `site.js`.
+Footer presentation and links come from `apps/web/components/SiteFooter.tsx`; shared layout ownership remains in `apps/web/app/layout.tsx`.
 
 Current footer content:
 
@@ -103,38 +102,19 @@ Current footer content:
 - Discord Join CTA with `target="_blank"` and `rel="noopener noreferrer"`.
 - Recruitment Tips link.
 - Guild, Culture, and Updates navigation columns.
-- Copyright text updated by `site.js`.
+- Copyright year rendered by the Footer component.
 - Footer metadata line with the game name.
 
 Keep the footer compact. It should remain a shared navigation and identity surface, not a full mission statement or duplicate Recruitment/Join content.
 
-## 6. Script Load Order
+## 6. App Router Ownership
 
-Current public page convention:
-
-```text
-utils.js -> supabase.js -> site.js -> page-specific script
-```
-
-Checked pages:
-
-- `index.html`
-- `join.html`
-- `events.html`
-- `gallery.html`
-- `ranks.html`
-- `leaders.html`
-- `tome.html`
-- `recruitment.html`
-- `announcements.html`
-- `raffles.html`
-- `spotify.html`
-- `spotlight.html`
-- `twills.html`
-
-All checked pages follow the same order. `gallery.html` keeps this order with existing cache-query strings on CSS and JS references.
-
-Do not reorder scripts casually. `utils.js` should remain available before shared and page scripts. `supabase.js` should not break signed-out public browsing. Keep `site.js` before page-specific scripts to preserve the current shell convention. Do not add a framework or bundler without explicit approval.
+- `apps/web/app/layout.tsx` owns root metadata, viewport settings, local fonts, the shared shell styles, `SiteHeader`, and `SiteFooter`.
+- Route `page.tsx` files import only the styles and server/client components their route needs.
+- Interactive behavior stays in focused client components; do not make the entire layout or a route client-side for one control.
+- Next emits content-hashed application bundles. There is no editable `index.html`, shared `site.js`, or manual public-script ordering in the live application.
+- Legacy `.html` URLs are redirect compatibility only. The immutable `legacy-static-final-2026-07-18` release is the rollback artifact; do not recreate or edit a parallel static surface.
+- Preserve signed-out fail-closed behavior when changing shell authentication or Supabase-backed components.
 
 ## 7. Home Copy and Tone Rules
 
@@ -153,7 +133,7 @@ The exact game name may remain in the approved Home subtitle, header/footer, tit
 
 ## 8. Metadata and Social Preview
 
-Home metadata is owned by `index.html`.
+Root Home metadata is owned by the typed `metadata` and `viewport` exports in `apps/web/app/layout.tsx`. Home JSON-LD is rendered by `apps/web/app/page.tsx`.
 
 Current conventions:
 
@@ -205,15 +185,12 @@ Next app shared hero presentation:
 - Keep page-specific palette, border, and glass styling scoped by `body[data-page="..."]`; do not change text, alt text, image paths, or route data for visual-only passes.
 - Validate Home plus each shared `PageHero` route at `360px`, `390px`, `768px`, `1024px`, and `1440px` before release.
 
-## 10. Cache Query Conventions
+## 10. Asset and Cache Conventions
 
-Current cache-query behavior:
-
-- Home currently loads `styles.css`, `utils.js`, `supabase.js`, `site.js`, and `home.js` without cache-query strings.
-- Gallery currently uses cache-query versions for Gallery CSS/JS references.
-- Shared CSS/JS query changes should be deliberate.
-- If shared CSS/JS changes in a future branch, review whether cache-query updates are needed on affected pages.
-- Do not add build tools, service workers, or runtime cache hacks without explicit approval.
+- Next owns content-hashed CSS and JavaScript bundle URLs; do not add manual cache-query strings to application imports.
+- Keep editable public JSON and media under `apps/web/public/data` and `apps/web/public/assets`.
+- Treat the immutable legacy release as rollback evidence, not an editable cache-busting surface.
+- Do not add service workers, duplicate static builds, or runtime cache hacks without an independently reviewed requirement.
 
 ## 11. Accessibility
 

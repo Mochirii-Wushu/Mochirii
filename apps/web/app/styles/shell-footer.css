@@ -7,6 +7,11 @@
   overflow:hidden;
   margin-top:64px;
   padding:44px 16px 34px;
+  padding:
+    44px
+    var(--page-inset-right)
+    max(34px, var(--safe-area-bottom))
+    var(--page-inset-left);
   border-top:1px solid rgba(221,239,255,.14);
   background:
     radial-gradient(circle at 12% 0%, rgba(43,170,135,.14), transparent 34%),
