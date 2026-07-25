@@ -66,6 +66,7 @@ for (const name of workflowFiles) {
     failures.push(`${file}: workflow must define at least one job.`);
   }
   for (const job of jobs) {
+    const jobText = lines.slice(job.start, job.end).join("\n");
     const runsOn = lines
       .slice(job.start, job.end)
       .map((line, offset) => ({ line, number: job.start + offset + 1 }))
@@ -76,11 +77,17 @@ for (const name of workflowFiles) {
     }
 
     const value = runsOn[0].line.slice("    runs-on:".length).trim();
+    const approvedRecoveryMatrix =
+      name === "validate-social.yml" &&
+      job.id === "validate-recovery-tools" &&
+      value === "${{ matrix.runner }}" &&
+      jobText.includes("- architecture: amd64\n            runner: ubuntu-24.04") &&
+      jobText.includes("- architecture: arm64\n            runner: ubuntu-24.04-arm");
     if (value.includes("self-hosted")) {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must not depend on a self-hosted runner.`);
     } else if (value === "ubuntu-latest") {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must pin the Ubuntu 24.04 runner family instead of ubuntu-latest.`);
-    } else if (value !== "ubuntu-24.04") {
+    } else if (value !== "ubuntu-24.04" && !approvedRecoveryMatrix) {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must use exact runs-on value ubuntu-24.04.`);
     }
   }

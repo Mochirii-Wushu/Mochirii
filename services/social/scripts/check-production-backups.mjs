@@ -154,6 +154,21 @@ rejectIncludes(workflowPath, workflow, [
   "pull_request_target",
 ]);
 
+const validationWorkflowPath = ".github/workflows/validate-social.yml";
+const validationWorkflow = readRepository(validationWorkflowPath);
+requireIncludes(validationWorkflowPath, validationWorkflow, [
+  "validate-recovery-tools:",
+  "name: recovery-tools-${{ matrix.architecture }}",
+  "runner: ubuntu-24.04",
+  "runner: ubuntu-24.04-arm",
+  "bash -n \\",
+  "shellcheck \\",
+  "bash services/social/scripts/install-pinned-recovery-tools.sh \"$tools_directory\"",
+  '"$tools_directory/age-keygen" -y "$test_directory/identity"',
+  "cmp --silent \"$test_directory/payload\" \"$test_directory/recovered\"",
+  "needs: [validate-social, validate-recovery-tools]",
+]);
+
 const backupInstallerPath = "scripts/install-production-backups.sh";
 const backupInstaller = read(backupInstallerPath);
 requireIncludes(backupInstallerPath, backupInstaller, [
@@ -182,6 +197,8 @@ requireIncludes(runbookPath, compactRunbook, [
   "`social-recovery` environment variables",
   "protected `social-recovery` environment",
   "protected `main`",
+  "native AMD64 and ARM64",
+  "does not install tools on the live Droplet",
 ]);
 rejectIncludes(runbookPath, runbook, ["repository Actions secrets"]);
 

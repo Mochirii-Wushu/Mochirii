@@ -45,6 +45,14 @@ The approved Ubuntu host must already provide `curl`, `install`, `mktemp`,
 `sha256sum`, `tar`, `uname`, and `unzip`; the installer stops with the missing
 prerequisite name before downloading anything.
 
+Repository validation runs syntax checks and ShellCheck, then installs and
+exercises the pinned binaries on native AMD64 and ARM64 Ubuntu 24.04 runners.
+Each runner verifies the exact versions and completes an `age` encrypt/decrypt
+round trip with a byte-identical payload. This CI coverage validates the source
+and release artifacts; it does not install tools on the live Droplet. The live
+host remains unchanged until a separately approved installation packet and
+post-install version readback are completed.
+
 To update a pin, review the upstream release and its security notes. For `age`,
 verify the [official release](https://github.com/FiloSottile/age/releases) checksum
 through its Sigsum or GitHub artifact attestation. For `rclone`, follow the

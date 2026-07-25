@@ -133,9 +133,70 @@ jobs:
         working-directory: services/social
         run: php artisan test tests/Unit/AvatarUploadPolicyTest.php
 
+  validate-recovery-tools:
+    name: recovery-tools-${{ matrix.architecture }}
+    needs: validate-social
+    if: needs.validate-social.outputs.social_changed == 'true'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate recovery shell
+        env:
+          RECOVERY_ARCHITECTURE: ${{ matrix.architecture }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n \
+            services/social/scripts/install-pinned-recovery-tools.sh \
+            services/social/scripts/install-production-backups.sh \
+            services/social/scripts/backup-production-runtime.sh
+          if [[ "$RECOVERY_ARCHITECTURE" == "amd64" ]]; then
+            shellcheck \
+              services/social/scripts/install-pinned-recovery-tools.sh \
+              services/social/scripts/install-production-backups.sh \
+              services/social/scripts/backup-production-runtime.sh
+          fi
+
+      - name: Install and exercise pinned recovery tools
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test_directory="$RUNNER_TEMP/recovery-tools-smoke"
+          tools_directory="$test_directory/bin"
+          install -d -m 0700 "$test_directory"
+          bash services/social/scripts/install-pinned-recovery-tools.sh "$tools_directory"
+
+          [[ "$("$tools_directory/age" --version)" == "v1.3.1" ]]
+          [[ "$("$tools_directory/age-keygen" --version)" == "v1.3.1" ]]
+          rclone_version_output="$("$tools_directory/rclone" version)"
+          [[ "${rclone_version_output%%$'\n'*}" == "rclone v1.74.4" ]]
+
+          printf '%s\n' 'Mochirii recovery tool smoke payload' > "$test_directory/payload"
+          "$tools_directory/age-keygen" --output "$test_directory/identity" >/dev/null 2>&1
+          recipient="$("$tools_directory/age-keygen" -y "$test_directory/identity")"
+          "$tools_directory/age" --recipient "$recipient" \
+            --output "$test_directory/payload.age" "$test_directory/payload"
+          "$tools_directory/age" --decrypt --identity "$test_directory/identity" \
+            --output "$test_directory/recovered" "$test_directory/payload.age"
+          cmp --silent "$test_directory/payload" "$test_directory/recovered"
+
   production-image:
     name: production-image
-    needs: validate-social
+    needs: [validate-social, validate-recovery-tools]
     if: needs.validate-social.outputs.social_changed == 'true' && !(github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -206,7 +267,7 @@ jobs:
 
   publish-social-image:
     name: publish-social-image
-    needs: validate-social
+    needs: [validate-social, validate-recovery-tools]
     if: needs.validate-social.outputs.social_changed == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
