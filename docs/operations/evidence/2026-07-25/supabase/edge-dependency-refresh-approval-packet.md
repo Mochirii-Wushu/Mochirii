@@ -1,6 +1,7 @@
 # Supabase Edge Dependency Refresh Approval Packet
 
-Status: Pending owner approval
+Status: Approved by the release owner on 2026-07-25; execution remains pending
+the final exact-head preflight and protected-branch checks.
 
 This packet is public and contains no credentials, provider tokens, customer
 data, or private provider exports.
