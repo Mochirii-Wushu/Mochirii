@@ -20,7 +20,7 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - The grid uses thumbnails for page speed.
 - The lightbox opens full images.
 - Never let the lightbox open `/thumbs/` images.
-- The Next and rollback static Gallery surfaces render static items in bounded batches of 24; keep the `Show more images` control as the only expansion action unless a later scoped performance pass replaces the pattern.
+- The canonical Next Gallery renders static items in bounded batches of 24; keep the `Show more images` control as the only expansion action unless a later scoped performance pass replaces the pattern. The immutable legacy release remains rollback-only.
 - Approved member and Discord submissions may render with time-limited Supabase signed URLs only. Do not expose raw storage buckets, storage paths, service-role keys, or private media references to browser code.
 - Home Gallery Spotlight must keep using thumbnail paths in its grid and full-size Gallery images in its lightbox.
 
@@ -108,12 +108,12 @@ Expected current static counts:
 
 If image data changes, counts should change from data automatically. Do not patch the labels by hand.
 
-## 10. Next and Rollback Cache Conventions
+## 10. Next and Legacy Rollback Conventions
 
 - The canonical Next `/gallery` route uses hashed application bundles and does not need manual cache-query updates.
-- The rollback `gallery.html` surface uses query strings for CSS/JS cache busting.
-- Update rollback `styles.css`, `gallery.js`, `site.js`, or `utils.js` query versions only when the corresponding rollback asset changes.
-- Do not add build tools, service workers, or runtime cache hacks for this convention.
+- `/gallery.html` is a Next redirect kept for incoming-link compatibility; it is not an editable Gallery implementation.
+- The immutable `legacy-static-final-2026-07-18` release is the only static rollback artifact. Restore it only through the separately approved rollback procedure; do not recreate or patch its HTML, CSS, or JavaScript in `main`.
+- Do not add duplicate build surfaces, service workers, or runtime cache hacks for this convention.
 
 ## 11. Validation
 
@@ -151,7 +151,7 @@ runtime noise.
 - Confirm `/gallery.html` redirects to canonical `/gallery` compatibility.
 - Open an invalid category URL and confirm it falls back to All.
 - Run the automated responsive matrix from `320px` reflow through `2560×1440`, including mobile portrait/landscape, tablet portrait/landscape, desktop, true ultrawide, portrait images, square images, enlarged text, and long captions.
-- Check a physical iPhone and iPad in both orientations for Safari dynamic browser chrome, touch operation, and nonzero safe-area insets.
+- Check a physical iPhone in portrait and both landscape directions, plus an iPad in portrait and landscape, with Safari browser chrome expanded and collapsed. Confirm the header, footer, skip link, mobile menu, both lightboxes, captions, close controls, touch dismissal, and focus return stay inside the nonzero safe area.
 - Confirm All shows the current static Gallery image count before approved member submissions load.
 - Confirm counts match current data.
 - Confirm Copy link works.

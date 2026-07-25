@@ -55,6 +55,11 @@ const screenshotViewportLabels = new Set([
 const touchViewports = viewportMatrix.filter(({ label }) =>
   ["modern iPhone portrait", "phone landscape"].includes(label),
 );
+const syntheticSafeAreaViewport = { label: "synthetic notched phone landscape", width: 844, height: 390 };
+const syntheticSafeAreaCases = [
+  { label: "notch left", top: 18, right: 21, bottom: 21, left: 59 },
+  { label: "notch right", top: 18, right: 59, bottom: 21, left: 21 },
+];
 
 const surfaces = [
   {
@@ -412,6 +417,11 @@ async function prepareSurfacePage(context, surface, engineLabel, resolvedBaseUrl
       )
     : null;
   await page.goto(`${resolvedBaseUrl}${surface.path}`, { waitUntil: "domcontentloaded" });
+  const viewportContent = await page.locator('meta[name="viewport"]').getAttribute("content");
+  assert(
+    viewportContent?.toLowerCase().split(",").map((value) => value.trim()).includes("viewport-fit=cover"),
+    `${engineLabel} ${surface.label}: emitted viewport metadata is missing viewport-fit=cover.`,
+  );
   if (approvedFeedRequest) await approvedFeedRequest;
   await page.waitForFunction(
     ({ selector, minimum }) => document.querySelectorAll(selector).length >= minimum,
@@ -937,6 +947,265 @@ async function captureScreenshot(page, engine, surface, viewport) {
   await page.screenshot({ path: path.join(screenshotDirectory, fileName) });
 }
 
+function assertInsideSafeRectangle(rect, safeArea, viewport, context) {
+  assert(
+    within(rect.left, safeArea.left, viewport.width - safeArea.right),
+    `${context}: left edge is outside the synthetic safe area.`,
+  );
+  assert(
+    within(rect.right, safeArea.left, viewport.width - safeArea.right),
+    `${context}: right edge is outside the synthetic safe area.`,
+  );
+  assert(
+    within(rect.top, safeArea.top, viewport.height - safeArea.bottom),
+    `${context}: top edge is outside the synthetic safe area.`,
+  );
+  assert(
+    within(rect.bottom, safeArea.top, viewport.height - safeArea.bottom),
+    `${context}: bottom edge is outside the synthetic safe area.`,
+  );
+}
+
+async function setSyntheticSafeArea(page, safeArea) {
+  await page.evaluate((insets) => {
+    const root = document.documentElement.style;
+    for (const edge of ["top", "right", "bottom", "left"]) {
+      root.setProperty(`--safe-area-${edge}`, `${insets[edge]}px`);
+    }
+  }, safeArea);
+}
+
+async function clearSyntheticSafeArea(page) {
+  await page.evaluate(() => {
+    const root = document.documentElement.style;
+    for (const edge of ["top", "right", "bottom", "left"]) {
+      root.removeProperty(`--safe-area-${edge}`);
+    }
+  });
+}
+
+async function resetPreparedPagesToTop(prepared) {
+  await Promise.all(prepared.map(async ({ page }) => {
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      const previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      window.scrollTo(0, 0);
+      root.style.scrollBehavior = previousScrollBehavior;
+    });
+    await waitForScrollSettled(page);
+  }));
+}
+
+async function measureSafeAreaConsumers(page) {
+  const skipLink = page.locator(".skip-link");
+  await skipLink.evaluate((element) => {
+    element.style.transition = "none";
+    element.style.transform = "translateY(0)";
+  });
+  await skipLink.focus();
+
+  const geometry = await page.evaluate(() => {
+    const rect = (element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        top: box.top,
+        right: box.right,
+        bottom: box.bottom,
+        left: box.left,
+        width: box.width,
+        height: box.height,
+      };
+    };
+    const contentRect = (element) => {
+      const box = rect(element);
+      const style = getComputedStyle(element);
+      const padding = {
+        top: Number.parseFloat(style.paddingTop) || 0,
+        right: Number.parseFloat(style.paddingRight) || 0,
+        bottom: Number.parseFloat(style.paddingBottom) || 0,
+        left: Number.parseFloat(style.paddingLeft) || 0,
+      };
+      return {
+        top: box.top + padding.top,
+        right: box.right - padding.right,
+        bottom: box.bottom - padding.bottom,
+        left: box.left + padding.left,
+        padding,
+      };
+    };
+
+    const header = document.querySelector(".site-header");
+    const container = document.querySelector("main .container");
+    const footer = document.querySelector(".site-footer");
+    const skip = document.querySelector(".skip-link");
+    return {
+      header: contentRect(header),
+      container: contentRect(container),
+      footer: contentRect(footer),
+      skip: rect(skip),
+      pageScrollWidth: document.documentElement.scrollWidth,
+    };
+  });
+
+  await skipLink.evaluate((element) => {
+    element.style.removeProperty("transition");
+    element.style.removeProperty("transform");
+  });
+  return geometry;
+}
+
+async function measureMobileSheetSafeArea(page) {
+  await page.locator("#menu-btn").click();
+  await page.locator("#mobile-menu").waitFor({ state: "visible" });
+  await page.waitForFunction(() => {
+    const shell = document.querySelector("#mobile-menu");
+    const sheet = shell?.querySelector(".mobile-sheet");
+    if (!sheet || shell.dataset.open !== "true") return false;
+    const style = getComputedStyle(sheet);
+    const transform = new DOMMatrixReadOnly(style.transform);
+    return style.opacity === "1"
+      && Math.abs(transform.m41) < 0.1
+      && Math.abs(transform.m42) < 0.1;
+  });
+  const geometry = await page.locator("#mobile-menu .mobile-sheet").evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const padding = {
+      top: Number.parseFloat(style.paddingTop) || 0,
+      right: Number.parseFloat(style.paddingRight) || 0,
+      bottom: Number.parseFloat(style.paddingBottom) || 0,
+      left: Number.parseFloat(style.paddingLeft) || 0,
+    };
+    return {
+      content: {
+        top: box.top + padding.top,
+        right: box.right - padding.right,
+        bottom: box.bottom - padding.bottom,
+        left: box.left + padding.left,
+      },
+      padding,
+    };
+  });
+  await page.locator('#mobile-menu [aria-label="Close menu"]').click();
+  await page.locator("#mobile-menu").waitFor({ state: "hidden" });
+  return geometry;
+}
+
+async function measureBirthdaySafeArea(page) {
+  return page.evaluate(() => {
+    const fixture = document.createElement("div");
+    fixture.id = "synthetic-safe-area-birthday";
+    fixture.className = "birthday-splash";
+    fixture.setAttribute("aria-hidden", "true");
+    fixture.innerHTML = `
+      <section class="birthday-splash__panel">
+        <button class="birthday-splash__close" type="button">Close</button>
+        <p class="birthday-splash__kicker">A lantern-bright wish</p>
+        <h2 class="birthday-splash__title">Happy Birthday Sinbell!!</h2>
+        <p class="birthday-splash__message">Mochi spirits love you!!</p>
+      </section>
+    `;
+    document.body.append(fixture);
+    const style = getComputedStyle(fixture);
+    const rect = (element) => {
+      const box = element.getBoundingClientRect();
+      return {
+        top: box.top,
+        right: box.right,
+        bottom: box.bottom,
+        left: box.left,
+      };
+    };
+    const padding = {
+      top: Number.parseFloat(style.paddingTop) || 0,
+      right: Number.parseFloat(style.paddingRight) || 0,
+      bottom: Number.parseFloat(style.paddingBottom) || 0,
+      left: Number.parseFloat(style.paddingLeft) || 0,
+    };
+    const panel = rect(fixture.querySelector(".birthday-splash__panel"));
+    const close = rect(fixture.querySelector(".birthday-splash__close"));
+    fixture.remove();
+    return { padding, panel, close };
+  });
+}
+
+async function verifyStickyHeader(page, context) {
+  const targetScroll = await page.evaluate(() => {
+    const maximum = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    const target = Math.min(500, maximum);
+    window.scrollTo(0, target);
+    return target;
+  });
+  assert(targetScroll > 0, `${context}: page is not tall enough to verify sticky header behavior.`);
+  await waitForScrollSettled(page);
+  const top = await page.locator(".site-header").evaluate((element) => element.getBoundingClientRect().top);
+  assert(Math.abs(top) <= geometryTolerance, `${context}: sticky header left the viewport at scrollY ${targetScroll}.`);
+  await resetPreparedPagesToTop([{ page }]);
+}
+
+async function verifySyntheticSafeAreas(prepared, engineLabel) {
+  const viewport = syntheticSafeAreaViewport;
+  await Promise.all(prepared.map(({ page }) => page.setViewportSize(viewportSize(viewport))));
+
+  for (const safeArea of syntheticSafeAreaCases) {
+    const context = `${engineLabel} ${safeArea.label} at ${viewport.width}x${viewport.height}`;
+    await Promise.all(prepared.map(({ page }) => setSyntheticSafeArea(page, safeArea)));
+    await resetPreparedPagesToTop(prepared);
+
+    try {
+      const home = prepared.find(({ surface }) => surface.key === "home");
+      await verifyStickyHeader(home.page, context);
+      const shell = await measureSafeAreaConsumers(home.page);
+      assert(shell.pageScrollWidth <= viewport.width + geometryTolerance, `${context}: page shell has horizontal overflow.`);
+      assert(shell.header.left >= safeArea.left - geometryTolerance, `${context}: header content enters the unsafe left inset.`);
+      assert(shell.header.right <= viewport.width - safeArea.right + geometryTolerance, `${context}: header content enters the unsafe right inset.`);
+      assert(shell.header.top >= safeArea.top - geometryTolerance, `${context}: header content enters the unsafe top inset.`);
+      assert(shell.container.left >= safeArea.left - geometryTolerance, `${context}: page content enters the unsafe left inset.`);
+      assert(shell.container.right <= viewport.width - safeArea.right + geometryTolerance, `${context}: page content enters the unsafe right inset.`);
+      assert(shell.footer.left >= safeArea.left - geometryTolerance, `${context}: footer content enters the unsafe left inset.`);
+      assert(shell.footer.right <= viewport.width - safeArea.right + geometryTolerance, `${context}: footer content enters the unsafe right inset.`);
+      assert(shell.footer.padding.bottom >= safeArea.bottom, `${context}: footer padding does not reserve the bottom inset.`);
+      assert(shell.skip.top >= safeArea.top - geometryTolerance, `${context}: focused skip link enters the unsafe top inset.`);
+      assert(shell.skip.left >= safeArea.left - geometryTolerance, `${context}: focused skip link enters the unsafe left inset.`);
+
+      const mobile = await measureMobileSheetSafeArea(home.page);
+      assertInsideSafeRectangle(mobile.content, safeArea, viewport, `${context} mobile-sheet content`);
+      for (const edge of ["top", "right", "bottom", "left"]) {
+        assert(mobile.padding[edge] >= safeArea[edge], `${context}: mobile-sheet ${edge} padding does not reserve the inset.`);
+      }
+
+      const birthday = await measureBirthdaySafeArea(home.page);
+      for (const edge of ["top", "right", "bottom", "left"]) {
+        assert(birthday.padding[edge] >= safeArea[edge], `${context}: birthday dialog ${edge} padding does not reserve the inset.`);
+      }
+      assertInsideSafeRectangle(birthday.panel, safeArea, viewport, `${context} birthday panel`);
+      assertInsideSafeRectangle(birthday.close, safeArea, viewport, `${context} birthday close control`);
+
+      for (const { page, surface, triggerIndex } of prepared) {
+        const opened = await openFromTrigger(page, surface, "keyboard", triggerIndex);
+        const state = await measure(page, surface);
+        assertInsideSafeRectangle(state.card, safeArea, viewport, `${context} ${surface.label} card`);
+        assertInsideSafeRectangle(state.close, safeArea, viewport, `${context} ${surface.label} close control`);
+        assert(
+          state.pageScrollWidth <= viewport.width + geometryTolerance,
+          `${context} ${surface.label}: document has horizontal overflow.`,
+        );
+        const shellPadding = state.contract.shellPadding.map((value) => Number.parseFloat(value) || 0);
+        const expectedMinimums = [safeArea.top, safeArea.right, safeArea.bottom, safeArea.left];
+        shellPadding.forEach((value, index) => {
+          assert(value >= expectedMinimums[index], `${context} ${surface.label}: lightbox shell does not reserve every inset.`);
+        });
+        await closeWithEscape(page, surface, opened, `${context} ${surface.label}`);
+      }
+
+      console.log(`${context}: shared safe-area consumers OK.`);
+    } finally {
+      await Promise.all(prepared.map(({ page }) => clearSyntheticSafeArea(page)));
+    }
+  }
+}
+
 async function verifyEngine(engine) {
   let browser;
   try {
@@ -1041,6 +1310,10 @@ async function verifyEngine(engine) {
 
       assertSameContract(engine.label, viewport, states[0], states[1]);
       console.log(`${engine.label} lightbox viewport OK: ${viewport.label} (${viewport.width}x${viewport.height}).`);
+    }
+
+    if (engine.key === "chromium") {
+      await verifySyntheticSafeAreas(prepared, engine.label);
     }
 
     prepared.forEach(({ assertNoBrowserErrors }) => assertNoBrowserErrors());

@@ -8,6 +8,12 @@ const homePagePath = "apps/web/app/page.tsx";
 const galleryPagePath = "apps/web/app/gallery/page.tsx";
 const homeModalPath = "apps/web/components/HomeGalleryLightboxModal.tsx";
 const galleryBrowserPath = "apps/web/components/public-pages/GalleryBrowser.tsx";
+const layoutPath = "apps/web/app/layout.tsx";
+const tokensPath = "apps/web/app/styles/tokens-base.css";
+const headerCssPath = "apps/web/app/styles/shell-header-nav.css";
+const footerCssPath = "apps/web/app/styles/shell-footer.css";
+const mobileCssPath = "apps/web/app/styles/shell-mobile-menu.css";
+const homeVisualCssPath = "apps/web/app/styles/public-home-visual.css";
 
 const sharedCss = readFileSync(sharedCssPath, "utf8").replace(/\r\n/g, "\n");
 const galleryCss = readFileSync(galleryCssPath, "utf8").replace(/\r\n/g, "\n");
@@ -15,6 +21,12 @@ const homePage = readFileSync(homePagePath, "utf8").replace(/\r\n/g, "\n");
 const galleryPage = readFileSync(galleryPagePath, "utf8").replace(/\r\n/g, "\n");
 const homeModal = readFileSync(homeModalPath, "utf8").replace(/\r\n/g, "\n");
 const galleryBrowser = readFileSync(galleryBrowserPath, "utf8").replace(/\r\n/g, "\n");
+const layout = readFileSync(layoutPath, "utf8").replace(/\r\n/g, "\n");
+const tokens = readFileSync(tokensPath, "utf8").replace(/\r\n/g, "\n");
+const headerCss = readFileSync(headerCssPath, "utf8").replace(/\r\n/g, "\n");
+const footerCss = readFileSync(footerCssPath, "utf8").replace(/\r\n/g, "\n");
+const mobileCss = readFileSync(mobileCssPath, "utf8").replace(/\r\n/g, "\n");
+const homeVisualCss = readFileSync(homeVisualCssPath, "utf8").replace(/\r\n/g, "\n");
 
 function fail(message) {
   console.error(message);
@@ -93,10 +105,10 @@ function findRule(rules, selector) {
   return rules.find((rule) => rule.selector === normalized);
 }
 
-function expectRuleContract(selector, expectedProperties) {
-  const rule = findRule(sharedRules, selector);
+function expectRuleContractIn(rules, sourcePath, selector, expectedProperties) {
+  const rule = findRule(rules, selector);
   if (!rule) {
-    fail(`Universal lightbox selector ${selector} is missing from ${sharedCssPath}.`);
+    fail(`Required selector ${selector} is missing from ${sourcePath}.`);
     return;
   }
 
@@ -105,16 +117,20 @@ function expectRuleContract(selector, expectedProperties) {
     const normalizedExpected = normalizeValue(expectedValue);
     if (actual.get(property) !== normalizedExpected) {
       fail(
-        `${selector} must set ${property}:${expectedValue}; in ${sharedCssPath}.`,
+        `${selector} must set ${property}:${expectedValue}; in ${sourcePath}.`,
       );
     }
   }
 }
 
-function expectPropertySequence(selector, property, expectedValues) {
-  const rule = findRule(sharedRules, selector);
+function expectRuleContract(selector, expectedProperties) {
+  expectRuleContractIn(sharedRules, sharedCssPath, selector, expectedProperties);
+}
+
+function expectPropertySequenceIn(rules, sourcePath, selector, property, expectedValues) {
+  const rule = findRule(rules, selector);
   if (!rule) {
-    fail(`Universal lightbox selector ${selector} is missing from ${sharedCssPath}.`);
+    fail(`Required selector ${selector} is missing from ${sourcePath}.`);
     return;
   }
 
@@ -123,8 +139,12 @@ function expectPropertySequence(selector, property, expectedValues) {
     .map((entry) => entry.value);
   const expected = expectedValues.map(normalizeValue);
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    fail(`${selector} must set ${property} in fallback order: ${expectedValues.join(" then ")}.`);
+    fail(`${selector} must set ${property} in fallback order in ${sourcePath}: ${expectedValues.join(" then ")}.`);
   }
+}
+
+function expectPropertySequence(selector, property, expectedValues) {
+  expectPropertySequenceIn(sharedRules, sharedCssPath, selector, property, expectedValues);
 }
 
 expectIncludes("Home shared lightbox import", homePage, 'import "./styles/shell-lightbox.css";', homePagePath);
@@ -132,12 +152,54 @@ expectIncludes("Gallery shared lightbox import", galleryPage, 'import "../styles
 expectIncludes("Gallery visual treatment import", galleryPage, 'import "../styles/public-gallery.css";', galleryPagePath);
 expectIncludes("Home keyboard-scrollable lightbox card", homeModal, '<figure className="lightbox-card" tabIndex={0}>', homeModalPath);
 expectIncludes("Gallery keyboard-scrollable lightbox card", galleryBrowser, '<figure className="lightbox-card" tabIndex={0}>', galleryBrowserPath);
+expectIncludes("Next viewport safe-area opt-in", layout, 'viewportFit: "cover"', layoutPath);
+const tokensRules = stylesheetRules.get(tokensPath);
+const headerRules = stylesheetRules.get(headerCssPath);
+const footerRules = stylesheetRules.get(footerCssPath);
+const mobileRules = stylesheetRules.get(mobileCssPath);
+const homeVisualRules = stylesheetRules.get(homeVisualCssPath);
+
+expectRuleContractIn(tokensRules, tokensPath, ":root", {
+  "--safe-area-top": "env(safe-area-inset-top, 0px)",
+  "--safe-area-right": "env(safe-area-inset-right, 0px)",
+  "--safe-area-bottom": "env(safe-area-inset-bottom, 0px)",
+  "--safe-area-left": "env(safe-area-inset-left, 0px)",
+  "--page-inset-right": "max(16px, var(--safe-area-right))",
+  "--page-inset-left": "max(16px, var(--safe-area-left))",
+});
+expectRuleContractIn(tokensRules, tokensPath, "html", { height: "100%" });
+expectRuleContractIn(tokensRules, tokensPath, "body", { "min-height": "100%" });
+expectRuleContractIn(tokensRules, tokensPath, ".container", {
+  "padding-right": "var(--page-inset-right)",
+  "padding-left": "var(--page-inset-left)",
+});
+expectRuleContractIn(tokensRules, tokensPath, ".skip-link", {
+  top: "max(12px, var(--safe-area-top))",
+  left: "var(--page-inset-left)",
+});
+expectRuleContractIn(headerRules, headerCssPath, ".site-header", {
+  padding: "max(14px, var(--safe-area-top)) var(--page-inset-right) 14px var(--page-inset-left)",
+});
+expectRuleContractIn(footerRules, footerCssPath, ".site-footer", {
+  padding: "44px var(--page-inset-right) max(34px, var(--safe-area-bottom)) var(--page-inset-left)",
+});
+expectRuleContractIn(mobileRules, mobileCssPath, ".mobile-sheet", {
+  padding: "max(14px, var(--safe-area-top)) max(14px, var(--safe-area-right)) max(16px, var(--safe-area-bottom)) max(14px, var(--safe-area-left))",
+});
+expectPropertySequenceIn(mobileRules, mobileCssPath, ".mobile-sheet", "height", ["100vh", "100dvh"]);
+expectRuleContractIn(homeVisualRules, homeVisualCssPath, 'body[data-page="home"] .birthday-splash', {
+  padding: "max(clamp(18px, 4vw, 44px), var(--safe-area-top)) max(clamp(18px, 4vw, 44px), var(--safe-area-right)) max(clamp(18px, 4vw, 44px), var(--safe-area-bottom)) max(clamp(18px, 4vw, 44px), var(--safe-area-left))",
+});
 
 expectRuleContract("#lightbox,#modalRoot", {
   "--lightbox-shell-gap": "clamp(12px, 4vw, 24px)",
   "--lightbox-close-size": "44px",
   "--lightbox-control-gap": "8px",
   "--lightbox-card-copy-reserve": "70px",
+  "--lightbox-inset-top": "max(var(--lightbox-shell-gap), var(--safe-area-top))",
+  "--lightbox-inset-right": "max(var(--lightbox-shell-gap), var(--safe-area-right))",
+  "--lightbox-inset-bottom": "max(var(--lightbox-shell-gap), var(--safe-area-bottom))",
+  "--lightbox-inset-left": "max(var(--lightbox-shell-gap), var(--safe-area-left))",
   position: "fixed",
   inset: "0",
   "overscroll-behavior": "contain",
