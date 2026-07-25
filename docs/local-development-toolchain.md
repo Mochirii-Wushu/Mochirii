@@ -80,3 +80,6 @@ longer part of local development.
 - Social image validation uses Docker Buildx `v0.35.0`, digest-pinned BuildKit
   `v0.31.2`, and Syft `v1.49.0` in GitHub Actions. These workflow-managed
   versions are validated as part of the repository's action-security contract.
+  Review updates against the official [Deno releases](https://github.com/denoland/deno/releases),
+  [Buildx releases](https://github.com/docker/buildx/releases), and
+  [Syft releases](https://github.com/anchore/syft/releases) before changing the pins.
