@@ -423,13 +423,6 @@ export default function Home() {
                 id="featuredBulletin"
                 className="home-featured"
                 href={cleanRoute(featured.href)}
-                aria-label={joinLabel([
-                  "Featured bulletin",
-                  typeLabel(featured.type),
-                  formatDateUTC(featuredDate),
-                  featured.title,
-                  optionalText(featured, "summary"),
-                ])}
               >
                 <StaticImage
                   id="featuredBulletinImage"

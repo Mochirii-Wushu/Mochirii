@@ -175,8 +175,9 @@ Home image behavior:
 - Hero image: `./assets/img/hero/hero.webp`
 - Background image: `./assets/bg/wuxia-bg.webp`
 - Seal image: `./assets/img/brand/emblem.webp`
-- Bulletin, door, spotlight, and Home gallery images render from `apps/web/public/data/home.json`.
+- Bulletin, door, and spotlight images render from `apps/web/public/data/home.json`; Home Gallery candidates come from `apps/web/public/data/gallery.json`, with `home.json` gallery entries retained only as fallback.
 - Home gallery thumbnails should use thumbnail paths where intended, and `full` should point to the full image used by the lightbox.
+- Home Screenshot Spotlight uses the same fluid, proportional lightbox geometry as `/gallery`; shared sizing belongs in `apps/web/app/styles/shell-lightbox.css`, not Home- or Gallery-only CSS.
 
 Birthday splash toggle:
 
@@ -229,7 +230,8 @@ Preserve these expectations:
 - Reduced-motion preferences remain respected.
 - No horizontal overflow at mobile widths.
 - Screen reader labels stay clear and not overly noisy.
-- Shared lightbox behavior keeps Escape close, focus trap, and focus return.
+- Shared lightbox behavior keeps Escape close, focus trap, keyboard access to the scrollable card, and focus return.
+- Shared lightbox images remain proportional at narrow, wide, portrait, and landscape viewports; enlarged or long captions scroll vertically without collapsing the image or creating horizontal overflow.
 
 ## 12. Validation
 
@@ -243,9 +245,15 @@ node scripts/check-js.mjs
 node scripts/check-refs.mjs
 node scripts/check-assets.mjs
 npm run check:production
+npm run setup:playwright
+npm --prefix apps/web run build
+npm run smoke:gallery
 ```
 
-Use `npm run smoke:gallery` as a general regression check if shared behavior could affect the gallery baseline. It expects a local static server on port `8765`.
+The Playwright setup command is a one-time local browser-runtime step. After the
+Web build completes, run `npm run smoke:gallery:serve` in a separate terminal.
+`npm run smoke:gallery` verifies Home and `/gallery` against the shared
+responsive contract on that production-mode Next app at `127.0.0.1:8765`.
 
 ## 13. Manual Home/Shell Smoke Checklist
 
@@ -259,6 +267,8 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 - Home hero renders.
 - Shared route heroes render full-frame without crop, tint, scrim, CSS filter, or intro-card overlap.
 - Home cards/doors render.
+- Home Screenshot Spotlight opens the selected full image in the same bounded proportional viewer as `/gallery`.
+- The lightbox passes mobile portrait/landscape, tablet, desktop, reflow, long-caption, keyboard, and touch checks without horizontal overflow.
 - Seal poem renders unchanged.
 - Key links resolve.
 - Mobile widths `360px`, `390px`, and `768px` have no horizontal overflow.

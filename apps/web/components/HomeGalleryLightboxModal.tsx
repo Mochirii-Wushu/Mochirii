@@ -112,10 +112,10 @@ export function HomeGalleryLightboxModal({
           aria-label="Close viewer"
           onClick={onClose}
         >
-          âœ•
+          {"\u2715"}
         </button>
 
-        <figure className="lightbox-card">
+        <figure className="lightbox-card" tabIndex={0}>
           <img
             id="modalImage"
             src={item.full}

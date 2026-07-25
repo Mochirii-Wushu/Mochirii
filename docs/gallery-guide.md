@@ -22,7 +22,15 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - Never let the lightbox open `/thumbs/` images.
 - The Next and rollback static Gallery surfaces render static items in bounded batches of 24; keep the `Show more images` control as the only expansion action unless a later scoped performance pass replaces the pattern.
 - Approved member and Discord submissions may render with time-limited Supabase signed URLs only. Do not expose raw storage buckets, storage paths, service-role keys, or private media references to browser code.
-- Home Gallery Spotlight must keep using thumbnail paths and must not switch to full-size Gallery images.
+- Home Gallery Spotlight must keep using thumbnail paths in its grid and full-size Gallery images in its lightbox.
+
+### Universal lightbox contract
+
+- Home Screenshot Spotlight and `/gallery` use the shared geometry in `apps/web/app/styles/shell-lightbox.css`.
+- `apps/web/app/styles/public-gallery.css` may customize Gallery colors, borders, blur, shadows, and interaction styling, but it must not redefine lightbox dimensions or layout.
+- The viewer uses a fluid safe-area-aware shell, a `1160px` maximum card width, `100vh`/`100dvh` height bounds, and `object-fit: contain` so images keep their natural proportions without crop.
+- If enlarged text or a long caption exceeds the available height, the keyboard-focusable card scrolls vertically while the image remains visible. The viewer must never introduce horizontal scrolling.
+- Keep the existing dialog semantics, 44px close target, Escape handling, focus containment and return, backdrop close, and body-scroll restoration.
 
 ## 4. Categories
 
@@ -67,11 +75,11 @@ Gallery category URLs use `?category=`.
 
 Valid examples:
 
-- `gallery.html?category=portraits`
-- `gallery.html?category=gatherings`
-- `gallery.html?category=action`
-- `gallery.html?category=scenery`
-- `gallery.html?category=companions`
+- `/gallery?category=portraits`
+- `/gallery?category=gatherings`
+- `/gallery?category=action`
+- `/gallery?category=scenery`
+- `/gallery?category=companions`
 
 Invalid categories fall back to All and clean the URL. Browser Back and Forward should preserve the selected filter, image count, and `aria-pressed` state.
 
@@ -79,7 +87,8 @@ Invalid categories fall back to All and clean the URL. Browser Back and Forward 
 
 - Copy link copies the current Gallery URL.
 - Category URLs include the selected category.
-- All uses the clean `gallery.html` URL where possible.
+- All uses the clean `/gallery` URL where possible.
+- `/gallery.html` remains redirect compatibility for legacy and rollback links; do not emit it as the canonical Next URL.
 - Feedback uses a short `aria-live` status message.
 - Keep the control plain: `Copy link`, `Link copied`, and `Copy failed`.
 
@@ -99,12 +108,11 @@ Expected current static counts:
 
 If image data changes, counts should change from data automatically. Do not patch the labels by hand.
 
-## 10. Cache Query Convention
+## 10. Next and Rollback Cache Conventions
 
-- `gallery.html` uses query strings for CSS/JS cache busting.
-- Update the `styles.css` query in `gallery.html` when Gallery CSS changes.
-- Update the `gallery.js` query in `gallery.html` when Gallery JS changes.
-- If shared Gallery behavior depends on `site.js` or `utils.js`, update those Gallery page queries in the same scoped task.
+- The canonical Next `/gallery` route uses hashed application bundles and does not need manual cache-query updates.
+- The rollback `gallery.html` surface uses query strings for CSS/JS cache busting.
+- Update rollback `styles.css`, `gallery.js`, `site.js`, or `utils.js` query versions only when the corresponding rollback asset changes.
 - Do not add build tools, service workers, or runtime cache hacks for this convention.
 
 ## 11. Validation
@@ -118,28 +126,39 @@ node scripts/check-json.mjs
 node scripts/check-refs.mjs
 node scripts/check-assets.mjs
 npm run check:media-performance
+npm run setup:playwright
+npm --prefix apps/web run build
 npm run smoke:gallery
+npm run smoke:gallery-approved-feed
 npm run check:production
 ```
 
-`npm run smoke:gallery` expects a local static server on port `8765`.
+The Playwright setup command is a one-time local browser-runtime step. After the
+Web build completes, run `npm run smoke:gallery:serve` in a separate terminal;
+both smoke tests expect that production-mode Next app on `127.0.0.1:8765`.
+Production mode keeps React and Vercel analytics behavior aligned with the CSP
+that ships, so the strict browser-error gate is not weakened for development
+runtime noise.
 
 ## 12. Manual Smoke Checklist
 
-- Open `/gallery.html`.
-- Open `/gallery.html?category=portraits`.
-- Open `/gallery.html?category=gatherings`.
-- Open `/gallery.html?category=action`.
-- Open `/gallery.html?category=scenery`.
-- Open `/gallery.html?category=companions`.
+- Open `/gallery`.
+- Open `/gallery?category=portraits`.
+- Open `/gallery?category=gatherings`.
+- Open `/gallery?category=action`.
+- Open `/gallery?category=scenery`.
+- Open `/gallery?category=companions`.
+- Confirm `/gallery.html` redirects to canonical `/gallery` compatibility.
 - Open an invalid category URL and confirm it falls back to All.
-- Check mobile widths at 360px, 390px, and 768px.
+- Run the automated responsive matrix from `320px` reflow through `2560×1440`, including mobile portrait/landscape, tablet portrait/landscape, desktop, true ultrawide, portrait images, square images, enlarged text, and long captions.
+- Check a physical iPhone and iPad in both orientations for Safari dynamic browser chrome, touch operation, and nonzero safe-area insets.
 - Confirm All shows the current static Gallery image count before approved member submissions load.
 - Confirm counts match current data.
 - Confirm Copy link works.
 - Confirm Browser Back and Forward update the selected filter.
 - Confirm the lightbox opens full images, not `/thumbs/`.
-- Confirm Escape closes the lightbox.
+- Confirm Escape, backdrop, and close-button dismissal restore focus and page scroll.
+- Confirm long captions scroll vertically by keyboard as well as pointer/touch without clipping or collapsing the image.
 - Confirm no horizontal overflow.
 - Confirm the initial Gallery render is capped at 24 images and `Show more images` expands the next batch.
 - Confirm approved runtime submissions use signed URLs and do not display raw Supabase storage references.

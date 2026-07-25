@@ -78,7 +78,7 @@ export function SiteFooter({
       <div className="footer-wrap">
         <div className="footer-top">
           <div className="footer-brand">
-            <Link className="footer-brand-link" href="/" aria-label="Mōchirīī Home">
+            <Link className="footer-brand-link" href="/">
               <Image
                 className="footer-emblem"
                 src="/assets/img/brand/emblem.webp"

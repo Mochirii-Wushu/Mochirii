@@ -13,8 +13,18 @@
 /* Base overlay for both */
 #lightbox,
 #modalRoot{
+  --lightbox-shell-gap:clamp(12px, 4vw, 24px);
+  --lightbox-close-size:44px;
+  --lightbox-control-gap:8px;
+  --lightbox-card-copy-reserve:70px;
+  --lightbox-inset-top:max(var(--lightbox-shell-gap), env(safe-area-inset-top, 0px));
+  --lightbox-inset-right:max(var(--lightbox-shell-gap), env(safe-area-inset-right, 0px));
+  --lightbox-inset-bottom:max(var(--lightbox-shell-gap), env(safe-area-inset-bottom, 0px));
+  --lightbox-inset-left:max(var(--lightbox-shell-gap), env(safe-area-inset-left, 0px));
   position:fixed;
   inset:0;
+  height:100vh;
+  height:100dvh;
   z-index:20000;
   pointer-events:auto;
   isolation:isolate;
@@ -39,9 +49,19 @@
   inset:0;
   z-index:2;
   display:grid;
-  place-items:center;
+  grid-template-columns:minmax(0, 1160px);
+  grid-template-rows:var(--lightbox-close-size) minmax(0, auto);
+  align-content:center;
+  justify-content:center;
+  justify-items:center;
+  row-gap:var(--lightbox-control-gap);
   box-sizing:border-box;
   padding:clamp(12px, 4vw, 24px);
+  padding:
+    var(--lightbox-inset-top)
+    var(--lightbox-inset-right)
+    var(--lightbox-inset-bottom)
+    var(--lightbox-inset-left);
   overflow:hidden;
   pointer-events:none; /* key: allow clicks to pass through to backdrop */
 }
@@ -54,6 +74,72 @@
 #lightbox #lightboxClose,
 #modalRoot #modalClose{
   pointer-events:auto;
+}
+
+/* Shared image-viewer geometry for Gallery and Home Screenshot Spotlight. */
+.lightbox-card{
+  box-sizing:border-box;
+  grid-row:2;
+  width:min(100%, 1160px);
+  max-width:100%;
+  max-height:calc(100vh - 48px - var(--lightbox-close-size) - var(--lightbox-control-gap));
+  max-height:calc(100dvh - var(--lightbox-inset-top) - var(--lightbox-inset-bottom) - var(--lightbox-close-size) - var(--lightbox-control-gap));
+  margin:0;
+  padding:14px;
+  border-radius:22px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.88);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+.lightbox-img{
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:100%;
+  max-height:min(82vh, calc(100vh - 48px - var(--lightbox-close-size) - var(--lightbox-control-gap) - var(--lightbox-card-copy-reserve)));
+  max-height:min(82dvh, calc(100dvh - var(--lightbox-inset-top) - var(--lightbox-inset-bottom) - var(--lightbox-close-size) - var(--lightbox-control-gap) - var(--lightbox-card-copy-reserve)));
+  object-fit:contain;
+  border-radius:16px;
+  flex:0 0 auto;
+  min-width:0;
+  min-height:0;
+}
+
+.lightbox-caption{
+  box-sizing:border-box;
+  flex:0 0 auto;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin-top:12px;
+  padding:8px 12px 0;
+  color:var(--ink-1);
+  font-size:.875rem;
+  line-height:1.45;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+
+.lightbox-close{
+  position:static;
+  grid-row:1;
+  justify-self:end;
+  align-self:center;
+  z-index:3;
+  width:var(--lightbox-close-size);
+  height:var(--lightbox-close-size);
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(10,12,14,.82);
+  color:var(--ink-0);
+  cursor:pointer;
 }
 
 /* Prevent dimming of the image itself (gallery + home) */

@@ -422,8 +422,8 @@ export function GalleryBrowser({
     });
   };
 
-  const openModal = (item: NormalizedGalleryItem) => {
-    lastFocusRef.current = document.activeElement as HTMLElement | null;
+  const openModal = (item: NormalizedGalleryItem, trigger: HTMLElement) => {
+    lastFocusRef.current = trigger;
     setOpenItemKey(item.stableKey);
   };
 
@@ -480,9 +480,9 @@ export function GalleryBrowser({
           aria-label="Close viewer"
           onClick={closeModal}
         >
-          ✕
+          {"\u2715"}
         </button>
-        <figure className="lightbox-card">
+        <figure className="lightbox-card" tabIndex={0}>
           {openItem ? (
             <img
               id="lightboxImg"
@@ -511,11 +511,11 @@ export function GalleryBrowser({
                 type="button"
                 data-category={category.slug}
                 aria-pressed={category.slug === activeCategory}
-                aria-label={`${category.label}, ${category.count} ${category.count === 1 ? "image" : "images"}`}
                 key={category.slug}
                 onClick={() => chooseCategory(category.slug)}
               >
                 {category.label} · {category.count}
+                <span className="sr-only"> {category.count === 1 ? "image" : "images"}</span>
               </button>
             ))}
           </div>
@@ -558,7 +558,7 @@ export function GalleryBrowser({
             data-caption={item.caption}
             data-category={itemCategories(item)[0] || undefined}
             key={item.stableKey}
-            onClick={() => openModal(item)}
+            onClick={(event) => openModal(item, event.currentTarget)}
           >
             <img src={item.thumb} alt={item.alt} loading="lazy" decoding="async" />
           </button>
