@@ -10,6 +10,8 @@ BACKUP_ENV="${MOCHIRII_SOCIAL_BACKUP_ENV:-$RUNTIME_ROOT/shared/backup.env}"
 RECIPIENT_FILE="${MOCHIRII_SOCIAL_BACKUP_RECIPIENT:-$RUNTIME_ROOT/shared/backup-recipient.pub}"
 LOCK_FILE="${MOCHIRII_SOCIAL_BACKUP_LOCK:-/run/lock/mochirii-social-backup.lock}"
 MARIADB_IMAGE="mariadb:11.4@sha256:a794d9eb009e20de605858a11f32f63b4075cbd197c650436f0e3b457e4caed7"
+AGE_VERSION="v1.3.1"
+RCLONE_VERSION="rclone v1.74.4"
 RESTORE_TABLES=(users statuses media oauth_clients)
 
 if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
@@ -39,6 +41,16 @@ if [[ "$verify_only" == false ]]; then
       exit 1
     }
   done
+  age_version_output="$(age --version 2>/dev/null || true)"
+  [[ "$age_version_output" == "$AGE_VERSION" ]] || {
+    echo "The age version does not match the approved backup pin." >&2
+    exit 1
+  }
+  rclone_version_output="$(rclone version 2>/dev/null || true)"
+  [[ "${rclone_version_output%%$'\n'*}" == "$RCLONE_VERSION" ]] || {
+    echo "The rclone version does not match the approved backup pin." >&2
+    exit 1
+  }
   [[ -f "$BACKUP_ENV" ]] || {
     echo "The root-owned backup environment is missing." >&2
     exit 1
