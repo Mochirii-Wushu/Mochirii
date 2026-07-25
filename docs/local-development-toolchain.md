@@ -84,7 +84,8 @@ longer part of local development.
   receiving GitHub's maintained image updates. The exact image and installed
   software versions remain recorded in each job's `Set up job` log.
   Review updates against the official [Deno releases](https://github.com/denoland/deno/releases),
-  [Buildx releases](https://github.com/docker/buildx/releases), and
+  [Buildx releases](https://github.com/docker/buildx/releases),
+  [BuildKit releases](https://github.com/moby/buildkit/releases), and
   [Syft releases](https://github.com/anchore/syft/releases) before changing the
   pins; use [GitHub's runner guidance](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job)
   when reviewing the hosted runner family.
