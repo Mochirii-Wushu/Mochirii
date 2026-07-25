@@ -113,10 +113,11 @@ This is the short source-of-truth index for the current Mochirii production post
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Release workflows use reviewed full-SHA action references, read-only minimum
-  permissions, checkout with credential persistence disabled, Node `22.23.1`,
-  Deno `2.9.4`, Docker Buildx `v0.35.0`, digest-pinned BuildKit `v0.31.2`, and
-  Syft `v1.49.0`. Repository-level `sha_pinning_required` remains a separate
-  approval-gated setting; do not change it as part of ordinary release work.
+  permissions, checkout with credential persistence disabled, the maintained
+  `ubuntu-24.04` runner family, Node `22.23.1`, Deno `2.9.4`, Docker Buildx
+  `v0.35.0`, digest-pinned BuildKit `v0.31.2`, and Syft `v1.49.0`.
+  Repository-level `sha_pinning_required` remains a separate approval-gated
+  setting; do not change it as part of ordinary release work.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
 - Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
 - ESLint 10 and TypeScript 7 remain intentionally deferred in issue #443.

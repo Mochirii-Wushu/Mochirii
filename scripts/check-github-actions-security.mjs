@@ -25,12 +25,57 @@ function stepBlock(lines, usesIndex) {
   return lines.slice(usesIndex, end).join("\n");
 }
 
+function workflowJobs(lines) {
+  const jobsIndex = lines.findIndex((line) => line === "jobs:");
+  if (jobsIndex === -1) return [];
+
+  const headers = [];
+  for (let index = jobsIndex + 1; index < lines.length; index += 1) {
+    if (/^\S/.test(lines[index]) && lines[index].trim()) break;
+    const match = lines[index].match(/^  ([A-Za-z0-9_-]+):\s*$/);
+    if (match) headers.push({ id: match[1], index });
+  }
+
+  return headers.map((header, position) => ({
+    id: header.id,
+    start: header.index,
+    end: headers[position + 1]?.index ?? lines.length,
+  }));
+}
+
+let totalJobCount = 0;
+
 for (const name of workflowFiles) {
   const file = `.github/workflows/${name}`;
   const text = readFileSync(resolve(workflowsDir, name), "utf8").replaceAll("\r\n", "\n");
   const lines = text.split("\n");
   let buildxStepCount = 0;
   let sbomStepCount = 0;
+  const jobs = workflowJobs(lines);
+  totalJobCount += jobs.length;
+
+  if (jobs.length === 0) {
+    failures.push(`${file}: workflow must define at least one job.`);
+  }
+  for (const job of jobs) {
+    const runsOn = lines
+      .slice(job.start, job.end)
+      .map((line, offset) => ({ line, number: job.start + offset + 1 }))
+      .filter(({ line }) => /^    runs-on:/.test(line));
+    if (runsOn.length !== 1) {
+      failures.push(`${file}: job ${job.id} must define exactly one runs-on value.`);
+      continue;
+    }
+
+    const value = runsOn[0].line.slice("    runs-on:".length).trim();
+    if (value.includes("self-hosted")) {
+      failures.push(`${file}:${runsOn[0].number}: job ${job.id} must not depend on a self-hosted runner.`);
+    } else if (value === "ubuntu-latest") {
+      failures.push(`${file}:${runsOn[0].number}: job ${job.id} must pin the Ubuntu 24.04 runner family instead of ubuntu-latest.`);
+    } else if (value !== "ubuntu-24.04") {
+      failures.push(`${file}:${runsOn[0].number}: job ${job.id} must use exact runs-on value ubuntu-24.04.`);
+    }
+  }
 
   if (!text.includes("permissions:\n  contents: read")) {
     failures.push(`${file}: workflow must declare top-level contents: read permissions.`);
@@ -103,4 +148,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`GitHub Actions security validation OK (${workflowFiles.length} workflows).`);
+console.log(`GitHub Actions security validation OK (${workflowFiles.length} workflows, ${totalJobCount} jobs).`);

@@ -80,6 +80,11 @@ longer part of local development.
 - Social image validation uses Docker Buildx `v0.35.0`, digest-pinned BuildKit
   `v0.31.2`, and Syft `v1.49.0` in GitHub Actions. These workflow-managed
   versions are validated as part of the repository's action-security contract.
+- Hosted jobs use `ubuntu-24.04` to keep the runner OS family explicit while
+  receiving GitHub's maintained image updates. The exact image and installed
+  software versions remain recorded in each job's `Set up job` log.
   Review updates against the official [Deno releases](https://github.com/denoland/deno/releases),
   [Buildx releases](https://github.com/docker/buildx/releases), and
-  [Syft releases](https://github.com/anchore/syft/releases) before changing the pins.
+  [Syft releases](https://github.com/anchore/syft/releases) before changing the
+  pins; use [GitHub's runner guidance](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job)
+  when reviewing the hosted runner family.

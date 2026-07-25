@@ -37,7 +37,7 @@ env:
 jobs:
   deploy:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: social-production
     timeout-minutes: 20
     permissions:
