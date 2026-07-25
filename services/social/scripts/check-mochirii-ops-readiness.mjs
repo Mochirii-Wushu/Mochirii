@@ -416,7 +416,10 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "docker login ghcr.io",
   "docker buildx imagetools inspect",
   "docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",
+  "version: v0.35.0",
+  "image=moby/buildkit:v0.31.2@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec",
   "anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610",
+  "syft-version: v1.49.0",
   "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
   "actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6",
 ]);
