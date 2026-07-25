@@ -82,7 +82,7 @@ updates:
           - ">=0.1.0"
       - dependency-name: webpack
         versions:
-          - ">=5.109.0"
+          - ">=5.107.0"
 
   - package-ecosystem: composer
     directory: /services/social
@@ -124,6 +124,7 @@ updates:
       - dependency-name: mariadb
         update-types:
           - version-update:semver-major
+          - version-update:semver-minor
       - dependency-name: redis
         update-types:
           - version-update:semver-major
