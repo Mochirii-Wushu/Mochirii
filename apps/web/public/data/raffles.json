@@ -19,9 +19,9 @@
     "Entries are closed and no promotion is active."
   ],
   "howToConfirm": [
-    "This website is the official source for the current Mochirii raffle status.",
-    "An open drawing is identified by an OPEN status and current rules on this website.",
-    "When this page says entries are closed, there is no active Mochirii raffle."
+    "This website is the official source for current Mochirii raffle information.",
+    "The current raffle status is ENTRIES CLOSED.",
+    "No official raffle rules are currently in effect."
   ],
   "memberSafety": [
     "Mochirii raffles follow a no-purchase-necessary entry principle.",
@@ -30,7 +30,7 @@
   ],
   "rulesStatus": {
     "title": "No current drawing",
-    "summary": "No official raffle rules are currently in effect because no drawing is open.",
+    "summary": "No official raffle rules are currently in effect because there is no current drawing.",
     "details": [
       "There is no current drawing.",
       "Entries are closed.",

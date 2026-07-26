@@ -29,7 +29,7 @@ export function RafflePage() {
             <section className="col-8">
               <div className="glass-card glass-card--primary glass-pad">
                 <p className="kicker">Current availability</p>
-                <h2 className="section-title">The raffle is not open</h2>
+                <h2 className="section-title">No current drawing</h2>
                 <ProseStack id="rafflesCurrentStatus" lines={data.currentStatus} />
               </div>
             </section>
@@ -40,7 +40,7 @@ export function RafflePage() {
                 <div className="badge-row" role="status" aria-label="Current entry status">
                   <span>Entries closed</span>
                 </div>
-                <p className="muted u-mt-18">No entry window is open.</p>
+                <p className="muted u-mt-18">No entry method is active.</p>
                 <div className="hero-cta-row u-mt-18">
                   <Link className="hero-cta" href="/raffle/rules">Read rules status</Link>
                 </div>
@@ -53,7 +53,7 @@ export function RafflePage() {
             <section className="col-7">
               <div className="glass-card glass-card--primary glass-pad">
                 <p className="kicker">Official status</p>
-                <h2 className="section-title">How to confirm official raffle information</h2>
+                <h2 className="section-title">Official raffle information</h2>
                 <ul className="list-stack">
                   {strings(data.howToConfirm).map((item) => <li key={item}>{item}</li>)}
                 </ul>

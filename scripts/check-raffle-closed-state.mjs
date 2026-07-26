@@ -87,7 +87,7 @@ for (const [label, pattern] of [
   ["prize provider name", /tremendous/i],
   ["Discord entry path", /discord/i],
   ["external URL", /https?:\/\//i],
-  ["future implementation promise", /will appear|will show|working entry|before entries are accepted|not currently available/i],
+  ["future implementation promise", /\b(?:will|planned|future|coming soon|tbd)\b|open drawing|working entry|before entries are accepted|not currently available/i],
   ["unpublished promotion detail", /\b(?:dates?|eligibility|rewards?)\b/i],
   ["internal implementation language", /prelaunch|preparation|launch requirements|legal review|implementation|backend|integration|provider|migration|funding|fulfillment/i],
 ]) {

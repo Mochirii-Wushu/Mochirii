@@ -22,7 +22,7 @@ export default function RaffleRulesStatusPage() {
             <h1 className="display-title" id="raffleRulesStatusHeading">
               {String(rulesStatus.title || "No active rules")}
             </h1>
-            <p className="lede">{String(rulesStatus.summary || "The Mochirii Monthly Raffle is NOT OPEN.")}</p>
+            <p className="lede">{String(rulesStatus.summary || "No official raffle rules are currently in effect.")}</p>
             <ul className="list-stack u-mt-18">
               {strings(rulesStatus.details).map((detail) => <li key={detail}>{detail}</li>)}
             </ul>
