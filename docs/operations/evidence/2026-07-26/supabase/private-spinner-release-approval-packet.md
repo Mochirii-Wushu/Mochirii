@@ -82,9 +82,10 @@ attempt an ad hoc destructive rollback.
    integrations. Mark the PR ready only after the final diff is reviewed.
 2. Squash-merge through protected `main`; do not deploy an unmerged worktree.
 3. Serialize the release until both production integrations finish.
-4. Confirm the migration appears exactly once, five spinner tables exist, both
-   schedules exist once, RLS is enabled, and only the service role has table
-   privileges.
+4. Confirm `20260726180052_add_private_live_spinner.sql` and the additive
+   `20260726213000_add_spinner_foreign_key_indexes.sql` follow-up each appear
+   exactly once, five spinner tables exist, both schedules exist once, RLS is
+   enabled, and only the service role has table privileges.
 5. Confirm all 33 configured functions report successful production
    deployments and that `spinner-live-session` and
    `reaper-spinner-dispatch` retain their reviewed authorization settings.
@@ -125,3 +126,26 @@ remaining steps needed to make the raffle spinner live, including the exact
 role-separated access, protected release, server-only channel delivery, and
 production verification described here. That approval applies to PR #520 and
 this packet's bounded provider effects only.
+
+## Post-deploy hardening addendum
+
+The production database advisor review after PR #520 identified the three
+spinner moderator-audit foreign keys as lacking their own lookup indexes.
+PostgreSQL does not create indexes automatically on the referencing side of a
+foreign key. The release owner's direction to complete the approved fixes
+therefore also covers the additive
+`20260726213000_add_spinner_foreign_key_indexes.sql` forward fix. It creates
+only these indexes and changes no access rule, row, function, schedule,
+credential, channel, or product behavior:
+
+- `spinner_commands_actor_id_idx` on `spinner_commands(actor_id)`;
+- `spinner_draw_receipts_actor_id_idx` on
+  `spinner_draw_receipts(actor_id)`;
+- `spinner_live_state_updated_by_idx` on
+  `spinner_live_state(updated_by)`.
+
+Release it through a separate reviewed pull request and protected `main`, run
+the full 48-assertion spinner database transaction against the migrated
+Preview database, then require the production advisor to report no remaining
+spinner foreign-key index finding. Do not apply it manually ahead of the
+protected merge.

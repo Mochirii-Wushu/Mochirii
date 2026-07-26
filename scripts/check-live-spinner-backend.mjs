@@ -5,8 +5,11 @@ const root = process.cwd();
 const failures = [];
 const migrationPath =
   "supabase/migrations/20260726180052_add_private_live_spinner.sql";
+const foreignKeyIndexMigrationPath =
+  "supabase/migrations/20260726213000_add_spinner_foreign_key_indexes.sql";
 const files = {
   migration: migrationPath,
+  foreignKeyIndexMigration: foreignKeyIndexMigrationPath,
   config: "supabase/config.toml",
   index: "supabase/functions/spinner-live-session/index.ts",
   engine: "supabase/functions/_shared/spinner-live.ts",
@@ -38,6 +41,7 @@ function excludes(label, text, pattern, message) {
 }
 
 const migration = read(files.migration);
+const foreignKeyIndexMigration = read(files.foreignKeyIndexMigration);
 const config = read(files.config);
 const index = read(files.index);
 const engine = read(files.engine);
@@ -47,6 +51,14 @@ const dispatcher = read(files.dispatcher);
 const dispatcherShared = read(files.dispatcherShared);
 const denoTest = read(files.test);
 const sqlTest = read(files.sqlTest);
+
+[
+  "create index spinner_commands_actor_id_idx\non public.spinner_commands (actor_id);",
+  "create index spinner_draw_receipts_actor_id_idx\non public.spinner_draw_receipts (actor_id);",
+  "create index spinner_live_state_updated_by_idx\non public.spinner_live_state (updated_by);",
+].forEach((snippet) =>
+  includes("spinner foreign-key indexes", foreignKeyIndexMigration, snippet)
+);
 
 for (
   const table of [

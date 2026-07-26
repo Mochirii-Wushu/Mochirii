@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(45);
+SELECT plan(48);
 
 INSERT INTO auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at
@@ -30,6 +30,30 @@ SELECT ok(
       AND contype = 'f'
       AND pg_get_constraintdef(oid) LIKE '%actor_id%'),
   'moderator account deletion nulls historical actor references without deleting receipts'
+);
+
+SELECT has_index(
+  'public',
+  'spinner_commands',
+  'spinner_commands_actor_id_idx',
+  ARRAY['actor_id'],
+  'command actor foreign-key lookups are indexed'
+);
+
+SELECT has_index(
+  'public',
+  'spinner_draw_receipts',
+  'spinner_draw_receipts_actor_id_idx',
+  ARRAY['actor_id'],
+  'receipt actor foreign-key lookups are indexed'
+);
+
+SELECT has_index(
+  'public',
+  'spinner_live_state',
+  'spinner_live_state_updated_by_idx',
+  ARRAY['updated_by'],
+  'live-state moderator foreign-key lookups are indexed'
 );
 
 SELECT ok(
