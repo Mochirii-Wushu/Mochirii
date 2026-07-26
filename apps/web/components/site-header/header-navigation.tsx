@@ -8,6 +8,7 @@ export type HeaderAuthState = {
   signedIn: boolean;
   activeMember: boolean;
   moderator: boolean;
+  spinnerViewer: boolean;
 };
 
 export function navKeyFromPath(pathname: string | null) {
@@ -21,6 +22,7 @@ export function navItemHidden(item: NavItem, authState: HeaderAuthState) {
   if (item.auth === "signed-in") return !authState.signedIn;
   if (item.auth === "verified") return !authState.activeMember;
   if (item.auth === "moderator") return !authState.moderator;
+  if (item.auth === "spinner-viewer") return !authState.spinnerViewer;
   return false;
 }
 
@@ -47,6 +49,8 @@ export function SiteNavLink({
           ? { "data-auth-verified": true }
           : item.auth === "moderator"
             ? { "data-auth-moderator": true }
+            : item.auth === "spinner-viewer"
+              ? { "data-auth-spinner-viewer": true }
             : {};
 
   if (item.external) {

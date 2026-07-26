@@ -831,6 +831,32 @@ Public Gallery ordering uses one normalized timestamp model. Static curated imag
 
 ## Local Testing Flow
 
+## Private Live Spinner
+
+`20260726180052_add_private_live_spinner.sql` adds five service-only tables for
+the shared roster, idempotent moderator commands, immutable 30-day receipts,
+bounded delivery state, and five-minute moderator authorization cache. Every
+table has RLS enabled; browser roles have no direct table privileges. The
+migration also installs the bounded maintenance and daily retention schedules.
+
+The two spinner functions are:
+
+- `spinner-live-session`: validates exact viewer or controller authority,
+  serves viewer-safe snapshots, and applies idempotent moderator commands after
+  the result is selected and durably staged.
+- `reaper-spinner-dispatch`: claims only the semantic raffle outbox, posts the
+  same-origin live-page link to the exact allowlisted channel, and edits that
+  same message with the stored result. Mentions are disabled.
+
+The Website session endpoints send only the signed-in access token and requested
+mode for authorization. Participant names and winner information are not part
+of authentication requests. Browser clients cannot read service credentials or
+the dispatch authorization value. Configuration, empty-outbox validation,
+single-draw acceptance, duplicate reconciliation, and forward-fix recovery are
+documented in `../docs/operations/private-spinner.md`.
+
+## Local Testing Flow
+
 Recommended local checks:
 
 ```sh

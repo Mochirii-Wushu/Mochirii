@@ -41,6 +41,8 @@ expectExcludes("header auth hook", hook, 'from "./header-auth-runtime"');
   "readHeaderAuthState",
   "subscribeToHeaderAuthState",
   "readHeaderModeratorAccess",
+  "verifyMemberAccess",
+  "openHeaderSpinnerViewer",
 ].forEach((snippet) => expectIncludes("deferred header auth runtime", runtime, snippet));
 
 [

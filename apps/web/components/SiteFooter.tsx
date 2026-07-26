@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import type { HeaderAuthState } from "@/components/site-header/header-navigation";
+import { SpinnerViewerNavLink } from "@/components/site-header/spinner-viewer-nav-link";
 import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
+import { accountWorkflowLinks } from "@/lib/site-navigation";
 
 type FooterLink = {
   href: string;
@@ -32,9 +36,11 @@ const updateLinks = [
 function FooterColumn({
   title,
   links,
+  children,
 }: {
   title: string;
   links: FooterLink[];
+  children?: ReactNode;
 }) {
   return (
     <div className="footer-col">
@@ -50,11 +56,20 @@ function FooterColumn({
           </Link>
         )
       ))}
+      {children}
     </div>
   );
 }
 
-export function SiteFooter() {
+const spinnerViewerLink = accountWorkflowLinks.find((item) => item.auth === "spinner-viewer");
+
+export function SiteFooter({
+  authState,
+  launchSpinnerViewer,
+}: {
+  authState: HeaderAuthState;
+  launchSpinnerViewer: () => Promise<boolean>;
+}) {
   const year = new Date().getFullYear();
 
   return (
@@ -103,7 +118,16 @@ export function SiteFooter() {
           <div className="footer-cols" aria-label="Footer navigation">
             <FooterColumn title="Guild" links={guildLinks} />
             <FooterColumn title="Culture" links={cultureLinks} />
-            <FooterColumn title="Updates" links={updateLinks} />
+            <FooterColumn title="Updates" links={updateLinks}>
+              {spinnerViewerLink ? (
+                <SpinnerViewerNavLink
+                  item={spinnerViewerLink}
+                  className="footer-nav"
+                  hidden={!authState.spinnerViewer}
+                  launchSpinnerViewer={launchSpinnerViewer}
+                />
+              ) : null}
+            </FooterColumn>
           </div>
         </div>
 

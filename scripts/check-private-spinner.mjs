@@ -57,6 +57,9 @@ const files = {
   nextConfig: "apps/web/next.config.ts",
   robots: "apps/web/public/robots.txt",
   sitemap: "apps/web/public/sitemap.xml",
+  runbook: "docs/operations/private-spinner.md",
+  dispatcherReadme: "supabase/functions/reaper-spinner-dispatch/README.md",
+  supabaseConfig: "supabase/config.toml",
 };
 
 const source = Object.fromEntries(Object.entries(files).map(([key, file]) => [key, read(file)]));
@@ -219,6 +222,7 @@ for (const required of [
   'role="status"',
   'aria-live="polite"',
   'className="roster-panel roster-panel--viewer"',
+  'className="roster-scroll" tabIndex={0} role="region"',
   "SETTINGS_STORAGE_KEY",
   'useState<MotionMode>("reduced")',
   'animationName: "spinner-live-wheel-turn"',
@@ -246,6 +250,10 @@ for (const required of [
   'src="/assets/img/brand/emblem.webp"',
   "Mōchirīī-roster-",
   "Mōchirīī-receipt-",
+  "const celebrationWasActive = celebrationRef.current !== null;",
+  "if (!celebrationWasActive) return;",
+  'if (nextMode === "off") {',
+  "playCelebration();",
 ]) includes("moderator spinner", source.controller, required);
 excludes("moderator spinner", source.controller, "onTransitionEnd");
 excludes("moderator spinner", source.controller, "document.documentElement.requestFullscreen");
@@ -275,7 +283,12 @@ for (const snippet of [
   'pathname.startsWith("/spinner/")',
   "if (isIsolatedSpinnerPath(pathname)) return children;",
 ]) includes("route-aware site shell", source.siteShell, snippet);
-for (const snippet of ["<SiteHeader />", "<SiteFooter />", "<Analytics />", "<SpeedInsights />"]) {
+for (const snippet of [
+  "<SiteHeader {...auth} />",
+  '<SiteFooter authState={auth.authState} launchSpinnerViewer={auth.launchSpinnerViewer} />',
+  "<Analytics />",
+  "<SpeedInsights />",
+]) {
   includes("ordinary route site shell", source.siteShell, snippet);
   excludes("root layout", source.layout, snippet.slice(0, -3));
 }
@@ -291,6 +304,87 @@ for (const snippet of [
 includes("robots", source.robots, "Disallow: /spinner");
 excludes("sitemap", source.sitemap, "https://mochirii.com/spinner");
 
+const configuredFunctions = Array.from(
+  source.supabaseConfig.matchAll(/^\[functions\.([^\]]+)\]$/gmu),
+  (match) => match[1],
+);
+if (configuredFunctions.length !== 33) {
+  failures.push(
+    `spinner release inventory: expected 33 configured functions, found ${configuredFunctions.length}.`,
+  );
+}
+for (const functionName of ["spinner-live-session", "reaper-spinner-dispatch"]) {
+  if (!configuredFunctions.includes(functionName)) {
+    failures.push(`spinner release inventory: missing ${functionName}.`);
+  }
+}
+for (const functionName of configuredFunctions) {
+  includes(
+    "spinner operations runbook inventory",
+    source.runbook,
+    `\`${functionName}\``,
+  );
+}
+
+for (const snippet of [
+  "all 33 Edge Functions declared in `supabase/config.toml`",
+  "The Preview database is data-less by design",
+  "select count(*)::integer as total_rows",
+  '"claimed": 0',
+  '"results": []',
+  "one disposable two-name draw and no other channel mutation",
+  "reaper_spinner_dispatch_secret",
+  "REAPER_SPINNER_DISPATCH_SECRET",
+  "The migration is forward-only.",
+  "A protected revert or forward-fix merge invokes the same 33-function production integration",
+  "Do not retry blindly.",
+  "operator_reconciled_start",
+  "and phase = 'start_pending'",
+  "and discord_message_id is null",
+]) includes("spinner operations runbook", source.runbook, snippet);
+
+for (const snippet of [
+  "redeploys all 33 functions declared in",
+  "zero claimed, completed,",
+  "Never retry blindly",
+  "forward-fix migration",
+]) includes("spinner dispatcher runbook", source.dispatcherReadme, snippet);
+
+function withoutStaticImports(value) {
+  const kept = [];
+  let insideImport = false;
+  for (const line of value.split(/\r?\n/u)) {
+    if (!insideImport && /^\s*import(?:\s|\{|\*)/u.test(line)) {
+      insideImport = !line.trimEnd().endsWith(";");
+      continue;
+    }
+    if (insideImport) {
+      if (line.trimEnd().endsWith(";")) insideImport = false;
+      continue;
+    }
+    kept.push(line);
+  }
+  return kept
+    .join("\n")
+    // These are null/empty metadata boundary keys, not rendered brand copy.
+    .replace(/\b(?:apple|twitter)\s*:/giu, "");
+}
+
+// This guard covers product-facing spinner source only. Dependency, license,
+// provenance, and operations documents retain their accurate internal names.
+const forbiddenRenderedBrandPatterns = [
+  { label: "artificial-intelligence wording", pattern: /\b(?:AI|artificial intelligence)\b/iu },
+  { label: "agent wording", pattern: /\bagents?\b/iu },
+  { label: "assistant-product branding", pattern: /\b(?:OpenAI|ChatGPT|GPT(?:-\d+)?|Codex|Anthropic|Claude|Gemini|Copilot)\b/iu },
+  { label: "framework or runtime branding", pattern: /\b(?:Next\.js|React|Angular|Vue|Svelte|Node\.js|Deno|Bun)\b/iu },
+  { label: "source-hosting branding", pattern: /\b(?:GitHub|GitLab|Bitbucket)\b/iu },
+  { label: "hosting or data-provider branding", pattern: /\b(?:Vercel|Cloudflare|Netlify|Supabase|Firebase|MongoDB|PostgreSQL|AWS)\b/iu },
+  { label: "company branding", pattern: /\b(?:Google|Meta|Microsoft|Apple|Amazon|Shopify|Canva|Figma)\b/iu },
+  { label: "social or media branding", pattern: /\b(?:Discord|Slack|Instagram|Facebook|Twitter|TikTok|YouTube|Spotify|Pixelfed)\b/iu },
+  { label: "game branding", pattern: /\bWhere Winds Meet\b/iu },
+  { label: "implementation branding", pattern: /\b(?:Web Crypto|TypeScript|JavaScript|npm|pnpm|Docker)\b/iu },
+];
+
 for (const [label, renderedSource] of Object.entries({
   page: source.page,
   spinnerLayout: source.spinnerLayout,
@@ -301,18 +395,14 @@ for (const [label, renderedSource] of Object.entries({
   controller: source.controller,
   viewer: source.viewer,
 })) {
-  for (const forbidden of [
-    "OpenAI",
-    "ChatGPT",
-    "Cloudflare",
-    "Vercel",
-    "Discord",
-    "Where Winds Meet",
-    "GitHub",
-    "Supabase",
-    "Web Crypto",
-  ]) excludes(`rendered ${label}`, renderedSource, forbidden);
-  if (/<iframe\b/i.test(renderedSource)) failures.push(`rendered ${label}: iframe found.`);
+  const surfaceSource = withoutStaticImports(renderedSource);
+  for (const forbidden of forbiddenRenderedBrandPatterns) {
+    if (forbidden.pattern.test(surfaceSource)) {
+      failures.push(`rendered ${label}: must not include ${forbidden.label}`);
+    }
+  }
+  if (/https?:\/\//iu.test(surfaceSource)) failures.push(`rendered ${label}: external URL found.`);
+  if (/<iframe\b/iu.test(surfaceSource)) failures.push(`rendered ${label}: iframe found.`);
 }
 
 for (const [label, productionSource] of Object.entries({

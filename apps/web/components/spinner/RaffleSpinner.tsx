@@ -848,9 +848,15 @@ export function RaffleSpinner() {
               disabled={rosterLocked}
               onChange={(event) => {
                 const nextMode = event.target.value as MotionMode;
+                const celebrationWasActive = celebrationRef.current !== null;
                 motionModeRef.current = nextMode;
                 setMotionMode(nextMode);
-                if (nextMode === "off") stopCelebration();
+                if (!celebrationWasActive) return;
+                if (nextMode === "off") {
+                  stopCelebration();
+                  return;
+                }
+                playCelebration();
               }}
             >
               <option value="full">Full</option>

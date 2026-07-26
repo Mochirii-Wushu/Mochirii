@@ -11,20 +11,30 @@ import {
   useState,
 } from "react";
 import {
+  type HeaderAuthState,
   navItemHidden,
   navKeyFromPath,
   SiteNavLink,
 } from "./site-header/header-navigation";
-import { useHeaderAuthState } from "./site-header/use-header-auth-state";
+import { SpinnerViewerNavLink } from "./site-header/spinner-viewer-nav-link";
 import { useMobileMenuFocusTrap } from "./site-header/use-mobile-menu-focus-trap";
 
-export function SiteHeader() {
+export function SiteHeader({
+  authState,
+  ensureAuthLoaded,
+  ensureModeratorAccess,
+  launchSpinnerViewer,
+}: {
+  authState: HeaderAuthState;
+  ensureAuthLoaded: () => Promise<void>;
+  ensureModeratorAccess: () => Promise<void>;
+  launchSpinnerViewer: () => Promise<boolean>;
+}) {
   const pathname = usePathname();
   const activeKey = navKeyFromPath(pathname);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { authState, ensureAuthLoaded, ensureModeratorAccess } = useHeaderAuthState();
   const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileShellRef = useRef<HTMLDivElement>(null);
@@ -221,14 +231,26 @@ export function SiteHeader() {
                   data-dropdown-menu
                 >
                   {accountWorkflowLinks.map((item) => (
-                    <SiteNavLink
-                      className="nav-item"
-                      item={item}
-                      activeKey={activeKey}
-                      key={item.nav}
-                      onClick={() => setOpenGroup(null)}
-                      hidden={navItemHidden(item, authState)}
-                    />
+                    item.auth === "spinner-viewer" ? (
+                      <SpinnerViewerNavLink
+                        className="nav-item"
+                        item={item}
+                        activeKey={activeKey}
+                        key={item.nav}
+                        onNavigate={() => setOpenGroup(null)}
+                        hidden={navItemHidden(item, authState)}
+                        launchSpinnerViewer={launchSpinnerViewer}
+                      />
+                    ) : (
+                      <SiteNavLink
+                        className="nav-item"
+                        item={item}
+                        activeKey={activeKey}
+                        key={item.nav}
+                        onClick={() => setOpenGroup(null)}
+                        hidden={navItemHidden(item, authState)}
+                      />
+                    )
                   ))}
                 </div>
               </div>
@@ -364,14 +386,26 @@ export function SiteHeader() {
               <div className="mobile-group">
                 <div className="mobile-group-title">Account</div>
                 {accountWorkflowLinks.map((item) => (
-                  <SiteNavLink
-                    className="mobile-link"
-                    item={item}
-                    activeKey={activeKey}
-                    key={item.nav}
-                    onClick={() => closeMobile()}
-                    hidden={navItemHidden(item, authState)}
-                  />
+                  item.auth === "spinner-viewer" ? (
+                    <SpinnerViewerNavLink
+                      className="mobile-link"
+                      item={item}
+                      activeKey={activeKey}
+                      key={item.nav}
+                      onNavigate={() => closeMobile()}
+                      hidden={navItemHidden(item, authState)}
+                      launchSpinnerViewer={launchSpinnerViewer}
+                    />
+                  ) : (
+                    <SiteNavLink
+                      className="mobile-link"
+                      item={item}
+                      activeKey={activeKey}
+                      key={item.nav}
+                      onClick={() => closeMobile()}
+                      hidden={navItemHidden(item, authState)}
+                    />
+                  )
                 ))}
               </div>
             ) : null}

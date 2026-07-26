@@ -320,7 +320,7 @@ export function ViewerRaffleSpinner() {
             <span className="roster-count" aria-label={`${participants.length} names`}>{participants.length}</span>
           </div>
 
-          <div className="roster-scroll" role="region" aria-label="Numbered raffle participants">
+          <div className="roster-scroll" tabIndex={0} role="region" aria-label="Numbered raffle participants">
             {numberedParticipants.length ? (
               <ol className="participant-list">
                 {numberedParticipants.map((participant) => (

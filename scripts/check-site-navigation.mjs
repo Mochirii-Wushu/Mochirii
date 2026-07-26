@@ -9,6 +9,7 @@ const header = read("apps/web/components/SiteHeader.tsx");
 const headerAuthState = read("apps/web/components/site-header/use-header-auth-state.ts");
 const headerAuthRuntime = read("apps/web/components/site-header/header-auth-runtime.ts");
 const headerNavigation = read("apps/web/components/site-header/header-navigation.tsx");
+const spinnerViewerNavLink = read("apps/web/components/site-header/spinner-viewer-nav-link.tsx");
 const navSource = read("apps/web/lib/site-navigation.ts");
 const footer = read("apps/web/components/SiteFooter.tsx");
 const socialPanel = read("apps/web/components/member-workflow/SocialHubPanel.tsx");
@@ -30,7 +31,7 @@ const publicItems = [...extractItems(navGroups), ...extractItems(publicUtilityLi
 const accountItems = extractItems(accountWorkflowLinks);
 const footerItems = extractItems(footer);
 
-const forbiddenGroupHrefs = ["/members", "/social", "/gallery-submit", "/leader-dashboard"];
+const forbiddenGroupHrefs = ["/members", "/social", "/gallery-submit", "/leader-dashboard", "/spinner"];
 
 for (const href of forbiddenGroupHrefs) {
   if (navGroups.includes(`href: "${href}"`)) {
@@ -50,12 +51,25 @@ assertIncludes("SiteHeader account controls", header, `aria-controls="nav-menu-a
 assertIncludes("SiteHeader account controls", header, `aria-haspopup="true"`);
 assertIncludes("SiteHeader account controls", header, `aria-expanded={openGroup === "account"}`);
 assertIncludes("SiteHeader moderator auth marker", headerNavigation, `"data-auth-moderator"`);
+assertIncludes("SiteHeader spinner viewer auth marker", headerNavigation, `"data-auth-spinner-viewer"`);
+assertIncludes("SiteHeader spinner viewer gate", header, `item.auth === "spinner-viewer"`);
+assertIncludes("SiteHeader spinner viewer launcher", header, "<SpinnerViewerNavLink");
+assertIncludes("deferred header exact spinner eligibility", headerAuthRuntime, "verifyMemberAccess");
+assertIncludes("deferred header exact spinner eligibility", headerAuthRuntime, "memberAccess?.galleryEligible === true");
+assertIncludes("deferred header exact spinner eligibility", headerAuthRuntime, 'memberAccess.memberStatus === "active"');
+assertIncludes("spinner viewer link fail-closed render", spinnerViewerNavLink, "if (hidden) return null;");
+assertIncludes("spinner viewer link session-first navigation", spinnerViewerNavLink, "const opened = await launchSpinnerViewer();");
+assertIncludes("spinner viewer link session-first navigation", spinnerViewerNavLink, "if (opened) {");
+assertIncludes("spinner viewer link session-first navigation", spinnerViewerNavLink, "window.location.assign(item.href);");
 
 assertNotIncludes("SiteHeader public nav", publicUtilityLinks, `href: "/social", label: "Social"`);
 assertNotIncludes("SiteHeader public utility Social", publicUtilityLinks, `href: SOCIAL_HOST, label: "Social"`);
 assertNotIncludes("SiteHeader account Members", accountWorkflowLinks, `href: "/members"`);
 assertNotIncludes("SiteHeader account Social Status", accountWorkflowLinks, `href: "/social", label: "Social Status"`);
 assertNotIncludes("SiteHeader account Mochi Pets", accountWorkflowLinks, `href: "/games/mochi-pets"`);
+assertIncludes("SiteHeader account Spinner", accountWorkflowLinks, `href: "/spinner", label: "Watch Spinner", nav: "spinner", auth: "spinner-viewer"`);
+assertNotIncludes("SiteHeader public Spinner", navGroups, `href: "/spinner"`);
+assertNotIncludes("SiteHeader public utility Spinner", publicUtilityLinks, `href: "/spinner"`);
 
 for (const file of retiredMembersRouteFiles) {
   if (existsSync(resolve(root, file))) failures.push(`${file}: retired members route surface must stay removed.`);
@@ -66,6 +80,9 @@ assertIncludes("SiteFooter Social", footer, `href: SOCIAL_HOST, label: "Social",
 assertNotIncludes("SiteFooter", footer, "hidden:");
 assertNotIncludes("SiteFooter", footer, "data-auth-");
 assertNotIncludes("SiteFooter public Social", footer, `href: "/social", label: "Social"`);
+assertNotIncludes("SiteFooter signed-out HTML", footer, `href="/spinner"`);
+assertIncludes("SiteFooter authenticated Spinner", footer, "<SpinnerViewerNavLink");
+assertIncludes("SiteFooter authenticated Spinner", footer, "hidden={!authState.spinnerViewer}");
 
 assertIncludes("SocialHubPanel public URL config", socialPanel, `"@/lib/public-urls"`);
 assertIncludes("SocialHubPanel", socialPanel, `href={SOCIAL_HOST}`);
@@ -88,10 +105,12 @@ assertIncludes("social page intro", socialPage, "Signed-in members continue to M
 assertIncludes("current live state", currentState, "public website information surface");
 assertIncludes("integration runbook", runbook, "public information site");
 
-checkScenario("signed-out", { signedIn: false, activeMember: false, moderator: false });
-checkScenario("signed-in", { signedIn: true, activeMember: false, moderator: false });
-checkScenario("active-member", { signedIn: true, activeMember: true, moderator: false });
-checkScenario("moderator", { signedIn: true, activeMember: true, moderator: true });
+checkScenario("signed-out", { signedIn: false, activeMember: false, moderator: false, spinnerViewer: false });
+checkScenario("signed-in", { signedIn: true, activeMember: false, moderator: false, spinnerViewer: false });
+checkScenario("active-unverified", { signedIn: true, activeMember: true, moderator: false, spinnerViewer: false });
+checkScenario("manual-approved-viewer", { signedIn: true, activeMember: false, moderator: false, spinnerViewer: true });
+checkScenario("active-verified-viewer", { signedIn: true, activeMember: true, moderator: false, spinnerViewer: true });
+checkScenario("moderator", { signedIn: true, activeMember: true, moderator: true, spinnerViewer: true });
 checkFooter();
 
 if (failures.length) {
@@ -103,6 +122,7 @@ if (failures.length) {
 console.log("Site navigation OK.");
 console.log("- Header Social and the public Mochi Pets project page live in the Guild dropdown only.");
 console.log("- Footer Social points to social.mochirii.com.");
+console.log("- Watch Spinner appears only after exact active verified viewer authorization.");
 console.log("- /social redirects signed-in members and keeps signed-out help.");
 
 function read(file) {
@@ -146,12 +166,19 @@ function visible(item, state) {
   if (item.auth === "signed-in") return state.signedIn;
   if (item.auth === "verified") return state.activeMember;
   if (item.auth === "moderator") return state.moderator;
+  if (item.auth === "spinner-viewer") return state.spinnerViewer;
   return true;
 }
 
 function checkScenario(label, state) {
   const items = [...publicItems, ...(state.signedIn ? accountItems : [])].filter((item) => visible(item, state));
   checkDuplicates(`header ${label}`, items);
+
+  const spinnerLinks = items.filter((item) => item.href === "/spinner");
+  const expectedSpinnerLinks = state.signedIn && state.spinnerViewer ? 1 : 0;
+  if (spinnerLinks.length !== expectedSpinnerLinks) {
+    failures.push(`header ${label}: expected ${expectedSpinnerLinks} Spinner link, found ${spinnerLinks.length}.`);
+  }
 
   if (state.signedIn && items.some((item) => item.href === "/social" && item.label === "Social")) {
     failures.push(`header ${label}: /social must be labelled Social Status, not Social.`);

@@ -12,9 +12,12 @@ dispatcher credentials remain server-only.
 
 Provider changes remain approval-gated. During an approved Supabase release:
 
-1. Apply `20260726180052_add_private_live_spinner.sql` and deploy
-   `spinner-live-session` plus `reaper-spinner-dispatch` from the same validated
-   commit.
+1. Apply `20260726180052_add_private_live_spinner.sql` from the same validated
+   commit as `spinner-live-session` and `reaper-spinner-dispatch`. The connected
+   production integration redeploys all 33 functions declared in
+   `supabase/config.toml`, not only these two; require the exact-head Preview,
+   full inventory readback, and serialized release described in
+   `docs/operations/private-spinner.md`.
 2. Configure the Edge environment with `DISCORD_RAFFLE_CHANNEL_ID` set to
    `1468667003366674721`, the existing server-only `DISCORD_BOT_TOKEN`, and a
    new high-entropy `REAPER_SPINNER_DISPATCH_SECRET`. Never copy any of those
@@ -28,8 +31,11 @@ Provider changes remain approval-gated. During an approved Supabase release:
    transaction that creates an outbox row; network delivery begins only after
    commit and never delays the authoritative spin response. Do not put either
    value in migration SQL.
-4. Run the dispatcher once with an empty outbox, then perform one approved
-   preview draw. Verify that one message links to
+4. Prove `spinner_discord_outbox` has zero rows, then invoke the dispatcher once
+   with `{ "limit": 1 }`. Require HTTP 200 with zero claimed, completed,
+   retried, and failed rows plus an empty results array; query the table again
+   and require zero. This empty claim must not make a Discord request. Then
+   perform one approved production acceptance draw. Verify that one message links to
    `https://mochirii.com/spinner` and that the same message ID is edited after
    reveal. Confirm no users, roles, `@here`, or `@everyone` were mentioned.
 
@@ -41,7 +47,11 @@ missing message IDs, and exhausted attempts fail closed for operator review.
 The nonce is best-effort idempotency across the external message service and
 database, not an atomic exactly-once guarantee. If a post succeeds but its
 message ID cannot be recorded through a prolonged outage, reconcile that draw
-before retrying after the provider's nonce-deduplication window.
+before retrying. Pause delivery, inspect only the affected outbox metadata and
+target-channel time window, require one unambiguous Reaper-authored start
+message, and adopt that exact message ID through the guarded transaction in
+`docs/operations/private-spinner.md`. Never retry blindly or edit/delete an
+ambiguous candidate.
 
 Attempts interrupted after reservation but before the selected result is
 durably staged fail closed. An unstaged spin command is terminalized as
@@ -61,3 +71,11 @@ No function deployment, Vault or function-secret mutation, database push, or
 Discord request is performed by adding these source files. Applying the
 migration during an approved release creates the scheduler source described
 above.
+
+For an emergency delivery pause, first unset the Edge
+`REAPER_SPINNER_DISPATCH_SECRET` and then remove the Vault
+`reaper_spinner_dispatch_secret` entry. This makes already queued requests fail
+closed before stopping new scheduled requests, without touching the shared bot
+token or outbox evidence. Database changes remain forward-only; use a reviewed
+forward-fix migration instead of deleting tables, jobs, receipts, or migration
+history.

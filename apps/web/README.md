@@ -125,6 +125,7 @@ Current Next routes:
 - `/gallery-submit`
 - `/leader-dashboard`
 - `/games/mochi-pets`
+- `/spinner` (private, dynamic, and excluded from the ordinary site shell)
 
 Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
@@ -134,6 +135,24 @@ Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 build, tester gate, iframe, browser bridge, Supabase call, or game-runtime
 dependency. Keep status language factual and do not announce a release date
 until a reviewed build supports it.
+
+## Private Live Spinner
+
+`/spinner` is a dynamically authorized, no-store route. Signed-out, inactive,
+unverified, expired, or otherwise ineligible requests receive the opaque local
+404 before the authorized client stage is loaded. Active currently verified
+guild members may enter an exact viewer session; the viewer has no roster or
+draw controls and loads a separate lazy client bundle. Existing moderators may
+enter an exact controller session from the authorized Leader Dashboard and
+receive the roster, draw, receipt, import, export, replay, removal, and motion
+controls.
+
+The route intentionally omits the normal header, footer, background layer,
+analytics, and performance telemetry. Eligible viewers instead receive a
+session-first `Watch Spinner` link in the ordinary authenticated Account menu
+and footer. The page uses only Mōchirīī product wording and same-origin network
+destinations. See `../../docs/operations/private-spinner.md` for the live data,
+delivery, privacy, release, and recovery contract.
 
 ## Current Visual Shell Standard
 
