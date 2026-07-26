@@ -57,6 +57,7 @@ try {
       colorScheme: "dark",
       ignoreHTTPSErrors: false,
     });
+    await stubLocalAnalytics(context);
     for (const route of routes) {
       const result = await inspectRoute(context, route, viewport);
       matrix.push(result);
@@ -132,10 +133,18 @@ async function inspectRoute(context, route, viewport) {
   const page = await context.newPage();
   const consoleErrors = [];
   const pageErrors = [];
+  const failedRequests = [];
+  const httpErrors = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(safeText(message.text()));
   });
   page.on("pageerror", (error) => pageErrors.push(safeText(error.message)));
+  page.on("requestfailed", (request) => {
+    failedRequests.push(safeText(`${request.method()} ${request.url()} ${request.failure()?.errorText || "failed"}`));
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 400) httpErrors.push(safeText(`${response.status()} ${response.url()}`));
+  });
 
   const url = `${baseUrl}${route.route}`;
   let response = null;
@@ -257,6 +266,8 @@ async function inspectRoute(context, route, viewport) {
     keyboardTrap: trap,
     consoleErrors: consoleErrors.slice(0, 8),
     pageErrors: pageErrors.slice(0, 8),
+    failedRequests: failedRequests.slice(0, 8),
+    httpErrors: httpErrors.slice(0, 8),
     gotoError,
   };
 
@@ -310,6 +321,15 @@ async function inspectKeyboardTrap(page) {
 
 function validateResult(route, result) {
   const label = `${route.route} ${result.viewport}`;
+  const opaqueSpinnerCleanup = route.route === "/leader-dashboard"
+    && result.httpErrors.length > 0
+    && result.httpErrors.every((error) => /^404 https?:\/\/[^/]+\/spinner\/session$/.test(error))
+    && result.failedRequests.every((error) => /^DELETE https?:\/\/[^/]+\/spinner\/session net::ERR_ABORTED$/.test(error));
+  const consoleErrors = opaqueSpinnerCleanup
+    ? result.consoleErrors.filter((error) => error !== "Failed to load resource: the server responded with a status of 404 (Not Found)")
+    : result.consoleErrors;
+  const failedRequests = opaqueSpinnerCleanup ? [] : result.failedRequests;
+  const httpErrors = opaqueSpinnerCleanup ? [] : result.httpErrors;
   if (!result.statusOk) failures.push(`${label}: expected a successful route load, got status ${result.status}${result.gotoError ? ` (${result.gotoError})` : ""}.`);
   if (route.expectMain && !result.main) failures.push(`${label}: missing #main skip-link target.`);
   if (result.horizontalOverflow) failures.push(`${label}: horizontal overflow (${result.widths.document}px document vs ${result.widths.viewport}px viewport).`);
@@ -334,8 +354,24 @@ function validateResult(route, result) {
   if (route.expectAlert && result.alerts === 0) warnings.push(`${label}: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.`);
   if (!result.reducedMotion.matches) failures.push(`${label}: reduced-motion media query did not match in Playwright context.`);
   if (result.reducedMotion.animated.length) warnings.push(`${label}: reduced-motion context still reported ${result.reducedMotion.animated.length} animated or transitioning sampled elements.`);
+  if (opaqueSpinnerCleanup) warnings.push(`${label}: signed-out spinner-session cleanup returned the intentional opaque 404 response.`);
   for (const error of result.pageErrors) failures.push(`${label}: page error: ${error}`);
-  for (const error of result.consoleErrors) warnings.push(`${label}: console error observed: ${error}`);
+  for (const error of consoleErrors) failures.push(`${label}: console error: ${error}`);
+  for (const error of failedRequests) failures.push(`${label}: failed request: ${error}`);
+  for (const error of httpErrors) failures.push(`${label}: HTTP error: ${error}`);
+}
+
+async function stubLocalAnalytics(context) {
+  await context.route("**/_vercel/insights/script.js", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/javascript; charset=utf-8",
+    body: "",
+  }));
+  await context.route("**/_vercel/speed-insights/script.js", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/javascript; charset=utf-8",
+    body: "",
+  }));
 }
 
 function renderMarkdown(report) {

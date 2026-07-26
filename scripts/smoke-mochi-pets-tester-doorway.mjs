@@ -9,6 +9,7 @@ const ENDPOINT_PATHS = new Set([
   "/games/mochi-pets/member-access",
   "/games/mochi-pets/tester-login",
 ]);
+const MEMBER_VERIFIER_PATH = "/functions/v1/verify-member-access";
 
 if (allowSelfSignedLocalhost) {
   const smokeUrl = new URL(baseUrl);
@@ -179,7 +180,8 @@ async function verifyDoorway(browser, browserName, viewport) {
   });
   await stubAnalytics(context);
   const page = await context.newPage();
-  const errors = installDiagnostics(page);
+  const diagnostics = { allowVerifierFailure: false };
+  const errors = installDiagnostics(page, diagnostics);
   let privateRequestCount = 0;
   page.on("request", (request) => {
     if (ENDPOINT_PATHS.has(new URL(request.url()).pathname)) privateRequestCount += 1;
@@ -270,10 +272,16 @@ async function verifyDoorway(browser, browserName, viewport) {
     await waitForHeading(page, "Enter the tester space");
     assert(!(await hasSessionCookie(context)), `${contextLabel} logout did not expire the tester cookie`);
 
-    await setBrowserSession(page, syntheticToken("provider-error", nextMemberId()));
-    await reloadDoorway(page);
-    await waitForHeading(page, "We couldn’t confirm your access");
-    assert(await page.locator('input[name="testerPassword"]').count() === 0, `${contextLabel} provider failure exposed the passcode form`);
+    diagnostics.allowVerifierFailure = true;
+    try {
+      await setBrowserSession(page, syntheticToken("provider-error", nextMemberId()));
+      await reloadDoorway(page);
+      await waitForHeading(page, "We couldn’t confirm your access");
+      await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => null);
+      assert(await page.locator('input[name="testerPassword"]').count() === 0, `${contextLabel} provider failure exposed the passcode form`);
+    } finally {
+      diagnostics.allowVerifierFailure = false;
+    }
 
     await page.addStyleTag({ content: "html{font-size:200%!important}" });
     await assertResponsiveLayout(page, `${contextLabel} at 200% text`);
@@ -516,17 +524,19 @@ async function stubAnalytics(context) {
   await context.route("**/_vercel/speed-insights/script.js", (route) => route.fulfill({ status: 204, body: "" }));
 }
 
-function installDiagnostics(page) {
+function installDiagnostics(page, diagnostics = { allowVerifierFailure: false }) {
   const errors = [];
   page.on("console", (message) => {
     if (message.type() !== "error") return;
     const location = message.location().url;
+    if (location && diagnostics.allowVerifierFailure && new URL(location).pathname === MEMBER_VERIFIER_PATH) return;
     if (location && ENDPOINT_PATHS.has(new URL(location).pathname)) return;
     errors.push(`console:${message.text()}`);
   });
   page.on("pageerror", (error) => {
     const expectedWebKitPrefetchCancellation = /^\/localhost:\d+\/[^ ?]*\?_rsc=[^ ]+ due to access control checks\.$/.test(error.message);
-    if (expectedWebKitPrefetchCancellation) return;
+    const expectedWebKitAuthCancellation = /^\/localhost:\d+\/auth\/v1\/user due to access control checks\.$/.test(error.message);
+    if (expectedWebKitPrefetchCancellation || expectedWebKitAuthCancellation) return;
     errors.push(`page:${error.message}`);
   });
   page.on("requestfailed", (request) => {
@@ -535,6 +545,7 @@ function installDiagnostics(page) {
     const failure = request.failure()?.errorText || "failed";
     const sameOriginNavigationCancellation = url.origin === new URL(baseUrl).origin && request.method() === "GET";
     const expectedCancellation = path === "/games/mochi-pets/member-access"
+      || path === MEMBER_VERIFIER_PATH
       || path === "/auth/v1/user"
       || path === "/rest/v1/member_profiles"
       || sameOriginNavigationCancellation;
@@ -544,6 +555,7 @@ function installDiagnostics(page) {
   page.on("response", (response) => {
     if (response.status() < 400) return;
     const path = new URL(response.url()).pathname;
+    if (diagnostics.allowVerifierFailure && path === MEMBER_VERIFIER_PATH && response.status() === 500) return;
     if (ENDPOINT_PATHS.has(path) && [400, 401, 403, 429, 503].includes(response.status())) return;
     errors.push(`http:${response.status()} ${response.url()}`);
   });
