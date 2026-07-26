@@ -1,9 +1,9 @@
 # Supabase Edge Dependency Refresh Approval Packet
 
 Status: Approved by the release owner on 2026-07-25 for the exact PR #511
-deployment. Execution remains blocked pending the final exact-head preflight,
-protected-branch checks, and separate authorization for unavoidable Supabase
-redeployments caused by prerequisite `main` merges.
+deployment, then expanded on 2026-07-26 UTC to cover the unavoidable
+31-function redeployments caused by each named follow-up `main` merge. Execution
+remains gated by the final exact-head preflight and protected-branch checks.
 
 This packet is public and contains no credentials, provider tokens, customer
 data, or private provider exports.
@@ -32,9 +32,11 @@ The connected Supabase production integration deploys every Edge Function
 declared in `supabase/config.toml` on each push or merge to the production
 branch, even when that commit has no `supabase/` diff. Production readback for
 PR #514 confirmed a fresh 31-function deployment from a documentation-only
-merge. Therefore prerequisite and later Website merges each cause another
-31-function redeployment. The release owner's approval above names PR #511
-only; it does not silently authorize those additional provider writes.
+merge. The release owner explicitly authorized the same 31-function integration
+redeployment after PR #509, PR #510, PR #512, the reviewed Playwright 1.62
+replacement PR, PR #508, and the final release-record PR. Those deployments
+must remain serialized and integration-driven; no manual deployment is
+authorized.
 
 The retained Mochi Pets functions remain quarantined provider endpoints during
 this dependency-only redeployment. This packet does not authorize exposing,
@@ -120,7 +122,7 @@ database state, schedules, Auth, Storage, or function settings as a workaround.
 Escalate before any manual provider deployment or emergency configuration
 change.
 
-## Exact approval requested
+## Exact approvals recorded
 
 > Approve squash-merging the exact reviewed head of Mochirii PR #511 and allow
 > the existing Supabase GitHub integration to perform the dependency-only
@@ -133,3 +135,13 @@ change.
 
 Approval of another task, a general request to update tools, or a green local
 check is not a substitute for this exact deployment approval.
+
+The release owner subsequently approved revising the sequence to merge PR #511
+first after a successful exact-head, non-skipped Supabase Preview. The same
+approval authorizes the existing protected-main integration to redeploy exactly
+the 31 functions in this packet after each named follow-up merge: PR #509, PR
+#510, PR #512, the reviewed Playwright 1.62 replacement PR, PR #508, and the
+final release-record PR. The existing 19/12 JWT configuration must remain
+unchanged. Migrations, schema or data, secrets, Auth, Data API exposure,
+Storage, schedules, branch settings, function enablement, and all other provider
+configuration remain outside scope. Manual deployment remains prohibited.

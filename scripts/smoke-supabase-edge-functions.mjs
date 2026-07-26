@@ -247,8 +247,8 @@ async function checkSecretProtectedRejects(config, target, label, extraHeaders =
   });
 
   assert(
-    result.status === 401 || result.status === 403 || result.status === 500,
-    `${target.name} ${label} expected fail-closed 401/403/500 response, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
+    result.status === 401 || result.status === 403,
+    `${target.name} ${label} expected 401/403 fail-closed response, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
   );
 
   assert(result.ok === false, `${target.name} ${label} unexpectedly succeeded.`);

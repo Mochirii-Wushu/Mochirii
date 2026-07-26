@@ -254,6 +254,13 @@ assertNotMatches(
   "live contract failures must not be downgraded to a successful skip.",
 );
 
+assertNotMatches(
+  "Supabase Edge Function smoke",
+  supabaseSmoke,
+  /result\.status\s*===\s*500/,
+  "runtime failures must not pass as healthy fail-closed responses.",
+);
+
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
   failures.push(
     `supabase/config.toml: expected ${expectedUnauthenticatedFunctions.length} verify_jwt=false functions, found ${verifyJwtFalseFunctions.length}: ${verifyJwtFalseFunctions.join(", ")}`,
