@@ -173,6 +173,7 @@ async function verifyDoorway(browser, browserName, viewport) {
     );
     await settleDeferredShell(page);
     await assertLockedLayout(page, browserName, viewport);
+    await assertMochiriiOnlyGameCopy(page, browserName, viewport);
 
     if (expectUnconfigured) {
       await page.locator("input[name=testerPassword]").fill("test-only-value");
@@ -209,6 +210,15 @@ async function verifyDoorway(browser, browserName, viewport) {
     await waitForStyledShell();
     let connection = page.locator('[data-mochi-pets-connection-state="not-connected"]');
     assert(await connection.isVisible(), `${label(browserName, viewport)} waiting room is not connected`);
+    assert(
+      await page.getByText("Mochi Pets will begin as a new game for this page and the Mochirii iPhone app.", { exact: false }).isVisible(),
+      `${label(browserName, viewport)} unlocked page is missing the browser and iPhone plan`,
+    );
+    assert(
+      await page.getByText("The retired prototype and its progress are not being restored.", { exact: true }).isVisible(),
+      `${label(browserName, viewport)} unlocked page is missing the fresh-start boundary`,
+    );
+    await assertMochiriiOnlyGameCopy(page, browserName, viewport);
     assert((await page.locator("iframe").count()) === 0, `${label(browserName, viewport)} rendered an iframe`);
     await assertNoHorizontalOverflow(page, browserName, viewport);
 
@@ -465,6 +475,14 @@ async function assertNoHorizontalOverflow(page, browserName, viewport) {
       `${label(browserName, viewport)} has ${overflow}px horizontal overflow: ${JSON.stringify(offenders)}`,
     );
   }
+}
+
+async function assertMochiriiOnlyGameCopy(page, browserName, viewport) {
+  const copy = await page.locator(".mochi-game-shell").innerText();
+  assert(
+    !/\b(?:GitHub|Supabase|Vercel|Fly\.io|DigitalOcean|Unity|Pixelfed|iOS|backend|repository|artifact|runtime|protocol|contract|integration)\b/i.test(copy),
+    `${label(browserName, viewport)} game page exposes provider or system language`,
+  );
 }
 
 function readArg(name, fallback) {

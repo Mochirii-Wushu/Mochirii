@@ -7,7 +7,7 @@ import { hasMochiPetsTesterSession } from "@/lib/mochi-pets/tester-session";
 
 export const metadata: Metadata = {
   title: "Mochi Pets",
-  description: "Private Mochirii tester doorway for the fresh Mochi Pets Unity project.",
+  description: "Private Mochirii tester doorway for a future Mochi Pets game on the web and in the Mochirii iPhone app.",
   robots: {
     index: false,
     follow: false,

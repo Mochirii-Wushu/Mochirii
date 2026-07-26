@@ -42,6 +42,7 @@ for (const file of retiredFiles) {
 const page = read(paths.page);
 assertIncludes("page", page, [
   'canonical: "/games/mochi-pets"',
+  "Private Mochirii tester doorway for a future Mochi Pets game on the web and in the Mochirii iPhone app.",
   "index: false",
   "follow: false",
   'dynamic = "force-dynamic"',
@@ -114,6 +115,8 @@ assertIncludes("tester gate", gate, [
   'name="testerPassword"',
   'role="alert"',
   "/assets/img/brand/emblem.webp",
+  "Mochirii member access across the browser game and iPhone app.",
+  "Guild conversation through Mochirii Social.",
   "No playable build yet",
 ]);
 
@@ -121,8 +124,10 @@ const waitingRoom = read(paths.waitingRoom);
 assertIncludes("waiting room", waitingRoom, [
   'action="/games/mochi-pets/tester-logout"',
   "data-mochi-pets-connection-state",
-  "Not connected",
-  "No previous game source",
+  "Not playable yet",
+  "Mochirii member access across both",
+  "conversation continuing through Mochirii Social",
+  "The retired prototype and its progress are not being restored.",
   "/assets/img/brand/emblem.webp",
 ]);
 
@@ -219,13 +224,18 @@ if (/NEXT_PUBLIC_MOCHI_PETS_(?:TESTER_)?(?:PASSWORD|SESSION_SECRET)/i.test(env))
 }
 
 const visibleCopy = `${gate}\n${waitingRoom}`;
+const literalVisibleText = [...visibleCopy.matchAll(/>([^<{}]*)</gs)]
+  .map((match) => match[1])
+  .join(" ");
 for (const [label, pattern] of [
   ["retired alpha claim", /\bclosed\s+alpha\b/i],
   ["retired shared-room claim", /\bshared\s+(?:3D\s+)?room\b/i],
   ["retired pet claim", /\bLirabao\b/i],
-  ["provider branding", /\b(?:Supabase|Vercel|Fly\.io|DigitalOcean)\b/i],
+  ["provider branding", /\b(?:GitHub|Supabase|Vercel|Fly\.io|DigitalOcean|Unity|Pixelfed)\b/i],
+  ["platform jargon", /\biOS\b/],
+  ["system jargon", /\b(?:backend|repository|artifact|runtime|protocol|contract|integration)\b/i],
 ]) {
-  if (pattern.test(visibleCopy)) failures.push(`customer-facing copy contains ${label}`);
+  if (pattern.test(literalVisibleText)) failures.push(`customer-facing copy contains ${label}`);
 }
 
 if (failures.length) {

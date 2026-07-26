@@ -32,7 +32,7 @@ export function MochiPetsTesterPasswordGate({ error }: { error: TesterGateError 
           </div>
           <h1 id="mochi-pets-title">Mochi Pets</h1>
           <p id={descriptionId}>
-            The private tester doorway is ready while the next Mochi Pets game begins later from a fresh Unity project.
+            A fresh Mochi Pets game is planned for this browser page and the Mochirii iPhone app. Development and play have not launched.
           </p>
         </div>
         <dl aria-label="Mochi Pets project status">
@@ -41,12 +41,12 @@ export function MochiPetsTesterPasswordGate({ error }: { error: TesterGateError 
             <dd>Tester password</dd>
           </div>
           <div>
-            <dt>Game build</dt>
-            <dd>Not connected</dd>
+            <dt>Play status</dt>
+            <dd>Not available yet</dd>
           </div>
           <div>
-            <dt>Project</dt>
-            <dd>Fresh restart</dd>
+            <dt>Planned for</dt>
+            <dd>Browser + iPhone</dd>
           </div>
         </dl>
       </header>
@@ -90,24 +90,24 @@ export function MochiPetsTesterPasswordGate({ error }: { error: TesterGateError 
           <ul>
             <li>The Mochirii tester-password doorway and private eight-hour browser session.</li>
             <li>A protected waiting area for approved guild testers.</li>
-            <li>A versioned connection point for the new game repository.</li>
+            <li>A fresh-start plan for the browser and Mochirii iPhone app.</li>
           </ul>
         </section>
         <section>
-          <h2>What comes next</h2>
+          <h2>What is planned</h2>
           <ul>
-            <li>A first reviewed build from the fresh Mochi Pets Unity project.</li>
-            <li>A reviewed game build with its own security and data contract.</li>
-            <li>Preview testing before any build is connected here.</li>
+            <li>A new Mochi Pets game built from scratch.</li>
+            <li>Mochirii member access across the browser game and iPhone app.</li>
+            <li>Guild conversation through Mochirii Social.</li>
           </ul>
         </section>
       </aside>
 
       <div className="mochi-game-preview-contract" aria-label="Mochi Pets launch boundaries">
         <span>Private tester doorway</span>
-        <span>New Unity foundation</span>
+        <span>Fresh game plan</span>
+        <span>Browser + iPhone</span>
         <span>No playable build yet</span>
-        <span>No purchases</span>
       </div>
     </section>
   );

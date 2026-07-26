@@ -21,7 +21,9 @@ export function MochiPetsTesterWaitingRoom({ connection }: { connection: MochiPe
             <p className="eyebrow">Mōchirīī Tester Space</p>
           </div>
           <h1 id="mochi-pets-title">Mochi Pets</h1>
-          <p>You have access to the private tester space. The new game build has not been connected yet.</p>
+          <p>
+            Tester access is active for this page. A fresh Mochi Pets game is planned for the browser and Mochirii iPhone app, but neither version is playable yet.
+          </p>
         </div>
         <form className="mochi-lock-form" method="post" action="/games/mochi-pets/tester-logout">
           <button className="hero-cta" type="submit">Lock tester space</button>
@@ -33,46 +35,46 @@ export function MochiPetsTesterWaitingRoom({ connection }: { connection: MochiPe
         aria-labelledby="mochi-pets-connection-title"
         data-mochi-pets-connection-state={connection.status}
       >
-        <p className="mochi-gate-kicker">Game connection</p>
-        <h2 id="mochi-pets-connection-title">Waiting for the new project</h2>
+        <p className="mochi-gate-kicker">Future game</p>
+        <h2 id="mochi-pets-connection-title">A fresh start for browser and iPhone</h2>
         <p>
-          This doorway is ready to receive a reviewed release from the fresh Mochi Pets Unity project.
-          Until then, it stays safely disconnected and does not call the retired prototype or its backend.
+          Mochi Pets will begin as a new game for this page and the Mochirii iPhone app. Guild members are planned to use Mochirii member access across both, with conversation continuing through Mochirii Social. Development and play have not launched.
         </p>
         <dl className="mochi-connection-facts">
           <div>
-            <dt>Connection status</dt>
-            <dd>{connection.status === "not-connected" ? "Not connected" : connection.status}</dd>
+            <dt>Play status</dt>
+            <dd>{connection.status === "not-connected" ? "Not playable yet" : "Available to testers"}</dd>
           </div>
           <div>
-            <dt>Contract version</dt>
-            <dd>{connection.protocolVersion}</dd>
+            <dt>Fresh start</dt>
+            <dd>Planned</dd>
           </div>
           <div>
-            <dt>Fresh source project</dt>
-            <dd>{connection.repository.sourceState === "scaffolded" ? "Prepared" : "Not prepared"}</dd>
+            <dt>Browser game</dt>
+            <dd>Not playable yet</dd>
           </div>
           <div>
-            <dt>Web build</dt>
-            <dd>{connection.platforms.web.artifact ?? "Not available"}</dd>
+            <dt>iPhone game</dt>
+            <dd>Not playable yet</dd>
           </div>
           <div>
-            <dt>iOS game</dt>
-            <dd>{connection.platforms.ios.artifact ?? "Not available"}</dd>
+            <dt>Member access</dt>
+            <dd>Planned for both</dd>
           </div>
           <div>
-            <dt>Guild connection</dt>
-            <dd>{connection.social.identityState === "not-connected" ? "Not connected" : "Connected"}</dd>
+            <dt>Guild conversation</dt>
+            <dd>Planned through Mochirii Social</dd>
           </div>
         </dl>
       </section>
 
-      <aside className="mochi-game-panel mochi-waiting-notes" aria-label="Mochi Pets clean restart boundaries">
-        <h2>Clean restart preserved</h2>
+      <aside className="mochi-game-panel mochi-waiting-notes" aria-label="Mochi Pets fresh-start plan">
+        <h2>Starting fresh</h2>
         <ul>
-          <li>No previous game source, saved progress, runtime, or game credential is connected.</li>
-          <li>The fresh Unity source project is prepared, with no playable artifact connected.</li>
-          <li>Game authentication and data access will be reviewed separately from this tester doorway.</li>
+          <li>The retired prototype and its progress are not being restored.</li>
+          <li>The browser and iPhone versions will come from the same new Mochi Pets game.</li>
+          <li>Mochirii member access is planned across both versions, and guild conversation will stay in Mochirii Social.</li>
+          <li>Game development has not begun, and no playable release or iPhone game connection is available.</li>
         </ul>
       </aside>
     </section>
