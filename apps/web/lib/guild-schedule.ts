@@ -287,6 +287,7 @@ function firstParagraph(value: unknown): string {
 export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now = new Date()): WebsiteEventCard[] {
   const timezone = scheduleTimezoneLabel(schedule);
   const monthlyCards: WebsiteEventCard[] = Object.values(schedule.monthly || {})
+    .filter((item) => item.id !== "monthly-raffle")
     .flatMap((item) => {
       const date = monthlyScheduleDate(schedule, item.id, "", now);
       if (!item.id || !item.title || !date) return [];
@@ -308,7 +309,7 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
         timeText,
         timezone,
         location: item.location,
-        href: item.id === "monthly-raffle" ? "/raffles" : item.location,
+        href: item.location,
         summary: firstParagraph(item.description) || timeText,
         image: item.discordCoverImage || "",
         discordCoverImage: item.discordCoverImage,

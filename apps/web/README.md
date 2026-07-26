@@ -112,7 +112,8 @@ Current Next routes:
 - `/tome`
 - `/events`
 - `/announcements`
-- `/raffles`
+- `/raffle`
+- `/raffle/rules`
 - `/gallery`
 - `/spotlight`
 - `/spotify`
@@ -175,7 +176,7 @@ Visual-only shell releases should verify Home and all shared routes at `360`, `3
 
 - Public/static routes migrated into App Router pages:
   `/join`, `/ranks`, `/leaders`, `/tome`, `/events`, `/announcements`,
-  `/raffles`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
+  `/raffle`, `/raffle/rules`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
 - Route content continues to render from the copied JSON files in `public/data/`.
 - Public client-side interactions migrated where needed: gallery filters/query links/lightbox, event filters, and Spotify filtering.
 - Legacy `.html` redirects for migrated pages are verified in `next.config.ts`.

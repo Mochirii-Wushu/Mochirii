@@ -30,7 +30,7 @@ const cultureLinks = [
 const updateLinks = [
   { href: "/announcements", label: "Announcements" },
   { href: "/events", label: "Events" },
-  { href: "/raffles", label: "Raffles" },
+  { href: "/raffle", label: "Raffle" },
 ] satisfies FooterLink[];
 
 function FooterColumn({

@@ -9,7 +9,8 @@ type PageKey =
   | "tome"
   | "events"
   | "announcements"
-  | "raffles"
+  | "raffle"
+  | "raffleRules"
   | "gallery"
   | "spotlight"
   | "spotify"
@@ -67,11 +68,18 @@ const pageMeta: Record<
     path: "/announcements",
     image: "/assets/img/announcements/hero.webp",
   },
-  raffles: {
-    title: "Mōchirīī Raffles • Where Winds Meet Guild",
+  raffle: {
+    title: "Mochirii Monthly Raffle Status",
     description:
-      "Monthly Mōchirīī raffle notes, rules, prize timing, and small thank-you draws for active members.",
-    path: "/raffles",
+      "Current availability for the Mochirii Monthly Raffle. No drawing is open, entries are closed, and no promotion is active.",
+    path: "/raffle",
+    image: "/assets/img/raffles/hero.webp",
+  },
+  raffleRules: {
+    title: "Mochirii Raffle Rules Status",
+    description:
+      "Current rules status for the Mochirii Monthly Raffle. No drawing is open and no official rules are currently in effect.",
+    path: "/raffle/rules",
     image: "/assets/img/raffles/hero.webp",
   },
   gallery: {

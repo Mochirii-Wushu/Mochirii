@@ -68,8 +68,7 @@ assert(events.meta?.timezoneLabel === expected.displayTimezone, "the Events page
 for (const item of events.upcoming || []) {
   assert(item.timezone === expected.displayTimezone, `events.${item.scheduleId || "unknown"}.timezone must use the website label.`);
 }
-assert(raffles.meta?.timezoneLabel === expected.displayTimezone, "the Raffles page must use the website timezone label.");
-assert(raffles.thisMonth?.timezone === expected.displayTimezone, "the current raffle must use the website timezone label.");
+assert(raffles.availabilityState === "closed", "the Raffle page must remain closed when no drawing is active.");
 
 const siteMetadata = read("apps/web/lib/site-metadata.ts");
 assertIncludes("site metadata", siteMetadata, `SITE_DESCRIPTION =\n  ${JSON.stringify(expected.description)}`);

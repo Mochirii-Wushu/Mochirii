@@ -70,7 +70,8 @@ const routeContracts = {
   "apps/web/app/join/page.tsx": ["public-join.css", "public-content-shared.css"],
   "apps/web/app/events/page.tsx": ["public-events.css", "public-side-pages.css", "public-content-shared.css", "public-gallery.css"],
   "apps/web/app/announcements/page.tsx": ["public-side-pages.css", "public-content-shared.css"],
-  "apps/web/app/raffles/page.tsx": ["public-events.css", "public-side-pages.css", "public-content-shared.css"],
+  "apps/web/app/raffle/page.tsx": ["public-side-pages.css", "public-content-shared.css"],
+  "apps/web/app/raffle/rules/page.tsx": ["public-side-pages.css", "public-content-shared.css"],
   "apps/web/app/spotify/page.tsx": ["public-side-pages.css", "public-content-shared.css", "public-gallery.css"],
   "apps/web/app/spotlight/page.tsx": ["public-side-pages.css", "public-content-shared.css", "public-profiles.css", "public-profile-cards.css"],
   "apps/web/app/gallery/page.tsx": ["public-content-shared.css", "public-gallery.css", "shell-lightbox.css"],
@@ -96,7 +97,8 @@ for (const [file, styles] of Object.entries(routeContracts)) {
 for (const file of [
   "apps/web/app/announcements/page.tsx",
   "apps/web/app/events/page.tsx",
-  "apps/web/app/raffles/page.tsx",
+  "apps/web/app/raffle/page.tsx",
+  "apps/web/app/raffle/rules/page.tsx",
 ]) {
   expectExcludes(file, read(file), "export const revalidate");
 }

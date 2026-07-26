@@ -1,55 +1,40 @@
 {
+  "programName": "Mochirii Monthly Raffle",
+  "availabilityState": "closed",
   "meta": {
-    "kicker": "Monthly raffle",
-    "title": "Mōchirīī Monthly Raffles",
-    "intro": "Once a month we run a raffle for active members as thanks for being part of the family. Sign up in-game, stay recently active & you're in the draw.",
-    "frequency": "Monthly",
-    "timezoneLabel": "Singapore Time (UTC+8)",
-    "badges": ["Sign up in guild menu", "Recent activity required", "Winners announced in game & Discord."],
+    "kicker": "Monthly member raffle",
+    "title": "Mochirii Monthly Raffle",
+    "intro": "There is no current Mochirii raffle drawing. Entries are closed and no promotion is active.",
+    "statusLabel": "ENTRIES CLOSED",
+    "frequency": "No current drawing",
+    "badges": ["Entries closed", "No active promotion", "No purchase necessary"],
     "hero": {
       "image": "./assets/img/raffles/hero.webp",
       "atmosphere": ""
     }
   },
-
-  "how": [
-    "Sign up for the monthly raffle event in the guild menu.",
-    "Stay active close to event time so the roster reflects your presence.",
-    "Leadership spins a pretty board with all your names & the winner is shown on Discord."
+  "currentStatus": [
+    "The Mochirii Monthly Raffle is Mochirii's member-drawing program.",
+    "There is no current drawing.",
+    "Entries are closed and no promotion is active."
   ],
-
-  "rules": [
-    "Eligible members logged in within the previous 2 days of event time.",
-    "Member must be signed up on the monthly event in the guild menu.",
-    "One entry per member unless an announcement specifies bonus entries.",
-    "Winners must claim within the window listed in the Discord post."
+  "howToConfirm": [
+    "This website is the official source for the current Mochirii raffle status.",
+    "An open drawing is identified by an OPEN status and current rules on this website.",
+    "When this page says entries are closed, there is no active Mochirii raffle."
   ],
-
-  "thisMonth": {
-    "scheduleId": "monthly-raffle",
-    "date": "2026-02-20",
-    "time": "9:30 PM",
-    "timezone": "Singapore Time (UTC+8)",
-    "prizes": [
-      "Exclusive in-game items (as available)",
-      "Guild-funded reward bundle",
-      "Special mention in the next spotlight"
-    ],
-    "notes": "Exact prizes may shift with availability."
-  },
-
-  "links": [
-    {
-      "label": "Raffle channel",
-      "href": "https://discord.com/invite/dPafqMwWPK"
-    },
-    {
-      "label": "Events page",
-      "href": "./events.html"
-    }
+  "memberSafety": [
+    "Mochirii raffles follow a no-purchase-necessary entry principle.",
+    "Never pay to enter a Mochirii raffle.",
+    "Treat any raffle message that conflicts with this website as unofficial."
   ],
-
-  "note": [
-    "If you win & need help with timing or claiming, let leadership know. We will do our best to help."
-  ]
+  "rulesStatus": {
+    "title": "No current drawing",
+    "summary": "No official raffle rules are currently in effect because no drawing is open.",
+    "details": [
+      "There is no current drawing.",
+      "Entries are closed.",
+      "No promotion is active."
+    ]
+  }
 }

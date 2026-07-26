@@ -82,7 +82,7 @@ const htmlRouteMap = new Map<string, string>([
   ["tome.html", "/tome"],
   ["events.html", "/events"],
   ["announcements.html", "/announcements"],
-  ["raffles.html", "/raffles"],
+  ["raffles.html", "/raffle"],
   ["recruitment.html", "/recruitment"],
   ["auth.html", "/auth"],
   ["account.html", "/account"],

@@ -371,11 +371,3 @@ body[data-page="events"] .badge-row > span > a:focus-visible{
     0 0 0 3px rgba(218,181,94,.20),
     0 0 0 5px rgba(48,178,143,.12);
 }
-
-body[data-page="raffles"] #rafflesLinks > span > a{
-  display:inline-flex;
-  align-items:center;
-  min-height:44px;
-  margin:-6px -10px;
-  padding:6px 10px;
-}

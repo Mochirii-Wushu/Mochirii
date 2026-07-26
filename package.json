@@ -65,6 +65,7 @@
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:private-spinner": "node scripts/check-private-spinner.mjs",
     "check:live-spinner-backend": "node scripts/check-live-spinner-backend.mjs",
+    "check:raffle-closed-state": "node scripts/check-raffle-closed-state.mjs",
     "check:recruitment-audio-player": "node scripts/check-recruitment-audio-player.mjs",
     "check:refs": "node scripts/check-refs.mjs",
     "check:security-hardening": "node scripts/check-security-hardening.mjs",

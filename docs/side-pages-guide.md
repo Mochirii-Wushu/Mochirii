@@ -5,14 +5,14 @@
 This guide covers the side pages:
 
 - Announcements
-- Raffles
+- Raffle (`/raffle`)
 - Spotify
 - Spotlight
 
 Current page roles:
 
 - Announcements: updates, notices, timing, and short public bulletins.
-- Raffles: raffle information, prize/chance/fairness details where supported, and participation notes.
+- Raffle: a complete public closed-state page and static rules status while no drawing or promotion is active.
 - Spotify: listening-room mood, music/embed presentation, and atmosphere through sound.
 - Spotlight: member appreciation, short human story, and featured moment or person where supported.
 
@@ -31,7 +31,7 @@ Side pages should stay page-specific and should not duplicate:
 Current data sources:
 
 - Announcements: `apps/web/public/data/announcements.json`
-- Raffles: `apps/web/public/data/raffles.json`
+- Raffle: `apps/web/public/data/raffles.json`
 - Spotify: `apps/web/public/data/spotify.json`
 - Spotlight: `apps/web/public/data/spotlight.json`
 - Rolling dates and weekly schedule timing: `apps/web/public/data/guild-schedule.json`
@@ -48,7 +48,7 @@ For each file:
 Current data shape summary:
 
 - Announcements: `meta` plus `items[]`.
-- Raffles: `meta`, `how[]`, `rules[]`, `thisMonth`, `links[]`, and `note[]`.
+- Raffle: `programName`, `availabilityState`, `meta`, `currentStatus[]`, `howToConfirm[]`, `memberSafety[]`, and `rulesStatus`.
 - Spotify: `intro` plus `items[]`.
 - Spotlight: `hero` plus `spotlight`.
 
@@ -94,51 +94,49 @@ Tone lane: word, notice, bulletin, update, timing, news.
 
 Do not turn Announcements into long Recruitment copy, an Events schedule replacement, Tome rules, or Gallery memories.
 
-## 4. Raffles Rules
+## 4. Raffle Status Rules
 
 Current supported fields:
 
+- `programName`
+- `availabilityState`
 - `meta.kicker`
 - `meta.title`
 - `meta.intro`
+- `meta.statusLabel`
 - `meta.frequency`
-- `meta.timezoneLabel`
 - `meta.badges[]`
 - `meta.hero.image`
 - `meta.hero.atmosphere`
-- `how[]`
-- `rules[]`
-- `thisMonth.date`
-- `thisMonth.time`
-- `thisMonth.timezone`
-- `thisMonth.prizes[]`
-- `thisMonth.notes`
-- `links[].label`
-- `links[].href`
-- `note[]`
+- `currentStatus[]`
+- `howToConfirm[]`
+- `memberSafety[]`
+- `rulesStatus.title`
+- `rulesStatus.summary`
+- `rulesStatus.details[]`
 
 How to add or update a raffle safely:
 
 - Edit `apps/web/public/data/raffles.json`.
-- Keep `how[]`, `rules[]`, and `note[]` as plain text arrays.
-- Keep prize and draw details clear enough to understand without extra interpretation.
-- Use `thisMonth` for current raffle timing, prize, and note details.
-- If `thisMonth.scheduleId` is present, the live Next Raffles page derives the visible date from `apps/web/public/data/guild-schedule.json`.
-- Use `links[]` only for supported label/href links.
-- Use relative links for site pages.
-- Use full `https://` links for external destinations.
+- Keep `availabilityState` equal to `closed` whenever no drawing is active.
+- Keep `currentStatus[]`, `howToConfirm[]`, `memberSafety[]`, and `rulesStatus.details[]` as plain text arrays.
+- State clearly that entries are closed, no promotion is active, and no entry method exists.
+- Keep the no-purchase notice visible even though no cycle is open.
+- Do not publish a sponsor, eligible locations, dates, rewards, official rules, entry controls, external links, or provider names before approval.
+- Do not add a client data request, authentication, form, API route, database call, schedule, or provider dependency to this closed-state surface.
 
 Observed rendering rules:
 
-- `how[]` and `note[]` render as prose paragraphs.
-- `rules[]` and `thisMonth.prizes[]` render as lists.
-- `thisMonth.date`, `thisMonth.time`, and `thisMonth.timezone` join into one meta line.
-- External `http` links receive `target="_blank"` and `rel="noopener noreferrer"`.
-- Load failures render an unable-to-load message in the how-it-works area.
+- `/raffle` is a static Server Component with a clear closed status and no dead or nonfunctional control.
+- `/raffle/rules` is a static status page, not an official-rules archive or an offer.
+- `/raffles` and `/raffles.html` permanently redirect to `/raffle`.
+- Public raffle data contains no external links or provider fields.
+- The website event-card renderer filters the inactive `monthly-raffle` schedule item so Events cannot advertise a drawing while the raffle is closed.
+- `apps/web/public/data/guild-schedule.json` remains a provider-consumed schedule source and is not rewritten by a public closed-state change. Its historical raffle record can move behind a nonpublic boundary only through a separately reviewed provider-safe migration.
 
-Tone lane: draw, ticket, prize, fairness, thanks, chance.
+Tone lane: status, availability, official source, member safety.
 
-Rules should remain plain and clear. Raffles should not duplicate Events schedule, Join onboarding, Recruitment philosophy, or Announcements beyond short notice context.
+The status should remain plain and clear. The Raffle page should not duplicate Events, Join, Recruitment, or Announcements beyond a short closed-state notice.
 
 ## 5. Spotify Rules
 
@@ -233,7 +231,7 @@ Avoid duplicating Leaders/Twills/Gallery roles. Spotlight should not become a co
 
 - Internal links must resolve.
 - External links must follow existing safe-link conventions.
-- Raffles external links currently receive `target="_blank"` and `rel="noopener noreferrer"` through `raffles.js`.
+- Raffle public sources do not contain external links.
 - Image paths must resolve.
 - Alt text should match visible content.
 - Decorative or hidden atmosphere images should remain empty-alt and hidden.
@@ -254,7 +252,7 @@ utils.js -> supabase.js -> site.js -> page-specific script
 Current side-page script order:
 
 - `announcements.html`: `./utils.js` -> `./supabase.js` -> `./site.js` -> `./announcements.js`
-- `raffles.html`: `./utils.js` -> `./supabase.js` -> `./site.js` -> `./raffles.js`
+- `/raffle` and `/raffle/rules`: static Next.js Server Components with no page-specific browser script.
 - `spotify.html`: `./utils.js` -> `./supabase.js` -> `./site.js` -> `./spotify.js`
 - `spotlight.html`: `./utils.js` -> `./supabase.js` -> `./site.js` -> `./spotlight.js`
 
@@ -299,6 +297,7 @@ node scripts/check-json.mjs
 node scripts/check-js.mjs
 node scripts/check-refs.mjs
 node scripts/check-assets.mjs
+npm run check:raffle-closed-state
 npm run check:production
 ```
 
@@ -307,7 +306,9 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 ## 12. Manual Side Pages Smoke Checklist
 
 - `/announcements.html` loads.
-- `/raffles.html` loads.
+- `/raffle` loads and says `Entries closed`, `No active promotion`, and `No purchase necessary`.
+- `/raffle/rules` shows that no active rules or entry method exist.
+- `/raffles` and `/raffles.html` permanently redirect to `/raffle`.
 - `/spotify.html` loads.
 - `/spotlight.html` loads.
 - Header/footer render.
