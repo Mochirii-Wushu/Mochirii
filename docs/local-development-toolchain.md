@@ -78,8 +78,10 @@ longer part of local development.
 - Lighthouse audits use the local package instead of `npx --yes` so the audit
   version is locked.
 - Social image validation uses Docker Buildx `v0.35.0`, digest-pinned BuildKit
-  `v0.31.2`, and Syft `v1.49.0` in GitHub Actions. These workflow-managed
-  versions are validated as part of the repository's action-security contract.
+  `v0.31.2`, and the official Syft `v1.49.0` container pinned by digest in
+  GitHub Actions. These workflow-managed versions are validated as part of the
+  repository's action-security contract without downloading an installer
+  script at runtime.
 - Hosted jobs use `ubuntu-24.04` to keep the runner OS family explicit while
   receiving GitHub's maintained image updates. The exact image and installed
   software versions remain recorded in each job's `Set up job` log.

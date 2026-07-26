@@ -340,13 +340,20 @@ requireIncludes(".env.docker.example", envDockerExample, [
 const dockerCompose = read("docker-compose.yml");
 requireIncludes("docker-compose.yml", dockerCompose, [
   "mariadb:11.4@sha256:a794d9eb009e20de605858a11f32f63b4075cbd197c650436f0e3b457e4caed7",
-  "redis:7-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+  "redis:7-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2",
   "MARIADB_DATABASE: ${DB_DATABASE}",
   "condition: service_healthy",
   'MAX_PHOTO_SIZE: "92160"',
   'MAX_AVATAR_SIZE: "92160"',
   'PHP_POST_MAX_SIZE: "100M"',
   'PHP_UPLOAD_MAX_FILE_SIZE: "95M"',
+]);
+const dockerComposeProduction = read("docker-compose.production.yml");
+requireIncludes("docker-compose.production.yml", dockerComposeProduction, [
+  "mariadb:11.4@sha256:a794d9eb009e20de605858a11f32f63b4075cbd197c650436f0e3b457e4caed7",
+  "redis:7-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2",
+  "MARIADB_DATABASE: ${DB_DATABASE}",
+  "condition: service_healthy",
 ]);
 if (dockerCompose.includes("mysql:9")) {
   failures.push("docker-compose.yml must not restore the incompatible MySQL 9 runtime");
@@ -418,8 +425,11 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c",
   "version: v0.35.0",
   "image=moby/buildkit:v0.31.2@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec",
-  "anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610",
-  "syft-version: v1.49.0",
+  "docker run --rm --network=none",
+  "SYFT_CHECK_FOR_APP_UPDATE=false",
+  "ghcr.io/anchore/syft:v1.49.0@sha256:13b53ebabe3d215268c90cf8fb9b875f0183908245f376fd4b3a2cb69d21d484",
+  "-v /var/run/docker.sock:/var/run/docker.sock",
+  "spdx-json=/work/pixelfed-sbom.spdx.json",
   "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
   "actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6",
 ]);

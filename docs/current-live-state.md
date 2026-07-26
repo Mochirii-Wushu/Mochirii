@@ -107,17 +107,19 @@ This is the short source-of-truth index for the current Mochirii production post
 
 ## GitHub And Release Flow
 
-- `main` is protected by required checks including static validation, Next validation, CodeQL, Vercel, and Supabase Preview.
-- The active `Primary Rules` ruleset requires `validate`, `validate-next`, `CodeQL`, `Vercel`, and `Supabase Preview`.
-- The active `Pull Request Review Gate` ruleset requires one approval and resolved review threads.
+- `main` is protected with strict current-head enforcement for `validate`,
+  `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
+  `Supabase Preview`.
+- The active `Pull Request Review Gate` ruleset requires resolved review
+  threads and currently requires zero approving reviews.
 - Use one scoped branch per task and one PR per release packet.
 - Do not edit `main` directly.
 - Release workflows use reviewed full-SHA action references, read-only minimum
   permissions, checkout with credential persistence disabled, the maintained
   `ubuntu-24.04` runner family, Node `22.23.1`, Deno `2.9.4`, Docker Buildx
-  `v0.35.0`, digest-pinned BuildKit `v0.31.2`, and Syft `v1.49.0`.
-  Repository-level `sha_pinning_required` remains a separate approval-gated
-  setting; do not change it as part of ordinary release work.
+  `v0.35.0`, digest-pinned BuildKit `v0.31.2`, and the official Syft `v1.49.0`
+  container pinned by digest. Repository-level full-SHA action pinning is
+  enabled; changes to that setting remain separately approval-gated.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
 - Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
 - ESLint 10 and TypeScript 7 remain intentionally deferred in issue #443.

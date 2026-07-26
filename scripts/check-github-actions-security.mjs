@@ -9,6 +9,7 @@ const workflowFiles = readdirSync(workflowsDir)
 const failures = [];
 const fullSha = /^[0-9a-f]{40}$/;
 const buildkitImage = "moby/buildkit:v0.31.2@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec";
+const syftImage = "ghcr.io/anchore/syft:v1.49.0@sha256:13b53ebabe3d215268c90cf8fb9b875f0183908245f376fd4b3a2cb69d21d484";
 const alwaysReportingWorkflows = new Map([
   ["validate-shopify-theme.yml", "validate-theme"],
   ["validate-social.yml", "validate-social"],
@@ -50,7 +51,7 @@ for (const name of workflowFiles) {
   const text = readFileSync(resolve(workflowsDir, name), "utf8").replaceAll("\r\n", "\n");
   const lines = text.split("\n");
   let buildxStepCount = 0;
-  let sbomStepCount = 0;
+  const syftImageCount = lines.filter((line) => line.trim() === `${syftImage} \\`).length;
   const jobs = workflowJobs(lines);
   totalJobCount += jobs.length;
 
@@ -126,19 +127,16 @@ for (const name of workflowFiles) {
         failures.push(`${file}:${index + 1}: setup-buildx must install Buildx v0.35.0 with the approved digest-pinned BuildKit v0.31.2 image.`);
       }
     }
-    if (action === "anchore/sbom-action") {
-      sbomStepCount += 1;
-      if (!/^\s+syft-version:\s*v1\.49\.0\s*$/m.test(block)) {
-        failures.push(`${file}:${index + 1}: sbom-action must install exact Syft v1.49.0.`);
-      }
+    if (action.startsWith("anchore/sbom-action")) {
+      failures.push(`${file}:${index + 1}: SBOM generation must use the approved digest-pinned Syft container instead of a runtime installer action.`);
     }
   });
 
   if (name === "validate-social.yml" && buildxStepCount !== 2) {
     failures.push(`${file}: must contain exactly two pinned setup-buildx steps (production-image and publish-social-image).`);
   }
-  if (name === "validate-social.yml" && sbomStepCount !== 2) {
-    failures.push(`${file}: must contain exactly two pinned sbom-action steps (production-image and publish-social-image).`);
+  if (name === "validate-social.yml" && syftImageCount !== 2) {
+    failures.push(`${file}: must contain exactly two approved digest-pinned Syft container invocations (production-image and publish-social-image).`);
   }
 }
 
