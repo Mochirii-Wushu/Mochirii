@@ -81,8 +81,9 @@
     },
     "overrides": {
         "body-parser": "1.20.6",
-        "brace-expansion": "1.1.16",
+        "brace-expansion": "5.0.8",
         "fast-uri": "3.1.4",
+        "postcss": "$postcss",
         "svgo": "2.8.3",
         "webpackbar": "^7.0.0"
     }
