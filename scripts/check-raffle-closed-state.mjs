@@ -121,7 +121,8 @@ if (failures.length) {
 
 console.log("Raffle closed-state contract OK.");
 console.log("- /raffle and /raffle/rules are static, Mochirii-only, and fail closed.");
-console.log("- Entry, claim, administration, backend, reward, schedule, and provider surfaces are absent.");
+console.log("- Entry, claim, administration, reward, and provider controls are absent from both pages.");
+console.log("- The separately governed monthly schedule record is filtered from rendered Website event cards.");
 
 function read(file) {
   const absolute = resolve(root, file);

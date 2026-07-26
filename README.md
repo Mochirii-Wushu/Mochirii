@@ -17,8 +17,9 @@ traffic, queues, schedules, media, authentication, and backups do not require a
 local workstation to remain online.
 
 The former Mochi Pets prototype and connected repository are retired.
-`/games/mochi-pets` is a noindex, Website-hosted tester doorway and disconnected
-waiting room. The fresh private game source is now
+`/games/mochi-pets` is a public, indexable Website page with a private tester
+doorway available only when its complete access configuration is present. The
+fresh private game source is now
 `Mochirii-Wushu/Mochirii-Pets`; it does not restore the prototype and no playable
 artifact is connected. See `docs/mochi-pets-future-project.md`.
 
