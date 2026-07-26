@@ -2,7 +2,7 @@ export const SPINNER_SESSION_COOKIE = "mochirii_spinner_access_v1";
 export const SPINNER_SESSION_TTL_SECONDS = 10 * 60;
 export const SPINNER_SESSION_HEARTBEAT_MS = 5 * 60 * 1000;
 // Keep the complete Set-Cookie line comfortably below common 4 KiB limits.
-export const MAX_SPINNER_ACCESS_TOKEN_LENGTH = 3_400;
+export const MAX_SPINNER_BEARER_LENGTH = 3_400;
 
 export type SpinnerAccessMode = "controller" | "viewer";
 
@@ -45,7 +45,7 @@ function decodeJwtPart(value: string): Record<string, unknown> | null {
 }
 
 export function parseJwtExpiryMs(token: string): number | null {
-  if (!token || token.length > MAX_SPINNER_ACCESS_TOKEN_LENGTH) return null;
+  if (!token || token.length > MAX_SPINNER_BEARER_LENGTH) return null;
   const parts = token.split(".");
   if (parts.length !== 3 || parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))) return null;
   if (!decodeJwtPart(parts[0])) return null;
@@ -57,9 +57,9 @@ export function parseJwtExpiryMs(token: string): number | null {
 
 export function readBearerToken(value: string | null | undefined): string | null {
   const header = String(value || "");
-  if (header.length > MAX_SPINNER_ACCESS_TOKEN_LENGTH + 16) return null;
+  if (header.length > MAX_SPINNER_BEARER_LENGTH + 16) return null;
   const match = header.match(/^Bearer\s+([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i);
-  if (!match || match[1].length > MAX_SPINNER_ACCESS_TOKEN_LENGTH) return null;
+  if (!match || match[1].length > MAX_SPINNER_BEARER_LENGTH) return null;
   return parseJwtExpiryMs(match[1]) ? match[1] : null;
 }
 
@@ -73,7 +73,7 @@ export function decodeSpinnerSessionCookie(value: string | null | undefined): {
   mode: SpinnerAccessMode;
 } | null {
   const raw = String(value || "");
-  if (raw.length > MAX_SPINNER_ACCESS_TOKEN_LENGTH + 2) return null;
+  if (raw.length > MAX_SPINNER_BEARER_LENGTH + 2) return null;
   const prefix = raw.slice(0, 2);
   const accessToken = raw.slice(2);
   if ((prefix !== "c:" && prefix !== "v:") || !parseJwtExpiryMs(accessToken)) return null;

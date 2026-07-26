@@ -33,7 +33,7 @@ export type SpinnerOutboxDependencies = {
 
 const SNOWFLAKE_PATTERN = /^\d{16,22}$/;
 export const SPINNER_DISPATCH_MAX_BODY_BYTES = 1_024;
-const SPINNER_DISPATCH_MAX_SECRET_BYTES = 1_024;
+const SPINNER_DISPATCH_MAX_CREDENTIAL_BYTES = 1_024;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -195,8 +195,8 @@ export async function constantTimeSecretEqual(
   if (
     providedBytes.length === 0 ||
     expectedBytes.length === 0 ||
-    providedBytes.length > SPINNER_DISPATCH_MAX_SECRET_BYTES ||
-    expectedBytes.length > SPINNER_DISPATCH_MAX_SECRET_BYTES
+    providedBytes.length > SPINNER_DISPATCH_MAX_CREDENTIAL_BYTES ||
+    expectedBytes.length > SPINNER_DISPATCH_MAX_CREDENTIAL_BYTES
   ) {
     return false;
   }

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  MAX_SPINNER_ACCESS_TOKEN_LENGTH,
+  MAX_SPINNER_BEARER_LENGTH,
   SPINNER_SESSION_TTL_SECONDS,
   decodeSpinnerSessionCookie,
   encodeSpinnerSessionCookie,
@@ -45,7 +45,7 @@ test("JWT expiry parsing accepts a bounded well-formed token", () => {
 test("bearer parsing rejects malformed and oversized values", () => {
   assert.equal(readBearerToken("Basic abc"), null);
   assert.equal(readBearerToken("Bearer not-a-jwt"), null);
-  assert.equal(readBearerToken(`Bearer ${"a".repeat(MAX_SPINNER_ACCESS_TOKEN_LENGTH + 1)}`), null);
+  assert.equal(readBearerToken(`Bearer ${"a".repeat(MAX_SPINNER_BEARER_LENGTH + 1)}`), null);
   assert.equal(parseJwtExpiryMs("a.b.c"), null);
 });
 
