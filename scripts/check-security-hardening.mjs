@@ -19,6 +19,8 @@ const files = {
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
   reaperSignature: "supabase/functions/_shared/discord-signature.ts",
   reaperMemberSync: "supabase/functions/reaper-discord-member-sync/index.ts",
+  reaperSpinnerDispatch: "supabase/functions/reaper-spinner-dispatch/index.ts",
+  spinnerDiscordOutbox: "supabase/functions/_shared/spinner-discord-outbox.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   mochiPetsAlphaShared: "supabase/functions/_shared/mochi-pets-alpha.ts",
@@ -86,6 +88,9 @@ const reaper = read(files.reaper);
 const reaperSignature = read(files.reaperSignature);
 const reaperSecuritySource = [reaper, reaperSignature].join("\n");
 const reaperMemberSync = read(files.reaperMemberSync);
+const reaperSpinnerDispatch = read(files.reaperSpinnerDispatch);
+const spinnerDiscordOutbox = read(files.spinnerDiscordOutbox);
+const reaperSpinnerSecuritySource = `${reaperSpinnerDispatch}\n${spinnerDiscordOutbox}`;
 const approvedFeed = read(files.approvedFeed);
 const visibleProfileCards = read(files.visibleProfileCards);
 const mochiPetsAlphaShared = read(files.mochiPetsAlphaShared);
@@ -206,6 +211,7 @@ const expectedUnauthenticatedFunctions = [
   "list-visible-profile-cards",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
+  "reaper-spinner-dispatch",
   "reaper-discord-member-sync",
   "send-vote-reminder",
   "send-member-spotlight-poll",
@@ -293,6 +299,16 @@ const unauthenticatedFunctionGuardSpecs = {
     source: reaperSecuritySource,
     kind: "Discord signature verified",
     snippets: ["x-signature-ed25519", "x-signature-timestamp", "verifyDiscordSignature(req, rawBody, publicKey)"],
+  },
+  "reaper-spinner-dispatch": {
+    source: reaperSpinnerSecuritySource,
+    kind: "shared-secret Reaper spinner outbox",
+    snippets: [
+      "REAPER_SPINNER_DISPATCH_SECRET",
+      "x-mochirii-reaper-spinner-secret",
+      "constantTimeSecretEqual(spinnerDispatcherSecret(req), dispatchSecret)",
+      "DISCORD_RAFFLE_CHANNEL_ID",
+    ],
   },
   "reaper-discord-member-sync": {
     source: reaperMemberSync,

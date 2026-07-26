@@ -6,6 +6,7 @@ import {
   asStringArray,
   defaultDisplayName,
   discordAvatarUrl,
+  profileMatchesTrustedDiscordIdentity,
   providerSubject,
   resolveDiscordIdentity,
   safeString,
@@ -458,9 +459,15 @@ async function handleRequest(req: Request): Promise<Response> {
     return jsonResponse({ ok: false, message: error instanceof Error ? error.message : "Identity sync failed." }, 500);
   }
 
-  const discordUserId = resolveDiscordIdentity(user, profile, syncedIdentities);
+  const discordUserId = resolveDiscordIdentity(user, syncedIdentities);
+  const profileDiscordUserId = safeString(profile?.discord_user_id, 40);
   let verificationMessage: string | null = null;
-  if (discordUserId && (body.refreshDiscord === true || !profile?.discord_checked_at)) {
+  if (
+    discordUserId &&
+    (body.refreshDiscord === true ||
+      !profile?.discord_checked_at ||
+      profileDiscordUserId !== discordUserId)
+  ) {
     try {
       const discordResult = await updateDiscordProfile(adminClient, userId, user, profile, discordUserId, now);
       verificationMessage = discordResult.message || null;
@@ -547,7 +554,16 @@ async function handleRequest(req: Request): Promise<Response> {
 
   const latestProfile = profileData as JsonRecord | null;
   const memberStatus = safeString(latestProfile?.member_status, 40) || "pending";
-  const discordVerified = memberStatus === "active" && recentDiscordVerification(latestProfile);
+  const trustedDiscordUserId = resolveDiscordIdentity(
+    user,
+    (Array.isArray(identityRows) ? identityRows : []) as SyncedIdentity[],
+  );
+  const discordVerified = memberStatus === "active" &&
+    profileMatchesTrustedDiscordIdentity(
+      latestProfile?.discord_user_id,
+      trustedDiscordUserId,
+    ) &&
+    recentDiscordVerification(latestProfile);
   const manualApproved = memberStatus === "active" && approvedManualVerification(verification);
   const galleryEligible = discordVerified || manualApproved;
   const method = discordVerified

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /spinner
 
 Sitemap: https://mochirii.com/sitemap.xml

@@ -44,6 +44,22 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
+const spinnerContentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "media-src 'self' data: blob:",
+  "connect-src 'self'",
+  "worker-src 'self' blob:",
+  "upgrade-insecure-requests",
+].join("; ");
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
@@ -76,6 +92,7 @@ const securityHeaders = [
 ] as const;
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   outputFileTracingRoot: workspaceRoot,
   turbopack: {
     root: workspaceRoot,
@@ -85,6 +102,27 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [...securityHeaders],
+      },
+      {
+        source: "/spinner/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: spinnerContentSecurityPolicy,
+          },
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0",
+          },
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet, noimageindex",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "no-referrer",
+          },
+        ],
       },
     ];
   },

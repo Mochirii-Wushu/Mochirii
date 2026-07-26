@@ -70,7 +70,7 @@ const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
 const galleryTypes = read("apps/web/lib/supabase/types.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
 const homePage = read("apps/web/app/page.tsx");
-const rootLayout = read("apps/web/app/layout.tsx");
+const routeShell = read("apps/web/components/SiteRouteShell.tsx");
 const sharedPublicComponents = read("apps/web/components/public-pages/common.tsx");
 const siteHeader = read("apps/web/components/SiteHeader.tsx");
 const siteFooter = read("apps/web/components/SiteFooter.tsx");
@@ -143,7 +143,7 @@ assert(homePriorityCount === 1, `Home page should have exactly one priority imag
   "fill",
   'sizes="100vw"',
   'loading="eager"',
-].forEach((snippet) => assertIncludes("responsive global background", rootLayout, snippet));
+].forEach((snippet) => assertIncludes("responsive global background", routeShell, snippet));
 assertIncludes("responsive global background styles", tokenStyles, ".bg-photo__image{");
 assertIncludes("responsive global background styles", tokenStyles, "object-fit:cover;");
 assert(!tokenStyles.includes('background:url("/assets/bg/wuxia-bg.webp")'), "Next background must not retain the full-size CSS request.");

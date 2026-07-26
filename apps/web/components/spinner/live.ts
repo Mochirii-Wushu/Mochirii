@@ -1,0 +1,337 @@
+import {
+  MAX_PARTICIPANTS,
+  parseStoredReceipts,
+  parseStoredRoster,
+  type DrawReceiptV1,
+  type MotionMode,
+  type ParticipantV1,
+} from "./raffle.ts";
+
+export const LIVE_SPINNER_POLL_MS = 2_000;
+export const SPINNER_SESSION_INVALID_EVENT = "mochirii:spinner-session-invalid";
+export const PENDING_SPINNER_COMMAND_STORAGE_KEY = "mochirii.raffle.pending-spin.v1";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export type SpinnerLivePhase = "idle" | "spinning" | "revealed";
+
+export interface SpinnerLiveSnapshotV1 {
+  version: 1;
+  sessionId: string;
+  revision: number;
+  phase: SpinnerLivePhase;
+  participants: ParticipantV1[];
+  startedAt: string | null;
+  revealAt: string | null;
+  durationMs: number;
+  startRotation: number;
+  finalRotation: number;
+  selectedIndex: number | null;
+  winner: ParticipantV1 | null;
+  drawId: string | null;
+  updatedAt: string;
+}
+
+export interface SpinnerLiveResultV1 {
+  snapshot: SpinnerLiveSnapshotV1;
+  receipt: DrawReceiptV1 | null;
+  commandId: string | null;
+  serverNow: string;
+}
+
+export interface SpinnerLiveTimeline {
+  startDelayMs: number;
+  revealDelayMs: number;
+  motionDurationMs: number;
+  motionDelayMs: number;
+}
+
+export interface SpinnerLiveMotionRotations {
+  startRotation: number;
+  finalRotation: number;
+}
+
+export interface PendingSpinnerCommandV1 {
+  version: 1;
+  commandId: string;
+  expectedRevision: number;
+  createdAt: string;
+}
+
+export class SpinnerLiveRequestError extends Error {
+  readonly status: number;
+  readonly code: string | null;
+
+  constructor(message: string, status: number, code: string | null = null) {
+    super(message);
+    this.name = "SpinnerLiveRequestError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
+export function isTerminalSpinnerSpinFailure(error: unknown): error is SpinnerLiveRequestError {
+  return error instanceof SpinnerLiveRequestError && error.code === "spin_result_not_durable";
+}
+
+export function spinnerSkipStateForDraw({
+  skipRequested,
+  skippedDrawId,
+  skippedCommandId,
+  resultCommandId,
+  drawId,
+}: {
+  skipRequested: boolean;
+  skippedDrawId: string | null;
+  skippedCommandId: string | null;
+  resultCommandId: string | null;
+  drawId: string;
+}): { skipRequested: boolean; skippedDrawId: string | null; skippedCommandId: string | null } {
+  const recoveredPendingDraw = skippedCommandId !== null && skippedCommandId === resultCommandId;
+  const appliesToDraw = skipRequested && (skippedDrawId === drawId || recoveredPendingDraw);
+  return appliesToDraw
+    ? { skipRequested: true, skippedDrawId: drawId, skippedCommandId: null }
+    : { skipRequested: false, skippedDrawId: null, skippedCommandId: null };
+}
+
+export type SpinnerLiveCommand =
+  | {
+      action: "set_roster";
+      commandId: string;
+      expectedRevision: number;
+      participants: ParticipantV1[];
+    }
+  | {
+      action: "spin";
+      commandId: string;
+      expectedRevision: number;
+    }
+  | {
+      action: "reset";
+      commandId: string;
+      expectedRevision: number;
+    };
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function isoOrNull(value: unknown): string | null {
+  if (value == null) return null;
+  if (typeof value !== "string" || !Number.isFinite(Date.parse(value))) return null;
+  return new Date(value).toISOString();
+}
+
+function integer(value: unknown, minimum = 0): number | null {
+  return Number.isSafeInteger(value) && Number(value) >= minimum ? Number(value) : null;
+}
+
+function participant(value: unknown): ParticipantV1 | null {
+  const roster = parseStoredRoster({ version: 1, participants: [value] });
+  return roster.participants.length === 1 ? roster.participants[0] : null;
+}
+
+export function parseSpinnerLiveSnapshot(value: unknown): SpinnerLiveSnapshotV1 | null {
+  const source = record(value);
+  if (!source || source.version !== 1) return null;
+  const rawParticipants = source.participants;
+  if (!Array.isArray(rawParticipants) || rawParticipants.length > MAX_PARTICIPANTS) return null;
+  const sessionId = typeof source.sessionId === "string" ? source.sessionId : "";
+  const revision = integer(source.revision);
+  const phase = source.phase;
+  const roster = parseStoredRoster({ version: 1, participants: rawParticipants });
+  if (roster.participants.length !== rawParticipants.length) return null;
+  const startedAt = isoOrNull(source.startedAt);
+  const revealAt = isoOrNull(source.revealAt);
+  const durationMs = integer(source.durationMs);
+  const startRotation = typeof source.startRotation === "number" && Number.isFinite(source.startRotation)
+    ? source.startRotation
+    : null;
+  const selectedIndex = source.selectedIndex == null ? null : integer(source.selectedIndex);
+  const winner = source.winner == null ? null : participant(source.winner);
+  const drawId = source.drawId == null ? null : typeof source.drawId === "string" ? source.drawId : "";
+  const updatedAt = isoOrNull(source.updatedAt);
+  const finalRotation = typeof source.finalRotation === "number" && Number.isFinite(source.finalRotation)
+    ? source.finalRotation
+    : null;
+
+  if (
+    !UUID_PATTERN.test(sessionId) || revision == null || !["idle", "spinning", "revealed"].includes(String(phase)) ||
+    roster.participants.length > MAX_PARTICIPANTS || durationMs == null || startRotation == null || finalRotation == null ||
+    !updatedAt || drawId === ""
+  ) return null;
+
+  if (phase === "idle") {
+    if (durationMs !== 0 || startedAt || revealAt || selectedIndex != null || winner || drawId) return null;
+  } else {
+    if (
+      !startedAt || !revealAt || !drawId || !UUID_PATTERN.test(drawId) ||
+      roster.participants.length < 2 || durationMs < 4_000 || durationMs > 30_000
+    ) return null;
+    if (phase === "spinning" && (selectedIndex != null || winner)) return null;
+    if (phase === "revealed") {
+      if (selectedIndex == null || !winner || selectedIndex >= roster.participants.length) return null;
+      if (winner.id !== roster.participants[selectedIndex]?.id) return null;
+    }
+    if (Date.parse(revealAt) - Date.parse(startedAt) !== durationMs) return null;
+  }
+
+  return {
+    version: 1,
+    sessionId,
+    revision,
+    phase: phase as SpinnerLivePhase,
+    participants: roster.participants,
+    startedAt,
+    revealAt,
+    durationMs,
+    startRotation,
+    finalRotation,
+    selectedIndex,
+    winner,
+    drawId,
+    updatedAt,
+  };
+}
+
+export function parseSpinnerLiveResult(value: unknown): SpinnerLiveResultV1 | null {
+  const envelope = record(value);
+  const data = record(envelope?.data ?? value);
+  const snapshot = parseSpinnerLiveSnapshot(data?.snapshot);
+  const serverNow = isoOrNull(data?.serverNow);
+  if (!snapshot || !serverNow) return null;
+  const commandId = data?.commandId == null
+    ? null
+    : typeof data.commandId === "string" && UUID_PATTERN.test(data.commandId)
+      ? data.commandId
+      : undefined;
+  if (commandId === undefined) return null;
+  const receipt = data?.receipt == null
+    ? null
+    : parseStoredReceipts({ version: 1, receipts: [data.receipt] })[0] ?? null;
+  if (receipt && receipt.drawId !== snapshot.drawId) return null;
+  return { snapshot, receipt, commandId, serverNow };
+}
+
+export function spinnerLiveTimeline(
+  snapshot: SpinnerLiveSnapshotV1,
+  serverNow: string,
+  motionMode: MotionMode,
+): SpinnerLiveTimeline {
+  const serverNowMs = Date.parse(serverNow);
+  const startedAtMs = snapshot.startedAt ? Date.parse(snapshot.startedAt) : serverNowMs;
+  const revealAtMs = snapshot.revealAt ? Date.parse(snapshot.revealAt) : serverNowMs;
+  const revealDelayMs = Math.max(0, revealAtMs - serverNowMs);
+  const preferredDurationMs = motionMode === "off"
+    ? 0
+    : motionMode === "reduced"
+      ? Math.min(1_650, snapshot.durationMs)
+      : snapshot.durationMs;
+  const motionStartMs = motionMode === "full"
+    ? startedAtMs
+    : revealAtMs - preferredDurationMs;
+  const startDelayMs = Math.max(0, motionStartMs - serverNowMs);
+  const motionDurationMs = motionMode === "off" || revealDelayMs === 0
+    ? 0
+    : preferredDurationMs;
+  const motionDelayMs = motionDurationMs === 0 ? revealDelayMs : motionStartMs - serverNowMs;
+  return { startDelayMs, revealDelayMs, motionDurationMs, motionDelayMs };
+}
+
+export function spinnerLiveMotionRotations(
+  snapshot: SpinnerLiveSnapshotV1,
+  motionMode: MotionMode,
+): SpinnerLiveMotionRotations {
+  if (motionMode === "off") {
+    return {
+      startRotation: snapshot.startRotation,
+      finalRotation: snapshot.startRotation,
+    };
+  }
+  if (motionMode === "reduced") {
+    const landingDelta = ((snapshot.finalRotation - snapshot.startRotation) % 360 + 360) % 360;
+    return {
+      startRotation: snapshot.startRotation,
+      finalRotation: snapshot.startRotation + landingDelta,
+    };
+  }
+  return {
+    startRotation: snapshot.startRotation,
+    finalRotation: snapshot.finalRotation,
+  };
+}
+
+export function parsePendingSpinnerCommand(value: unknown): PendingSpinnerCommandV1 | null {
+  const source = record(value);
+  const createdAt = isoOrNull(source?.createdAt);
+  const expectedRevision = integer(source?.expectedRevision);
+  const commandId = typeof source?.commandId === "string" ? source.commandId : "";
+  if (source?.version !== 1 || !UUID_PATTERN.test(commandId) || expectedRevision == null || !createdAt) return null;
+  return { version: 1, commandId, expectedRevision, createdAt };
+}
+
+export function createSpinnerCommandId(): string {
+  const provider = globalThis.crypto;
+  if (!provider || typeof provider.getRandomValues !== "function") {
+    throw new Error("A secure command identifier could not be created.");
+  }
+  if (typeof provider.randomUUID === "function") return provider.randomUUID();
+
+  const bytes = provider.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10, 16).join(""),
+  ].join("-");
+}
+
+async function spinnerLiveRequest(init: RequestInit): Promise<SpinnerLiveResultV1> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch("/spinner/live", {
+      credentials: "same-origin",
+      cache: "no-store",
+      ...init,
+      headers: {
+        Accept: "application/json",
+        ...(init.body ? { "Content-Type": "application/json" } : {}),
+        ...Object.fromEntries(new Headers(init.headers)),
+      },
+      signal: controller.signal,
+    });
+    const payload = await response.json().catch(() => null);
+    const parsed = parseSpinnerLiveResult(payload);
+    if (!response.ok || !parsed) {
+      if ([401, 403, 404].includes(response.status)) {
+        window.dispatchEvent(new Event(SPINNER_SESSION_INVALID_EVENT));
+      }
+      const errorCode = typeof record(payload)?.error === "string"
+        ? String(record(payload)?.error)
+        : null;
+      const message = errorCode === "spin_result_not_durable"
+        ? "That draw attempt was not retained. No winner was kept. Select Spin again to create a new draw."
+        : response.status === 409
+          ? "The live roster changed in another moderator session. Refreshing the shared stage."
+          : "The live draw could not be synchronized.";
+      throw new SpinnerLiveRequestError(message, response.status, errorCode);
+    }
+    return parsed;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+export function fetchSpinnerLiveSnapshot() {
+  return spinnerLiveRequest({ method: "GET" });
+}
+
+export function sendSpinnerLiveCommand(command: SpinnerLiveCommand) {
+  return spinnerLiveRequest({ method: "POST", body: JSON.stringify(command) });
+}

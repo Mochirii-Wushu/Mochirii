@@ -11,6 +11,7 @@ const signedOutState: HeaderAuthState = {
   signedIn: false,
   activeMember: false,
   moderator: false,
+  spinnerViewer: false,
 };
 
 type HeaderAuthRuntime = typeof import("./header-auth-runtime");
@@ -135,5 +136,18 @@ export function useHeaderAuthState() {
     }
   }, [ensureAuthLoaded, publishAuthState, publishModeratorState]);
 
-  return { authState, ensureAuthLoaded, ensureModeratorAccess };
+  const launchSpinnerViewer = useCallback(async () => {
+    await ensureAuthLoaded();
+    if (!mountedRef.current || !authStateRef.current.spinnerViewer) return false;
+
+    try {
+      const runtime = runtimeRef.current || await loadHeaderAuthRuntime();
+      if (!mountedRef.current || !authStateRef.current.spinnerViewer) return false;
+      return await runtime.openHeaderSpinnerViewer();
+    } catch {
+      return false;
+    }
+  }, [ensureAuthLoaded]);
+
+  return { authState, ensureAuthLoaded, ensureModeratorAccess, launchSpinnerViewer };
 }

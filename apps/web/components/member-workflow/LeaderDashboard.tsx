@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { requireAuth, onAuthStateChange } from "@/lib/supabase/auth";
+import {
+  clearPrivateSpinnerSession,
+  openPrivateSpinnerSession,
+  requireAuth,
+  onAuthStateChange,
+} from "@/lib/supabase/auth";
 import {
   checkInstagramApiStatus,
   checkLeaderGalleryModerationAccess,
@@ -79,6 +84,8 @@ export function LeaderDashboard() {
     userId?: string | null;
     verification?: MemberAccessVerification | null;
   } | null>(null);
+  const [spinnerLaunchBusy, setSpinnerLaunchBusy] = useState(false);
+  const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
 
   const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
     const nextStatus = normalizeStatus(status);
@@ -175,6 +182,7 @@ export function LeaderDashboard() {
     setReviewStatus("Checking moderator access.");
     const auth = await requireAuth();
     if (!auth.ok) {
+      void clearPrivateSpinnerSession();
       setPanel("signed-out");
       setBusy(false);
       return;
@@ -203,6 +211,31 @@ export function LeaderDashboard() {
       subscription.data?.subscription?.unsubscribe();
     };
   }, [checkAccess]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("spinner") !== "expired") return;
+    url.searchParams.delete("spinner");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+    void Promise.resolve().then(() => {
+      setSpinnerLaunchMessage("The private draw session ended. Open it again when you are ready.");
+    });
+  }, []);
+
+  async function openSpinner() {
+    if (spinnerLaunchBusy) return;
+    setSpinnerLaunchBusy(true);
+    setSpinnerLaunchMessage("Opening the private draw stage.");
+
+    try {
+      const result = await openPrivateSpinnerSession("controller");
+      if (!result.ok || result.mode !== "controller") throw new Error("Access unavailable.");
+      window.location.assign("/spinner");
+    } catch {
+      setSpinnerLaunchMessage("Private draw access could not be opened. Refresh your session and try again.");
+      setSpinnerLaunchBusy(false);
+    }
+  }
 
   async function moderate(item: GalleryReviewSubmission, action: "approved" | "rejected") {
     const submissionId = text(item.id);
@@ -518,6 +551,22 @@ export function LeaderDashboard() {
 
   return (
     <>
+    <section className="glass-card glass-card--primary glass-pad auth-panel" id="spinnerLaunchPanel" aria-busy={spinnerLaunchBusy}>
+      <div className="auth-panel__head">
+        <div>
+          <p className="kicker">Leader Tool</p>
+          <h2 className="section-title">Raffle Spinner</h2>
+        </div>
+        <span className="status-pill">Moderator only</span>
+      </div>
+      <p className="lede">Open the private full-screen draw stage for the current gathering.</p>
+      <div className="auth-actions">
+        <button className="hero-cta hero-cta--primary" type="button" disabled={spinnerLaunchBusy} onClick={openSpinner}>
+          {spinnerLaunchBusy ? "Opening…" : "Open Spinner"}
+        </button>
+      </div>
+      <WorkflowNotice hidden={!spinnerLaunchMessage}>{spinnerLaunchMessage}</WorkflowNotice>
+    </section>
     <section className="glass-card glass-card--primary glass-pad auth-panel" id="reviewPanel" aria-busy={busy}>
       <div className="auth-panel__head">
         <div>

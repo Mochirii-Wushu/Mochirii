@@ -70,14 +70,21 @@ function assertRouteListed(label, text, route) {
 
 function checkLayoutObservability() {
   const layout = read("apps/web/app/layout.tsx");
+  const routeShell = read("apps/web/components/SiteRouteShell.tsx");
 
-  assertIncludes("root layout", layout, 'import { Analytics } from "@vercel/analytics/next";');
-  assertIncludes("root layout", layout, 'import { SpeedInsights } from "@vercel/speed-insights/next";');
+  assertIncludes("root layout", layout, 'import { SiteRouteShell } from "@/components/SiteRouteShell";');
   assertIncludes("root layout", layout, 'import { SITE_ORIGIN } from "@/lib/public-urls";');
-  assertIncludes("root layout", layout, "<Analytics />");
-  assertIncludes("root layout", layout, "<SpeedInsights />");
+  assertIncludes("root layout", layout, "<SiteRouteShell>{children}</SiteRouteShell>");
   assertIncludes("root layout", layout, "metadataBase: new URL(SITE_ORIGIN)");
   assertIncludes("root layout", layout, 'canonical: "/"');
+
+  assertIncludes("route-aware site shell", routeShell, 'import { Analytics } from "@vercel/analytics/next";');
+  assertIncludes("route-aware site shell", routeShell, 'import { SpeedInsights } from "@vercel/speed-insights/next";');
+  assertIncludes("route-aware site shell", routeShell, 'pathname === "/spinner"');
+  assertIncludes("route-aware site shell", routeShell, 'pathname.startsWith("/spinner/")');
+  assertIncludes("route-aware site shell", routeShell, "if (isIsolatedSpinnerPath(pathname)) return children;");
+  assertIncludes("route-aware site shell", routeShell, "<Analytics />");
+  assertIncludes("route-aware site shell", routeShell, "<SpeedInsights />");
 }
 
 function checkPublicMetadata() {

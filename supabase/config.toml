@@ -29,6 +29,12 @@ verify_jwt = true
 import_map = "./functions/list-gallery-review-queue/deno.json"
 entrypoint = "./functions/list-gallery-review-queue/index.ts"
 
+[functions.spinner-live-session]
+enabled = true
+verify_jwt = true
+import_map = "./functions/spinner-live-session/deno.json"
+entrypoint = "./functions/spinner-live-session/index.ts"
+
 [functions.moderate-gallery-submission]
 enabled = true
 verify_jwt = true
@@ -58,6 +64,12 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/reaper-discord-interactions/deno.json"
 entrypoint = "./functions/reaper-discord-interactions/index.ts"
+
+[functions.reaper-spinner-dispatch]
+enabled = true
+verify_jwt = false
+import_map = "./functions/reaper-spinner-dispatch/deno.json"
+entrypoint = "./functions/reaper-spinner-dispatch/index.ts"
 
 [functions.reaper-discord-member-sync]
 enabled = true

@@ -4,7 +4,7 @@ export type NavItem = {
   href: string;
   label: string;
   nav: string;
-  auth?: "signed-out" | "signed-in" | "verified" | "moderator";
+  auth?: "signed-out" | "signed-in" | "verified" | "moderator" | "spinner-viewer";
   external?: boolean;
 };
 
@@ -56,5 +56,6 @@ export const publicUtilityLinks: NavItem[] = [
 export const accountWorkflowLinks: NavItem[] = [
   { href: "/account", label: "Profile & Settings", nav: "account", auth: "signed-in" },
   { href: "/gallery-submit", label: "Submit Image", nav: "gallery-submit", auth: "verified" },
+  { href: "/spinner", label: "Watch Spinner", nav: "spinner", auth: "spinner-viewer" },
   { href: "/leader-dashboard", label: "Leader Dashboard", nav: "leader-dashboard", auth: "moderator" },
 ];

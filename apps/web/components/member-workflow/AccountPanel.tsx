@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
+import {
+  parseStoredMotion,
+  SETTINGS_STORAGE_KEY,
+  type MotionMode,
+} from "@/components/spinner/raffle";
 import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
 import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
-import { getLinkedIdentities, linkProviderIdentity } from "@/lib/supabase/auth";
+import { getLinkedIdentities, linkProviderIdentity, openPrivateSpinnerSession } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
 import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
@@ -76,6 +81,7 @@ export function AccountPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
+  const [spinnerViewerMotion, setSpinnerViewerMotion] = useState<MotionMode>("reduced");
   const [linkedIdentities, setLinkedIdentities] = useState<MemberAccessIdentity[]>([]);
   const [formState, setFormState] = useState<FormState>(emptyFormState);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
@@ -88,6 +94,8 @@ export function AccountPanel() {
   const [socialStatus, setSocialStatus] = useState("");
   const [socialError, setSocialError] = useState("");
   const [submissionsError, setSubmissionsError] = useState("");
+  const [spinnerLaunchBusy, setSpinnerLaunchBusy] = useState(false);
+  const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
 
   const loadSubmissions = useCallback(async () => {
     setSubmissionsError("");
@@ -195,6 +203,28 @@ export function AccountPanel() {
     };
   }, [loadAccount]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("spinner") !== "expired") return;
+    url.searchParams.delete("spinner");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+    void Promise.resolve().then(() => {
+      setSpinnerLaunchMessage("The private draw session ended. Open it again when a live draw is available.");
+    });
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (stored != null) {
+        const storedMotion = parseStoredMotion(stored);
+        queueMicrotask(() => setSpinnerViewerMotion(storedMotion));
+      }
+    } catch {
+      // Reduced remains the safe default when browser storage is unavailable.
+    }
+  }, []);
+
   async function checkMemberAccess() {
     setBusy(true);
     setVerifyError("");
@@ -255,6 +285,31 @@ export function AccountPanel() {
     window.location.href = "/auth";
   }
 
+  async function openSpinnerViewer() {
+    if (spinnerLaunchBusy) return;
+    setSpinnerLaunchBusy(true);
+    setSpinnerLaunchMessage("Opening the live draw stage.");
+
+    const result = await openPrivateSpinnerSession("viewer");
+    if (!result.ok) {
+      setSpinnerLaunchMessage("Live draw access could not be opened. Refresh your verification and try again.");
+      setSpinnerLaunchBusy(false);
+      return;
+    }
+
+    window.location.assign("/spinner");
+  }
+
+  function updateSpinnerViewerMotion(nextMode: MotionMode) {
+    setSpinnerViewerMotion(nextMode);
+    try {
+      window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ version: 1, motionMode: nextMode }));
+      setSpinnerLaunchMessage(`Live draw motion set to ${nextMode}.`);
+    } catch {
+      setSpinnerLaunchMessage("The live draw motion preference could not be saved in this browser.");
+    }
+  }
+
   if (!user) {
     return (
       <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel" aria-busy={busy}>
@@ -284,6 +339,7 @@ export function AccountPanel() {
   const bioLength = formState.bio.length;
   const pixelfedAccount = socialAccounts.find((account) => text(account.provider).toLowerCase() === "pixelfed") || null;
   const pixelfedReady = pixelfedAccount?.status === "active" && Boolean(pixelfedAccount.profile_url);
+  const spinnerViewerAvailable = access.ok && !moderatorAvailable;
 
   return (
     <div className="grid-12 grid-gap" id="accountPanel" aria-busy={busy}>
@@ -377,6 +433,17 @@ export function AccountPanel() {
                 <small>Send an image to the private review queue.</small>
               </Link>
             ) : null}
+            {spinnerViewerAvailable ? (
+              <button
+                className="account-action-card account-action-card--button"
+                type="button"
+                onClick={openSpinnerViewer}
+                disabled={busy || spinnerLaunchBusy}
+              >
+                <span>{spinnerLaunchBusy ? "Opening Live Draw…" : "Watch Live Draw"}</span>
+                <small>Open the shared raffle stage in view-only mode.</small>
+              </button>
+            ) : null}
             <Link className="account-action-card" href="/gallery">
               <span>Public Gallery</span>
               <small>View approved images and gallery sorting.</small>
@@ -396,6 +463,24 @@ export function AccountPanel() {
               <small>End this browser session.</small>
             </button>
           </div>
+
+          {spinnerViewerAvailable ? (
+            <label className="form-field">
+              <span>Live draw motion</span>
+              <select
+                value={spinnerViewerMotion}
+                onChange={(event) => updateSpinnerViewerMotion(event.target.value as MotionMode)}
+                disabled={busy || spinnerLaunchBusy}
+              >
+                <option value="full">Full</option>
+                <option value="reduced">Reduced</option>
+                <option value="off">Off</option>
+              </select>
+              <small>This preference applies to the view-only stage; the stage itself has no controls.</small>
+            </label>
+          ) : null}
+
+          <WorkflowNotice hidden={!spinnerLaunchMessage}>{spinnerLaunchMessage}</WorkflowNotice>
 
           <div className="requirement-list" aria-label="Upload access requirements">
             <h3 className="section-title section-title--sm">Upload access needs</h3>

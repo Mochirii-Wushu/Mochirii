@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import Image from "next/image";
 import type { ReactNode } from "react";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import { SiteRouteShell } from "@/components/SiteRouteShell";
 import { SITE_ORIGIN } from "@/lib/public-urls";
 import { SITE_DESCRIPTION, SITE_LANGUAGE, SITE_OG_LOCALE, SITE_TITLE } from "@/lib/site-metadata";
 import "./styles/font-fallbacks.css";
@@ -84,21 +80,7 @@ export default function RootLayout({
   return (
     <html lang={SITE_LANGUAGE} className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body data-page="home">
-        <SiteHeader />
-        <div className="bg-photo" aria-hidden="true">
-          <Image
-            src="/assets/bg/wuxia-bg.webp"
-            alt=""
-            className="bg-photo__image"
-            fill
-            sizes="100vw"
-            loading="eager"
-          />
-        </div>
-        {children}
-        <SiteFooter />
-        <Analytics />
-        <SpeedInsights />
+        <SiteRouteShell>{children}</SiteRouteShell>
       </body>
     </html>
   );

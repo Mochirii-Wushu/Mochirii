@@ -1,20 +1,21 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { brotliCompressSync, constants as zlibConstants } from "node:zlib";
 
 const buildRoot = path.resolve(".next");
 const manifestPath = path.join(buildRoot, "server", "app", "page_client-reference-manifest.js");
+const spinnerManifestPath = path.join(buildRoot, "server", "app", "spinner", "page_client-reference-manifest.js");
 const layoutLimit = 63 * 1024;
 const homeIncrementalLimit = 5 * 1024;
 const forbiddenRuntimeMarkers = ["GoTrueClient", "PostgrestError", "RealtimeClient"];
 const failures = [];
 
-function parseHomeManifest() {
-  const source = readFileSync(manifestPath, "utf8");
-  const marker = 'globalThis.__RSC_MANIFEST["/page"] = ';
+function parseManifest(file, route) {
+  const source = readFileSync(file, "utf8");
+  const marker = `globalThis.__RSC_MANIFEST[${JSON.stringify(route)}] = `;
   const start = source.indexOf(marker);
   const end = source.lastIndexOf(";");
-  if (start < 0 || end < start) throw new Error("Home client-reference manifest assignment was not found.");
+  if (start < 0 || end < start) throw new Error(`${route} client-reference manifest assignment was not found.`);
   return JSON.parse(source.slice(start + marker.length, end));
 }
 
@@ -42,8 +43,10 @@ function formatKiB(bytes) {
 }
 
 let manifest;
+let spinnerManifest;
 try {
-  manifest = parseHomeManifest();
+  manifest = parseManifest(manifestPath, "/page");
+  spinnerManifest = parseManifest(spinnerManifestPath, "/spinner/page");
 } catch (error) {
   console.error(`Client bundle guard could not read the production build: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
@@ -52,9 +55,11 @@ try {
 const entries = manifest.entryJSFiles || {};
 let layoutFiles;
 let homeFiles;
+let spinnerFiles;
 try {
   layoutFiles = entryFiles(entries, "/app/layout");
   homeFiles = entryFiles(entries, "/app/page");
+  spinnerFiles = entryFiles(spinnerManifest.entryJSFiles || {}, "/app/spinner/page");
 } catch (error) {
   console.error(`Client bundle guard could not resolve route entries: ${error instanceof Error ? error.message : String(error)}`);
   process.exit(1);
@@ -66,6 +71,28 @@ const layoutChunks = layoutFiles.map((file) => ({ file, buffer: readChunk(file) 
 const homeIncrementalChunks = homeIncrementalFiles.map((file) => ({ file, buffer: readChunk(file) }));
 const layoutBrotli = layoutChunks.reduce((total, chunk) => total + brotliBytes(chunk.buffer), 0);
 const homeIncrementalBrotli = homeIncrementalChunks.reduce((total, chunk) => total + brotliBytes(chunk.buffer), 0);
+
+const staticChunkDirectory = path.join(buildRoot, "static", "chunks");
+const staticChunks = readdirSync(staticChunkDirectory, { withFileTypes: true })
+  .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
+  .map((entry) => ({
+    file: `static/chunks/${entry.name}`,
+    buffer: readFileSync(path.join(staticChunkDirectory, entry.name)),
+  }));
+function chunksContaining(marker) {
+  const encoded = Buffer.from(marker);
+  return staticChunks.filter((chunk) => chunk.buffer.includes(encoded)).map((chunk) => chunk.file);
+}
+const controllerChunks = chunksContaining("Bulk paste");
+const viewerChunks = chunksContaining("Watching the shared draw in real time.");
+if (controllerChunks.length !== 1) failures.push(`expected one controller-only spinner chunk, found ${controllerChunks.length}`);
+if (viewerChunks.length !== 1) failures.push(`expected one viewer-only spinner chunk, found ${viewerChunks.length}`);
+if (controllerChunks[0] && viewerChunks[0] && controllerChunks[0] === viewerChunks[0]) {
+  failures.push("controller and viewer spinner surfaces share the same lazy chunk");
+}
+for (const privateChunk of [...controllerChunks, ...viewerChunks]) {
+  if (spinnerFiles.includes(privateChunk)) failures.push(`spinner entry eagerly loads mode-specific chunk ${privateChunk}`);
+}
 
 for (const marker of forbiddenRuntimeMarkers) {
   const offenders = layoutChunks.filter((chunk) => chunk.buffer.includes(Buffer.from(marker))).map((chunk) => chunk.file);
@@ -89,3 +116,4 @@ console.log("Client bundle guard passed.");
 console.log(`- Initial layout: ${formatKiB(layoutBrotli)} across ${layoutFiles.length} chunk(s).`);
 console.log(`- Home incremental: ${formatKiB(homeIncrementalBrotli)} across ${homeIncrementalFiles.length} chunk(s).`);
 console.log("- Supabase Auth, PostgREST, and Realtime markers are absent from the initial layout.");
+console.log("- Private spinner controller and viewer code remain distinct, lazy chunks.");

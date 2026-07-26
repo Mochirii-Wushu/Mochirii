@@ -3,6 +3,7 @@ import {
   asStringArray,
   defaultDisplayName,
   discordAvatarUrl,
+  profileMatchesTrustedDiscordIdentity,
   providerSubject,
   resolveDiscordIdentity,
   safeString,
@@ -65,7 +66,7 @@ Deno.test("provider subjects keep provider field precedence and phone fallback",
   assertEquals(providerSubject("discord", {}, {}, {}), null);
 });
 
-Deno.test("Discord identity resolution uses synced, auth, profile, then metadata precedence", () => {
+Deno.test("Discord identity resolution accepts only active synced or provider identities", () => {
   const user = {
     identities: [
       { provider: "google", provider_id: "google-subject" },
@@ -73,27 +74,65 @@ Deno.test("Discord identity resolution uses synced, auth, profile, then metadata
     ],
     user_metadata: { provider_id: "444444444444444444" },
   };
-  const profile = { discord_user_id: "333333333333333333" };
 
   assertEquals(
-    resolveDiscordIdentity(user, profile, [
-      { provider: "discord", provider_subject: "111111111111111111" },
+    resolveDiscordIdentity({ identities: [] }, [
+      {
+        provider: "discord",
+        provider_subject: "111111111111111111",
+        active: true,
+      },
     ]),
     "111111111111111111",
   );
-  assertEquals(resolveDiscordIdentity(user, profile), "222222222222222222");
+  assertEquals(resolveDiscordIdentity(user), "222222222222222222");
   assertEquals(
-    resolveDiscordIdentity({ identities: [] }, profile),
-    "333333333333333333",
+    resolveDiscordIdentity({ identities: [] }, [{
+      provider: "discord",
+      provider_subject: "333333333333333333",
+      active: false,
+    }]),
+    null,
   );
   assertEquals(
     resolveDiscordIdentity({
       identities: [],
       user_metadata: user.user_metadata,
-    }, null),
-    "444444444444444444",
+    }),
+    null,
   );
-  assertEquals(resolveDiscordIdentity({ identities: [] }, null), null);
+  assertEquals(resolveDiscordIdentity({ identities: [] }), null);
+});
+
+Deno.test("Discord identity resolution fails closed when trusted sources conflict", () => {
+  assertEquals(
+    resolveDiscordIdentity({
+      identities: [{
+        provider: "discord",
+        provider_id: "222222222222222222",
+      }],
+    }, [{
+      provider: "discord",
+      provider_subject: "111111111111111111",
+      active: true,
+    }]),
+    null,
+  );
+  assertEquals(
+    resolveDiscordIdentity({ identities: [] }, [
+      {
+        provider: "discord",
+        provider_subject: "111111111111111111",
+        active: true,
+      },
+      {
+        provider: "discord",
+        provider_subject: "222222222222222222",
+        active: true,
+      },
+    ]),
+    null,
+  );
 });
 
 Deno.test("Discord identity resolution applies one shared identifier length boundary", () => {
@@ -101,15 +140,37 @@ Deno.test("Discord identity resolution applies one shared identifier length boun
   assertEquals(
     resolveDiscordIdentity({
       identities: [{ provider: "discord", provider_id: longIdentity }],
-    }, null),
+    }),
     "1".repeat(40),
   );
   assertEquals(
-    resolveDiscordIdentity({}, null, [{
+    resolveDiscordIdentity({}, [{
       provider: "discord",
       provider_subject: longIdentity,
+      active: true,
     }]),
     "1".repeat(40),
+  );
+});
+
+Deno.test("Discord profile verification requires an exact trusted identity match", () => {
+  assertEquals(
+    profileMatchesTrustedDiscordIdentity(
+      "111111111111111111",
+      "111111111111111111",
+    ),
+    true,
+  );
+  assertEquals(
+    profileMatchesTrustedDiscordIdentity(
+      "111111111111111111",
+      "222222222222222222",
+    ),
+    false,
+  );
+  assertEquals(
+    profileMatchesTrustedDiscordIdentity("111111111111111111", null),
+    false,
   );
 });
 

@@ -22,6 +22,15 @@ const protectedFunctions = [
     body: { checkOnly: true },
   },
   {
+    name: "spinner-live-session",
+    body: {
+      action: "spin",
+      commandId: "00000000-0000-4000-8000-000000000000",
+      expectedRevision: 0,
+    },
+    deniedStatuses: [401, 403, 404],
+  },
+  {
     name: "moderate-gallery-submission",
     body: {
       submission_id: "00000000-0000-4000-8000-000000000000",
@@ -117,6 +126,12 @@ const secretProtectedFunctions = [
       gateway_sequence: 0,
       occurred_at: "2026-07-26T00:00:00.000Z",
     },
+  },
+  {
+    name: "reaper-spinner-dispatch",
+    secretHeader: "x-mochirii-reaper-spinner-secret",
+    cors: false,
+    body: { limit: 1 },
   },
   {
     name: "send-vote-reminder",
@@ -233,9 +248,10 @@ async function checkProtectedRejects(config, target, label, authorization) {
     body: JSON.stringify(target.body),
   });
 
+  const deniedStatuses = target.deniedStatuses || [401, 403];
   assert(
-    result.status === 401 || result.status === 403,
-    `${target.name} ${label} expected 401/403 fail-closed response, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
+    deniedStatuses.includes(result.status),
+    `${target.name} ${label} expected ${deniedStatuses.join("/")} fail-closed response, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
   );
 }
 
