@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyCurrentMochiPetsMember } from "@/lib/mochi-pets/member-verification";
+import { authorizeMochiPetsTesterEntry } from "@/lib/mochi-pets/tester-access-policy-core";
 import {
+  checkMochiPetsTesterRateLimit,
+  clearMochiPetsTesterFailures,
+  recordMochiPetsTesterFailure,
+} from "@/lib/mochi-pets/tester-rate-limit";
+import {
+  createMochiPetsTesterMemberBinding,
   createMochiPetsTesterSessionValue,
   isMochiPetsTesterAccessConfigured,
   MOCHI_PETS_TESTER_COOKIE,
@@ -7,7 +15,8 @@ import {
   verifyMochiPetsTesterPassword,
 } from "@/lib/mochi-pets/tester-session";
 
-const MAX_FORM_BYTES = 4_096;
+const COOKIE_PATH = "/games/mochi-pets";
+const MAX_FORM_BYTES = 8_192;
 
 export const runtime = "nodejs";
 
@@ -20,17 +29,28 @@ function requestProtocol(request: NextRequest) {
   return protocol === "http" || protocol === "https" ? protocol : null;
 }
 
-function redirectToDoorway(error?: "invalid" | "unavailable") {
-  const location = error
-    ? `/games/mochi-pets?tester_error=${encodeURIComponent(error)}`
-    : "/games/mochi-pets";
-  return new NextResponse(null, {
-    status: 303,
-    headers: {
-      "Cache-Control": "private, no-store",
-      Location: location,
-    },
+function response(payload: Record<string, unknown>, status = 200) {
+  return NextResponse.json(payload, {
+    status,
+    headers: { "Cache-Control": "private, no-store", Vary: "Cookie, Authorization" },
   });
+}
+
+function expireCookie(result: NextResponse, name: string) {
+  result.cookies.set({
+    name,
+    value: "",
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: COOKIE_PATH,
+    maxAge: 0,
+  });
+}
+
+function clearPrivateAccess(result: NextResponse) {
+  expireCookie(result, MOCHI_PETS_TESTER_COOKIE);
+  return result;
 }
 
 function isSameOriginFormPost(request: NextRequest) {
@@ -44,9 +64,7 @@ function isSameOriginFormPost(request: NextRequest) {
   if (!origin || !host || !protocol) return false;
   if (contentLengthHeader) {
     const contentLength = Number(contentLengthHeader);
-    if (!Number.isFinite(contentLength) || contentLength <= 0 || contentLength > MAX_FORM_BYTES) {
-      return false;
-    }
+    if (!Number.isFinite(contentLength) || contentLength <= 0 || contentLength > MAX_FORM_BYTES) return false;
   }
   if (!contentType.startsWith("application/x-www-form-urlencoded")) return false;
 
@@ -55,6 +73,12 @@ function isSameOriginFormPost(request: NextRequest) {
   } catch {
     return false;
   }
+}
+
+function bearerToken(request: NextRequest) {
+  const authorization = request.headers.get("authorization") || "";
+  const match = authorization.match(/^Bearer ([A-Za-z0-9._~-]{1,8192})$/);
+  return match?.[1] || "";
 }
 
 async function readBoundedPassword(request: NextRequest) {
@@ -97,25 +121,52 @@ async function readBoundedPassword(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isSameOriginFormPost(request)) return redirectToDoorway("invalid");
-  if (!isMochiPetsTesterAccessConfigured()) return redirectToDoorway("unavailable");
+  if (!isSameOriginFormPost(request)) return response({ ok: false, error: "invalid_request" }, 400);
+  const token = bearerToken(request);
+  if (!token) {
+    return clearPrivateAccess(response({ ok: false, error: "member_required" }, 401));
+  }
+  if (!isMochiPetsTesterAccessConfigured()) {
+    return clearPrivateAccess(response({ ok: false, error: "unavailable" }, 503));
+  }
+
+  const verification = await verifyCurrentMochiPetsMember(token);
+  if (!verification.ok) {
+    return clearPrivateAccess(response({ ok: false, error: "member_required" }, verification.status));
+  }
+  const memberBinding = createMochiPetsTesterMemberBinding(verification.memberId);
+  if (!memberBinding) return clearPrivateAccess(response({ ok: false, error: "unavailable" }, 503));
+  const rateLimit = checkMochiPetsTesterRateLimit(memberBinding);
+  if (!rateLimit.allowed) {
+    const result = clearPrivateAccess(response({ ok: false, error: "rate_limited" }, 429));
+    result.headers.set("Retry-After", String(rateLimit.retryAfterSeconds));
+    return result;
+  }
 
   const password = await readBoundedPassword(request);
-  if (password === null) return redirectToDoorway("invalid");
-  if (!(await verifyMochiPetsTesterPassword(password))) return redirectToDoorway("invalid");
+  if (password === null) return clearPrivateAccess(response({ ok: false, error: "invalid_request" }, 400));
+  const authorization = await authorizeMochiPetsTesterEntry({
+    verification,
+    password,
+    createMemberBinding: () => memberBinding,
+    verifyPassword: verifyMochiPetsTesterPassword,
+    createTesterSession: createMochiPetsTesterSessionValue,
+  });
+  if (!authorization.ok) {
+    if (authorization.error === "invalid") recordMochiPetsTesterFailure(memberBinding);
+    return clearPrivateAccess(response({ ok: false, error: authorization.error }, authorization.status));
+  }
+  clearMochiPetsTesterFailures(memberBinding);
 
-  const session = await createMochiPetsTesterSessionValue();
-  if (!session) return redirectToDoorway("unavailable");
-
-  const response = redirectToDoorway();
-  response.cookies.set({
+  const result = response({ ok: true });
+  result.cookies.set({
     name: MOCHI_PETS_TESTER_COOKIE,
-    value: session,
+    value: authorization.testerSession,
     httpOnly: true,
-    secure: requestProtocol(request) === "https",
+    secure: true,
     sameSite: "lax",
-    path: "/games/mochi-pets",
+    path: COOKIE_PATH,
     maxAge: MOCHI_PETS_TESTER_COOKIE_MAX_AGE,
   });
-  return response;
+  return result;
 }

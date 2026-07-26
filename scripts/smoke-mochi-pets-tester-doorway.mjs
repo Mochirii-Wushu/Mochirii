@@ -1,22 +1,24 @@
 const args = process.argv.slice(2);
-const baseUrl = readArg("--base-url", process.env.MOCHI_PETS_TEST_BASE_URL || "http://127.0.0.1:8765").replace(/\/$/, "");
-const browserBaseUrl = readArg("--browser-base-url", baseUrl).replace(/\/$/, "");
+const baseUrl = readArg("--base-url", process.env.MOCHI_PETS_TEST_BASE_URL || "https://localhost:8765").replace(/\/$/, "");
 const browserArg = readArg("--browser", "chromium");
+const storageKey = readArg("--supabase-storage-key", "sb-localhost-auth-token");
 const expectUnconfigured = args.includes("--expect-unconfigured");
 const allowSelfSignedLocalhost = args.includes("--allow-self-signed-localhost");
-const password = process.env.MOCHI_PETS_TESTER_PASSWORD || "";
-const DEFERRED_SHELL_SETTLE_MS = 1_750;
+const password = process.env.MOCHI_PETS_SMOKE_PASSWORD || "";
+const ENDPOINT_PATHS = new Set([
+  "/games/mochi-pets/member-access",
+  "/games/mochi-pets/tester-login",
+]);
 
 if (allowSelfSignedLocalhost) {
-  const browserUrl = new URL(browserBaseUrl);
+  const smokeUrl = new URL(baseUrl);
   assert(
-    browserUrl.protocol === "https:" && ["localhost", "127.0.0.1"].includes(browserUrl.hostname),
+    smokeUrl.protocol === "https:" && ["localhost", "127.0.0.1"].includes(smokeUrl.hostname),
     "self-signed certificate bypass is restricted to local HTTPS smoke URLs",
   );
 }
-
 if (!expectUnconfigured && !password) {
-  throw new Error("MOCHI_PETS_TESTER_PASSWORD is required for the configured doorway smoke.");
+  throw new Error("MOCHI_PETS_SMOKE_PASSWORD is required for the configured doorway smoke.");
 }
 
 const playwright = await import("playwright");
@@ -34,10 +36,10 @@ const representativeViewports = [
   { width: 844, height: 390 },
   { width: 1440, height: 900 },
 ];
+let memberOrdinal = 1;
+let navigationOrdinal = 1;
 
-await verifyCrossOriginRejection();
-await verifyMalformedLoginRejection();
-await verifyLoginEndpointState();
+await verifyEndpointGuards();
 
 for (const browserName of browserNames) {
   const browserType = playwright[browserName];
@@ -52,6 +54,10 @@ for (const browserName of browserNames) {
       await verifyDoorway(browser, browserName, viewport);
       console.log(`  - ${viewport.width}x${viewport.height}: passed`);
     }
+    if (!expectUnconfigured && browserName === "chromium") {
+      await verifyRateLimit(browser);
+      await verifyMalformedSuccessFailsClosed(browser);
+    }
   } finally {
     await browser.close();
   }
@@ -59,91 +65,110 @@ for (const browserName of browserNames) {
 
 console.log(`Mochi Pets tester doorway smoke passed (${browserNames.join(", ")}).`);
 
-async function verifyCrossOriginRejection() {
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded",
-    Origin: "https://attacker.invalid",
-  };
-  const login = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
-    method: "POST",
-    redirect: "manual",
-    headers,
-    body: "testerPassword=test-only-value",
-  });
-  assert(login.status === 303, "cross-origin login did not return the generic redirect");
-  assert(!login.headers.get("set-cookie"), "cross-origin login set a cookie");
-
-  const logout = await fetch(`${baseUrl}/games/mochi-pets/tester-logout`, {
-    method: "POST",
-    redirect: "manual",
-    headers,
-  });
-  assert(logout.status === 303, "cross-origin logout did not return the generic redirect");
-  assert(!logout.headers.get("set-cookie"), "cross-origin logout changed the cookie");
-}
-
-async function verifyMalformedLoginRejection() {
+async function verifyEndpointGuards() {
   const origin = new URL(baseUrl).origin;
-  for (const testCase of [
+  const formHeaders = {
+    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+    Origin: origin,
+  };
+  const jsonHeaders = { "Content-Type": "application/json", Origin: origin };
+
+  const crossOriginLogin = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
+    method: "POST",
+    redirect: "manual",
+    headers: { ...formHeaders, Origin: "https://attacker.invalid" },
+    body: new URLSearchParams({ testerPassword: "synthetic-valid-length-passcode" }),
+  });
+  assertResponse(crossOriginLogin, 400, "cross-origin login");
+  assert(!crossOriginLogin.headers.get("set-cookie"), "cross-origin login changed the tester cookie");
+
+  const crossOriginMember = await fetch(`${baseUrl}/games/mochi-pets/member-access`, {
+    method: "POST",
+    headers: { ...jsonHeaders, Origin: "https://attacker.invalid" },
+    body: "{}",
+  });
+  assertResponse(crossOriginMember, 400, "cross-origin member check");
+  assert(!crossOriginMember.headers.get("set-cookie"), "cross-origin member check changed the tester cookie");
+
+  const crossOriginLogout = await fetch(`${baseUrl}/games/mochi-pets/tester-logout`, {
+    method: "POST",
+    redirect: "manual",
+    headers: { Origin: "https://attacker.invalid" },
+  });
+  assertResponse(crossOriginLogout, 303, "cross-origin logout");
+  assert(!crossOriginLogout.headers.get("set-cookie"), "cross-origin logout changed the tester cookie");
+
+  for (const fixture of [
     {
-      label: "wrong content type",
+      label: "wrong-content-type login",
+      path: "/games/mochi-pets/tester-login",
       headers: { "Content-Type": "application/json", Origin: origin },
-      body: JSON.stringify({ testerPassword: "test-only-value" }),
+      body: "{}",
     },
     {
-      label: "oversized form",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", Origin: origin },
-      body: `testerPassword=${"x".repeat(4_097)}`,
+      label: "oversized login",
+      path: "/games/mochi-pets/tester-login",
+      headers: formHeaders,
+      body: new URLSearchParams({ testerPassword: "x".repeat(8_193) }).toString(),
+    },
+    {
+      label: "nonempty member check",
+      path: "/games/mochi-pets/member-access",
+      headers: jsonHeaders,
+      body: '{"unexpected":true}',
+    },
+    {
+      label: "oversized member check",
+      path: "/games/mochi-pets/member-access",
+      headers: jsonHeaders,
+      body: JSON.stringify({ value: "x".repeat(64) }),
     },
   ]) {
-    const response = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
+    const response = await fetch(`${baseUrl}${fixture.path}`, {
       method: "POST",
-      redirect: "manual",
-      headers: testCase.headers,
-      body: testCase.body,
+      headers: fixture.headers,
+      body: fixture.body,
     });
-    assert(response.status === 303, `${testCase.label} login did not return the generic redirect`);
-    assert(!response.headers.get("set-cookie"), `${testCase.label} login set a cookie`);
-    assert(
-      response.headers.get("cache-control") === "private, no-store",
-      `${testCase.label} login response is cacheable`,
-    );
+    assertResponse(response, 400, fixture.label);
   }
-}
 
-async function verifyLoginEndpointState() {
-  const origin = new URL(baseUrl).origin;
-  const response = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
+  const noBearerMember = await fetch(`${baseUrl}/games/mochi-pets/member-access`, {
     method: "POST",
-    redirect: "manual",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Origin: origin,
-    },
-    body: new URLSearchParams({ testerPassword: password || "test-only-value" }),
+    headers: jsonHeaders,
+    body: "{}",
   });
-  const location = response.headers.get("location") ?? "";
-  const cookie = response.headers.get("set-cookie") ?? "";
-  assert(response.status === 303, "same-origin login endpoint did not redirect");
-  assert(response.headers.get("cache-control") === "private, no-store", "login endpoint response is cacheable");
+  assertResponse(noBearerMember, 401, "member check without bearer");
+  const noBearerLogin = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
+    method: "POST",
+    headers: formHeaders,
+    body: new URLSearchParams({ testerPassword: "synthetic-valid-length-passcode" }),
+  });
+  assertResponse(noBearerLogin, 401, "login without bearer");
 
   if (expectUnconfigured) {
-    assert(location.endsWith("?tester_error=unavailable"), "unconfigured login endpoint did not fail closed");
-    assert(!cookie, "unconfigured login endpoint set a cookie");
-    return;
+    const token = syntheticToken("member", nextMemberId());
+    const unconfiguredMember = await fetch(`${baseUrl}/games/mochi-pets/member-access`, {
+      method: "POST",
+      headers: { ...jsonHeaders, Authorization: `Bearer ${token}` },
+      body: "{}",
+    });
+    assertResponse(unconfiguredMember, 503, "unconfigured member check");
+    const unconfiguredLogin = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
+      method: "POST",
+      headers: { ...formHeaders, Authorization: `Bearer ${token}` },
+      body: new URLSearchParams({ testerPassword: "synthetic-valid-length-passcode" }),
+    });
+    assertResponse(unconfiguredLogin, 503, "unconfigured login");
+  } else {
+    const token = syntheticToken("member", nextMemberId());
+    const configuredLogin = await fetch(`${baseUrl}/games/mochi-pets/tester-login`, {
+      method: "POST",
+      headers: { ...formHeaders, Authorization: `Bearer ${token}` },
+      body: new URLSearchParams({ testerPassword: password }),
+    });
+    assertResponse(configuredLogin, 200, "configured login");
+    assertSessionCookieHeader(configuredLogin.headers.get("set-cookie"));
   }
-
-  const rejection = location.includes("tester_error=unavailable")
-    ? "unavailable"
-    : location.includes("tester_error=invalid") ? "invalid" : "unexpected redirect";
-  assert(
-    location.endsWith("/games/mochi-pets"),
-    `valid login endpoint rejected the synthetic password (${rejection})`,
-  );
-  assertSessionCookieHeader(cookie, {
-    expectedSecure: false,
-    contextLabel: "direct HTTP login endpoint",
-  });
 }
 
 async function verifyDoorway(browser, browserName, viewport) {
@@ -152,337 +177,377 @@ async function verifyDoorway(browser, browserName, viewport) {
     reducedMotion: "reduce",
     ignoreHTTPSErrors: allowSelfSignedLocalhost,
   });
-  await context.route("**/_vercel/insights/script.js", (route) => route.fulfill({ status: 204, body: "" }));
-  await context.route("**/_vercel/speed-insights/script.js", (route) => route.fulfill({ status: 204, body: "" }));
-  let page = await context.newPage();
-  const errors = [];
-  const diagnosticsByPage = new WeakMap();
-  let intentionalNavigation = false;
-  installDiagnostics(page);
+  await stubAnalytics(context);
+  const page = await context.newPage();
+  const errors = installDiagnostics(page);
+  let privateRequestCount = 0;
+  page.on("request", (request) => {
+    if (ENDPOINT_PATHS.has(new URL(request.url()).pathname)) privateRequestCount += 1;
+  });
+  const contextLabel = label(browserName, viewport);
 
   try {
-    const response = await page.goto(`${browserBaseUrl}/games/mochi-pets`, { waitUntil: "networkidle" });
-    assert(response?.status() === 200, `${label(browserName, viewport)} route did not return 200`);
-    assert(
-      response?.headers()["cache-control"]?.includes("no-store"),
-      `${label(browserName, viewport)} doorway response is cacheable`,
-    );
-    assert(
-      (await page.locator('meta[name="robots"]').getAttribute("content"))?.includes("noindex"),
-      `${label(browserName, viewport)} doorway is missing noindex metadata`,
-    );
-    await settleDeferredShell(page);
-    await assertLockedLayout(page, browserName, viewport);
-    await assertMochiriiOnlyGameCopy(page, browserName, viewport);
-
+    const response = await page.goto(`${baseUrl}/games/mochi-pets`, { waitUntil: "domcontentloaded" });
+    assert(response?.status() === 200, `${contextLabel} route did not return 200`);
     if (expectUnconfigured) {
-      await page.locator("input[name=testerPassword]").fill("test-only-value");
-      await submitAndWaitForNavigation(page.getByRole("button", { name: "Unlock tester space" }));
-      assert(
-        new URL(page.url()).searchParams.get("tester_error") === "unavailable",
-        `${label(browserName, viewport)} unconfigured login did not return unavailable`,
-      );
-      assert(
-        await page.locator("#mochi-pets-gate-error").isVisible(),
-        `${label(browserName, viewport)} unavailable alert is hidden`,
-      );
-      assert(!(await hasSessionCookie(context)), `${label(browserName, viewport)} unconfigured login set a cookie`);
-      assert(errors.length === 0, `${label(browserName, viewport)} browser errors: ${errors.join(" | ")}`);
+      await page.getByRole("heading", { level: 1, name: "Mochi Pets" }).waitFor();
+      await assertPublicConcept(page, contextLabel);
+      const publicCopy = await page.locator(".mochi-game-shell").innerText();
+      assert(!/\b(?:tester|passcode|sign in|access|unavailable|try again)\b/i.test(publicCopy), `${contextLabel} public-only concept exposes private doorway language`);
+      assert(await page.locator("form, input, .mochi-gate-notes").count() === 0, `${contextLabel} public-only concept exposes private controls`);
+      assert(privateRequestCount === 0, `${contextLabel} public-only concept requested a private access endpoint`);
+      await page.waitForTimeout(1_750);
+      await assertNoPrivateClientCode(page, contextLabel);
+      await assertResponsiveLayout(page, contextLabel);
+      await page.addStyleTag({ content: "html{font-size:200%!important}" });
+      await assertResponsiveLayout(page, `${contextLabel} public-only at 200% text`);
+      assert(errors.length === 0, `${contextLabel} browser errors: ${errors.join(" | ")}`);
       return;
     }
 
-    await page.locator("input[name=testerPassword]").fill("incorrect-test-password");
-    await submitAndWaitForNavigation(page.getByRole("button", { name: "Unlock tester space" }));
-    assert(
-      new URL(page.url()).searchParams.get("tester_error") === "invalid",
-      `${label(browserName, viewport)} invalid login did not return invalid`,
-    );
-    assert(
-      await page.locator("#mochi-pets-gate-error").isVisible(),
-      `${label(browserName, viewport)} invalid alert is hidden`,
-    );
-    assert(!(await hasSessionCookie(context)), `${label(browserName, viewport)} invalid login set a cookie`);
+    await waitForHeading(page, "Website sign-in required");
+    await assertPublicConcept(page, contextLabel);
+    await assertResponsiveLayout(page, contextLabel);
+    assert(await page.getByRole("link", { name: "Sign in to Mochirii" }).isVisible(), `${contextLabel} sign-in action is hidden`);
+    assert(await page.locator('input[name="testerPassword"]').count() === 0, `${contextLabel} exposes the passcode form while signed out`);
 
-    await page.locator("input[name=testerPassword]").fill(password);
-    await submitAndWaitForNavigation(page.getByRole("button", { name: "Unlock tester space" }));
-    assertDoorwayUrl(page, browserName, viewport);
+    const nonmemberToken = syntheticToken("nonmember", nextMemberId());
+    await setBrowserSession(page, nonmemberToken);
+    await reloadDoorway(page);
+    await waitForHeading(page, "Verified membership required");
+    assert(await page.locator('input[name="testerPassword"]').count() === 0, `${contextLabel} nonmember sees the passcode form`);
 
-    await waitForStyledShell();
-    let connection = page.locator('[data-mochi-pets-connection-state="not-connected"]');
-    assert(await connection.isVisible(), `${label(browserName, viewport)} waiting room is not connected`);
-    assert(
-      await page.getByText("Mochi Pets will begin as a new game for this page and the Mochirii iPhone app.", { exact: false }).isVisible(),
-      `${label(browserName, viewport)} unlocked page is missing the browser and iPhone plan`,
-    );
-    assert(
-      await page.getByText("The retired prototype and its progress are not being restored.", { exact: true }).isVisible(),
-      `${label(browserName, viewport)} unlocked page is missing the fresh-start boundary`,
-    );
-    await assertMochiriiOnlyGameCopy(page, browserName, viewport);
-    assert((await page.locator("iframe").count()) === 0, `${label(browserName, viewport)} rendered an iframe`);
-    await assertNoHorizontalOverflow(page, browserName, viewport);
+    const memberA = nextMemberId();
+    await setBrowserSession(page, syntheticToken("member", memberA));
+    await reloadDoorway(page);
+    await waitForHeading(page, "Enter the tester space");
+    const input = page.getByLabel("Tester passcode");
+    assert(await input.getAttribute("minlength") === "15", `${contextLabel} passcode minimum is not 15`);
+    assert(await input.getAttribute("maxlength") === "128", `${contextLabel} passcode maximum is not 128`);
+    await assertResponsiveLayout(page, `${contextLabel} passcode form`);
+    const textScale = await page.addStyleTag({ content: "html{font-size:200%!important}" });
+    await assertResponsiveLayout(page, `${contextLabel} passcode form at 200% text`);
+    await textScale.evaluate((element) => element.remove());
 
-    const cookies = await context.cookies();
-    const session = cookies.find((cookie) => cookie.name === "mochi_pets_tester_access");
-    assert(session, `${label(browserName, viewport)} valid login did not set the session cookie`);
-    assert(session.httpOnly, `${label(browserName, viewport)} session cookie is not HTTP-only`);
-    assert(
-      session.secure === (new URL(browserBaseUrl).protocol === "https:"),
-      `${label(browserName, viewport)} session cookie Secure state does not match transport`,
-    );
-    // The HTTPS proxy validates the exact response header. Playwright WebKit
-    // normalizes the resulting cookie to None even when SameSite=Lax was sent.
-    const browserReportsExpectedSameSite = session.sameSite === "Lax"
-      || (browserName === "webkit" && session.sameSite === "None");
-    assert(
-      browserReportsExpectedSameSite,
-      `${label(browserName, viewport)} session cookie SameSite is ${session.sameSite || "missing"}, expected Lax`,
-    );
-    assert(session.path === "/games/mochi-pets", `${label(browserName, viewport)} session cookie path is wrong`);
+    await input.fill("incorrect-smoke-passcode");
+    await input.focus();
+    const invalidResponse = await submitAndWait(page, { keyboard: true });
+    assert(invalidResponse.status() === 403, `${contextLabel} invalid passcode was not rejected`);
+    await page.getByText("That password did not work.", { exact: false }).waitFor();
+    assert(await input.evaluate((element) => element === document.activeElement), `${contextLabel} invalid passcode did not preserve input focus`);
+    assert(await page.locator('#mochi-pets-gate-error[role="alert"]').isVisible(), `${contextLabel} invalid passcode alert is not announced`);
+    assert(!(await hasSessionCookie(context)), `${contextLabel} invalid passcode set a tester cookie`);
 
-    await replaceWithFreshDoorwayPage();
-    await waitForStyledShell();
-    connection = page.locator('[data-mochi-pets-connection-state="not-connected"]');
-    assert(await connection.isVisible(), `${label(browserName, viewport)} valid session did not persist`);
+    await input.fill(password);
+    const acceptedResponse = await submitAndWait(page);
+    assert(acceptedResponse.status() === 200, `${contextLabel} valid passcode returned ${acceptedResponse.status()} instead of 200`);
+    await waitForHeading(page, "Welcome to the tester space");
+    await assertSessionCookie(context, contextLabel, browserName === "webkit");
+    await assertWaitingRoomFocus(page, contextLabel);
+    await assertResponsiveLayout(page, contextLabel);
 
-    const replacement = session.value.startsWith("a") ? "b" : "a";
-    const tamperedValue = `${replacement}${session.value.slice(1)}`;
-    assert(tamperedValue !== session.value, `${label(browserName, viewport)} tamper fixture did not change`);
-    await context.clearCookies();
-    await context.addCookies([{
-      name: session.name,
-      value: tamperedValue,
-      domain: session.domain,
-      path: session.path,
-      expires: session.expires,
-      httpOnly: session.httpOnly,
-      secure: session.secure,
-      sameSite: session.sameSite,
-    }]);
-    const installedTamperedCookies = (await context.cookies())
-      .filter((cookie) => cookie.name === "mochi_pets_tester_access");
-    assert(
-      installedTamperedCookies.length === 1 && installedTamperedCookies[0].value === tamperedValue,
-      `${label(browserName, viewport)} tamper fixture was not installed exactly once`,
-    );
-    await replaceWithFreshDoorwayPage();
-    await assertLockedLayout(page, browserName, viewport);
+    await reloadDoorway(page);
+    await waitForHeading(page, "Welcome to the tester space");
+    await assertWaitingRoomFocus(page, contextLabel);
 
-    await page.locator("input[name=testerPassword]").fill(password);
-    await submitAndWaitForNavigation(page.getByRole("button", { name: "Unlock tester space" }));
-    assertDoorwayUrl(page, browserName, viewport);
-    await submitAndWaitForNavigation(page.getByRole("button", { name: "Lock tester space" }));
-    assertDoorwayUrl(page, browserName, viewport);
-    await assertLockedLayout(page, browserName, viewport);
-    assert(
-      !(await context.cookies()).some((cookie) => cookie.name === "mochi_pets_tester_access"),
-      `${label(browserName, viewport)} logout did not expire the session cookie`,
-    );
+    const memberB = nextMemberId();
+    await setBrowserSession(page, syntheticToken("member", memberB));
+    await reloadDoorway(page);
+    await waitForHeading(page, "Enter the tester space");
+    assert(!(await hasSessionCookie(context)), `${contextLabel} member-bound cookie survived an account change`);
 
-    await page.waitForTimeout(100);
-    assert(errors.length === 0, `${label(browserName, viewport)} browser errors: ${errors.join(" | ")}`);
+    await setBrowserSession(page, syntheticToken("member", memberA));
+    await reloadDoorway(page);
+    await waitForHeading(page, "Enter the tester space");
+    await page.getByLabel("Tester passcode").fill(password);
+    const relockEntry = await submitAndWait(page);
+    assert(relockEntry.status() === 200, `${contextLabel} could not reopen the tester space before logout`);
+    await waitForHeading(page, "Welcome to the tester space");
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }),
+      page.getByRole("button", { name: "Lock tester space" }).click(),
+    ]);
+    await waitForHeading(page, "Enter the tester space");
+    assert(!(await hasSessionCookie(context)), `${contextLabel} logout did not expire the tester cookie`);
+
+    await setBrowserSession(page, syntheticToken("provider-error", nextMemberId()));
+    await reloadDoorway(page);
+    await waitForHeading(page, "We couldn’t confirm your access");
+    assert(await page.locator('input[name="testerPassword"]').count() === 0, `${contextLabel} provider failure exposed the passcode form`);
+
+    await page.addStyleTag({ content: "html{font-size:200%!important}" });
+    await assertResponsiveLayout(page, `${contextLabel} at 200% text`);
+    assert(errors.length === 0, `${contextLabel} browser errors: ${errors.join(" | ")}`);
   } finally {
-    uninstallDiagnostics(page);
     await context.close();
   }
+}
 
-  async function withIntentionalNavigation(action) {
-    intentionalNavigation = true;
-    try {
-      return await action();
-    } finally {
-      await new Promise((resolveWait) => setTimeout(resolveWait, 100));
-      intentionalNavigation = false;
+async function verifyRateLimit(browser) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ignoreHTTPSErrors: allowSelfSignedLocalhost });
+  await stubAnalytics(context);
+  const page = await context.newPage();
+  const errors = installDiagnostics(page);
+  try {
+    await page.goto(`${baseUrl}/games/mochi-pets`, { waitUntil: "domcontentloaded" });
+    await setBrowserSession(page, syntheticToken("member", nextMemberId()));
+    await reloadDoorway(page);
+    await waitForHeading(page, "Enter the tester space");
+    for (let attempt = 1; attempt <= 5; attempt += 1) {
+      await page.getByLabel("Tester passcode").fill(`incorrect-rate-passcode-${attempt}`);
+      const input = page.getByLabel("Tester passcode");
+      await input.focus();
+      const response = await submitAndWait(page, { keyboard: true });
+      assert(response.status() === 403, `rate-limit fixture attempt ${attempt} was not rejected as invalid`);
+      assert(await input.evaluate((element) => element === document.activeElement), `rate-limit fixture attempt ${attempt} lost input focus`);
     }
-  }
-
-  async function submitAndWaitForNavigation(button) {
-    await withIntentionalNavigation(async () => {
-      await Promise.all([
-        page.waitForNavigation({ waitUntil: "networkidle" }),
-        button.click(),
-      ]);
-      await settleDeferredShell(page);
-    });
-  }
-
-  async function replaceWithFreshDoorwayPage() {
-    await withIntentionalNavigation(async () => {
-      uninstallDiagnostics(page);
-      await page.close();
-      page = await context.newPage();
-      installDiagnostics(page);
-      const response = await page.goto(`${browserBaseUrl}/games/mochi-pets`, { waitUntil: "networkidle" });
-      assert(response?.status() === 200, `${label(browserName, viewport)} revisit did not return 200`);
-      await settleDeferredShell(page);
-    });
-  }
-
-  async function waitForStyledShell() {
-    await page.waitForFunction(() => {
-      const shell = document.querySelector(".mochi-game-shell");
-      const footerLink = document.querySelector(".footer-nav");
-      return Boolean(
-        shell
-        && getComputedStyle(shell).display === "grid"
-        && (!footerLink || getComputedStyle(footerLink).display === "flex")
-      );
-    });
-  }
-
-  function installDiagnostics(targetPage) {
-    targetPage.setDefaultTimeout(15_000);
-    targetPage.setDefaultNavigationTimeout(20_000);
-    const onConsole = (message) => {
-      if (message.type() === "error") errors.push(`console: ${message.text()}`);
-    };
-    const onPageError = (error) => errors.push(`page: ${error.message}`);
-    const onRequestFailed = (request) => {
-      const errorText = request.failure()?.errorText ?? "failed";
-      const url = new URL(request.url());
-      const browserNavigationAbort = new Set([
-        "net::ERR_ABORTED",
-        "NS_BINDING_ABORTED",
-        "Load request cancelled",
-      ]).has(errorText);
-      const expectedNavigationAbort = intentionalNavigation
-        && request.method() === "GET"
-        && request.isNavigationRequest()
-        && url.origin === new URL(browserBaseUrl).origin
-        && browserNavigationAbort;
-      if (!expectedNavigationAbort) errors.push(`request: ${request.method()} ${request.url()} ${errorText}`);
-    };
-    const onResponse = (response) => {
-      if (response.status() >= 400) errors.push(`http: ${response.status()} ${response.url()}`);
-    };
-    diagnosticsByPage.set(targetPage, { onConsole, onPageError, onRequestFailed, onResponse });
-    targetPage.on("console", onConsole);
-    targetPage.on("pageerror", onPageError);
-    targetPage.on("requestfailed", onRequestFailed);
-    targetPage.on("response", onResponse);
-  }
-
-  function uninstallDiagnostics(targetPage) {
-    const handlers = diagnosticsByPage.get(targetPage);
-    if (!handlers) return;
-    targetPage.off("console", handlers.onConsole);
-    targetPage.off("pageerror", handlers.onPageError);
-    targetPage.off("requestfailed", handlers.onRequestFailed);
-    targetPage.off("response", handlers.onResponse);
-    diagnosticsByPage.delete(targetPage);
+    await page.getByLabel("Tester passcode").fill("incorrect-rate-passcode-final");
+    const limitedInput = page.getByLabel("Tester passcode");
+    await limitedInput.focus();
+    const limited = await submitAndWait(page, { keyboard: true });
+    assert(limited.status() === 429, "sixth passcode attempt did not hit the real rate limiter");
+    assert(Number(limited.headers()["retry-after"]) > 0, "rate-limited response lacks Retry-After");
+    await page.getByText("Too many passcode attempts.", { exact: false }).waitFor();
+    assert(await limitedInput.evaluate((element) => element === document.activeElement), "rate-limited response lost input focus");
+    assert(await page.locator('#mochi-pets-gate-error[role="alert"]').isVisible(), "rate-limited alert is not announced");
+    assert(errors.length === 0, `rate-limit browser errors: ${errors.join(" | ")}`);
+  } finally {
+    await context.close();
   }
 }
 
-async function settleDeferredShell(page) {
-  // The shared header intentionally defers its signed-out auth runtime by up
-  // to 1.5 seconds. Let that load finish before deliberate full-page forms.
-  await page.waitForTimeout(DEFERRED_SHELL_SETTLE_MS);
-  await page.waitForLoadState("networkidle");
+async function verifyMalformedSuccessFailsClosed(browser) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ignoreHTTPSErrors: allowSelfSignedLocalhost });
+  await stubAnalytics(context);
+  await context.route("**/games/mochi-pets/member-access", async (route) => {
+    if (route.request().method() === "POST") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "Cache-Control": "private, no-store" },
+        body: JSON.stringify({ memberAccess: false, testerAccess: true }),
+      });
+      return;
+    }
+    await route.continue();
+  });
+  const page = await context.newPage();
+  const errors = installDiagnostics(page);
+  try {
+    await page.goto(`${baseUrl}/games/mochi-pets`, { waitUntil: "domcontentloaded" });
+    await setBrowserSession(page, syntheticToken("member", nextMemberId()));
+    await reloadDoorway(page);
+    await waitForHeading(page, "We couldn’t confirm your access");
+    assert(await page.locator('input[name="testerPassword"]').count() === 0, "malformed success unlocked the passcode form");
+    assert(await page.getByText("Welcome to the tester space", { exact: true }).count() === 0, "malformed success unlocked the waiting room");
+    assert(errors.length === 0, `malformed-success browser errors: ${errors.join(" | ")}`);
+  } finally {
+    await context.close();
+  }
 }
 
-function assertDoorwayUrl(page, browserName, viewport) {
-  const url = new URL(page.url());
+async function assertPublicConcept(page, contextLabel) {
+  const title = page.getByRole("heading", { level: 1, name: "Mochi Pets" });
+  assert(await title.isVisible(), `${contextLabel} public title is hidden`);
+  assert(await page.locator(".mochi-game-brand img").count() === 1, `${contextLabel} Mochirii emblem is missing or repeated`);
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
+  assert(canonical?.endsWith("/games/mochi-pets"), `${contextLabel} canonical URL is missing or incorrect`);
+  const robots = await page.locator('meta[name="robots"]').getAttribute("content").catch(() => "");
+  assert(!/noindex/i.test(robots || ""), `${contextLabel} public concept page is noindex`);
+  assert(await page.locator("iframe").count() === 0, `${contextLabel} restored an iframe`);
+  assert(await page.getByRole("link", { name: "Mochi Pets", exact: true }).count() >= 1, `${contextLabel} public navigation link is missing`);
+
+  const copy = await page.locator(".mochi-game-shell").innerText();
   assert(
-    url.pathname === "/games/mochi-pets" && !url.search,
-    `${label(browserName, viewport)} did not return to the canonical doorway URL`,
+    !/\b(?:GitHub|Supabase|Vercel|Fly\.io|DigitalOcean|Unity|Pixelfed|backend|repository|artifact|runtime|protocol|contract|integration|development|coming soon)\b/i.test(copy),
+    `${contextLabel} exposes provider, implementation, or status language`,
   );
+  assert(
+    (copy.match(/A shared 3D guild home beyond the Jianghu/g) || []).length === 1,
+    `${contextLabel} public concept statement is missing or repeated`,
+  );
+}
+
+async function assertResponsiveLayout(page, contextLabel) {
+  const metrics = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  assert(metrics.scrollWidth <= metrics.clientWidth + 1, `${contextLabel} has horizontal page overflow`);
+  const shell = page.locator(".mochi-game-shell");
+  const shellBox = await shell.boundingBox();
+  assert(shellBox && shellBox.width > 0 && shellBox.height > 0, `${contextLabel} shell collapsed`);
+  assert(shellBox.x >= -1 && shellBox.x + shellBox.width <= metrics.clientWidth + 1, `${contextLabel} shell escapes the viewport`);
+  const controls = page.locator(".mochi-game-shell a, .mochi-game-shell button, .mochi-game-shell input");
+  for (let index = 0; index < await controls.count(); index += 1) {
+    const control = controls.nth(index);
+    if (!(await control.isVisible())) continue;
+    const box = await control.boundingBox();
+    assert(box && box.width >= 44 && box.height >= 44, `${contextLabel} has an interactive target smaller than 44px`);
+  }
+}
+
+async function assertWaitingRoomFocus(page, contextLabel) {
+  const title = page.getByRole("heading", { level: 1, name: "Mochi Pets" });
+  await page.waitForFunction(() => document.activeElement?.id === "mochi-pets-title");
+  const outline = await title.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { style: style.outlineStyle, width: parseFloat(style.outlineWidth) };
+  });
+  assert(outline.style !== "none" && outline.width >= 2, `${contextLabel} unlocked focus indicator is not visible`);
+}
+
+async function assertNoPrivateClientCode(page, contextLabel) {
+  const matches = await page.evaluate(async () => {
+    const urls = [...new Set([
+      ...Array.from(document.scripts, (script) => script.src).filter(Boolean),
+      ...performance.getEntriesByType("resource")
+        .map((entry) => entry.name)
+        .filter((url) => /\/_next\/static\/.*\.js(?:\?|$)/.test(url)),
+    ])];
+    const privateSignatures = ["/games/mochi-pets/member-access", "Unlock tester space"];
+    const hits = [];
+    for (const url of urls) {
+      const source = await fetch(url, { cache: "no-store" }).then((response) => response.text());
+      if (privateSignatures.some((signature) => source.includes(signature))) {
+        hits.push(new URL(url).pathname);
+      }
+    }
+    return hits;
+  });
+  assert(matches.length === 0, `${contextLabel} public-only page loaded private client code: ${matches.join(", ")}`);
+}
+
+async function submitAndWait(page, { keyboard = false } = {}) {
+  const responsePromise = page.waitForResponse((response) => (
+    new URL(response.url()).pathname === "/games/mochi-pets/tester-login"
+    && response.request().method() === "POST"
+  ));
+  if (keyboard) await page.getByLabel("Tester passcode").press("Enter");
+  else await page.getByRole("button", { name: "Unlock tester space" }).click();
+  return responsePromise;
+}
+
+async function waitForHeading(page, name) {
+  await page.getByRole("heading", { name, exact: true }).waitFor({ state: "visible" });
+}
+
+async function reloadDoorway(page) {
+  const url = `${baseUrl}/games/mochi-pets?smoke_navigation=${navigationOrdinal}`;
+  navigationOrdinal += 1;
+  await page.goto(url, { waitUntil: "commit", timeout: 45_000 });
+}
+
+async function setBrowserSession(page, token) {
+  const claims = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+  const session = {
+    access_token: token,
+    refresh_token: "synthetic-refresh-token",
+    token_type: "bearer",
+    expires_in: 7_200,
+    expires_at: claims.exp,
+    user: {
+      id: claims.sub,
+      aud: "authenticated",
+      role: "authenticated",
+      email: "smoke-member@example.invalid",
+      app_metadata: {},
+      user_metadata: {},
+      identities: [],
+      created_at: "2026-01-01T00:00:00.000Z",
+    },
+  };
+  await page.evaluate(([key, value]) => localStorage.setItem(key, value), [storageKey, JSON.stringify(session)]);
+}
+
+function syntheticToken(scenario, sub) {
+  const now = Math.floor(Date.now() / 1_000);
+  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({
+    aud: "authenticated",
+    exp: now + 7_200,
+    iat: now,
+    role: "authenticated",
+    scenario,
+    sub,
+  })).toString("base64url");
+  return `${header}.${payload}.synthetic-signature`;
+}
+
+function nextMemberId() {
+  const suffix = String(memberOrdinal).padStart(12, "0");
+  memberOrdinal += 1;
+  return `00000000-0000-4000-8000-${suffix}`;
 }
 
 async function hasSessionCookie(context) {
-  return (await context.cookies()).some((cookie) => cookie.name === "mochi_pets_tester_access");
+  return (await context.cookies(`${baseUrl}/games/mochi-pets`)).some((cookie) => cookie.name === "mochi_pets_tester_access");
 }
 
-async function assertLockedLayout(page, browserName, viewport) {
-  try {
-    await page.waitForFunction(() => {
-      const shell = document.querySelector(".mochi-game-shell");
-      const footerLink = document.querySelector(".footer-nav");
-      return Boolean(
-        shell
-        && getComputedStyle(shell).display === "grid"
-        && (!footerLink || getComputedStyle(footerLink).display === "flex")
-      );
-    });
-  } catch (error) {
-    const snapshot = await page.evaluate(() => {
-      const shell = document.querySelector(".mochi-game-shell");
-      const footerLink = document.querySelector(".footer-nav");
-      return {
-        readyState: document.readyState,
-        shellDisplay: shell ? getComputedStyle(shell).display : null,
-        footerLinkDisplay: footerLink ? getComputedStyle(footerLink).display : null,
-        stylesheets: [...document.styleSheets].map((sheet) => sheet.href || "inline"),
-      };
-    });
-    throw new Error(`${label(browserName, viewport)} styles did not become ready: ${JSON.stringify(snapshot)}`, {
-      cause: error,
-    });
-  }
-  const input = page.locator("input[name=testerPassword]");
-  try {
-    await input.waitFor({ state: "visible" });
-  } catch (error) {
-    const snapshot = await page.evaluate(() => ({
-      readyState: document.readyState,
-      path: window.location.pathname,
-      search: window.location.search,
-      passwordInputs: document.querySelectorAll('input[name="testerPassword"]').length,
-      waitingRooms: document.querySelectorAll("[data-mochi-pets-connection-state]").length,
-    }));
-    throw new Error(`${label(browserName, viewport)} tester password input did not become visible: ${JSON.stringify(snapshot)}`, {
-      cause: error,
-    });
-  }
-  assert((await page.locator("iframe").count()) === 0, `${label(browserName, viewport)} locked page rendered an iframe`);
-  assert((await page.locator("[data-mochi-pets-connection-state]").count()) === 0, `${label(browserName, viewport)} locked page exposed the waiting room`);
-  await input.focus();
-  assert(await input.evaluate((element) => element.matches(":focus")), `${label(browserName, viewport)} password input cannot receive focus`);
-  await page.addStyleTag({ content: "html { font-size: 200% !important; }" });
-  await page.waitForFunction(() => Number.parseFloat(getComputedStyle(document.documentElement).fontSize) >= 31);
-  await assertNoHorizontalOverflow(page, browserName, viewport);
-}
-
-async function assertNoHorizontalOverflow(page, browserName, viewport) {
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  if (overflow > 1) {
-    const offenders = await page.evaluate(() => [...document.querySelectorAll("body *")]
-      .map((element) => {
-        const rect = element.getBoundingClientRect();
-        const style = getComputedStyle(element);
-        const parent = element.parentElement;
-        const parentRect = parent?.getBoundingClientRect();
-        const parentStyle = parent ? getComputedStyle(parent) : null;
-        return {
-          selector: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${[...element.classList].map((name) => `.${name}`).join("")}`,
-          left: Math.round(rect.left),
-          right: Math.round(rect.right),
-          width: Math.round(rect.width),
-          display: style.display,
-          minWidth: style.minWidth,
-          maxWidth: style.maxWidth,
-          whiteSpace: style.whiteSpace,
-          overflowWrap: style.overflowWrap,
-          parent: parent ? `${parent.tagName.toLowerCase()}${parent.id ? `#${parent.id}` : ""}${[...parent.classList].map((name) => `.${name}`).join("")}` : null,
-          parentLeft: parentRect ? Math.round(parentRect.left) : null,
-          parentRight: parentRect ? Math.round(parentRect.right) : null,
-          parentWidth: parentRect ? Math.round(parentRect.width) : null,
-          parentDisplay: parentStyle?.display ?? null,
-        };
-      })
-      .filter((entry) => entry.left < -1 || entry.right > document.documentElement.clientWidth + 1)
-      .slice(0, 8));
-    throw new Error(
-      `${label(browserName, viewport)} has ${overflow}px horizontal overflow: ${JSON.stringify(offenders)}`,
-    );
-  }
-}
-
-async function assertMochiriiOnlyGameCopy(page, browserName, viewport) {
-  const copy = await page.locator(".mochi-game-shell").innerText();
+async function assertSessionCookie(context, contextLabel, allowWebKitNormalization = false) {
+  const cookie = (await context.cookies(`${baseUrl}/games/mochi-pets`)).find((entry) => entry.name === "mochi_pets_tester_access");
+  assert(cookie, `${contextLabel} valid access did not set the tester cookie`);
+  assert(cookie.httpOnly, `${contextLabel} tester cookie is not HttpOnly`);
+  assert(cookie.secure, `${contextLabel} tester cookie is not Secure`);
   assert(
-    !/\b(?:GitHub|Supabase|Vercel|Fly\.io|DigitalOcean|Unity|Pixelfed|iOS|backend|repository|artifact|runtime|protocol|contract|integration)\b/i.test(copy),
-    `${label(browserName, viewport)} game page exposes provider or system language`,
+    cookie.sameSite === "Lax" || (allowWebKitNormalization && cookie.sameSite === "None"),
+    `${contextLabel} tester cookie jar has an unexpected SameSite value`,
   );
+  assert(cookie.path === "/games/mochi-pets", `${contextLabel} tester cookie path is too broad`);
+  assert(cookie.expires > Date.now() / 1_000, `${contextLabel} tester cookie is expired`);
+}
+
+function assertSessionCookieHeader(header) {
+  const cookie = header || "";
+  assert(cookie.startsWith("mochi_pets_tester_access="), "configured login did not set the tester cookie header");
+  assert(/;\s*HttpOnly(?:;|$)/i.test(cookie), "tester cookie header is missing HttpOnly");
+  assert(/;\s*Secure(?:;|$)/i.test(cookie), "tester cookie header is missing Secure");
+  assert(/;\s*SameSite=Lax(?:;|$)/i.test(cookie), "tester cookie header is missing SameSite=Lax");
+  assert(/;\s*Path=\/games\/mochi-pets(?:;|$)/i.test(cookie), "tester cookie header path is too broad");
+}
+
+function assertResponse(response, expectedStatus, contextLabel) {
+  assert(response.status === expectedStatus, `${contextLabel} returned ${response.status}, expected ${expectedStatus}`);
+  assert(/no-store/i.test(response.headers.get("cache-control") || ""), `${contextLabel} response is cacheable`);
+}
+
+async function stubAnalytics(context) {
+  await context.route("**/_vercel/insights/script.js", (route) => route.fulfill({ status: 204, body: "" }));
+  await context.route("**/_vercel/speed-insights/script.js", (route) => route.fulfill({ status: 204, body: "" }));
+}
+
+function installDiagnostics(page) {
+  const errors = [];
+  page.on("console", (message) => {
+    if (message.type() !== "error") return;
+    const location = message.location().url;
+    if (location && ENDPOINT_PATHS.has(new URL(location).pathname)) return;
+    errors.push(`console:${message.text()}`);
+  });
+  page.on("pageerror", (error) => {
+    const expectedWebKitPrefetchCancellation = /^\/localhost:\d+\/[^ ?]*\?_rsc=[^ ]+ due to access control checks\.$/.test(error.message);
+    if (expectedWebKitPrefetchCancellation) return;
+    errors.push(`page:${error.message}`);
+  });
+  page.on("requestfailed", (request) => {
+    const url = new URL(request.url());
+    const path = url.pathname;
+    const failure = request.failure()?.errorText || "failed";
+    const sameOriginNavigationCancellation = url.origin === new URL(baseUrl).origin && request.method() === "GET";
+    const expectedCancellation = path === "/games/mochi-pets/member-access"
+      || path === "/auth/v1/user"
+      || path === "/rest/v1/member_profiles"
+      || sameOriginNavigationCancellation;
+    if (expectedCancellation && /(?:aborted|cancelled)/i.test(failure)) return;
+    errors.push(`request:${request.method()} ${request.url()} ${failure}`);
+  });
+  page.on("response", (response) => {
+    if (response.status() < 400) return;
+    const path = new URL(response.url()).pathname;
+    if (ENDPOINT_PATHS.has(path) && [400, 401, 403, 429, 503].includes(response.status())) return;
+    errors.push(`http:${response.status()} ${response.url()}`);
+  });
+  return errors;
 }
 
 function readArg(name, fallback) {
@@ -492,21 +557,6 @@ function readArg(name, fallback) {
 
 function label(browserName, viewport) {
   return `${browserName} ${viewport.width}x${viewport.height}`;
-}
-
-function assertSessionCookieHeader(header, { expectedSecure, contextLabel }) {
-  const cookie = header ?? "";
-  assert(cookie.includes("mochi_pets_tester_access="), `${contextLabel} did not set a session cookie`);
-  assert(/;\s*HttpOnly(?:;|$)/i.test(cookie), `${contextLabel} cookie is missing HttpOnly`);
-  assert(/;\s*SameSite=Lax(?:;|$)/i.test(cookie), `${contextLabel} cookie is missing SameSite=Lax`);
-  assert(
-    /;\s*Path=\/games\/mochi-pets(?:;|$)/i.test(cookie),
-    `${contextLabel} cookie path is not /games/mochi-pets`,
-  );
-  assert(
-    /;\s*Secure(?:;|$)/i.test(cookie) === expectedSecure,
-    `${contextLabel} cookie Secure state does not match transport`,
-  );
 }
 
 function assert(condition, message) {

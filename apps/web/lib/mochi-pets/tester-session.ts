@@ -1,8 +1,8 @@
 import "server-only";
 
-import { cookies } from "next/headers";
 import {
   createMochiPetsTesterSessionValue as createSessionValue,
+  createMochiPetsTesterMemberBinding as createMemberBinding,
   isMochiPetsTesterAccessConfigured as accessConfigured,
   MOCHI_PETS_TESTER_COOKIE,
   MOCHI_PETS_TESTER_COOKIE_MAX_AGE,
@@ -27,12 +27,14 @@ export function verifyMochiPetsTesterPassword(password: string) {
   return verifyPassword(password, configuredSecrets().password);
 }
 
-export function createMochiPetsTesterSessionValue(now = Date.now()) {
-  return createSessionValue(configuredSecrets(), now);
+export function createMochiPetsTesterSessionValue(memberBinding: string, now = Date.now()) {
+  return createSessionValue(configuredSecrets(), memberBinding, now);
 }
 
-export async function hasMochiPetsTesterSession(now = Date.now()) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(MOCHI_PETS_TESTER_COOKIE)?.value ?? "";
-  return verifyMochiPetsTesterSessionValue(token, configuredSecrets(), now);
+export function createMochiPetsTesterMemberBinding(memberId: string) {
+  return createMemberBinding(configuredSecrets(), memberId);
+}
+
+export function verifyMochiPetsTesterCookieValue(token: string, memberBinding: string, now = Date.now()) {
+  return verifyMochiPetsTesterSessionValue(token, configuredSecrets(), memberBinding, now);
 }

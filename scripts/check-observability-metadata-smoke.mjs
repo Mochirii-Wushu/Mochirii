@@ -22,6 +22,7 @@ const publicRoutes = [
   { route: "/spotify", key: "spotify", file: "apps/web/app/spotify/page.tsx" },
   { route: "/spotlight", key: "spotlight", file: "apps/web/app/spotlight/page.tsx" },
   { route: "/twills", key: "twills", file: "apps/web/app/twills/page.tsx" },
+  { route: "/games/mochi-pets", key: "mochiPets", file: "apps/web/app/games/mochi-pets/page.tsx" },
 ];
 
 const protectedRoutes = [
@@ -37,10 +38,7 @@ const retiredRoutes = [
   { route: `/games/${retiredGameSlug}`, file: `apps/web/app/games/${retiredGameSlug}/page.tsx` },
 ];
 
-const noindexRoutes = [
-  ...protectedRoutes,
-  { route: "/games/mochi-pets", file: "apps/web/app/games/mochi-pets/page.tsx", expectedFollow: false },
-];
+const noindexRoutes = [...protectedRoutes];
 
 const allSmokeRoutes = [...publicRoutes.map((item) => item.route), ...noindexRoutes.map((item) => item.route)];
 

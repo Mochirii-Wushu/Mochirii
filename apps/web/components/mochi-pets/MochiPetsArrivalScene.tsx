@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export function MochiPetsArrivalScene() {
+export function MochiPetsArrivalScene({ publicOnly = false }: { publicOnly?: boolean }) {
   return (
     <div className="mochi-arrival-scene" aria-hidden="true">
       <Image
@@ -12,8 +12,8 @@ export function MochiPetsArrivalScene() {
         sizes="(max-width: 980px) calc(100vw - 48px), 38vw"
       />
       <div className="mochi-arrival-scene__caption">
-        <span>Guild arrival</span>
-        <strong>Mochi Pets tester doorway</strong>
+        <span>{publicOnly ? "Mōchirīī Guild World" : "Guild arrival"}</span>
+        <strong>{publicOnly ? "Mochi Pets" : "Mochi Pets tester doorway"}</strong>
       </div>
     </div>
   );

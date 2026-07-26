@@ -17,6 +17,7 @@ const guildLinks = [
   { href: "/spotlight", label: "Spotlight" },
   { href: "/gallery", label: "Gallery" },
   { href: SOCIAL_HOST, label: "Social", external: true },
+  { href: "/games/mochi-pets", label: "Mochi Pets" },
 ] satisfies FooterLink[];
 
 const cultureLinks = [

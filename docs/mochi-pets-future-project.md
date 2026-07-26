@@ -1,11 +1,15 @@
 # Mochi Pets Fresh Project
 
-Mochi Pets is not an active website game or playable build. The former
-prototype repository and local checkout are deleted and must not be restored.
-The stable website route `/games/mochi-pets` provides a server-rendered tester
-password doorway and a disconnected waiting room. It must not embed, fetch,
-authenticate against, or depend on a game runtime while the connection contract
-is `not-connected`.
+Mochi Pets has no connected game runtime. The former prototype repository and
+local checkout are deleted and must not be restored. The stable, indexable
+website route `/games/mochi-pets` is a Mochirii concept page with an optional
+protected inner tester doorway. Builds without complete server-only tester
+configuration render the public concept alone. When included, that doorway
+requires freshly server-verified active Website membership and the current
+tester passcode. It must not embed, fetch
+from, authenticate against, or depend on a game runtime while the connection
+contract is `not-connected`, and the internal contract must not be serialized
+into the public page payload.
 
 The new private `Mochirii-Wushu/Mochirii-Pets` repository is a clean Unity
 foundation. It owns the single game source that will later produce Web and iOS
@@ -48,10 +52,10 @@ playable-build claim should appear until supported by a verified build.
    data only in separate threat-modeled and privacy-reviewed changes. Keep all
    provider credentials out of Unity assets, public Git, client logs, and
    website configuration.
-6. Connect the website only after a reviewed build has a stable hosted contract.
+6. Connect a playable Website artifact only after a reviewed build has a stable hosted contract.
    Extend `docs/integrations/mochi-pets-website-contract.md` through a focused
    Website pull request, test the integration on a preview, and preserve the
-   disconnected waiting room as the rollback state.
+   public concept page and locked tester doorway as the rollback state.
 
 The iOS host stays in `Mochirii-Social-Mobile`. It embeds a reviewed Unity export
 full-screen while Social and guild chat remain native screens connected to the

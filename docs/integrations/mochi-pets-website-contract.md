@@ -1,7 +1,8 @@
 # Mochi Pets Website Contract
 
-The Website owns the stable `/games/mochi-pets` route, its Mochirii presentation,
-the shared tester-password form, and the Website-only tester session. The fresh
+The Website owns the stable, public `/games/mochi-pets` concept route, its
+Mochirii presentation, the protected tester doorway, and the Website-only
+tester session. The fresh
 private `Mochirii-Wushu/Mochirii-Pets` repository owns the new Unity project,
 game source, tests, future build artifacts, platform bridges, and game-specific
 authentication contract.
@@ -17,26 +18,54 @@ provider secret or active game API. Its `social.originKey` resolves through the
 shared [`public-urls.json`](../../apps/web/config/public-urls.json) contract so
 the Social origin has one canonical source.
 
+The connection record is an internal release contract. The public page must not
+serialize it into rendered HTML, React Server Component payloads, metadata, or
+browser state.
+
 ## Current Website Backend
 
-- `POST /games/mochi-pets/tester-login` verifies the server-only shared tester
-  password and creates an eight-hour Website session.
+- `POST /games/mochi-pets/member-access` accepts the current browser Website
+  access token only in the Authorization header, invokes the existing hosted
+  member verifier, requires an active verified member, and then evaluates the
+  tester cookie bound to that member. Missing, invalid, revoked, unverified, or
+  mismatched access clears the tester cookie and fails closed.
+- `POST /games/mochi-pets/tester-login` repeats current member verification,
+  then verifies the server-only shared tester passcode before creating an
+  eight-hour Website session bound to that member.
 - `POST /games/mochi-pets/tester-logout` expires that session.
-- The signed, versioned cookie is HTTP-only, same-site, HTTPS-secure in hosted
+- The single signed, versioned cookie is HTTP-only, same-site, HTTPS-secure in all
   environments, and scoped to `/games/mochi-pets`.
 - `MOCHI_PETS_TESTER_PASSWORD` and `MOCHI_PETS_TESTER_SESSION_SECRET` are
   server-only provider values. The session secret must be an independent random
   value of at least 32 bytes.
+- The private doorway is present only in a build with both complete values.
+  Without that complete configuration, the route statically renders the public
+  concept alone; the access endpoints independently remain fail closed.
+- The server accepts 15 to 128 Unicode code points within a 512-byte bound; the
+  browser entry field caps input at 128 UTF-16 code units. The credential
+  workflow must therefore generate a high-entropy ASCII value in their shared
+  range. Submitted Unicode remains supported and is counted by code point.
+  No composition rule is imposed. The 15-character minimum, support for at
+  least 64 characters, Unicode handling, and absence of composition rules align
+  with current [NIST SP 800-63B password-verifier guidance](https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver).
+- Password comparison uses scrypt with `N=2^15`, `r=8`, and `p=1`, followed by
+  constant-time comparison. This bounded serverless setting is deliberate and
+  is not claimed as OWASP parameter parity; member verification, a per-instance
+  five-failure/15-minute defense-in-depth limiter, and the required provider
+  firewall rule form the online gate.
+- Browser session retrieval is only a raw-token handoff. The access token never
+  enters a URL, request body, DOM, React state, tester cookie, or application log.
 - The cookie authorizes only the Website waiting room. It is not a game API
   credential and must never be sent to a Unity build or another origin.
 
-Before production activation, add one narrowly scoped Vercel Firewall rate-limit
+Before issuing production tester access, add one narrowly scoped Vercel Firewall rate-limit
 rule for `POST /games/mochi-pets/tester-login`. The reviewed starting policy is
 10 requests per 10 minutes keyed by IP and JA4, returning HTTP 429. Reconfirm
 current plan availability and pricing in the official
 [Vercel rate-limiting documentation](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting)
-before the provider write. Application-memory counters are not an acceptable
-substitute in a distributed serverless runtime.
+before the provider write. The application-memory limiter is per instance and
+is not a substitute for this distributed provider rule or a provider-cost
+control for malformed requests.
 
 The waiting room performs no game request and contains no runtime URL, iframe,
 repository token, provider credential, Supabase game call, or dependency on the

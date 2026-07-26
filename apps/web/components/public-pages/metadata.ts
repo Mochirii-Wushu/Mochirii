@@ -15,7 +15,8 @@ type PageKey =
   | "spotlight"
   | "spotify"
   | "recruitment"
-  | "twills";
+  | "twills"
+  | "mochiPets";
 
 const pageMeta: Record<
   PageKey,
@@ -116,6 +117,13 @@ const pageMeta: Record<
       "Profile for Twills, Mōchirīī leader and guild contact for Where Winds Meet members who need a clear next step.",
     path: "/twills",
     image: "/assets/img/profiles/twills/hero.webp",
+  },
+  mochiPets: {
+    title: "Mochi Pets • Mōchirīī Guild World",
+    description:
+      "A shared 3D Mochirii guild home beyond the Jianghu, bringing members together with a Mochi companion of their own across iPhone and desktop.",
+    path: "/games/mochi-pets",
+    image: "/assets/img/mochi-pets/gate-arrival.webp",
   },
 };
 

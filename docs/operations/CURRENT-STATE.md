@@ -16,8 +16,14 @@ provider exports, customer data, signed URLs, or mutable access details here.
 - `apps/shopify-theme` is the Shopify theme source.
 - `services/social` is the DigitalOcean-hosted Mochirii Social source.
 - `supabase` contains migrations and Edge Functions for the hosted backend.
-- `/games/mochi-pets` is a noindex Website-owned tester doorway and disconnected
-  waiting room with no game browser bridge or backend dependency. The former
+- `/games/mochi-pets` is a public, indexable Website-owned concept page with an
+  optional protected inner tester doorway and no game browser bridge or backend
+  dependency. Builds without complete server-only tester configuration render
+  the public concept alone. When included, private entry requires freshly
+  server-verified active Website
+  membership and the current tester passcode; its single signed cookie is
+  HTTP-only and bound to that verified member. The internal disconnected game
+  contract is not included in the public page payload. The former
   prototype repository and local checkout are deleted and must not be restored.
   The fresh private game-source owner is `Mochirii-Wushu/Mochirii-Pets`; no Web
   or iOS playable artifact is connected.

@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     name: MOCHI_PETS_TESTER_COOKIE,
     value: "",
     httpOnly: true,
-    secure: requestProtocol(request) === "https",
+    secure: true,
     sameSite: "lax",
     path: "/games/mochi-pets",
     maxAge: 0,

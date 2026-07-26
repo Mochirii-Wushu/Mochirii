@@ -132,12 +132,14 @@ Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
 ## Mochi Pets Tester Doorway
 
-`/games/mochi-pets` is a dynamic, noindex tester-password doorway with a
-Website-only signed session and a disconnected waiting room. It has no playable
-build, iframe, browser token bridge, Supabase game call, or game-runtime
-dependency. Keep `MOCHI_PETS_TESTER_PASSWORD` and
-`MOCHI_PETS_TESTER_SESSION_SECRET` server-only, and keep status language factual
-until a reviewed build supports it.
+`/games/mochi-pets` is a public, indexable Mochirii concept page. The protected
+inner tester doorway is included only in builds that receive both complete
+server-only tester settings; otherwise the page contains only its public
+concept. When included, the doorway requires a freshly server-verified active
+Website member plus the current passcode and uses one signed, member-bound,
+server-only session cookie. It has no iframe, browser token bridge, game-data
+call, or hosted game-runtime dependency. Keep `MOCHI_PETS_TESTER_PASSWORD` and
+`MOCHI_PETS_TESTER_SESSION_SECRET` server-only.
 
 ## Private Live Spinner
 

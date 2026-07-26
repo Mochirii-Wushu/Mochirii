@@ -45,9 +45,18 @@
   grid-template-columns:minmax(280px, .82fr) minmax(300px, .62fr) minmax(260px, .56fr);
   grid-template-areas:
     "scene status status"
-    "scene gate notes"
-    "scene contract contract";
+    "scene gate notes";
   align-content:start;
+}
+
+.mochi-game-shell--concept{
+  grid-template-columns:minmax(280px, .82fr) minmax(420px, 1.18fr);
+  grid-template-areas:"scene status";
+  align-items:stretch;
+}
+
+.mochi-game-shell--concept .mochi-game-status{
+  align-items:center;
 }
 
 .mochi-game-shell--unlocked{
@@ -98,6 +107,11 @@
   line-height:1;
 }
 
+.mochi-game-status h1:focus{
+  outline:3px solid rgba(255,255,255,.72);
+  outline-offset:4px;
+}
+
 .mochi-game-status p,
 .mochi-game-panel p{
   max-width:68ch;
@@ -106,7 +120,6 @@
   line-height:1.55;
 }
 
-.mochi-game-status dl,
 .mochi-connection-facts{
   display:flex;
   flex-wrap:wrap;
@@ -115,7 +128,6 @@
   margin:0;
 }
 
-.mochi-game-status dl > div,
 .mochi-connection-facts > div{
   min-width:92px;
   padding:9px 10px;
@@ -124,14 +136,12 @@
   background:rgba(255,255,255,.06);
 }
 
-.mochi-game-status dt,
 .mochi-connection-facts dt{
   color:var(--ink-2);
   font-size:11px;
   text-transform:uppercase;
 }
 
-.mochi-game-status dd,
 .mochi-connection-facts dd{
   margin:3px 0 0;
   color:var(--ink-0);
@@ -279,13 +289,6 @@
 .mochi-gate-notes section{
   display:grid;
   gap:8px;
-  padding-bottom:12px;
-  border-bottom:1px solid rgba(221,239,255,.10);
-}
-
-.mochi-gate-notes section:last-child{
-  padding-bottom:0;
-  border-bottom:0;
 }
 
 .mochi-gate-notes ul,
@@ -301,24 +304,6 @@
 .mochi-gate-notes li::marker,
 .mochi-waiting-notes li::marker{
   color:var(--lantern);
-}
-
-.mochi-game-preview-contract{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
-  grid-area:contract;
-}
-
-.mochi-game-preview-contract span{
-  border:1px solid rgba(218,181,94,.26);
-  border-radius:14px;
-  background:rgba(218,181,94,.13);
-  color:var(--ink-0);
-  font-size:13px;
-  line-height:1.2;
-  padding:8px 10px;
 }
 
 .mochi-connection-panel{
@@ -342,7 +327,12 @@
   justify-content:flex-end;
 }
 
+.mochi-lock-form .hero-cta{
+  min-height:44px;
+}
+
 @media (max-width:980px){
+  .mochi-game-shell--concept,
   .mochi-game-shell--locked,
   .mochi-game-shell--unlocked{
     grid-template-columns:1fr;
@@ -353,8 +343,13 @@
       "status"
       "gate"
       "scene"
-      "notes"
-      "contract";
+      "notes";
+  }
+
+  .mochi-game-shell--concept{
+    grid-template-areas:
+      "status"
+      "scene";
   }
 
   .mochi-game-shell--unlocked{
@@ -376,8 +371,6 @@
   .mochi-game-page{padding-top:90px; padding-bottom:32px;}
   .mochi-game-shell{border-radius:18px; padding:12px;}
   .mochi-game-status{align-items:flex-start; flex-direction:column; padding:14px;}
-  .mochi-game-status dl{justify-content:flex-start;}
-  .mochi-game-status dl > div{flex:1 1 120px;}
   .mochi-arrival-scene{min-height:clamp(300px, 110vw, 460px); border-radius:15px;}
   .mochi-arrival-scene__caption{right:12px; bottom:12px; left:12px;}
   .mochi-lock-form{justify-content:flex-start; width:100%;}
