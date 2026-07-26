@@ -9,8 +9,9 @@ credentials, and operational evidence.
 | Storefront theme | `Mochirii-Wushu/Mochirii` `apps/shopify-theme` | Shopify | Theme publication and shared store-record writes remain separately gated. |
 | Shared backend | `Mochirii-Wushu/Mochirii` `supabase` | Supabase | Secrets remain runtime-only; schema changes are migration based. |
 | Guild social | `Mochirii-Wushu/Mochirii` `services/social` | DigitalOcean and Spaces | Federation remains disabled. Runtime state is never committed. |
-| Mochi Pets static project page | `Mochirii-Wushu/Mochirii` `apps/web` | Vercel | Owns `/games/mochi-pets`; no game runtime, access bridge, or backend dependency is active. |
-| Future Mochi Pets game | Not created | Not selected | Must begin later as a fresh Unity project in a new `Mochirii-Wushu` repository after separate approval. |
+| Mochi Pets tester doorway | `Mochirii-Wushu/Mochirii` `apps/web` | Vercel | Owns `/games/mochi-pets`, its Website-only password session, and the disconnected connection contract; no game runtime or game backend is active. |
+| Mochi Pets game source | `Mochirii-Wushu/Mochirii-Pets` | None; source only | Fresh Unity owner for future Web and iOS artifacts. No prototype history, runtime, backend, or playable build is connected. |
+| Mochi Pets mobile host and chat | `Mochirii-Wushu/Mochirii-Social-Mobile` | Future iOS app | Owns Social OAuth, native chat, navigation, and the future full-screen Unity host; consumes an immutable iOS export rather than Unity source. |
 | Local credentials and supplier evidence | No Git repository | `Mochi Creds` and protected provider secret stores | Never committed, logged, copied into artifacts, or exposed to browser code. |
 | Durable runbooks | `docs/operations` | GitHub | Markdown only; no secret values or signed URLs. |
 | Generated evidence | `.artifacts/operations` | Local ignored storage | Screenshots, logs, JSON readbacks, and rollback exports stay untracked. |
@@ -36,5 +37,5 @@ boundary is not permission to remove open-source attribution.
    for Social, an exact image digest and SBOM.
 4. Store provider values in protected environments and runtime secret stores;
    docs list names and destinations only.
-5. Keep any future game project and provider changes outside Website work until
-   a fresh Unity project is separately approved.
+5. Keep game-source and provider changes in their owning repositories and
+   approval packets; Website may consume only reviewed immutable game artifacts.

@@ -45,13 +45,15 @@ known set and CI rejects every new occurrence.
 - Discord/Reaper runs through hosted Edge Functions. No local bot process is a
   production dependency.
 
-## Future Game Boundary
+## Mochi Pets Boundary
 
-No active game repository or runtime is part of this architecture.
-`/games/mochi-pets` is a static, noindex Website route with no browser bridge or
-backend dependency. A future game must begin as a separately approved fresh
-Unity project in the `Mochirii-Wushu` GitHub organization and establish a new
-versioned integration contract before the static page changes.
+No playable game runtime is part of this architecture.
+`/games/mochi-pets` is a noindex Website route with a server-only shared tester
+gate and a disconnected waiting room. Its versioned connection contract makes
+no network request and contains no game origin or credential. The fresh private
+`Mochirii-Wushu/Mochirii-Pets` Unity repository owns game source for both Web and
+iOS; Website and Mobile consume only reviewed immutable artifacts. Mochirii
+Social remains the single member identity and future chat platform.
 
 See [repository ownership](operations/repository-ownership.md) for the detailed
 change and deployment matrix.

@@ -59,15 +59,20 @@ This is the short source-of-truth index for the current Mochirii production post
 - The repository toolchain pins Supabase CLI `2.109.1`. Use the repo-local binary on Windows (`node_modules/.bin/supabase.cmd`) and run Supabase CLI calls serially to avoid telemetry-file `EPERM` races.
 - Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables and adds high-value foreign-key indexes. Applied game-schema history remains preserved until a separately approved retention migration is designed.
 - Supabase linked advisor snapshot on 2026-07-12: security advisors returned 14 findings (`13` service-only `rls_enabled_no_policy` info findings plus `1` leaked-password protection warning). The focused migration `20260712164503_service_only_default_deny_policies.sql` is the protected-preview remediation for the 13 service-only tables; production remains unchanged until that PR is approved and deployed. Leaked-password protection is intentionally cost-deferred while the project remains on Free. Performance `unused_index` findings remain observation-only. See `docs/supabase-advisor-remediation-plan.md`.
-- The historical route/function/table rename remains preserved in applied migrations. `/games/mochi-pets` is now a static noindex future-project page; `/games/mochi-social` remains a normal 404 with no redirect.
+- The historical route/function/table rename remains preserved in applied migrations. `/games/mochi-pets` is a noindex Website tester doorway whose waiting room stays disconnected from game functions; `/games/mochi-social` remains a normal 404 with no redirect.
 
-## Mochi Pets Future Project
+## Mochi Pets Fresh Project
 
-- The customer-facing prototype, tester gate, iframe bridge, game URL configuration, and leader controls are retired. The static page has no game backend dependency.
+- The customer-facing prototype, iframe bridge, game URL configuration, and leader controls remain retired. A new server-only tester gate opens only a disconnected Website waiting room and has no game backend dependency.
 - `/games/mochi-pets` renders entirely from the Website deployment and states that no playable build or release date is available.
-- The approved retirement sequence deletes the former GitHub repository and local checkout only after the static page is production-verified.
+- The former GitHub repository and validated local checkout were deleted. They must not be restored or reused as the next game foundation.
 - Suspended Fly resources and any already-deployed Supabase functions, secrets, tables, or rows are not deleted by this source change. Security-reviewed function source remains in `supabase` until their inventory, retention, and removal are approved through a separate provider/data packet.
-- Any later implementation starts from a fresh Unity project and a new `Mochirii-Wushu` repository under `docs/mochi-pets-future-project.md`.
+- The fresh private Unity source repository is `Mochirii-Wushu/Mochirii-Pets`.
+  Its registration is tracked by the Website contract, while Web/iOS artifacts,
+  Social identity, chat, and game APIs remain fail-closed and not connected.
+- Any playable implementation connects through the versioned Website contract
+  in `docs/integrations/mochi-pets-website-contract.md` after reviewed immutable
+  artifacts and host compatibility evidence exist.
 
 ## Mochirii Social / Pixelfed
 

@@ -16,10 +16,11 @@ provider exports, customer data, signed URLs, or mutable access details here.
 - `apps/shopify-theme` is the Shopify theme source.
 - `services/social` is the DigitalOcean-hosted Mochirii Social source.
 - `supabase` contains migrations and Edge Functions for the hosted backend.
-- `/games/mochi-pets` is a static noindex future-project page with no browser
-  bridge, tester gate, or backend dependency. The former repository and local
-  checkout are retirement-only and are removed after the static page is
-  production-verified.
+- `/games/mochi-pets` is a noindex Website-owned tester doorway and disconnected
+  waiting room with no game browser bridge or backend dependency. The former
+  prototype repository and local checkout are deleted and must not be restored.
+  The fresh private game-source owner is `Mochirii-Wushu/Mochirii-Pets`; no Web
+  or iOS playable artifact is connected.
 
 The duplicate root static website is retired. Release
 `legacy-static-final-2026-07-18` contains its final restorable artifact;
@@ -104,7 +105,7 @@ The supported local workspace contains:
 C:\Github Repo's\Mochirii Website\
   Website\      Canonical website, theme, Social, and Supabase repository
   Mochirii-Social-Mobile\  First-party mobile client repository
-  Mochi Pets\   Retirement-only checkout pending deletion after page cutover
+  Mochirii-Pets\  Fresh Unity source repository; no playable artifact connected
   Mochi Creds\  Private synchronized credential and recovery boundary
   AGENTS.md      Umbrella workspace guidance
 ```
@@ -238,8 +239,9 @@ generated archives belong only in ignored `.artifacts/operations`.
 
 ## Deferred
 
-- A future Mochi Pets implementation is deferred until a separately approved
-  fresh Unity project is created under `Mochirii-Wushu`.
+- Mochi Pets gameplay remains deferred while the fresh private
+  `Mochirii-Wushu/Mochirii-Pets` Unity source has no reviewed Web or iOS playable
+  artifact connected to Website or Mobile.
 - Shopify product-evidence review, physical samples, remaining operational and
   provider validation, approved change packets, rollback exports, final
   payment setup, password removal, and public launch under the

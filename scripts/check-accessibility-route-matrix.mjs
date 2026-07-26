@@ -33,7 +33,7 @@ const routes = [
   { route: "/oauth/consent", label: "OAuth Consent", file: "apps/web/app/oauth/consent/page.tsx", type: "protected-entry", workflow: "Supabase OAuth consent", componentFiles: ["apps/web/components/member-workflow/OAuthConsentPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/gallery-submit", label: "Gallery Submit", file: "apps/web/app/gallery-submit/page.tsx", type: "member", workflow: "member upload", componentFiles: ["apps/web/components/member-workflow/GallerySubmitForm.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", file: "apps/web/app/leader-dashboard/page.tsx", type: "moderator", workflow: "moderation queues", componentFiles: ["apps/web/components/member-workflow/LeaderDashboard.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "future-project", workflow: "static project status", protectedNoindex: true },
+  { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "protected-entry", workflow: "tester-password doorway", componentFiles: ["apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx", "apps/web/components/mochi-pets/MochiPetsTesterWaitingRoom.tsx"], expectsForm: true, expectsAlert: true, protectedNoindex: true },
 ];
 
 const shell = inspectShell();
@@ -62,6 +62,7 @@ const report = {
     "Color contrast for muted text, status pills, form errors, badges, and glass panels in light and dark image areas.",
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
     "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, and leader queues.",
+    "Mochi Pets password error announcement, signed-out form labels, and unlocked waiting-room status.",
     "Iframe keyboard reachability and titles for Discord and Spotify embeds.",
   ],
   warnings,

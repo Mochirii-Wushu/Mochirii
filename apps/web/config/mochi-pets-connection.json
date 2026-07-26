@@ -1,0 +1,19 @@
+{
+  "protocolVersion": 1,
+  "status": "not-connected",
+  "websiteRoute": "/games/mochi-pets",
+  "repository": {
+    "slug": "Mochirii-Wushu/Mochirii-Pets",
+    "visibility": "private",
+    "sourceState": "scaffolded"
+  },
+  "platforms": {
+    "web": { "artifact": null },
+    "ios": { "artifact": null }
+  },
+  "social": {
+    "originKey": "socialHost",
+    "identityState": "not-connected",
+    "chatState": "not-ready"
+  }
+}

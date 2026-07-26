@@ -130,11 +130,13 @@ Current Next routes:
 
 Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
-## Mochi Pets Project Page
+## Mochi Pets Tester Doorway
 
-`/games/mochi-pets` is a static, noindex future-project page. It has no playable
-build, tester gate, iframe, browser bridge, Supabase call, or game-runtime
-dependency. Keep status language factual and do not announce a release date
+`/games/mochi-pets` is a dynamic, noindex tester-password doorway with a
+Website-only signed session and a disconnected waiting room. It has no playable
+build, iframe, browser token bridge, Supabase game call, or game-runtime
+dependency. Keep `MOCHI_PETS_TESTER_PASSWORD` and
+`MOCHI_PETS_TESTER_SESSION_SECRET` server-only, and keep status language factual
 until a reviewed build supports it.
 
 ## Private Live Spinner

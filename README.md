@@ -17,9 +17,10 @@ traffic, queues, schedules, media, authentication, and backups do not require a
 local workstation to remain online.
 
 The former Mochi Pets prototype and connected repository are retired.
-`/games/mochi-pets` remains a static, noindex status page hosted entirely by the
-website. A future game may begin later only as a fresh Unity project under the
-`Mochirii-Wushu` organization; see `docs/mochi-pets-future-project.md`.
+`/games/mochi-pets` is a noindex, Website-hosted tester doorway and disconnected
+waiting room. The fresh private game source is now
+`Mochirii-Wushu/Mochirii-Pets`; it does not restore the prototype and no playable
+artifact is connected. See `docs/mochi-pets-future-project.md`.
 
 See [system architecture](docs/architecture.md) and
 [repository ownership](docs/operations/repository-ownership.md).

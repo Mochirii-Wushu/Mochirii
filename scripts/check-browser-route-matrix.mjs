@@ -27,7 +27,7 @@ const routes = [
   { route: "/account", label: "Account", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectNoIframe: true, expectNoForm: true },
+  { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectNoIframe: true, expectForm: true },
 ];
 
 const viewports = [
@@ -320,8 +320,8 @@ function validateResult(route, result) {
   if (!result.focus.visible) failures.push(`${label}: keyboard tabbing did not reach a visible focus state.`);
   if (result.keyboardTrap.likelyTrap) failures.push(`${label}: keyboard tabbing appears trapped on one focus stop.`);
   if (result.iframes.total !== result.iframes.titled) failures.push(`${label}: iframe title coverage ${result.iframes.titled}/${result.iframes.total}.`);
-  if (route.expectNoIframe && result.iframes.total !== 0) failures.push(`${label}: static project page must not contain an iframe.`);
-  if (route.expectNoForm && result.forms !== 0) failures.push(`${label}: static project page must not contain a form.`);
+  if (route.expectNoIframe && result.iframes.total !== 0) failures.push(`${label}: disconnected tester doorway must not contain an iframe.`);
+  if (route.expectForm && result.forms === 0) failures.push(`${label}: tester doorway must contain its password form.`);
   if (route.requireOpaquePanels?.length) {
     if (result.readabilityPanels.total === 0) failures.push(`${label}: no critical readability panels matched ${route.requireOpaquePanels.join(", ")}.`);
     if (result.readabilityPanels.transparent > 0) {

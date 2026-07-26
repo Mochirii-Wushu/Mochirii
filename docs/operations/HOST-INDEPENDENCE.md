@@ -2,10 +2,14 @@
 
 The customer website, password-protected storefront, hosted backend, and Social
 application continue running when the development workstation is offline.
-The static Mochi Pets status page is served by the website and has no game
-runtime dependency. Codex, Chrome, local worktrees, Docker Desktop, local CLIs,
-and the private credential boundary are development or administration tools
-only.
+The Mochi Pets tester doorway and waiting room are served by the Vercel-hosted
+Website and have no game runtime dependency. Its password and independent
+session secret are the only two doorway-specific values and remain server-only
+in the Vercel runtime environment; missing values fail closed, and production
+route/config source rejects loopback, private-network, file, or workstation
+destinations. Codex, Chrome, local worktrees, Docker
+Desktop, local CLIs, and the private credential boundary are development or
+administration tools only.
 
 The machine-readable contract is
 [`docs/integrations/hosted-runtime.json`](../integrations/hosted-runtime.json).
