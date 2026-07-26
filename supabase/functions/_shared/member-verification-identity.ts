@@ -3,6 +3,7 @@ export type JsonRecord = Record<string, unknown>;
 export type SyncedProviderIdentity = {
   provider: string;
   provider_subject: string | null;
+  active: boolean;
 };
 
 export function asRecord(value: unknown): JsonRecord {
@@ -68,14 +69,15 @@ export function providerSubject(
 
 export function resolveDiscordIdentity(
   user: JsonRecord,
-  profile: JsonRecord | null,
   syncedIdentities: readonly SyncedProviderIdentity[] = [],
 ): string | null {
-  const synced = syncedIdentities.find((identity) =>
-    identity.provider === "discord"
-  )?.provider_subject;
-  const syncedId = safeString(synced, 40);
-  if (syncedId) return syncedId;
+  const trustedIds = new Set<string>();
+
+  for (const identity of syncedIdentities) {
+    if (identity.provider !== "discord" || identity.active !== true) continue;
+    const id = safeString(identity.provider_subject, 40);
+    if (id) trustedIds.add(id);
+  }
 
   const identities = Array.isArray(user.identities) ? user.identities : [];
   for (const identity of identities) {
@@ -87,18 +89,19 @@ export function resolveDiscordIdentity(
       providerSubject("discord", record, identityData, user),
       40,
     );
-    if (id) return id;
+    if (id) trustedIds.add(id);
   }
 
-  const metadata = asRecord(user.user_metadata);
-  return safeString(
-    profile?.discord_user_id ||
-      metadata.provider_id ||
-      metadata.sub ||
-      metadata.id ||
-      metadata.user_id,
-    40,
-  );
+  return trustedIds.size === 1 ? [...trustedIds][0] : null;
+}
+
+export function profileMatchesTrustedDiscordIdentity(
+  profileDiscordUserId: unknown,
+  trustedDiscordUserId: unknown,
+): boolean {
+  const profileId = safeString(profileDiscordUserId, 40);
+  const trustedId = safeString(trustedDiscordUserId, 40);
+  return Boolean(profileId && trustedId && profileId === trustedId);
 }
 
 export function discordAvatarUrl(discordUser: JsonRecord): string | null {

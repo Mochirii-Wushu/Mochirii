@@ -132,6 +132,13 @@ const reviewedLoopbacks = new Map([
       { value: "http://127.0.0.1:3000", count: 1 },
     ],
   ],
+  [
+    "apps/web/lib/spinner/session-policy.ts",
+    [
+      { value: '"localhost"', count: 2 },
+      { value: '"127.0.0.1"', count: 2 },
+    ],
+  ],
 ]);
 
 if (!existsSync(manifestPath)) failures.push("hosted runtime manifest is missing");

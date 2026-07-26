@@ -9,6 +9,7 @@ import {
   resolveDiscordIdentity,
   safeString,
   type JsonRecord,
+  type SyncedProviderIdentity,
 } from "../_shared/member-verification-identity.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 
@@ -188,11 +189,22 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   const userId = String(user.id);
-  const { data: profileData, error: profileError } = await adminClient
-    .from("member_profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
+  const [profileResult, identityResult] = await Promise.all([
+    adminClient
+      .from("member_profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle(),
+    adminClient
+      .from("member_auth_identities")
+      .select("provider,provider_subject,active")
+      .eq("user_id", userId)
+      .eq("provider", "discord")
+      .eq("active", true),
+  ]);
+
+  const { data: profileData, error: profileError } = profileResult;
+  const { data: identityRows, error: identityError } = identityResult;
 
   if (profileError) {
     console.error("verify-discord-member profile lookup failed", {
@@ -201,10 +213,32 @@ async function handleRequest(req: Request): Promise<Response> {
     });
   }
 
+  if (identityError) {
+    console.error("verify-discord-member trusted identity lookup failed", {
+      code: identityError.code,
+      message: identityError.message,
+    });
+    return jsonResponse(
+      verificationBody({
+        verified: false,
+        hasGuildMembership: false,
+        hasRequiredRoles: false,
+        pending: false,
+        missingRoleIds: requiredRoleIds,
+        memberStatus: "pending",
+        message: "Discord verification could not be completed. Please try again later.",
+      }),
+      500,
+    );
+  }
+
   const profile = profileData as JsonRecord | null;
   const currentStatus = safeString(profile?.member_status, 40) || "pending";
   const lockedStatus = LOCKED_STATUSES.has(currentStatus);
-  const discordUserId = resolveDiscordIdentity(user, profile);
+  const discordUserId = resolveDiscordIdentity(
+    user,
+    (identityRows || []) as SyncedProviderIdentity[],
+  );
   const now = new Date().toISOString();
 
   if (!discordUserId) {

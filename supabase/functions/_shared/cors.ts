@@ -39,7 +39,12 @@ export async function withProtectedCors(
   const headers = new Headers(response.headers);
 
   for (const [key, value] of Object.entries(protectedCorsHeaders(req, options))) {
-    headers.set(key, value);
+    if (key.toLowerCase() === "vary") {
+      const existing = headers.get(key);
+      headers.set(key, existing ? `${existing}, ${value}` : value);
+    } else {
+      headers.set(key, value);
+    }
   }
 
   return new Response(response.body, {

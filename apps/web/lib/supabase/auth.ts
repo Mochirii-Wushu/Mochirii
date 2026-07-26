@@ -1,4 +1,5 @@
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import type { SpinnerAccessMode } from "@/lib/spinner/session-policy";
 import {
   AUTH_PROVIDER_REGISTRY,
   isOAuthProviderId,
@@ -165,8 +166,65 @@ export async function signInWithDiscord(options: { redirectTo?: string } = {}) {
   return signInWithProvider("discord", options);
 }
 
+async function requestPrivateSpinnerSession(init: RequestInit, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch("/spinner/session", {
+      credentials: "same-origin",
+      cache: "no-store",
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
+export async function openPrivateSpinnerSession(requestedMode: SpinnerAccessMode): Promise<
+  { ok: true; mode: SpinnerAccessMode } | { ok: false }
+> {
+  if (typeof window === "undefined") return { ok: false };
+
+  try {
+    const sessionResult = await getCurrentSession();
+    const accessToken = sessionResult.data?.session?.access_token || "";
+    if (!sessionResult.ok || !accessToken) return { ok: false };
+
+    const response = await requestPrivateSpinnerSession({
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+        "X-Spinner-Mode": requestedMode,
+      },
+    }, 8_000);
+    const mode = response.headers.get("X-Spinner-Mode");
+    if (response.status !== 204 || mode !== requestedMode) {
+      return { ok: false };
+    }
+    return { ok: true, mode };
+  } catch {
+    return { ok: false };
+  }
+}
+
+export async function clearPrivateSpinnerSession() {
+  if (typeof window === "undefined") return;
+  try {
+    await requestPrivateSpinnerSession({
+      method: "DELETE",
+      headers: { Accept: "application/json" },
+      keepalive: true,
+    }, 4_000);
+  } catch {
+    // Server-issued spinner access remains bounded by its short expiry.
+  }
+}
+
 export async function signOut() {
   try {
+    await clearPrivateSpinnerSession();
     const client = requireBrowserSupabaseClient();
     const { error } = await client.auth.signOut();
     if (error) return failedResult(error);

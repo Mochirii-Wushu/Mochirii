@@ -207,13 +207,34 @@ assertIncludes("check-all", checkAll, '["test:supabase-service-role", ["deno", "
   "defaultDisplayName",
   "providerSubject",
   "resolveDiscordIdentity",
+  "profileMatchesTrustedDiscordIdentity",
+  "identity.active !== true",
   "discordAvatarUrl",
 ].forEach((snippet) => assertIncludes("shared member verification identity", memberVerificationIdentity, snippet));
 
 [
-  "Discord identity resolution uses synced, auth, profile, then metadata precedence",
+  "metadata.provider_id",
+  "profile?.discord_user_id ||",
+].forEach((snippet) => assertNotIncludes("shared member verification identity authority", memberVerificationIdentity, snippet));
+
+[
+  "Discord identity resolution accepts only active synced or provider identities",
+  "Discord identity resolution fails closed when trusted sources conflict",
+  "Discord profile verification requires an exact trusted identity match",
   "Discord avatar URLs select static and animated CDN formats",
 ].forEach((snippet) => assertIncludes("shared member verification identity tests", memberVerificationIdentityTest, snippet));
+
+[
+  ["verify-member-access", verifyMemberAccess],
+  ["verify-discord-member", verifyDiscordMember],
+  ["shared gallery moderation", galleryModeration],
+].forEach(([label, source]) => {
+  assertIncludes(label, source, "member_auth_identities");
+  assertIncludes(label, source, '.eq("active", true)');
+  assertIncludes(label, source, "resolveDiscordIdentity(");
+});
+
+assertIncludes("verify-member-access trusted profile binding", verifyMemberAccess, "profileMatchesTrustedDiscordIdentity(");
 
 [
   'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',

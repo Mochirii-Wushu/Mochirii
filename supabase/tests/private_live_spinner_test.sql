@@ -1,0 +1,601 @@
+BEGIN;
+SELECT plan(45);
+
+INSERT INTO auth.users (
+  id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at
+) VALUES (
+  '99999999-9999-4999-8999-999999999999',
+  'authenticated',
+  'authenticated',
+  'spinner-backend-test@example.invalid',
+  '',
+  now(),
+  now(),
+  now()
+);
+
+SELECT ok(to_regclass('public.spinner_live_state') IS NOT NULL, 'live state table exists');
+SELECT ok(to_regclass('public.spinner_commands') IS NOT NULL, 'command table exists');
+SELECT ok(to_regclass('public.spinner_draw_receipts') IS NOT NULL, 'receipt table exists');
+SELECT ok(to_regclass('public.spinner_discord_outbox') IS NOT NULL, 'Discord outbox table exists');
+SELECT ok(to_regclass('public.spinner_moderator_authorizations') IS NOT NULL, 'moderator authorization cache exists');
+
+SELECT ok(
+  (SELECT NOT attnotnull FROM pg_attribute
+    WHERE attrelid = 'public.spinner_commands'::regclass AND attname = 'actor_id')
+  AND (SELECT NOT attnotnull FROM pg_attribute
+    WHERE attrelid = 'public.spinner_draw_receipts'::regclass AND attname = 'actor_id')
+  AND (SELECT bool_and(confdeltype = 'n') FROM pg_constraint
+    WHERE conrelid IN ('public.spinner_commands'::regclass, 'public.spinner_draw_receipts'::regclass)
+      AND contype = 'f'
+      AND pg_get_constraintdef(oid) LIKE '%actor_id%'),
+  'moderator account deletion nulls historical actor references without deleting receipts'
+);
+
+SELECT ok(
+  (SELECT bool_and(relrowsecurity) FROM pg_class WHERE oid IN (
+    'public.spinner_live_state'::regclass,
+    'public.spinner_commands'::regclass,
+    'public.spinner_draw_receipts'::regclass,
+    'public.spinner_discord_outbox'::regclass,
+    'public.spinner_moderator_authorizations'::regclass
+  )),
+  'RLS is enabled on every authoritative spinner table'
+);
+
+SELECT ok(
+  NOT has_table_privilege('anon', 'public.spinner_live_state', 'select')
+  AND NOT has_table_privilege('anon', 'public.spinner_commands', 'select')
+  AND NOT has_table_privilege('anon', 'public.spinner_draw_receipts', 'select')
+  AND NOT has_table_privilege('anon', 'public.spinner_discord_outbox', 'select')
+  AND NOT has_table_privilege('anon', 'public.spinner_moderator_authorizations', 'select'),
+  'anonymous clients have no direct spinner table access'
+);
+
+SELECT ok(
+  NOT has_table_privilege('authenticated', 'public.spinner_live_state', 'select')
+  AND NOT has_table_privilege('authenticated', 'public.spinner_commands', 'select')
+  AND NOT has_table_privilege('authenticated', 'public.spinner_draw_receipts', 'select')
+  AND NOT has_table_privilege('authenticated', 'public.spinner_discord_outbox', 'select')
+  AND NOT has_table_privilege('authenticated', 'public.spinner_moderator_authorizations', 'select'),
+  'authenticated clients have no direct spinner table access'
+);
+
+SELECT ok(
+  has_table_privilege('service_role', 'public.spinner_live_state', 'select')
+  AND has_table_privilege('service_role', 'public.spinner_commands', 'select')
+  AND has_table_privilege('service_role', 'public.spinner_draw_receipts', 'select')
+  AND has_table_privilege('service_role', 'public.spinner_discord_outbox', 'select')
+  AND has_table_privilege('service_role', 'public.spinner_moderator_authorizations', 'select'),
+  'service role owns the authoritative spinner path'
+);
+
+SELECT ok(
+  NOT has_function_privilege('authenticated', 'public.spinner_reserve_command(uuid,text,uuid,bigint,text)', 'execute'),
+  'browser roles cannot reserve moderator commands'
+);
+SELECT ok(
+  NOT has_function_privilege('authenticated', 'public.spinner_apply_command(uuid)', 'execute'),
+  'browser roles cannot apply moderator commands'
+);
+SELECT ok(
+  NOT has_function_privilege('authenticated', 'public.spinner_finalize_reveal()', 'execute'),
+  'browser roles cannot finalize the live state directly'
+);
+SELECT ok(
+  has_function_privilege('service_role', 'public.spinner_reserve_command(uuid,text,uuid,bigint,text)', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_stage_command(uuid,jsonb)', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_reject_unstaged_spin(uuid)', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_apply_command(uuid)', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_recover_commands()', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_finalize_reveal()', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_cleanup_expired(timestamp with time zone)', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_claim_discord_outbox(uuid,integer)', 'execute')
+  AND has_function_privilege('service_role', 'public.spinner_finish_discord_outbox_claim(uuid,uuid,text,text,text,timestamp with time zone)', 'execute'),
+  'service role can run the transactional command functions'
+);
+
+SELECT is((SELECT count(*)::integer FROM public.spinner_live_state), 1, 'exactly one live state row is seeded');
+
+SELECT ok(
+  (SELECT pg_get_constraintdef(oid) FROM pg_constraint
+    WHERE conname = 'spinner_discord_outbox_channel_allowlist_check')
+    LIKE '%1468667003366674721%',
+  'the semantic raffle outbox is pinned to the approved channel'
+);
+
+SELECT ok(
+  EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgrelid = 'public.spinner_draw_receipts'::regclass
+      AND tgname = 'spinner_draw_receipts_immutable'
+      AND tgenabled <> 'D'
+  ),
+  'receipt immutability trigger is enabled'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM pg_constraint
+    WHERE conname IN (
+      'spinner_commands_retention_check',
+      'spinner_draw_receipts_retention_check',
+      'spinner_discord_outbox_retention_check'
+    )),
+  3,
+  'command, receipt, and outbox records retain a 30-day floor'
+);
+
+SELECT ok(
+  (SELECT pg_get_constraintdef(oid)
+    FROM pg_constraint
+    WHERE conname = 'spinner_moderator_authorizations_window_check')
+    LIKE '%00:05:00%',
+  'cached moderator authority cannot outlive the five-minute revocation window'
+);
+
+SELECT ok(
+  EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND tablename = 'spinner_discord_outbox'
+      AND indexname = 'spinner_discord_outbox_draw_channel_key'
+  ),
+  'one outbox row is keyed by draw and semantic channel'
+);
+
+SELECT ok(
+  NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'realtime'
+      AND tablename = 'messages'
+      AND cmd = 'INSERT'
+      AND policyname LIKE 'spinner%'
+  ),
+  'spinner viewers have no Realtime send policy'
+);
+
+SELECT ok(
+  EXISTS (
+    SELECT 1 FROM pg_attribute
+    WHERE attrelid = 'public.spinner_commands'::regclass
+      AND attname = 'lease_expires_at'
+      AND NOT attisdropped
+  )
+  AND EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND tablename = 'spinner_commands'
+      AND indexname = 'spinner_commands_pending_lease_idx'
+  ),
+  'pending commands have an indexed recovery lease'
+);
+
+SELECT is(
+  (SELECT count(*)::integer FROM cron.job
+    WHERE jobname IN ('spinner-maintenance-every-5-seconds', 'spinner-cleanup-daily')),
+  2,
+  'automatic maintenance, delivery retries, and retention cleanup are scheduled'
+);
+
+SELECT ok(
+  EXISTS (
+    SELECT 1 FROM pg_trigger
+    WHERE tgrelid = 'public.spinner_discord_outbox'::regclass
+      AND tgname = 'spinner_discord_outbox_queue_dispatch'
+      AND tgenabled <> 'D'
+  ),
+  'new draw outbox rows queue Reaper delivery immediately after commit'
+);
+
+SELECT ok(
+  (public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+    'set_roster',
+    '99999999-9999-4999-8999-999999999999',
+    0,
+    repeat('a', 64)
+  ) ->> 'reserved')::boolean,
+  'the first command reserves revision zero'
+);
+
+SELECT ok(
+  (public.spinner_stage_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+    jsonb_build_object('participants', '[]'::jsonb, 'rosterHashSha256', repeat('0', 64))
+  ) ->> 'ok')::boolean,
+  'a clear roster command can be staged'
+);
+
+SELECT public.spinner_apply_command('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1');
+SELECT ok(
+  (SELECT revision = 1 AND participants = '[]'::jsonb FROM public.spinner_live_state WHERE singleton_id = 1)
+  AND (SELECT status = 'applied' FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1'),
+  'set_roster accepts zero participants and increments the revision once'
+);
+
+SELECT ok(
+  (public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1',
+    'set_roster',
+    '99999999-9999-4999-8999-999999999999',
+    0,
+    repeat('a', 64)
+  ) ->> 'status') = 'applied'
+  AND (SELECT revision = 1 FROM public.spinner_live_state WHERE singleton_id = 1),
+  'replaying an applied command returns its result without another revision'
+);
+
+SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+    'set_roster',
+    '99999999-9999-4999-8999-999999999999',
+    1,
+    repeat('b', 64)
+  );
+SELECT public.spinner_stage_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+    jsonb_build_object(
+      'participants', jsonb_build_array(jsonb_build_object(
+        'version', 1,
+        'id', '11111111-1111-4111-8111-111111111111',
+        'displayName', 'Lotus'
+      )),
+      'rosterHashSha256', repeat('1', 64)
+    )
+  );
+SELECT public.spinner_apply_command('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2');
+SELECT ok(
+  (SELECT revision = 2 AND jsonb_array_length(participants) = 1 FROM public.spinner_live_state WHERE singleton_id = 1)
+  AND (SELECT status = 'applied' FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2'),
+  'set_roster accepts one participant for editing while draw eligibility remains separate'
+);
+
+UPDATE public.spinner_live_state
+SET start_rotation = 777, final_rotation = 777
+WHERE singleton_id = 1;
+
+SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3',
+    'reset',
+    '99999999-9999-4999-8999-999999999999',
+    2,
+    repeat('c', 64)
+  );
+SELECT public.spinner_stage_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3',
+    '{}'::jsonb
+  );
+SELECT public.spinner_apply_command('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa3');
+SELECT ok(
+  (
+    SELECT revision = 3
+      AND jsonb_array_length(participants) = 1
+      AND start_rotation = 777
+      AND final_rotation = 777
+      AND draw_id IS NULL
+      AND winner IS NULL
+    FROM public.spinner_live_state
+    WHERE singleton_id = 1
+  ),
+  'reset preserves the roster and resting wheel rotation while clearing prior draw state'
+);
+
+SELECT ok(
+  (public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4',
+    'set_roster',
+    '99999999-9999-4999-8999-999999999999',
+    3,
+    repeat('d', 64)
+  ) ->> 'reserved')::boolean,
+  'an unstaged command can be reserved before recovery'
+);
+UPDATE public.spinner_commands
+SET created_at = now() - interval '2 minutes',
+  lease_expires_at = now() - interval '1 minute'
+WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4';
+SELECT public.spinner_recover_commands();
+SELECT ok(
+  (SELECT action = 'set_roster'
+      AND status = 'pending'
+      AND staged_payload IS NULL
+      AND error_code = 'unstaged_lease_expired'
+    FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4'),
+  'an expired unstaged non-spin command remains pending and explicitly reclaimable'
+);
+WITH replay AS MATERIALIZED (
+  SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4',
+    'set_roster',
+    '99999999-9999-4999-8999-999999999999',
+    3,
+    repeat('d', 64)
+  ) AS result
+)
+SELECT ok(
+  (SELECT (result ->> 'reserved')::boolean
+      AND (result ->> 'recoveredReservation')::boolean
+      AND result ->> 'status' = 'pending'
+    FROM replay)
+  AND (SELECT revision = 3 FROM public.spinner_live_state WHERE singleton_id = 1),
+  'an exact-ID retry reclaims an expired unstaged command without changing live state'
+);
+
+SELECT public.spinner_stage_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4',
+    jsonb_build_object(
+      'participants', jsonb_build_array(
+        jsonb_build_object('version', 1, 'id', '11111111-1111-4111-8111-111111111111', 'displayName', 'Lotus'),
+        jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
+      ),
+      'rosterHashSha256', repeat('2', 64)
+    )
+  );
+SELECT ok(
+  (SELECT status = 'pending' AND staged_payload is not null
+    FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4'),
+  'a recoverable roster replacement can be staged once'
+);
+UPDATE public.spinner_commands
+SET created_at = now() - interval '2 minutes',
+  lease_expires_at = now() - interval '1 minute'
+WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa4';
+SELECT public.spinner_recover_commands();
+SELECT ok(
+  (SELECT revision = 4 AND jsonb_array_length(participants) = 2
+    FROM public.spinner_live_state WHERE singleton_id = 1),
+  'an expired staged command applies its frozen payload without resampling'
+);
+
+SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6',
+    'spin',
+    '99999999-9999-4999-8999-999999999999',
+    4,
+    repeat('f', 64)
+  );
+SELECT public.spinner_stage_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6',
+    jsonb_build_object(
+      'receipt', jsonb_build_object(
+        'version', 1,
+        'drawId', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+        'timestampIso', now(),
+        'singaporeTime', '26 Jul 2026, 20:34:56 SGT',
+        'appVersion', '1.0.0',
+        'algorithmVersion', 'uniform-uint32-rejection-v1',
+        'rosterSnapshot', jsonb_build_object(
+          'version', 1,
+          'participants', jsonb_build_array(
+            jsonb_build_object('version', 1, 'id', '11111111-1111-4111-8111-111111111111', 'displayName', 'Lotus'),
+            jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
+          )
+        ),
+        'rosterHashSha256', repeat('2', 64),
+        'rejectionLimit', 4294967296,
+        'sampledWords', jsonb_build_array(1),
+        'acceptedWord', 1,
+        'selectedIndex', 1,
+        'winner', jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
+      ),
+      'startAt', now() + interval '2 seconds',
+      'revealAt', now() + interval '6.8 seconds',
+      'durationMs', 4800,
+      'startRotation', 777,
+      'finalRotation', 2757,
+      'discordChannelKey', 'raffle_spins',
+      'discordChannelId', '1468667003366674721',
+      'discordStartPayload', jsonb_build_object(
+        'content', 'Mōchirīī raffle is live: https://mochirii.com/spinner',
+        'nonce', 'bbbbbbbbbbbbbbbbbbbbbbbbb',
+        'enforce_nonce', true,
+        'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+      ),
+      'discordResultPayload', jsonb_build_object(
+        'content', 'Mōchirīī raffle complete.',
+        'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+      )
+    )
+  );
+SELECT public.spinner_apply_command('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6');
+SELECT ok(
+  (SELECT status = 'applied' FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6')
+  AND (SELECT phase = 'start_pending' FROM public.spinner_discord_outbox
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+  'a spin persists first and returns without waiting on Discord delivery'
+);
+
+SELECT ok(
+  (SELECT timestamp_iso = now()
+      AND timestamp_iso = (receipt ->> 'timestampIso')::timestamptz
+    FROM public.spinner_draw_receipts
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')
+  AND (SELECT started_at = now() + interval '2 seconds'
+    FROM public.spinner_live_state WHERE singleton_id = 1),
+  'the receipt records selection time separately from the synchronized future start'
+);
+
+SELECT ok(
+  (SELECT response_snapshot -> 'winner' ->> 'displayName' = 'Jade'
+      AND (response_snapshot ->> 'selectedIndex')::integer = 1
+    FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6'),
+  'the idempotent command record retains the frozen winner before display reveal'
+);
+
+UPDATE public.spinner_discord_outbox
+SET attempt_count = 20,
+  claim_token = null,
+  claim_expires_at = null
+WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+SELECT * FROM public.spinner_claim_discord_outbox(
+  'abababab-abab-4bab-8bab-abababababab',
+  10
+);
+SELECT ok(
+  (SELECT phase = 'failed' AND last_error_code = 'delivery_attempts_exhausted'
+    FROM public.spinner_discord_outbox
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+  'an exhausted delivery is failed deterministically instead of violating its attempt bound'
+);
+
+UPDATE public.spinner_live_state
+SET started_at = now() - interval '6 seconds',
+  reveal_at = now() - interval '1 second'
+WHERE singleton_id = 1;
+SELECT public.spinner_finalize_reveal();
+WITH replay AS MATERIALIZED (
+  SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6',
+    'spin',
+    '99999999-9999-4999-8999-999999999999',
+    4,
+    repeat('f', 64)
+  ) AS result
+)
+SELECT ok(
+  (SELECT result -> 'snapshot' ->> 'phase' = 'revealed'
+      AND result -> 'snapshot' -> 'winner' ->> 'displayName' = 'Jade'
+    FROM replay),
+  'an applied spin replay returns the current revealed winner without changing revision'
+);
+
+INSERT INTO public.spinner_commands (
+  command_id, action, actor_id, expected_revision, request_hash_sha256, status,
+  created_at, lease_expires_at, completed_at, expires_at
+) VALUES (
+  'cccccccc-cccc-4ccc-8ccc-cccccccccccc', 'spin',
+  '99999999-9999-4999-8999-999999999999', 0, repeat('3', 64), 'applied',
+  now() - interval '31 days', now() - interval '30 days', now() - interval '31 days', now() - interval '1 day'
+);
+INSERT INTO public.spinner_draw_receipts (
+  draw_id, command_id, session_id, revision, actor_id, timestamp_iso,
+  singapore_time, app_version, algorithm_version, roster_snapshot,
+  roster_hash_sha256, rejection_limit, sampled_words, accepted_word,
+  selected_index, winner, receipt, created_at, expires_at
+) VALUES (
+  'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+  'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+  'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', 1,
+  '99999999-9999-4999-8999-999999999999', now() - interval '31 days',
+  '25 Jun 2026, 20:34:56 SGT', '1.0.0', 'uniform-uint32-rejection-v1',
+  jsonb_build_object('version', 1, 'participants', jsonb_build_array(
+    jsonb_build_object('version', 1, 'id', '11111111-1111-4111-8111-111111111111', 'displayName', 'Lotus'),
+    jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
+  )),
+  repeat('3', 64), 4294967296, jsonb_build_array(0), 0, 0,
+  jsonb_build_object('version', 1, 'id', '11111111-1111-4111-8111-111111111111', 'displayName', 'Lotus'),
+  jsonb_build_object('version', 1, 'drawId', 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'),
+  now() - interval '31 days', now() - interval '1 day'
+);
+INSERT INTO public.spinner_discord_outbox (
+  draw_id, channel_key, channel_id, phase, start_payload, result_payload,
+  reveal_after, created_at, updated_at, completed_at, expires_at
+) VALUES (
+  'dddddddd-dddd-4ddd-8ddd-dddddddddddd', 'raffle_spins', '1468667003366674721', 'completed',
+  jsonb_build_object(
+    'content', 'Expired draw', 'nonce', 'ddddddddddddddddddddddddd', 'enforce_nonce', true,
+    'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+  ),
+  jsonb_build_object(
+    'content', 'Expired result',
+    'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+  ),
+  now() - interval '31 days', now() - interval '31 days', now() - interval '31 days',
+  now() - interval '31 days', now() - interval '1 day'
+);
+UPDATE public.spinner_live_state
+SET draw_id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
+WHERE singleton_id = 1;
+SELECT public.spinner_cleanup_expired();
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM public.spinner_discord_outbox WHERE draw_id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd')
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_draw_receipts WHERE draw_id = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd')
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_commands WHERE command_id = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'),
+  'retention cleanup removes expired evidence after 30 days even when the live stage still points at that draw'
+);
+
+SELECT public.spinner_reserve_command(
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa7',
+  'spin',
+  '99999999-9999-4999-8999-999999999999',
+  6,
+  repeat('7', 64)
+);
+UPDATE public.spinner_commands
+SET created_at = now() - interval '2 minutes',
+  lease_expires_at = now() - interval '1 minute'
+WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa7';
+SELECT public.spinner_recover_commands();
+WITH replay AS MATERIALIZED (
+  SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa7',
+    'spin',
+    '99999999-9999-4999-8999-999999999999',
+    6,
+    repeat('7', 64)
+  ) AS result
+)
+SELECT ok(
+  (SELECT result ->> 'reserved' = 'false'
+      AND result ->> 'status' = 'rejected'
+      AND result ->> 'error' = 'spin_result_not_durable'
+    FROM replay),
+  'a persisted spin reservation lost before staging is terminal so its exact command ID cannot resample'
+);
+
+SELECT public.spinner_reserve_command(
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa8',
+  'spin',
+  '99999999-9999-4999-8999-999999999999',
+  6,
+  repeat('8', 64)
+);
+SELECT public.spinner_reject_unstaged_spin(
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa8'
+);
+SELECT ok(
+  (SELECT status = 'rejected' AND error_code = 'spin_result_not_durable'
+    FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa8'),
+  'an Edge failure terminalizes an unstaged spin so retry requires a new command ID'
+);
+
+INSERT INTO public.spinner_moderator_authorizations (user_id, verified_at, expires_at)
+VALUES (
+  '99999999-9999-4999-8999-999999999999',
+  now() - interval '10 minutes',
+  now() - interval '5 minutes'
+);
+SELECT public.spinner_cleanup_expired();
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM public.spinner_moderator_authorizations
+    WHERE user_id = '99999999-9999-4999-8999-999999999999'),
+  'expired moderator authority is removed by bounded retention cleanup'
+);
+
+INSERT INTO public.spinner_moderator_authorizations (user_id, verified_at, expires_at)
+VALUES (
+  '99999999-9999-4999-8999-999999999999',
+  now(),
+  now() + interval '5 minutes'
+);
+
+DELETE FROM auth.users WHERE id = '99999999-9999-4999-8999-999999999999';
+SELECT ok(
+  NOT EXISTS (SELECT 1 FROM auth.users WHERE id = '99999999-9999-4999-8999-999999999999')
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_commands WHERE actor_id IS NOT NULL)
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_draw_receipts WHERE actor_id IS NOT NULL)
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_moderator_authorizations)
+  AND EXISTS (SELECT 1 FROM public.spinner_draw_receipts
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+  'deleting a moderator account nulls actor references while retaining immutable draw evidence'
+);
+
+SELECT * FROM finish();
+ROLLBACK;

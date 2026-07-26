@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import { resolveDiscordIdentity, type SyncedProviderIdentity } from "./member-verification-identity.ts";
 import { getServiceRoleKey } from "./supabase-service-role.ts";
 
 export type JsonRecord = Record<string, unknown>;
@@ -99,36 +100,6 @@ export async function readRequiredJsonBody(req: Request): Promise<{ ok: true; bo
       ),
     };
   }
-}
-
-function resolveDiscordIdentity(user: JsonRecord, profile: JsonRecord | null): string | null {
-  const identities = Array.isArray(user.identities) ? user.identities : [];
-
-  for (const identity of identities) {
-    const record = asRecord(identity);
-    if (record.provider !== "discord") continue;
-
-    const identityData = asRecord(record.identity_data);
-    const id = safeString(
-      record.provider_id ||
-        identityData.provider_id ||
-        identityData.sub ||
-        identityData.id ||
-        identityData.user_id,
-      40,
-    );
-    if (id) return id;
-  }
-
-  const metadata = asRecord(user.user_metadata);
-  return safeString(
-    profile?.discord_user_id ||
-      metadata.provider_id ||
-      metadata.sub ||
-      metadata.id ||
-      metadata.user_id,
-    40,
-  );
 }
 
 function moderatorConfigMatches(configuredRoleIds: string[]): boolean {
@@ -245,21 +216,36 @@ export async function requireModeratorAccess(req: Request): Promise<ModeratorAcc
   }
 
   const userId = String(user.id);
-  const { data: profileData, error: profileError } = await adminClient
-    .from("member_profiles")
-    .select("discord_user_id")
-    .eq("id", userId)
-    .maybeSingle();
+  const { data: identityRows, error: identityError } = await adminClient
+    .from("member_auth_identities")
+    .select("provider,provider_subject,active")
+    .eq("user_id", userId)
+    .eq("provider", "discord")
+    .eq("active", true);
 
-  if (profileError) {
-    console.error("gallery moderation profile lookup failed", {
-      code: profileError.code,
-      message: profileError.message,
+  if (identityError) {
+    console.error("gallery moderation trusted identity lookup failed", {
+      code: identityError.code,
+      message: identityError.message,
     });
+    return {
+      ok: false,
+      response: jsonResponse(
+        {
+          ok: false,
+          hasAccess: false,
+          error: "identity_lookup_failed",
+          message: "Moderator access could not be verified. Please try again later.",
+        },
+        500,
+      ),
+    };
   }
 
-  const profile = profileData as JsonRecord | null;
-  const discordUserId = resolveDiscordIdentity(user as unknown as JsonRecord, profile);
+  const discordUserId = resolveDiscordIdentity(
+    user as unknown as JsonRecord,
+    (identityRows || []) as SyncedProviderIdentity[],
+  );
 
   if (!discordUserId) {
     return {

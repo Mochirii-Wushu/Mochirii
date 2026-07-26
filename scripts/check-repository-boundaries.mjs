@@ -31,6 +31,9 @@ const infrastructureNames = [
 ];
 const generatedArchivePattern = /\.(?:7z|bak|bundle|dump|gz|rar|tar|tgz|zip)$/i;
 const databaseArtifactPattern = /\.(?:sql|sqlite|sqlite3)$/i;
+const reviewedDatabaseTestPaths = new Set([
+  "supabase/tests/private_live_spinner_test.sql",
+]);
 const credentialPathPattern = /(^|\/)(?:Mochi Creds|private-evidence|Repository Backups)(\/|$)/i;
 const privateKeyPathPattern = /\.(?:key|p12|pfx|pem)$/i;
 const realEnvPattern = /(^|\/)\.env(?:\.[^/]+)?$/i;
@@ -166,7 +169,11 @@ for (const relativePath of files) {
   if (generatedArchivePattern.test(normalizedPath)) {
     failures.push(`${normalizedPath}: generated archives and backup artifacts must not be tracked`);
   }
-  if (databaseArtifactPattern.test(normalizedPath) && !normalizedPath.startsWith("supabase/migrations/")) {
+  if (
+    databaseArtifactPattern.test(normalizedPath) &&
+    !normalizedPath.startsWith("supabase/migrations/") &&
+    !reviewedDatabaseTestPaths.has(normalizedPath)
+  ) {
     failures.push(`${normalizedPath}: database artifacts are allowed only as reviewed Supabase migrations`);
   }
   if (realEnvPattern.test(normalizedPath) && !allowedEnvFiles.has(normalizedPath)) {
