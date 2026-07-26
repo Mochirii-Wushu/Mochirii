@@ -10,6 +10,14 @@ const protectedFunctions = [
     body: {},
   },
   {
+    name: "verify-member-access",
+    body: {},
+  },
+  {
+    name: "review-member-verification",
+    body: {},
+  },
+  {
     name: "list-gallery-review-queue",
     body: { checkOnly: true },
   },
@@ -19,6 +27,10 @@ const protectedFunctions = [
       submission_id: "00000000-0000-4000-8000-000000000000",
       action: "approved",
     },
+  },
+  {
+    name: "delete-rejected-gallery-submission",
+    body: {},
   },
   {
     name: "list-instagram-publish-queue",
@@ -42,11 +54,45 @@ const protectedFunctions = [
       confirmManualShare: true,
     },
   },
+  {
+    name: "check-instagram-api-status",
+    body: {},
+  },
+  {
+    name: "list-member-profiles",
+    body: {},
+  },
+  {
+    name: "get-member-profile",
+    body: {},
+  },
+  {
+    name: "submit-member-profile-media",
+    body: {},
+  },
+  {
+    name: "list-member-profile-media-queue",
+    body: {},
+  },
+  {
+    name: "moderate-member-profile-media",
+    body: {},
+  },
 ];
 
 const secretProtectedFunctions = [
   {
+    name: "reaper-discord-interactions",
+    invalidHeaders: {
+      "x-signature-ed25519": "00",
+      "x-signature-timestamp": "0",
+    },
+    cors: false,
+    body: { type: 1 },
+  },
+  {
     name: "submit-discord-gallery-image",
+    secretHeader: "x-mochirii-reaper-secret",
     body: {
       guildId: "1078630751077142608",
       channelId: "1078630751077142608",
@@ -59,6 +105,45 @@ const secretProtectedFunctions = [
       instagramOptIn: false,
     },
   },
+  {
+    name: "reaper-discord-member-sync",
+    secretHeader: "x-mochirii-reaper-member-sync-secret",
+    cors: false,
+    body: {
+      event_type: "guildMemberUpdate",
+      guild_id: "1078630751077142608",
+      discord_user_id: "1078630751077142608",
+      roles: [],
+      gateway_sequence: 0,
+      occurred_at: "2026-07-26T00:00:00.000Z",
+    },
+  },
+  {
+    name: "send-vote-reminder",
+    secretHeader: "x-mochirii-vote-reminder-secret",
+    body: { preview: true },
+  },
+  {
+    name: "send-member-spotlight-poll",
+    secretHeader: "x-mochirii-spotlight-poll-secret",
+    body: { preview: true },
+  },
+  {
+    name: "publish-member-spotlight-winner",
+    secretHeader: "x-mochirii-spotlight-poll-secret",
+    body: { preview: true },
+  },
+  {
+    name: "sync-pixelfed-social-account",
+    secretHeader: "x-mochirii-social-sync-secret",
+    cors: false,
+    body: {},
+  },
+];
+
+const publicReadOnlyFunctions = [
+  "list-visible-profile-cards",
+  "get-current-spotlight-winner",
 ];
 
 function readSupabasePublicConfig() {
@@ -225,7 +310,60 @@ async function checkApprovedFeed(config) {
   assert(deleteResult.status === 405, `${name} DELETE expected 405 Method not allowed, got ${deleteResult.status}.`);
 }
 
-const warnings = [];
+async function checkVisibleProfileCards(config) {
+  const name = "list-visible-profile-cards";
+  await checkOptions(config, name);
+
+  const result = await fetchContract(functionUrl(config, name), {
+    method: "POST",
+    headers: headers(config),
+    body: JSON.stringify({ slugs: [] }),
+  });
+
+  assert(
+    result.status === 200,
+    `${name} empty lookup expected 200, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
+  );
+  assert(result.json?.ok === true, `${name} empty lookup did not return ok=true.`);
+  assert(Array.isArray(result.json?.data?.profiles), `${name} profiles must be an array.`);
+  assert(result.json.data.profiles.length === 0, `${name} empty lookup unexpectedly returned profiles.`);
+  assert(Number(result.json.data.count) === 0, `${name} empty lookup count must be zero.`);
+  assert(Number(result.json.data.signedUrlSeconds) === 600, `${name} signedUrlSeconds must be 600.`);
+  await checkMethodNotAllowed(config, name);
+}
+
+async function checkCurrentSpotlightWinner(config) {
+  const name = "get-current-spotlight-winner";
+  await checkOptions(config, name);
+
+  const result = await fetchContract(functionUrl(config, name), {
+    method: "GET",
+    headers: headers(config),
+  });
+
+  assert(
+    result.status === 200,
+    `${name} GET expected 200, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
+  );
+  assert(result.json?.ok === true, `${name} response did not return ok=true.`);
+  assert(result.json?.data && typeof result.json.data === "object", `${name} response missing data.`);
+  const expectedKeys = ["monthKey", "publishedAt", "source", "winnerName"];
+  const actualKeys = Object.keys(result.json.data).sort();
+  assert(JSON.stringify(actualKeys) === JSON.stringify(expectedKeys), `${name} returned an unexpected public field set.`);
+  for (const key of ["winnerName", "monthKey", "publishedAt", "source"]) {
+    assert(typeof result.json.data[key] === "string", `${name} ${key} must be a string.`);
+  }
+  assert(
+    ["fallback", "monthly-discord-poll"].includes(result.json.data.source),
+    `${name} returned an unexpected source value.`,
+  );
+  await checkMethodNotAllowed(config, name);
+}
+
+assert(
+  publicReadOnlyFunctions.length === 2,
+  "Public read-only Supabase smoke inventory changed without a reviewed contract update.",
+);
 
 try {
   const config = readSupabasePublicConfig();
@@ -238,32 +376,26 @@ try {
   }
 
   for (const target of secretProtectedFunctions) {
-    await checkOptions(config, target.name);
+    if (target.cors !== false) await checkOptions(config, target.name);
     await checkMethodNotAllowed(config, target.name);
-    await checkSecretProtectedRejects(config, target, "without ingest secret");
+    await checkSecretProtectedRejects(config, target, "without required authentication");
     await checkSecretProtectedRejects(config, target, "with publishable key as bearer", {
       Authorization: `Bearer ${config.publishableKey}`,
     });
-    await checkSecretProtectedRejects(config, target, "with invalid ingest header", {
-      "x-mochirii-reaper-secret": "invalid-ingest-secret",
-    });
+    await checkSecretProtectedRejects(
+      config,
+      target,
+      "with invalid authentication headers",
+      target.invalidHeaders || { [target.secretHeader]: "invalid-smoke-secret" },
+    );
   }
 
   await checkApprovedFeed(config);
+  await checkVisibleProfileCards(config);
+  await checkCurrentSpotlightWinner(config);
   console.log("Supabase Edge Function contract smoke OK.");
 } catch (error) {
   const message = error?.message || String(error);
-  const networkUnavailable =
-    error?.name === "TimeoutError" ||
-    error?.name === "AbortError" ||
-    /fetch failed|network|ENOTFOUND|ECONNRESET|ETIMEDOUT|EAI_AGAIN|aborted/i.test(message);
-
-  if (networkUnavailable) {
-    warnings.push(`Supabase Edge Function contract smoke skipped: ${message}`);
-    warnings.forEach((warning) => console.warn(`WARN ${warning}`));
-    process.exit(0);
-  }
-
   console.error(`Supabase Edge Function contract smoke failed: ${message}`);
   process.exit(1);
 }

@@ -15,6 +15,7 @@ const files = {
   fontBundleGuard: "apps/web/scripts/check-font-bundle.mjs",
   nextConfig: "apps/web/next.config.ts",
   supabaseConfig: "supabase/config.toml",
+  supabaseSmoke: "scripts/smoke-supabase-edge-functions.mjs",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
   reaperSignature: "supabase/functions/_shared/discord-signature.ts",
   reaperMemberSync: "supabase/functions/reaper-discord-member-sync/index.ts",
@@ -68,6 +69,10 @@ function extractVerifyJwtFalseFunctions(config) {
     .map(([_, name]) => name);
 }
 
+function extractConfiguredFunctions(config) {
+  return [...config.matchAll(/\[functions\.([^\]]+)\]/g)].map(([, name]) => name);
+}
+
 const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const appLayout = read(files.appLayout);
@@ -76,6 +81,7 @@ const fontFallbacks = read(files.fontFallbacks);
 const fontBundleGuard = read(files.fontBundleGuard);
 const nextConfig = read(files.nextConfig);
 const supabaseConfig = read(files.supabaseConfig);
+const supabaseSmoke = read(files.supabaseSmoke);
 const reaper = read(files.reaper);
 const reaperSignature = read(files.reaperSignature);
 const reaperSecuritySource = [reaper, reaperSignature].join("\n");
@@ -209,6 +215,44 @@ const expectedUnauthenticatedFunctions = [
   "mochi-pets-alpha-progress",
   "sync-pixelfed-social-account",
 ];
+
+const quarantinedUnauthenticatedFunctions = new Set([
+  "mochi-pets-alpha-action",
+  "mochi-pets-alpha-progress",
+]);
+
+const quarantinedFunctions = new Set([
+  "mochi-pets-alpha-session",
+  "mochi-pets-unity-auth",
+  "mochi-pets-alpha-action",
+  "mochi-pets-alpha-progress",
+  "mochi-pets-alpha-admin",
+  "submit-mochi-pets-feedback",
+]);
+
+for (const name of extractConfiguredFunctions(supabaseConfig)) {
+  if (quarantinedFunctions.has(name)) continue;
+  const targetDeclaration = new RegExp(`(?:name:\\s*|const name = )"${name}"`);
+  assertMatches(
+    "Supabase Edge Function smoke",
+    supabaseSmoke,
+    targetDeclaration,
+    `missing fail-closed or read-only coverage for ${name}.`,
+  );
+}
+
+for (const name of quarantinedUnauthenticatedFunctions) {
+  if (!expectedUnauthenticatedFunctions.includes(name)) {
+    failures.push(`Supabase Edge Function smoke: quarantine list contains unexpected function ${name}.`);
+  }
+}
+
+assertNotMatches(
+  "Supabase Edge Function smoke",
+  supabaseSmoke,
+  /contract smoke skipped|process\.exit\(0\)/,
+  "live contract failures must not be downgraded to a successful skip.",
+);
 
 if (verifyJwtFalseFunctions.length !== expectedUnauthenticatedFunctions.length) {
   failures.push(
