@@ -23,6 +23,18 @@ Functions, and schema changes migration-based. Do not commit real secrets or
 - Do not deploy Edge Functions unless a future task explicitly approves deployment.
 - Protected page text must not be changed for auth/gallery-upload work.
 
+## Edge Function Dependencies
+
+Every deployed function owns a local `deno.json` with exact direct dependency
+versions, following [Supabase's function dependency guidance](https://supabase.com/docs/guides/functions/dependencies).
+The Supabase CLI uses that file as Deno configuration when bundling a function;
+it does not upload the repository root `deno.lock`. Accordingly,
+`npm run check:supabase-edge-types` checks all 31 entrypoints with their real
+function-local configuration and no deployment lock, records and audits each
+entrypoint's current resolution in its own temporary lock, and separately audits
+the repository lock used by local tooling. Never describe the root lock as
+freezing the deployed transitive graph.
+
 ## Pixelfed Guild Social Mapping
 
 Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow. The staging runtime exists outside Vercel; first authenticated testing is admin-only until the source-control, OIDC, media, backup, and moderation gates pass.
@@ -93,7 +105,7 @@ Script order on pages with Auth or upload behavior is:
 
 ```html
 <script src="./utils.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.8" defer></script>
 <script src="./supabase.js" defer></script>
 <script src="./site.js" defer></script>
 <script src="./page.js" defer></script>
