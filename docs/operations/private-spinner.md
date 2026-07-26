@@ -63,7 +63,8 @@ The dispatcher never receives the participant roster. It receives only prebuilt 
 
 Source, tests, migration, and function code may be reviewed in a PR. The following remain separate owner-approved provider mutations:
 
-- applying `20260726180052_add_private_live_spinner.sql`;
+- applying `20260726180052_add_private_live_spinner.sql` and its additive
+  `20260726213000_add_spinner_foreign_key_indexes.sql` follow-up;
 - allowing the connected production integration to redeploy all 33 Edge Functions declared in `supabase/config.toml`, including the new `spinner-live-session` and `reaper-spinner-dispatch` functions;
 - setting `DISCORD_RAFFLE_CHANNEL_ID`, `REAPER_SPINNER_DISPATCH_SECRET`, or changing any existing bot secret;
 - adding the matching Vault values used by scheduled dispatch;

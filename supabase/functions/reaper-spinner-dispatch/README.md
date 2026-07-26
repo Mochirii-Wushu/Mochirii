@@ -12,8 +12,10 @@ dispatcher credentials remain server-only.
 
 Provider changes remain approval-gated. During an approved Supabase release:
 
-1. Apply `20260726180052_add_private_live_spinner.sql` from the same validated
-   commit as `spinner-live-session` and `reaper-spinner-dispatch`. The connected
+1. Apply `20260726180052_add_private_live_spinner.sql` and the additive
+   `20260726213000_add_spinner_foreign_key_indexes.sql` follow-up from validated
+   protected commits. Keep `spinner-live-session` and
+   `reaper-spinner-dispatch` on the matching protected source. The connected
    production integration redeploys all 33 functions declared in
    `supabase/config.toml`, not only these two; require the exact-head Preview,
    full inventory readback, and serialized release described in
