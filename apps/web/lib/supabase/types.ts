@@ -78,6 +78,18 @@ export type SocialAccount = {
   updated_at?: string | null;
 };
 
+export type MemberSocialLink = {
+  id: string;
+  user_id: string;
+  provider: "instagram" | "facebook" | "tiktok" | "twitch" | "youtube" | "x" | "bluesky" | "mastodon" | "spotify" | "linkedin" | "custom" | string;
+  display_label: string;
+  profile_url: string;
+  sort_order: number;
+  is_visible: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 export type EditableProfilePayload = {
   display_name?: string | null;
   game_uid?: string | null;

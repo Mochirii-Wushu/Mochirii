@@ -100,6 +100,10 @@ const runtimeTextExtensions = new Set([
 ]);
 const reviewedLoopbacks = new Map([
   [
+    "apps/web/lib/member-social-links/profile-links-core.ts",
+    [{ value: "localhost", count: 2 }],
+  ],
+  [
     "services/social/caddy/Caddyfile",
     [{ value: "reverse_proxy 127.0.0.1:8080", count: 1 }],
   ],
