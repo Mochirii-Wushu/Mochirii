@@ -1,4 +1,5 @@
 import type { ParticipantV1 } from "./raffle";
+import { wheelSegmentLabel } from "@/lib/spinner/media-contract";
 
 const WHEEL_PALETTE = [
   "#123f3a",
@@ -8,20 +9,6 @@ const WHEEL_PALETTE = [
   "#824f35",
   "#254b67",
 ] as const;
-
-function splitGraphemes(value: string) {
-  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-    const Segmenter = Intl.Segmenter;
-    return Array.from(new Segmenter(undefined, { granularity: "grapheme" }).segment(value), (part) => part.segment);
-  }
-  return Array.from(value);
-}
-
-function truncateWheelName(value: string, participantCount: number) {
-  const limit = participantCount > 72 ? 7 : participantCount > 40 ? 10 : participantCount > 20 ? 14 : 19;
-  const graphemes = splitGraphemes(value);
-  return graphemes.length > limit ? `${graphemes.slice(0, Math.max(1, limit - 1)).join("")}…` : value;
-}
 
 export function drawWheel(canvas: HTMLCanvasElement, participants: readonly ParticipantV1[]) {
   const bounds = canvas.getBoundingClientRect();
@@ -89,7 +76,7 @@ export function drawWheel(canvas: HTMLCanvasElement, participants: readonly Part
 
       const middle = start + slice / 2;
       const fontSize = Math.max(8, Math.min(size * 0.034, (size * 0.68 * slice) / 2.8));
-      const label = `${index + 1}. ${truncateWheelName(participant.displayName, participants.length)}`;
+      const label = wheelSegmentLabel(participant.displayName, participants.length, index);
       context.save();
       context.translate(center, center);
       context.rotate(middle);

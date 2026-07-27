@@ -19,10 +19,13 @@
     "vercel:version": "vercel --version",
     "start": "next start",
     "lint": "eslint",
+    "test:spinner-private": "node --experimental-default-type=module --experimental-strip-types --test ../../tests/spinner-media-renderer.test.ts ../../tests/spinner-proxy.test.ts",
     "toolchain:check": "node scripts/check-local-toolchain.mjs",
     "verify:local": "npm run toolchain:check && npm run lint && npm run build && npm run check:client-bundle && npm run check:font-bundle && npm run check:route-css-bundle"
   },
   "dependencies": {
+    "@napi-rs/canvas": "1.0.2",
+    "@napi-rs/webcodecs": "1.3.1",
     "@supabase/supabase-js": "^2.110.8",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",

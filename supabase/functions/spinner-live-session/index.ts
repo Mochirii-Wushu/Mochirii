@@ -23,6 +23,10 @@ import {
   sha256Hex,
   type SpinnerSnapshotV1,
 } from "../_shared/spinner-live.ts";
+import {
+  animationManifestHash,
+  buildAnimationManifest,
+} from "../_shared/spinner-media.ts";
 
 type JsonRecord = Record<string, unknown>;
 type SpinnerAction = "set_roster" | "spin" | "reset";
@@ -303,6 +307,7 @@ async function handleCommand(req: Request): Promise<Response> {
         startRotation: Number(state.final_rotation || 0),
       });
       const discord = buildDiscordOutboxPayloads(plan.receipt);
+      const animationManifest = await buildAnimationManifest(plan.receipt, plan);
       stagedPayload = {
         receipt: plan.receipt,
         startAt: plan.startAt,
@@ -314,6 +319,8 @@ async function handleCommand(req: Request): Promise<Response> {
         discordChannelId: discord.channelId,
         discordStartPayload: discord.startPayload,
         discordResultPayload: discord.resultPayload,
+        animationManifest,
+        animationManifestHashSha256: await animationManifestHash(animationManifest),
       };
     } catch (error) {
       console.error("spinner-live-session secure draw preparation failed", {

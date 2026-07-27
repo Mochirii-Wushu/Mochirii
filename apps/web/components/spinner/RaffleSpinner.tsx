@@ -37,6 +37,7 @@ import {
   type RosterStateV1,
 } from "./raffle";
 import { startCelebration, type CelebrationHandle } from "./celebration";
+import { resolveCelebrationMotionMode } from "./celebration-scene";
 import {
   createSpinnerCommandId,
   isTerminalSpinnerSpinFailure,
@@ -64,6 +65,9 @@ type WheelMotion = {
 type WheelMotionStyle = CSSProperties & {
   "--spinner-wheel-start"?: string;
   "--spinner-wheel-finish"?: string;
+};
+type CelebrationStyle = CSSProperties & {
+  "--spinner-celebration-delay"?: string;
 };
 
 const RECEIPT_HISTORY_LIMIT = 100;
@@ -118,6 +122,7 @@ function filenameTimestamp() {
 export function RaffleSpinner() {
   const [participants, setParticipants] = useState<ParticipantV1[]>([]);
   const [motionMode, setMotionMode] = useState<MotionMode>("full");
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [receipts, setReceipts] = useState<DrawReceiptV1[]>([]);
   const [phase, setPhase] = useState<DrawPhase>("idle");
   const [winnerReceipt, setWinnerReceipt] = useState<DrawReceiptV1 | null>(null);
@@ -132,6 +137,8 @@ export function RaffleSpinner() {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [wheelMotion, setWheelMotion] = useState<WheelMotion | null>(null);
   const [effectsActive, setEffectsActive] = useState(false);
+  const [celebrationRequestId, setCelebrationRequestId] = useState(0);
+  const [celebrationAnimationDelayMs, setCelebrationAnimationDelayMs] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [secureRandomAvailable, setSecureRandomAvailable] = useState(true);
@@ -143,6 +150,12 @@ export function RaffleSpinner() {
   const wheelCanvasRef = useRef<HTMLCanvasElement>(null);
   const wheelFrameRef = useRef<HTMLDivElement>(null);
   const celebrationCanvasRef = useRef<HTMLCanvasElement>(null);
+  const winnerRevealRef = useRef<HTMLDivElement>(null);
+  const pendingCelebrationRef = useRef<{
+    drawId: string;
+    revealAt: string | null | undefined;
+    replay: boolean;
+  } | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
   const pendingReceiptRef = useRef<DrawReceiptV1 | null>(null);
   const drawAttemptRef = useRef(new DrawAttempt<DrawReceiptV1>());
@@ -152,7 +165,8 @@ export function RaffleSpinner() {
   const skippedCommandIdRef = useRef<string | null>(null);
   const revealedDrawIdRef = useRef<string | null>(null);
   const pendingRotationRef = useRef(0);
-  const motionModeRef = useRef<MotionMode>("full");
+  const effectiveMotionModeRef = useRef<MotionMode>("full");
+  const previousEffectiveMotionModeRef = useRef<MotionMode>("full");
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const celebrationRef = useRef<CelebrationHandle | null>(null);
   const liveRevisionRef = useRef(0);
@@ -163,7 +177,10 @@ export function RaffleSpinner() {
   const commandBusyRef = useRef(false);
   const pendingSpinCommandRef = useRef<PendingSpinnerCommandV1 | null>(null);
   const preparingDrawRef = useRef(false);
+  const serverClockOffsetRef = useRef(0);
   const mountedRef = useRef(true);
+
+  const effectiveMotionMode = resolveCelebrationMotionMode(motionMode, prefersReducedMotion);
 
   const rosterLocked = phase === "spinning" || liveBusy || !liveReady;
   const numberedParticipants = useMemo(() => renumberParticipants(participants), [participants]);
@@ -181,6 +198,7 @@ export function RaffleSpinner() {
   }, []);
 
   const stopCelebration = useCallback(() => {
+    pendingCelebrationRef.current = null;
     celebrationRef.current?.stop();
     celebrationRef.current = null;
     setEffectsActive(false);
@@ -213,12 +231,29 @@ export function RaffleSpinner() {
     return next;
   }, []);
 
-  const playCelebration = useCallback(() => {
+  const playCelebration = useCallback((
+    drawId: string,
+    revealAt: string | null | undefined,
+    replay = false,
+  ) => {
     const canvas = celebrationCanvasRef.current;
-    const selectedMode = motionModeRef.current;
+    const selectedMode = effectiveMotionModeRef.current;
     stopCelebration();
     if (!canvas || selectedMode === "off") return;
-    const handle = startCelebration(canvas, selectedMode);
+    const authoritativeNowMs = Date.now() + serverClockOffsetRef.current;
+    const parsedRevealAtMs = revealAt ? Date.parse(revealAt) : Number.NaN;
+    const revealAtMs = replay || !Number.isFinite(parsedRevealAtMs)
+      ? authoritativeNowMs
+      : parsedRevealAtMs;
+    const handle = startCelebration(canvas, {
+      mode: selectedMode,
+      drawId,
+      revealAtMs,
+      authoritativeNowMs,
+      protectedRegion: winnerRevealRef.current?.getBoundingClientRect() ?? null,
+    });
+    if (!handle.active) return;
+    setCelebrationAnimationDelayMs(-Math.min(4_800, Math.max(0, authoritativeNowMs - revealAtMs)));
     celebrationRef.current = handle;
     setEffectsActive(true);
     void handle.finished.then(() => {
@@ -228,6 +263,26 @@ export function RaffleSpinner() {
       }
     });
   }, [stopCelebration]);
+
+  const queueCelebration = useCallback((
+    drawId: string,
+    revealAt: string | null | undefined,
+    replay = false,
+  ) => {
+    pendingCelebrationRef.current = { drawId, revealAt, replay };
+    setCelebrationRequestId((current) => current + 1);
+  }, []);
+
+  useEffect(() => {
+    const pending = pendingCelebrationRef.current;
+    if (!pending || phase !== "revealed") return;
+    const animationFrame = requestAnimationFrame(() => {
+      if (pendingCelebrationRef.current !== pending) return;
+      pendingCelebrationRef.current = null;
+      playCelebration(pending.drawId, pending.revealAt, pending.replay);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [celebrationRequestId, phase, playCelebration]);
 
   const revealPendingWinner = useCallback((reason: RevealReason = "animation-complete") => {
     const snapshot = liveSnapshotRef.current;
@@ -254,11 +309,17 @@ export function RaffleSpinner() {
         .slice(0, RECEIPT_HISTORY_LIMIT));
     }
     setStatus(`Winner: ${selectedWinner.displayName}.`);
-    if (!skipRequestedRef.current && !document.hidden) playCelebration();
-  }, [playCelebration, stopScheduledAnimation]);
+    if (!skipRequestedRef.current && !document.hidden) {
+      queueCelebration(drawId, snapshot?.revealAt);
+    }
+  }, [queueCelebration, stopScheduledAnimation]);
 
   const applyLiveResult = useCallback((result: SpinnerLiveResultV1) => {
     const { snapshot, receipt, commandId, serverNow } = result;
+    const serverNowMs = Date.parse(serverNow);
+    if (Number.isFinite(serverNowMs)) {
+      serverClockOffsetRef.current = serverNowMs - Date.now();
+    }
     if (snapshot.revision < liveRevisionRef.current) return;
     liveCommandIdRef.current = snapshot.drawId ? commandId : null;
     const applyKey = `${snapshot.revision}:${snapshot.phase}:${snapshot.drawId || "idle"}`;
@@ -353,7 +414,7 @@ export function RaffleSpinner() {
     setPhase("spinning");
     setWheelMotion(null);
     setWheelRotation(snapshot.startRotation);
-    const selectedMotion = motionModeRef.current;
+    const selectedMotion = effectiveMotionModeRef.current;
     const timeline = spinnerLiveTimeline(snapshot, serverNow, selectedMotion);
     const rotations = spinnerLiveMotionRotations(snapshot, selectedMotion);
     setStatus(skipRequestedRef.current
@@ -381,6 +442,14 @@ export function RaffleSpinner() {
   });
 
   useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReducedMotion(query.matches);
+    updatePreference();
+    query.addEventListener("change", updatePreference);
+    return () => query.removeEventListener("change", updatePreference);
+  }, []);
+
+  useEffect(() => {
     const rosterStorage = readStoredJson(ROSTER_STORAGE_KEY);
     const receiptStorage = readStoredJson(RECEIPTS_STORAGE_KEY);
     const settingsStorage = readStoredJson(SETTINGS_STORAGE_KEY);
@@ -391,9 +460,10 @@ export function RaffleSpinner() {
       readStoredJson(PENDING_SPINNER_COMMAND_STORAGE_KEY).value,
     );
     const hasStoredMotion = rawSettings !== undefined;
+    const systemPrefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const storedMotion = hasStoredMotion
       ? parseStoredMotion(rawSettings)
-      : window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "reduced" : "full";
+      : systemPrefersReducedMotion ? "reduced" : "full";
     const runtimeCrypto = Reflect.get(globalThis, "crypto") as
       | { getRandomValues?: unknown }
       | undefined;
@@ -404,7 +474,11 @@ export function RaffleSpinner() {
       setParticipants(storedRoster.participants);
       setReceipts(storedReceipts.slice(0, RECEIPT_HISTORY_LIMIT));
       setMotionMode(storedMotion);
-      motionModeRef.current = storedMotion;
+      setPrefersReducedMotion(systemPrefersReducedMotion);
+      effectiveMotionModeRef.current = resolveCelebrationMotionMode(
+        storedMotion,
+        systemPrefersReducedMotion,
+      );
       pendingSpinCommandRef.current = storedPendingCommand;
       setSecureRandomAvailable(cryptoAvailable);
       setHydrated(true);
@@ -423,8 +497,16 @@ export function RaffleSpinner() {
   }, []);
 
   useEffect(() => {
-    motionModeRef.current = motionMode;
-  }, [motionMode]);
+    effectiveMotionModeRef.current = effectiveMotionMode;
+    const previousMode = previousEffectiveMotionModeRef.current;
+    previousEffectiveMotionModeRef.current = effectiveMotionMode;
+    if (previousMode === effectiveMotionMode) return;
+    stopCelebration();
+    if (liveSnapshotRef.current?.phase === "spinning") {
+      liveApplyKeyRef.current = "";
+      void refreshLiveSnapshot();
+    }
+  }, [effectiveMotionMode, refreshLiveSnapshot, stopCelebration]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -473,8 +555,11 @@ export function RaffleSpinner() {
 
   useEffect(() => {
     const onVisibilityChange = () => {
-      if (document.hidden && liveSnapshotRef.current?.phase === "spinning") {
-        setStatus("The stored draw continues live. Its result will appear at the scheduled reveal time.");
+      if (document.hidden) {
+        stopCelebration();
+        if (liveSnapshotRef.current?.phase === "spinning") {
+          setStatus("The stored draw continues live. Its result will appear at the scheduled reveal time.");
+        }
       } else if (!document.hidden && liveSnapshotRef.current?.phase === "spinning") {
         liveApplyKeyRef.current = "";
       }
@@ -488,7 +573,18 @@ export function RaffleSpinner() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       document.removeEventListener("fullscreenchange", onFullscreenChange);
     };
-  }, []);
+  }, [stopCelebration]);
+
+  useEffect(() => {
+    if (!liveError) return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) stopCelebration();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [liveError, stopCelebration]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -771,11 +867,14 @@ export function RaffleSpinner() {
 
   const replayCelebration = () => {
     if (!(winnerReceipt?.winner ?? liveWinner)) return;
-    if (motionModeRef.current === "off") {
+    if (effectiveMotionModeRef.current === "off") {
       setNotice("Celebration effects are off. Choose Full or Reduced to replay them.");
       return;
     }
-    playCelebration();
+    const snapshot = liveSnapshotRef.current;
+    const drawId = winnerReceipt ? receiptId(winnerReceipt) : snapshot?.drawId;
+    if (!drawId) return;
+    queueCelebration(drawId, snapshot?.revealAt, true);
   };
 
   const skipEffects = () => {
@@ -831,8 +930,14 @@ export function RaffleSpinner() {
   };
 
   return (
-    <main className="raffle-app" id="main">
-      <canvas ref={celebrationCanvasRef} className="celebration-canvas" aria-hidden="true" />
+    <main
+      className={`raffle-app ${effectsActive ? "is-celebrating" : ""} ${effectiveMotionMode === "reduced" ? "is-motion-reduced" : ""}`}
+      id="main"
+      style={{ "--spinner-celebration-delay": `${celebrationAnimationDelayMs}ms` } as CelebrationStyle}
+    >
+      {hydrated && effectiveMotionMode !== "off" ? (
+        <canvas ref={celebrationCanvasRef} className="celebration-canvas" aria-hidden="true" />
+      ) : null}
 
       <header className="raffle-masthead">
         <div className="raffle-brand-lockup">
@@ -848,15 +953,14 @@ export function RaffleSpinner() {
               disabled={rosterLocked}
               onChange={(event) => {
                 const nextMode = event.target.value as MotionMode;
-                const celebrationWasActive = celebrationRef.current !== null;
-                motionModeRef.current = nextMode;
+                const celebrationWasActive = celebrationRef.current?.active === true;
+                const nextEffectiveMode = resolveCelebrationMotionMode(
+                  nextMode,
+                  prefersReducedMotion,
+                );
+                effectiveMotionModeRef.current = nextEffectiveMode;
                 setMotionMode(nextMode);
-                if (!celebrationWasActive) return;
-                if (nextMode === "off") {
-                  stopCelebration();
-                  return;
-                }
-                playCelebration();
+                if (celebrationWasActive) stopCelebration();
               }}
             >
               <option value="full">Full</option>
@@ -885,7 +989,7 @@ export function RaffleSpinner() {
 
           <div
             ref={wheelFrameRef}
-            className={`wheel-frame ${phase === "spinning" && motionMode === "full" && wheelMotion ? "is-spinning" : ""}`}
+            className={`wheel-frame ${phase === "spinning" && effectiveMotionMode === "full" && wheelMotion ? "is-spinning" : ""}`}
           >
             <div className="wheel-pointer" aria-hidden="true"><span /></div>
             <div
@@ -900,7 +1004,10 @@ export function RaffleSpinner() {
             </div>
           </div>
 
-          <div className={`winner-reveal ${phase === "revealed" && visibleWinner ? "is-visible" : ""}`}>
+          <div
+            ref={winnerRevealRef}
+            className={`winner-reveal ${phase === "revealed" && visibleWinner ? "is-visible" : ""}`}
+          >
             {phase === "revealed" && visibleWinner && visibleWinnerIndex != null ? (
               <>
                 <span className="eyebrow">The moonwheel has spoken</span>

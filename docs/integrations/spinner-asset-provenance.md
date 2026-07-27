@@ -17,6 +17,9 @@ remain all rights reserved unless an existing license file states otherwise.
 ## Existing website artwork
 
 The spinner references the canonical website copies of the guild emblem,
-raffle hero, wuxia background, and local fonts. No duplicate copies or new font
-licenses were added. Required font licenses remain in their existing tracked
-locations.
+raffle hero, wuxia background, and browser fonts. The protected media renderer
+also bundles complete Noto Serif SC and Noto Color Emoji fonts so Unicode
+participant names render consistently without host-installed fonts. Their
+exact source commits, hashes, and OFL license locations are recorded in
+`apps/web/server-assets/spinner-fonts/README.md`. These server assets are not
+part of the public browser font bundle.

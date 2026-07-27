@@ -30,6 +30,14 @@ function before(label, source, first, second) {
   }
 }
 
+function beforeLast(label, source, first, second) {
+  const firstIndex = source.indexOf(first);
+  const secondIndex = source.lastIndexOf(second);
+  if (firstIndex < 0 || secondIndex < 0 || firstIndex >= secondIndex) {
+    failures.push(`${label}: expected ${first} before the final ${second}`);
+  }
+}
+
 const files = {
   page: "apps/web/app/spinner/page.tsx",
   spinnerLayout: "apps/web/app/spinner/layout.tsx",
@@ -37,6 +45,7 @@ const files = {
   notFound: "apps/web/app/spinner/not-found.tsx",
   sessionRoute: "apps/web/app/spinner/session/route.ts",
   liveRoute: "apps/web/app/spinner/live/route.ts",
+  proxy: "apps/web/proxy.ts",
   access: "apps/web/lib/spinner/access.ts",
   policy: "apps/web/lib/spinner/session-policy.ts",
   stage: "apps/web/components/spinner/SpinnerStage.tsx",
@@ -47,6 +56,7 @@ const files = {
   live: "apps/web/components/spinner/live.ts",
   raffle: "apps/web/components/spinner/raffle.ts",
   celebration: "apps/web/components/spinner/celebration.ts",
+  celebrationScene: "apps/web/components/spinner/celebration-scene.ts",
   wheel: "apps/web/components/spinner/wheel.ts",
   css: "apps/web/public/assets/css/member-spinner.css",
   account: "apps/web/components/member-workflow/AccountPanel.tsx",
@@ -107,6 +117,32 @@ includes("spinner not-found", source.notFound, "Page unavailable.");
 excludes("spinner not-found", source.notFound, "Raffle Spinner");
 excludes("spinner not-found", source.notFound, "SpinnerViewerBootstrap");
 excludes("spinner not-found", source.notFound, '"use client"');
+
+for (const snippet of [
+  'request.nextUrl.pathname !== `${SPINNER_PAGE_PATH}/`',
+  'request.method !== "GET" && request.method !== "HEAD"',
+  "decodeSpinnerSessionCookie(",
+  "validateSpinnerAccessTokenForMode({",
+  "mode: session.mode",
+  "access.mode !== session.mode",
+  "new NextResponse(null, {",
+  "status: 404",
+  "NextResponse.next()",
+  'matcher: ["/spinner"]',
+  'path: SPINNER_PAGE_PATH',
+  "httpOnly: true",
+  "secure: true",
+  'sameSite: "strict"',
+  "maxAge: 0",
+  "expires: new Date(0)",
+]) includes("spinner page proxy", source.proxy, snippet);
+excludes("spinner page proxy", source.proxy, 'matcher: ["/spinner/:path*"]');
+beforeLast(
+  "spinner page proxy authorization",
+  source.proxy,
+  "validateSpinnerAccessTokenForMode({",
+  "return NextResponse.next();",
+);
 
 [
   "SPINNER_SESSION_COOKIE",
@@ -228,9 +264,13 @@ for (const required of [
   'animationName: "spinner-live-wheel-turn"',
   'motionMode === "full" && wheelMotion',
   "spinnerLiveMotionRotations(snapshot, motionMode)",
-  'if (nextMotionMode !== "full")',
-  "celebrationRef.current?.stop()",
-  "setEffectsActive(false)",
+  "resolveCelebrationMotionMode(",
+  "if (nextMotionMode !== effectiveMotionRef.current) stopCelebration();",
+  "queueWinnerCelebration(snapshot.drawId, snapshot.revealAt)",
+  "requestAnimationFrame(() =>",
+  "authoritativeNowMs",
+  "protectedRegion: winnerRevealRef.current?.getBoundingClientRect()",
+  'motionPreferenceReady && motionMode !== "off" ? (',
   'appliedKeyRef.current = ""',
   "refreshLiveRef.current?.()",
 ]) includes("view-only spinner", source.viewer, required);
@@ -244,16 +284,19 @@ for (const required of [
   "&& !skipRequestedRef.current",
   "isTerminalSpinnerSpinFailure(error)",
   "spinnerSkipStateForDraw({",
-  'motionMode === "full" && wheelMotion',
+  'effectiveMotionMode === "full" && wheelMotion',
   "spinnerLiveMotionRotations(snapshot, selectedMotion)",
   'id="main"',
   'src="/assets/img/brand/emblem.webp"',
   "Mōchirīī-roster-",
   "Mōchirīī-receipt-",
-  "const celebrationWasActive = celebrationRef.current !== null;",
-  "if (!celebrationWasActive) return;",
-  'if (nextMode === "off") {',
-  "playCelebration();",
+  "const celebrationWasActive = celebrationRef.current?.active === true;",
+  "if (celebrationWasActive) stopCelebration();",
+  "queueCelebration(drawId, snapshot?.revealAt);",
+  "requestAnimationFrame(() =>",
+  "authoritativeNowMs",
+  "protectedRegion: winnerRevealRef.current?.getBoundingClientRect()",
+  'hydrated && effectiveMotionMode !== "off" ? (',
 ]) includes("moderator spinner", source.controller, required);
 excludes("moderator spinner", source.controller, "onTransitionEnd");
 excludes("moderator spinner", source.controller, "document.documentElement.requestFullscreen");
@@ -296,6 +339,7 @@ includes("root layout", source.layout, "<SiteRouteShell>{children}</SiteRouteShe
 
 for (const snippet of [
   "poweredByHeader: false",
+  "skipTrailingSlashRedirect: true",
   'source: "/spinner/:path*"',
   '"connect-src \'self\'"',
   'value: "private, no-store, max-age=0"',
@@ -411,12 +455,49 @@ for (const [label, productionSource] of Object.entries({
   live: source.live,
   raffle: source.raffle,
   celebration: source.celebration,
+  celebrationScene: source.celebrationScene,
   wheel: source.wheel,
 })) {
   excludes(label, productionSource, "Math.random");
   excludes(label, productionSource, "XMLHttpRequest");
 }
-includes("bounded celebration", source.celebration, 'mode === "full" ? 4_800 : 2_450');
+for (const snippet of [
+  "standard: {",
+  "durationMs: 4_800",
+  "maxParticles: 156",
+  "maxBackingPixels: 8_300_000",
+  "maxParticles: 96",
+  "maxBackingPixels: 4_200_000",
+  "durationMs: 2_400",
+  "maxParticles: 32",
+  "maxBackingPixels: 3_000_000",
+  'return preferredMode === "full" && prefersReducedMotion ? "reduced" : preferredMode;',
+  'presentationSeed(`${drawId}:${profile}`)',
+]) includes("bounded deterministic celebration", source.celebrationScene, snippet);
+for (const effect of [
+  "paint-splash",
+  "neon-stream",
+  "ribbon",
+  "petal",
+  "bubble",
+  "droplet",
+  "streak",
+  "firework",
+  "star",
+  "spark",
+  "bloom",
+]) includes("celebration effects", source.celebrationScene, effect);
+for (const snippet of [
+  "document.hidden",
+  'window.addEventListener("resize", stopOnResize',
+  'document.addEventListener("fullscreenchange", stopOnResize)',
+  'window.matchMedia("(forced-colors: active)")',
+  "canvas.getClientRects().length === 0",
+  "new ResizeObserver",
+  "clearProtectedRegion",
+  "canvas.width = 0",
+  "canvas.height = 0",
+]) includes("celebration lifecycle", source.celebration, snippet);
 
 for (const key of [
   "mochirii.raffle.roster.v1",
@@ -435,6 +516,10 @@ source.css.split(/\r?\n/).forEach((line, index) => {
 });
 includes("spinner CSS", source.css, "@keyframes spinner-wheel-aura");
 includes("spinner CSS", source.css, "@keyframes spinner-live-wheel-turn");
+includes("spinner CSS", source.css, "@keyframes spinner-celebration-stage-bloom");
+includes("spinner CSS", source.css, "@keyframes spinner-winner-crown");
+includes("spinner CSS", source.css, "animation-delay: var(--spinner-celebration-delay, 0ms)");
+includes("spinner CSS", source.css, ".spinner-page .raffle-app.is-motion-reduced .draw-stage");
 excludes("spinner CSS", source.css, "@keyframes wheel-aura");
 
 const assetPath = resolve(root, "apps/web/public/assets/img/spinner/mochirii-banner.webp");
@@ -451,6 +536,11 @@ const spinnerProductionSource = Object.values(source).join("\n");
 excludes("spinner source", spinnerProductionSource, "xartyzx.chatgpt.site");
 excludes("spinner source", spinnerProductionSource, "mochirii-raffle-spinner");
 
+const baseUrlArgument = process.argv.find((argument) => argument.startsWith("--base-url="));
+if (baseUrlArgument) {
+  await verifyDeployedSignedOutBoundary(baseUrlArgument.slice("--base-url=".length));
+}
+
 if (failures.length) {
   console.error(`Private spinner validation failed (${failures.length} issue${failures.length === 1 ? "" : "s"}).`);
   failures.forEach((failure) => console.error(`- ${failure}`));
@@ -458,3 +548,92 @@ if (failures.length) {
 }
 
 console.log("Private spinner validation OK.");
+if (baseUrlArgument) console.log("- Deployed signed-out /spinner response is an empty opaque 404.");
+
+async function verifyDeployedSignedOutBoundary(input) {
+  let baseUrl;
+  try {
+    baseUrl = new URL(input);
+  } catch {
+    failures.push("deployed spinner boundary: --base-url must be an absolute URL.");
+    return;
+  }
+
+  const localHost = baseUrl.hostname === "localhost" || baseUrl.hostname === "127.0.0.1";
+  if (baseUrl.protocol !== "https:" && !(localHost && baseUrl.protocol === "http:")) {
+    failures.push("deployed spinner boundary: --base-url must use HTTPS, except for a local verification server.");
+    return;
+  }
+
+  try {
+    const requests = [
+      { label: "GET /spinner", path: "/spinner", method: "GET", accept: "text/html" },
+      { label: "HEAD /spinner", path: "/spinner", method: "HEAD", accept: "text/html" },
+      { label: "GET /spinner/", path: "/spinner/", method: "GET", accept: "text/html" },
+      { label: "HEAD /spinner/", path: "/spinner/", method: "HEAD", accept: "text/html" },
+      { label: "GET /spinner query", path: "/spinner?boundary=1", method: "GET", accept: "text/html" },
+      { label: "RSC /spinner", path: "/spinner?_rsc=boundary", method: "GET", accept: "text/x-component", rsc: true },
+    ];
+
+    for (const request of requests) {
+      const response = await fetch(new URL(request.path, baseUrl), {
+        method: request.method,
+        cache: "no-store",
+        redirect: "manual",
+        headers: {
+          Accept: request.accept,
+          ...(request.rsc ? { RSC: "1" } : {}),
+          "User-Agent": "Mochirii-Spinner-Verification/1.0",
+        },
+      });
+      const body = await response.text();
+      verifyOpaqueSpinnerResponse(request.label, response, body);
+    }
+  } catch (error) {
+    failures.push(`deployed spinner boundary: request failed (${error instanceof Error ? error.message : String(error)}).`);
+  }
+}
+
+function verifyOpaqueSpinnerResponse(label, response, body) {
+  if (response.status !== 404) {
+    failures.push(`deployed spinner boundary ${label}: expected 404, received ${response.status}.`);
+  }
+  if (body !== "") {
+    failures.push(`deployed spinner boundary ${label}: expected an empty body, received ${new TextEncoder().encode(body).byteLength} bytes.`);
+  }
+  if (response.headers.has("link")) {
+    failures.push(`deployed spinner boundary ${label}: response must not advertise preload links.`);
+  }
+
+  const cacheControl = response.headers.get("cache-control") || "";
+  if (!/\bprivate\b/iu.test(cacheControl) || !/\bno-store\b/iu.test(cacheControl)) {
+    failures.push(`deployed spinner boundary ${label}: response must be private and no-store.`);
+  }
+  const robots = response.headers.get("x-robots-tag") || "";
+  for (const directive of ["noindex", "nofollow", "noarchive", "nosnippet", "noimageindex"]) {
+    if (!robots.toLowerCase().includes(directive)) {
+      failures.push(`deployed spinner boundary ${label}: X-Robots-Tag is missing ${directive}.`);
+    }
+  }
+  const vary = response.headers.get("vary") || "";
+  if (!vary.split(",").some((value) => value.trim().toLowerCase() === "cookie")) {
+    failures.push(`deployed spinner boundary ${label}: Vary must include Cookie.`);
+  }
+
+  const setCookie = typeof response.headers.getSetCookie === "function"
+    ? response.headers.getSetCookie().join(", ")
+    : response.headers.get("set-cookie") || "";
+  for (const pattern of [
+    /mochirii_spinner_access_v1=/iu,
+    /Path=\/spinner(?:;|,|$)/iu,
+    /Max-Age=0(?:;|,|$)/iu,
+    /Expires=Thu, 01 Jan 1970 00:00:00 GMT/iu,
+    /HttpOnly/iu,
+    /Secure/iu,
+    /SameSite=strict/iu,
+  ]) {
+    if (!pattern.test(setCookie)) {
+      failures.push(`deployed spinner boundary ${label}: clearing cookie does not match ${pattern}.`);
+    }
+  }
+}

@@ -838,6 +838,10 @@ the shared roster, idempotent moderator commands, immutable 30-day receipts,
 bounded delivery state, and five-minute moderator authorization cache. Every
 table has RLS enabled; browser roles have no direct table privileges. The
 migration also installs the bounded maintenance and daily retention schedules.
+`20260727033342_add_spinner_media_jobs.sql` adds a sixth service-only table for
+best-effort replay media metadata. It stores no media bytes, waits for the
+winner message before rendering, and cannot roll back or alter the primary
+draw/result flow.
 
 The two spinner functions are:
 
@@ -846,7 +850,9 @@ The two spinner functions are:
   the result is selected and durably staged.
 - `reaper-spinner-dispatch`: claims only the semantic raffle outbox, posts the
   same-origin live-page link to the exact allowlisted channel, and edits that
-  same message with the stored result. Mentions are disabled.
+  same message with the stored result. Mentions are disabled. It then handles
+  independently bounded, capability-scoped replay rendering and idempotent
+  attachment to that completed message.
 
 The Website session endpoints send only the signed-in access token and requested
 mode for authorization. Participant names and winner information are not part

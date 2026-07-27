@@ -18,6 +18,15 @@ import {
   type ParticipantV1,
   // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
 } from "../apps/web/components/spinner/raffle.ts";
+import {
+  CELEBRATION_LIMITS,
+  celebrationCanvasMetrics,
+  celebrationElapsedMs,
+  celebrationProfileForViewport,
+  createCelebrationScene,
+  resolveCelebrationMotionMode,
+  // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
+} from "../apps/web/components/spinner/celebration-scene.ts";
 
 const SESSION_ID = "10000000-0000-4000-8000-000000000001";
 const DRAW_ID = "20000000-0000-4000-8000-000000000002";
@@ -307,4 +316,127 @@ test("Skip remains attached to one draw across refresh and never leaks to the ne
     resultCommandId: OTHER_DRAW_ID,
     drawId: OTHER_DRAW_ID,
   }), { skipRequested: false, skippedDrawId: null, skippedCommandId: null });
+});
+
+test("celebration scenes deterministically include every approved effect within exact budgets", () => {
+  const expectedKinds = new Set([
+    "paint-splash",
+    "neon-stream",
+    "ribbon",
+    "petal",
+    "bubble",
+    "droplet",
+    "streak",
+    "firework",
+    "star",
+    "spark",
+    "bloom",
+  ]);
+  const standard = createCelebrationScene({
+    drawId: DRAW_ID,
+    mode: "full",
+    width: 1_280,
+    height: 720,
+  });
+  const repeated = createCelebrationScene({
+    drawId: DRAW_ID,
+    mode: "full",
+    width: 1_280,
+    height: 720,
+  });
+  assert.ok(standard);
+  assert.deepEqual(repeated, standard);
+  assert.equal(standard.profile, "standard");
+  assert.equal(standard.durationMs, 4_800);
+  assert.equal(standard.particles.length, CELEBRATION_LIMITS.standard.maxParticles);
+  assert.deepEqual(new Set(standard.particles.map((particle) => particle.kind)), expectedKinds);
+
+  const differentDraw = createCelebrationScene({
+    drawId: OTHER_DRAW_ID,
+    mode: "full",
+    width: 1_280,
+    height: 720,
+  });
+  assert.ok(differentDraw);
+  assert.notDeepEqual(differentDraw.particles, standard.particles);
+});
+
+test("celebration profiles enforce standard, compact, Reduced, and Off limits", () => {
+  assert.equal(celebrationProfileForViewport("full", 1_280, 720), "standard");
+  assert.equal(celebrationProfileForViewport("full", 759, 720), "compact");
+  assert.equal(celebrationProfileForViewport("full", 1_280, 639), "compact");
+  assert.equal(celebrationProfileForViewport("reduced", 1_280, 720), "reduced");
+  assert.equal(celebrationProfileForViewport("off", 1_280, 720), null);
+
+  const compact = createCelebrationScene({
+    drawId: DRAW_ID,
+    mode: "full",
+    width: 720,
+    height: 720,
+  });
+  const reduced = createCelebrationScene({
+    drawId: DRAW_ID,
+    mode: "reduced",
+    width: 1_280,
+    height: 720,
+  });
+  assert.ok(compact);
+  assert.ok(reduced);
+  assert.equal(compact.durationMs, 4_800);
+  assert.equal(compact.particles.length, 96);
+  assert.equal(compact.maxBackingPixels, 4_200_000);
+  assert.equal(reduced.durationMs, 2_400);
+  assert.equal(reduced.particles.length, 32);
+  assert.equal(reduced.maxBackingPixels, 3_000_000);
+  assert.equal(createCelebrationScene({
+    drawId: DRAW_ID,
+    mode: "off",
+    width: 1_280,
+    height: 720,
+  }), null);
+});
+
+test("celebration canvas sizing caps pixel ratio and backing allocation", () => {
+  const standard = celebrationCanvasMetrics(3_840, 2_160, 4, "standard");
+  const compact = celebrationCanvasMetrics(1_920, 1_080, 3, "compact");
+  const reduced = celebrationCanvasMetrics(2_560, 1_600, 3, "reduced");
+
+  assert.ok(standard.dpr <= 2);
+  assert.ok(standard.backingPixels <= 8_300_000);
+  assert.ok(compact.backingPixels <= 4_200_000);
+  assert.ok(reduced.backingPixels <= 3_000_000);
+  assert.equal(celebrationCanvasMetrics(640, 480, 1, "standard").dpr, 1);
+});
+
+test("celebration motion and authoritative reveal timing fail toward less motion", () => {
+  assert.equal(resolveCelebrationMotionMode("full", false), "full");
+  assert.equal(resolveCelebrationMotionMode("full", true), "reduced");
+  assert.equal(resolveCelebrationMotionMode("reduced", false), "reduced");
+  assert.equal(resolveCelebrationMotionMode("off", false), "off");
+  assert.equal(resolveCelebrationMotionMode("off", true), "off");
+
+  assert.equal(celebrationElapsedMs(1_000, 2_250, 4_800), 1_250);
+  assert.equal(celebrationElapsedMs(2_000, 1_000, 4_800), 0);
+  assert.equal(celebrationElapsedMs(1_000, 9_000, 4_800), 4_800);
+  assert.equal(celebrationElapsedMs(Number.NaN, 9_000, 4_800), 0);
+});
+
+test("celebration particle origins preserve the winner region", () => {
+  const protectedRegion = { x: 360, y: 220, width: 560, height: 180 };
+  const scene = createCelebrationScene({
+    drawId: DRAW_ID,
+    mode: "full",
+    width: 1_280,
+    height: 720,
+    protectedRegion,
+  });
+  assert.ok(scene);
+  assert.deepEqual(scene.protectedRegion, protectedRegion);
+  for (const particle of scene.particles) {
+    const inside = particle.x >= protectedRegion.x
+      && particle.x <= protectedRegion.x + protectedRegion.width
+      && particle.y >= protectedRegion.y
+      && particle.y <= protectedRegion.y + protectedRegion.height;
+    assert.equal(inside, false, `${particle.kind} originated inside the protected winner region`);
+  }
 });

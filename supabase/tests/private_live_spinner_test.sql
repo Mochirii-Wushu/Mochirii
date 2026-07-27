@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(48);
+SELECT plan(49);
 
 INSERT INTO auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at
@@ -411,6 +411,8 @@ SELECT public.spinner_stage_command(
       'durationMs', 4800,
       'startRotation', 777,
       'finalRotation', 2757,
+      'animationManifest', jsonb_build_object('version', 1),
+      'animationManifestHashSha256', repeat('9', 64),
       'discordChannelKey', 'raffle_spins',
       'discordChannelId', '1468667003366674721',
       'discordStartPayload', jsonb_build_object(
@@ -432,6 +434,16 @@ SELECT ok(
   AND (SELECT phase = 'start_pending' FROM public.spinner_discord_outbox
     WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
   'a spin persists first and returns without waiting on Discord delivery'
+);
+
+SELECT ok(
+  EXISTS (SELECT 1 FROM public.spinner_draw_receipts
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')
+  AND EXISTS (SELECT 1 FROM public.spinner_discord_outbox
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_media_jobs
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
+  'malformed optional media cannot roll back the draw or primary message outbox'
 );
 
 SELECT ok(
