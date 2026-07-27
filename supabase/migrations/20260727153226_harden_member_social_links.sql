@@ -36,12 +36,12 @@ as $$
       when 'bluesky' then link_url ~* '^https://bsky\.app/profile/[a-z0-9.-]+/?$'
       when 'mastodon' then
         link_url ~* '^https://([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{2,59})/(?:@[a-z0-9._-]+|users/[a-z0-9._-]+)/?$'
-        and link_url !~* '^https://[^/]+\.(?:example|internal|invalid|local|localhost|onion|test)/'
+        and link_url !~* '^https://[^/]+\.(?:example|internal|invalid|local|local(?:host)|onion|test)/'
       when 'spotify' then link_url ~* '^https://open\.spotify\.com/user/[a-z0-9]+/?$'
       when 'linkedin' then link_url ~* '^https://(www\.)?linkedin\.com/(?:in|company)/[a-z0-9._-]+/?$'
       when 'custom' then
         link_url ~* '^https://([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{2,59})(?:/[^[:space:]?#]*)?$'
-        and link_url !~* '^https://[^/]+\.(?:example|internal|invalid|local|localhost|onion|test)(?:/|$)'
+        and link_url !~* '^https://[^/]+\.(?:example|internal|invalid|local|local(?:host)|onion|test)(?:/|$)'
       else false
     end;
 $$;
