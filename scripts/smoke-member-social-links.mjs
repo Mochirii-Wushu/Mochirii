@@ -187,7 +187,10 @@ async function runBrowser(browserName, browserType, session, shareMode) {
     page.on("requestfailed", (request) => {
       const url = new URL(request.url());
       const failure = request.failure()?.errorText || "failed";
-      if (url.origin === baseUrl && url.pathname === "/_next/image" && failure === "net::ERR_ABORTED") return;
+      const responsiveImageWasSuperseded = url.origin === baseUrl
+        && url.pathname === "/_next/image"
+        && ["net::ERR_ABORTED", "NS_BINDING_ABORTED"].includes(failure);
+      if (responsiveImageWasSuperseded) return;
       failedRequests.push(`${url.origin}${url.pathname}: ${sanitizeDiagnostic(failure)}`);
     });
     page.on("response", (response) => {
