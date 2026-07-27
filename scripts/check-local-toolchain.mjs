@@ -44,8 +44,8 @@ const denoResult = spawnSync("deno", ["--version"], { encoding: "utf8", shell: i
 const denoOutput = `${denoResult.stdout || ""}${denoResult.stderr || ""}`.trim();
 checks.push({
   label: "Deno",
-  ok: denoResult.status === 0 && /^deno 2\.9\.3\b/m.test(denoOutput),
-  output: `${denoOutput}${/^deno 2\.9\.3\b/m.test(denoOutput) ? "" : "\nRun `deno upgrade 2.9.3`."}`,
+  ok: denoResult.status === 0 && /^deno 2\.9\.4\b/m.test(denoOutput),
+  output: `${denoOutput}${/^deno 2\.9\.4\b/m.test(denoOutput) ? "" : "\nRun `deno upgrade 2.9.4`."}`,
 });
 
 command("docker", docker, ["--version"]);

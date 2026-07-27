@@ -8,7 +8,7 @@ and CI run the same checks before website changes reach Vercel.
 - Node.js `22.23.1` via `fnm`; `.node-version` and `.nvmrc` pin the repo.
 - npm `10.x`, bundled with the pinned Node.js runtime.
 - Git and GitHub CLI for branch, PR, and repository hygiene.
-- Deno `2.9.3` for Supabase Edge Function tests, matching GitHub Actions.
+- Deno `2.9.4` for Supabase Edge Function tests, matching GitHub Actions.
 - Docker Desktop for Supabase local containers.
 - Supabase CLI as a root dev dependency; run through `npm` or
   `node_modules/.bin/supabase` to avoid the root `supabase.js` name collision.
@@ -21,7 +21,7 @@ and CI run the same checks before website changes reach Vercel.
 
 ```powershell
 fnm use 22.23.1
-deno upgrade 2.9.3
+deno upgrade 2.9.4
 npm ci
 npm run setup:playwright
 cd apps\web
@@ -77,3 +77,21 @@ longer part of local development.
   install workflow.
 - Lighthouse audits use the local package instead of `npx --yes` so the audit
   version is locked.
+- Social image validation installs the official Docker Buildx `v0.35.0` Linux
+  AMD64 release only after its exact SHA-256 and Sigstore bundle identity pass,
+  then starts digest-pinned BuildKit `v0.31.2`. The official Syft `v1.49.0`
+  binary is accepted only after the release checksum file's Anchore Sigstore
+  identity and both pinned SHA-256 values pass. Cosign itself is installed by a
+  full-SHA-pinned Sigstore action at exact version `v3.0.6`.
+- The full-SHA-pinned Deno setup action installs `2.9.4`; validation then checks
+  the installed Linux AMD64 binary against the immutable official release
+  SHA-256 before any repository tests run.
+- Hosted jobs use `ubuntu-24.04` to keep the runner OS family explicit while
+  receiving GitHub's maintained image updates. The exact image and installed
+  software versions remain recorded in each job's `Set up job` log.
+  Review updates against the official [Deno releases](https://github.com/denoland/deno/releases),
+  [Buildx releases](https://github.com/docker/buildx/releases),
+  [BuildKit releases](https://github.com/moby/buildkit/releases), and
+  [Syft releases](https://github.com/anchore/syft/releases) before changing the
+  pins; use [GitHub's runner guidance](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job)
+  when reviewing the hosted runner family.
