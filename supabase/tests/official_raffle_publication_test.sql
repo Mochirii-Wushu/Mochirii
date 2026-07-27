@@ -1,5 +1,23 @@
 BEGIN;
-SELECT plan(27);
+SELECT plan(29);
+
+CREATE TEMP TABLE spinner_dispatch_probe (
+  call_count integer NOT NULL DEFAULT 0
+) ON COMMIT DROP;
+INSERT INTO spinner_dispatch_probe DEFAULT VALUES;
+
+CREATE OR REPLACE FUNCTION private.spinner_invoke_reaper_dispatcher()
+RETURNS bigint
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  UPDATE pg_temp.spinner_dispatch_probe
+  SET call_count = call_count + 1;
+  RETURN 1;
+END;
+$$;
 
 INSERT INTO auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at
@@ -40,6 +58,17 @@ SELECT is(
      AND table_name IN ('spinner_live_state', 'spinner_draw_receipts', 'spinner_discord_outbox')),
   3,
   'live state, receipts, and outbox persist server-authoritative draw mode'
+);
+SELECT ok(
+  EXISTS (
+    SELECT 1
+    FROM pg_trigger
+    WHERE tgrelid = 'public.spinner_discord_outbox'::regclass
+      AND tgname = 'spinner_discord_outbox_queue_dispatch'
+      AND tgenabled <> 'D'
+      AND (tgtype & 1) = 1
+  ),
+  'the Reaper dispatcher is bound to each surviving official outbox row'
 );
 
 INSERT INTO public.spinner_commands (
@@ -170,6 +199,28 @@ INSERT INTO public.spinner_discord_outbox (
     'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
   ),
   '2026-06-27 15:32:34.563+00'::timestamptz
+);
+
+UPDATE pg_temp.spinner_dispatch_probe SET call_count = 0;
+INSERT INTO public.spinner_discord_outbox (
+  draw_id, channel_key, channel_id, start_payload, result_payload, reveal_after
+) VALUES (
+  '11111111-1010-4010-8010-101010101010', 'raffle_spins', '1468667003366674721',
+  jsonb_build_object(
+    'content', 'test', 'nonce', '1111111111111111111111111', 'enforce_nonce', true,
+    'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+  ),
+  jsonb_build_object(
+    'content', 'test',
+    'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+  ),
+  now() - interval '2 hours'
+);
+
+SELECT is(
+  (SELECT call_count FROM pg_temp.spinner_dispatch_probe),
+  0,
+  'a test spin cannot wake delivery for a pre-existing ready official row'
 );
 
 SELECT ok(

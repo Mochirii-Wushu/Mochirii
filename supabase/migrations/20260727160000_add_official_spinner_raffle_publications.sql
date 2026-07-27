@@ -149,6 +149,36 @@ create trigger spinner_discord_outbox_prepare_draw_mode
 before insert on public.spinner_discord_outbox
 for each row execute function private.spinner_prepare_outbox_draw_mode();
 
+-- The original dispatcher hook was statement-level. PostgreSQL executes an
+-- AFTER STATEMENT trigger even when a BEFORE ROW trigger suppresses every
+-- candidate row, which meant a test draw could wake delivery for an unrelated
+-- pending official draw. Bind dispatch to a surviving official row instead.
+create or replace function private.spinner_queue_reaper_dispatcher()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if tg_level <> 'ROW' or new.draw_mode <> 'official' then
+    return null;
+  end if;
+
+  -- pg_net queues the request transactionally and performs network I/O after
+  -- commit, so the authoritative draw response never waits on delivery.
+  perform private.spinner_invoke_reaper_dispatcher();
+  return new;
+end;
+$$;
+
+revoke all on function private.spinner_queue_reaper_dispatcher() from public, anon, authenticated;
+grant execute on function private.spinner_queue_reaper_dispatcher() to service_role;
+
+drop trigger if exists spinner_discord_outbox_queue_dispatch on public.spinner_discord_outbox;
+create trigger spinner_discord_outbox_queue_dispatch
+after insert on public.spinner_discord_outbox
+for each row execute function private.spinner_queue_reaper_dispatcher();
+
 create or replace function private.spinner_set_live_draw_mode()
 returns trigger
 language plpgsql
