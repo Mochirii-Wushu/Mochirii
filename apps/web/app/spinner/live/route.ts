@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cancelResponseBody, readBoundedResponseText } from "@/lib/bounded-response";
+import {
+  spinnerProxyOutcomeForStatus,
+  type SpinnerProxyOutcome,
+} from "@/lib/spinner/proxy-outcome";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 import {
   SPINNER_PRIVATE_RESPONSE_HEADERS,
@@ -14,20 +19,37 @@ export const runtime = "nodejs";
 const MAX_COMMAND_BYTES = 64 * 1024;
 const MAX_RESPONSE_BYTES = 256 * 1024;
 const UPSTREAM_TIMEOUT_MS = 12_000;
+const SPINNER_OUTCOME_HEADER = "X-Mochirii-Spinner-Outcome";
+
+function recordProxyError(classification: string, upstreamStatus?: number) {
+  console.error("spinner_live_proxy_error", {
+    classification,
+    ...(upstreamStatus ? { upstreamStatus } : {}),
+  });
+}
 
 function opaqueDenied() {
   return new NextResponse(null, {
     status: 404,
-    headers: SPINNER_PRIVATE_RESPONSE_HEADERS,
+    headers: {
+      ...SPINNER_PRIVATE_RESPONSE_HEADERS,
+      [SPINNER_OUTCOME_HEADER]: "access-denied",
+    },
   });
 }
 
-function privateJson(body: unknown, status: number, headers: HeadersInit = {}) {
+function privateJson(
+  body: unknown,
+  status: number,
+  outcome: SpinnerProxyOutcome,
+  headers: HeadersInit = {},
+) {
   return NextResponse.json(body, {
     status,
     headers: {
       ...SPINNER_PRIVATE_RESPONSE_HEADERS,
       "Content-Type": "application/json; charset=utf-8",
+      [SPINNER_OUTCOME_HEADER]: outcome,
       ...Object.fromEntries(new Headers(headers)),
     },
   });
@@ -65,7 +87,8 @@ async function forwardLiveRequest({
   ifNoneMatch?: string | null;
 }) {
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    return privateJson({ ok: false, message: "The live draw is unavailable." }, 503);
+    recordProxyError("configuration_unavailable");
+    return privateJson({ ok: false, message: "The live draw is unavailable." }, 503, "upstream-error");
   }
 
   const controller = new AbortController();
@@ -86,37 +109,44 @@ async function forwardLiveRequest({
       signal: controller.signal,
     });
 
-    if ([401, 403, 404].includes(response.status)) return opaqueDenied();
+    if ([401, 403, 404].includes(response.status)) {
+      await cancelResponseBody(response);
+      return opaqueDenied();
+    }
     const etag = response.headers.get("etag");
     if (response.status === 304) {
       return new NextResponse(null, {
         status: 304,
         headers: {
           ...SPINNER_PRIVATE_RESPONSE_HEADERS,
+          [SPINNER_OUTCOME_HEADER]: "not-modified",
           ...(etag ? { ETag: etag } : {}),
         },
       });
     }
 
-    const contentLength = Number(response.headers.get("content-length") || 0);
-    if (contentLength > MAX_RESPONSE_BYTES) {
-      return privateJson({ ok: false, message: "The live draw is unavailable." }, 503);
-    }
-    const responseText = await response.text();
-    if (new TextEncoder().encode(responseText).byteLength > MAX_RESPONSE_BYTES) {
-      return privateJson({ ok: false, message: "The live draw is unavailable." }, 503);
+    const responseText = await readBoundedResponseText(response, MAX_RESPONSE_BYTES);
+    if (responseText === null) {
+      recordProxyError("response_too_large", response.status);
+      return privateJson({ ok: false, message: "The live draw is unavailable." }, 503, "upstream-error");
     }
 
     let payload: unknown = null;
     try {
       payload = JSON.parse(responseText) as unknown;
     } catch {
-      return privateJson({ ok: false, message: "The live draw is unavailable." }, 503);
+      recordProxyError("invalid_json", response.status);
+      return privateJson({ ok: false, message: "The live draw is unavailable." }, 503, "upstream-error");
     }
-    const safeStatus = [200, 400, 409, 429, 503].includes(response.status) ? response.status : 503;
-    return privateJson(payload, safeStatus, etag ? { ETag: etag } : {});
+    const outcome = spinnerProxyOutcomeForStatus(method, response.status);
+    if (!outcome) {
+      recordProxyError(response.status === 503 ? "upstream_status" : "unexpected_status", response.status);
+      return privateJson({ ok: false, message: "The live draw is unavailable." }, 503, "upstream-error");
+    }
+    return privateJson(payload, response.status, outcome, etag ? { ETag: etag } : {});
   } catch {
-    return privateJson({ ok: false, message: "The live draw is unavailable." }, 503);
+    recordProxyError("network_or_timeout");
+    return privateJson({ ok: false, message: "The live draw is unavailable." }, 503, "upstream-error");
   } finally {
     clearTimeout(timeout);
   }
@@ -141,11 +171,11 @@ export async function POST(request: NextRequest) {
 
   const declaredLength = Number(request.headers.get("content-length") || 0);
   if (!Number.isFinite(declaredLength) || declaredLength < 0 || declaredLength > MAX_COMMAND_BYTES) {
-    return privateJson({ ok: false, message: "The command is invalid." }, 400);
+    return privateJson({ ok: false, message: "The command is invalid." }, 400, "command-rejected");
   }
   const body = await request.text();
   if (!body || new TextEncoder().encode(body).byteLength > MAX_COMMAND_BYTES) {
-    return privateJson({ ok: false, message: "The command is invalid." }, 400);
+    return privateJson({ ok: false, message: "The command is invalid." }, 400, "command-rejected");
   }
 
   return forwardLiveRequest({

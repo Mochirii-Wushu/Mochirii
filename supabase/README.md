@@ -197,7 +197,7 @@ and six-month rotation notes belong only under
 Do not commit or print Apple private key material, generated client secrets,
 OAuth payloads, cookies, token values, or digests of those values.
 Apple: active identity evidence only. It does not automatically prove guild
-membership, gallery eligibility, moderator status, or Mochirii Social account
+membership, gallery eligibility, moderator status, or Mōchirīī Social account
 creation. First activation testing should link Apple to the
 existing admin account from Account before testing signed-out Apple login.
 
@@ -773,7 +773,7 @@ Preview is the safe first command. Apply requires `confirm:true`, Moderator role
 
 ## Retired Member Profile Surface And Vanity Rank Roles
 
-Website member profile publishing is retired. `/members` and `/members/[slug]` should stay absent from the Next app and resolve through normal 404 behavior with no redirect. Mochirii Social is now the member social/profile destination.
+Website member profile publishing is retired. `/members` and `/members/[slug]` should stay absent from the Next app and resolve through normal 404 behavior with no redirect. Mōchirīī Social is now the member social/profile destination.
 
 The Supabase profile/media objects remain shared backend identity data until a separate Supabase dependency audit/migration is approved. Do not remove `member_profiles`, `member_profile_media`, profile Edge Functions, Storage buckets, or grants from this website cleanup alone.
 

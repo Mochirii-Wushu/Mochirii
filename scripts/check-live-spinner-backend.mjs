@@ -13,12 +13,15 @@ const mediaMigrationPath =
   "supabase/migrations/20260727033342_add_spinner_media_jobs.sql";
 const officialRaffleMigrationPath =
   "supabase/migrations/20260727160000_add_official_spinner_raffle_publications.sql";
+const reviewedDrawClassificationMigrationPath =
+  "supabase/migrations/20260727211442_classify_reviewed_sya_spinner_draw.sql";
 const files = {
   migration: migrationPath,
   countdownMigration: countdownMigrationPath,
   foreignKeyIndexMigration: foreignKeyIndexMigrationPath,
   mediaMigration: mediaMigrationPath,
   officialRaffleMigration: officialRaffleMigrationPath,
+  reviewedDrawClassificationMigration: reviewedDrawClassificationMigrationPath,
   config: "supabase/config.toml",
   index: "supabase/functions/spinner-live-session/index.ts",
   engine: "supabase/functions/_shared/spinner-live.ts",
@@ -33,6 +36,12 @@ const files = {
   sqlTest: "supabase/tests/private_live_spinner_test.sql",
   mediaSqlTest: "supabase/tests/spinner_media_jobs_test.sql",
   winnerRunbook: "docs/operations/SPINNER-RAFFLE-WINNER-PUBLICATION.md",
+  reviewedDrawReadback:
+    "supabase/operations/validate_reviewed_sya_spinner_classification.sql",
+  reviewedDrawFixture:
+    "supabase/tests/fixtures/reviewed_sya_spinner_classification.sql",
+  reviewedDrawMigrationTest:
+    "scripts/test-reviewed-sya-spinner-classification.mjs",
 };
 
 function read(rel) {
@@ -59,7 +68,13 @@ const countdownMigration = read(files.countdownMigration);
 const foreignKeyIndexMigration = read(files.foreignKeyIndexMigration);
 const mediaMigration = read(files.mediaMigration);
 const officialRaffleMigration = read(files.officialRaffleMigration);
+const reviewedDrawClassificationMigration = read(
+  files.reviewedDrawClassificationMigration,
+);
 const winnerRunbook = read(files.winnerRunbook);
+const reviewedDrawReadback = read(files.reviewedDrawReadback);
+const reviewedDrawFixture = read(files.reviewedDrawFixture);
+const reviewedDrawMigrationTest = read(files.reviewedDrawMigrationTest);
 const config = read(files.config);
 const index = read(files.index);
 const engine = read(files.engine);
@@ -322,10 +337,94 @@ excludes(
 );
 
 for (const snippet of [
+  "begin;",
+  "lock table public.spinner_raffle_result_publications in share row exclusive mode",
+  "publication.source_mode = 'legacy-reviewed'",
+  "publication.cycle_month = '2026-07-01'::date",
+  "publication.selected_at = '2026-07-27 15:29:29.763+00'::timestamptz",
+  "publication.reveal_at = '2026-07-27 15:32:34.563+00'::timestamptz",
+  "publication.published_at = '2026-07-27 15:32:39.181748+00'::timestamptz",
+  "publication.winner_display_name = 'Sya'",
+  "publication.approved_by = receipt.actor_id",
+  "receipt.receipt ->> 'drawId' = receipt.draw_id::text",
+  "receipt.roster_snapshot -> 'participants' -> receipt.selected_index = receipt.winner",
+  "outbox.phase = 'completed'",
+  "live.phase = 'revealed'",
+  "exact_match_count <> 1",
+  "receipt_mode = 'official' and outbox_mode = 'official' and live_mode = 'official'",
+  "receipt_mode <> 'unclassified'",
+  "disable trigger spinner_draw_receipts_immutable",
+  "enable trigger spinner_draw_receipts_immutable",
+  "set draw_mode = 'official'",
+  "The reviewed spinner classification postcondition failed.",
+  "Historical rows remain unclassified except for exact reviewed backfills",
+  "commit;",
+]) {
+  includes(
+    "reviewed Sya classification migration",
+    reviewedDrawClassificationMigration,
+    snippet,
+  );
+}
+
+for (const snippet of [
+  "reviewed-sya-test@example.invalid",
+  "draw_mode = 'unclassified'",
+  "'legacy-reviewed'",
+]) {
+  includes("reviewed Sya populated-state fixture", reviewedDrawFixture, snippet);
+}
+for (const snippet of [
+  "resetTo(priorVersion)",
+  'assertReadbackState("t|t|t|t|f|t|f")',
+  "psql(migrationSql)",
+  'assertDatabaseState("official|official|official|3")',
+  'assertReadbackState("t|t|t|f|t|t|t")',
+  "expectFailure: true",
+  "forced reviewed Sya classification rollback test",
+  "expectedError: /ERROR:",
+  'assertDatabaseState("unclassified|unclassified|unclassified|3")',
+  "resetTo()",
+]) {
+  includes("reviewed Sya migration execution test", reviewedDrawMigrationTest, snippet);
+}
+for (const forbidden of [
+  /insert\s+into\s+public\.spinner_/iu,
+  /delete\s+from\s+public\.spinner_/iu,
+  /update\s+public\.spinner_raffle_result_publications/iu,
+  /update\s+public\.spinner_raffle_result_revocations/iu,
+  /net\.http_post/iu,
+  /discord/iu,
+]) {
+  excludes(
+    "reviewed Sya classification migration",
+    reviewedDrawClassificationMigration.replace(/spinner_discord_outbox/gu, "spinner_delivery_outbox"),
+    forbidden,
+    `forbidden side effect matched ${forbidden}`,
+  );
+}
+
+for (const snippet of [
+  "winner_display_name = 'Sya'",
+  "cycle_month = '2026-07-01'::date",
+  "publication_count = 1",
+  "exact_state_count = 1",
+  "revocation_count = 0",
+  "wholly_unclassified_count = 1",
+  "wholly_official_count = 1",
+  "migration_ready",
+  "all_checks_pass",
+]) {
+  includes("reviewed Sya readback", reviewedDrawReadback, snippet);
+}
+
+for (const snippet of [
   "Signed-out and unverified visitors receive exactly `Winner Confirmed`",
   "A test receipt is durable for private review",
   "drops the temporary backfill function",
   "unchanged 33-function inventory and 20/13 JWT parity",
+  "20260727211442_classify_reviewed_sya_spinner_draw.sql",
+  "does not publish, announce, redraw, or create a reward",
 ]) includes("spinner raffle winner runbook", winnerRunbook, snippet);
 
 includes(

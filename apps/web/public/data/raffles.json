@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "programName": "Mochirii Monthly Raffle",
+  "programName": "Mōchirīī Monthly Raffle",
   "meta": {
     "kicker": "Monthly guild drawings",
-    "title": "Mochirii Monthly Raffle",
-    "intro": "Mochirii holds monthly drawings for eligible guild members. No raffle is active and no submissions are being accepted.",
+    "title": "Mōchirīī Monthly Raffle",
+    "intro": "Mōchirīī holds monthly drawings for eligible guild members. No raffle is active and no submissions are being accepted.",
     "frequency": "Monthly drawings",
     "badges": ["No raffle is active", "Entries closed", "No purchase necessary"],
     "hero": {
@@ -75,7 +75,7 @@
     "oddsFormula": "A member's valid entries divided by all valid entries after the drawing closes."
   },
   "rewards": {
-    "summary": "Drawing rewards may include electronic gifts, approved in-game gifts, and two Mochirii community honors.",
+    "summary": "Drawing rewards may include electronic gifts, approved in-game gifts, and two Mōchirīī community honors.",
     "activeDrawingNotice": "Each active drawing identifies the exact primary reward, value, eligible locations, delivery method, redemption terms, and available choices in its official rules.",
     "categories": [
       {
@@ -96,14 +96,14 @@
       }
     ]
   },
-  "eligibility": "Verified Mochirii guild member in good standing, age 18 or older, resident of a country approved for that drawing, and limited to one account and one opt-in per person per cycle.",
+  "eligibility": "Verified Mōchirīī guild member in good standing, age 18 or older, resident of a country approved for that drawing, and limited to one account and one opt-in per person per cycle.",
   "standingPrinciples": [
     "No purchase necessary. A purchase or payment never improves the chance of selection.",
     "Published odds are a member's valid entries divided by all valid entries after the drawing closes.",
     "Each drawing has separate official rules stating its dates, eligibility, reward, value, claim period, expiration, and any location restrictions.",
     "Each completed drawing confirms one primary winner, two community-honor recipients, and predetermined alternates without replacement.",
     "Singapore time governs each drawing.",
-    "Potential winners must retrieve rewards through the authenticated Mochirii claim page within seven days after the drawing unless the active drawing rules lawfully require a different period.",
+    "Potential winners must retrieve rewards through the authenticated Mōchirīī claim page within seven days after the drawing unless the active drawing rules lawfully require a different period.",
     "Private claim reminders may be sent when approximately 72 hours and 24 hours remain.",
     "Electronic rewards expire 30 days after issue unless the active drawing rules lawfully state a different term.",
     "Signed-out visitors see only Winner confirmed or Community honor confirmed. Authenticated guild members may see each recipient's selected guild display name.",

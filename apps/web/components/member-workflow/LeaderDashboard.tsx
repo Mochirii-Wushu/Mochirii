@@ -221,9 +221,15 @@ export function LeaderDashboard() {
     }
 
     setPanel("review");
-    await loadQueue({ status: "pending", page: 1, thumbnailState: "all" });
-    await loadInstagramQueue({ status: instagramActiveStatus });
-    await loadInstagramApiStatus();
+    setBusy(false);
+
+    // Access to the moderator spinner is established above. Queue and provider
+    // reads are independent review tools and must not hold that doorway open.
+    void Promise.allSettled([
+      loadQueue({ status: "pending", page: 1, thumbnailState: "all" }),
+      loadInstagramQueue({ status: instagramActiveStatus }),
+      loadInstagramApiStatus(),
+    ]);
   }, [instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadQueue]);
 
   useEffect(() => {

@@ -6,6 +6,8 @@ const failures = [];
 const migrationDirectory = path.join(root, "supabase", "migrations");
 const migrationName = "20260727144954_add_member_social_links.sql";
 const hardeningMigrationName = "20260727153226_harden_member_social_links.sql";
+const selectPolicyMigrationName =
+  "20260727212838_consolidate_member_social_links_select_policy.sql";
 
 function read(relativePath) {
   const fullPath = path.join(root, relativePath);
@@ -26,6 +28,9 @@ function excludes(label, source, snippet) {
 
 const migration = read(path.join("supabase", "migrations", migrationName));
 const hardeningMigration = read(path.join("supabase", "migrations", hardeningMigrationName));
+const selectPolicyMigration = read(
+  path.join("supabase", "migrations", selectPolicyMigrationName),
+);
 const core = read("apps/web/lib/member-social-links/profile-links-core.ts");
 const client = read("apps/web/lib/supabase/member-social-links.ts");
 const component = read("apps/web/components/member-workflow/MemberSocialLinks.tsx");
@@ -41,6 +46,9 @@ if (!existsSync(path.join(migrationDirectory, migrationName))) {
 }
 if (!existsSync(path.join(migrationDirectory, hardeningMigrationName))) {
   failures.push("profile-link hardening migration must retain its generated Supabase CLI filename.");
+}
+if (!existsSync(path.join(migrationDirectory, selectPolicyMigrationName))) {
+  failures.push("profile-link SELECT-policy migration must retain its generated Supabase CLI filename.");
 }
 
 [
@@ -71,6 +79,18 @@ if (!existsSync(path.join(migrationDirectory, hardeningMigrationName))) {
   "revoke update",
   "grant update (is_visible)",
 ].forEach((snippet) => includes("hardening migration", hardeningMigration, snippet));
+
+[
+  'drop policy if exists "Members can read their own profile links"',
+  'drop policy if exists "Verified members can read shared profile links"',
+  'create policy "Members can read permitted profile links"',
+  "(select auth.uid()) = user_id",
+  "is_visible is true",
+  "private.member_has_gallery_upload_access((select auth.uid()))",
+  "private.member_has_gallery_upload_access(user_id)",
+].forEach((snippet) =>
+  includes("consolidated SELECT policy migration", selectPolicyMigration, snippet)
+);
 
 [
   "instagram",
@@ -111,6 +131,11 @@ includes("stored-XSS tests", test, "onerror=alert(1)");
 includes("RLS database tests", databaseTest, "another verified member can read only explicitly shared links");
 includes("constrained create database tests", databaseTest, "cannot bypass bounded creation");
 includes("atomic reorder database tests", databaseTest, "atomically reorder");
+includes(
+  "single permissive SELECT policy test",
+  databaseTest,
+  "without duplicate permissive SELECT policies",
+);
 includes("package script", packageJson, '"check:member-social-links"');
 includes("package test", packageJson, '"test:member-social-links"');
 includes("root validation", checkAll, "check:member-social-links");

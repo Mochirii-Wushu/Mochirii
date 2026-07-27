@@ -8,7 +8,7 @@ export type MemberGateState = "checking" | "signed-out" | "not-verified" | "read
 
 const errorCopy: Record<Exclude<TesterGateError, null>, string> = {
   invalid: "That password did not work. Check the tester invitation and try again.",
-  member_required: "Verified Mochirii membership and the current tester passcode are both required.",
+  member_required: "Verified Mōchirīī membership and the current tester passcode are both required.",
   rate_limited: "Too many passcode attempts. Wait a few minutes, then try again.",
   unavailable: "We couldn’t confirm your access. Please try again.",
 };
@@ -16,15 +16,15 @@ const errorCopy: Record<Exclude<TesterGateError, null>, string> = {
 const memberStateCopy: Record<Exclude<MemberGateState, "ready">, { title: string; body: string }> = {
   checking: {
     title: "Checking member access",
-    body: "Confirming your Mochirii website sign-in.",
+    body: "Confirming your Mōchirīī website sign-in.",
   },
   "signed-out": {
     title: "Website sign-in required",
-    body: "Sign in with your Mochirii website account before entering the tester passcode.",
+    body: "Sign in with your Mōchirīī website account before entering the tester passcode.",
   },
   "not-verified": {
     title: "Verified membership required",
-    body: "Your website sign-in is active, but verified Mochirii membership is still required.",
+    body: "Your website sign-in is active, but verified Mōchirīī membership is still required.",
   },
   unavailable: {
     title: "We couldn’t confirm your access",
@@ -68,7 +68,7 @@ export function MochiPetsTesterPasswordGate({
           </div>
           <h1 id="mochi-pets-title">Mochi Pets</h1>
           <p id={descriptionId}>
-            A shared 3D guild home beyond the Jianghu, bringing Mochirii members together with a Mochi companion of their own across iPhone and desktop.
+            A shared 3D guild home beyond the Jianghu, bringing Mōchirīī members together with a Mochi companion of their own across iPhone and desktop.
           </p>
         </div>
       </header>
@@ -84,7 +84,7 @@ export function MochiPetsTesterPasswordGate({
           <div>
             <p className="mochi-gate-kicker">Private tester access</p>
             <h2>Enter the tester space</h2>
-            <p>Verified Mochirii membership is confirmed. Enter the current tester passcode to continue.</p>
+            <p>Verified Mōchirīī membership is confirmed. Enter the current tester passcode to continue.</p>
           </div>
           {error ? (
             <p className="form-message mochi-form-message" id={errorId} role="alert">
@@ -122,7 +122,7 @@ export function MochiPetsTesterPasswordGate({
           </div>
           {memberState === "signed-out" ? (
             <Link className="hero-cta hero-cta--primary mochi-gate-submit" href="/auth?redirect=%2Fgames%2Fmochi-pets">
-              Sign in to Mochirii
+              Sign in to Mōchirīī
             </Link>
           ) : memberState === "not-verified" ? (
             <Link className="hero-cta mochi-gate-submit" href="/account">
@@ -140,7 +140,7 @@ export function MochiPetsTesterPasswordGate({
         <section>
           <h2>Tester doorway</h2>
           <ul>
-            <li>Verified Mochirii website membership.</li>
+            <li>Verified Mōchirīī website membership.</li>
             <li>The current Mochi Pets tester passcode.</li>
             <li>Both checks are required before the private space opens.</li>
           </ul>

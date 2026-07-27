@@ -76,7 +76,7 @@ const exactKeys = [
 ];
 assertDeepEqual(Object.keys(data).sort(), exactKeys.sort(), "raffle data: public contract fields must be exact");
 assert(data.schemaVersion === 1, "raffle data: schemaVersion must be 1");
-assert(data.programName === "Mochirii Monthly Raffle", "raffle data: programName must use Mochirii branding");
+assert(data.programName === "Mōchirīī Monthly Raffle", "raffle data: programName must use public Mōchirīī branding");
 assert(data.publicView?.timezone === "Asia/Singapore", "raffle data: Singapore must remain the authoritative time zone");
 assert(data.publicView?.cycleStatus === "inactive", "raffle data: public release must remain inactive");
 assert(data.publicView?.standardEntryStatus === "closed", "raffle data: standard entries must be closed");
@@ -101,7 +101,7 @@ for (const [index, method] of (data.entryModel?.permanentBonusMethods || []).ent
   assert(method.maximumEntries === 1, `raffle data: method ${index + 1} must be capped at one entry`);
 }
 
-for (const phrase of ["Verified Mochirii guild member in good standing", "age 18 or older", "country approved for that drawing", "one account and one opt-in per person per cycle"]) {
+for (const phrase of ["Verified Mōchirīī guild member in good standing", "age 18 or older", "country approved for that drawing", "one account and one opt-in per person per cycle"]) {
   assert(data.eligibility?.includes(phrase), `raffle data: standing eligibility missing ${phrase}`);
 }
 assert(data.rewards?.categories?.length >= 4, "raffle data: electronic, in-game, and two community-honor concepts are required");
@@ -158,7 +158,7 @@ for (const [label, pattern] of [
 }
 
 for (const phrase of [
-  "Mochirii holds monthly drawings for eligible guild members",
+  "Mōchirīī holds monthly drawings for eligible guild members",
   "No raffle is active",
   "Standard entries",
   "Bonus entries",

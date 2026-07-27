@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: RuleVersionPageProps): Promis
   const version = getRaffleRuleVersion(slug);
   if (!version) return {};
 
-  const description = `Immutable rules for ${version.cycleLabel} in the Mochirii Monthly Raffle.`;
+  const description = `Immutable rules for ${version.cycleLabel} in the Mōchirīī Monthly Raffle.`;
   return {
     title: version.title,
     description,
@@ -47,7 +47,7 @@ export default async function RaffleRuleVersionPage({ params }: RuleVersionPageP
       <main className="page-main" id="main">
         <div className="container raffle-public-layout">
           <section className="glass-card glass-card--primary glass-pad" aria-labelledby="raffleRuleVersionHeading">
-            <p className="kicker">Mochirii Monthly Raffle</p>
+            <p className="kicker">Mōchirīī Monthly Raffle</p>
             <h1 className="display-title" id="raffleRuleVersionHeading">{version.title}</h1>
             <p className="lede">{version.cycleLabel}</p>
             <div className="badge-row u-mt-18" aria-label="Drawing rule notices">

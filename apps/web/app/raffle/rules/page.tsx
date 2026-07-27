@@ -17,7 +17,7 @@ export default function RaffleRulesPage() {
       <main className="page-main" id="main">
         <div className="container raffle-public-layout">
           <section className="glass-card glass-card--primary glass-pad" aria-labelledby="raffleRulesHeading">
-            <p className="kicker">Mochirii Monthly Raffle</p>
+            <p className="kicker">Mōchirīī Monthly Raffle</p>
             <h1 className="display-title" id="raffleRulesHeading">Raffle rules</h1>
             <p className="lede">Standing program principles remain available between drawings. Each active drawing has separate official rules.</p>
             <div className="badge-row u-mt-18" role="status" aria-label="Current drawing rules status">

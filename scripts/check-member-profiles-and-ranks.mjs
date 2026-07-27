@@ -158,7 +158,7 @@ assertMatches(
   "readOnly",
   "maxLength={1000}",
   "\"@/lib/public-urls\"",
-  "Open Mochirii Social",
+  "Open Mōchirīī Social",
 ].forEach((snippet) => assertIncludes("account panel", accountPanel, snippet));
 
 [
@@ -245,14 +245,14 @@ assertNotIncludes("css", css, ".member-directory-grid");
 
 [
   "member profile publishing is retired",
-  "Mochirii Social",
+  "Mōchirīī Social",
   "shared backend identity data",
   "separate Supabase dependency audit",
 ].forEach((snippet) => assertIncludes("supabase README", supabaseReadme, snippet));
 
 [
   "Retired Member Profile Surface",
-  "Mochirii Social",
+  "Mōchirīī Social",
   "No Discord role mutation happens from CI",
 ].forEach((snippet) => assertIncludes("feature doc", featureDoc, snippet));
 

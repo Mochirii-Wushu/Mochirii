@@ -57,7 +57,7 @@ export function instagramStatusConfig(status: string) {
 
 function uploaderName(item: GalleryReviewSubmission) {
   const uploader = item.uploader || {};
-  return uploader.discordGlobalName || uploader.displayName || uploader.discordUsername || "Mochirii Member";
+  return uploader.discordGlobalName || uploader.displayName || uploader.discordUsername || "Mōchirīī Member";
 }
 
 function discordDetail(item: GalleryReviewSubmission) {
@@ -327,7 +327,7 @@ export function InstagramJobCard({
         <div className="review-details__head">
           <div>
             <h3>{title}</h3>
-            <p className="muted">{submission.uploader?.displayName || "Mochirii Member"} - {sourceLabel}</p>
+            <p className="muted">{submission.uploader?.displayName || "Mōchirīī Member"} - {sourceLabel}</p>
           </div>
           <span className={`submission-status submission-status--${status}`}>{status}</span>
         </div>

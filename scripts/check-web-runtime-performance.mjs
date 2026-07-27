@@ -21,6 +21,14 @@ function assertNotIncludes(label, source, snippet) {
   if (source.includes(snippet)) failures.push(`${label}: forbidden snippet found: ${snippet}`);
 }
 
+function assertOrdered(label, source, earlier, later) {
+  const earlierIndex = source.indexOf(earlier);
+  const laterIndex = source.indexOf(later);
+  if (earlierIndex < 0 || laterIndex < 0 || earlierIndex >= laterIndex) {
+    failures.push(`${label}: expected ${earlier} before ${later}`);
+  }
+}
+
 function pageFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const fullPath = path.join(directory, entry.name);
@@ -129,6 +137,38 @@ for (const [file, route] of [
   assertNotIncludes(file, source, `Promise.resolve().then(() => measureAuthenticatedRouteTask("${route}"`);
 }
 
+const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
+const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
+assertIncludes("Account essential reads", accountPanel, "const [profileResult, accessResult] = await Promise.all([");
+assertIncludes("Account optional reads", accountPanel, "void Promise.allSettled([");
+assertIncludes("Account load generation", accountPanel, "accountLoadGenerationRef.current === loadGeneration");
+assertOrdered(
+  "Account access readiness before moderator discovery",
+  accountPanel,
+  "setBusy(false);",
+  "void checkLeaderGalleryModerationAccess().then",
+);
+assertIncludes("Account stale optional-read guard", accountPanel, "loadSubmissions(loadGeneration)");
+assertIncludes("Leader optional queues", leaderDashboard, "void Promise.allSettled([");
+assertOrdered(
+  "Leader access before optional queues",
+  leaderDashboard,
+  'setPanel("review");',
+  "void Promise.allSettled([",
+);
+assertIncludes("Leader queue-local loading", leaderDashboard, "setBusy(true);");
+assertOrdered(
+  "Leader spinner before moderation queue",
+  leaderDashboard,
+  'id="spinnerLaunchPanel" aria-busy={spinnerLaunchBusy}',
+  'id="reviewPanel" aria-busy={busy}',
+);
+assertIncludes(
+  "Leader spinner readiness",
+  leaderDashboard,
+  'disabled={spinnerLaunchBusy} onClick={openSpinner}',
+);
+
 if (failures.length) {
   console.error("Web runtime performance contract failed:");
   failures.forEach((failure) => console.error(`- ${failure}`));
@@ -141,3 +181,4 @@ console.log("- Events hydration uses one server-generated reference time.");
 console.log("- Public Gallery and profile-card feed code has no Supabase SDK dependency.");
 console.log("- Discord preview is user activated and retains a direct link.");
 console.log("- Authenticated route timings are local, bounded, and identifier-free.");
+console.log("- Moderator spinner access renders before optional queue reads; queue loading stays scoped to the review panel.");

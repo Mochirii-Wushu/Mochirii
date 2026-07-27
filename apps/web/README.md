@@ -86,6 +86,18 @@ Analytics and Core Web Vitals data can take a few minutes, and enough real produ
 
 The account, OAuth consent, and leader-dashboard clients also record a local User Timing measure when Supabase Auth emits the initial session event and on later auth-state loads. The components do not start a second eager load before that event. Measure names contain only the fixed route, `load` phase, completion state, and one of five bounded duration buckets. The helper sends no network request, has no production collector, and records no member identifier; developers inspect it manually in browser performance tooling before changing those authenticated routes.
 
+Essential Account and leader-dashboard access reads run together. Optional submission,
+Gallery, Instagram, and Social status reads settle afterward; the moderator spinner card
+renders before its independent moderation queues complete. The live-spinner proxy
+streams upstream responses through a 256 KiB byte ceiling, classifies expected access
+denial separately from actual upstream failure, and exposes no member or draw identifier
+in its bounded diagnostic record. Clients pause polling while hidden or offline and use
+bounded jittered backoff after real synchronization failures.
+
+Public guild wording comes from `lib/brand.ts`: `Mōchirīī` and `Mōchī` are the NFC
+display forms. ASCII `Mochirii` is reserved for reviewed technical and commerce
+boundaries and is enforced by the root `check:public-guild-brand` contract.
+
 Production bundle validation reads each public route's client-reference manifest after `next build`. Every public entry is limited to 225 KiB Brotli, Gallery-only code must stay out of unrelated public entries, and Supabase Auth, PostgREST, and Realtime SDK markers must stay out of every public entry. Public routes import their route component directly so an unrelated page cannot pull the full public-page barrel into its client graph.
 
 ## Public Assets And Data
@@ -233,11 +245,11 @@ Approval for the public Gallery never posts to Instagram automatically. If an ap
 
 Instagram account IDs, tokens, API versions, and API base URLs stay in Supabase secrets only. They do not belong in Vercel env vars or any `NEXT_PUBLIC_*` value.
 
-## Retired Member Profiles And Mochirii Social
+## Retired Member Profiles And Mōchirīī Social
 
-The website `/members` and `/members/[slug]` product surface is retired. Those URLs should resolve through the normal missing-route behavior, with no redirect, while member social/profile activity moves to Mochirii Social at `https://social.mochirii.com`.
+The website `/members` and `/members/[slug]` product surface is retired. Those URLs should resolve through the normal missing-route behavior, with no redirect, while member social/profile activity moves to Mōchirīī Social at `https://social.mochirii.com`.
 
-The Account page still lets a signed-in member edit safe profile fields, verify Discord membership, review gallery submission history, and open Mochirii Social. Discord handle is read-only and refreshed from Discord verification, not typed by the member. Bios allow up to 1,000 characters.
+The Account page still lets a signed-in member edit safe profile fields, verify Discord membership, review gallery submission history, and open Mōchirīī Social. Discord handle is read-only and refreshed from Discord verification, not typed by the member. Bios allow up to 1,000 characters.
 
 Shared backend identity data remains in Supabase until a separate Supabase dependency audit/migration is approved. Keep `member_profiles`, Discord verification, gallery/rank dependencies, and `social_accounts` intact during website cleanup work.
 

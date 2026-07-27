@@ -115,9 +115,11 @@ historical-residue baseline without rewriting public Git history.
 ## Content And Product Guidance
 
 Route-specific guidance remains under `docs`. Protected website copy is guarded
-by exact hashes and must not be changed incidentally. Customer and guild-leader
-surfaces use Mochirii and product language; infrastructure and supplier names
-stay in internal code, required attribution, CI, and no-secret technical docs.
+by exact hashes and must not be changed incidentally. Public guild surfaces use
+the NFC trademark forms `Mōchirīī` and `Mōchī`; technical identifiers, repository
+slugs, infrastructure, Shopify, and `Mochirii Cosmetics` commerce surfaces retain
+ASCII `Mochirii`. Supplier and provider names stay in internal code, required
+attribution, CI, and no-secret technical docs.
 
 Use [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), the root
 [AGENTS.md](AGENTS.md), and the nearest subdirectory `AGENTS.md` before changes.

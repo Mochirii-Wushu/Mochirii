@@ -82,7 +82,7 @@ assertNotIncludes("public page", page, [
 assertIncludes("public metadata", metadata, [
   "mochiPets:",
   'path: "/games/mochi-pets"',
-  "A shared 3D Mochirii guild home beyond the Jianghu",
+  "A shared 3D Mōchirīī guild home beyond the Jianghu",
 ]);
 
 const privateDoorway = read(paths.privateDoorway);
@@ -276,7 +276,7 @@ assertIncludes("tester gate", gate, [
   'role="alert"',
   "/assets/img/brand/emblem.webp",
   "A shared 3D guild home beyond the Jianghu",
-  "Verified Mochirii website membership.",
+  "Verified Mōchirīī website membership.",
   "The current Mochi Pets tester passcode.",
 ]);
 

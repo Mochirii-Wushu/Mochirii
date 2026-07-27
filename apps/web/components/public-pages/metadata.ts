@@ -70,16 +70,16 @@ const pageMeta: Record<
     image: "/assets/img/announcements/hero.webp",
   },
   raffle: {
-    title: "Mochirii Monthly Raffle",
+    title: "Mōchirīī Monthly Raffle",
     description:
-      "Monthly Mochirii guild drawings, standing entry limits, possible reward types, current entry status, and results. No purchase necessary.",
+      "Monthly Mōchirīī guild drawings, standing entry limits, possible reward types, current entry status, and results. No purchase necessary.",
     path: "/raffle",
     image: "/assets/img/raffles/hero.webp",
   },
   raffleRules: {
-    title: "Mochirii Monthly Raffle Rules",
+    title: "Mōchirīī Monthly Raffle Rules",
     description:
-      "Standing Mochirii Monthly Raffle eligibility, entry limits, free participation methods, current drawing rules, and completed-drawing archive.",
+      "Standing Mōchirīī Monthly Raffle eligibility, entry limits, free participation methods, current drawing rules, and completed-drawing archive.",
     path: "/raffle/rules",
     image: "/assets/img/raffles/hero.webp",
   },
@@ -121,7 +121,7 @@ const pageMeta: Record<
   mochiPets: {
     title: "Mochi Pets • Mōchirīī Guild World",
     description:
-      "A shared 3D Mochirii guild home beyond the Jianghu, bringing members together with a Mochi companion of their own across iPhone and desktop.",
+      "A shared 3D Mōchirīī guild home beyond the Jianghu, bringing members together with a Mochi companion of their own across iPhone and desktop.",
     path: "/games/mochi-pets",
     image: "/assets/img/mochi-pets/gate-arrival.webp",
   },

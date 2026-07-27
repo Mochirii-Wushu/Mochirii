@@ -15,6 +15,7 @@ import {
   spinnerCountdownSeconds,
   spinnerDrawAnnouncementTransition,
   spinnerLivePollInterval,
+  spinnerLiveErrorRetryDelay,
   spinnerLiveMotionRotations,
   spinnerSkipControlVisible,
   spinnerSkipStateForDraw,
@@ -355,6 +356,18 @@ test("countdown polling remains normal until the authoritative start", () => {
   const idle = parseSpinnerLiveSnapshot(idleSnapshot(PARTICIPANTS));
   assert.ok(idle);
   assert.equal(spinnerLivePollInterval(idle, "2026-07-26T18:04:00.000Z"), 2_000);
+});
+
+test("live polling failures back off with bounded jitter and reset-ready delays", () => {
+  assert.equal(spinnerLiveErrorRetryDelay(1, 0.5), 2_500);
+  assert.equal(spinnerLiveErrorRetryDelay(2, 0.5), 5_000);
+  assert.equal(spinnerLiveErrorRetryDelay(3, 0.5), 10_000);
+  assert.equal(spinnerLiveErrorRetryDelay(4, 0.5), 20_000);
+  assert.equal(spinnerLiveErrorRetryDelay(5, 0.5), 30_000);
+  assert.equal(spinnerLiveErrorRetryDelay(99, 1), 30_000);
+  assert.equal(spinnerLiveErrorRetryDelay(1, 0), 2_000);
+  assert.equal(spinnerLiveErrorRetryDelay(1, 1), 3_000);
+  assert.equal(spinnerLiveErrorRetryDelay(Number.NaN, Number.NaN), 2_500);
 });
 
 test("draw announcements occur once per countdown and spin across refresh recovery", () => {

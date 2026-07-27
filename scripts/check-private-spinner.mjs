@@ -45,6 +45,7 @@ const files = {
   notFound: "apps/web/app/spinner/not-found.tsx",
   sessionRoute: "apps/web/app/spinner/session/route.ts",
   liveRoute: "apps/web/app/spinner/live/route.ts",
+  proxyOutcome: "apps/web/lib/spinner/proxy-outcome.ts",
   proxy: "apps/web/proxy.ts",
   access: "apps/web/lib/spinner/access.ts",
   policy: "apps/web/lib/spinner/session-policy.ts",
@@ -236,10 +237,20 @@ for (const snippet of [
   'method: "POST"',
   'Authorization: `Bearer ${accessToken}`',
   '"X-Mochirii-Spinner-Mode": mode',
+  'SPINNER_OUTCOME_HEADER = "X-Mochirii-Spinner-Outcome"',
+  "await cancelResponseBody(response)",
+  "readBoundedResponseText(response, MAX_RESPONSE_BYTES)",
+  "spinnerProxyOutcomeForStatus(method, response.status)",
+  'recordProxyError("response_too_large", response.status)',
+  '"access-denied"',
+  '"upstream-error"',
+  'console.error("spinner_live_proxy_error"',
   "/functions/v1/spinner-live-session",
   "MAX_COMMAND_BYTES",
   "UPSTREAM_TIMEOUT_MS",
 ]) includes("same-origin live proxy", source.liveRoute, snippet);
+includes("same-origin live proxy outcomes", source.proxyOutcome, '"rate-limited"');
+includes("same-origin live proxy outcomes", source.proxyOutcome, 'method === "POST"');
 excludes("same-origin live proxy", source.liveRoute, "SERVICE_ROLE");
 
 for (const forbidden of [
