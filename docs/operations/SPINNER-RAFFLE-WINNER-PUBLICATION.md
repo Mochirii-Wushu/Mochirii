@@ -19,7 +19,7 @@ The controller begins in official mode. **Test spin** is an explicit switch and 
 
 An official draw atomically reserves one result for the Singapore calendar month when its outbox row is created. The result's effective publication time is the authoritative `reveal_at`; the public RPC independently gates on `reveal_at <= now()`. Public visibility therefore does not depend on external guild-message delivery. A unique month constraint rejects a second official result for the same Singapore month.
 
-A test receipt is durable for private review, but its outbox insert is suppressed before insertion. Consequently it creates no guild announcement, rendered media, public result, reward side effect, or official-month reservation. The publication validator independently rejects any attempt to insert a result for a test receipt.
+A test receipt is durable for private review, but its outbox insert is suppressed before insertion. The dispatcher trigger is row-level and accepts only a surviving official outbox row, so a suppressed test insert cannot wake delivery for unrelated pending work. Consequently a test spin creates no guild announcement, rendered media, public result, reward side effect, or official-month reservation. The publication validator independently rejects any attempt to insert a result for a test receipt.
 
 ## Privacy And Immutability
 
