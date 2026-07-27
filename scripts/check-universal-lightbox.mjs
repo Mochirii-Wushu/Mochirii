@@ -8,6 +8,7 @@ const homePagePath = "apps/web/app/page.tsx";
 const galleryPagePath = "apps/web/app/gallery/page.tsx";
 const homeModalPath = "apps/web/components/HomeGalleryLightboxModal.tsx";
 const galleryBrowserPath = "apps/web/components/public-pages/GalleryBrowser.tsx";
+const lightboxOverlayPath = "apps/web/components/useLightboxOverlay.ts";
 const layoutPath = "apps/web/app/layout.tsx";
 const tokensPath = "apps/web/app/styles/tokens-base.css";
 const headerCssPath = "apps/web/app/styles/shell-header-nav.css";
@@ -21,6 +22,7 @@ const homePage = readFileSync(homePagePath, "utf8").replace(/\r\n/g, "\n");
 const galleryPage = readFileSync(galleryPagePath, "utf8").replace(/\r\n/g, "\n");
 const homeModal = readFileSync(homeModalPath, "utf8").replace(/\r\n/g, "\n");
 const galleryBrowser = readFileSync(galleryBrowserPath, "utf8").replace(/\r\n/g, "\n");
+const lightboxOverlay = readFileSync(lightboxOverlayPath, "utf8").replace(/\r\n/g, "\n");
 const layout = readFileSync(layoutPath, "utf8").replace(/\r\n/g, "\n");
 const tokens = readFileSync(tokensPath, "utf8").replace(/\r\n/g, "\n");
 const headerCss = readFileSync(headerCssPath, "utf8").replace(/\r\n/g, "\n");
@@ -152,6 +154,12 @@ expectIncludes("Gallery shared lightbox import", galleryPage, 'import "../styles
 expectIncludes("Gallery visual treatment import", galleryPage, 'import "../styles/public-gallery.css";', galleryPagePath);
 expectIncludes("Home keyboard-scrollable lightbox card", homeModal, '<figure className="lightbox-card" tabIndex={0}>', homeModalPath);
 expectIncludes("Gallery keyboard-scrollable lightbox card", galleryBrowser, '<figure className="lightbox-card" tabIndex={0}>', galleryBrowserPath);
+[
+  "const scrollbarWidth = Math.max(0, window.innerWidth - documentElement.clientWidth);",
+  "const currentPaddingRight = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;",
+  "body.style.paddingRight = `${currentPaddingRight + scrollbarWidth}px`;",
+  "body.style.paddingRight = previousPaddingRight;",
+].forEach((snippet) => expectIncludes("Shared scrollbar compensation", lightboxOverlay, snippet, lightboxOverlayPath));
 expectIncludes("Next viewport safe-area opt-in", layout, 'viewportFit: "cover"', layoutPath);
 const tokensRules = stylesheetRules.get(tokensPath);
 const headerRules = stylesheetRules.get(headerCssPath);

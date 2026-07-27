@@ -8,7 +8,7 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 
 - Gallery data lives in `apps/web/public/data/gallery.json`.
 - The current static Gallery source has 73 images in the `general` album.
-- Approved member and Discord submissions are added at runtime through Supabase signed URLs and are not written into `apps/web/public/data/gallery.json`.
+- Approved member and Discord submissions are added at runtime through separate short-lived thumbnail and full-image URLs and are not written into `apps/web/public/data/gallery.json`.
 - Do not change image paths unless assets are actually added, replaced, or removed in the same scoped task.
 - Captions and alt text should match visible image content.
 - Do not invent player identities, events, locations, or actions that are not visible or otherwise confirmed.
@@ -20,8 +20,11 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - The grid uses thumbnails for page speed.
 - The lightbox opens full images.
 - Never let the lightbox open `/thumbs/` images.
+- Every approved runtime submission needs a private WebP derivative no larger than 720 pixels on its longest edge and 80 KiB. The moderator browser prepares it during approval; the Edge Function verifies both the WebP structure and a complete pixel decode before storage.
+- Do not use managed on-the-fly image transformations for this path. They are an optional provider feature with a separate cost/configuration boundary, while the stored derivative has no per-view transform requirement.
+- The worst-case first 24 member derivatives and the representative first 24 static thumbnails must each remain below 2 MiB. Browser tests also require no original request before the viewer opens and CLS no greater than 0.1.
 - The canonical Next Gallery renders static items in bounded batches of 24; keep the `Show more images` control as the only expansion action unless a later scoped performance pass replaces the pattern. The immutable legacy release remains rollback-only.
-- Approved member and Discord submissions may render with time-limited Supabase signed URLs only. Do not expose raw storage buckets, storage paths, service-role keys, or private media references to browser code.
+- Approved member and Discord submissions may render with time-limited signed URLs only. Derivatives live below the service-owned `_approved/thumbs/{submission}/{revision}.webp` prefix; members cannot insert, update, read, or delete that prefix. Do not expose raw storage buckets, storage paths, service-role keys, or private media references to browser code.
 - Home Gallery Spotlight must keep using thumbnail paths in its grid and full-size Gallery images in its lightbox.
 
 ### Universal lightbox contract
@@ -162,6 +165,8 @@ runtime noise.
 - Confirm no horizontal overflow.
 - Confirm the initial Gallery render is capped at 24 images and `Show more images` expands the next batch.
 - Confirm approved runtime submissions use signed URLs and do not display raw Supabase storage references.
+- Confirm approved runtime submissions use distinct thumbnail and full-image URLs, and that the full image is not requested before its viewer opens.
+- Confirm the random mix is stable through hydration and does not reshuffle after first paint.
 
 ## 13. Media Performance
 

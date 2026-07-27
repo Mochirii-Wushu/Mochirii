@@ -435,15 +435,43 @@ async function prepareSurfacePage(context, surface, engineLabel, resolvedBaseUrl
 }
 
 async function bodyState(page) {
-  return page.evaluate(() => ({
-    scrollY: window.scrollY,
-    overflow: document.body.style.overflow,
-    position: document.body.style.position,
-    top: document.body.style.top,
-    left: document.body.style.left,
-    right: document.body.style.right,
-    paddingRight: document.body.style.paddingRight,
-  }));
+  return page.evaluate(() => {
+    const reference = document.querySelector(".site-header__inner") || document.querySelector("main .container");
+    const referenceRect = reference?.getBoundingClientRect();
+    return {
+      scrollY: window.scrollY,
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      left: document.body.style.left,
+      right: document.body.style.right,
+      paddingRight: document.body.style.paddingRight,
+      computedPaddingRight: Number.parseFloat(getComputedStyle(document.body).paddingRight) || 0,
+      scrollbarWidth: Math.max(0, window.innerWidth - document.documentElement.clientWidth),
+      reference: referenceRect
+        ? { left: referenceRect.left, right: referenceRect.right, width: referenceRect.width }
+        : null,
+    };
+  });
+}
+
+async function assertScrollbarCompensation(page, before, context) {
+  const after = await bodyState(page);
+  const expectedPadding = before.scrollbarWidth > 0
+    ? before.computedPaddingRight + before.scrollbarWidth
+    : before.computedPaddingRight;
+  assert(
+    Math.abs(after.computedPaddingRight - expectedPadding) <= 1,
+    `${context}: body padding did not compensate for the ${before.scrollbarWidth}px scrollbar.`,
+  );
+  if (before.reference && after.reference) {
+    for (const field of ["left", "right", "width"]) {
+      assert(
+        Math.abs(after.reference[field] - before.reference[field]) <= 1.5,
+        `${context}: page content shifted at ${field} while the lightbox locked scrolling.`,
+      );
+    }
+  }
 }
 
 async function waitForScrollSettled(page) {
@@ -511,6 +539,7 @@ async function openFromTrigger(page, surface, method = "keyboard", triggerIndex 
   else await state.trigger.click();
 
   await waitForOpen(page, surface);
+  await assertScrollbarCompensation(page, state.before, `${surface.label} scroll lock`);
   state.before.triggerScrollY = state.before.scrollY;
   state.before.scrollY = await page.evaluate(() => {
     const lockedTop = Number.parseFloat(document.body.style.top);

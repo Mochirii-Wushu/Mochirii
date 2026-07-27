@@ -10,14 +10,26 @@ import {
 } from "../_shared/gallery-moderation.ts";
 
 const SIGNED_URL_SECONDS = 10 * 60;
-const QUEUE_LIMIT = 50;
+const DEFAULT_PAGE_SIZE = 25;
+const MAX_PAGE_SIZE = 50;
 const EVENT_LIMIT = 250;
 const MEMBER_GALLERY_BUCKET = "member-gallery";
 const VALID_STATUSES = new Set(["pending", "approved", "rejected", "archived"]);
+const VALID_THUMBNAIL_STATES = new Set(["all", "missing", "ready"]);
 
 function normalizeStatus(value: unknown): string {
   const status = safeString(value, 20)?.toLowerCase() || "pending";
   return VALID_STATUSES.has(status) ? status : "pending";
+}
+
+function boundedInteger(value: unknown, fallback: number, minimum: number, maximum: number): number {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback;
+}
+
+function normalizeThumbnailState(value: unknown): string {
+  const state = safeString(value, 20)?.toLowerCase() || "all";
+  return VALID_THUMBNAIL_STATES.has(state) ? state : "all";
 }
 
 function emptySummary(status: string) {
@@ -27,6 +39,7 @@ function emptySummary(status: string) {
     approved: 0,
     rejected: 0,
     archived: 0,
+    missingThumbnails: 0,
     total: 0,
     shown: 0,
   };
@@ -82,6 +95,11 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   const requestedStatus = normalizeStatus(bodyResult.body.status);
+  const requestedPage = boundedInteger(bodyResult.body.page, 1, 1, 10000);
+  const requestedPageSize = boundedInteger(bodyResult.body.page_size, DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE);
+  const thumbnailState = requestedStatus === "approved"
+    ? normalizeThumbnailState(bodyResult.body.thumbnail_state)
+    : "all";
   const summary = emptySummary(requestedStatus);
   const countResults = await Promise.all(
     [...VALID_STATUSES].map(async (status) => ({
@@ -116,11 +134,38 @@ async function handleRequest(req: Request): Promise<Response> {
     summary.total += count;
   }
 
+  const { count: missingThumbnailCount, error: missingThumbnailCountError } = await access.adminClient
+    .from("gallery_submissions")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "approved")
+    .is("thumbnail_revision_id", null);
+
+  if (missingThumbnailCountError) {
+    console.error("list-gallery-review-queue thumbnail count failed", {
+      code: missingThumbnailCountError.code,
+      message: missingThumbnailCountError.message,
+    });
+    return jsonResponse(
+      {
+        ok: false,
+        error: "thumbnail_count_failed",
+        message: "Gallery thumbnail backfill count could not be loaded.",
+      },
+      500,
+    );
+  }
+  summary.missingThumbnails = Number(missingThumbnailCount || 0);
+
   let submissionQuery = access.adminClient
     .from("gallery_submissions")
-    .select("id,user_id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at,submission_source,discord_guild_id,discord_channel_id,discord_message_id,discord_attachment_id,discord_user_id,instagram_opt_in,instagram_opt_in_at,instagram_opt_in_source,instagram_opt_in_copy_version")
-    .eq("status", requestedStatus)
-    .limit(QUEUE_LIMIT);
+    .select("id,user_id,storage_bucket,storage_path,thumbnail_revision_id,thumbnail_storage_path,thumbnail_mime_type,thumbnail_size_bytes,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at,submission_source,discord_guild_id,discord_channel_id,discord_message_id,discord_attachment_id,discord_user_id,instagram_opt_in,instagram_opt_in_at,instagram_opt_in_source,instagram_opt_in_copy_version", { count: "exact" })
+    .eq("status", requestedStatus);
+
+  if (thumbnailState === "missing") {
+    submissionQuery = submissionQuery.is("thumbnail_revision_id", null);
+  } else if (thumbnailState === "ready") {
+    submissionQuery = submissionQuery.not("thumbnail_revision_id", "is", null);
+  }
 
   if (requestedStatus === "pending") {
     submissionQuery = submissionQuery.order("created_at", { ascending: true });
@@ -130,7 +175,10 @@ async function handleRequest(req: Request): Promise<Response> {
       .order("created_at", { ascending: false });
   }
 
-  const { data: submissionData, error: submissionError } = await submissionQuery;
+  const pageOffset = (requestedPage - 1) * requestedPageSize;
+  submissionQuery = submissionQuery.range(pageOffset, pageOffset + requestedPageSize - 1);
+
+  const { data: submissionData, error: submissionError, count: filteredCount } = await submissionQuery;
 
   if (submissionError) {
     console.error("list-gallery-review-queue submission lookup failed", {
@@ -149,6 +197,29 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   const submissions = Array.isArray(submissionData) ? submissionData as JsonRecord[] : [];
+  const previewPaths = submissions
+    .filter((submission) => safeString(submission.storage_bucket, 80) === MEMBER_GALLERY_BUCKET)
+    .map((submission) => safeString(submission.storage_path, 1000))
+    .filter((value): value is string => Boolean(value));
+  const signedPreviewsByPath = new Map<string, string>();
+
+  if (previewPaths.length > 0) {
+    const { data: signedPreviewData, error: signedPreviewError } = await access.adminClient.storage
+      .from(MEMBER_GALLERY_BUCKET)
+      .createSignedUrls(previewPaths, SIGNED_URL_SECONDS);
+
+    if (signedPreviewError) {
+      console.warn("list-gallery-review-queue preview signing batch failed", {
+        message: signedPreviewError.message,
+      });
+    } else {
+      for (const signed of signedPreviewData || []) {
+        const path = safeString(signed.path, 1000);
+        const signedUrl = safeString(signed.signedUrl, 4000);
+        if (path && signedUrl) signedPreviewsByPath.set(path, signedUrl);
+      }
+    }
+  }
   const submissionIds = [
     ...new Set(
       submissions
@@ -250,19 +321,8 @@ async function handleRequest(req: Request): Promise<Response> {
       });
       previewError = "invalid_storage_reference";
     } else {
-      const { data: signedData, error: signedError } = await access.adminClient.storage
-        .from(bucket)
-        .createSignedUrl(storagePath, SIGNED_URL_SECONDS);
-
-      if (signedError || !signedData?.signedUrl) {
-        console.warn("list-gallery-review-queue signed URL creation failed", {
-          submissionId,
-          message: signedError?.message || "Missing signed URL",
-        });
-        previewError = "preview_unavailable";
-      } else {
-        signedPreviewUrl = signedData.signedUrl;
-      }
+      signedPreviewUrl = signedPreviewsByPath.get(storagePath) || null;
+      if (!signedPreviewUrl) previewError = "preview_unavailable";
     }
 
     const userId = safeString(submission.user_id, 80) || "";
@@ -310,6 +370,10 @@ async function handleRequest(req: Request): Promise<Response> {
       rejectionReason: safeString(submission.rejection_reason, 500),
       storageBucket: bucket,
       storagePath,
+      thumbnailRevisionId: safeString(submission.thumbnail_revision_id, 80),
+      thumbnailStoragePath: safeString(submission.thumbnail_storage_path, 1000),
+      thumbnailMimeType: safeString(submission.thumbnail_mime_type, 80),
+      thumbnailSizeBytes: Number(submission.thumbnail_size_bytes || 0) || null,
       signedPreviewUrl,
       previewError,
       instagramOptIn: submission.instagram_opt_in === true,
@@ -328,7 +392,16 @@ async function handleRequest(req: Request): Promise<Response> {
       submissions: queue,
       count: queue.length,
       status: requestedStatus,
+      thumbnailState,
       summary,
+      pagination: {
+        page: requestedPage,
+        pageSize: requestedPageSize,
+        total: Number(filteredCount || 0),
+        totalPages: Math.ceil(Number(filteredCount || 0) / requestedPageSize),
+        hasPrevious: requestedPage > 1,
+        hasNext: pageOffset + queue.length < Number(filteredCount || 0),
+      },
       signedUrlSeconds: SIGNED_URL_SECONDS,
     },
     message: queue.length

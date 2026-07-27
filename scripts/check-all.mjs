@@ -56,6 +56,7 @@ const checks = [
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
   ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],
+  ["test:gallery-thumbnail", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/gallery-thumbnail_test.ts"]],
   ["check:gallery-timestamps", ["node", "scripts/check-gallery-timestamps.mjs"]],
   ["check:media-performance", ["node", "scripts/check-media-performance.mjs"]],
   ["check:next-route-delivery", ["node", "scripts/check-next-route-delivery.mjs"]],

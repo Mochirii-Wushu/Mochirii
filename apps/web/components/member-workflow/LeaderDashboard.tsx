@@ -19,6 +19,7 @@ import {
   publishInstagramGallerySubmission,
   reviewMemberVerification,
 } from "@/lib/supabase/moderation";
+import { createGalleryThumbnail } from "@/lib/gallery-thumbnail";
 import {
   text,
   type GalleryReviewQueue,
@@ -47,11 +48,14 @@ import {
 import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+type GalleryThumbnailState = "all" | "missing" | "ready";
 
 export function LeaderDashboard() {
   const [busy, setBusy] = useState(true);
   const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
   const [activeStatus, setActiveStatus] = useState<ModerationStatus>("pending");
+  const [queuePage, setQueuePage] = useState(1);
+  const [queueThumbnailState, setQueueThumbnailState] = useState<GalleryThumbnailState>("all");
   const [queue, setQueue] = useState<GalleryReviewQueue | null>(null);
   const [reviewStatus, setReviewStatus] = useState("Loading pending submissions.");
   const [reviewError, setReviewError] = useState("");
@@ -87,15 +91,34 @@ export function LeaderDashboard() {
   const [spinnerLaunchBusy, setSpinnerLaunchBusy] = useState(false);
   const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
 
-  const loadQueue = useCallback(async ({ status = activeStatus, successMessage = "" }: { status?: ModerationStatus; successMessage?: string } = {}) => {
+  const loadQueue = useCallback(async ({
+    status = "pending",
+    page = 1,
+    thumbnailState = "all",
+    successMessage = "",
+  }: {
+    status?: ModerationStatus;
+    page?: number;
+    thumbnailState?: GalleryThumbnailState;
+    successMessage?: string;
+  } = {}) => {
     const nextStatus = normalizeStatus(status);
+    const nextPage = Math.max(1, Math.trunc(page));
+    const nextThumbnailState = nextStatus === "approved" ? thumbnailState : "all";
     const config = statusConfig(nextStatus);
     setActiveStatus(nextStatus);
+    setQueuePage(nextPage);
+    setQueueThumbnailState(nextThumbnailState);
     setBusy(true);
     setReviewError("");
     setReviewStatus(`Loading ${config.label.toLowerCase()} submissions.`);
 
-    const result = await listGalleryReviewQueue({ status: nextStatus });
+    const result = await listGalleryReviewQueue({
+      status: nextStatus,
+      page: nextPage,
+      pageSize: 25,
+      thumbnailState: nextThumbnailState,
+    });
     if (!result.ok) {
       setQueue(null);
       setReviewError(result.message || "Gallery moderation submissions could not be loaded.");
@@ -113,7 +136,7 @@ export function LeaderDashboard() {
           : config.empty),
     );
     setBusy(false);
-  }, [activeStatus]);
+  }, []);
 
   const loadInstagramQueue = useCallback(async ({ status = instagramActiveStatus, successMessage = "" }: { status?: string; successMessage?: string } = {}) => {
     const nextStatus = instagramStatusConfig(status).id;
@@ -197,10 +220,10 @@ export function LeaderDashboard() {
     }
 
     setPanel("review");
-    await loadQueue({ status: activeStatus });
+    await loadQueue({ status: "pending", page: 1, thumbnailState: "all" });
     await loadInstagramQueue({ status: instagramActiveStatus });
     await loadInstagramApiStatus();
-  }, [activeStatus, instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadQueue]);
+  }, [instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadQueue]);
 
   useEffect(() => {
     void Promise.resolve().then(() => checkAccess());
@@ -237,7 +260,7 @@ export function LeaderDashboard() {
     }
   }
 
-  async function moderate(item: GalleryReviewSubmission, action: "approved" | "rejected") {
+  async function moderate(item: GalleryReviewSubmission, action: "approved" | "rejected" | "thumbnail") {
     const submissionId = text(item.id);
     const reason = text(reasons[submissionId]);
 
@@ -248,8 +271,35 @@ export function LeaderDashboard() {
 
     setBusy(true);
     setReviewError("");
-    setReviewStatus(action === "approved" ? "Approving submission." : "Declining submission.");
-    const result = await moderateGallerySubmission(submissionId, action, reason);
+    setReviewStatus(
+      action === "rejected"
+        ? "Declining submission."
+        : action === "thumbnail"
+          ? "Preparing the gallery thumbnail."
+          : "Preparing the gallery thumbnail before approval.",
+    );
+
+    let thumbnail = null;
+    if (action !== "rejected") {
+      const previewUrl = text(item.signedPreviewUrl);
+      if (!previewUrl) {
+        setReviewError("The image preview must be available before preparing its gallery thumbnail.");
+        setReviewStatus("");
+        setBusy(false);
+        return;
+      }
+
+      try {
+        thumbnail = await createGalleryThumbnail(previewUrl);
+      } catch (error) {
+        setReviewError(error instanceof Error ? error.message : "The gallery thumbnail could not be prepared.");
+        setReviewStatus("");
+        setBusy(false);
+        return;
+      }
+    }
+
+    const result = await moderateGallerySubmission(submissionId, action, reason, thumbnail);
     if (!result.ok) {
       setReviewError(result.message || "The submission could not be moderated.");
       setReviewStatus("");
@@ -259,6 +309,8 @@ export function LeaderDashboard() {
 
     await loadQueue({
       status: activeStatus,
+      page: queuePage,
+      thumbnailState: queueThumbnailState,
       successMessage: result.message || "Submission moderated.",
     });
     if (action === "approved") {
@@ -315,6 +367,8 @@ export function LeaderDashboard() {
     setCleanupBusyId("");
     await loadQueue({
       status: activeStatus,
+      page: queuePage,
+      thumbnailState: queueThumbnailState,
       successMessage: result.message || "Rejected submission cleaned up.",
     });
   }
@@ -573,7 +627,7 @@ export function LeaderDashboard() {
           <p className="kicker">Moderation Queue</p>
           <h2 className="section-title">Member Submissions</h2>
         </div>
-        <button className="hero-cta" type="button" onClick={() => loadQueue({ status: activeStatus })} disabled={busy}>Refresh</button>
+        <button className="hero-cta" type="button" onClick={() => loadQueue({ status: activeStatus, page: queuePage, thumbnailState: queueThumbnailState })} disabled={busy}>Refresh</button>
       </div>
 
       <div className="queue-tabs" id="queueTabs" role="group" aria-label="Gallery moderation queues">
@@ -585,12 +639,33 @@ export function LeaderDashboard() {
             aria-pressed={status.id === activeStatus}
             disabled={busy}
             key={status.id}
-            onClick={() => loadQueue({ status: status.id })}
+            onClick={() => loadQueue({ status: status.id, page: 1, thumbnailState: "all" })}
           >
             {status.label} · {Number(queue?.summary?.[status.id] || 0)}
           </button>
         ))}
       </div>
+
+      {activeStatus === "approved" ? (
+        <div className="queue-tabs" role="group" aria-label="Approved thumbnail filter">
+          {([
+            ["all", "All approved"],
+            ["missing", "Needs thumbnail"],
+            ["ready", "Thumbnail ready"],
+          ] as Array<[GalleryThumbnailState, string]>).map(([state, label]) => (
+            <button
+              className="queue-tab"
+              type="button"
+              aria-pressed={state === queueThumbnailState}
+              disabled={busy}
+              key={state}
+              onClick={() => loadQueue({ status: "approved", page: 1, thumbnailState: state })}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <QueueSummary queue={queue} shown={submissions.length} />
 
@@ -623,6 +698,29 @@ export function LeaderDashboard() {
           </WorkflowEmptyState>
         )}
       </div>
+      {(queue?.pagination?.hasPrevious || queue?.pagination?.hasNext) ? (
+        <nav className="auth-actions" aria-label="Gallery moderation pages">
+          <button
+            className="hero-cta"
+            type="button"
+            disabled={busy || !queue?.pagination?.hasPrevious}
+            onClick={() => loadQueue({ status: activeStatus, page: queuePage - 1, thumbnailState: queueThumbnailState })}
+          >
+            Previous page
+          </button>
+          <span className="review-action-note">
+            Page {Number(queue?.pagination?.page || queuePage)} of {Math.max(1, Number(queue?.pagination?.totalPages || 1))}
+          </span>
+          <button
+            className="hero-cta"
+            type="button"
+            disabled={busy || !queue?.pagination?.hasNext}
+            onClick={() => loadQueue({ status: activeStatus, page: queuePage + 1, thumbnailState: queueThumbnailState })}
+          >
+            Next page
+          </button>
+        </nav>
+      ) : null}
     </section>
     <section className="glass-card glass-card--primary glass-pad auth-panel" id="memberVerificationPanel" aria-busy={memberVerificationBusy}>
       <div className="auth-panel__head">

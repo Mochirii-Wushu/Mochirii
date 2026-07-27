@@ -8,9 +8,15 @@ import {
   requireModeratorAccess,
   safeString,
 } from "../_shared/gallery-moderation.ts";
+import {
+  galleryThumbnailStoragePath,
+  parseGalleryThumbnailPayload,
+} from "../_shared/gallery-thumbnail.ts";
+import { isDecodableGalleryWebp } from "../_shared/gallery-webp-decoder.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const VALID_ACTIONS = new Set(["approved", "rejected"]);
+const VALID_ACTIONS = new Set(["approved", "rejected", "thumbnail"]);
+const MEMBER_GALLERY_BUCKET = "member-gallery";
 const INSTAGRAM_SUPPORTED_MIME_TYPES = new Set(["image/jpeg"]);
 
 function buildInstagramCaption(submission: JsonRecord): string {
@@ -62,79 +68,185 @@ async function handleRequest(req: Request): Promise<Response> {
       {
         ok: false,
         error: "invalid_action",
-        message: "Moderation action must be approved or rejected.",
+        message: "Moderation action must be approved, rejected, or thumbnail.",
       },
       400,
     );
   }
 
-  const rejectionReason = action === "rejected" ? rawReason || "Rejected by moderator." : null;
-  const reviewedAt = new Date().toISOString();
-
-  const { data: updatedSubmission, error: updateError } = await access.adminClient
+  const expectedStatus = action === "thumbnail" ? "approved" : "pending";
+  const { data: currentSubmission, error: lookupError } = await access.adminClient
     .from("gallery_submissions")
-    .update({
-      status: action,
-      reviewed_by: access.userId,
-      reviewed_at: reviewedAt,
-      rejection_reason: rejectionReason,
-    })
+    .select("id,user_id,storage_bucket,storage_path,thumbnail_revision_id,thumbnail_storage_path,title,caption,mime_type,instagram_opt_in")
     .eq("id", submissionId)
-    .eq("status", "pending")
-    .select("id,status,reviewed_by,reviewed_at,rejection_reason,title,caption,mime_type,instagram_opt_in")
+    .eq("status", expectedStatus)
     .maybeSingle();
 
-  if (updateError) {
-    console.error("moderate-gallery-submission update failed", {
-      code: updateError.code,
-      message: updateError.message,
+  if (lookupError) {
+    console.error("moderate-gallery-submission lookup failed", {
+      code: lookupError.code,
+      message: lookupError.message,
+      submissionId,
     });
-
     return jsonResponse(
       {
         ok: false,
-        error: "submission_update_failed",
-        message: "The gallery submission could not be moderated.",
+        error: "submission_lookup_failed",
+        message: "The gallery submission could not be loaded.",
       },
       500,
     );
   }
 
-  if (!updatedSubmission) {
+  if (!currentSubmission) {
     return jsonResponse(
       {
         ok: false,
-        error: "submission_not_pending",
-        message: "This gallery submission is no longer pending or could not be found.",
+        error: action === "thumbnail" ? "submission_not_approved" : "submission_not_pending",
+        message: action === "thumbnail"
+          ? "This gallery submission is not approved or could not be found."
+          : "This gallery submission is no longer pending or could not be found.",
       },
       409,
     );
   }
 
-  const { error: eventError } = await access.adminClient
-    .from("gallery_moderation_events")
-    .insert({
-      submission_id: submissionId,
-      moderator_id: access.userId,
-      action,
-      reason: rejectionReason,
-    });
+  const thumbnailResult = action === "rejected"
+    ? null
+    : parseGalleryThumbnailPayload(bodyResult.body.thumbnail);
 
-  if (eventError) {
-    console.error("moderate-gallery-submission event insert failed", {
-      code: eventError.code,
-      message: eventError.message,
-      submissionId,
-    });
-
+  if (thumbnailResult && !thumbnailResult.ok) {
     return jsonResponse(
       {
         ok: false,
-        error: "moderation_event_failed",
-        message: "The submission was updated, but the moderation audit event could not be recorded.",
+        error: thumbnailResult.error,
+        message: "A bounded gallery thumbnail is required before approval.",
       },
-      500,
+      400,
     );
+  }
+
+  if (
+    thumbnailResult?.ok &&
+    !await isDecodableGalleryWebp(
+      thumbnailResult.thumbnail.bytes,
+      thumbnailResult.thumbnail.width,
+      thumbnailResult.thumbnail.height,
+    )
+  ) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "thumbnail_decode_failed",
+        message: "The gallery thumbnail could not be decoded safely.",
+      },
+      400,
+    );
+  }
+
+  const userId = safeString(currentSubmission.user_id, 80);
+  const bucket = safeString(currentSubmission.storage_bucket, 80);
+  const originalStoragePath = safeString(currentSubmission.storage_path, 1000);
+  const priorThumbnailRevisionId = safeString(currentSubmission.thumbnail_revision_id, 80);
+  const priorThumbnailPath = safeString(currentSubmission.thumbnail_storage_path, 1000);
+  let thumbnailRevisionId: string | null = null;
+  let thumbnailPath: string | null = null;
+
+  if (thumbnailResult?.ok) {
+    if (!userId || bucket !== MEMBER_GALLERY_BUCKET || !originalStoragePath) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: "invalid_storage_reference",
+          message: "The gallery image storage reference is invalid.",
+        },
+        409,
+      );
+    }
+
+    thumbnailRevisionId = crypto.randomUUID();
+    thumbnailPath = galleryThumbnailStoragePath(submissionId, thumbnailRevisionId);
+    const { error: thumbnailUploadError } = await access.adminClient.storage
+      .from(MEMBER_GALLERY_BUCKET)
+      .upload(thumbnailPath, thumbnailResult.thumbnail.bytes, {
+        contentType: thumbnailResult.thumbnail.mimeType,
+        cacheControl: "31536000",
+        upsert: false,
+      });
+
+    if (thumbnailUploadError) {
+      console.error("moderate-gallery-submission thumbnail upload failed", {
+        message: thumbnailUploadError.message,
+        submissionId,
+      });
+      return jsonResponse(
+        {
+          ok: false,
+          error: "thumbnail_upload_failed",
+          message: "The gallery thumbnail could not be stored.",
+        },
+        500,
+      );
+    }
+
+  }
+
+  const rejectionReason = action === "rejected" ? rawReason || "Rejected by moderator." : null;
+  const { data: commitData, error: commitError } = await access.adminClient.rpc(
+    "gallery_commit_moderation",
+    {
+      p_submission_id: submissionId,
+      p_moderator_id: access.userId,
+      p_action: action,
+      p_reason: rejectionReason,
+      p_thumbnail_revision_id: thumbnailRevisionId,
+      p_thumbnail_storage_path: thumbnailPath,
+      p_thumbnail_mime_type: thumbnailResult?.ok ? thumbnailResult.thumbnail.mimeType : null,
+      p_thumbnail_size_bytes: thumbnailResult?.ok ? thumbnailResult.thumbnail.sizeBytes : null,
+      p_expected_thumbnail_revision_id: priorThumbnailRevisionId || null,
+    },
+  );
+  const commit = commitData && typeof commitData === "object" && !Array.isArray(commitData)
+    ? commitData as JsonRecord
+    : {};
+  const committed = commit.committed === true;
+
+  if (commitError || !committed) {
+    if (thumbnailPath) {
+      await access.adminClient.storage.from(MEMBER_GALLERY_BUCKET).remove([thumbnailPath]);
+    }
+    console.error("moderate-gallery-submission atomic commit failed", {
+      code: commitError?.code,
+      message: commitError?.message || safeString(commit.reason, 80) || "Atomic moderation conflict",
+      submissionId,
+    });
+    return jsonResponse(
+      {
+        ok: false,
+        error: commitError ? "moderation_commit_failed" : safeString(commit.reason, 80),
+        message: action === "thumbnail"
+          ? "This gallery thumbnail changed before the update completed. Refresh and try again."
+          : "This gallery submission changed before moderation completed. Refresh and try again.",
+      },
+      commitError ? 500 : 409,
+    );
+  }
+
+  const updatedSubmission = commit.submission && typeof commit.submission === "object" && !Array.isArray(commit.submission)
+    ? commit.submission as JsonRecord
+    : {};
+  const reviewedAt = safeString(updatedSubmission.reviewed_at, 80);
+
+  if (action === "thumbnail" && priorThumbnailPath && priorThumbnailPath !== thumbnailPath) {
+    const { error: staleThumbnailError } = await access.adminClient.storage
+      .from(MEMBER_GALLERY_BUCKET)
+      .remove([priorThumbnailPath]);
+    if (staleThumbnailError) {
+      console.warn("moderate-gallery-submission stale thumbnail cleanup deferred", {
+        message: staleThumbnailError.message,
+        submissionId,
+      });
+    }
   }
 
   let instagramJob: JsonRecord | null = null;
@@ -215,6 +327,10 @@ async function handleRequest(req: Request): Promise<Response> {
       reviewedAt,
       instagramJob,
     },
-    message: action === "approved" ? "Submission approved for a future publishing step." : "Submission declined.",
+    message: action === "approved"
+      ? "Submission approved for the guild gallery."
+      : action === "thumbnail"
+        ? "Gallery thumbnail prepared."
+        : "Submission declined.",
   });
 }

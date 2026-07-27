@@ -41,6 +41,8 @@
     "check:dns-cutover-rehearsal": "node scripts/check-dns-cutover-rehearsal.mjs",
     "check:dns-cutover-workstation": "node scripts/check-dns-cutover-workstation.mjs",
     "check:gallery-approved-feed": "node scripts/check-gallery-approved-feed.mjs",
+    "test:gallery-thumbnail": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/gallery-thumbnail_test.ts",
+    "test:gallery-thumbnail-db": "supabase test db --local supabase/tests/gallery_submission_thumbnails_test.sql",
     "check:gallery-timestamps": "node scripts/check-gallery-timestamps.mjs",
     "check:media-performance": "node scripts/check-media-performance.mjs",
     "check:next-route-delivery": "node scripts/check-next-route-delivery.mjs",

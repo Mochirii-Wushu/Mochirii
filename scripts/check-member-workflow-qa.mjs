@@ -92,7 +92,7 @@ for (const file of retiredFiles) {
   "public.handle_new_member_profile()",
   "security definer",
   "member-gallery",
-  "Approved submissions become eligible for the approved public Gallery feed",
+  "Approved submissions with a validated derivative become eligible for the approved public Gallery feed",
   "member profile publishing is retired",
   "shared backend identity data",
   "list-visible-profile-cards",
@@ -223,8 +223,9 @@ assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile
 [
   "MEMBER_GALLERY_BUCKET",
   "signedUrlSeconds",
-  "createSignedUrl",
+  "createSignedUrls",
   "storage_path",
+  "thumbnail_storage_path",
 ].forEach((snippet) => assertIncludes("approved gallery feed", approvedFeed, snippet));
 
 [
