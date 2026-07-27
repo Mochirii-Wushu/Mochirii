@@ -1,7 +1,7 @@
 import type { DiscordFetchResult, JsonRecord } from "./discord-api.ts";
 import {
   createSpinnerMediaToken,
-  SPINNER_MEDIA_TOKEN_TTL_MS,
+  SPINNER_MEDIA_CAPABILITY_LEASE_MS,
   spinnerMediaFilename,
   spinnerMediaTokenHash,
   type SpinnerMediaTokenPayloadV1,
@@ -29,7 +29,7 @@ export async function createJobCapability(
   secret: string,
   now = new Date(),
 ): Promise<{ token: string; tokenHashSha256: string; expiresAt: string }> {
-  const expiresAt = new Date(now.getTime() + SPINNER_MEDIA_TOKEN_TTL_MS);
+  const expiresAt = new Date(now.getTime() + SPINNER_MEDIA_CAPABILITY_LEASE_MS);
   const payload: SpinnerMediaTokenPayloadV1 = {
     version: 1,
     jobId: job.id,
