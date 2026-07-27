@@ -3,16 +3,25 @@
 namespace App;
 
 use App\Util\Media\License;
+use App\Services\MochiriiPrivateMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
-use Storage;
 
 class Media extends Model
 {
     use SoftDeletes;
 
     protected $guarded = [];
+
+    protected $hidden = [
+        'cdn_url',
+        'hls_path',
+        'media_path',
+        'optimized_url',
+        'remote_url',
+        'thumbnail_path',
+        'thumbnail_url',
+    ];
 
     protected function casts(): array
     {
@@ -35,39 +44,29 @@ class Media extends Model
 
     public function url()
     {
-        if ($this->cdn_url) {
-            // return Storage::disk(config('filesystems.cloud'))->url($this->media_path);
-            return $this->cdn_url;
+        if ($this->remote_media) {
+            return app(MochiriiPrivateMedia::class)->placeholder();
         }
 
-        if ($this->remote_media && $this->remote_url) {
-            return $this->remote_url;
-        }
-
-        return url(Storage::url($this->media_path));
+        return app(MochiriiPrivateMedia::class)->media($this);
     }
 
     public function thumbnailUrl()
     {
-        if ($this->thumbnail_url) {
-            return $this->thumbnail_url;
+        if ($this->remote_media) {
+            return app(MochiriiPrivateMedia::class)->placeholder();
         }
 
-        if (! $this->remote_media && $this->thumbnail_path) {
-            return url(Storage::url($this->thumbnail_path));
+        return app(MochiriiPrivateMedia::class)->media($this, MochiriiPrivateMedia::PREVIEW);
+    }
+
+    public function optimizedUrl()
+    {
+        if ($this->remote_media) {
+            return app(MochiriiPrivateMedia::class)->placeholder();
         }
 
-        if (! $this->thumbnail_path && $this->cdn_url) {
-            return $this->cdn_url;
-        }
-
-        if ($this->media_path && $this->mime && in_array($this->mime, ['image/jpeg', 'image/png', 'image/jpg'])) {
-            return $this->remote_media || Str::startsWith($this->media_path, 'http') ?
-                $this->media_path :
-                url(Storage::url($this->media_path));
-        }
-
-        return url(Storage::url('public/no-preview.png'));
+        return app(MochiriiPrivateMedia::class)->media($this, MochiriiPrivateMedia::OPTIMIZED);
     }
 
     public function thumb()

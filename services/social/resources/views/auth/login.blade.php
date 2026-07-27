@@ -9,7 +9,7 @@
                     <img src="{{ config('app.logo') }}" width="64" height="64" alt="Mochirii Social emblem">
                     <p class="mochirii-social-kicker">Guild Social</p>
                     <h1 class="font-weight-bold mb-2">Mochirii Social Login</h1>
-                    <p class="mb-0">Members enter through the Mochirii doorway. Keep your account close, kind, and guild-only.</p>
+                    <p class="mb-0">Internal guild social platform for profiles, photos &amp; staying connected. Only verified members can access here &amp; everything is private with no data sharing outside.</p>
                 </div>
 
                 @if ($errors->any())
@@ -28,9 +28,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="mochirii-social-divider"><span>Direct account login</span></div>
-                    @endif
-
+                    @else
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
@@ -106,6 +104,7 @@
                         </button>
 
                     </form>
+                    @endif
                     @if((bool) config_cache('pixelfed.open_registration') || (bool) config_cache('instance.curated_registration.enabled'))
                     <hr>
 
@@ -231,35 +230,12 @@
         box-shadow: 0 18px 36px rgba(16, 32, 27, 0.38);
     }
 
-    .mochirii-social-divider {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin: 0.35rem 0 1.2rem;
-        color: rgba(248, 237, 221, 0.66);
-        font-size: 0.78rem;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .mochirii-social-divider::before,
-    .mochirii-social-divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: rgba(223, 190, 113, 0.24);
-    }
-
     footer a,
     footer .text-muted {
         color: rgba(248, 237, 221, 0.72) !important;
     }
 
     @media (max-width: 640px) {
-        .mochirii-social-login {
-            padding-inline: 0.75rem;
-        }
-
         .mochirii-social-card {
             border-radius: 18px;
         }

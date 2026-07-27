@@ -91,7 +91,7 @@
 					<div v-if="tab == 'add'">
 						<div class="form-group">
 							<label for="title" class="font-weight-bold text-muted">Add Post by URL</label>
-							<input type="text" class="form-control" placeholder="https://pixelfed.dev/p/admin/1" v-model="id">
+							<input type="text" class="form-control" placeholder="https://social.mochirii.com/p/member/1" v-model="id">
 							<p class="help-text small text-muted">Only local, public posts can be added</p>
 						</div>
 						<div class="form-group pt-4">

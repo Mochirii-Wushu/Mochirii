@@ -5,7 +5,7 @@ return [
 	'about'			=> '關於',
 	'help'			=> '說明',
 	'language'		=> '語言',
-	'fediverse'		=> 'Fediverse',
+	'fediverse'		=> 'Mochirii Social',
 	'opensource'	=> '開放原始碼',
 	'terms'			=> '條款',
 	'privacy'		=> '隱私',

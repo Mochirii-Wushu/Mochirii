@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Gwreiddio',
 
 	'communityGuidelines' => 'Canllawiau Cymunedol',
-	'whatIsTheFediverse' => 'Beth yw\'r Fediverse?',
+	'whatIsTheFediverse' => 'About Mochirii Social',
 	'controllingVisibility' => 'Rheoli Gwelededd',
 	'blockingAccounts' => 'Cyfrifon Blocio',
 	'safetyTips' => 'Awgrymiadau Diogelwch',

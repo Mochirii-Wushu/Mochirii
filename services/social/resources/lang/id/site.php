@@ -3,7 +3,7 @@ return [
 	'about'			=> 'Tentang',
 	'help'			=> 'Bantuan',
 	'language'		=> 'Bahasa',
-	'fediverse'		=> 'Fediverse',
+	'fediverse'		=> 'Mochirii Social',
 	'opensource'	=> 'Open Source',
 	'terms'			=> 'Syarat',
 	'privacy'		=> 'Privasi',

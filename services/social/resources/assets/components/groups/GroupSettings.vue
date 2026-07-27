@@ -716,7 +716,7 @@
 				],
 				moderatedInstances: [
 					'pawoo.net',
-					'pixelfed.com'
+					'example.social'
 				],
 				importBlocksData: {},
 				importBlocksUploaded: false,
@@ -1068,7 +1068,7 @@
 					const url = window.URL.createObjectURL(new Blob([response.data]));
 					const link = document.createElement('a');
 					link.href = url;
-					link.setAttribute('download', `pixelfed-group-blocks-${Date.now()}.json`);
+					link.setAttribute('download', `mochirii-social-group-blocks-${Date.now()}.json`);
 					document.body.appendChild(link);
 					link.click();
 				});

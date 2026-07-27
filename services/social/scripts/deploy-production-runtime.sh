@@ -192,7 +192,9 @@ if ! compose_release "$release_dir" up \
 fi
 
 if [[ "$migrations_applied" == true ]]; then
-  wait_for_container_health pixelfed-app 300
+  # The HTTP readiness check intentionally stays unhealthy during maintenance.
+  # Wait only for the process before lifting maintenance, then verify readiness.
+  wait_for_container_running pixelfed-app 120
   docker exec pixelfed-app php artisan up --no-ansi
 fi
 if ! verify_runtime; then

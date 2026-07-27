@@ -41,9 +41,9 @@ class GroupMediaPipeline implements ShouldQueue
         $storagePath = implode('/', $p);
 
         $disk = Storage::disk(config('filesystems.cloud'));
-        $file = $disk->putFileAs($storagePath, new File($path), $name, 'public');
+        $file = $disk->putFileAs($storagePath, new File($path), $name, 'private');
         $url = $disk->url($file);
-        $thumbFile = $disk->putFileAs($storagePath, new File($thumb), $thumbname, 'public');
+        $thumbFile = $disk->putFileAs($storagePath, new File($thumb), $thumbname, 'private');
         $thumbUrl = $disk->url($thumbFile);
         $media->thumbnail_url = $thumbUrl;
         $media->cdn_url = $url;

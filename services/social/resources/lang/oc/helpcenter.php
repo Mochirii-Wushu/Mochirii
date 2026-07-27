@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Integrar',
 
 	'communityGuidelines' => 'Linhas directrises de la comunitat',
-	'whatIsTheFediverse' => 'Qu\'es aquò lo Fedivers ?',
+	'whatIsTheFediverse' => 'About Mochirii Social',
 	'controllingVisibility' => 'Contraròtle de la visibilitat',
 	'blockingAccounts' => 'Blocatge de compte',
 	'safetyTips' => 'Astúcias de seguretat',

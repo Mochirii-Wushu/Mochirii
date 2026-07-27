@@ -1,7 +1,7 @@
 <template>
 <div class="w-100 h-100">
 	<div v-if="!loaded" style="height: 80vh;" class="d-flex justify-content-center align-items-center">
-		<img src="/img/pixelfed-icon-grey.svg" class="">
+		<img src="/img/mochirii-icon.png" class="" alt="Mochirii emblem">
 	</div>
 	<div class="row mt-3" v-if="loaded">
 		<div class="col-12 p-0 mb-3">
@@ -247,7 +247,7 @@
 		<form>
 			<div class="form-group">
 				<label for="title" class="font-weight-bold text-muted">Add Post by URL</label>
-				<input type="text" class="form-control" placeholder="https://pixelfed.dev/p/admin/1" v-model="photoId">
+				<input type="text" class="form-control" placeholder="https://social.mochirii.com/p/member/1" v-model="photoId">
 				<p class="help-text small text-muted">Only local, public posts can be added</p>
 			</div>
 			<button type="button" class="btn btn-primary btn-sm py-1 font-weight-bold px-3 float-right" @click.prevent="pushId">

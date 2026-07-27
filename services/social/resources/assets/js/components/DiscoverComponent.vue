@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div v-if="!loaded" style="height: 70vh;" class="d-flex justify-content-center align-items-center">
-			<img src="/img/pixelfed-icon-grey.svg">
+			<img src="/img/mochirii-icon.png" alt="Mochirii emblem">
 		</div>
 		<div v-else>
 			<div v-if="authenticated" class="d-block d-md-none border-top-0 pt-3">

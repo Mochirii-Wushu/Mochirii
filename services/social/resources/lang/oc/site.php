@@ -5,7 +5,7 @@ return [
 	'about'			=> 'A prepaus',
 	'help'			=> 'Ajuda',
 	'language'		=> 'Lenga',
-	'fediverse'		=> 'Fediverse',
+	'fediverse'		=> 'Mochirii Social',
 	'opensource'	=> 'Open Source',
 	'terms'			=> 'Tèrmes',
 	'privacy'		=> 'Privacitat',

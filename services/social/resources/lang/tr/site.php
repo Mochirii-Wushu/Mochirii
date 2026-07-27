@@ -5,7 +5,7 @@ return [
 	'about'			=> 'Hakkında',
 	'help'			=> 'Yardım',
 	'language'		=> 'Dil',
-	'fediverse'		=> 'Fediverse',
+	'fediverse'		=> 'Mochirii Social',
 	'opensource'	=> 'Açık Kaynak',
 	'terms'			=> 'Koşullar',
 	'privacy'		=> 'Gizlilik',

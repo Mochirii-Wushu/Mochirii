@@ -6,13 +6,13 @@ import {
   asStringArray,
   defaultDisplayName,
   discordAvatarUrl,
-  profileMatchesTrustedDiscordIdentity,
   providerSubject,
   resolveDiscordIdentity,
   safeString,
   type JsonRecord,
 } from "../_shared/member-verification-identity.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
+import { currentMemberAccess } from "../_shared/member-access-policy.ts";
 
 type SyncedIdentity = {
   provider: string;
@@ -39,7 +39,6 @@ const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"
 const APPROVED_PROVIDER_IDS = new Set(["discord", "phone", "apple", "facebook", "google", "kakao", "twitch", "spotify"]);
 const NON_DISCORD_METHODS = new Set(["manual_review", "phone", "apple", "facebook", "google", "kakao", "twitch", "spotify"]);
 const LOCKED_STATUSES = new Set(["suspended", "archived"]);
-const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -133,23 +132,6 @@ function phoneIdentity(user: JsonRecord, now: string): SyncedIdentity | null {
     active: true,
     last_observed_at: now,
   };
-}
-
-function recentDiscordVerification(profile: JsonRecord | null): boolean {
-  const verifiedAt = safeString(profile?.discord_verified_at, 80);
-  if (!verifiedAt) return false;
-  const timestamp = Date.parse(verifiedAt);
-  return Number.isFinite(timestamp) && Date.now() - timestamp <= RECENT_VERIFICATION_MS;
-}
-
-function approvedManualVerification(verification: JsonRecord | null): boolean {
-  const status = safeString(verification?.gallery_access_status, 40);
-  const verifiedAt = safeString(verification?.gallery_access_verified_at, 80);
-  const expiresAt = safeString(verification?.gallery_access_expires_at, 80);
-  if (status !== "approved" || !verifiedAt) return false;
-  if (!expiresAt) return true;
-  const expiry = Date.parse(expiresAt);
-  return Number.isFinite(expiry) && expiry >= Date.now();
 }
 
 function publicIdentity(identity: JsonRecord): JsonRecord {
@@ -558,14 +540,13 @@ async function handleRequest(req: Request): Promise<Response> {
     user,
     (Array.isArray(identityRows) ? identityRows : []) as SyncedIdentity[],
   );
-  const discordVerified = memberStatus === "active" &&
-    profileMatchesTrustedDiscordIdentity(
-      latestProfile?.discord_user_id,
-      trustedDiscordUserId,
-    ) &&
-    recentDiscordVerification(latestProfile);
-  const manualApproved = memberStatus === "active" && approvedManualVerification(verification);
-  const galleryEligible = discordVerified || manualApproved;
+  const access = currentMemberAccess({
+    profile: latestProfile,
+    verification,
+    trustedDiscordUserId,
+  });
+  const { discordVerified, manualApproved } = access;
+  const galleryEligible = access.eligible;
   const method = discordVerified
     ? "discord"
     : manualApproved

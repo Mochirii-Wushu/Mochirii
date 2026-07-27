@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'توکار',
 
 	'communityGuidelines' => 'دستورالعمل‌های اجتماع',
-	'whatIsTheFediverse' => 'فدیورس چیست؟',
+	'whatIsTheFediverse' => 'About Mochirii Social',
 	'controllingVisibility' => 'کنترل نمایش',
 	'blockingAccounts' => 'حساب‌های مسدودشده',
 	'safetyTips' => 'نکات امنیتی',

@@ -1172,7 +1172,7 @@ class Inbox
             'story_username' => $targetProfile->username,
             'story_actor_username' => $actorProfile->username,
             'story_id' => $story->id,
-            'story_media_url' => url(Storage::url($story->path)),
+            'story_media_url' => $story->mediaUrl(),
             'reaction' => $text,
         ]);
         $dm->save();
@@ -1292,7 +1292,7 @@ class Inbox
             'story_username' => $targetProfile->username,
             'story_actor_username' => $actorProfile->username,
             'story_id' => $story->id,
-            'story_media_url' => url(Storage::url($story->path)),
+            'story_media_url' => $story->mediaUrl(),
             'caption' => $text,
         ]);
         $dm->save();

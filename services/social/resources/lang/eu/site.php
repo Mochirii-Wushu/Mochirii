@@ -3,7 +3,7 @@ return [
 	'about'			=> 'Honi buruz',
 	'help'			=> 'Laguntza',
 	'language'		=> 'Hizkuntza',
-	'fediverse'		=> 'Fedibertsoa',
+	'fediverse'		=> 'Mochirii Social',
 	'opensource'	=> 'Kode irekia',
 	'terms'			=> 'Baldintzak',
 	'privacy'		=> 'Pribatutasuna',

@@ -16,7 +16,7 @@ return [
     'embed'             => 'Includi',
 
     'communityGuidelines'   => 'Linee Guida della Comunità',
-    'whatIsTheFediverse'    => 'Cos\'è il Fediverso',
+    'whatIsTheFediverse'    => 'About Mochirii Social',
     'controllingVisibility' => 'Controllare la Visibilità',
     'blockingAccounts'      => 'Bloccare gli Account',
     'safetyTips'            => 'Suggerimenti per la Sicurezza',

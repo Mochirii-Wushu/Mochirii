@@ -9,7 +9,7 @@
             <div class="spacer">·</div>
             <a v-if="config.show_legal_notice_link" href="/site/legal-notice">Legal Notice</a>
             <div v-if="config.show_legal_notice_link" class="spacer">·</div>
-            <a href="https://mochirii.com/social">Mochirii</a>
+            <a href="https://mochirii.com/">Mochirii</a>
         </div>
 
         <div class="footer-component-attribution">

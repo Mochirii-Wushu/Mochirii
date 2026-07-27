@@ -22,11 +22,21 @@ const requiredFiles = [
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/SocialHubPanel.tsx",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
+  "apps/web/lib/oauth/authorization-details-error.ts",
+  "apps/web/lib/oauth/authorization-load-queue.ts",
+  "apps/web/lib/oauth/authorization-load-queue.test.mts",
+  "apps/web/lib/oauth/consent-login-url.ts",
+  "apps/web/lib/oauth/consent-login-url.test.mts",
+  "apps/web/lib/oauth/prior-consent-redirect.ts",
+  "apps/web/lib/oauth/prior-consent-redirect.test.mts",
+  "apps/web/lib/supabase/client.ts",
   "apps/web/lib/supabase/social.ts",
   "supabase/migrations/20260702080720_add_pixelfed_social_accounts.sql",
   "supabase/functions/sync-pixelfed-social-account/index.ts",
   "supabase/functions/_shared/pixelfed-social-sync.ts",
   "supabase/functions/_shared/pixelfed-social-sync_test.ts",
+  "supabase/functions/_shared/member-access-policy.ts",
+  "supabase/functions/_shared/member-access-policy_test.ts",
 ];
 
 const snippetChecks = [
@@ -64,7 +74,38 @@ const snippetChecks = [
       "verifyMemberAccess",
       "profileIsActive",
       "activeMember",
+      "createAuthorizationLoadQueue",
+      "classifyAuthorizationDetailsFailure",
+      "oauthConsentLoginHref",
+      "priorConsentRedirect",
+      "Return to Mochirii Social and start again.",
       "/api/oauth/decision",
+    ],
+  },
+  {
+    label: "OAuth authorization id round trip",
+    file: "apps/web/lib/oauth/consent-login-url.test.mts",
+    snippets: [
+      "preserves the exact OAuth authorization id",
+      "authorization ids cannot inject another redirect parameter",
+    ],
+  },
+  {
+    label: "OAuth browser client",
+    file: "apps/web/lib/supabase/client.ts",
+    snippets: [
+      'flowType: "pkce"',
+      "detectSessionInUrl: true",
+    ],
+  },
+  {
+    label: "OAuth authorization request queue",
+    file: "apps/web/lib/oauth/authorization-load-queue.ts",
+    snippets: [
+      "createAuthorizationLoadQueue",
+      "queued",
+      "tail",
+      "stop",
     ],
   },
   {
@@ -441,13 +482,32 @@ for (const { label, file, snippets } of snippetChecks) {
   snippets.forEach((snippet) => assertIncludes(label, text, snippet));
 }
 
+const consentPanel = read("apps/web/components/member-workflow/OAuthConsentPanel.tsx");
+if (consentPanel.includes("Promise.resolve().then(() => load())")) {
+  failures.push("OAuth consent must not race an eager details read with the initial auth-state callback.");
+}
+if (consentPanel.includes("detailsError?.message")) {
+  failures.push("OAuth consent must not render provider/internal authorization errors to members.");
+}
+if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("priorConsentRedirect(nextDetails")) {
+  failures.push("Prior OAuth consent redirects must follow the current member access check.");
+}
+
 [
   "docs/pixelfed-guild-social-adr.md",
   "docs/pixelfed-first-login-testing.md",
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
+  "apps/web/lib/oauth/authorization-details-error.ts",
+  "apps/web/lib/oauth/authorization-load-queue.ts",
+  "apps/web/lib/oauth/authorization-load-queue.test.mts",
+  "apps/web/lib/oauth/prior-consent-redirect.ts",
+  "apps/web/lib/oauth/prior-consent-redirect.test.mts",
+  "apps/web/lib/supabase/client.ts",
   "supabase/functions/sync-pixelfed-social-account/index.ts",
   "supabase/functions/_shared/pixelfed-social-sync.ts",
+  "supabase/functions/_shared/member-access-policy.ts",
+  "supabase/functions/_shared/member-access-policy_test.ts",
   "scripts/check-pixelfed-first-login-readiness.mjs",
 ].forEach((file) => scanNoSecrets(file, read(file)));
 

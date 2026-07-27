@@ -108,12 +108,14 @@ const reviewedLoopbacks = new Map([
     [
       { value: "mariadb-admin ping -h 127.0.0.1", count: 1 },
       { value: "127.0.0.1:8080:8080", count: 1 },
+      { value: "http://127.0.0.1:8080/api/service/health-check", count: 1 },
     ],
   ],
   [
     "services/social/scripts/check-production-runtime.mjs",
     [
       { value: "127.0.0.1:8080:8080", count: 1 },
+      { value: "http://127.0.0.1:8080/api/service/health-check", count: 1 },
       { value: "reverse_proxy 127.0.0.1:8080", count: 1 },
     ],
   ],

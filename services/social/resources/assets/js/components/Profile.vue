@@ -21,7 +21,7 @@
         </div>
     </div>
     <div v-if="loading" style="height: 80vh;" class="d-flex justify-content-center align-items-center">
-        <img src="/img/pixelfed-icon-grey.svg" class="">
+        <img src="/img/mochirii-icon.png" class="" alt="Mochirii emblem">
     </div>
     <div v-if="!loading && !warning">
         <div v-if="layout == 'metro'" class="container">
@@ -258,7 +258,7 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="p-1 p-sm-2 p-md-3 d-flex justify-content-center align-items-center" style="height: 30vh;">
-                                        <img src="/img/pixelfed-icon-grey.svg" class="">
+                                        <img src="/img/mochirii-icon.png" class="" alt="Mochirii emblem">
                                     </div>
                                 </div>
                             </div>

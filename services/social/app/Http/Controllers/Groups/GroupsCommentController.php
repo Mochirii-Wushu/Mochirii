@@ -180,12 +180,13 @@ class GroupsCommentController extends Controller
         $photo = $request->file('photo');
         $storagePath = GroupMediaService::path($group->id, $pid, $status->id);
         $storagePath = 'public/g/'.$group->id.'/p/'.$parent->id;
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
 
         $media = new GroupMedia;
         $media->group_id = $group->id;
         $media->status_id = $status->id;
         $media->profile_id = $request->user()->profile_id;
+        $media->is_comment = true;
         $media->media_path = $path;
         $media->size = $photo->getSize();
         $media->mime = $photo->getMimeType();
@@ -193,6 +194,11 @@ class GroupsCommentController extends Controller
 
         ImageResizePipeline::dispatchSync($media);
         ImageS3UploadPipeline::dispatchSync($media);
+
+        // Preserve owner-only draft access until the upload pipeline has
+        // completed, then make the comment media visible to permitted readers.
+        $status->visibility = 'public';
+        $status->save();
 
         // $gp = new GroupPost;
         // $gp->group_id = $group->id;

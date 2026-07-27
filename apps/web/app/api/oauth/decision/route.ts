@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { approvedSocialOAuthRedirect } from "@/lib/oauth/approved-social-redirect";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 type DecisionBody = {
@@ -20,14 +21,10 @@ type MemberAccessPayload = {
   message?: string | null;
 };
 
-const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 const NO_STORE_HEADERS = { "Cache-Control": "private, no-store" };
 
 type OAuthConsentPayload = {
   redirect_url?: unknown;
-  error?: unknown;
-  error_description?: unknown;
-  message?: unknown;
 };
 
 function json(payload: Record<string, unknown>, init: ResponseInit = {}) {
@@ -50,23 +47,12 @@ function memberAccessPayload(value: unknown): MemberAccessPayload {
   return payload.data && typeof payload.data === "object" ? payload.data : payload;
 }
 
-function hasRecentDiscordVerification(profile?: MemberAccessPayload["profile"]) {
-  const timestamp = new Date(profile?.discord_verified_at || 0).getTime();
-  return Number.isFinite(timestamp) && Date.now() - timestamp <= RECENT_VERIFICATION_MS;
-}
-
 function memberAccessIsActive(access: MemberAccessPayload) {
   const profile = access.profile || null;
   return Boolean(
     profile?.member_status === "active" &&
-      (access.galleryEligible === true ||
-        access.discordVerified === true ||
-        (profile.has_required_discord_roles === true && hasRecentDiscordVerification(profile))),
+      (access.galleryEligible === true || access.discordVerified === true),
   );
-}
-
-function oauthErrorMessage(payload: OAuthConsentPayload) {
-  return String(payload.error_description || payload.message || payload.error || "Authorization decision failed.");
 }
 
 async function submitAuthorizationDecision({
@@ -93,13 +79,13 @@ async function submitAuthorizationDecision({
     body: JSON.stringify({ action: decision }),
   });
   const payload = (await response.json().catch(() => ({}))) as OAuthConsentPayload;
-  const redirectUrl = typeof payload.redirect_url === "string" ? payload.redirect_url : "";
+  const redirectUrl = approvedSocialOAuthRedirect(payload.redirect_url);
 
   if (!response.ok || !redirectUrl) {
     return {
       ok: false as const,
-      status: response.status || 400,
-      error: oauthErrorMessage(payload),
+      status: response.status >= 500 ? 502 : 400,
+      error: "Authorization decision could not be completed.",
     };
   }
 

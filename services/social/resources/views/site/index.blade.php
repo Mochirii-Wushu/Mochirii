@@ -117,10 +117,14 @@
 				<img src="{{ config('app.logo') }}" alt="Mochirii Social emblem">
 				<p class="social-landing__kicker">Guild Social</p>
 				<h1 id="socialLandingTitle">Mochirii Social</h1>
-				<p>A members-only image hall for Mochirii profiles, gallery posts, and quiet guild sharing. Active members enter through the Mochirii doorway.</p>
+				<p>Internal guild social platform for profiles, photos &amp; staying connected. Only verified members can access here &amp; everything is private with no data sharing outside.</p>
 				<div class="social-landing__actions">
+					@if(config('remote-auth.oidc.enabled'))
+					<a class="social-landing__primary" href="/auth/oidc/start">Continue with Mochirii</a>
+					@else
 					<a class="social-landing__primary" href="/login">Login</a>
-					<a class="social-landing__secondary" href="https://mochirii.com/social">Return to Mochirii</a>
+					@endif
+					<a class="social-landing__secondary" href="https://mochirii.com/">Return to Mochirii</a>
 				</div>
 			</section>
 		</main>

@@ -438,10 +438,10 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
 
     Route::group(['prefix' => 'users'], function () {
         Route::redirect('/', '/');
-        Route::get('{user}.atom', 'ProfileController@showAtomFeed')->where('user', '.*');
-        Route::get('{username}/outbox', 'FederationController@userOutbox');
-        Route::get('{username}/followers', 'FederationController@userFollowers');
-        Route::get('{username}/following', 'FederationController@userFollowing');
+        Route::get('{user}.atom', 'ProfileController@showAtomFeed')->where('user', '.*')->middleware('mochirii.federation-disabled');
+        Route::get('{username}/outbox', 'FederationController@userOutbox')->middleware('mochirii.federation-disabled');
+        Route::get('{username}/followers', 'FederationController@userFollowers')->middleware('mochirii.federation-disabled');
+        Route::get('{username}/following', 'FederationController@userFollowing')->middleware('mochirii.federation-disabled');
         Route::get('{username}', 'ProfileController@permalinkRedirect');
     });
 
@@ -470,13 +470,13 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
         Route::get('{id}/invite', 'GroupController@groupInviteLanding');
         Route::get('{id}/settings', 'GroupController@groupSettings');
         Route::get('{gid}/topics/{topic}', 'Groups\GroupsTopicController@showTopicFeed');
-        Route::get('{gid}/p/{sid}.json', 'GroupController@getStatusObject');
+        Route::get('{gid}/p/{sid}.json', 'GroupController@getStatusObject')->middleware('mochirii.federation-disabled');
         Route::get('{gid}/p/{sid}', 'GroupController@showStatus');
         Route::get('{id}/user/{pid}', 'GroupController@showProfile');
         Route::get('{id}/un/{pid}', 'GroupController@showProfile');
         Route::get('{id}/username/{pid}', 'GroupController@showProfileByUsername');
         Route::get('{id}/{path}', 'GroupController@show');
-        Route::get('{id}.json', 'GroupController@getGroupObject');
+        Route::get('{id}.json', 'GroupController@getGroupObject')->middleware('mochirii.federation-disabled');
         Route::get('feed', 'GroupController@index');
         Route::get('create', 'GroupController@index');
         Route::get('discover', 'GroupController@index');
@@ -494,11 +494,11 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
     Route::get('p/{username}/{id}/embed', 'StatusController@showEmbed');
     Route::get('p/{username}/{id}/edit', 'StatusController@edit');
     Route::post('p/{username}/{id}/edit', 'StatusController@editStore');
-    Route::get('p/{username}/{id}.json', 'StatusController@showObject');
+    Route::get('p/{username}/{id}.json', 'StatusController@showObject')->middleware('mochirii.federation-disabled');
     Route::get('p/{username}/{id}', 'StatusController@show');
     Route::get('{username}/embed', 'ProfileController@embed');
     Route::get('{username}/live', 'LiveStreamController@showProfilePlayer');
-    Route::get('@{username}@{domain}', 'SiteController@legacyWebfingerRedirect');
-    Route::get('@{username}', 'SiteController@legacyProfileRedirect');
+    Route::get('@{username}@{domain}', 'SiteController@legacyWebfingerRedirect')->middleware('mochirii.federation-disabled');
+    Route::get('@{username}', 'SiteController@legacyProfileRedirect')->middleware('mochirii.federation-disabled');
     Route::get('{username}', 'ProfileController@show');
 });

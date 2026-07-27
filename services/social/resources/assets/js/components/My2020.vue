@@ -83,7 +83,7 @@
 	</div>
 	<div v-if="loaded" class="fixed-top">
 		<p class="text-center mt-3 d-flex justify-content-center align-items-center mb-0">
-			<img src="/img/pixelfed-icon-grey.svg" width="60" height="60">
+			<img src="/img/mochirii-icon.png" width="60" height="60" alt="Mochirii emblem">
 			<span class="text-light font-weight-bold ml-3" style="font-size: 22px;">#my2020</span>
 		</p>
 	</div>

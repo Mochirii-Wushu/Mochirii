@@ -9,8 +9,8 @@
 
 	<title>Mochirii Social | 404 Embed Not Found</title>
 
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'pixelfed') }}">
-	<meta property="og:title" content="{{ $title ?? config_cache('app.name', 'pixelfed') }}">
+	<meta property="og:site_name" content="{{ config_cache('app.name', 'Mochirii Social') }}">
+	<meta property="og:title" content="{{ $title ?? config_cache('app.name', 'Mochirii Social') }}">
 	<meta name="medium" content="image">
 	<meta name="theme-color" content="#10c5f8">
 	<meta name="apple-mobile-web-app-capable" content="yes">

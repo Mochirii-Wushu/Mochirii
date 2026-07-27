@@ -25,8 +25,12 @@ const publicSurfaceDirs = [
   "resources/views/errors",
   "resources/views/profile",
   "resources/views/status",
+  "resources/views/atom",
+  "resources/views/mobile",
+  "resources/views/portfolio",
   "resources/views/emails",
   "resources/assets/components/partials",
+  "resources/assets/components/landing",
 ];
 const publicSurfaceFiles = [
   ".env.docker.example",
@@ -35,7 +39,16 @@ const publicSurfaceFiles = [
   "config/instance.php",
   "resources/assets/components/AccountImport.vue",
   "resources/assets/components/Discover.vue",
+  "resources/assets/components/groups/GroupSettings.vue",
   "resources/assets/components/sections/DiscoverFeed.vue",
+  "resources/assets/js/components/CollectionComponent.vue",
+  "resources/assets/js/components/CollectionCompose.vue",
+  "resources/assets/js/components/ComposeModal.vue",
+  "resources/assets/js/components/DiscoverComponent.vue",
+  "resources/assets/js/components/LoopComponent.vue",
+  "resources/assets/js/components/My2020.vue",
+  "resources/assets/js/components/PostComponent.vue",
+  "resources/assets/js/components/Profile.vue",
   "resources/assets/js/i18n/en.json",
   "resources/lang/en/settings.php",
   "resources/lang/en/web.php",
@@ -43,6 +56,11 @@ const publicSurfaceFiles = [
 const publicDenyTokens = [
   "Pixelfed",
   "pixelfed-icon",
+  "placeholder=\"@pixelfed\"",
+  "pixelfed.dev",
+  "pixelfed-group-blocks",
+  "'pixelfed.com'",
+  "https://mochirii.com/social",
   "Instagram",
   "Mastodon",
   "Fediverse",
@@ -159,6 +177,21 @@ for (const removedFile of ["funding.json", ".github/FUNDING.yml"]) {
 
 for (const file of [...publicSurfaceFiles, ...publicSurfaceDirs.flatMap(walkFiles)]) {
   assertNoPublicResidue(file);
+}
+
+for (const file of walkFiles("resources/lang")) {
+  const lines = read(file).split("\n");
+  lines.forEach((line, index) => {
+    const separator = line.indexOf("=>");
+    if (separator < 0) return;
+
+    const visibleValue = line.slice(separator + 2).split("//", 1)[0];
+    if (/pixelfed|mastodon|fedivers|fediwers|fedibertso|fedivesm|ffedirasi|فدیورس|פדיוורס|федіверс/iu.test(visibleValue)) {
+      failures.push(
+        `${file}:${index + 1} contains upstream branding in a customer-visible translation value`,
+      );
+    }
+  });
 }
 
 const languageBundleFiles = [
@@ -332,6 +365,11 @@ requireIncludes(".env.docker.example", envDockerExample, [
   'AP_INBOX="false"',
   'AP_OUTBOX="false"',
   'AP_SHAREDINBOX="false"',
+  'ATOM_FEEDS="false"',
+  'NODEINFO="false"',
+  'WEBFINGER="false"',
+  'PF_NETWORK_TIMELINE="false"',
+  'PF_ACCT_MIGRATION_ENABLED="false"',
   'PF_ENABLE_CLOUD="true"',
   'PF_LOCAL_AVATAR_TO_CLOUD="true"',
   'MAIL_FROM_NAME="Mochirii Social"',
@@ -347,6 +385,8 @@ requireIncludes("docker-compose.yml", dockerCompose, [
   'MAX_AVATAR_SIZE: "92160"',
   'PHP_POST_MAX_SIZE: "100M"',
   'PHP_UPLOAD_MAX_FILE_SIZE: "95M"',
+  '"http://127.0.0.1:8080/api/service/health-check"',
+  "start_period: 60s",
 ]);
 const dockerComposeProduction = read("docker-compose.production.yml");
 requireIncludes("docker-compose.production.yml", dockerComposeProduction, [
@@ -354,6 +394,8 @@ requireIncludes("docker-compose.production.yml", dockerComposeProduction, [
   "redis:7-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2",
   "MARIADB_DATABASE: ${DB_DATABASE}",
   "condition: service_healthy",
+  '"http://127.0.0.1:8080/api/service/health-check"',
+  "start_period: 60s",
 ]);
 if (dockerCompose.includes("mysql:9")) {
   failures.push("docker-compose.yml must not restore the incompatible MySQL 9 runtime");
@@ -517,6 +559,64 @@ requireIncludes("app/Http/Middleware/AdminOrNotFound.php", routeMiddleware, [
   "abort_if(Auth::check() == false || Auth::user()->is_admin == false, 404)",
 ]);
 
+const privateSocialMiddleware = read("app/Http/Middleware/MochiriiPrivateSocial.php");
+requireIncludes("app/Http/Middleware/MochiriiPrivateSocial.php", privateSocialMiddleware, [
+  "class MochiriiPrivateSocial",
+  "auth/oidc/start",
+  "auth/oidc/callback",
+  "oauth/authorize",
+  "oauth/token",
+  "UserOidcMapping::where('user_id'",
+  "MochiriiSocialSyncService $socialSync",
+  "$this->socialSync->hasCurrentAccess",
+  "mochirii_oidc_verified_at",
+  "MochiriiLocalAccountPolicy $localAccountPolicy",
+  "RefreshToken::where('access_token_id'",
+  "$token->revoke()",
+  "$authGuard->logout()",
+  "$request->session()->invalidate()",
+  "$path === '/oauth/authorize'",
+]);
+
+const localAccountPolicy = read("app/Services/MochiriiLocalAccountPolicy.php");
+requireIncludes("app/Services/MochiriiLocalAccountPolicy.php", localAccountPolicy, [
+  "class MochiriiLocalAccountPolicy",
+  "REACTIVATABLE_STATUSES = ['disabled', 'delete']",
+  "public function mayAuthenticate(User $user): bool",
+  "public function mayAccess(User $user): bool",
+]);
+
+const federationBoundary = read("app/Http/Middleware/MochiriiFederationDisabled.php");
+requireIncludes("app/Http/Middleware/MochiriiFederationDisabled.php", federationBoundary, [
+  "class MochiriiFederationDisabled",
+  "abort(404)",
+]);
+
+const federationConfig = read("config/federation.php");
+for (const unsafeDefault of [
+  "env('AP_OUTBOX', true)",
+  "env('AP_INBOX', true)",
+  "env('AP_SHAREDINBOX', true)",
+  "env('ATOM_FEEDS', true)",
+  "env('NODEINFO', true)",
+  "env('WEBFINGER', true)",
+  "env('PF_NETWORK_TIMELINE', true)",
+]) {
+  if (federationConfig.includes(unsafeDefault)) {
+    failures.push(`config/federation.php retains unsafe federation default: ${unsafeDefault}`);
+  }
+}
+
+const runtimeLibrary = read("scripts/production-runtime-lib.sh");
+requireIncludes("scripts/production-runtime-lib.sh", runtimeLibrary, [
+  "redact_runtime_diagnostics",
+  "emit_container_diagnostics",
+  "authorization_id|code|code_verifier|state|access_token|refresh_token",
+]);
+if ((runtimeLibrary.match(/docker logs --tail/g) || []).length !== 1) {
+  failures.push("scripts/production-runtime-lib.sh must emit container logs only through the redaction helper");
+}
+
 const webRoutes = read("routes/web.php");
 requireIncludes("routes/web.php", webRoutes, [
   "Route::get('discover', 'DiscoverController@home')->name('discover')->middleware('admin.notfound')",
@@ -529,7 +629,87 @@ requireIncludes("routes/web.php", webRoutes, [
   "Route::get('developers', 'SettingsController@developers')->name('settings.developers')->middleware(['dangerzone', 'admin.notfound'])",
   "Route::get('labs', 'SettingsController@labs')->name('settings.labs')->middleware('admin.notfound')",
   "Route::group(['prefix' => 'import', 'middleware' => ['dangerzone', 'admin.notfound']]",
+  "middleware('mochirii.federation-disabled')",
 ]);
+
+const apiRoutes = read("routes/api.php");
+requireIncludes("routes/api.php", apiRoutes, [
+  "['mochirii.private:api', 'auth:api', 'validemail']",
+  "Route::middleware('mochirii.federation-disabled')->group",
+  "storage/m/_v2/{pid}/{mhash}/{uhash}/{f}",
+  "Route::get('instance', 'Api\\ApiV1Controller@instance')->middleware($middleware)",
+  "Route::get('instance', 'Api\\ApiV2Controller@instance')->middleware($middleware)",
+  "Route::get('custom_emojis', 'Api\\ApiV1Controller@customEmojis')->middleware($middleware)",
+  "Route::get('accounts/lookup', 'Api\\ApiV1Controller@accountLookupById')",
+  "Route::post('apps', fn () => abort(404))",
+]);
+
+const instanceApiV1 = read("app/Http/Controllers/Api/ApiV1Controller.php");
+const instanceApiV2 = read("app/Http/Controllers/Api/ApiV2Controller.php");
+requireIncludes("app/Http/Controllers/Api/ApiV1Controller.php", instanceApiV1, [
+  "3.5.3 (compatible; Mochirii Social)",
+]);
+requireIncludes("app/Http/Controllers/Api/ApiV2Controller.php", instanceApiV2, [
+  "3.5.3 (compatible; Mochirii Social)",
+  "https://github.com/Mochirii-Wushu/Mochirii",
+]);
+for (const [file, text] of [
+  ["app/Http/Controllers/Api/ApiV1Controller.php", instanceApiV1],
+  ["app/Http/Controllers/Api/ApiV2Controller.php", instanceApiV2],
+]) {
+  if (text.includes("compatible; Pixelfed") || text.includes("github.com/pixelfed/pixelfed")) {
+    failures.push(`${file} exposes upstream branding in member-facing instance metadata`);
+  }
+}
+
+const privateBoundaryTests = read("tests/Feature/PrivateSocialBoundaryTest.php");
+requireIncludes("tests/Feature/PrivateSocialBoundaryTest.php", privateBoundaryTests, [
+  "signed_out_member_content_fails_closed",
+  "an_oidc_verified_social_member_passes_the_private_boundary",
+  "signed_out_api_profile_and_instance_surfaces_do_not_render_member_data",
+  "federation_endpoints_stay_unavailable",
+  "a_locally_suspended_web_member_is_logged_out_and_the_session_is_invalidated",
+  "a_finalized_deleted_local_account_is_denied_before_remote_sync",
+  "signed_out_authorization_and_logout_entry_points_remain_reachable",
+  "denied_api_access_revokes_the_current_access_and_refresh_tokens",
+  "anonymous_oauth_client_registration_is_unavailable",
+]);
+
+const websiteNavigationFiles = [
+  "apps/web/lib/site-navigation.ts",
+  "apps/web/components/SiteHeader.tsx",
+  "apps/web/components/SiteFooter.tsx",
+];
+for (const file of websiteNavigationFiles) {
+  const text = readRepository(file);
+  for (const token of ["Pixelfed", "Fediverse", "Mastodon"]) {
+    if (text.toLowerCase().includes(token.toLowerCase())) {
+      failures.push(`${file} exposes upstream Social branding in Website navigation: ${token}`);
+    }
+  }
+}
+
+const socialLoginSmoke = readRepository("scripts/smoke-social-login.mjs");
+requireIncludes("scripts/smoke-social-login.mjs", socialLoginSmoke, [
+  '["Chromium", chromium]',
+  '["Firefox", firefox]',
+  '["WebKit", webkit]',
+  '{ label: "320 portrait", width: 320, height: 568 }',
+  '{ label: "320 landscape", width: 568, height: 320 }',
+  '{ label: "360 portrait", width: 360, height: 800 }',
+  '{ label: "390 portrait", width: 390, height: 844 }',
+  "Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.",
+  "public navigation exposes upstream branding",
+  "document overflows horizontally",
+  "primary control is shorter than 44px",
+  "verifyConsentAuthorizationIdRoundTrip",
+  "browser login round trip changes the authorization id",
+]);
+
+const repositoryPackageJson = JSON.parse(readRepository("package.json"));
+if (repositoryPackageJson.scripts?.["smoke:social-login"] !== "node scripts/smoke-social-login.mjs") {
+  failures.push("package.json must expose the smoke:social-login browser contract");
+}
 
 const settingsSidebar = read("resources/views/settings/partial/sidebar.blade.php");
 requireIncludes("resources/views/settings/partial/sidebar.blade.php", settingsSidebar, [

@@ -5,7 +5,7 @@ return [
 	'about'			=> 'Sobre',
 	'help'			=> 'Ajuda',
 	'language'		=> 'Idioma',
-	'fediverse'		=> 'Fediverse',
+	'fediverse'		=> 'Mochirii Social',
 	'opensource'	=> 'Código Aberto',
 	'terms'			=> 'Termos',
 	'privacy'		=> 'Privacidade',
@@ -19,7 +19,7 @@ return [
 
     // site/about
     'photo_sharing_for_everyone'                            => 'Compartilhamento de Fotos. Para Todos',
-    'pixelfed_is_an_image_sharing_platform_etc'             => 'Pixelfed é uma plataforma de compartilhamento de imagens, uma alternativa ética às plataformas centralizadas.',
+    'pixelfed_is_an_image_sharing_platform_etc'             => 'Mochirii Social is the guild community for member profiles and photos.',
     'feature_packed'                                        => 'Repleto de Recursos.',
     'the_best_for_the_brightest'                            => 'O melhor para os mais brilhantes 📸',
     'albums'                                                => 'Álbuns',
@@ -42,8 +42,8 @@ return [
 
     // site/fediverse
     'is_a_portmanteau_of_federation_and_universe_etc'       => 'é um portmanteau de “federação” e “universo”. É um nome comum e informal para uma federação de servidores de redes sociais, especializados em diferentes tipos de mídia.',
-    'supported_fediverse_projects'                          => 'Projetos Fediverse Suportados',
-    'some_of_the_better_known_fediverse_projects_include'   => 'Alguns dos projetos Fediverse mais conhecidos incluem:',
+    'supported_fediverse_projects'                          => 'Mochirii Social',
+    'some_of_the_better_known_fediverse_projects_include'   => 'Mochirii Social is available only to verified guild members.',
     'a_federated_microblogging_alternative'                 => 'Uma alternativa de microblogging federada.',
 
     // site/opensource
@@ -53,6 +53,6 @@ return [
     'opensource.or'                                         => 'ou',
     'view'                                                  => 'ver',
     'the_source_code_and_run_their_own_instance'            => 'o código-fonte e executar sua própria instância!',
-    'open_source_in_pixelfed'                               => 'Código aberto no Pixelfed',
+    'open_source_in_pixelfed'                               => 'About Mochirii Social',
 
 ];

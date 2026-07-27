@@ -58,7 +58,7 @@ class StoryService
                     'seen' => in_array($pid, self::views($s->id)),
                     'created_at' => $s->created_at->toAtomString(),
                     'expires_at' => $s->expires_at->toAtomString(),
-                    'media' => url(Storage::url($s->path)),
+                    'media' => $s->mediaUrl(),
                     'can_reply' => (bool) $s->can_reply,
                     'can_react' => (bool) $s->can_react,
                     'poll' => $s->type == 'poll' ? PollService::storyPoll($s->id) : null,

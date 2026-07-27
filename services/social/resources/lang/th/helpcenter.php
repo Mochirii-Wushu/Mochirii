@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Embed',
 
 	'communityGuidelines' => 'Community Guidelines',
-	'whatIsTheFediverse' => 'What is the fediverse?',
+	'whatIsTheFediverse' => 'About Mochirii Social',
 	'controllingVisibility' => 'Controlling Visibility',
 	'blockingAccounts' => 'Blocking Accounts',
 	'safetyTips' => 'Safety Tips',

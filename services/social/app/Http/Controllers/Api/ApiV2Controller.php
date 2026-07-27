@@ -65,8 +65,8 @@ class ApiV2Controller extends Controller
             return [
                 'domain' => config('pixelfed.domain.app'),
                 'title' => config_cache('app.name'),
-                'version' => '3.5.3 (compatible; Pixelfed '.config('pixelfed.version').')',
-                'source_url' => 'https://github.com/pixelfed/pixelfed',
+                'version' => '3.5.3 (compatible; Mochirii Social)',
+                'source_url' => 'https://github.com/Mochirii-Wushu/Mochirii',
                 'description' => config_cache('app.short_description'),
                 'usage' => [
                     'users' => [
@@ -261,7 +261,7 @@ class ApiV2Controller extends Controller
         }
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $hash = \hash_file('sha256', $photo);
         $license = null;
         $mime = $photo->getMimeType();

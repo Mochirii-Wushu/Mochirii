@@ -108,6 +108,7 @@ jobs:
         run: |
           cp .env.testing .env
           php artisan key:generate
+          php artisan passport:keys --force
 
       - name: Lint changed Social PHP files
         if: steps.changes.outputs.changed == 'true'
@@ -131,7 +132,17 @@ jobs:
       - name: Run targeted Social tests
         if: steps.changes.outputs.changed == 'true'
         working-directory: services/social
-        run: php artisan test tests/Unit/AvatarUploadPolicyTest.php
+        run: >-
+          php artisan test
+          tests/Unit/AvatarUploadPolicyTest.php
+          tests/Feature/RemoteOidcTest.php
+          tests/Feature/LoginTest.php
+          tests/Feature/HealthCheckTest.php
+          tests/Feature/MochiriiSocialSyncServiceTest.php
+          tests/Feature/OAuthTokenRevocationTest.php
+          tests/Feature/PrivateSocialBoundaryTest.php
+          tests/Feature/PrivateMediaGatewayTest.php
+          tests/Feature/PrivateMediaSourceContractTest.php
 
   validate-recovery-tools:
     name: recovery-tools-${{ matrix.architecture }}

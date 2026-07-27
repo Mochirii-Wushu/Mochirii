@@ -324,7 +324,7 @@ class ApiV1Controller extends Controller
                 $file = $request->file('avatar');
                 $path = "public/avatars/{$profile->id}";
                 $name = strtolower(str_random(6)).'.'.$file->guessExtension();
-                $request->file('avatar')->storePubliclyAs($path, $name);
+                $request->file('avatar')->storeAs($path, $name, ['visibility' => 'private']);
                 $av->media_path = "{$path}/{$name}";
                 $av->save();
                 Cache::forget("avatar:{$profile->id}");
@@ -1834,7 +1834,7 @@ class ApiV1Controller extends Controller
                 'short_description' => config_cache('app.short_description'),
                 'description' => config_cache('app.description'),
                 'email' => config('instance.email'),
-                'version' => '3.5.3 (compatible; Pixelfed '.config('pixelfed.version').')',
+                'version' => '3.5.3 (compatible; Mochirii Social)',
                 'urls' => [
                     'streaming_api' => null,
                 ],
@@ -1982,7 +1982,7 @@ class ApiV1Controller extends Controller
         abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $license = null;
         $mime = $photo->getMimeType();
 
@@ -2214,7 +2214,7 @@ class ApiV1Controller extends Controller
         abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $license = null;
         $mime = $photo->getMimeType();
 

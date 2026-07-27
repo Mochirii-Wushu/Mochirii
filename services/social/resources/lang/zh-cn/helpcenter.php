@@ -16,7 +16,7 @@ return [
 	'embed'	=> '嵌入',
 
 	'communityGuidelines' => '社区指南',
-	'whatIsTheFediverse' => 'fediverse 是什么?',
+	'whatIsTheFediverse' => 'About Mochirii Social',
 	'controllingVisibility' => '控制可见性',
 	'blockingAccounts' => '封锁账户',
 	'safetyTips' => '安全提示',

@@ -5,7 +5,7 @@ return [
 	'about'         => 'このサーバーについて',
 	'help'          => 'ヘルプ',
 	'language'      => '言語',
-	'fediverse'     => 'Fediverse',
+	'fediverse'     => 'Mochirii Social',
 	'opensource'	=> 'オープンソース',
 	'terms'         => '利用規約',
 	'privacy'       => 'プライバシーポリシー',
@@ -31,7 +31,7 @@ return [
 
     // site/about
     'photo_sharing_for_everyone'                            => '撮って、楽しむ。世界中の友達と',
-    'pixelfed_is_an_image_sharing_platform_etc'             => 'Pixelfedは写真共有のための分散型プラットフォームです。中央集権的な既存プラットフォームよりも倫理的な選択肢として作成されました。', // this is actually never used because it's a fallback for config_cache('app.description') and config_cache('app.short_description') which seem to be impossible to set to empty when saved via /admin/settings?t=branding
+    'pixelfed_is_an_image_sharing_platform_etc'             => 'Mochirii Social is the guild community for member profiles and photos.', // this is actually never used because it's a fallback for config_cache('app.description') and config_cache('app.short_description') which seem to be impossible to set to empty when saved via /admin/settings?t=branding
     'feature_packed'                                        => '見どころ、色とりどり',
     'the_best_for_the_brightest'                            => '最高の一枚のために、最良の空間を📸',
     'albums'                                                => 'アルバムの1ページ',
@@ -54,8 +54,8 @@ return [
 
     // site/fediverse
     'is_a_portmanteau_of_federation_and_universe_etc'       => 'とは、"federation"（連合体）と"universe"（宇宙）を組み合わせて作られたかばん語です。短文を投稿するSNSや写真を共有するSNS、動画を扱うSNSなど、さまざまな種類のメディアに特化したSNSサーバーが互いに連携して形成する、一つの巨大なコミュニケーション・ネットワークを指す通称です。',
-    'supported_fediverse_projects'                          => 'このサーバーが対応しているFediverseプロジェクト',
-    'some_of_the_better_known_fediverse_projects_include'   => 'よく知られたプロジェクトも含まれています',
+    'supported_fediverse_projects'                          => 'Mochirii Social',
+    'some_of_the_better_known_fediverse_projects_include'   => 'Mochirii Social is available only to verified guild members.',
     'a_federated_microblogging_alternative'                 => '短文投稿に特化した分散型のマイクロブログSNS',
 
     // site/opensource
@@ -65,5 +65,5 @@ return [
     'opensource.or'                                         => 'や',
     'view'                                                  => 'ソースコード',
     'the_source_code_and_run_their_own_instance'            => 'の確認ができ、自分自身のサーバーで運用することも可能です！',
-    'open_source_in_pixelfed'                               => 'オープンソースとしてのPixelfed',
+    'open_source_in_pixelfed'                               => 'About Mochirii Social',
 ];

@@ -2,7 +2,19 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  classifyAuthorizationDetailsFailure,
+  type AuthorizationDetailsFailureKind,
+} from "@/lib/oauth/authorization-details-error";
+import { approvedSocialOAuthRedirect } from "@/lib/oauth/approved-social-redirect";
+import {
+  createAuthorizationLoadQueue,
+  type AuthorizationLoadQueue,
+} from "@/lib/oauth/authorization-load-queue";
+import { oauthConsentLoginHref } from "@/lib/oauth/consent-login-url";
+import { priorConsentRedirect } from "@/lib/oauth/prior-consent-redirect";
+import { SOCIAL_HOST } from "@/lib/public-urls";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { requireBrowserSupabaseClient } from "@/lib/supabase/client";
 import { profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
@@ -29,79 +41,108 @@ function scopeList(scope: unknown) {
     .filter(Boolean);
 }
 
-function consentLoginHref(authorizationId: string) {
-  return `/auth?redirect=${encodeURIComponent(`/oauth/consent?authorization_id=${authorizationId}`)}`;
-}
-
 export function OAuthConsentPanel() {
   const searchParams = useSearchParams();
   const authorizationId = text(searchParams.get("authorization_id"));
-  const loginHref = useMemo(() => consentLoginHref(authorizationId), [authorizationId]);
+  const loginHref = useMemo(() => oauthConsentLoginHref(authorizationId), [authorizationId]);
   const [busy, setBusy] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
   const [details, setDetails] = useState<AuthorizationDetails | null>(null);
   const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
   const [status, setStatus] = useState("Checking authorization request.");
   const [error, setError] = useState("");
+  const [errorKind, setErrorKind] = useState<AuthorizationDetailsFailureKind | "missing" | "">("");
+  const loadQueueRef = useRef<AuthorizationLoadQueue | null>(null);
 
   const load = useCallback(async () => {
     setBusy(true);
     setError("");
+    setErrorKind("");
+    setDetails(null);
+    setMemberAccess(null);
 
-    if (!authorizationId) {
-      setSignedIn(false);
+    try {
+      if (!authorizationId) {
+        setSignedIn(false);
+        setStatus("");
+        setError("This sign-in request is missing. Return to Mochirii Social and start again.");
+        setErrorKind("missing");
+        return;
+      }
+
+      const sessionResult = await getCurrentSession();
+      if (!sessionResult.ok) {
+        setSignedIn(false);
+        setStatus("");
+        setError("We couldn't check your Mochirii sign-in. Sign in again, then retry.");
+        setErrorKind("session");
+        return;
+      }
+
+      const session = sessionResult.data?.session || null;
+      setSignedIn(Boolean(session));
+      if (!session) {
+        setStatus("Sign in before authorizing guild social access.");
+        return;
+      }
+
+      const client = requireBrowserSupabaseClient();
+      const { data, error: detailsError } = await client.auth.oauth.getAuthorizationDetails(authorizationId);
+      if (detailsError || !data) {
+        const failure = classifyAuthorizationDetailsFailure(detailsError);
+        setStatus("");
+        setError(failure.message);
+        setErrorKind(failure.kind);
+        return;
+      }
+
+      const nextDetails = data as AuthorizationDetails;
+      const access = await verifyMemberAccess();
+      if (!access.ok || !access.data) {
+        setStatus("");
+        setError("We couldn't verify guild membership. Try again.");
+        setErrorKind("temporary");
+        return;
+      }
+
+      const nextAccess = access.data;
+      const nextActiveMember = profileIsActive(nextAccess.profile, nextAccess);
+      const redirectUrl = priorConsentRedirect(nextDetails, nextActiveMember);
+      if (redirectUrl) {
+        window.location.assign(redirectUrl);
+        return;
+      }
+
+      setMemberAccess(nextAccess);
+      setDetails(nextDetails);
+      setStatus(
+        nextActiveMember
+          ? "Authorization request ready."
+          : "Active guild membership is required before authorizing guild social access.",
+      );
+    } catch {
       setDetails(null);
+      setMemberAccess(null);
       setStatus("");
-      setError("Missing authorization request.");
+      setError("We couldn't load this authorization request. Try again.");
+      setErrorKind("temporary");
+    } finally {
       setBusy(false);
-      return;
     }
-
-    const sessionResult = await getCurrentSession();
-    const session = sessionResult.data?.session || null;
-    setSignedIn(Boolean(session));
-    if (!session) {
-      setDetails(null);
-      setStatus("Sign in before authorizing guild social access.");
-      setBusy(false);
-      return;
-    }
-
-    const client = requireBrowserSupabaseClient();
-    const { data, error: detailsError } = await client.auth.oauth.getAuthorizationDetails(authorizationId);
-    if (detailsError || !data) {
-      setDetails(null);
-      setStatus("");
-      setError(detailsError?.message || "Authorization request could not be loaded.");
-      setBusy(false);
-      return;
-    }
-
-    const nextDetails = data as AuthorizationDetails;
-    if (!("authorization_id" in nextDetails) && nextDetails.redirect_url) {
-      window.location.assign(nextDetails.redirect_url);
-      return;
-    }
-
-    const access = await verifyMemberAccess();
-    const nextAccess = access.data || null;
-    const nextActiveMember = profileIsActive(nextAccess?.profile, nextAccess);
-    setMemberAccess(nextAccess);
-    setDetails(nextDetails);
-    setStatus(
-      nextActiveMember
-        ? "Authorization request ready."
-        : access.message || "Active guild membership is required before authorizing guild social access.",
-    );
-    setBusy(false);
   }, [authorizationId]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => load());
+    const queue = createAuthorizationLoadQueue(load);
+    loadQueueRef.current = queue;
+    void queue.request();
     const subscription = onAuthStateChange(() => {
-      void load();
+      void queue.request();
     });
-    return () => subscription.data?.subscription?.unsubscribe();
+    return () => {
+      queue.stop();
+      if (loadQueueRef.current === queue) loadQueueRef.current = null;
+      subscription.data?.subscription?.unsubscribe();
+    };
   }, [load]);
 
   async function decide(decision: "approve" | "deny") {
@@ -109,32 +150,42 @@ export function OAuthConsentPanel() {
     setError("");
     setStatus(decision === "approve" ? "Approving authorization." : "Denying authorization.");
 
-    const sessionResult = await getCurrentSession();
-    const token = sessionResult.data?.session?.access_token || "";
-    if (!token) {
-      setError("Sign in again before continuing.");
-      setStatus("");
-      setBusy(false);
-      return;
-    }
+    try {
+      const sessionResult = await getCurrentSession();
+      const token = sessionResult.ok ? sessionResult.data?.session?.access_token || "" : "";
+      if (!token) {
+        setMemberAccess(null);
+        setError("Sign in again before continuing.");
+        setErrorKind("session");
+        setStatus("");
+        return;
+      }
 
-    const response = await fetch("/api/oauth/decision", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ authorization_id: authorizationId, decision }),
-    });
-    const payload = await response.json().catch(() => ({})) as { redirectUrl?: string; error?: string };
-    if (!response.ok || !payload.redirectUrl) {
-      setError(payload.error || "Authorization decision failed.");
-      setStatus("");
-      setBusy(false);
-      return;
-    }
+      const response = await fetch("/api/oauth/decision", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ authorization_id: authorizationId, decision }),
+      });
+      const payload = await response.json().catch(() => ({})) as { redirectUrl?: string };
+      const redirectUrl = approvedSocialOAuthRedirect(payload.redirectUrl);
+      if (!response.ok || !redirectUrl) {
+        setError("Authorization decision could not be completed. Try again.");
+        setErrorKind("temporary");
+        setStatus("");
+        return;
+      }
 
-    window.location.assign(payload.redirectUrl);
+      window.location.assign(redirectUrl);
+    } catch {
+      setError("Authorization decision could not be completed. Try again.");
+      setErrorKind("temporary");
+      setStatus("");
+    } finally {
+      setBusy(false);
+    }
   }
 
   const scopes = scopeList(details?.scope);
@@ -183,14 +234,36 @@ export function OAuthConsentPanel() {
       <WorkflowNotice tone={activeMember ? "success" : "warning"}>{status || "Authorization status unavailable."}</WorkflowNotice>
       <WorkflowNotice tone="danger" role="alert" hidden={!error}>{error}</WorkflowNotice>
 
-      <div className="auth-actions">
-        <button className="hero-cta hero-cta--primary" type="button" disabled={busy || !signedIn || !activeMember || !details} onClick={() => void decide("approve")}>
-          Approve
-        </button>
-        <button className="hero-cta" type="button" disabled={busy || !signedIn || !details} onClick={() => void decide("deny")}>
-          Deny
-        </button>
-      </div>
+      {errorKind === "temporary" ? (
+        <div className="auth-actions">
+          <button className="hero-cta" type="button" disabled={busy} onClick={() => void loadQueueRef.current?.request()}>
+            Try again
+          </button>
+        </div>
+      ) : null}
+
+      {errorKind === "session" ? (
+        <div className="auth-actions">
+          <Link className="hero-cta hero-cta--primary" href={loginHref}>Login again</Link>
+        </div>
+      ) : null}
+
+      {errorKind === "expired" || errorKind === "missing" ? (
+        <div className="auth-actions">
+          <a className="hero-cta" href={SOCIAL_HOST}>Return to Mochirii Social</a>
+        </div>
+      ) : null}
+
+      {details ? (
+        <div className="auth-actions">
+          <button className="hero-cta hero-cta--primary" type="button" disabled={busy || !signedIn || !activeMember} onClick={() => void decide("approve")}>
+            Approve
+          </button>
+          <button className="hero-cta" type="button" disabled={busy || !signedIn} onClick={() => void decide("deny")}>
+            Deny
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

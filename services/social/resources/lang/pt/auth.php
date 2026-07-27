@@ -37,7 +37,7 @@ return [
     'sendReset'        =>   'Enviar Link de Recuperação de Senha',
     'backLogin'        =>   'Back to Login',
 
-    'signInMastodon'  => 'Entrar com Mastodon',
+    'signInMastodon'  => 'Continue with Mochirii',
     'verifyYourEmailAddress' => ' - Verifique seu endereço de e-mail',
 
 

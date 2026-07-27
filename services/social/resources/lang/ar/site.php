@@ -5,7 +5,7 @@ return [
     'about'             => 'حَول',
     'help'              => 'المُسَاعَدَة',
     'language'          => 'اللُّغَة',
-    'fediverse'         => 'Fediverse',
+    'fediverse'         => 'Mochirii Social',
     'opensource'        => 'المَصدَرُ المَفتُوح',
     'terms'             => 'الشُّرُوط',
     'privacy'           => 'الخُصُوصِيَّة',

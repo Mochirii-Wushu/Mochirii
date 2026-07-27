@@ -4,12 +4,12 @@ namespace App;
 
 use App\Models\ProfileAlias;
 use App\Services\FollowerService;
+use App\Services\MochiriiPrivateMedia;
 use App\Util\Lexer\PrettyNumber;
 use Cache;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Storage;
 
 /**
  * @property int $id
@@ -188,19 +188,11 @@ class Profile extends Model
 
     public function avatarUrl()
     {
-        $url = Cache::remember('avatar:'.$this->id, 1209600, function () {
+        $url = Cache::remember('avatar:private:v1:'.$this->id, 1209600, function () {
             $avatar = $this->avatar;
 
             if (! $avatar) {
                 return url('/storage/avatars/default.jpg');
-            }
-
-            if ($avatar->cdn_url) {
-                if (substr($avatar->cdn_url, 0, 8) === 'https://') {
-                    return $avatar->cdn_url;
-                } else {
-                    return url('/storage/avatars/default.jpg');
-                }
             }
 
             $path = $avatar->media_path;
@@ -209,11 +201,8 @@ class Profile extends Model
                 return url('/storage/avatars/default.jpg');
             }
 
-            if ($avatar->is_remote &&
-                $avatar->remote_url &&
-                boolval(config_cache('federation.avatars.store_local')) == true
-            ) {
-                return $avatar->remote_url;
+            if ($avatar->is_remote) {
+                return url('/storage/avatars/default.jpg');
             }
 
             if ($path === 'public/avatars/default.jpg') {
@@ -224,13 +213,7 @@ class Profile extends Model
                 return url('/storage/avatars/default.jpg');
             }
 
-            if (config('filesystems.default') !== 'local') {
-                return Storage::url($path);
-            }
-
-            $path = "{$path}?v={$avatar->change_count}";
-
-            return url(Storage::url($path));
+            return app(MochiriiPrivateMedia::class)->avatar($this);
         });
 
         return $url;

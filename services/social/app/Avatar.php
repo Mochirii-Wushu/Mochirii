@@ -23,8 +23,13 @@ class Avatar extends Model
     protected $visible = [
         'id',
         'profile_id',
-        'media_path',
         'size',
+    ];
+
+    protected $hidden = [
+        'cdn_url',
+        'media_path',
+        'remote_url',
     ];
 
     public function profile()

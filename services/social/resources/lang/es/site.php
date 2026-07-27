@@ -5,7 +5,7 @@ return [
     'about'             => 'Acerca de',
     'help'              => 'Ayuda',
     'language'          => 'Idioma',
-    'fediverse'         => 'Fediverso',
+    'fediverse'         => 'Mochirii Social',
     'opensource'        => 'Código Abierto',
     'terms'             => 'Términos',
     'privacy'           => 'Privacidad',
@@ -31,7 +31,7 @@ return [
 
     // site/about
     'photo_sharing_for_everyone'                            => 'Compartir fotos. Para todos',
-    'pixelfed_is_an_image_sharing_platform_etc'             => 'Pixelfed es una plataforma para compartir fotos, una alternativa ética a plataformas centralizadas.', // this is actually never used because it's a fallback for config_cache('app.description') and config_cache('app.short_description') which seem to be impossible to set to empty when saved via /admin/settings?t=branding
+    'pixelfed_is_an_image_sharing_platform_etc'             => 'Mochirii Social is the guild community for member profiles and photos.', // this is actually never used because it's a fallback for config_cache('app.description') and config_cache('app.short_description') which seem to be impossible to set to empty when saved via /admin/settings?t=branding
     'feature_packed'                                        => 'Características incluidas.',
     'the_best_for_the_brightest'                            => 'Lo mejor para los más brillantes ??',
     'albums'                                                => 'Álbumes',
@@ -54,8 +54,8 @@ return [
 
     // site/fediverse
     'is_a_portmanteau_of_federation_and_universe_etc'       => 'es la combinación de "federación" y "universo". Es un nombre común e informal para una federación de servidores de redes sociales, que se especializan en diferentes tipos de contenido.',
-    'supported_fediverse_projects'                          => 'Proyectos apoyados por Fediverso',
-    'some_of_the_better_known_fediverse_projects_include'   => 'Algunos de los proyectos del fediversos más conocidos incluyen:',
+    'supported_fediverse_projects'                          => 'Mochirii Social',
+    'some_of_the_better_known_fediverse_projects_include'   => 'Mochirii Social is available only to verified guild members.',
     'a_federated_microblogging_alternative'                 => 'Una alternativa federada de microblogging.',
 
     // site/opensource
@@ -65,5 +65,5 @@ return [
     'opensource.or'                                         => 'o',
     'view'                                                  => 'revisar',
     'the_source_code_and_run_their_own_instance'            => 'el código fuente y ejecutar sus propias instancias!!',
-    'open_source_in_pixelfed'                               => 'Código abierto en Pixelfed',
+    'open_source_in_pixelfed'                               => 'About Mochirii Social',
 ];

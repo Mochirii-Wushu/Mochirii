@@ -81,7 +81,7 @@ class GroupsPostController extends Controller
             $photo = $request->file('photo');
             $storagePath = GroupMediaService::path($group->id, $pid, $status->id);
             // $storagePath = 'public/g/' . $group->id . '/p/' . $status->id;
-            $path = $photo->storePublicly($storagePath);
+            $path = $photo->store($storagePath, ['visibility' => 'private']);
             // $hash = \hash_file('sha256', $photo);
 
             $media = new GroupMedia;
@@ -107,7 +107,7 @@ class GroupsPostController extends Controller
         if ($type == 'video') {
             $video = $request->file('video');
             $storagePath = 'public/g/'.$group->id.'/p/'.$status->id;
-            $path = $video->storePublicly($storagePath);
+            $path = $video->store($storagePath, ['visibility' => 'private']);
             $hash = \hash_file('sha256', $video);
 
             $media = new Media;
@@ -123,6 +123,11 @@ class GroupsPostController extends Controller
             VideoThumbnail::dispatch($media);
             sleep(15);
         }
+
+        // Media is reachable by other permitted group members only after the
+        // complete post pipeline succeeds.
+        $gp->visibility = 'public';
+        $gp->save();
 
         GroupService::log(
             $group->id,

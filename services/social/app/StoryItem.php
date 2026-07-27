@@ -4,7 +4,6 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Pixelfed\Snowflake\HasSnowflakePrimary;
-use Storage;
 
 /**
  * @property int $id
@@ -41,6 +40,9 @@ class StoryItem extends Model
 
     public function url()
     {
-        return url(Storage::url($this->media_path));
+        // The legacy story_items table was removed. Keep this retired model
+        // incapable of reintroducing a raw storage URL if referenced by old
+        // extension code; current stories use the authenticated Story gateway.
+        return app(Services\MochiriiPrivateMedia::class)->placeholder();
     }
 }

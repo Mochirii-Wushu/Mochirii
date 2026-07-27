@@ -506,7 +506,7 @@
                         <autocomplete
                             v-show="taggedUsernames.length < 10"
                             :search="tagSearch"
-                            placeholder="@pixelfed"
+                            placeholder="@mochirii"
                             aria-label="Search usernames"
                             :get-result-value="getTagResultValue"
                             @submit="onTagSubmitLocation"

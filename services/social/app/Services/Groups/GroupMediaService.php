@@ -38,8 +38,8 @@ class GroupMediaService
                     'id' => (string) $media->id,
                     'type' => 'Document',
                     'url' => $media->url(),
-                    'preview_url' => $media->url(),
-                    'remote_url' => $media->url,
+                    'preview_url' => $media->thumbnailUrl(),
+                    'remote_url' => null,
                     'description' => $media->cw_summary,
                     'blurhash' => $media->blurhash ?? 'U4Rfzst8?bt7ogayj[j[~pfQ9Goe%Mj[WBay',
                 ];

@@ -1,7 +1,7 @@
 <?= '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL ?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
     <id>{{$permalink}}</id>
-    <title>{{$profile['username']}} on {{config('pixelfed.domain.app', 'Pixelfed')}}</title>
+    <title>{{$profile['username']}} on {{config('pixelfed.domain.app', 'Mochirii Social')}}</title>
     <subtitle type="html">{{strip_tags($profile['note'])}}</subtitle>
     @if($items && count($items))
         <updated>{{$items[0]['created_at']}}</updated>

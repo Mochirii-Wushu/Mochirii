@@ -7,6 +7,11 @@ import {
   type JsonRecord,
 } from "../_shared/pixelfed-social-sync.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
+import { currentMemberAccess } from "../_shared/member-access-policy.ts";
+import {
+  asRecord,
+  resolveDiscordIdentity,
+} from "../_shared/member-verification-identity.ts";
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -66,12 +71,18 @@ Deno.serve(async (req: Request) => {
   const [
     { data: userData, error: userError },
     { data: profileData, error: profileError },
+    { data: verificationData, error: verificationError },
   ] = await Promise.all([
     adminClient.auth.admin.getUserById(payload.sub),
     adminClient
       .from("member_profiles")
-      .select("id")
+      .select("id,member_status,discord_user_id,has_required_discord_roles,discord_verified_at")
       .eq("id", payload.sub)
+      .maybeSingle(),
+    adminClient
+      .from("member_verifications")
+      .select("gallery_access_status,gallery_access_verified_at,gallery_access_expires_at")
+      .eq("user_id", payload.sub)
       .maybeSingle(),
   ]);
 
@@ -90,24 +101,67 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: "profile_lookup_failed" }, 500);
   }
 
+  if (verificationError) {
+    console.error("sync-pixelfed-social-account verification lookup failed", {
+      code: verificationError.code,
+      message: verificationError.message,
+    });
+    return jsonResponse({ ok: false, error: "verification_lookup_failed" }, 500);
+  }
+
   const now = new Date().toISOString();
+  const user = asRecord(userData.user);
+  const access = currentMemberAccess({
+    profile: profileData ? asRecord(profileData) : null,
+    verification: verificationData ? asRecord(verificationData) : null,
+    trustedDiscordUserId: resolveDiscordIdentity(user),
+  });
+
+  if (!access.eligible) {
+    const { error: revokeError } = await adminClient
+      .from("social_accounts")
+      .update({
+        status: "revoked",
+        profile_link_visible: false,
+        federation_enabled: false,
+        revoked_at: now,
+        last_synced_at: now,
+      })
+      .eq("user_id", payload.sub)
+      .eq("provider", "pixelfed");
+
+    if (revokeError) {
+      console.error("sync-pixelfed-social-account access revocation failed", {
+        code: revokeError.code,
+        message: revokeError.message,
+      });
+      return jsonResponse({ ok: false, error: "access_revocation_failed" }, 500);
+    }
+
+    return jsonResponse({ ok: false, error: "current_member_access_required" }, 403);
+  }
+
+  const socialAccount: JsonRecord = {
+    user_id: payload.sub,
+    member_profile_id: profileData?.id || null,
+    provider: "pixelfed",
+    provider_subject: payload.sub,
+    provider_user_id: payload.provider_user_id,
+    username: payload.username,
+    profile_url: payload.profile_url,
+    status: "active",
+    federation_enabled: false,
+    last_synced_at: now,
+    revoked_at: null,
+  };
+  if (payload.event === "login" || payload.event === "account_created") {
+    socialAccount.last_login_at = now;
+  }
+
   const { error: upsertError } = await adminClient
     .from("social_accounts")
     .upsert(
-      {
-        user_id: payload.sub,
-        member_profile_id: profileData?.id || null,
-        provider: "pixelfed",
-        provider_subject: payload.sub,
-        provider_user_id: payload.provider_user_id,
-        username: payload.username,
-        profile_url: payload.profile_url,
-        status: "active",
-        federation_enabled: false,
-        last_login_at: now,
-        last_synced_at: now,
-        revoked_at: null,
-      },
+      socialAccount,
       { onConflict: "user_id,provider" },
     );
 
@@ -122,7 +176,6 @@ Deno.serve(async (req: Request) => {
   return jsonResponse({
     ok: true,
     status: "synced",
-    provider: "pixelfed",
     profileUrl: payload.profile_url,
   });
 });
