@@ -61,6 +61,18 @@ function hasExactRecoveryRunnerMatrix(jobText) {
     ]);
 }
 
+function hasExactRecoveryArchitectureGate(jobText) {
+  return [
+    "name: Verify native recovery runner architecture",
+    "RECOVERY_ARCHITECTURE: ${{ matrix.architecture }}",
+    "RUNNER_ARCHITECTURE: ${{ runner.arch }}",
+    'native_architecture="$(uname -m)"',
+    'case "$RECOVERY_ARCHITECTURE:$RUNNER_ARCHITECTURE:$native_architecture" in',
+    "amd64:X64:x86_64 | arm64:ARM64:aarch64)",
+    "Unexpected recovery runner architecture:",
+  ].every((requirement) => jobText.includes(requirement));
+}
+
 const recoveryMatrixCanary = `
       matrix:
         include:
@@ -109,7 +121,8 @@ for (const name of workflowFiles) {
       name === "validate-social.yml" &&
       job.id === "validate-recovery-tools" &&
       value === "${{ matrix.runner }}" &&
-      hasExactRecoveryRunnerMatrix(jobText);
+      hasExactRecoveryRunnerMatrix(jobText) &&
+      hasExactRecoveryArchitectureGate(jobText);
     if (value.includes("self-hosted")) {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must not depend on a self-hosted runner.`);
     } else if (value === "ubuntu-latest") {

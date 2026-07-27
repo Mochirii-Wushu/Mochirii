@@ -51,13 +51,14 @@ Each runner verifies the exact versions, completes an `age` encrypt/decrypt
 round trip with a byte-identical payload, and exercises `rclone` `copyto`, `lsf`,
 and `deletefile` against its no-network local backend. The
 [`ubuntu-24.04-arm` runner](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
-is a GitHub-hosted public-preview dependency, so its unavailability fails the
-required `validate-social` result closed and blocks Social image publication;
-the workflow does not silently fall back to another architecture or bypass the
-check. This CI coverage validates the source and release artifacts; it does not
-install tools on the live Droplet. The live host remains unchanged until a
-separately approved installation packet and post-install version readback are
-completed.
+uses GitHub-hosted native ARM64 hardware. A fail-closed preflight binds each
+matrix entry to GitHub's `runner.arch` value and the host's `uname -m` result, so
+the required `validate-social` result fails closed on an unexpected or
+unavailable architecture and blocks Social image publication. The workflow does
+not silently fall back to emulation, another architecture, or a bypass. This CI
+coverage validates the source and release artifacts; it does not install tools
+on the live Droplet. The live host remains unchanged until a separately approved
+installation packet and post-install version readback are completed.
 
 To update a pin, review the upstream release and its security notes. For `age`,
 verify the [official release](https://github.com/FiloSottile/age/releases) checksum

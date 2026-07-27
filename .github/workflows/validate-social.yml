@@ -154,6 +154,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Verify native recovery runner architecture
+        env:
+          RECOVERY_ARCHITECTURE: ${{ matrix.architecture }}
+          RUNNER_ARCHITECTURE: ${{ runner.arch }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          native_architecture="$(uname -m)"
+          case "$RECOVERY_ARCHITECTURE:$RUNNER_ARCHITECTURE:$native_architecture" in
+            amd64:X64:x86_64 | arm64:ARM64:aarch64)
+              ;;
+            *)
+              echo "Unexpected recovery runner architecture: matrix=$RECOVERY_ARCHITECTURE runner=$RUNNER_ARCHITECTURE uname=$native_architecture" >&2
+              exit 1
+              ;;
+          esac
+
       - name: Validate recovery shell
         env:
           RECOVERY_ARCHITECTURE: ${{ matrix.architecture }}
