@@ -58,6 +58,9 @@ SELECT ok(
 SELECT ok(
   NOT private.member_social_link_url_is_valid('instagram', 'https://instagram.com.evil.example/mochirii')
   AND NOT private.member_social_link_url_is_valid('custom', 'https://localhost/profile')
+  AND NOT private.member_social_link_url_is_valid('custom', 'https://127.0.0.10/profile')
+  AND NOT private.member_social_link_url_is_valid('custom', 'https://guild.internal/profile')
+  AND NOT private.member_social_link_url_is_valid('mastodon', 'https://social.test/@member')
   AND NOT private.member_social_link_url_is_valid('custom', 'https://name:secret@example.com/profile'),
   'hostname confusion, local hosts, and embedded credentials fail validation'
 );
