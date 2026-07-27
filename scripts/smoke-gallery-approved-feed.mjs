@@ -268,8 +268,16 @@ async function newCheckedPage(context, feedMode = null, { holdFixture = false } 
     if (msg.type() === "error") errors.push(`Console error: ${msg.text()}`);
   });
   page.on("requestfailed", (request) => {
+    const url = new URL(request.url());
+    const failure = request.failure()?.errorText || "unknown error";
+    const appRouterPrefetchWasCanceled = request.method() === "GET"
+      && request.resourceType() === "fetch"
+      && url.host === new URL(baseUrl).host
+      && url.searchParams.has("_rsc")
+      && ["net::ERR_ABORTED", "NS_BINDING_ABORTED", "cancelled"].includes(failure);
+    if (appRouterPrefetchWasCanceled) return;
     errors.push(
-      `Failed request: ${request.method()} ${request.url()} (${request.failure()?.errorText || "unknown error"})`,
+      `Failed request: ${request.method()} ${request.url()} (${failure})`,
     );
   });
   page.on("request", (request) => {

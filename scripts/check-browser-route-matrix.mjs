@@ -12,6 +12,7 @@ const getArg = (name, fallback) => {
 const writeReport = argSet.has("--write") || process.env.BROWSER_ROUTE_MATRIX_WRITE === "true";
 const baseUrl = getArg("--base-url", process.env.BROWSER_ROUTE_MATRIX_BASE_URL || SITE_ORIGIN).replace(/\/$/, "");
 const browserName = getArg("--browser", process.env.BROWSER_ROUTE_MATRIX_BROWSER || "chromium").toLowerCase();
+const navigationBaseUrl = localWebKitNavigationUrl(baseUrl, browserName);
 const reportJsonPath = resolve(root, "reports/browser-route-matrix.json");
 const reportMdPath = resolve(root, "reports/browser-route-matrix.md");
 const checkedAt = new Date().toISOString();
@@ -76,6 +77,7 @@ try {
       colorScheme: "dark",
       ignoreHTTPSErrors: false,
     });
+    await bridgeWebKitLocalHttps(context, navigationBaseUrl);
     await stubLocalAnalytics(context);
     for (const route of routes) {
       const result = await inspectRoute(context, route, viewport);
@@ -170,7 +172,7 @@ async function inspectRoute(context, route, viewport) {
     const expectedNextPrefetchCancellation = failure === "net::ERR_ABORTED"
       && request.method() === "GET"
       && request.resourceType() === "fetch"
-      && requestUrl.origin === new URL(baseUrl).origin
+      && requestUrl.origin === new URL(navigationBaseUrl).origin
       && requestUrl.searchParams.has("_rsc")
       && headers.rsc === "1"
       && headers["next-router-prefetch"] === "1";
@@ -187,7 +189,7 @@ async function inspectRoute(context, route, viewport) {
     if (/^https:\/\/discord\.com\/widget\?/i.test(request.url())) discordPreviewRequests.push(request.url());
   });
 
-  const url = `${baseUrl}${route.route}`;
+  const url = `${navigationBaseUrl}${route.route}`;
   let response = null;
   let gotoError = "";
   try {
@@ -540,6 +542,28 @@ async function stubLocalAnalytics(context) {
     contentType: "application/json; charset=utf-8",
     body: JSON.stringify({ ok: true, data: { profiles: [], count: 0 } }),
   }));
+}
+
+function localWebKitNavigationUrl(urlValue, engineName) {
+  const url = new URL(urlValue);
+  if (engineName !== "webkit" || url.protocol !== "http:" || !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname)) {
+    return urlValue;
+  }
+
+  url.protocol = "https:";
+  return url.href.replace(/\/$/, "");
+}
+
+async function bridgeWebKitLocalHttps(context, secureBaseUrl) {
+  if (secureBaseUrl === baseUrl) return;
+
+  const secureOrigin = new URL(secureBaseUrl).origin;
+  await context.route(`${secureOrigin}/**`, async (route) => {
+    const localUrl = new URL(route.request().url());
+    localUrl.protocol = "http:";
+    const response = await route.fetch({ url: localUrl.href });
+    await route.fulfill({ response });
+  });
 }
 
 function renderMarkdown(report) {

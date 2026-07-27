@@ -195,8 +195,16 @@ function watchBrowserErrors(page, surfaceLabel, engineLabel) {
     }
   });
   page.on("requestfailed", (request) => {
+    const url = new URL(request.url());
+    const failure = request.failure()?.errorText || "unknown error";
+    const appRouterPrefetchWasCanceled = request.method() === "GET"
+      && request.resourceType() === "fetch"
+      && url.host === new URL(baseUrl).host
+      && url.searchParams.has("_rsc")
+      && ["net::ERR_ABORTED", "NS_BINDING_ABORTED", "cancelled"].includes(failure);
+    if (appRouterPrefetchWasCanceled) return;
     errors.push(
-      `${surfaceLabel} failed request: ${request.method()} ${request.url()} (${request.failure()?.errorText || "unknown error"})`,
+      `${surfaceLabel} failed request: ${request.method()} ${request.url()} (${failure})`,
     );
   });
   page.on("response", (response) => {
