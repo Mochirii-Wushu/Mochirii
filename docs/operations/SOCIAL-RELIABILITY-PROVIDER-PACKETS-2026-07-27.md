@@ -46,8 +46,8 @@ Read-only production checks established the following:
   the live landing page still links its secondary action to `/social`, so the
   source correction in this packet is not yet live.
 
-The source release also adds a bounded container readiness check against the
-existing local HTTP health route, removes the mobile login gutter mismatch,
+The source release also separates process liveness from a bounded container
+readiness route that requires both MariaDB and Redis, removes the mobile login gutter mismatch,
 adds the missing guest CSRF metadata, and removes public fallback references to
 the upstream product name. The exact requested Mochirii description is shared
 by the landing and login surfaces.
@@ -78,9 +78,10 @@ Ray/colo metadata, container state, and resource measurements. Do not capture
 cookies, authorization codes, URL fragments, request bodies, environment
 variables, database contents, member identifiers, or OAuth credentials.
 
-1. Sample the landing page, login, authorization start, and
-   /api/service/health-check from at least two independent regions. Bound every
-   request to 10 seconds.
+1. Sample the landing page, login, authorization start, and public process
+   liveness route `/api/service/health-check` from at least two independent
+   regions. Bound every request to 10 seconds. Do not interpret liveness alone
+   as database/cache readiness.
 2. In Cloudflare analytics, correlate the same UTC window by hostname, status,
    edge location, and Ray ID. Record whether a security rule actually matched.
 3. In DigitalOcean Monitoring, correlate CPU, memory, load, disk, and network
@@ -91,6 +92,8 @@ variables, database contents, member identifiers, or OAuth credentials.
    - docker compose ps
    - docker inspect state and health for the application, database, cache,
      queue worker, and scheduler
+   - the origin-only `/api/service/readiness-check`, which must return `READY`
+     only after both MariaDB and Redis respond within their bounded probes
    - bounded container logs for the same window
    - kernel out-of-memory events for the same window
    Route all captured container diagnostics through the source redaction helper
@@ -104,7 +107,8 @@ variables, database contents, member identifiers, or OAuth credentials.
 Cloudflare documents a 522 as an edge-to-origin connection timeout, so a 522
 must be diagnosed at that boundary rather than treated as an application
 status code. Docker distinguishes a running process from application
-readiness; the new health check measures the latter.
+readiness; `/api/service/health-check` measures liveness, while Docker uses the
+five-second-bounded `/api/service/readiness-check` dependency probe.
 
 ## Packet A: reviewed Social image rollout
 
@@ -123,7 +127,8 @@ readiness; the new health check measures the latter.
 - Verification:
   1. Image signature, provenance, source revision, and architecture manifests
      match the reviewed commit.
-  2. Application container reaches HTTP healthy after the startup grace period.
+  2. Application container reaches dependency-aware HTTP readiness after the
+     startup grace period; the separate public liveness route also responds.
   3. Database, cache, queue worker, and scheduler remain healthy.
   4. The landing, login, health, and OIDC start/callback boundary pass bounded
      checks.
@@ -133,13 +138,18 @@ readiness; the new health check measures the latter.
   6. A fresh active-member flow preserves one authorization request through
      website login, shows consent once, and returns to the canonical Social
      callback.
+  7. Anonymous requests to both the direct media object and its CDN form are
+     denied, private-media configuration is enabled on readback, and one
+     authorized application media request succeeds. Only then may the operator
+     select `ANONYMOUS DENIAL AND CUTOVER VERIFIED`.
 - Rollback: use the existing production workflow to restore the captured prior
   immutable digest; verify the same health and public routes. Do not roll back
   database state because this packet contains no migration.
 - Stop conditions: digest/source mismatch, unsigned image, required migration,
   unhealthy dependency, repeated restart, callback-host drift, authorization
   request loss, public vendor branding, registration opening, federation
-  exposure, or any unexpected provider/configuration diff.
+  exposure, anonymous direct-object or CDN access, private-media readback drift,
+  or any unexpected provider/configuration diff.
 
 ## Packet B: narrowly scoped Cloudflare correction
 
@@ -157,7 +167,8 @@ Cloudflare rule as the cause.**
   or rate limits on any member route.
 - Writer: one authenticated Cloudflare operator with MFA.
 - Verification: the exact matching event stops; unrelated managed protections
-  still apply; origin and public readiness both pass; no DNS/TLS change.
+  still apply; public liveness and origin-only dependency readiness both pass;
+  no DNS/TLS change.
 - Rollback: restore the captured rule/action/priority or remove the newly
   created narrow exception.
 - Stop conditions: no matching security event, ambiguous rule ownership,

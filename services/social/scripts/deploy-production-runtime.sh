@@ -35,11 +35,16 @@ bundle_path="${1:-}"
 commit="${2:-}"
 digest="${3:-}"
 migration_approval="${4:-NONE}"
+private_media_approval="${5:-NOT_VERIFIED}"
 
 validate_commit "$commit"
 validate_digest "$digest"
 [[ "$migration_approval" == "NONE" || "$migration_approval" == "MIGRATIONS_APPROVED" ]] || {
   echo "Migration approval must be NONE or MIGRATIONS_APPROVED." >&2
+  exit 1
+}
+[[ "$private_media_approval" == "ANONYMOUS_DENIAL_AND_CUTOVER_VERIFIED" ]] || {
+  echo "Deployment requires anonymous object/CDN denial and private-media cutover readback." >&2
   exit 1
 }
 [[ -f "$bundle_path" ]] || {

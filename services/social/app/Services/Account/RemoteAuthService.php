@@ -12,6 +12,11 @@ class RemoteAuthService
 {
     const CACHE_KEY = 'pf:services:remoteauth:';
 
+    private static function beagleEnabled(): bool
+    {
+        return (bool) config('instance.discover.beagle_api');
+    }
+
     public static function getConfig()
     {
         return json_encode([
@@ -116,7 +121,7 @@ class RemoteAuthService
 
     public static function isDomainCompatible($domain = false)
     {
-        if (! $domain) {
+        if (! self::beagleEnabled() || ! $domain) {
             return false;
         }
 
@@ -145,6 +150,10 @@ class RemoteAuthService
 
     public static function lookupWebfingerUses($wf)
     {
+        if (! self::beagleEnabled()) {
+            return false;
+        }
+
         try {
             $res = Http::timeout(20)->retry(3, 750)->get('https://beagle.pixelfed.net/api/v1/raa/lookup?webfinger='.$wf);
             if (! $res->ok()) {
@@ -167,6 +176,10 @@ class RemoteAuthService
 
     public static function submitToBeagle($ow, $ou, $dw, $du)
     {
+        if (! self::beagleEnabled()) {
+            return;
+        }
+
         try {
             $url = 'https://beagle.pixelfed.net/api/v1/raa/submit';
             $res = Http::throw()->timeout(10)->get($url, [

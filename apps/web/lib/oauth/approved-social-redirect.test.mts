@@ -1,12 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { approvedSocialOAuthRedirect } from "./approved-social-redirect.ts";
+import {
+  approvedSocialOAuthRedirect,
+  isApprovedSocialOAuthReturnDestination,
+} from "./approved-social-redirect.ts";
 
 test("accepts only the exact Mochirii Social OIDC callback", () => {
   assert.equal(
     approvedSocialOAuthRedirect("https://social.mochirii.com/auth/oidc/callback?code=opaque&state=opaque"),
     "https://social.mochirii.com/auth/oidc/callback?code=opaque&state=opaque",
   );
+});
+
+test("accepts only the registered callback as a consent return destination", () => {
+  assert.equal(
+    isApprovedSocialOAuthReturnDestination("https://social.mochirii.com/auth/oidc/callback"),
+    true,
+  );
+  assert.equal(
+    isApprovedSocialOAuthReturnDestination("https://social.mochirii.com/auth/oidc/callback?next=opaque"),
+    false,
+  );
+  assert.equal(isApprovedSocialOAuthReturnDestination("https://example.com/auth/oidc/callback"), false);
 });
 
 test("rejects origin and path confusion", () => {

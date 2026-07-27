@@ -25,3 +25,11 @@ export function approvedSocialOAuthRedirect(value: unknown): string {
     return "";
   }
 }
+
+export function isApprovedSocialOAuthReturnDestination(value: unknown): boolean {
+  const approved = approvedSocialOAuthRedirect(value);
+  if (!approved) return false;
+
+  const url = new URL(approved);
+  return url.search === "";
+}

@@ -29,7 +29,7 @@
 @endsection
 
 @push('meta')
-<meta property="og:description" content="">
+<meta property="og:description" content="{{ config('mochirii-branding.description') }}">
 @endpush
 
 

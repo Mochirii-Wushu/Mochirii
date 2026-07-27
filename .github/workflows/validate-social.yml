@@ -138,6 +138,7 @@ jobs:
           tests/Feature/RemoteOidcTest.php
           tests/Feature/LoginTest.php
           tests/Feature/HealthCheckTest.php
+          tests/Feature/DisabledUpstreamServicesTest.php
           tests/Feature/MochiriiSocialSyncServiceTest.php
           tests/Feature/OAuthTokenRevocationTest.php
           tests/Feature/PrivateSocialBoundaryTest.php

@@ -11,7 +11,7 @@
 	<meta property="og:title" content="{{ config('mochirii-branding.display_name') ?? 'Mōchirīī Social' }}">
 	<meta property="og:type" content="article">
 	<meta property="og:url" content="{{route('site.about')}}">
-	<meta property="og:description" content="{{config_cache('app.short_description')}}">
+	<meta property="og:description" content="{{ config('mochirii-branding.description') }}">
 	<meta name="medium" content="image">
 	<meta name="theme-color" content="#10c5f8">
 	<meta name="apple-mobile-web-app-capable" content="yes">
@@ -40,7 +40,7 @@
 			<h1 class="display-4 font-weight-bold py-3">{{ config_cache('about.title') ?? __('site.photo_sharing_for_everyone') }}</h1>
 			<div class="col-lg-6 mx-auto py-3">
 			  <p class="mb-4 font-weight-light text-left" style="font-size: 26px; line-height: 40px;">
-				{!! config_cache('app.description') ?? config_cache('app.short_description') ?? 'Mōchirīī Social is the guild home for member posts, profiles, and images.' !!}
+				{{ config('mochirii-branding.description') }}
 			  </p>
 			</div>
 		</div>

@@ -34,6 +34,10 @@ class NotificationAppGatewayService
 
     public static function checkServerSupport()
     {
+        if ((bool) config('instance.notifications.nag.enabled') === false) {
+            return false;
+        }
+
         $endpoint = 'https://'.config('instance.notifications.nag.endpoint').'/api/v1/instance-check?domain='.config('pixelfed.domain.app');
         try {
             $res = Http::withHeaders(['X-PIXELFED-API' => 1])

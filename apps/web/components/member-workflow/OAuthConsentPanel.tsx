@@ -8,7 +8,10 @@ import {
   classifyAuthorizationDetailsFailure,
   type AuthorizationDetailsFailureKind,
 } from "@/lib/oauth/authorization-details-error";
-import { approvedSocialOAuthRedirect } from "@/lib/oauth/approved-social-redirect";
+import {
+  approvedSocialOAuthRedirect,
+  isApprovedSocialOAuthReturnDestination,
+} from "@/lib/oauth/approved-social-redirect";
 import {
   createAuthorizationLoadQueue,
   type AuthorizationLoadQueue,
@@ -103,6 +106,13 @@ export function OAuthConsentPanel() {
       }
 
       const nextDetails = data as AuthorizationDetails;
+      if (!isApprovedSocialOAuthReturnDestination(nextDetails.redirect_uri)) {
+        setStatus("");
+        setError("This guild social request could not be verified. Return to Mōchirīī Social and start again.");
+        setErrorKind("expired");
+        return;
+      }
+
       const access = await verifyMemberAccess();
       if (!access.ok || !access.data) {
         setStatus("");
@@ -224,7 +234,7 @@ export function OAuthConsentPanel() {
           </div>
           <div>
             <dt>Return destination</dt>
-            <dd>{text(details.redirect_uri, "Not provided")}</dd>
+            <dd>{SOCIAL_CLIENT_DISPLAY_NAME}</dd>
           </div>
           <div>
             <dt>Requested access</dt>

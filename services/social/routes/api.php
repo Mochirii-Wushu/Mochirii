@@ -29,6 +29,7 @@ Route::middleware('mochirii.federation-disabled')->group(function () {
 });
 Route::redirect('.well-known/change-password', '/settings/password');
 Route::get('api/service/health-check', 'HealthCheckController@get');
+Route::get('api/service/readiness-check', 'HealthCheckController@readiness');
 Route::post('api/auth/app-code-verify', 'AppRegisterController@verifyCode')->middleware('throttle:app-code-verify');
 Route::post('api/auth/onboarding', 'AppRegisterController@onboarding')->middleware('throttle:app-code-verify');
 Route::get('storage/m/_v2/{pid}/{mhash}/{uhash}/{f}', 'MediaController@fallbackRedirect')

@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 umask 077
-read -r action argument_one argument_two argument_three argument_four extra \
+read -r action argument_one argument_two argument_three argument_four argument_five extra \
   <<<"${SSH_ORIGINAL_COMMAND:-}"
 
 if [[ "$action" == "verify" ]]; then
@@ -11,7 +11,7 @@ if [[ "$action" == "verify" ]]; then
     echo "The verification confirmation is invalid." >&2
     exit 1
   }
-  [[ -z "${argument_two:-}" && -z "${argument_three:-}" && -z "${argument_four:-}" && -z "${extra:-}" ]] || {
+  [[ -z "${argument_two:-}" && -z "${argument_three:-}" && -z "${argument_four:-}" && -z "${argument_five:-}" && -z "${extra:-}" ]] || {
     echo "Unexpected verification arguments." >&2
     exit 1
   }
@@ -32,6 +32,7 @@ commit="$argument_one"
 digest="$argument_two"
 confirmation="$argument_three"
 migration_approval="$argument_four"
+private_media_approval="$argument_five"
 
 [[ "$confirmation" == "DEPLOY_social.mochirii.com" ]] || {
   echo "The deployment confirmation is invalid." >&2
@@ -40,6 +41,7 @@ migration_approval="$argument_four"
 [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
 [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
 [[ "$migration_approval" == "NONE" || "$migration_approval" == "MIGRATIONS_APPROVED" ]]
+[[ "$private_media_approval" == "ANONYMOUS_DENIAL_AND_CUTOVER_VERIFIED" ]]
 
 bundle_path="$(mktemp /tmp/mochirii-social-release.XXXXXX.tar.gz)"
 cleanup() {
@@ -54,4 +56,4 @@ head -c 1048577 >"$bundle_path"
 }
 
 sudo -n /usr/local/sbin/mochirii-social-deploy \
-  "$bundle_path" "$commit" "$digest" "$migration_approval"
+  "$bundle_path" "$commit" "$digest" "$migration_approval" "$private_media_approval"

@@ -18,8 +18,17 @@ class BeagleService
 
     const DISCOVER_POSTS_CACHE_KEY = 'pf:services:beagle:discover-posts:v1';
 
+    private static function enabled(): bool
+    {
+        return (bool) config('instance.discover.beagle_api');
+    }
+
     public static function getDefaultRules()
     {
+        if (! self::enabled()) {
+            return [];
+        }
+
         return Cache::remember(self::DEFAULT_RULES_CACHE_KEY, now()->addDays(7), function () {
             try {
                 $res = Http::withOptions(['allow_redirects' => false])
@@ -51,11 +60,11 @@ class BeagleService
 
     public static function getDiscover()
     {
-        if ((bool) config_cache('federation.activitypub.enabled') == false) {
+        if (! self::enabled()) {
             return [];
         }
 
-        if ((bool) config('instance.discover.beagle_api') == false) {
+        if ((bool) config_cache('federation.activitypub.enabled') == false) {
             return [];
         }
 
@@ -92,11 +101,11 @@ class BeagleService
 
     public static function getDiscoverPosts()
     {
-        if ((bool) config_cache('federation.activitypub.enabled') == false) {
+        if (! self::enabled()) {
             return [];
         }
 
-        if ((bool) config('instance.discover.beagle_api') == false) {
+        if ((bool) config_cache('federation.activitypub.enabled') == false) {
             return [];
         }
 

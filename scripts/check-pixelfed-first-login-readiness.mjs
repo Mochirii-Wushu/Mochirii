@@ -78,6 +78,7 @@ const snippetChecks = [
       "classifyAuthorizationDetailsFailure",
       "oauthConsentLoginHref",
       "priorConsentRedirect",
+      "isApprovedSocialOAuthReturnDestination",
       "const SOCIAL_CLIENT_DISPLAY_NAME = \"Mōchirīī Social\"",
       "Guild Social Access",
       "Return destination",
@@ -511,6 +512,12 @@ if (consentPanel.includes("Promise.resolve().then(() => load())")) {
 }
 if (consentPanel.includes("detailsError?.message")) {
   failures.push("OAuth consent must not render provider/internal authorization errors to members.");
+}
+if (consentPanel.includes("text(details.redirect_uri")) {
+  failures.push("OAuth consent must not render a raw redirect URI to members.");
+}
+if (consentPanel.indexOf("isApprovedSocialOAuthReturnDestination(nextDetails.redirect_uri)") > consentPanel.indexOf("setDetails(nextDetails)")) {
+  failures.push("OAuth consent must validate the registered return destination before rendering request details.");
 }
 for (const forbiddenConsentCopy of ["OAuth Consent", "Redirect URI", "client request", "client_name", "clientName"]) {
   if (consentPanel.includes(forbiddenConsentCopy)) {

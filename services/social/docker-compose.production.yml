@@ -90,7 +90,7 @@ services:
           "5",
           "--output",
           "/dev/null",
-          "http://127.0.0.1:8080/api/service/health-check",
+          "http://127.0.0.1:8080/api/service/readiness-check",
         ]
       interval: 10s
       timeout: 5s

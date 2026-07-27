@@ -3,7 +3,7 @@
 return [
     'force_https_urls' => env('FORCE_HTTPS_URLS', true),
 
-    'description' => env('INSTANCE_DESCRIPTION', 'Mochirii Social - guild image sharing for Mochirii members'),
+    'description' => env('INSTANCE_DESCRIPTION', 'Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.'),
 
     'contact' => [
         'enabled' => env('INSTANCE_CONTACT_FORM', false),
@@ -18,7 +18,7 @@ return [
         'tags' => [
             'is_public' => env('INSTANCE_PUBLIC_HASHTAGS', false),
         ],
-        'beagle_api' => env('PF_INSTANCE_USE_BEAGLE_API', true),
+        'beagle_api' => env('PF_INSTANCE_USE_BEAGLE_API', false),
     ],
 
     'email' => env('INSTANCE_CONTACT_EMAIL'),
@@ -154,7 +154,7 @@ return [
         ],
 
         'nag' => [
-            'enabled' => (bool) env('INSTANCE_NOTIFY_APP_GATEWAY', true),
+            'enabled' => (bool) env('INSTANCE_NOTIFY_APP_GATEWAY', false),
             'api_key' => env('PIXELFED_PUSHGATEWAY_KEY', false),
             'endpoint' => 'push.pixelfed.net',
         ],

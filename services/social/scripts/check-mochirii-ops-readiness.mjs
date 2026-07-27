@@ -213,9 +213,29 @@ requireIncludes("config/mochirii-branding.php", brandingConfig, [
   `'description' => '${publicDescription}'`,
 ]);
 
+const instanceConfig = read("config/instance.php");
+requireIncludes("config/instance.php", instanceConfig, [
+  `'description' => env('INSTANCE_DESCRIPTION', '${publicDescription}')`,
+  "'beagle_api' => env('PF_INSTANCE_USE_BEAGLE_API', false)",
+  "'enabled' => (bool) env('INSTANCE_NOTIFY_APP_GATEWAY', false)",
+]);
+const applicationConfig = read("config/app.php");
+requireIncludes("config/app.php", applicationConfig, [
+  "'name' => env('APP_NAME', 'Mōchirīī Social')",
+  `'short_description' => env('PF_SHORT_DESCRIPTION', '${publicDescription}')`,
+  `'description' => env('PF_DESCRIPTION', '${publicDescription}')`,
+]);
+const groupsConfig = read("config/groups.php");
+requireIncludes("config/groups.php", groupsConfig, [
+  "'federation' => env('GROUPS_FEDERATION', false)",
+]);
+
 for (const file of [
   "resources/views/site/index.blade.php",
   "resources/views/auth/login.blade.php",
+  "resources/views/site/about.blade.php",
+  "resources/views/welcome.blade.php",
+  "resources/views/home.blade.php",
 ]) {
   const entrySource = read(file);
   requireIncludes(file, entrySource, [
@@ -397,15 +417,19 @@ requireIncludes("docs/fediverse-activation-runbook.md", fediverseDoc, [
 
 const envExample = read(".env.example");
 requireIncludes(".env.example", envExample, [
-  'APP_NAME="Mochirii Social"',
+  'APP_NAME="Mōchirīī Social"',
   'OPEN_REGISTRATION="false"',
   'ACTIVITY_PUB="false"',
-  'MAIL_FROM_NAME="Mochirii Social"',
+  'MAIL_FROM_NAME="Mōchirīī Social"',
+  'PF_INSTANCE_USE_BEAGLE_API="false"',
+  'INSTANCE_NOTIFY_APP_GATEWAY="false"',
+  'GROUPS_FEDERATION="false"',
+  'MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS="2"',
 ]);
 
 const envDockerExample = read(".env.docker.example");
 requireIncludes(".env.docker.example", envDockerExample, [
-  'APP_NAME="Mochirii Social"',
+  'APP_NAME="Mōchirīī Social"',
   'OPEN_REGISTRATION="false"',
   'INSTANCE_DISCOVER_PUBLIC="false"',
   'MAX_PHOTO_SIZE="92160"',
@@ -425,7 +449,11 @@ requireIncludes(".env.docker.example", envDockerExample, [
   'PF_ACCT_MIGRATION_ENABLED="false"',
   'PF_ENABLE_CLOUD="true"',
   'PF_LOCAL_AVATAR_TO_CLOUD="true"',
-  'MAIL_FROM_NAME="Mochirii Social"',
+  'MAIL_FROM_NAME="Mōchirīī Social"',
+  'PF_INSTANCE_USE_BEAGLE_API="false"',
+  'INSTANCE_NOTIFY_APP_GATEWAY="false"',
+  'GROUPS_FEDERATION="false"',
+  'MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS="2"',
 ]);
 
 const dockerCompose = read("docker-compose.yml");
@@ -438,7 +466,7 @@ requireIncludes("docker-compose.yml", dockerCompose, [
   'MAX_AVATAR_SIZE: "92160"',
   'PHP_POST_MAX_SIZE: "100M"',
   'PHP_UPLOAD_MAX_FILE_SIZE: "95M"',
-  '"http://127.0.0.1:8080/api/service/health-check"',
+  '"http://127.0.0.1:8080/api/service/readiness-check"',
   "start_period: 60s",
 ]);
 const dockerComposeProduction = read("docker-compose.production.yml");
@@ -447,7 +475,7 @@ requireIncludes("docker-compose.production.yml", dockerComposeProduction, [
   "redis:7-alpine@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2",
   "MARIADB_DATABASE: ${DB_DATABASE}",
   "condition: service_healthy",
-  '"http://127.0.0.1:8080/api/service/health-check"',
+  '"http://127.0.0.1:8080/api/service/readiness-check"',
   "start_period: 60s",
 ]);
 if (dockerCompose.includes("mysql:9")) {
@@ -521,6 +549,7 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0",
   "Rebuild and verify committed Social assets",
+  "tests/Feature/DisabledUpstreamServicesTest.php",
   "npm run production",
   "git diff --exit-code",
   "git ls-files --others --exclude-standard",
@@ -552,6 +581,7 @@ requireIncludes(".github/workflows/deploy-social-production.yml", deploymentWork
   "services/social/docker-compose.production.yml",
   "repository=Mochirii-Wushu/Mochirii",
   "DEPLOY social.mochirii.com",
+  "ANONYMOUS DENIAL AND CUTOVER VERIFIED",
   "persist-credentials: false",
 ]);
 
@@ -658,6 +688,27 @@ for (const unsafeDefault of [
   if (federationConfig.includes(unsafeDefault)) {
     failures.push(`config/federation.php retains unsafe federation default: ${unsafeDefault}`);
   }
+}
+
+const upstreamServices = read("app/Services/Internal/BeagleService.php");
+requireIncludes("app/Services/Internal/BeagleService.php", upstreamServices, [
+  "private static function enabled(): bool",
+  "if (! self::enabled())",
+]);
+const notificationGateway = read("app/Services/NotificationAppGatewayService.php");
+requireIncludes("app/Services/NotificationAppGatewayService.php", notificationGateway, [
+  "if ((bool) config('instance.notifications.nag.enabled') === false)",
+]);
+const upstreamBoundaryTests = read("tests/Feature/DisabledUpstreamServicesTest.php");
+requireIncludes("tests/Feature/DisabledUpstreamServicesTest.php", upstreamBoundaryTests, [
+  "Http::preventStrayRequests()",
+  "Http::assertNothingSent()",
+  "upstream_discovery_and_push_services_default_to_disabled",
+]);
+
+const guestLayout = read("resources/views/layouts/app-guest.blade.php");
+if (guestLayout.includes("maximum-scale=1") || guestLayout.includes("user-scalable=no")) {
+  failures.push("resources/views/layouts/app-guest.blade.php must preserve browser zoom");
 }
 
 const runtimeLibrary = read("scripts/production-runtime-lib.sh");

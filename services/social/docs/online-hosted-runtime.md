@@ -50,7 +50,16 @@ The `Deploy Mochirii Social production` workflow requires:
 - the exact digest published for that commit;
 - the typed confirmation `DEPLOY social.mochirii.com`;
 - `NONE` when no migration is expected, or `MIGRATIONS APPROVED` after a
-  reviewed online backup.
+  reviewed online backup;
+- the explicit `ANONYMOUS DENIAL AND CUTOVER VERIFIED` gate only after a
+  same-window readback proves that anonymous direct-object and CDN requests are
+  denied, private media remains enabled, and an authorized application media
+  request still succeeds.
+
+The private-media gate is required for every runtime publication. Do not select
+it from historical documentation or assumed provider state. Capture the
+public-safe pass/fail evidence outside Git without retaining object keys,
+signed URLs, member identifiers, credentials, or response bodies.
 
 The workflow verifies the GHCR commit tag resolves to the supplied digest,
 then sends a two-file no-secret release bundle over strict-host-key SSH. The

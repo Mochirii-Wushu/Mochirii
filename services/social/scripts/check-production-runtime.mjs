@@ -55,7 +55,7 @@ requireIncludes(composePath, compose, [
   'MAX_AVATAR_SIZE: "92160"',
   'PHP_POST_MAX_SIZE: "100M"',
   'PHP_UPLOAD_MAX_FILE_SIZE: "95M"',
-  '"http://127.0.0.1:8080/api/service/health-check"',
+  '"http://127.0.0.1:8080/api/service/readiness-check"',
   "start_period: 60s",
   "pull_policy: never",
 ]);
@@ -84,6 +84,7 @@ requireIncludes(deployWorkflowPath, deployWorkflow, [
   "persist-credentials: false",
   "DEPLOY social.mochirii.com",
   "MIGRATIONS APPROVED",
+  "ANONYMOUS DENIAL AND CUTOVER VERIFIED",
   "StrictHostKeyChecking=yes",
   "UserKnownHostsFile=~/.ssh/known_hosts",
   "docker buildx imagetools inspect",
@@ -136,6 +137,7 @@ requireIncludes(deployScriptPath, deployScript, [
   '"--verify-online-hosting"',
   "verify_online_hosting",
   "The release Compose file does not match the approved host template.",
+  "Deployment requires anonymous object/CDN denial and private-media cutover readback.",
 ]);
 
 const runtimeLibraryPath = "scripts/production-runtime-lib.sh";
@@ -162,6 +164,23 @@ requireIncludes(entrypointPath, entrypoint, [
   "--verify-online-hosting",
   "head -c 1048577",
   "sudo -n /usr/local/sbin/mochirii-social-deploy",
+  "ANONYMOUS_DENIAL_AND_CUTOVER_VERIFIED",
+]);
+
+const healthControllerPath = "app/Http/Controllers/HealthCheckController.php";
+const healthController = read(healthControllerPath);
+requireIncludes(healthControllerPath, healthController, [
+  "DB::connection('readiness')->selectOne('select 1 as ready')",
+  "Redis::connection('readiness')->command('ping')",
+  "['PONG', '+PONG']",
+  "response('NOT READY', 503)",
+]);
+
+const databaseConfigPath = "config/database.php";
+const databaseConfig = read(databaseConfigPath);
+requireIncludes(databaseConfigPath, databaseConfig, [
+  "MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS",
+  "'readiness' => [",
 ]);
 
 const installerPath = "scripts/install-production-runtime.sh";
