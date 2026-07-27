@@ -10,8 +10,10 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { useBodyPortalRoot, useBodyScrollLock } from "@/components/useLightboxOverlay";
-import { listApprovedGallerySubmissions } from "@/lib/supabase/gallery-submissions";
-import type { ApprovedGallerySubmission } from "@/lib/supabase/types";
+import {
+  listApprovedGallerySubmissions,
+  type ApprovedGallerySubmission,
+} from "@/lib/gallery/approved-feed";
 
 type Category = {
   slug?: string;
@@ -280,8 +282,9 @@ export function GalleryBrowser({
 
   useEffect(() => {
     let canceled = false;
+    const controller = new AbortController();
 
-    listApprovedGallerySubmissions()
+    listApprovedGallerySubmissions(controller.signal)
       .then((result) => {
         if (canceled) return;
         const submissions = result.ok && Array.isArray(result.data?.submissions) ? result.data.submissions : [];
@@ -293,6 +296,7 @@ export function GalleryBrowser({
 
     return () => {
       canceled = true;
+      controller.abort();
     };
   }, []);
 

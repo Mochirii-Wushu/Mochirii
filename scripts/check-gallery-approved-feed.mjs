@@ -11,11 +11,11 @@ function assertIncludes(label, text, snippet) {
 }
 
 const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
-const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
+const approvedGalleryFeed = read("apps/web/lib/gallery/approved-feed.ts");
 const runbook = read("docs/vote-reminder-runbook.md");
 
 [
-  'import { listApprovedGallerySubmissions } from "@/lib/supabase/gallery-submissions";',
+  'from "@/lib/gallery/approved-feed";',
   'const memberSubmissionsCategory = "member-submissions";',
   "function approvedSubmissionToGalleryItem",
   "const galleryRenderBatchSize = 24;",
@@ -27,7 +27,7 @@ const runbook = read("docs/vote-reminder-runbook.md");
   "submission.signed_url",
   "submission.preview_error",
   "galleryAddedAt: text(submission.created_at || submission.reviewed_at)",
-  "listApprovedGallerySubmissions()",
+  "listApprovedGallerySubmissions(controller.signal)",
   "setApprovedItems",
   "[...items, ...approvedItems]",
 ].forEach((snippet) => assertIncludes("GalleryBrowser approved feed", galleryBrowser, snippet));
@@ -38,7 +38,15 @@ const runbook = read("docs/vote-reminder-runbook.md");
   "list-approved-gallery-submissions",
   "method: \"POST\"",
   "Approved gallery feed could not be loaded.",
-].forEach((snippet) => assertIncludes("gallery submissions public feed", gallerySubmissions, snippet));
+].forEach((snippet) => assertIncludes("SDK-free approved Gallery feed", approvedGalleryFeed, snippet));
+
+[
+  "@supabase/supabase-js",
+  "@/lib/supabase/",
+  "requireBrowserSupabaseClient",
+].forEach((snippet) => {
+  if (approvedGalleryFeed.includes(snippet)) failures.push(`SDK-free approved Gallery feed: forbidden dependency found: ${snippet}`);
+});
 
 [
   "RandomNumberGenerator]::Create()",

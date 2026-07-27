@@ -84,6 +84,10 @@ Vercel can serve those scripts from project-specific unique paths rather than th
 
 Analytics and Core Web Vitals data can take a few minutes, and enough real production visits, to appear in the Vercel dashboard.
 
+The account, OAuth consent, and leader-dashboard clients also record a local User Timing measure when Supabase Auth emits the initial session event and on later auth-state loads. The components do not start a second eager load before that event. Measure names contain only the fixed route, `load` phase, completion state, and one of five bounded duration buckets. The helper sends no network request, has no production collector, and records no member identifier; developers inspect it manually in browser performance tooling before changing those authenticated routes.
+
+Production bundle validation reads each public route's client-reference manifest after `next build`. Every public entry is limited to 225 KiB Brotli, Gallery-only code must stay out of unrelated public entries, and Supabase Auth, PostgREST, and Realtime SDK markers must stay out of every public entry. Public routes import their route component directly so an unrelated page cannot pull the full public-page barrel into its client graph.
+
 ## Public Assets And Data
 
 `public/assets/` and `public/data/` are the canonical tracked media and content

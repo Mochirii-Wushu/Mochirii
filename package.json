@@ -64,6 +64,8 @@
     "check:member-profiles-and-ranks": "node scripts/check-member-profiles-and-ranks.mjs",
     "check:mochi-pets-edge-authority": "node scripts/check-mochi-pets-edge-authority.mjs",
     "check:observability-metadata-smoke": "node scripts/check-observability-metadata-smoke.mjs",
+    "check:web-runtime-performance": "node scripts/check-web-runtime-performance.mjs",
+    "test:web-runtime-performance": "npm --prefix apps/web run test:web-runtime-performance",
     "check:pixelfed-first-login-readiness": "node scripts/check-pixelfed-first-login-readiness.mjs",
     "check:pixelfed-oidc-spike": "node scripts/check-pixelfed-oidc-spike.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",

@@ -65,6 +65,8 @@ const checks = [
   ["test:header-auth-loader", ["deno", "test", "--lock=deno.lock", "--frozen=true", "apps/web/components/site-header/deferred-task_test.ts"]],
   ["check:events-page-schedule-sync", ["node", "scripts/check-events-page-schedule-sync.mjs"]],
   ["check:observability-metadata-smoke", ["node", "scripts/check-observability-metadata-smoke.mjs"]],
+  ["check:web-runtime-performance", ["node", "scripts/check-web-runtime-performance.mjs"]],
+  ["test:web-runtime-performance", [...npmCommand, "--prefix", "apps/web", "run", "test:web-runtime-performance"]],
   ["test:supabase-migration-list", ["node", "scripts/test-supabase-migration-list.mjs"]],
   ["check:full-stack-release-evidence", ["node", "scripts/check-full-stack-release-evidence.mjs"]],
   ["check:csp-inline-hardening", ["node", "scripts/check-csp-inline-hardening.mjs"]],

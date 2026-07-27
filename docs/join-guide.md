@@ -95,6 +95,7 @@ Current link behavior:
 - `checklist.items` render an item link only when both `href` and `label` are present.
 - `notes.links` render as badge-row links.
 - Discord links are external and open in a new tab with `rel="noopener noreferrer"`.
+- The optional Discord server preview is user activated. Its iframe must not exist or make a Discord request until the visitor selects `Show server preview`; the ordinary `Open Discord` link remains available without loading the preview.
 - Internal links currently point to Events, Tome, Ranks, Leaders, and Home.
 - Shared header/footer links are mounted by `site.js`, not `join.js`.
 
@@ -117,6 +118,7 @@ The current Join renderer does not support link icons, descriptions, aria-label 
 - Keep checklist marker numbers decorative with `aria-hidden="true"`.
 - Keep CTA and checklist link focus states visible.
 - Keep touch targets usable on mobile.
+- Keep the server-preview disclosure button keyboard operable with accurate `aria-expanded` and `aria-controls` state.
 - Avoid horizontal overflow at mobile widths.
 - Keep onboarding copy readable by screen readers.
 - Keep `#joinError` available as a polite status message for load failures.

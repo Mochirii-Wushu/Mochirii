@@ -52,6 +52,7 @@ Not currently implemented:
 - Event-board dates are rendered with `MochiriiUtils.formatDateUTC`.
 - Featured event dates in the Next app derive from the first upcoming schedule card; `featured.date` is fallback shell data only.
 - Reaper's `/sync-events` command reads the mirrored guild schedule JSON and must stay aligned with the website schedule helpers.
+- The Next `/events` route waits for a real request, generates one ISO reference time on the server, and passes it through the complete Event Board render. This keeps status current without calling `Date.now()` or a no-argument `new Date()` during client hydration.
 
 Current sorting:
 

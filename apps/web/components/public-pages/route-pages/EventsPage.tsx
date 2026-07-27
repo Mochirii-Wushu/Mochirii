@@ -8,12 +8,17 @@ import { EventsBoard } from "../EventsBoard";
 import { BadgeRow, formatDateUTC, MetaRow, PageHero, publicPath, StaticImage, text } from "../common";
 import { linkProps, record, records, strings } from "../page-helpers";
 
-export function EventsPage() {
+type EventsPageProps = {
+  referenceTime: string;
+};
+
+export function EventsPage(props: EventsPageProps) {
+  const { referenceTime } = props;
   const data = record(eventsData);
   const meta = record(data.meta);
   const featured = record(data.featured);
   const recurring = record(data.recurring);
-  const eventBoardItems = websiteEventCardsFromSchedule(guildScheduleData);
+  const eventBoardItems = websiteEventCardsFromSchedule(guildScheduleData, new Date(referenceTime));
   const featuredEvent = eventBoardItems[0];
   const featuredHref = text(featuredEvent?.href || featured.href);
   const featuredMeta = [
@@ -107,6 +112,7 @@ export function EventsPage() {
                 </h3>
                 <EventsBoard
                   items={eventBoardItems}
+                  referenceTime={referenceTime}
                 />
               </div>
             </aside>

@@ -19,13 +19,14 @@ function assertNotIncludes(label, source, snippet) {
 
 const eventsSource = readPublicPageExport(repoRoot, "EventsPage", failures).text;
 const boardSource = readText("apps/web/components/public-pages/EventsBoard.tsx");
+const referenceTimeSource = readText("apps/web/lib/events/reference-time.ts");
 const cssSource = readAppCss().replace(/\r\n/g, "\n");
 const scheduleSource = readText("apps/web/lib/guild-schedule.ts");
 const schedule = readJsonFile("apps/web/public/data/guild-schedule.json");
 const legacyEvents = readJsonFile("apps/web/public/data/events.json");
 
 if (!eventsSource) fail("EventsPage source block not found.");
-assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData)");
+assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData, new Date(referenceTime))");
 assertNotIncludes("EventsPage", eventsSource, "records(data.upcoming)");
 assertNotIncludes("EventsPage", eventsSource, "eventBoardItemsFromSchedule");
 
@@ -36,7 +37,12 @@ assertIncludes("guild schedule helper", scheduleSource, "image: occurrence.disco
 assertNotIncludes("guild schedule helper", scheduleSource, 'item.id === "monthly-raffle" ? "/raffle"');
 
 assertIncludes("EventsBoard", boardSource, "parseIso(item.startIso)");
-assertIncludes("EventsBoard", boardSource, "parseIso(item.endIso)");
+assertIncludes("EventsBoard", boardSource, "eventStatusAt(item, referenceTimeMs)");
+assertIncludes("EventsBoard", boardSource, "parseReferenceTime(referenceTime)");
+assertNotIncludes("EventsBoard", boardSource, "Date.now()");
+assertNotIncludes("EventsBoard", boardSource, "new Date()");
+assertIncludes("Events reference-time helper", referenceTimeSource, "parseIso(item.endIso)");
+assertIncludes("EventsPage", eventsSource, "referenceTime={referenceTime}");
 assertIncludes("EventsBoard", boardSource, "item.timeText || item.time");
 assertIncludes("EventsPage", eventsSource, "events-board-card");
 assertIncludes("EventsBoard", boardSource, "aria-label=\"Event Board results\"");

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { DISCORD_INVITE_URL } from "@/lib/public-urls";
+import { eventStatusAt, parseReferenceTime } from "@/lib/events/reference-time";
 import { StaticImage } from "./common";
 
 type EventItem = {
@@ -49,19 +50,6 @@ function publicPath(value: unknown, fallback = "") {
   return `/${raw}`;
 }
 
-function parseDateOnlyUTC(value: unknown) {
-  const match = text(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return null;
-
-  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function todayUTC() {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-}
-
 function parseIso(value: unknown) {
   const raw = text(value);
   if (!raw) return null;
@@ -69,18 +57,11 @@ function parseIso(value: unknown) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function eventStatus(item: EventItem) {
-  const eventEnd = parseIso(item.endIso);
-  if (eventEnd) return eventEnd.getTime() >= Date.now() ? "upcoming" : "past";
-  const eventDate = parseDateOnlyUTC(item.date);
-  if (!eventDate) return "upcoming";
-  return eventDate.getTime() >= todayUTC().getTime() ? "upcoming" : "past";
-}
-
 function eventTimestamp(item: EventItem) {
   const eventStart = parseIso(item.startIso);
   if (eventStart) return eventStart.getTime();
-  return parseDateOnlyUTC(item.date)?.getTime() ?? 0;
+  const date = item.date ? new Date(`${item.date}T00:00:00Z`) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
 }
 
 function formatDateUTC(value: unknown) {
@@ -100,8 +81,9 @@ function isExternal(href: string) {
   return /^https?:\/\//i.test(href);
 }
 
-export function EventsBoard({ items }: { items: EventItem[] }) {
+export function EventsBoard({ items, referenceTime }: { items: EventItem[]; referenceTime: string }) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>("upcoming");
+  const referenceTimeMs = useMemo(() => parseReferenceTime(referenceTime), [referenceTime]);
 
   const normalized = useMemo(
     () =>
@@ -109,10 +91,10 @@ export function EventsBoard({ items }: { items: EventItem[] }) {
         .map((item, index) => ({
           ...item,
           index,
-          status: eventStatus(item) as FilterKey,
+          status: eventStatusAt(item, referenceTimeMs) as FilterKey,
         }))
         .filter((item) => item.title || item.summary || item.date),
-    [items],
+    [items, referenceTimeMs],
   );
 
   const visible = useMemo(() => {

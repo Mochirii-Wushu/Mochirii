@@ -3,7 +3,7 @@ import "../styles/public-content-shared.css";
 import "../styles/public-profiles.css";
 import "../styles/public-profile-cards.css";
 import { metadataFor } from "@/components/public-pages/metadata";
-import { SpotlightPage } from "@/components/public-pages/pages";
+import { SpotlightPage } from "@/components/public-pages/route-pages/SpotlightPage";
 
 export const metadata = metadataFor("spotlight");
 export const revalidate = 3600;
