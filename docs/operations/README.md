@@ -9,17 +9,17 @@ canonical Mochirii repository and hosted production surfaces.
 C:\Github Repo's\Mochirii Website\
   Website\      GitHub: Mochirii-Wushu/Mochirii
   Mochirii-Social-Mobile\  GitHub: Mochirii-Wushu/Mochirii-Social-Mobile
-  Mochi Pets\   Retirement-only checkout pending deletion after page cutover
+  Mochirii-Pets\  GitHub: Mochirii-Wushu/Mochirii-Pets; fresh Unity source
   Mochi Creds\  Private credential and recovery boundary, never Git tracked
   AGENTS.md      Umbrella workspace guidance
 ```
 
 Within `Website`, the public website, storefront theme, Social application, and
 Supabase backend live under `apps/web`, `apps/shopify-theme`, `services/social`,
-and `supabase`. The former Mochi Pets repository is not an active product
-source and is scheduled for deletion after the static future-project page is
-verified in production. Any new game starts later from a separately approved
-fresh Unity project.
+and `supabase`. The former Mochi Pets prototype and repository are deleted.
+`Mochirii-Wushu/Mochirii-Pets` is the fresh Unity source owner, while Website
+owns the server-only tester doorway and disconnected waiting room. No playable
+Web or iOS artifact is connected.
 
 ## Directory Contract
 

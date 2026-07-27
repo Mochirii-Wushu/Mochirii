@@ -43,7 +43,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { href: "/announcements", label: "Announcements", nav: "announcements" },
       { href: "/events", label: "Events", nav: "events" },
-      { href: "/raffles", label: "Raffles", nav: "raffles" },
+      { href: "/raffle", label: "Raffle", nav: "raffle" },
     ],
   },
 ];

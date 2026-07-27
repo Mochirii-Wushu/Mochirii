@@ -9,12 +9,14 @@ type PageKey =
   | "tome"
   | "events"
   | "announcements"
-  | "raffles"
+  | "raffle"
+  | "raffleRules"
   | "gallery"
   | "spotlight"
   | "spotify"
   | "recruitment"
-  | "twills";
+  | "twills"
+  | "mochiPets";
 
 const pageMeta: Record<
   PageKey,
@@ -67,11 +69,18 @@ const pageMeta: Record<
     path: "/announcements",
     image: "/assets/img/announcements/hero.webp",
   },
-  raffles: {
-    title: "Mōchirīī Raffles • Where Winds Meet Guild",
+  raffle: {
+    title: "Mochirii Monthly Raffle Status",
     description:
-      "Monthly Mōchirīī raffle notes, rules, prize timing, and small thank-you draws for active members.",
-    path: "/raffles",
+      "Current status for the Mochirii Monthly Raffle. Entries are closed, there is no current drawing, and no promotion is active.",
+    path: "/raffle",
+    image: "/assets/img/raffles/hero.webp",
+  },
+  raffleRules: {
+    title: "Mochirii Raffle Rules Status",
+    description:
+      "Current rules status for the Mochirii Monthly Raffle. There is no current drawing and no official rules are in effect.",
+    path: "/raffle/rules",
     image: "/assets/img/raffles/hero.webp",
   },
   gallery: {
@@ -108,6 +117,13 @@ const pageMeta: Record<
       "Profile for Twills, Mōchirīī leader and guild contact for Where Winds Meet members who need a clear next step.",
     path: "/twills",
     image: "/assets/img/profiles/twills/hero.webp",
+  },
+  mochiPets: {
+    title: "Mochi Pets • Mōchirīī Guild World",
+    description:
+      "A shared 3D Mochirii guild home beyond the Jianghu, bringing members together with a Mochi companion of their own across iPhone and desktop.",
+    path: "/games/mochi-pets",
+    image: "/assets/img/mochi-pets/gate-arrival.webp",
   },
 };
 

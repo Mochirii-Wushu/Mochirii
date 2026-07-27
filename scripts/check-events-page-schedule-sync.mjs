@@ -30,9 +30,10 @@ assertNotIncludes("EventsPage", eventsSource, "records(data.upcoming)");
 assertNotIncludes("EventsPage", eventsSource, "eventBoardItemsFromSchedule");
 
 assertIncludes("guild schedule helper", scheduleSource, "export function websiteEventCardsFromSchedule");
+assertIncludes("guild schedule helper", scheduleSource, '.filter((item) => item.id !== "monthly-raffle")');
 assertIncludes("guild schedule helper", scheduleSource, "image: item.discordCoverImage || \"\"");
 assertIncludes("guild schedule helper", scheduleSource, "image: occurrence.discordCoverImage || \"\"");
-assertIncludes("guild schedule helper", scheduleSource, "item.id === \"monthly-raffle\" ? \"/raffles\"");
+assertNotIncludes("guild schedule helper", scheduleSource, 'item.id === "monthly-raffle" ? "/raffle"');
 
 assertIncludes("EventsBoard", boardSource, "parseIso(item.startIso)");
 assertIncludes("EventsBoard", boardSource, "parseIso(item.endIso)");
@@ -53,9 +54,10 @@ assertNotIncludes("EventsPage", eventsSource, "style={{ width: \"100%\", height:
 assertNotIncludes("EventsBoard", boardSource, "style={{ width: \"100%\", height: \"auto\"");
 
 const monthlyEvents = Object.values(schedule.monthly || {});
+const publicMonthlyEvents = monthlyEvents.filter((item) => item.id !== "monthly-raffle");
 const weeklyEvents = (schedule.weekly || []).filter((item) => item.discord === true);
-const websiteEventCount = monthlyEvents.length + weeklyEvents.length;
-if (websiteEventCount !== 8) fail(`expected 8 schedule-derived website event cards, received ${websiteEventCount}.`);
+const websiteEventCount = publicMonthlyEvents.length + weeklyEvents.length;
+if (websiteEventCount !== 7) fail(`expected 7 schedule-derived website event cards, received ${websiteEventCount}.`);
 
 const legacyUpcoming = Array.isArray(legacyEvents.upcoming) ? legacyEvents.upcoming : [];
 const weeklyById = new Map(weeklyEvents.map((item) => [String(item.id || ""), item]));

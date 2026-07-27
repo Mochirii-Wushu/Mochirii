@@ -1,6 +1,6 @@
 {
   "copy": {
-    "bulletinIntro": "Hall notes, events, raffles & little scroll updates keep the guild lanterns glowing.",
+    "bulletinIntro": "Hall notes, events, raffle updates & little scrolls keep the guild lanterns glowing.",
     "doorsIntro": "Explore the ways that guide Mōchirīī along its wanderers filled path.",
     "spotlightIntro": "Pretty guild member who's always so lovely, beautiful & keeping the guild a wonderful place for everyone.",
     "galleryIntro": "Screenshots from baddie smashing, pretty roads, lantern-lit detours & small moments that become guild memory."
@@ -52,12 +52,11 @@
     },
     {
       "type": "raffle",
-      "scheduleId": "monthly-raffle",
-      "title": "Monthly cosmetics raffle open to all members who sign up each month.",
-      "date": "2026-02-28",
+      "title": "Mochirii Monthly Raffle status: no current drawing.",
+      "date": "2026-07-26",
       "image": "./assets/img/bulletins/raffle.webp",
       "imageAlt": "Raffle bulletin cover",
-      "href": "./raffles.html"
+      "href": "/raffle"
     },
     {
       "type": "announcement",

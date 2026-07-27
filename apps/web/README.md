@@ -112,7 +112,8 @@ Current Next routes:
 - `/tome`
 - `/events`
 - `/announcements`
-- `/raffles`
+- `/raffle`
+- `/raffle/rules`
 - `/gallery`
 - `/spotlight`
 - `/spotify`
@@ -129,12 +130,16 @@ Current Next routes:
 
 Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
 
-## Mochi Pets Project Page
+## Mochi Pets Tester Doorway
 
-`/games/mochi-pets` is a static, noindex future-project page. It has no playable
-build, tester gate, iframe, browser bridge, Supabase call, or game-runtime
-dependency. Keep status language factual and do not announce a release date
-until a reviewed build supports it.
+`/games/mochi-pets` is a public, indexable Mochirii concept page. The protected
+inner tester doorway is included only in builds that receive both complete
+server-only tester settings; otherwise the page contains only its public
+concept. When included, the doorway requires a freshly server-verified active
+Website member plus the current passcode and uses one signed, member-bound,
+server-only session cookie. It has no iframe, browser token bridge, game-data
+call, or hosted game-runtime dependency. Keep `MOCHI_PETS_TESTER_PASSWORD` and
+`MOCHI_PETS_TESTER_SESSION_SECRET` server-only.
 
 ## Private Live Spinner
 
@@ -175,7 +180,7 @@ Visual-only shell releases should verify Home and all shared routes at `360`, `3
 
 - Public/static routes migrated into App Router pages:
   `/join`, `/ranks`, `/leaders`, `/tome`, `/events`, `/announcements`,
-  `/raffles`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
+  `/raffle`, `/raffle/rules`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
 - Route content continues to render from the copied JSON files in `public/data/`.
 - Public client-side interactions migrated where needed: gallery filters/query links/lightbox, event filters, and Spotify filtering.
 - Legacy `.html` redirects for migrated pages are verified in `next.config.ts`.

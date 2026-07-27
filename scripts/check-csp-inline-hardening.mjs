@@ -25,7 +25,7 @@ const routeMatrix = [
   { route: "/leader-dashboard", surface: "moderation", features: ["Supabase moderation queues", "status messages"] },
   { route: "/spotify", surface: "Spotify", features: ["Spotify iframe embeds"] },
   { route: "/spotlight", surface: "spotlight", features: ["Supabase public spotlight endpoint"] },
-  { route: "/games/mochi-pets", surface: "Mochi Pets", features: ["static project-status content"] },
+  { route: "/games/mochi-pets", surface: "Mochi Pets", features: ["same-origin tester form", "disconnected waiting room"] },
   { route: "/tome", surface: "Tome", features: ["static conduct content"] },
 ];
 

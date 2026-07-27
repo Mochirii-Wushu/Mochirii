@@ -14,6 +14,7 @@ export type HeaderAuthState = {
 export function navKeyFromPath(pathname: string | null) {
   const path = (pathname || "/").replace(/\/+$/, "") || "/";
   if (path === "/" || path === "/index.html") return "home";
+  if (path === "/raffle" || path.startsWith("/raffle/")) return "raffle";
   return path.slice(1).replace(/\.html$/, "") || "home";
 }
 

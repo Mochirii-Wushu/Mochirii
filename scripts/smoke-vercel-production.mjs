@@ -10,7 +10,8 @@ const cleanRoutes = [
   "/tome",
   "/events",
   "/announcements",
-  "/raffles",
+  "/raffle",
+  "/raffle/rules",
   "/gallery",
   "/spotlight",
   "/spotify",
@@ -36,7 +37,8 @@ const legacyRedirects = new Map([
   ["/leaders.html", "/leaders"],
   ["/events.html", "/events"],
   ["/announcements.html", "/announcements"],
-  ["/raffles.html", "/raffles"],
+  ["/raffles", "/raffle"],
+  ["/raffles.html", "/raffle"],
   ["/gallery.html", "/gallery"],
   ["/spotlight.html", "/spotlight"],
   ["/spotify.html", "/spotify"],
@@ -53,7 +55,7 @@ const bodyChecks = new Map([
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
-  ["/games/mochi-pets", /Mochi Pets|new project planned|fresh Unity project/i],
+  ["/games/mochi-pets", /Mochi Pets|tester doorway|fresh Unity project/i],
 ]);
 
 const requestHeaders = {

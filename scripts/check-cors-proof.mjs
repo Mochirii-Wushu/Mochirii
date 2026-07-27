@@ -81,9 +81,9 @@ const routeProbes = [
     id: "mochi-pets",
     method: "GET",
     path: "/games/mochi-pets",
-    surface: "Mochi Pets static project page",
+    surface: "Mochi Pets same-origin tester doorway",
     expectedStatus: [200],
-    futureCorsNeed: "none observed; static same-origin page",
+    futureCorsNeed: "none observed; login, logout, and waiting room remain same-origin",
     requiredHeader: true,
   },
   {

@@ -17,6 +17,7 @@ const guildLinks = [
   { href: "/spotlight", label: "Spotlight" },
   { href: "/gallery", label: "Gallery" },
   { href: SOCIAL_HOST, label: "Social", external: true },
+  { href: "/games/mochi-pets", label: "Mochi Pets" },
 ] satisfies FooterLink[];
 
 const cultureLinks = [
@@ -30,7 +31,7 @@ const cultureLinks = [
 const updateLinks = [
   { href: "/announcements", label: "Announcements" },
   { href: "/events", label: "Events" },
-  { href: "/raffles", label: "Raffles" },
+  { href: "/raffle", label: "Raffle" },
 ] satisfies FooterLink[];
 
 function FooterColumn({

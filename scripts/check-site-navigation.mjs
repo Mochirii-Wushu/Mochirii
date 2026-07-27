@@ -77,6 +77,7 @@ for (const file of retiredMembersRouteFiles) {
 
 assertIncludes("SiteFooter public URL config", footer, `"@/lib/public-urls"`);
 assertIncludes("SiteFooter Social", footer, `href: SOCIAL_HOST, label: "Social", external: true`);
+assertIncludes("SiteFooter Mochi Pets", footer, `href: "/games/mochi-pets", label: "Mochi Pets"`);
 assertNotIncludes("SiteFooter", footer, "hidden:");
 assertNotIncludes("SiteFooter", footer, "data-auth-");
 assertNotIncludes("SiteFooter public Social", footer, `href: "/social", label: "Social"`);
@@ -120,8 +121,8 @@ if (failures.length) {
 }
 
 console.log("Site navigation OK.");
-console.log("- Header Social and the public Mochi Pets project page live in the Guild dropdown only.");
-console.log("- Footer Social points to social.mochirii.com.");
+console.log("- Header Social and the public Mochi Pets page live in the Guild dropdown.");
+console.log("- Footer Social and Mochi Pets links are public.");
 console.log("- Watch Spinner appears only after exact active verified viewer authorization.");
 console.log("- /social redirects signed-in members and keeps signed-out help.");
 

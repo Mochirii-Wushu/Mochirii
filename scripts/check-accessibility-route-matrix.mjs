@@ -22,7 +22,8 @@ const routes = [
   { route: "/tome", label: "Tome", file: "apps/web/app/tome/page.tsx", type: "public", workflow: "conduct reference" },
   { route: "/recruitment", label: "Recruitment", file: "apps/web/app/recruitment/page.tsx", type: "public", workflow: "recruiting copy", expectsDescribedBy: true },
   { route: "/announcements", label: "Announcements", file: "apps/web/app/announcements/page.tsx", type: "public", workflow: "updates" },
-  { route: "/raffles", label: "Raffles", file: "apps/web/app/raffles/page.tsx", type: "public", workflow: "giveaway reference" },
+  { route: "/raffle", label: "Raffle", file: "apps/web/app/raffle/page.tsx", type: "public", workflow: "closed raffle status" },
+  { route: "/raffle/rules", label: "Raffle Rules Status", file: "apps/web/app/raffle/rules/page.tsx", type: "public", workflow: "raffle rules status" },
   { route: "/spotify", label: "Spotify", file: "apps/web/app/spotify/page.tsx", type: "public", workflow: "embedded playlists", componentFiles: ["apps/web/components/public-pages/SpotifyBrowser.tsx"], expectsIframe: true },
   { route: "/spotlight", label: "Spotlight", file: "apps/web/app/spotlight/page.tsx", type: "public", workflow: "member spotlight" },
   { route: "/twills", label: "Twills", file: "apps/web/app/twills/page.tsx", type: "public", workflow: "profile reference", componentFiles: ["apps/web/components/public-pages/ProfileDisplay.tsx"] },
@@ -32,7 +33,7 @@ const routes = [
   { route: "/oauth/consent", label: "OAuth Consent", file: "apps/web/app/oauth/consent/page.tsx", type: "protected-entry", workflow: "Supabase OAuth consent", componentFiles: ["apps/web/components/member-workflow/OAuthConsentPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/gallery-submit", label: "Gallery Submit", file: "apps/web/app/gallery-submit/page.tsx", type: "member", workflow: "member upload", componentFiles: ["apps/web/components/member-workflow/GallerySubmitForm.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", file: "apps/web/app/leader-dashboard/page.tsx", type: "moderator", workflow: "moderation queues", componentFiles: ["apps/web/components/member-workflow/LeaderDashboard.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "future-project", workflow: "static project status", protectedNoindex: true },
+  { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "public-with-protected-entry", workflow: "public concept and private tester doorway", componentFiles: ["apps/web/components/mochi-pets/MochiPetsPublicConcept.tsx", "apps/web/components/mochi-pets/MochiPetsPrivateDoorway.tsx", "apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx", "apps/web/components/mochi-pets/MochiPetsTesterWaitingRoom.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true },
 ];
 
 const shell = inspectShell();
@@ -61,6 +62,7 @@ const report = {
     "Color contrast for muted text, status pills, form errors, badges, and glass panels in light and dark image areas.",
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
     "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, and leader queues.",
+    "Mochi Pets member-check status, passcode error announcement, signed-out guidance, and unlocked waiting-room facts.",
     "Iframe keyboard reachability and titles for Discord and Spotify embeds.",
   ],
   warnings,

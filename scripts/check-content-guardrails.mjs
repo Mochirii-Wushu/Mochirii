@@ -15,7 +15,7 @@ const topLevelManifest = {
   "home.json": ["copy", "celebrationSplash", "hero", "seal", "bulletins", "tiles", "spotlight", "gallery"],
   "join.json": ["hero", "steps", "quickStart", "checklist", "culture", "notes"],
   "leaders.json": ["hero", "panel", "council", "leaders", "responsibilities"],
-  "raffles.json": ["meta", "how", "rules", "thisMonth", "links", "note"],
+  "raffles.json": ["programName", "availabilityState", "meta", "currentStatus", "howToConfirm", "memberSafety", "rulesStatus"],
   "ranks.json": ["hero", "progression", "tiers"],
   "recruitment.json": ["hero", "meta", "audio", "content"],
   "spotify.json": ["intro", "items"],
@@ -150,8 +150,15 @@ function validateHref(filePath, valuePath, value) {
     return;
   }
 
+  if (/^\/[A-Za-z0-9_/-]+(?:[?#].*)?$/.test(text)) {
+    const route = text.split(/[?#]/)[0];
+    const routeFile = path.join(root, "apps", "web", "app", route.slice(1), "page.tsx");
+    if (!existsSync(routeFile)) addFailure(`${filePath}.${valuePath}: missing Next route for ${text}.`);
+    return;
+  }
+
   if (!/^\.[/][A-Za-z0-9_-]+\.html(?:[?#].*)?$/.test(text)) {
-    addFailure(`${filePath}.${valuePath}: internal href should be a relative ./*.html link.`);
+    addFailure(`${filePath}.${valuePath}: internal href should be a root-relative Next route or relative ./*.html compatibility link.`);
     return;
   }
 

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:mochirii:mochi-pets:website-contract:v1",
+  "title": "Mochi Pets website connection contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocolVersion",
+    "status",
+    "websiteRoute",
+    "repository",
+    "platforms",
+    "social"
+  ],
+  "properties": {
+    "protocolVersion": { "const": 1 },
+    "status": { "const": "not-connected" },
+    "websiteRoute": { "const": "/games/mochi-pets" },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slug", "visibility", "sourceState"],
+      "properties": {
+        "slug": { "const": "Mochirii-Wushu/Mochirii-Pets" },
+        "visibility": { "const": "private" },
+        "sourceState": { "const": "scaffolded" }
+      }
+    },
+    "platforms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["web", "ios"],
+      "properties": {
+        "web": { "$ref": "#/$defs/disconnectedPlatform" },
+        "ios": { "$ref": "#/$defs/disconnectedPlatform" }
+      }
+    },
+    "social": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["originKey", "identityState", "chatState"],
+      "properties": {
+        "originKey": { "const": "socialHost" },
+        "identityState": { "const": "not-connected" },
+        "chatState": { "const": "not-ready" }
+      }
+    }
+  },
+  "$defs": {
+    "disconnectedPlatform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact"],
+      "properties": {
+        "artifact": { "type": "null" }
+      }
+    }
+  }
+}

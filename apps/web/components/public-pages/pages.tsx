@@ -4,7 +4,7 @@ export { LeadersPage } from "./route-pages/LeadersPage";
 export { TomePage } from "./route-pages/TomePage";
 export { EventsPage } from "./route-pages/EventsPage";
 export { AnnouncementsPage } from "./route-pages/AnnouncementsPage";
-export { RafflesPage } from "./route-pages/RafflesPage";
+export { RafflePage } from "./route-pages/RafflePage";
 export { GalleryPage } from "./route-pages/GalleryPage";
 export { SpotlightPage } from "./route-pages/SpotlightPage";
 export { SpotifyPage } from "./route-pages/SpotifyPage";
