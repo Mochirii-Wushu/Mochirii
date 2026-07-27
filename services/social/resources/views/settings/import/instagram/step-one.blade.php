@@ -8,7 +8,7 @@
   </div>
   <hr>
   <section>
-    <p class="lead">Before you proceed, confirm the archive was provided through an approved Mochirii Social administrator workflow.</p>
+    <p class="lead">Before you proceed, confirm the archive was provided through an approved Mōchirīī Social administrator workflow.</p>
   </section>
   <section class="mt-5 col-md-8 offset-md-2">
     <div class="card mb-3 step-one">

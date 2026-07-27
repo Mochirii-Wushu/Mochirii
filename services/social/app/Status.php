@@ -183,11 +183,8 @@ class Status extends Model
     public function mediaUrl()
     {
         $media = $this->firstMedia();
-        $path = $media->media_path;
-        $hash = is_null($media->processed_at) ? md5('unprocessed') : md5($media->created_at);
-        $url = $media->cdn_url ? $media->cdn_url."?v={$hash}" : url(Storage::url($path)."?v={$hash}");
 
-        return $url;
+        return $media ? $media->url() : url(Storage::url('public/no-preview.png'));
     }
 
     public function likes()

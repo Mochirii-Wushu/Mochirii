@@ -1,4 +1,4 @@
-@extends('layouts.anon',['title' => 'About ' . config_cache('app.name')])
+@extends('layouts.anon',['title' => 'About ' . config('mochirii-branding.display_name')])
 
 @section('content')
 

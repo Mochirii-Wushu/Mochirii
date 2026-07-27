@@ -4,7 +4,7 @@
 <div class="container">
 	<div class="row">
 		<div class="col-12 col-md-6 offset-md-3 pt-5">
-			<p class="h3 text-center font-weight-lighter py-3 mb-4 text-secondary">Follow <span class="text-dark">{{$profile->username}}</span> on Mochirii Social</p>
+			<p class="h3 text-center font-weight-lighter py-3 mb-4 text-secondary">Follow <span class="text-dark">{{$profile->username}}</span> on Mōchirīī Social</p>
 			<div class="card">
 				<div class="card-header p-0 m-0">
 					<div style="width: 100%;height: 140px;background: #0070b7"></div>

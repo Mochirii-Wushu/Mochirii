@@ -1,7 +1,7 @@
 <template>
 	<div class="w-100 h-100">
 		<div v-if="loading" style="min-height: 400px;" class="d-flex justify-content-center align-items-center">
-			<img src="/img/pixelfed-icon-grey.svg" class="">
+			<img src="/img/mochirii-icon.png" class="" alt="Mōchirīī emblem">
 		</div>
 		<div v-else>
 			<div class="mb-4">
@@ -35,7 +35,7 @@
 			<div v-else class="col-12">
 				<div class="card">
 					<div class="card-body">
-						<p class="lead text-center mb-0">Loops are an exciting new way to explore short videos on Mochirii Social.</p>
+						<p class="lead text-center mb-0">Loops are an exciting new way to explore short videos on Mōchirīī Social.</p>
 					</div>
 				</div>
 			</div>

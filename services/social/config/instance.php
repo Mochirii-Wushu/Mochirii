@@ -178,7 +178,7 @@ return [
                     'enabled' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY', false),
                     'bundle' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY_BUNDLE', false),
                     'max_per_day' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY_MPD', 10),
-                    // Set to a CSV of admin usernames like 'admin,dansup,test'
+                    // Set to a CSV of admin usernames like 'admin,moderator,operator'
                     'to_usernames' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_TO_USERNAMES'),
                     'cc_addresses' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY_CC'),
                 ],

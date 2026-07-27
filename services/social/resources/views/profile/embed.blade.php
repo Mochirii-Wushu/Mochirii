@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>{{ $title ?? config_cache('app.name', 'Mochirii Social') }}</title>
-    <meta property="og:site_name" content="{{ config_cache('app.name', 'pixelfed') }}">
-    <meta property="og:title" content="{{ $title ?? config_cache('app.name', 'pixelfed') }}">
+    <title>{{ $title ?? config('mochirii-branding.display_name') }}</title>
+    <meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+    <meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">
     <meta property="og:type" content="profile">
     <meta property="og:url" content="{{$profile['url']}}">
     <meta name="medium" content="image">

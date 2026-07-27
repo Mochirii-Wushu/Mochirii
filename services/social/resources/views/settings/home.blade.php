@@ -25,7 +25,7 @@
 						<label class="custom-file-label" for="avatarInput">{{__('settings.home.select_a_profile_photo')}}</label>
 					</div>
 					<p><span class="small font-weight-bold">{{__('settings.home.must_be_a_jpeg_or_png_max_avatar_size')}} <span id="maxAvatarSize"></span></span></p>
-					<p class="small text-muted mb-2">Mochirii optimizes profile photos automatically into {{$avatarPolicy['primary_size']}}px and {{$avatarPolicy['thumbnail_size']}}px images and strips metadata during processing.</p>
+					<p class="small text-muted mb-2">Mōchirīī optimizes profile photos automatically into {{$avatarPolicy['primary_size']}}px and {{$avatarPolicy['thumbnail_size']}}px images and strips metadata during processing.</p>
 					<div id="previewAvatar"></div>
 					<p class="mb-0"><button type="submit" class="btn btn-primary px-4 py-0 font-weight-bold">{{__('settings.home.upload')}}</button></p>
 				</div>

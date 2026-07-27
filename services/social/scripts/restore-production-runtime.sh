@@ -99,7 +99,7 @@ for table_name in users statuses media oauth_clients; do
 done
 
 compose_release "$current_release" up --detach --no-build pixelfed horizon scheduler
-wait_for_container_health pixelfed-app 300
+wait_for_container_running pixelfed-app 120
 docker exec pixelfed-app php artisan optimize:clear --no-ansi >/dev/null
 docker exec pixelfed-app php artisan up --no-ansi
 verify_runtime

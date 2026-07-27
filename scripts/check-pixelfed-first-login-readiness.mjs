@@ -22,11 +22,21 @@ const requiredFiles = [
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/SocialHubPanel.tsx",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
+  "apps/web/lib/oauth/authorization-details-error.ts",
+  "apps/web/lib/oauth/authorization-load-queue.ts",
+  "apps/web/lib/oauth/authorization-load-queue.test.mts",
+  "apps/web/lib/oauth/consent-login-url.ts",
+  "apps/web/lib/oauth/consent-login-url.test.mts",
+  "apps/web/lib/oauth/prior-consent-redirect.ts",
+  "apps/web/lib/oauth/prior-consent-redirect.test.mts",
+  "apps/web/lib/supabase/client.ts",
   "apps/web/lib/supabase/social.ts",
   "supabase/migrations/20260702080720_add_pixelfed_social_accounts.sql",
   "supabase/functions/sync-pixelfed-social-account/index.ts",
   "supabase/functions/_shared/pixelfed-social-sync.ts",
   "supabase/functions/_shared/pixelfed-social-sync_test.ts",
+  "supabase/functions/_shared/member-access-policy.ts",
+  "supabase/functions/_shared/member-access-policy_test.ts",
 ];
 
 const snippetChecks = [
@@ -64,7 +74,53 @@ const snippetChecks = [
       "verifyMemberAccess",
       "profileIsActive",
       "activeMember",
+      "createAuthorizationLoadQueue",
+      "classifyAuthorizationDetailsFailure",
+      "oauthConsentLoginHref",
+      "priorConsentRedirect",
+      "const SOCIAL_CLIENT_DISPLAY_NAME = \"Mōchirīī Social\"",
+      "Guild Social Access",
+      "Return destination",
+      "Requested access",
+      "Return to Mōchirīī Social and start again.",
       "/api/oauth/decision",
+    ],
+  },
+  {
+    label: "OAuth consent page",
+    file: "apps/web/app/oauth/consent/page.tsx",
+    snippets: [
+      'title: "Mōchirīī Social Access"',
+      'description: "Review access to Mōchirīī Social."',
+      'ariaLabel="Guild social access"',
+      'title="Connect Mōchirīī Social"',
+      "Review the requested guild social access before continuing.",
+    ],
+  },
+  {
+    label: "OAuth authorization id round trip",
+    file: "apps/web/lib/oauth/consent-login-url.test.mts",
+    snippets: [
+      "preserves the exact OAuth authorization id",
+      "authorization ids cannot inject another redirect parameter",
+    ],
+  },
+  {
+    label: "OAuth browser client",
+    file: "apps/web/lib/supabase/client.ts",
+    snippets: [
+      'flowType: "pkce"',
+      "detectSessionInUrl: true",
+    ],
+  },
+  {
+    label: "OAuth authorization request queue",
+    file: "apps/web/lib/oauth/authorization-load-queue.ts",
+    snippets: [
+      "createAuthorizationLoadQueue",
+      "queued",
+      "tail",
+      "stop",
     ],
   },
   {
@@ -87,7 +143,7 @@ const snippetChecks = [
     snippets: [
       "requireAuth",
       "window.location.assign(SOCIAL_HOST)",
-      "Sign in on Mōchirīī before opening the guild social platform.",
+      "Sign in to Mōchirīī before opening the guild social platform.",
       "Open Mōchirīī Social",
     ],
   },
@@ -167,6 +223,14 @@ const secretPatterns = [
   { label: "client secret assignment", pattern: /\bclient[_-]?secret\s*[:=]\s*\S{8,}/i },
   { label: "password assignment", pattern: /\bpassword\s*[:=]\s*\S{8,}/i },
 ];
+
+const oauthDecisionRoute = read("apps/web/app/api/oauth/decision/route.ts");
+if (!oauthDecisionRoute.includes("if (!response.ok || !redirectUrl)")) {
+  failures.push("OAuth decision route must accept every successful HTTP 2xx response through Response.ok.");
+}
+if (/response\.status\s*={2,3}\s*201/.test(oauthDecisionRoute)) {
+  failures.push("OAuth decision route must not require the legacy HTTP 201 success status.");
+}
 
 function read(file) {
   const full = path.join(root, file);
@@ -441,13 +505,37 @@ for (const { label, file, snippets } of snippetChecks) {
   snippets.forEach((snippet) => assertIncludes(label, text, snippet));
 }
 
+const consentPanel = read("apps/web/components/member-workflow/OAuthConsentPanel.tsx");
+if (consentPanel.includes("Promise.resolve().then(() => load())")) {
+  failures.push("OAuth consent must not race an eager details read with the initial auth-state callback.");
+}
+if (consentPanel.includes("detailsError?.message")) {
+  failures.push("OAuth consent must not render provider/internal authorization errors to members.");
+}
+for (const forbiddenConsentCopy of ["OAuth Consent", "Redirect URI", "client request", "client_name", "clientName"]) {
+  if (consentPanel.includes(forbiddenConsentCopy)) {
+    failures.push(`OAuth consent must use first-party member language rather than: ${forbiddenConsentCopy}.`);
+  }
+}
+if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("priorConsentRedirect(nextDetails")) {
+  failures.push("Prior OAuth consent redirects must follow the current member access check.");
+}
+
 [
   "docs/pixelfed-guild-social-adr.md",
   "docs/pixelfed-first-login-testing.md",
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
+  "apps/web/lib/oauth/authorization-details-error.ts",
+  "apps/web/lib/oauth/authorization-load-queue.ts",
+  "apps/web/lib/oauth/authorization-load-queue.test.mts",
+  "apps/web/lib/oauth/prior-consent-redirect.ts",
+  "apps/web/lib/oauth/prior-consent-redirect.test.mts",
+  "apps/web/lib/supabase/client.ts",
   "supabase/functions/sync-pixelfed-social-account/index.ts",
   "supabase/functions/_shared/pixelfed-social-sync.ts",
+  "supabase/functions/_shared/member-access-policy.ts",
+  "supabase/functions/_shared/member-access-policy_test.ts",
   "scripts/check-pixelfed-first-login-readiness.mjs",
 ].forEach((file) => scanNoSecrets(file, read(file)));
 

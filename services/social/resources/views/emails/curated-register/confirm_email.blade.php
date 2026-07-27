@@ -1,5 +1,5 @@
 @component('mail::message')
-# Action Needed: Confirm Your Email to Activate Your Mochirii Social Account
+# Action Needed: Confirm Your Email to Activate Your Mōchirīī Social Account
 
 Hello **{{'@'.$verify->username}}**,
 

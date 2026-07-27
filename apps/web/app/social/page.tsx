@@ -6,8 +6,8 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
-  title: "Mōchirīī Social Handoff",
-  description: "Members-only Mōchirīī social handoff page.",
+  title: "Mōchirīī Social Access",
+  description: "Verified guild members can continue to Mōchirīī Social.",
   robots: {
     index: false,
     follow: false,
@@ -27,9 +27,9 @@ export default function SocialPage() {
         image="./assets/img/gallery/hero.webp"
         imageAlt="Guild social gallery banner artwork"
         kicker="Guild Social"
-        title="Social"
+        title="Mōchirīī Social"
         center={false}
-        intro={<p className="lede">Signed-in members continue to Mōchirīī Social for guild sharing and internal updates.</p>}
+        intro={<p className="lede">Verified guild members can continue to the private guild social platform.</p>}
       />
       <main className="page-main" id="main">
         <div className="container">

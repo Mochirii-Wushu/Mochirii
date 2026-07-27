@@ -112,6 +112,15 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perDay(50)->by($request->ip());
         });
 
+        RateLimiter::for('oauth-token-revoke', function (Request $request) {
+            $user = $request->user('api');
+            $actor = $user
+                ? 'u:'.$user->getAuthIdentifier()
+                : 'ip:'.$request->ip();
+
+            return Limit::perMinute(10)->by($actor);
+        });
+
         RateLimiter::for('oauth-pat', function (Request $request) {
             $user = $request->user('web');
 

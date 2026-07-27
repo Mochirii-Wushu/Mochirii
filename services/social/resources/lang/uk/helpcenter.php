@@ -16,7 +16,7 @@ return [
    'embed' => 'Експорт',
 
    'communityGuidelines' => 'Правила спільноти',
-   'whatIsTheFediverse' => 'Що таке федіверс?',
+   'whatIsTheFediverse' => 'About Mōchirīī Social',
    'controllingVisibility' => 'Керування видимістю',
    'blockingAccounts' => 'Блокування облікових записів',
    'safetyTips' => 'Поради безпеки',

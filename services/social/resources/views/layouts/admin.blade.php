@@ -8,11 +8,11 @@
 
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{{ $title ?? config_cache('app.name') }}</title>
+	<title>{{ $title ?? config('mochirii-branding.display_name') }}</title>
 	<link rel="manifest" href="/manifest.json">
 
-	<meta property="og:site_name" content="{{ config_cache('app.name') }}">
-	<meta property="og:title" content="{{ $title ?? config_cache('app.name') }}">
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+	<meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">
 	<meta property="og:type" content="article">
 	<meta property="og:url" content="{{url(request()->url())}}">
 	@stack('meta')

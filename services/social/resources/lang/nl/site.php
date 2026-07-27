@@ -3,7 +3,7 @@ return [
     'about'             => 'Over ons',
     'help'              => 'Ondersteuning',
     'language'          => 'Taal',
-    'fediverse'         => 'Fediverse',
+    'fediverse'         => 'Mōchirīī Social',
     'opensource'        => 'Open Source',
     'terms'             => 'Voorwaarden',
     'privacy'           => 'Privacy',

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config_cache('app.name') }} - Authorization</title>
+    <title>{{ config('mochirii-branding.display_name') }} - Authorization</title>
     <link href="{{ mix('/css/app.css') }}" rel="stylesheet">
     <style>
         .passport-authorize .container {
@@ -38,7 +38,7 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="text-center mb-5">
-                    <img src="{{ config('app.logo') }}" alt="Mochirii Social emblem">
+                    <img src="{{ config('app.logo') }}" alt="Mōchirīī Social emblem">
                 </div>
                 <p class="text-center h3 font-weight-light mb-3">Authorize {{ $client->name }}</p>
                 <div class="card card-default shadow-none border">

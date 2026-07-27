@@ -36,7 +36,7 @@
   <div class="card border-left-blue mb-3">
     <div class="card-body">
       <p class="h5">Know the age guidelines</p>
-      <p class="mb-0">Please keep in mind that Mochirii Social is meant for members who meet the age requirements for their region.</p>
+      <p class="mb-0">Please keep in mind that Mōchirīī Social is meant for members who meet the age requirements for their region.</p>
     </div>
   </div>
 

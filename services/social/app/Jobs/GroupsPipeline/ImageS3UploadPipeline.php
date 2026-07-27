@@ -79,7 +79,7 @@ class ImageS3UploadPipeline implements ShouldQueue
         return retry(3, function () use ($storagePath, $path, $name) {
             $baseDisk = (bool) config_cache('pixelfed.cloud_storage') ? config('filesystems.cloud') : 'local';
             $disk = Storage::disk($baseDisk);
-            $file = $disk->putFileAs($storagePath, new File($path), $name, 'public');
+            $file = $disk->putFileAs($storagePath, new File($path), $name, 'private');
 
             return $disk->url($file);
         }, random_int(100, 500));
@@ -95,7 +95,7 @@ class ImageS3UploadPipeline implements ShouldQueue
             $baseDisk = self::$attempts > 1 ? $this->getAltDriver() : config('filesystems.cloud');
             try {
                 $disk = Storage::disk($baseDisk);
-                $file = $disk->putFileAs($storagePath, new File($path), $name, 'public');
+                $file = $disk->putFileAs($storagePath, new File($path), $name, 'private');
 
                 return $disk->url($file);
             } catch (S3Exception|ClientException|ConnectException|UnableToWriteFile|Exception $e) {

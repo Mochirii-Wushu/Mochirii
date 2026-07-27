@@ -1,5 +1,5 @@
 @extends('layouts.app', [
-    'title' => $profile->name . ' (@' . $acct . ') - Mochirii Social',
+    'title' => $profile->name . ' (@' . $acct . ') - Mōchirīī Social',
     'ogTitle' => $profile->name . ' (@' . $acct . ')',
     'ogType' => 'profile'
 ])
@@ -33,10 +33,10 @@ $metaDescription = $profile->followers_count > 100 ? \App\Services\AccountServic
     <meta property="og:image:height" content="200">@endif
     <meta property="twitter:card" content="summary">
     <meta property="profile:username" content="{{$acct}}">
-	<link href="{{$profile->permalink('.atom')}}" rel="alternate" title="{{$profile->username}} on Mochirii Social" type="application/atom+xml">
+	<link href="{{$profile->permalink('.atom')}}" rel="alternate" title="{{$profile->username}} on Mōchirīī Social" type="application/atom+xml">
 	<link href="{{$profile->permalink()}}" rel="alternate" type="application/activity+json">
-    <meta name="application-name" content="Mochirii Social">
-    <meta name="generator" content="Mochirii Social">
+    <meta name="application-name" content="Mōchirīī Social">
+    <meta name="generator" content="Mōchirīī Social">
     @if($profile->website && $profile->followers_count > 100)<link href="{{$profile->website}}" rel="me" type="text/html">
 @endif
 	@if(false == $settings['crawlable'] || $profile->remote_url || $profile->followers_count < 100)<meta name="robots" content="noindex, nofollow">@endif

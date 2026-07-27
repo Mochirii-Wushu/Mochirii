@@ -6,7 +6,7 @@
     <h3 class="font-weight-bold">Service Account</h3>
   </div>
   <hr>
-  <p class="lead">Mochirii Social uses a reserved service account for platform operations.</p>
+  <p class="lead">Mōchirīī Social uses a reserved service account for platform operations.</p>
   <div class="py-4">
     <p class="font-weight-bold h5 pb-3">For Admins</p>
     <p class="mb-0">This reserved account is not a member profile and should not be used for normal posting or messaging.</p>

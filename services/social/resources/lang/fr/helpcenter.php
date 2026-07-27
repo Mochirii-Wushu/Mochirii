@@ -15,7 +15,7 @@ return [
     'embed'                    =>    'Intégrer',
 
     'communityGuidelines'      =>    'Règlement de la communauté',
-    'whatIsTheFediverse'       =>    'Qu\'est-ce que le fediverse ?',
+    'whatIsTheFediverse'       =>    'About Mōchirīī Social',
     'controllingVisibility'    =>    'Contrôler la visibilité',
     'blockingAccounts'         =>    'Blocage des comptes',
     'safetyTips'               =>    'Conseils de sécurité',

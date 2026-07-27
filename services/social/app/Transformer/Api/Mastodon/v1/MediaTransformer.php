@@ -14,7 +14,7 @@ class MediaTransformer extends Fractal\TransformerAbstract
             'type' => lcfirst($media->activityVerb()),
             'url' => $media->url(),
             'preview_url' => $media->thumbnailUrl(),
-            'remote_url' => $media->remote_url,
+            'remote_url' => null,
             'text_url' => $media->url(),
             'description' => $media->caption,
             'blurhash' => $media->blurhash ?? 'U4Rfzst8?bt7ogayj[j[~pfQ9Goe%Mj[WBay',

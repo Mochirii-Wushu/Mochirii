@@ -19,7 +19,7 @@
               Posts, following and other public information: The list of people you follow is listed publicly, the same is true for your followers. When you submit a message, the date and time is stored as well as the application you submitted the message from. Messages may contain media attachments, such as pictures and videos. Public and unlisted posts are available publicly. When you feature a post on your profile, that is also publicly available information. Your posts are delivered to your followers, in some cases it means they are delivered to different servers and copies are stored there. When you delete posts, this is likewise delivered to your followers. The action of reblogging or favouriting another post is always public.
             </li>
             <li>
-              Direct and followers-only posts: All posts are stored and processed on the server. Followers-only posts are delivered to your followers and users who are mentioned in them, and direct posts are delivered only to users mentioned in them. We make a good faith effort to limit access to those posts only to authorized persons. Please keep in mind that operators and recipients may view such messages, and that recipients may screenshot, copy, or otherwise re-share them. Do not share sensitive information over Mochirii Social.
+              Direct and followers-only posts: All posts are stored and processed on the server. Followers-only posts are delivered to your followers and users who are mentioned in them, and direct posts are delivered only to users mentioned in them. We make a good faith effort to limit access to those posts only to authorized persons. Please keep in mind that operators and recipients may view such messages, and that recipients may screenshot, copy, or otherwise re-share them. Do not share sensitive information over Mōchirīī Social.
             </li>
             <li>
               IPs and other metadata: When you log in, we record the IP address you log in from, as well as the name of your browser application. All the logged in sessions are available for your review and revocation in the settings. The latest IP address used is stored for up to 12 months. We also may retain server logs which include the IP address of every request to our server.
@@ -30,7 +30,7 @@
           <p class="">Any of the information we collect from you may be used in the following ways:</p>
           <ul class=" pl-4">
             <li>
-              To provide the core functionality of Mochirii Social. You can only interact with other people's content and post your own content when you are logged in. For example, you may follow other people to view their combined posts in your own personalized home timeline.
+              To provide the core functionality of Mōchirīī Social. You can only interact with other people's content and post your own content when you are logged in. For example, you may follow other people to view their combined posts in your own personalized home timeline.
             </li>
             <li>
               To aid moderation of the community, for example comparing your IP address with other known ones to determine ban evasion or other violations.
@@ -82,7 +82,7 @@
 
           <p class="">This document is CC-BY-SA. It was last updated Jun 12, 2018.</p>
 
-          <p class="">Mochirii Social privacy terms may be updated as staging and moderation policies mature.</p>
+          <p class="">Mōchirīī Social privacy terms may be updated as privacy and moderation practices evolve.</p>
         </div>
         @endif
       </div>

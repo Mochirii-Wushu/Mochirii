@@ -340,7 +340,7 @@
 									<a href="/site/terms" class="text-lighter pr-2">Terms</a>
 								</p>
 								<p class="mb-0 text-uppercase text-muted small">
-									<a href="/site/about" class="text-lighter" rel="noopener" title="" data-toggle="tooltip">Mochirii Social</a>
+									<a href="/site/about" class="text-lighter" rel="noopener" title="" data-toggle="tooltip">Mōchirīī Social</a>
 								</p>
 							</div>
 						</footer>

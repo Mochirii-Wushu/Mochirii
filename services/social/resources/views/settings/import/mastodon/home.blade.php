@@ -8,7 +8,7 @@
   <hr>
   <section>
     <div class="alert alert-info">
-      <p class="mb-0 font-weight-bold">Imports are disabled during Mochirii Social staging. Contact a Mochirii admin before importing posts.</p>
+      <p class="mb-0 font-weight-bold">Imports are unavailable. Contact a Mōchirīī administrator before importing posts.</p>
     </div>
     <p class="lead font-weight-bold mb-1">Requirements:</p>
     <ul class="lead mb-4">

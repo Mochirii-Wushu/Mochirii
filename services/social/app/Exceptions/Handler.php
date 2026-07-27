@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use GuzzleHttp\Exception\ConnectException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -81,6 +82,12 @@ class Handler extends ExceptionHandler
                     'message' => $exception->getMessage(),
                     'errors' => $exception->validator->getMessageBag(),
                 ], $exception->status);
+            }
+
+            if ($exception instanceof AuthenticationException) {
+                return response()->json([
+                    'error' => 'Unauthenticated.',
+                ], 401);
             }
 
             $isHttp = $this->isHttpException($exception);

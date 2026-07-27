@@ -55,6 +55,8 @@ requireIncludes(composePath, compose, [
   'MAX_AVATAR_SIZE: "92160"',
   'PHP_POST_MAX_SIZE: "100M"',
   'PHP_UPLOAD_MAX_FILE_SIZE: "95M"',
+  '"http://127.0.0.1:8080/api/service/health-check"',
+  "start_period: 60s",
   "pull_policy: never",
 ]);
 rejectIncludes(composePath, compose, [
@@ -129,6 +131,7 @@ requireIncludes(deployScriptPath, deployScript, [
   "/usr/local/sbin/mochirii-social-backup",
   "php artisan migrate --force --isolated --no-interaction",
   "rollback_image",
+  "wait_for_container_running pixelfed-app 120",
   "verify_runtime",
   '"--verify-online-hosting"',
   "verify_online_hosting",
@@ -143,6 +146,8 @@ requireIncludes(runtimeLibraryPath, runtimeLibrary, [
   '--env-file "$SHARED_ROOT/pixelfed.env"',
   '--env-file "$release_dir/release.env"',
   "https://social.mochirii.com/",
+  "wait_for_container_running()",
+  "wait_for_container_health pixelfed-app 300",
   "verify_spaces_round_trip",
   'Storage::disk("s3")',
   "Spaces write, read, and delete gates passed.",
@@ -178,7 +183,14 @@ requireIncludes(migrationPath, migration, [
   "php artisan down",
   "rsync -aHAX --numeric-ids",
   "rollback_legacy",
-  "wait_for_container_health pixelfed-app 300",
+  "wait_for_container_running pixelfed-app 120",
+]);
+
+const restorePath = "scripts/restore-production-runtime.sh";
+const restore = read(restorePath);
+requireIncludes(restorePath, restore, [
+  "wait_for_container_running pixelfed-app 120",
+  "verify_runtime",
 ]);
 
 const backupInstallerPath = "scripts/install-production-backups.sh";
@@ -212,6 +224,7 @@ for (const [relativePath, text] of [
   [entrypointPath, entrypoint],
   [installerPath, installer],
   [migrationPath, migration],
+  [restorePath, restore],
   [backupInstallerPath, backupInstaller],
   [caddyInstallerPath, caddyInstaller],
 ]) {

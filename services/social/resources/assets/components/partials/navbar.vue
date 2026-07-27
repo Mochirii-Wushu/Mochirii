@@ -2,7 +2,7 @@
     <nav class="metro-nav navbar navbar-expand navbar-light navbar-mochirii sticky-top shadow-none py-1">
         <div class="container-fluid">
                 <a class="navbar-brand d-flex align-items-center" href="/i/web" title="Logo">
-                    <img :src="config.logo" height="30px" class="px-2" loading="eager" alt="Mochirii Social emblem">
+                    <img :src="config.logo" height="30px" class="px-2" loading="eager" alt="Mōchirīī Social emblem">
                     <span class="font-weight-bold mb-0 d-none d-sm-block" style="font-size:20px;">
                         {{ brandName }}
                     </span>
@@ -375,7 +375,7 @@
 
         data() {
             return {
-                brandName: 'Mochirii Social',
+                brandName: 'Mōchirīī Social',
                 user: window._sharedData.user,
                 profileLayoutModel: 'grid',
                 hasLocalTimeline: true,

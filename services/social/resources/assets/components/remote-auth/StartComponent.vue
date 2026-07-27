@@ -4,7 +4,7 @@
         <div class="col-12 col-md-5">
             <div class="card shadow-none border" style="border-radius: 20px;">
                 <div v-if="!loaded" class="card-body d-flex justify-content-center flex-column" style="min-height: 662px;">
-                    <p class="lead text-center font-weight-bold mb-0">Continue with Mochirii</p>
+                    <p class="lead text-center font-weight-bold mb-0">Continue with Mōchirīī</p>
                     <div class="w-100">
                         <hr>
                     </div>
@@ -14,9 +14,9 @@
                 </div>
 
                 <div v-else class="card-body" style="min-height: 662px;">
-                    <p class="lead text-center font-weight-bold">Continue with Mochirii</p>
+                    <p class="lead text-center font-weight-bold">Continue with Mōchirīī</p>
                     <hr>
-                    <p class="small text-center mb-3">Continue through the Mochirii doorway:</p>
+                    <p class="small text-center mb-3">Continue through the Mōchirīī doorway:</p>
                     <button
                         v-for="domain in domains"
                         type="button"

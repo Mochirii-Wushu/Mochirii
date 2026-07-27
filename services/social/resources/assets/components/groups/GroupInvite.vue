@@ -22,7 +22,7 @@
 
 							<div v-else-if="tab === 'form'" key="form">
 								<div class="d-flex justify-content-center align-items-center flex-column">
-									<p class="text-center h4 font-weight-bold"><a href="#">@dansup</a> invited you to join</p>
+									<p class="text-center h4 font-weight-bold">You were invited to join</p>
 
 									<div class="card my-3 shadow-none border" style="width: 300px;">
 										<img v-if="group.metadata && group.metadata.hasOwnProperty('header')" :src="group.metadata.header.url" class="card-img-top" style="width: 100%; height: 100px;object-fit: cover;">
@@ -79,7 +79,6 @@
 										<button class="btn btn-primary font-weight-bold btn-sm" @click="acceptInvite">Accept</button>
 									</div>
 								</div>
-								<!-- <p class="text-center h4 font-weight-bold">by <a href="#" class="font-weight-bold">@dansup</a></p> -->
 							</div>
 
 							<div v-else-if="tab === 'existingmember'" key="existingmember">

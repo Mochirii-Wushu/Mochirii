@@ -114,21 +114,6 @@
 							</span>
 						</p>
 
-						<!-- <div v-if="replyChildId == status.id && status.reply_count" class="media media-status align-items-top mt-3">
-							<div class="comment-border-arrow"></div>
-							<a href="https://social.mochirii.com/groups/328821658771132416/user/321493203255693312"><img src="https://social.mochirii.com/storage/avatars/321493203255693312/5a6nqo.jpg?v=2" width="32" height="32" class="rounded-circle media-avatar border"></a>
-							<div class="media-body"><div class="media-body-comment"><p class="media-body-comment-username"><a href="https://social.mochirii.com/groups/328821658771132416/user/321493203255693312">
-								dansup
-							</a></p> <div class="read-more-component" style="word-break: break-all;"><div>test</div></div></div> <p class="media-body-reactions"><a href="#" class="font-weight-bold text-muted">
-								Like
-							</a> <span class="mx-1">·</span> <a href="https://social.mochirii.com/groups/328821658771132416/p/358529382599041029" class="font-weight-bold text-muted">
-							1h
-						</a> <span><span class="mx-1">·</span> <a href="#" class="font-weight-bold text-lighter">
-									Delete
-								</a></span></p>
-							</div>
-						</div> -->
-
 						<div v-if="replyChildIndex == index && status.hasOwnProperty('children') && status.children.hasOwnProperty('feed') && status.children.feed.length">
 							<comment-post
 								v-for="(s, index) in status.children.feed"

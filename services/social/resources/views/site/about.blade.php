@@ -6,9 +6,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="mobile-web-app-capable" content="yes">
-	<title>{{ config_cache('app.name') ?? 'Mochirii Social' }}</title>
-	<meta property="og:site_name" content="{{ config_cache('app.name') ?? 'Mochirii Social' }}">
-	<meta property="og:title" content="{{ config_cache('app.name') ?? 'Mochirii Social' }}">
+	<title>{{ config('mochirii-branding.display_name') ?? 'Mōchirīī Social' }}</title>
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') ?? 'Mōchirīī Social' }}">
+	<meta property="og:title" content="{{ config('mochirii-branding.display_name') ?? 'Mōchirīī Social' }}">
 	<meta property="og:type" content="article">
 	<meta property="og:url" content="{{route('site.about')}}">
 	<meta property="og:description" content="{{config_cache('app.short_description')}}">
@@ -40,7 +40,7 @@
 			<h1 class="display-4 font-weight-bold py-3">{{ config_cache('about.title') ?? __('site.photo_sharing_for_everyone') }}</h1>
 			<div class="col-lg-6 mx-auto py-3">
 			  <p class="mb-4 font-weight-light text-left" style="font-size: 26px; line-height: 40px;">
-				{!! config_cache('app.description') ?? config_cache('app.short_description') ?? 'Mochirii Social is the guild home for member posts, profiles, and images.' !!}
+				{!! config_cache('app.description') ?? config_cache('app.short_description') ?? 'Mōchirīī Social is the guild home for member posts, profiles, and images.' !!}
 			  </p>
 			</div>
 		</div>
@@ -217,7 +217,7 @@
 						<span class="text-primary">{{$user_count}}</span>
 						{{__('site.people_have_shared')}}
 						<span class="text-primary">{{$post_count}}</span>
-						{{__('site.photos_and_videos_on')}} {{config_cache('app.name')}}!
+						{{__('site.photos_and_videos_on')}} {{config('mochirii-branding.display_name')}}!
 					</p>
 					@if(config_cache('pixelfed.open_registration'))
 					<div class="section-spacer"></div>

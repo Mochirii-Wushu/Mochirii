@@ -88,7 +88,7 @@
                         <autocomplete
                             :search="composeSearch"
                             :disabled="composeLoading"
-                            placeholder="@dansup"
+                            placeholder="@guildmate"
                             aria-label="Search usernames"
                             :get-result-value="getTagResultValue"
                             @submit="onTagSubmitLocation"

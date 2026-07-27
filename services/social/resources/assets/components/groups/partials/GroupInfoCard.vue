@@ -53,7 +53,7 @@
 					<i class="fal fa-map-marker-alt fa-lg"></i>
 				</div>
 				<div class="fact-body">
-					<p class="fact-title">Mochirii Network</p>
+					<p class="fact-title">Mōchirīī Network</p>
 					<p class="fact-subtitle">This group has not specified a location.</p>
 				</div>
 			</div> -->

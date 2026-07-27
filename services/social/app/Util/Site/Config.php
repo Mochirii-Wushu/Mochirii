@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class Config
 {
-    const CACHE_KEY = 'api:site:configuration:_v0.9';
+    const CACHE_KEY = 'api:site:configuration:_v0.10';
 
     public static function get()
     {
@@ -52,10 +52,10 @@ class Config
                 'ab' => config('exp'),
 
                 'site' => [
-                    'name' => config_cache('app.name'),
+                    'name' => config('mochirii-branding.display_name'),
                     'domain' => config('pixelfed.domain.app'),
                     'url' => config('app.url'),
-                    'description' => config_cache('app.short_description'),
+                    'description' => config('mochirii-branding.description'),
                 ],
 
                 'account' => [

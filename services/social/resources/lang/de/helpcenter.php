@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Einbetten',
 
 	'communityGuidelines' => 'Gemeinschaftsrichtlinien',
-	'whatIsTheFediverse' => 'Was ist das Fediversum?',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => 'Sichtbarkeit steuern',
 	'blockingAccounts' => 'Kontosperrung',
 	'safetyTips' => 'Sicherheitstipps',

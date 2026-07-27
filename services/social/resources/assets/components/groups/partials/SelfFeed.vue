@@ -11,7 +11,7 @@
         <div class="row h-100 bg-light justify-content-center">
             <div class="col-12 col-md-10 col-lg-6">
                 <div v-if="emptyFeed" class="mt-5">
-                    <h1 class="font-weight-bold">Welcome to Mochirii Social Groups!</h1>
+                    <h1 class="font-weight-bold">Welcome to Mōchirīī Social Groups!</h1>
                     <p class="lead">Groups are a way to participate in like minded communities and topics.</p>
                     <hr class="my-4">
                     <p>Anyone can create and manage their own group as long as it abides by our <a href="/site/kb/community-guidelines" target="_blank">community guidelines</a>.</p>

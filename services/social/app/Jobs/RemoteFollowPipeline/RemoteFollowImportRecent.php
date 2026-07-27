@@ -224,7 +224,7 @@ class RemoteFollowImportRecent implements ShouldQueue
             $img = file_get_contents($url);
             $file = '/tmp/'.str_random(64);
             file_put_contents($file, $img);
-            $path = Storage::putFile($storagePath, new File($file), 'public');
+            $path = Storage::putFile($storagePath, new File($file), 'private');
 
             $media = new Media;
             $media->status_id = $status->id;

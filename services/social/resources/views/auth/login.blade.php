@@ -1,4 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.app', ['title' => config('mochirii-branding.display_name') . ' Login'])
+
+@push('meta')
+<meta name="description" content="{{ config('mochirii-branding.description') }}">
+<meta property="og:description" content="{{ config('mochirii-branding.description') }}">
+<meta name="twitter:description" content="{{ config('mochirii-branding.description') }}">
+@endpush
 
 @section('content')
 <div class="container mt-4 mochirii-social-login">
@@ -6,10 +12,10 @@
         <div class="col-lg-5">
             <div class="card shadow-none border mochirii-social-card">
                 <div class="card-header bg-transparent p-4 text-center mochirii-social-card__head">
-                    <img src="{{ config('app.logo') }}" width="64" height="64" alt="Mochirii Social emblem">
+                    <img src="{{ config('app.logo') }}" width="64" height="64" alt="Mōchirīī Social emblem">
                     <p class="mochirii-social-kicker">Guild Social</p>
-                    <h1 class="font-weight-bold mb-2">Mochirii Social Login</h1>
-                    <p class="mb-0">Members enter through the Mochirii doorway. Keep your account close, kind, and guild-only.</p>
+                    <h1 class="font-weight-bold mb-2">Mōchirīī Social Login</h1>
+                    <p class="mb-0">{{ config('mochirii-branding.description') }}</p>
                 </div>
 
                 @if ($errors->any())
@@ -24,13 +30,11 @@
                     <div class="form-group row mb-4">
                         <div class="col-md-12">
                             <a href="/auth/oidc/start" class="btn btn-primary btn-block btn-lg rounded-pill font-weight-bold mochirii-social-primary">
-                                Continue with Mochirii
+                                Continue with Mōchirīī
                             </a>
                         </div>
                     </div>
-                    <div class="mochirii-social-divider"><span>Direct account login</span></div>
-                    @endif
-
+                    @else
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
@@ -106,6 +110,7 @@
                         </button>
 
                     </form>
+                    @endif
                     @if((bool) config_cache('pixelfed.open_registration') || (bool) config_cache('instance.curated_registration.enabled'))
                     <hr>
 
@@ -231,35 +236,12 @@
         box-shadow: 0 18px 36px rgba(16, 32, 27, 0.38);
     }
 
-    .mochirii-social-divider {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin: 0.35rem 0 1.2rem;
-        color: rgba(248, 237, 221, 0.66);
-        font-size: 0.78rem;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-
-    .mochirii-social-divider::before,
-    .mochirii-social-divider::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: rgba(223, 190, 113, 0.24);
-    }
-
     footer a,
     footer .text-muted {
         color: rgba(248, 237, 221, 0.72) !important;
     }
 
     @media (max-width: 640px) {
-        .mochirii-social-login {
-            padding-inline: 0.75rem;
-        }
-
         .mochirii-social-card {
             border-radius: 18px;
         }

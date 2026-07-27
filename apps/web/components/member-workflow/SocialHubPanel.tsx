@@ -14,7 +14,7 @@ function GateMessage({ title, message }: { title: string; message: string }) {
       <p className="muted">{message}</p>
       <div className="auth-actions">
         <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mōchirīī Social</a>
-        <Link className="hero-cta" href="/auth?redirect=/social">Website Login</Link>
+        <Link className="hero-cta" href="/auth?redirect=/social">Mōchirīī Login</Link>
       </div>
     </section>
   );
@@ -23,7 +23,7 @@ function GateMessage({ title, message }: { title: string; message: string }) {
 export function SocialHubPanel() {
   const [busy, setBusy] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
-  const [message, setMessage] = useState("Checking website sign-in before opening Mōchirīī Social.");
+  const [message, setMessage] = useState("Checking your Mōchirīī sign-in before opening guild social.");
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -33,7 +33,7 @@ export function SocialHubPanel() {
     const auth = await requireAuth();
     setSignedIn(Boolean(auth.ok));
     if (!auth.ok) {
-      setMessage("Sign in on Mōchirīī before opening the guild social platform.");
+      setMessage("Sign in to Mōchirīī before opening the guild social platform.");
       setBusy(false);
       return;
     }
@@ -59,7 +59,7 @@ export function SocialHubPanel() {
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Guild Social</p>
-          <h2 className="section-title">Mōchirīī Social Handoff</h2>
+          <h2 className="section-title">Mōchirīī Social Access</h2>
         </div>
         <p className={`status-pill status-pill--${signedIn ? "active" : "pending"}`}>
           {signedIn ? "Opening" : "Checking"}

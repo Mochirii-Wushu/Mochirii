@@ -56,7 +56,7 @@
     <p>These provisions notwithstanding, the administration of the service reserves the right to revoke any user's access permissions, at any time, for any reason, except as limited by law.</p>
     <hr>
     <p class="">This document was last updated Jun 26, 2019.</p>
-    <p class="">Mochirii Social guidelines may be updated as staging and moderation policies mature.</p>
+    <p class="">Mōchirīī Social guidelines may be updated as community and moderation practices evolve.</p>
 </div>
   @endif
 @endsection

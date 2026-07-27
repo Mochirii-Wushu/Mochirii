@@ -79,7 +79,7 @@
 			avatarHelpText() {
 				const primary = this.config.primary_size || 640;
 				const thumb = this.config.thumbnail_size || 320;
-				return `Upload JPEG, PNG, or WebP up to ${this.avatarMaxMegabytes} MB. Mochirii keeps it optimized automatically as ${primary}px and ${thumb}px profile images.`;
+				return `Upload JPEG, PNG, or WebP up to ${this.avatarMaxMegabytes} MB. Mōchirīī keeps it optimized automatically as ${primary}px and ${thumb}px profile images.`;
 			}
 		},
 
@@ -124,7 +124,7 @@
 				}
 
 				if(file.size > this.avatarMaxBytes) {
-					swal('Image too large', `Profile images can be up to ${this.avatarMaxMegabytes} MB. Mochirii will optimize accepted images automatically.`, 'error');
+					swal('Image too large', `Profile images can be up to ${this.avatarMaxMegabytes} MB. Mōchirīī will optimize accepted images automatically.`, 'error');
 					return false;
 				}
 

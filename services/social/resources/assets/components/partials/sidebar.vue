@@ -229,7 +229,7 @@
             <a href="/site/privacy" class="font-weight-bold">{{ $t('navmenu.privacy') }}</a>
             <a href="/site/terms" class="font-weight-bold">{{ $t('navmenu.terms') }}</a>
             <a v-if="showLegalNoticeLink" href="/site/legal-notice" class="font-weight-bold">{{ $t('navmenu.legalNotice') }}</a>
-            <span class="font-weight-bold powered-by">Mochirii Social</span>
+            <span class="font-weight-bold powered-by">Mōchirīī Social</span>
         </div>
 
         <!-- <b-modal

@@ -102,7 +102,6 @@
 								<div class="media-body">
 									{{ commonIntersects.friends_count }} mutual friend<span v-if="commonIntersects.friends.length > 1">s</span> including
 									<span v-for="(friend, index) in commonIntersects.friends"><a :href="friend.url" class="text-dark font-weight-bold">{{ friend.acct }}</a><span v-if="commonIntersects.friends.length > index + 1">, </span><span v-else> </span></span>
-									<!-- <a href="#" class="text-dark font-weight-bold">dansup</a>, <a href="#" class="text-dark font-weight-bold">admin</a> and 1 other -->
 								</div>
 							</div>
 

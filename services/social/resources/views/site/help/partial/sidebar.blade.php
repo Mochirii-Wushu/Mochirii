@@ -43,7 +43,7 @@
         </a>
       </li>
       {{-- <li class="nav-item {{request()->is('*/what-is-the-network')?'active':''}}">
-        <a class="nav-link font-weight-light text-muted" href="{{route('help.getting-started')}}">Mochirii Social Network</a>
+        <a class="nav-link font-weight-light text-muted" href="{{route('help.getting-started')}}">Mōchirīī Social Network</a>
       </li>
       <li class="nav-item {{request()->is('*/controlling-visibility')?'active':''}}">
         <a class="nav-link font-weight-light text-muted" href="{{route('help.controlling-visibility')}}">

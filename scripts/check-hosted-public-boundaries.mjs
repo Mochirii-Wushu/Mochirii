@@ -35,10 +35,10 @@ const checks = [
     validate: (result) => expectHtml(result, /Mochirii/i),
   },
   {
-    label: "Mochirii Social instance",
+    label: "Mōchirīī Social instance",
     url: `${SOCIAL_HOST}/api/v1/instance`,
     statuses: [200],
-    validate: (result) => expectJson(result, (body) => body?.uri === "social.mochirii.com" && body?.title === "Mochirii Social"),
+    validate: (result) => expectJson(result, (body) => body?.uri === "social.mochirii.com" && body?.title === "Mōchirīī Social"),
   },
   {
     label: "Storefront password boundary",

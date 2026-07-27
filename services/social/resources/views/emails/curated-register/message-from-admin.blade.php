@@ -3,7 +3,7 @@
 
 Hello,
 
-You recently applied to join our Mochirii Social community using the &commat;**{{ $verify->username }}** username.
+You recently applied to join our Mōchirīī Social community using the &commat;**{{ $verify->username }}** username.
 
 The admins have a message for you:
 

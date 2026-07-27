@@ -38,5 +38,5 @@ return [
     'sendReset'        =>   'Envoyer le lien de réinitialisation de mot de passe',
     'backLogin'        =>   'Retour à l’identification',
 
-    'signInMastodon'  => 'S’inscrire avec Mastodon',
+    'signInMastodon'  => 'Continue with Mōchirīī',
 ];

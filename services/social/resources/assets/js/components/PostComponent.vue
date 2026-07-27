@@ -1,7 +1,7 @@
 <template>
 <div>
 	<div v-if="!loaded" style="height: 80vh;" class="d-flex justify-content-center align-items-center">
-			<img src="/img/pixelfed-icon-grey.svg" class="">
+			<img src="/img/mochirii-icon.png" class="" alt="Mōchirīī emblem">
 	</div>
 	<div v-if="loaded && warning" class="bg-white mt-n4 pt-3 border-bottom">
 		<div class="container">

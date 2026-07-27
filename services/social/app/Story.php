@@ -3,9 +3,9 @@
 namespace App;
 
 use App\Util\Lexer\Bearcap;
+use App\Services\MochiriiPrivateMedia;
 use Auth;
 use Illuminate\Database\Eloquent\Model;
-use Storage;
 
 /**
  * @property int $id
@@ -80,7 +80,7 @@ class Story extends Model
 
     public function mediaUrl()
     {
-        return url(Storage::url($this->path));
+        return app(MochiriiPrivateMedia::class)->story($this);
     }
 
     public function bearcapUrl()

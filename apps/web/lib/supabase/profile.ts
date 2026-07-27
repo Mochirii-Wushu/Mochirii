@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { invokeEdgeFunction, requireBrowserSupabaseClient } from "./client";
 import { RECENT_VERIFICATION_MS, SAFE_PROFILE_FIELDS } from "./config";
 import { getCurrentUser, requireAuth } from "./auth";
+import { isRecentPastTimestamp } from "./profile-verification-time";
 import {
   createError,
   createResult,
@@ -29,8 +30,7 @@ export function signedInName(user: User | null | undefined, profile?: MemberProf
 }
 
 export function hasRecentVerification(profile?: MemberProfile | null) {
-  const time = new Date(profile?.discord_verified_at || 0).getTime();
-  return Number.isFinite(time) && Date.now() - time <= RECENT_VERIFICATION_MS;
+  return isRecentPastTimestamp(profile?.discord_verified_at, RECENT_VERIFICATION_MS);
 }
 
 export function profileHasVerifiedRoles(profile?: MemberProfile | null) {

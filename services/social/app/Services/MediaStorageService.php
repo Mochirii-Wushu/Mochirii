@@ -208,7 +208,7 @@ class MediaStorageService
         $hash = hash_file('sha256', $tmpName);
 
         $disk = Storage::disk(config('filesystems.cloud'));
-        $file = $disk->putFileAs($base, new File($tmpName), $path, 'public');
+        $file = $disk->putFileAs($base, new File($tmpName), $path, 'private');
         $permalink = $disk->url($file);
 
         $media->media_path = $file;
@@ -295,7 +295,7 @@ class MediaStorageService
         }
 
         $disk = Storage::disk($driver);
-        $file = $disk->putFileAs($base, new File($tmpName), $path, 'public');
+        $file = $disk->putFileAs($base, new File($tmpName), $path, 'private');
         $permalink = $disk->url($file);
 
         $avatar->media_path = $base.'/'.$path;

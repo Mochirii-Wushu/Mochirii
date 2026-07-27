@@ -160,7 +160,7 @@
 						<autocomplete
 							:search="composeSearch"
 							:disabled="composeLoading"
-							placeholder="@dansup"
+							placeholder="Search guild members"
 							aria-label="Search usernames"
 							:get-result-value="getTagResultValue"
 							@submit="onTagSubmitLocation"

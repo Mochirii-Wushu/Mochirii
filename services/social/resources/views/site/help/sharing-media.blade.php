@@ -46,7 +46,7 @@
 	<p>
 		<a class="text-dark font-weight-bold" data-toggle="collapse" href="#collapse3" role="button" aria-expanded="false" aria-controls="collapse3">
 			<i class="fas fa-chevron-down mr-2"></i>
-			How do I add a caption before sharing my photos or videos on Mochirii Social?
+			How do I add a caption before sharing my photos or videos on Mōchirīī Social?
 		</a>
 		<div class="collapse" id="collapse3">
 			<div>

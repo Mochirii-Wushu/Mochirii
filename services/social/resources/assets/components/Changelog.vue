@@ -86,7 +86,7 @@
 
 					<div class="pb-3">
 						<p class="lead">Older</p>
-						<p>Mochirii Social staging changes are published through the Mochirii ops release process.</p>
+						<p>Mōchirīī Social improvements are shared in this changelog.</p>
 					</div>
 				</div>
 

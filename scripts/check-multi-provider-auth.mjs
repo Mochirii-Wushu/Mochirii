@@ -35,6 +35,7 @@ const verifyMemberAccess = read("supabase/functions/verify-member-access/index.t
 const verifyDiscordMember = read("supabase/functions/verify-discord-member/index.ts");
 const memberVerificationIdentity = read("supabase/functions/_shared/member-verification-identity.ts");
 const memberVerificationIdentityTest = read("supabase/functions/_shared/member-verification-identity_test.ts");
+const memberAccessPolicy = read("supabase/functions/_shared/member-access-policy.ts");
 const supabaseServiceRole = read("supabase/functions/_shared/supabase-service-role.ts");
 const supabaseServiceRoleTest = read("supabase/functions/_shared/supabase-service-role_test.ts");
 const approvedGalleryFeed = read("supabase/functions/list-approved-gallery-submissions/index.ts");
@@ -234,7 +235,22 @@ assertIncludes("check-all", checkAll, '["test:supabase-service-role", ["deno", "
   assertIncludes(label, source, "resolveDiscordIdentity(");
 });
 
-assertIncludes("verify-member-access trusted profile binding", verifyMemberAccess, "profileMatchesTrustedDiscordIdentity(");
+[
+  '../_shared/member-access-policy.ts',
+  'currentMemberAccess({',
+].forEach((snippet) => assertIncludes("verify-member-access shared access policy", verifyMemberAccess, snippet));
+
+[
+  "profileMatchesTrustedDiscordIdentity(",
+  "profile?.has_required_discord_roles !== true",
+  "profile?.discord_verified_at",
+  "timestamp <= nowMs",
+  "MEMBER_VERIFICATION_MAX_AGE_MS",
+  'status !== "approved"',
+  "verifiedTimestamp > nowMs",
+  "expiry >= nowMs",
+  "profile?.member_status",
+].forEach((snippet) => assertIncludes("shared current-member access policy", memberAccessPolicy, snippet));
 
 [
   'Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")',

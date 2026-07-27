@@ -12,11 +12,11 @@ return [
     */
     'activitypub' => [
         'enabled' => env('ACTIVITY_PUB', false),
-        'outbox' => env('AP_OUTBOX', true),
-        'inbox' => env('AP_INBOX', true),
-        'sharedInbox' => env('AP_SHAREDINBOX', true),
+        'outbox' => env('AP_OUTBOX', false),
+        'inbox' => env('AP_INBOX', false),
+        'sharedInbox' => env('AP_SHAREDINBOX', false),
 
-        'remoteFollow' => env('AP_REMOTE_FOLLOW', true),
+        'remoteFollow' => env('AP_REMOTE_FOLLOW', false),
 
         'delivery' => [
             'timeout' => env('ACTIVITYPUB_DELIVERY_TIMEOUT', 30),
@@ -35,7 +35,7 @@ return [
     ],
 
     'atom' => [
-        'enabled' => env('ATOM_FEEDS', true),
+        'enabled' => env('ATOM_FEEDS', false),
     ],
 
     'avatars' => [
@@ -43,14 +43,14 @@ return [
     ],
 
     'nodeinfo' => [
-        'enabled' => env('NODEINFO', true),
+        'enabled' => env('NODEINFO', false),
     ],
 
     'webfinger' => [
-        'enabled' => env('WEBFINGER', true)
+        'enabled' => env('WEBFINGER', false)
     ],
 
-    'network_timeline' => env('PF_NETWORK_TIMELINE', true),
+    'network_timeline' => env('PF_NETWORK_TIMELINE', false),
     'network_timeline_days_falloff' => env('PF_NETWORK_TIMELINE_DAYS_FALLOFF', 90),
 
     'custom_emoji' => [
@@ -60,5 +60,5 @@ return [
         'max_size' => env('CUSTOM_EMOJI_MAX_SIZE', 2000000),
     ],
 
-    'migration' => env('PF_ACCT_MIGRATION_ENABLED', true),
+    'migration' => env('PF_ACCT_MIGRATION_ENABLED', false),
 ];

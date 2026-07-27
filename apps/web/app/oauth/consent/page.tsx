@@ -8,8 +8,8 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
-  title: "Mōchirīī OAuth Consent - Guild Social",
-  description: "Approve or deny guild social OAuth access for active Mōchirīī members.",
+  title: "Mōchirīī Social Access",
+  description: "Review access to Mōchirīī Social.",
   robots: {
     index: false,
     follow: false,
@@ -25,13 +25,13 @@ export default function OAuthConsentPage() {
       <BodyPageMarker page="oauth-consent" />
       <PageHero
         page="oauthConsent"
-        ariaLabel="OAuth consent hero"
+        ariaLabel="Guild social access"
         image="./assets/img/leaders/panel.webp"
         imageAlt="Guild consent banner artwork"
         kicker="Guild Social"
-        title="OAuth Consent"
+        title="Connect Mōchirīī Social"
         center={false}
-        intro={<p className="lede">Review the client request before guild social access is granted.</p>}
+        intro={<p className="lede">Review the requested guild social access before continuing.</p>}
       />
       <main className="page-main" id="main">
         <div className="container">

@@ -9,10 +9,10 @@
 
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{!! $title ?? config_cache('app.name') !!}</title>
+	<title>{!! $title ?? config('mochirii-branding.display_name') !!}</title>
 
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'pixelfed') }}">
-	<meta property="og:title" content="{{ $title ?? config_cache('app.name', 'pixelfed') }}">
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+	<meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">
 	<meta property="og:type" content="article">
 	<meta property="og:url" content="{{request()->url()}}">
 	@stack('meta')

@@ -4,7 +4,7 @@
 <div class="jumbotron jumbotron-fluid bg-primary text-white mb-0 py-4">
 	<div class="container">
 		<p class="h1 font-weight-light">About</p>
-		<p class="h3 font-weight-light py-4">{{$page->title ?? 'Mochirii Social is the guild home for member posts, profiles, and images.'}}</p>
+		<p class="h3 font-weight-light py-4">{{$page->title ?? 'Mōchirīī Social is the guild home for member posts, profiles, and images.'}}</p>
 	</div>
 </div>
 <div class="bg-white">
@@ -115,5 +115,5 @@
 @endsection
 
 @push('meta')
-<meta property="og:description" content="Mochirii Social is the guild home for member posts, profiles, and images.">
+<meta property="og:description" content="Mōchirīī Social is the guild home for member posts, profiles, and images.">
 @endpush

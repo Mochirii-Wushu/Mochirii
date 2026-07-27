@@ -83,7 +83,7 @@ rsync -aHAX --numeric-ids --delete "$legacy_root/redis-data/" "$DATA_ROOT/redis/
 
 "${legacy_compose[@]}" down --remove-orphans
 compose_release "$release_dir" up --detach --no-build db redis pixelfed horizon scheduler
-wait_for_container_health pixelfed-app 300
+wait_for_container_running pixelfed-app 120
 docker exec pixelfed-app php artisan up --no-ansi
 verify_runtime
 ln -sfn "$release_dir" "$CURRENT_LINK"

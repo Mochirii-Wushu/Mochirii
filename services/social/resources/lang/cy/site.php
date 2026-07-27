@@ -5,7 +5,7 @@ return [
 	'about'			=> 'Amdamon',
 	'help'			=> 'Help',
 	'language'		=> 'Iaith',
-	'fediverse'		=> 'Ffedirasiwn',
+	'fediverse'		=> 'Mōchirīī Social',
 	'opensource'	=> 'Ffynhonnell Agor',
 	'terms'			=> 'Termau',
 	'privacy'		=> 'Preifatrwydd',

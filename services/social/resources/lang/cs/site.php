@@ -4,7 +4,7 @@ return [
     'about'             => 'O nás',
     'help'              => 'Nápověda',
     'language'          => 'Jazyk',
-    'fediverse'         => 'Fedivesmír',
+    'fediverse'         => 'Mōchirīī Social',
     'opensource'        => 'Otevřený zdroj',
     'terms'             => 'Podmínky',
     'privacy'           => 'Soukromí',

@@ -34,6 +34,7 @@ use App\ProfileSponsor;
 use App\Report;
 use App\Services\AccountService;
 use App\Services\FollowerService;
+use App\Services\OAuthTokenRevocationService;
 use App\Services\PublicTimelineService;
 use App\Status;
 use App\StatusArchived;
@@ -73,7 +74,7 @@ class DeleteAccountPipeline implements ShouldQueue
         $this->user = $user;
     }
 
-    public function handle()
+    public function handle(OAuthTokenRevocationService $tokenRevocation)
     {
         $user = $this->user;
 
@@ -83,6 +84,8 @@ class DeleteAccountPipeline implements ShouldQueue
 
             return;
         }
+
+        $tokenRevocation->revokeAllFor($user);
 
         // Verify user has a profile
         if (! $user->profile_id) {

@@ -365,7 +365,7 @@ export default {
 		},
 
 		uploadValidationMessage(errObject) {
-			const fallback = 'Mochirii Social supports JPEG, JPG, PNG, and WebP images. Please choose a file whose contents match one of those image types.';
+			const fallback = 'Mōchirīī Social supports JPEG, JPG, PNG, and WebP images. Please choose a file whose contents match one of those image types.';
 			const data = errObject.response && errObject.response.data ? errObject.response.data : {};
 
 			if(data.message) {

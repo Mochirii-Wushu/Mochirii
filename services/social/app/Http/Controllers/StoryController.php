@@ -96,7 +96,7 @@ class StoryController extends StoryComposeController
                 'latest' => [
                     'id' => $s->id,
                     'type' => $s->type,
-                    'preview_url' => url(Storage::url($s->path)),
+                    'preview_url' => url('/media/private/story/'.$s->id.'/original'),
                 ],
                 'url' => $url,
                 'seen' => StoryService::hasSeen($pid, StoryService::latest($s->profile_id)),
@@ -134,7 +134,7 @@ class StoryController extends StoryComposeController
                     'id' => (string) $s->id,
                     'type' => $s->type,
                     'duration' => $s->duration,
-                    'src' => url(Storage::url($s->path)),
+                    'src' => $s->mediaUrl(),
                     'created_at' => $s->created_at->toAtomString(),
                     'expires_at' => $s->expires_at->toAtomString(),
                     'view_count' => ($authed == $s->profile_id) ? ($s->view_count ?? 0) : null,

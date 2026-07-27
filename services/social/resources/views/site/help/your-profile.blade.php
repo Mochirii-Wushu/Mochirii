@@ -31,7 +31,7 @@
     </a>
     <div class="collapse" id="collapse2">
       <div>
-        Your username is part of your guild social identity, so username changes are not supported during staging. Please contact an admin if a correction is needed.
+        Your username is part of your guild social identity, so username changes are not supported. Please contact an administrator if a correction is needed.
       </div>
     </div>
   </p>
@@ -149,7 +149,7 @@
     </a>
     <div class="collapse" id="migrate-collapse1">
       <div>
-        Account migration is not available during Mochirii Social staging. Contact a Mochirii admin if you need help with an account move.
+        Account migration is unavailable. Contact a Mōchirīī administrator if you need help moving an account.
         <hr>
         <p>Navigate to the <a href="/settings/account/aliases/manage">Account Aliases</a> page in the Settings to begin.</p>
       </div>
@@ -173,7 +173,7 @@
     </a>
     <div class="collapse" id="migrate-collapse3">
       <div>
-        Post migrations are not available during Mochirii Social staging.
+        Post migration is unavailable.
         <hr>
         It can take a few hours to process post migration imports, please contact admins if it takes longer than 24 hours.
       </div>
@@ -220,7 +220,7 @@
         <p>After you delete your account, you can't sign up again with the same username on this instance or add that username to another account on this instance, and we can't reactivate deleted accounts.</p>
         <p>To permanently delete your account:</p>
         <ol class="">
-          <li>Go to <a href="{{route('settings.remove.permanent')}}">the <span class="font-weight-bold">Delete Your Account</span> page</a>. If you're not logged into Mochirii Social on the web, you'll be asked to log in first. You can't delete your account from within a mobile app.</li>
+          <li>Go to <a href="{{route('settings.remove.permanent')}}">the <span class="font-weight-bold">Delete Your Account</span> page</a>. If you're not logged into Mōchirīī Social on the web, you'll be asked to log in first. You can't delete your account from within a mobile app.</li>
           <li>Navigate to the <a href="{{route('settings.security')}}">Security Settings</a></li>
           <li>Confirm your account password.</li>
           <li>Scroll down to the Danger Zone section and click on the <span class="btn btn-sm btn-outline-danger py-1 font-weight-bold">Delete</span> button.</li>

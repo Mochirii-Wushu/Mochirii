@@ -9,13 +9,13 @@
             <div class="spacer">·</div>
             <a v-if="config.show_legal_notice_link" href="/site/legal-notice">Legal Notice</a>
             <div v-if="config.show_legal_notice_link" class="spacer">·</div>
-            <a href="https://mochirii.com/social">Mochirii</a>
+            <a href="https://mochirii.com/">Mōchirīī</a>
         </div>
 
         <div class="footer-component-attribution">
             <div><span>© {{ getYear() }} {{ config.domain }}</span></div>
             <div class="spacer">·</div>
-            <div><span>Mochirii Social</span></div>
+            <div><span>Mōchirīī Social</span></div>
         </div>
     </div>
 </template>

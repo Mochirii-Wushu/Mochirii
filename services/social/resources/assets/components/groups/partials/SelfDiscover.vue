@@ -57,17 +57,17 @@
 
 			<div class="jumbotron mb-4 text-light bg-black" style="margin-top: 5rem;">
 	<div class="container">
-		<h1 class="display-4">Across Mochirii Social</h1>
+		<h1 class="display-4">Across Mōchirīī Social</h1>
 	<p class="mb-0">
 		<button
 			class="btn btn-outline-light"
 			@click="toggleTab('networkGroups')"
 			>
-			Explore Mochirii groups <i class="fal fa-chevron-right ml-2"></i>
+			Explore Mōchirīī groups <i class="fal fa-chevron-right ml-2"></i>
 		</button>
 	</p>
 	<hr class="my-4">
-	<p class="lead">We're in the early stages of Mochirii group tools. <a href="#">Learn more about Mochirii groups <i class="fal fa-chevron-right ml-2 fa-sm"></i></a></p>
+	<p class="lead">We're in the early stages of Mōchirīī group tools. <a href="#">Learn more about Mōchirīī groups <i class="fal fa-chevron-right ml-2 fa-sm"></i></a></p>
 	</div>
             </div>
 
@@ -301,12 +301,12 @@
 			<div class="row my-4 justify-content-center">
 				<div class="col-12 col-md-6">
 					<div class="title mb-4">
-						<span>Mochirii Groups</span>
+						<span>Mōchirīī Groups</span>
 						<button class="btn btn-light font-weight-bold" @click="toggleTab('home')">Go Back</button>
 					</div>
 					<div class="mt-3">
 						<div class="bg-white border text-center p-3">
-							<p class="font-weight-light mb-0">No Mochirii groups found</p>
+							<p class="font-weight-light mb-0">No Mōchirīī groups found</p>
 						</div>
 					</div>
 				</div>

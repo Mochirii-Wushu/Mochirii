@@ -3,5 +3,10 @@ social.mochirii.com {
 	request_body {
 		max_size 100MB
 	}
+	@privateMemberStorage {
+		path /storage/m/* /storage/_esm.t3/* /storage/g/* /storage/g1/* /storage/avatars/* /storage/cache/avatars/*
+		not path /storage/avatars/default.jpg /storage/avatars/default.png
+	}
+	respond @privateMemberStorage 404
 	reverse_proxy 127.0.0.1:8080
 }

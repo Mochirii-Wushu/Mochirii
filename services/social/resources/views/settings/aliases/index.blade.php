@@ -58,7 +58,7 @@
                             </div>
 
                             <hr>
-                            <p class="mb-0 small">Account migration is disabled during Mochirii Social staging. Contact a Mochirii admin before moving an account.</p>
+                            <p class="mb-0 small">Account migration is unavailable. Contact a Mōchirīī administrator if you need help moving an account.</p>
                         </div>
 
                     </div>

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Avatar;
 use App\Jobs\AvatarPipeline\AvatarStorageLargePurge;
 use App\Profile;
-use Cache;
 use Exception;
 use Illuminate\Support\Str;
 use League\Flysystem\UnableToCheckDirectoryExistence;
@@ -16,11 +15,6 @@ class AvatarService
 {
     public static function get($profile_id)
     {
-        $exists = Cache::get('avatar:'.$profile_id);
-        if ($exists) {
-            return $exists;
-        }
-
         $profile = Profile::find($profile_id);
         if (! $profile) {
             return config('app.url').'/storage/avatars/default.jpg';

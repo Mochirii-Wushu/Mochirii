@@ -12,7 +12,7 @@ return [
 	'timelines' => 'Línia Temporal',
 	'embed'	=> 'Incrustat',
 	'communityGuidelines' => 'Guies de la Comunitat',
-	'whatIsTheFediverse' => 'Què és el Fediverse?',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => 'Controlant la Visibilitat',
 	'blockingAccounts' => 'Bloquejant Comptes',
 	'safetyTips' => 'Apunts de Seguretat',

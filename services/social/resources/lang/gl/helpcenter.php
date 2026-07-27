@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Incrustar',
 
 	'communityGuidelines' => 'Guías da comunidade',
-	'whatIsTheFediverse' => 'Que é o fediverso?',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => 'Control da visibilidade',
 	'blockingAccounts' => 'Bloqueo de contas',
 	'safetyTips' => 'Seguridade',

@@ -5,8 +5,8 @@
     <div class="row justify-content-center align-items-center">
         <div class="col-12 col-md-7">
             <div class="logo">
-                <img src="{{ config('app.logo') }}" width="40" height="40" alt="Mochirii Social emblem">
-                <p class="font-weight-bold mb-0">Mochirii Social</p>
+                <img src="{{ config('app.logo') }}" width="40" height="40" alt="Mōchirīī Social emblem">
+                <p class="font-weight-bold mb-0">Mōchirīī Social</p>
             </div>
 
             @include('auth.curated-register.partials.progress-bar', ['step' => $step ?? 1])

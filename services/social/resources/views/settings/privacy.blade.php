@@ -23,7 +23,7 @@
       <label class="form-check-label font-weight-bold" for="is_private">
         Manually Review Follow Requests
       </label>
-      <p class="text-muted small help-text">When you get a follow request, Mochirii Social will not automatically approve it. You can instead manually confirm or deny the follow request. Your existing followers won't be affected.</p>
+      <p class="text-muted small help-text">When you get a follow request, Mōchirīī Social will not automatically approve it. You can instead manually confirm or deny the follow request. Your existing followers won't be affected.</p>
     </div>
 
     <div class="form-check pb-3">
