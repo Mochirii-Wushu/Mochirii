@@ -20,6 +20,13 @@ class HealthCheckController extends Controller
 
     public function readiness(Request $request)
     {
+        if (! $this->isDirectLoopbackRequest($request)) {
+            return response('', 404)->withHeaders([
+                'Content-Type' => 'text/plain',
+                'Cache-Control' => 'private, no-store',
+            ]);
+        }
+
         try {
             $database = DB::connection('readiness')->selectOne('select 1 as ready');
             if ((int) ($database->ready ?? 0) !== 1) {
@@ -42,5 +49,25 @@ class HealthCheckController extends Controller
             'Content-Type' => 'text/plain',
             'Cache-Control' => 'max-age=0, must-revalidate, no-cache, no-store',
         ]);
+    }
+
+    private function isDirectLoopbackRequest(Request $request): bool
+    {
+        if (! in_array($request->server('REMOTE_ADDR'), ['127.0.0.1', '::1'], true)) {
+            return false;
+        }
+
+        $host = strtolower((string) $request->server('HTTP_HOST'));
+        if (! in_array($host, ['127.0.0.1', '127.0.0.1:8080', '[::1]', '[::1]:8080'], true)) {
+            return false;
+        }
+
+        foreach (array_keys($request->headers->all()) as $header) {
+            if ($header === 'forwarded' || $header === 'x-real-ip' || str_starts_with($header, 'x-forwarded-')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

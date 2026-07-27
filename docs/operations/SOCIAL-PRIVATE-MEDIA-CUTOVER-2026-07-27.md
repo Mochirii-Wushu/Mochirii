@@ -18,9 +18,12 @@ The reviewed source foundation does the following:
   contracts;
 - authenticates browser media requests with the existing encrypted server
   session and native clients with a Passport bearer token;
-- revalidates current Mochirii membership and the resource audience on every
-  request, including blocks, following-only posts, direct-message
-  participants, story expiry, and private-group membership;
+- revalidates local suspension/deletion state and the resource audience on
+  every request, including blocks, following-only posts, direct-message
+  participants, story expiry, and private-group membership; a successful
+  external guild-membership decision may be cached for no more than 300
+  seconds and therefore is not a promise of an external provider call on every
+  request;
 - redirects cloud objects only to HTTPS, allowlisted, very-short-lived signed
   URLs and streams local files with byte-range support;
 - denies direct member-storage paths at Caddy and sends `private, no-store`,

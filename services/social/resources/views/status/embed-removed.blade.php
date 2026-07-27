@@ -12,10 +12,10 @@
 	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
 	<meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">
 	<meta name="medium" content="image">
-	<meta name="theme-color" content="#10c5f8">
+	<meta name="theme-color" content="#172a23">
 	<meta name="apple-mobile-web-app-capable" content="yes">
-	<link rel="shortcut icon" type="image/png" href="/img/favicon.png?v=2">
-	<link rel="apple-touch-icon" type="image/png" href="/img/favicon.png?v=2">
+	<link rel="shortcut icon" type="image/png" href="/img/mochirii-icon.png?v=3">
+	<link rel="apple-touch-icon" type="image/png" href="/img/mochirii-icon.png?v=3">
 	<link href="{{ mix('css/app.css') }}" rel="stylesheet">
 	<style type="text/css">
 		.embed-card {

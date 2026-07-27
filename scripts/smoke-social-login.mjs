@@ -70,7 +70,7 @@ const server = spawn(
       ...process.env,
       APP_ENV: "testing",
       APP_DEBUG: "false",
-      APP_NAME: "Mochirii Social",
+      APP_NAME: "Mochirii",
       APP_URL: baseUrl,
       APP_DOMAIN: "127.0.0.1",
       ADMIN_DOMAIN: "127.0.0.1",

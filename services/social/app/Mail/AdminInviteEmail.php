@@ -20,7 +20,7 @@ class AdminInviteEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'You\'ve been invited to join '.config('app.name').'!',
+            subject: 'You\'ve been invited to join '.config('mochirii-branding.display_name').'!',
         );
     }
 

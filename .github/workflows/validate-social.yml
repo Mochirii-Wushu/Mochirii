@@ -138,6 +138,12 @@ jobs:
           tests/Feature/RemoteOidcTest.php
           tests/Feature/LoginTest.php
           tests/Feature/HealthCheckTest.php
+          tests/Feature/MochiriiBrandingTest.php
+          tests/Feature/ReadinessBoundarySourceContractTest.php
+          tests/Feature/RetiredAccountCreationBoundaryTest.php
+          tests/Feature/PassportSurfaceBoundaryTest.php
+          tests/Feature/ExceptionHandlerTest.php
+          tests/Feature/RetiredSurfaceSourceContractTest.php
           tests/Feature/DisabledUpstreamServicesTest.php
           tests/Feature/MochiriiSocialSyncServiceTest.php
           tests/Feature/OAuthTokenRevocationTest.php

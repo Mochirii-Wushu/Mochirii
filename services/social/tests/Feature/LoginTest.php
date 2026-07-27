@@ -77,7 +77,7 @@ class LoginTest extends TestCase
         config([
             // Runtime/provider identifiers deliberately remain ASCII. The
             // customer-visible mark is owned by mochirii-branding.php.
-            'app.name' => 'Mochirii Social',
+            'app.name' => 'Mochirii',
             'app.url' => 'https://social.mochirii.com',
             'pixelfed.domain.app' => 'Mochirii Social',
             'remote-auth.oidc.enabled' => true,

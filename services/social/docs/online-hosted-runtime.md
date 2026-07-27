@@ -42,6 +42,19 @@ The production Compose file accepts only an immutable GHCR digest, contains no
 build directives, binds the application to `127.0.0.1:8080`, and uses absolute
 data paths. Caddy is the only public path to the app.
 
+Process liveness and dependency readiness are deliberately separate. The
+public `/api/service/health-check` confirms only that the application process
+can answer. The dependency probe is callable only from the application
+container loopback and must be run exactly as:
+
+```sh
+docker exec pixelfed-app curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8080/api/service/readiness-check
+```
+
+It returns `READY` only after bounded MariaDB and Redis probes succeed. The
+same path through `https://social.mochirii.com` must always return opaque
+`404`; it is not a public monitoring endpoint.
+
 ## Deployment Contract
 
 The `Deploy Mochirii Social production` workflow requires:
@@ -69,6 +82,12 @@ wrapper. The wrapper also requires the bundled Compose file to match the
 root-owned template accepted during bootstrap, so possession of the deploy key
 cannot introduce a new privileged mount or service definition.
 
+The image workflow does not install or attest `/etc/caddy/Caddyfile`. A Caddy
+boundary change is a separate host packet: capture the active and reviewed
+SHA-256 values, create a root-owned backup, validate a candidate, atomically
+replace the target, reload rather than restart Caddy, and prove rollback. Never
+assume an image publication activated new Caddy matchers.
+
 Image-only failures automatically restore the prior release. A release that
 applies a database migration does not pretend to offer automatic schema
 rollback; it remains in maintenance mode for a forward fix or tested restore.
@@ -92,6 +111,24 @@ Supabase Auth boundary, unsigned Reaper and member-access rejection, and the
 public Discord API. This workflow is the no-workstation independence proof; it
 does not send Discord messages or mutate commands, accounts, or provider
 settings.
+
+## Authorization And Revocation Boundary
+
+First-party Social authorization permits only a pre-registered OAuth
+authorization-code client with S256 PKCE and an exact callback. Implicit grants,
+out-of-band redirects, public client self-registration, personal access tokens,
+and interactive token-management surfaces remain unavailable. The Website
+binds consent to the exact server-only `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID`; a
+missing or mismatched value fails closed before consent.
+
+Local account suspension, deletion state, and current resource audience are
+checked on every request. A successful external membership decision may be
+cached for no more than 300 seconds to bound provider load; a denial is never
+converted into a positive cache entry. This does not mean the external
+provider is called on every request. Lower-latency external revocation requires
+a separately reviewed authenticated invalidation hook that evicts only the
+affected member decision; do not shorten or bypass the current boundary by
+adding polling, broad cache flushes, or a new paid service.
 
 ## Bootstrap And Rollback
 

@@ -92,8 +92,11 @@ variables, database contents, member identifiers, or OAuth credentials.
    - docker compose ps
    - docker inspect state and health for the application, database, cache,
      queue worker, and scheduler
-   - the origin-only `/api/service/readiness-check`, which must return `READY`
-     only after both MariaDB and Redis respond within their bounded probes
+   - the origin-only `/api/service/readiness-check`, using exactly
+     `docker exec pixelfed-app curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8080/api/service/readiness-check`;
+     it must return `READY` only after both MariaDB and Redis respond within
+     their bounded probes, while the same route through
+     `https://social.mochirii.com` must remain an opaque `404`
    - bounded container logs for the same window
    - kernel out-of-memory events for the same window
    Route all captured container diagnostics through the source redaction helper
@@ -122,6 +125,9 @@ five-second-bounded `/api/service/readiness-check` dependency probe.
 - Intended after value: one immutable digest built from the exact merged commit
   containing only the reviewed source changes. No environment, database,
   storage, DNS, Cloudflare, OAuth-client, Droplet-size, or secret change.
+- Boundary: the image workflow does not install or attest the host Caddyfile.
+  The retired-route and dependency-readiness edge matchers do not become live
+  until the separately approved Caddy packet below is applied and verified.
 - Writer: the protected GitHub production workflow and its existing
   least-privilege deployment identity.
 - Verification:
@@ -196,6 +202,70 @@ text, screenshots, or provider tickets.
   affected session privately, request to expose a credential for comparison,
   or any broader provider-account change.
 
+## Packet D: atomic production Caddy boundary
+
+**Separate exact approval required; no action was performed.**
+
+- Target: only `/etc/caddy/Caddyfile` on the current Social host, sourced from
+  the exact reviewed `services/social/caddy/Caddyfile`. Do not change DNS,
+  TLS, Cloudflare, Docker, application environment, or any other host file.
+- Before capture: merged commit; source and active-target SHA-256 values;
+  `caddy validate` result; Caddy service state; direct container readiness;
+  public liveness; public readiness `404`; and status-only reads for every
+  retired route. Store no response bodies, cookies, query values, member data,
+  or credentials.
+- Writer: one MFA-authenticated host operator with root access, using the
+  reviewed `services/social/scripts/install-production-caddy.sh` from the
+  exact merged checkout.
+- Intended write: create a root-owned mode-`0600` backup of the active target,
+  validate a root-owned candidate in `/etc/caddy`, atomically rename the
+  candidate over the target on the same filesystem, and reload Caddy. Do not
+  restart Caddy or any container.
+- Verification:
+  1. The active target SHA-256 exactly equals the reviewed source SHA-256.
+  2. `caddy validate` passes before and after the atomic rename.
+  3. `docker exec pixelfed-app curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8080/api/service/readiness-check`
+     succeeds, while the public readiness route returns `404`.
+  4. Every reviewed retired installer, registration, client-management,
+     personal-token, token-management, and invite path returns opaque `404`.
+  5. `/oauth/token` and `/oauth/authorize` are not caught by a Caddy `404`;
+     the first-party authorization-code boundary remains reachable.
+  6. Landing, login, health, and one fresh first-party authorization flow pass
+     without exposing upstream branding or diagnostic detail.
+- Rollback: validate the captured root-owned backup, atomically rename a copy
+  over the target, reload Caddy, and repeat the same direct/public gates.
+- Stop conditions: source/target hash ambiguity, invalid candidate, missing
+  backup, reload failure, dependency failure, any retired route not `404`, an
+  OAuth route caught by the matcher, unexpected configuration diff, or a need
+  to restart unrelated services.
+
+## Packet E: server-only Website OAuth client binding
+
+**Separate exact approval required; no action was performed.**
+
+- Target: only the `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` variable in the existing
+  Vercel Website project, for Production and Preview. It is an identifier, not
+  a client secret, but its value must not be copied into Git, PRs, logs, docs,
+  screenshots, tickets, or customer responses.
+- Before capture: presence/absence and scope of the existing variable; the
+  registered first-party client inventory; exact allowed callback
+  `https://social.mochirii.com/auth/oidc/callback`; authorization-code flow;
+  S256 PKCE; and confirmation that no out-of-band redirect is registered.
+- Intended after value: the exact registered first-party client ID in the
+  server-only variable for Production and Preview. Do not create any
+  `NEXT_PUBLIC_` equivalent, client secret, OAuth client, redirect, or provider
+  setting.
+- Verification: deploy a reviewed Preview; a missing or mismatched ID fails
+  closed without rendering consent; the exact matching client completes one
+  authorization-code plus S256 PKCE flow; browser bundles and rendered HTML do
+  not contain the identifier; and no provider error detail reaches members.
+- Rollback: restore the captured previous value and scopes, or remove the
+  variable if it was previously absent, then redeploy the prior Website
+  commit and repeat the fail-closed checks.
+- Stop conditions: ambiguous client inventory, callback mismatch, implicit or
+  out-of-band flow, browser-exposed variable, requested secret handling,
+  unrelated environment diff, or inability to prove the deployed source.
+
 ## References
 
 - [Supabase OAuth 2.1 flow](https://supabase.com/docs/guides/auth/oauth-server/oauth-flows)
@@ -207,3 +277,5 @@ text, screenshots, or provider tickets.
 - [Cloudflare 522 guidance](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-522/)
 - [Caddy reverse proxy health checks](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#active-health-checks)
 - [DigitalOcean metrics agent](https://docs.digitalocean.com/products/monitoring/how-to/install-metrics-agent/)
+- [Caddy command-line validation](https://caddyserver.com/docs/command-line#caddy-validate)
+- [Next.js environment variables](https://nextjs.org/docs/app/guides/environment-variables)

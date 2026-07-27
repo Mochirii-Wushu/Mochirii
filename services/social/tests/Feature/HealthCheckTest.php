@@ -34,7 +34,7 @@ class HealthCheckTest extends TestCase
         $redis->shouldReceive('command')->once()->with('ping')->andReturn('PONG');
         Redis::shouldReceive('connection')->once()->with('readiness')->andReturn($redis);
 
-        $response = $this->get('/api/service/readiness-check');
+        $response = $this->getReadinessFromLoopback();
 
         $response->assertOk()->assertSeeText('READY');
         $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
@@ -46,7 +46,7 @@ class HealthCheckTest extends TestCase
         DB::shouldReceive('connection')->once()->with('readiness')->andThrow(new RuntimeException('unavailable'));
         Redis::shouldReceive('connection')->never();
 
-        $response = $this->get('/api/service/readiness-check');
+        $response = $this->getReadinessFromLoopback();
 
         $response->assertStatus(503)->assertSeeText('NOT READY');
         $this->assertSame('5', $response->headers->get('Retry-After'));
@@ -64,6 +64,59 @@ class HealthCheckTest extends TestCase
         $redis->shouldReceive('command')->once()->with('ping')->andReturn(false);
         Redis::shouldReceive('connection')->once()->with('readiness')->andReturn($redis);
 
-        $this->get('/api/service/readiness-check')->assertStatus(503)->assertSeeText('NOT READY');
+        $this->getReadinessFromLoopback()->assertStatus(503)->assertSeeText('NOT READY');
+    }
+
+    #[Test]
+    public function readiness_is_opaque_to_public_requests_without_dependency_probes(): void
+    {
+        DB::shouldReceive('connection')->never();
+        Redis::shouldReceive('connection')->never();
+
+        $response = $this
+            ->withServerVariables([
+                'REMOTE_ADDR' => '203.0.113.10',
+                'HTTP_HOST' => 'social.mochirii.com',
+            ])
+            ->get('/api/service/readiness-check');
+
+        $response
+            ->assertNotFound()
+            ->assertContent('');
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
+    }
+
+    #[Test]
+    public function readiness_is_opaque_to_reverse_proxy_requests_without_dependency_probes(): void
+    {
+        DB::shouldReceive('connection')->never();
+        Redis::shouldReceive('connection')->never();
+
+        $response = $this
+            ->withServerVariables([
+                'REMOTE_ADDR' => '127.0.0.1',
+                'HTTP_HOST' => 'social.mochirii.com',
+            ])
+            ->withHeaders([
+                'Forwarded' => 'for=203.0.113.10;proto=https',
+                'X-Forwarded-For' => '203.0.113.10',
+                'X-Forwarded-Host' => 'social.mochirii.com',
+                'X-Forwarded-Proto' => 'https',
+            ])
+            ->get('/api/service/readiness-check');
+
+        $response
+            ->assertNotFound()
+            ->assertContent('');
+        $this->assertStringContainsString('no-store', (string) $response->headers->get('Cache-Control'));
+    }
+
+    private function getReadinessFromLoopback()
+    {
+        return $this
+            ->withServerVariables([
+                'REMOTE_ADDR' => '127.0.0.1',
+            ])
+            ->get('http://127.0.0.1:8080/api/service/readiness-check');
     }
 }

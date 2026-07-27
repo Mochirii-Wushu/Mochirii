@@ -36,6 +36,9 @@ const publicSurfaceDirs = [
 ];
 const publicSurfaceFiles = [
   ".env.docker.example",
+  "public/manifest.json",
+  "public/offline.html",
+  "public/sw.js",
   "package.json",
   "package-lock.json",
   "config/instance.php",
@@ -206,6 +209,56 @@ for (const file of publicSurfaceDirs.flatMap(walkFiles)) {
   }
 }
 
+const manifest = read("public/manifest.json");
+requireIncludes("public/manifest.json", manifest, [
+  `"name": "${publicDisplayName}"`,
+  '"short_name": "Mōchī"',
+  `"description": "${publicDescription}"`,
+  '"src": "/img/mochirii-icon.png"',
+]);
+
+const offlinePage = read("public/offline.html");
+requireIncludes("public/offline.html", offlinePage, [
+  "Mōchirīī Social is offline",
+  '/img/mochirii-icon.png',
+  'alt="Mōchirīī emblem"',
+]);
+
+const serviceWorker = read("public/sw.js");
+requireIncludes("public/sw.js", serviceWorker, [
+  'const OFFLINE_VERSION = 2;',
+  '"/img/mochirii-icon.png"',
+]);
+
+for (const removedAsset of [
+  "public/img/favicon.png",
+  "public/img/pixelfed-icon-black.svg",
+  "public/img/pixelfed-icon-color.png",
+  "public/img/pixelfed-icon-color.svg",
+  "public/img/pixelfed-icon-grey.svg",
+  "public/img/pixelfed-icon-white.svg",
+]) {
+  if (fs.existsSync(path.join(root, removedAsset))) {
+    failures.push(`${removedAsset} must not remain on the public Social surface`);
+  }
+}
+
+for (const file of publicSurfaceDirs.flatMap(walkFiles)) {
+  const contents = read(file);
+  if (contents.includes("/img/favicon.png") || contents.includes("#10c5f8")) {
+    failures.push(`${file} must use the canonical Mōchirīī emblem and theme color`);
+  }
+}
+
+for (const file of [...walkFiles("public/js"), ...walkFiles("public/css")]) {
+  const contents = read(file);
+  for (const token of ["pixelfed-icon", "A members-only Mochirii social hall", "Mochirii Social"]) {
+    if (contents.includes(token)) {
+      failures.push(`${file} contains stale generated public branding: ${token}`);
+    }
+  }
+}
+
 const brandingConfig = read("config/mochirii-branding.php");
 requireIncludes("config/mochirii-branding.php", brandingConfig, [
   `'display_name' => '${publicDisplayName}'`,
@@ -221,7 +274,7 @@ requireIncludes("config/instance.php", instanceConfig, [
 ]);
 const applicationConfig = read("config/app.php");
 requireIncludes("config/app.php", applicationConfig, [
-  "'name' => env('APP_NAME', 'Mōchirīī Social')",
+  "'name' => env('APP_NAME', 'Mochirii')",
   `'short_description' => env('PF_SHORT_DESCRIPTION', '${publicDescription}')`,
   `'description' => env('PF_DESCRIPTION', '${publicDescription}')`,
 ]);
@@ -371,7 +424,38 @@ requireIncludes("docs/mochirii-social-sync.md", syncDoc, [
   "social_accounts",
   "federation_enabled = false",
   "hard safety caps",
+  "at most 300 seconds",
+  "must not create",
+  "a positive cache entry",
+  "authenticated invalidation hook",
 ]);
+
+const onlineRuntimeDoc = read("docs/online-hosted-runtime.md");
+requireIncludes("docs/online-hosted-runtime.md", onlineRuntimeDoc, [
+  "docker exec pixelfed-app curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8080/api/service/readiness-check",
+  "must always return opaque",
+  "image workflow does not install or attest `/etc/caddy/Caddyfile`",
+  "authorization-code client with S256 PKCE",
+  "server-only `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID`",
+  "cached for no more than 300 seconds",
+  "authenticated invalidation hook",
+]);
+
+const reliabilityPacket = readRepository(
+  "docs/operations/SOCIAL-RELIABILITY-PROVIDER-PACKETS-2026-07-27.md",
+);
+requireIncludes(
+  "docs/operations/SOCIAL-RELIABILITY-PROVIDER-PACKETS-2026-07-27.md",
+  reliabilityPacket,
+  [
+    "## Packet D: atomic production Caddy boundary",
+    "## Packet E: server-only Website OAuth client binding",
+    "root-owned mode-`0600` backup",
+    "atomically rename",
+    "`MOCHIRII_SOCIAL_OAUTH_CLIENT_ID`",
+    "`NEXT_PUBLIC_` equivalent",
+  ],
+);
 
 const upstreamDoc = read("docs/upstream-sync-policy.md");
 requireIncludes("docs/upstream-sync-policy.md", upstreamDoc, [
@@ -417,8 +501,10 @@ requireIncludes("docs/fediverse-activation-runbook.md", fediverseDoc, [
 
 const envExample = read(".env.example");
 requireIncludes(".env.example", envExample, [
-  'APP_NAME="Mōchirīī Social"',
+  'APP_NAME="Mochirii"',
   'OPEN_REGISTRATION="false"',
+  'APP_REGISTER="false"',
+  'PF_ALLOW_APP_REGISTRATION="false"',
   'ACTIVITY_PUB="false"',
   'MAIL_FROM_NAME="Mōchirīī Social"',
   'PF_INSTANCE_USE_BEAGLE_API="false"',
@@ -429,8 +515,10 @@ requireIncludes(".env.example", envExample, [
 
 const envDockerExample = read(".env.docker.example");
 requireIncludes(".env.docker.example", envDockerExample, [
-  'APP_NAME="Mōchirīī Social"',
+  'APP_NAME="Mochirii"',
   'OPEN_REGISTRATION="false"',
+  'APP_REGISTER="false"',
+  'PF_ALLOW_APP_REGISTRATION="false"',
   'INSTANCE_DISCOVER_PUBLIC="false"',
   'MAX_PHOTO_SIZE="92160"',
   'MAX_AVATAR_SIZE="92160"',
@@ -454,6 +542,45 @@ requireIncludes(".env.docker.example", envDockerExample, [
   'INSTANCE_NOTIFY_APP_GATEWAY="false"',
   'GROUPS_FEDERATION="false"',
   'MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS="2"',
+]);
+
+const envTesting = read(".env.testing");
+requireIncludes(".env.testing", envTesting, [
+  'APP_NAME="Mochirii"',
+  'APP_REGISTER=false',
+  'PF_ALLOW_APP_REGISTRATION=false',
+]);
+
+const adminInviteEmail = read("app/Mail/AdminInviteEmail.php");
+requireIncludes("app/Mail/AdminInviteEmail.php", adminInviteEmail, [
+  "config('mochirii-branding.display_name')",
+]);
+if (adminInviteEmail.includes("config('app.name')")) {
+  failures.push("app/Mail/AdminInviteEmail.php must not expose the technical APP_NAME in an email subject");
+}
+
+const caddy = read("caddy/Caddyfile");
+requireIncludes("caddy/Caddyfile", caddy, [
+  "@dependencyReadiness path /api/service/readiness-check",
+  'header @dependencyReadiness Cache-Control "private, no-store"',
+  "respond @dependencyReadiness 404",
+  "@retiredCreationAndTokenManagement path /installer*",
+  "respond @retiredCreationAndTokenManagement 404",
+  "reverse_proxy 127.0.0.1:8080",
+]);
+if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
+  failures.push("caddy/Caddyfile must reject readiness before the public reverse proxy");
+}
+
+const caddyInstaller = read("scripts/install-production-caddy.sh");
+requireIncludes("scripts/install-production-caddy.sh", caddyInstaller, [
+  "mktemp /etc/caddy/Caddyfile.mochirii-candidate.XXXXXX",
+  "mktemp /etc/caddy/Caddyfile.mochirii-backup.XXXXXX",
+  'install -m 0600 -o root -g root "$target_config" "$rollback_config"',
+  'mv -f "$candidate_config" "$target_config"',
+  "docker exec pixelfed-app curl",
+  "retired_paths=(",
+  "for path in /oauth/token /oauth/authorize",
 ]);
 
 const dockerCompose = read("docker-compose.yml");
@@ -550,6 +677,12 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0",
   "Rebuild and verify committed Social assets",
   "tests/Feature/DisabledUpstreamServicesTest.php",
+  "tests/Feature/MochiriiBrandingTest.php",
+  "tests/Feature/ReadinessBoundarySourceContractTest.php",
+  "tests/Feature/RetiredAccountCreationBoundaryTest.php",
+  "tests/Feature/PassportSurfaceBoundaryTest.php",
+  "tests/Feature/ExceptionHandlerTest.php",
+  "tests/Feature/RetiredSurfaceSourceContractTest.php",
   "npm run production",
   "git diff --exit-code",
   "git ls-files --others --exclude-standard",
@@ -728,13 +861,28 @@ requireIncludes("routes/web.php", webRoutes, [
   "Route::get('network', 'TimelineController@network')->name('timeline.network')->middleware('admin.notfound')",
   "Route::get('import', fn () => abort(404))->name('help.import')",
   "Route::get('discover', fn () => abort(404))->name('help.discover')",
-  "Route::get('applications', 'SettingsController@applications')->name('settings.applications')->middleware(['dangerzone', 'admin.notfound'])",
   "Route::post('data-export/account', 'SettingsController@exportAccount')->middleware(['dangerzone', 'admin.notfound'])",
-  "Route::get('developers', 'SettingsController@developers')->name('settings.developers')->middleware(['dangerzone', 'admin.notfound'])",
+  "'oauth/clients',",
+  "'oauth/personal-access-tokens',",
+  "'oauth/token/refresh',",
+  "'settings/developers',",
+  "'settings/applications',",
+  'Route::any("{$retiredPath}/{path?}", static fn () => abort(404))',
   "Route::get('labs', 'SettingsController@labs')->name('settings.labs')->middleware('admin.notfound')",
   "Route::group(['prefix' => 'import', 'middleware' => ['dangerzone', 'admin.notfound']]",
   "middleware('mochirii.federation-disabled')",
 ]);
+for (const retiredControllerRoute of [
+  "SettingsController@applications",
+  "SettingsController@developers",
+  "Passport\\AuthorizedAccessTokenController",
+  "Passport\\ClientController",
+  "Passport\\PersonalAccessTokenController",
+]) {
+  if (webRoutes.includes(retiredControllerRoute)) {
+    failures.push(`routes/web.php restores retired account/client surface: ${retiredControllerRoute}`);
+  }
+}
 
 const apiRoutes = read("routes/api.php");
 requireIncludes("routes/api.php", apiRoutes, [
@@ -811,6 +959,7 @@ requireIncludes("scripts/smoke-social-login.mjs", socialLoginSmoke, [
   '{ label: "360 portrait", width: 360, height: 800 }',
   '{ label: "390 portrait", width: 390, height: 844 }',
   "Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.",
+  'APP_NAME: "Mochirii"',
   "public navigation exposes upstream branding",
   "document overflows horizontally",
   "primary control is shorter than 44px",
@@ -826,12 +975,15 @@ if (repositoryPackageJson.scripts?.["smoke:social-login"] !== "node scripts/smok
 const settingsSidebar = read("resources/views/settings/partial/sidebar.blade.php");
 requireIncludes("resources/views/settings/partial/sidebar.blade.php", settingsSidebar, [
   "Auth::user()->is_admin",
-  "settings.applications",
-  "settings.developers",
   "settings.import",
   "settings.dataexport",
   "settings.labs",
 ]);
+for (const retiredSetting of ["settings.applications", "settings.developers", "settings.invites"]) {
+  if (settingsSidebar.includes(retiredSetting)) {
+    failures.push(`resources/views/settings/partial/sidebar.blade.php exposes retired setting: ${retiredSetting}`);
+  }
+}
 
 const spaRoutes = read("resources/assets/js/spa.js");
 requireIncludes("resources/assets/js/spa.js", spaRoutes, [

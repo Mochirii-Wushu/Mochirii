@@ -140,6 +140,12 @@ verify_runtime() {
 
   docker exec pixelfed-horizon php artisan horizon:status --no-ansi
   docker exec pixelfed-scheduler php artisan schedule:list --no-ansi >/dev/null
+  docker exec pixelfed-app curl \
+    --fail \
+    --silent \
+    --show-error \
+    --max-time 5 \
+    http://127.0.0.1:8080/api/service/readiness-check >/dev/null
   curl \
     --fail \
     --silent \
@@ -154,6 +160,19 @@ verify_runtime() {
     --location \
     --max-time 30 \
     https://social.mochirii.com/ >/dev/null
+
+  local public_readiness_status
+  public_readiness_status="$(curl \
+    --silent \
+    --show-error \
+    --max-time 20 \
+    --output /dev/null \
+    --write-out '%{http_code}' \
+    https://social.mochirii.com/api/service/readiness-check)"
+  [[ "$public_readiness_status" == "404" ]] || {
+    echo "Public dependency readiness route returned HTTP $public_readiness_status instead of 404." >&2
+    return 1
+  }
 
   docker exec pixelfed-app php artisan tinker --execute="
     if (

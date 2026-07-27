@@ -150,6 +150,10 @@ requireIncludes(runtimeLibraryPath, runtimeLibrary, [
   "https://social.mochirii.com/",
   "wait_for_container_running()",
   "wait_for_container_health pixelfed-app 300",
+  "docker exec pixelfed-app curl",
+  "http://127.0.0.1:8080/api/service/readiness-check",
+  "https://social.mochirii.com/api/service/readiness-check",
+  '[[ "$public_readiness_status" == "404" ]]',
   "verify_spaces_round_trip",
   'Storage::disk("s3")',
   "Spaces write, read, and delete gates passed.",
@@ -170,11 +174,17 @@ requireIncludes(entrypointPath, entrypoint, [
 const healthControllerPath = "app/Http/Controllers/HealthCheckController.php";
 const healthController = read(healthControllerPath);
 requireIncludes(healthControllerPath, healthController, [
+  "if (! $this->isDirectLoopbackRequest($request))",
+  "['127.0.0.1', '::1']",
+  "str_starts_with($header, 'x-forwarded-')",
   "DB::connection('readiness')->selectOne('select 1 as ready')",
   "Redis::connection('readiness')->command('ping')",
   "['PONG', '+PONG']",
   "response('NOT READY', 503)",
 ]);
+if (healthController.indexOf("if (! $this->isDirectLoopbackRequest($request))") > healthController.indexOf("DB::connection('readiness')")) {
+  failures.push(`${healthControllerPath} must authorize direct loopback before probing dependencies`);
+}
 
 const databaseConfigPath = "config/database.php";
 const databaseConfig = read(databaseConfigPath);
@@ -227,15 +237,31 @@ const caddy = read(caddyPath);
 requireIncludes(caddyPath, caddy, [
   "social.mochirii.com",
   "max_size 100MB",
+  "@dependencyReadiness path /api/service/readiness-check",
+  'header @dependencyReadiness Cache-Control "private, no-store"',
+  "respond @dependencyReadiness 404",
   "reverse_proxy 127.0.0.1:8080",
 ]);
+if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
+  failures.push(`${caddyPath} must reject the dependency readiness route before the public reverse proxy`);
+}
+
 const caddyInstallerPath = "scripts/install-production-caddy.sh";
 const caddyInstaller = read(caddyInstallerPath);
 requireIncludes(caddyInstallerPath, caddyInstaller, [
   "caddy validate",
   "systemctl reload caddy",
   "rollback",
+  "mktemp /etc/caddy/Caddyfile.mochirii-candidate.XXXXXX",
+  "mktemp /etc/caddy/Caddyfile.mochirii-backup.XXXXXX",
+  'install -m 0600 -o root -g root "$target_config" "$rollback_config"',
+  'mv -f "$candidate_config" "$target_config"',
+  'docker exec pixelfed-app curl',
+  "retired_paths=(",
+  "for path in /oauth/token /oauth/authorize",
   "https://social.mochirii.com/",
+  "https://social.mochirii.com/api/service/readiness-check",
+  '[[ "$readiness_status" == "404" ]]',
 ]);
 
 for (const [relativePath, text] of [
