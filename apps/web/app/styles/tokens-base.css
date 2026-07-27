@@ -204,6 +204,11 @@ img{max-width:100%;display:block;}
   .col-8,.col-7,.col-6,.col-5,.col-4{grid-column:span 12;}
 }
 
+@media (max-width:640px){
+  .grid-12{grid-template-columns:minmax(0,1fr);}
+  .col-12,.col-8,.col-7,.col-6,.col-5,.col-4{grid-column:1 / -1;}
+}
+
 /* =========================================================
    HERO â€” Hero image shell + overlap card positioning
    ========================================================= */
