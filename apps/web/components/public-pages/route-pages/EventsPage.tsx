@@ -1,3 +1,4 @@
+import Link from "next/link";
 import eventsData from "@/public/data/events.json";
 import guildScheduleData from "@/public/data/guild-schedule.json";
 import { DISCORD_INVITE_URL } from "@/lib/public-urls";
@@ -154,7 +155,7 @@ export function EventsPage() {
                     </a>
                   </span>
                   <span>
-                    <a href="/join">How to join</a>
+                    <Link href="/join">How to join</Link>
                   </span>
                 </div>
               </div>

@@ -46,6 +46,7 @@ const routeStyles = [
   "member-leader-dashboard.css",
   "shell-lightbox.css",
   "mochi-pets.css",
+  "public-not-found.css",
 ];
 
 globalStyles.forEach((style) => expectIncludes("root layout", rootLayout, style));
@@ -87,11 +88,42 @@ const routeContracts = {
   "apps/web/app/gallery-submit/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-forms.css", "member-gallery-submit.css"],
   "apps/web/app/leader-dashboard/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-forms.css", "member-gallery-submit.css", "member-leader-dashboard.css"],
   "apps/web/app/games/mochi-pets/layout.tsx": ["mochi-pets.css"],
+  "apps/web/app/not-found.tsx": ["public-not-found.css"],
 };
 
 for (const [file, styles] of Object.entries(routeContracts)) {
   const source = read(file);
   styles.forEach((style) => expectIncludes(file, source, style));
+}
+
+const rootNotFound = read("apps/web/app/not-found.tsx");
+[
+  '<BodyPageMarker page="not-found" />',
+  'id="main"',
+  "Page not found",
+  "Return Home",
+  "/assets/img/brand/emblem.webp",
+  'title: "Page not found | Mōchirīī"',
+  "alternates: { canonical: null }",
+].forEach((snippet) => expectIncludes("root not-found", rootNotFound, snippet));
+
+const catchAllNotFound = read("apps/web/app/[...not-found]/page.tsx");
+[
+  'import { notFound } from "next/navigation";',
+  'title: "Page not found | Mōchirīī"',
+  "alternates: { canonical: null }",
+  "notFound();",
+].forEach((snippet) => expectIncludes("routing-level catch-all not-found", catchAllNotFound, snippet));
+
+const spinnerCatchAllNotFound = read("apps/web/app/spinner/[...not-found]/page.tsx");
+[
+  'import { notFound } from "next/navigation";',
+  "notFound();",
+].forEach((snippet) => expectIncludes("opaque spinner catch-all not-found", spinnerCatchAllNotFound, snippet));
+
+const spinnerNotFound = read("apps/web/app/spinner/not-found.tsx");
+for (const snippet of ["Page not found", "Return Home", "/assets/img/brand/emblem.webp"]) {
+  expectExcludes("opaque spinner not-found", spinnerNotFound, snippet);
 }
 
 for (const file of [

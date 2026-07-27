@@ -1,6 +1,7 @@
 const DEFAULT_BASE_URL = "https://mochirii.vercel.app";
 const TIMEOUT_MS = 30000;
 const retiredGameRoute = `/games/${["mochi", "social"].join("-")}`;
+const unknownRoute = "/__mochirii-unknown-route__";
 
 const cleanRoutes = [
   "/",
@@ -117,6 +118,29 @@ async function checkRetiredRoute(baseUrl, path) {
   console.log(`OK retired route ${path} 404`);
 }
 
+async function checkBrandedNotFound(baseUrl) {
+  const response = await request(baseUrl, unknownRoute, { method: "GET" });
+  const body = await response.text();
+
+  if (response.status !== 404) {
+    throw new Error(`${unknownRoute} expected HTTP 404, got ${response.status}`);
+  }
+
+  for (const pattern of [/Page not found/, /Return Home/, /Mōchirīī/]) {
+    if (!pattern.test(body)) {
+      throw new Error(`${unknownRoute} did not render the branded recovery page`);
+    }
+  }
+
+  const robotsTags = body.match(/<meta\b[^>]*>/gi) || [];
+  const noindex = robotsTags.some((tag) => /name=["']robots["']/i.test(tag) && /content=["'][^"']*\bnoindex\b/i.test(tag));
+  if (!noindex) {
+    throw new Error(`${unknownRoute} did not render the automatic noindex directive`);
+  }
+
+  console.log(`OK branded unknown route ${unknownRoute} 404`);
+}
+
 async function checkRedirect(baseUrl, from, expectedPath) {
   const first = await request(baseUrl, from, { redirect: "manual" });
   const followed = await request(baseUrl, from, { redirect: "follow" });
@@ -163,6 +187,8 @@ try {
   for (const route of retiredRoutes) {
     await checkRetiredRoute(baseUrl, route);
   }
+
+  await checkBrandedNotFound(baseUrl);
 
   for (const [from, expectedPath] of legacyRedirects) {
     await checkRedirect(baseUrl, from, expectedPath);
