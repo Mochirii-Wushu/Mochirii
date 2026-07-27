@@ -23,6 +23,7 @@ const routes = [
   { route: "/raffle", label: "Raffle", expectMain: true, expectNoIframe: true, expectNoForm: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
   { route: "/raffle/rules", label: "Raffle Rules Status", expectMain: true, expectNoIframe: true, expectNoForm: true, requireOpaquePanels: [".page-main .glass-card"] },
   { route: "/gallery", label: "Gallery", expectMain: true, expectLiveRegion: true },
+  { route: "/tome", label: "Tome", expectMain: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
   { route: "/auth", label: "Auth", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/account", label: "Account", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
@@ -49,6 +50,7 @@ const viewports = [
   { name: "mobile-390x900", width: 390, height: 900 },
   { name: "mobile-414x896", width: 414, height: 896 },
   { name: "mobile-430x932", width: 430, height: 932 },
+  { name: "mobile-320x568-text-200", width: 320, height: 568, textScale: 2 },
   { name: "desktop-1280x720", width: 1280, height: 720 },
   { name: "desktop-1366x768", width: 1366, height: 768 },
   { name: "desktop-1440x900", width: 1440, height: 900 },
@@ -169,6 +171,13 @@ async function inspectRoute(context, route, viewport) {
     gotoError = safeText(error?.message || String(error));
   }
 
+  if (viewport.textScale) {
+    await page.evaluate((scale) => {
+      document.documentElement.style.fontSize = `${scale * 100}%`;
+    }, viewport.textScale);
+    await page.waitForTimeout(50);
+  }
+
   const status = response?.status() || 0;
   const expectedStatus = route.expectedStatus ?? 200;
   const statusOk = status === expectedStatus && !gotoError;
@@ -220,6 +229,23 @@ async function inspectRoute(context, route, viewport) {
     const footerColumnBounds = footerColumns
       ? [...footerColumns.children].map((element) => element.getBoundingClientRect())
       : [];
+    const textOverflowSamples = [...document.querySelectorAll(".page-main .glass-card, .page-main p, .page-main li")]
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        const bounds = element.getBoundingClientRect();
+        return bounds.width > 0
+          && bounds.height > 0
+          && style.display !== "none"
+          && style.visibility !== "hidden"
+          && !["auto", "scroll"].includes(style.overflowX)
+          && Math.ceil(element.scrollWidth) > Math.ceil(element.clientWidth) + 1;
+      })
+      .slice(0, 6)
+      .map((element) => ({
+        selector: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${[...element.classList].map((name) => `.${name}`).join("")}`,
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+      }));
     return {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
@@ -233,6 +259,7 @@ async function inspectRoute(context, route, viewport) {
       labeledInputs: inputs.filter((input) => Boolean(input.id && document.querySelector(`label[for="${CSS.escape(input.id)}"]`)) || Boolean(input.closest("label")) || Boolean(input.getAttribute("aria-label")) || Boolean(input.getAttribute("aria-labelledby"))).length,
       iframes: { total: iframes.length, titled: iframes.filter((iframe) => Boolean(iframe.getAttribute("title")?.trim())).length },
       horizontalOverflow: Math.ceil(doc.scrollWidth) > Math.ceil(doc.clientWidth) + 1 || Math.ceil(body.scrollWidth) > Math.ceil(body.clientWidth) + 1,
+      textOverflowSamples,
       documentWidth: doc.scrollWidth,
       viewportWidth: doc.clientWidth,
       footerReflow: {
@@ -275,6 +302,7 @@ async function inspectRoute(context, route, viewport) {
     inputs: { total: browserState.inputCount || 0, labeled: browserState.labeledInputs || 0 },
     iframes: browserState.iframes || { total: 0, titled: 0 },
     horizontalOverflow: Boolean(browserState.horizontalOverflow),
+    textOverflowSamples: browserState.textOverflowSamples || [],
     widths: { document: browserState.documentWidth || 0, viewport: browserState.viewportWidth || viewport.width },
     footerReflow: browserState.footerReflow || { present: false, horizontalOverflow: true, clippedColumns: true },
     reducedMotion: browserState.reducedMotion || { matches: false, animated: [] },
@@ -358,6 +386,7 @@ function validateResult(route, result) {
   if (route.expectBrandEmblem && !result.brandEmblem) failures.push(`${label}: branded page emblem is missing.`);
   if (route.expectMain && !result.main) failures.push(`${label}: missing #main skip-link target.`);
   if (result.horizontalOverflow) failures.push(`${label}: horizontal overflow (${result.widths.document}px document vs ${result.widths.viewport}px viewport).`);
+  if (result.textOverflowSamples.length) failures.push(`${label}: internal text overflow ${JSON.stringify(result.textOverflowSamples)}.`);
   if (!result.footerReflow.present) failures.push(`${label}: footer navigation is missing.`);
   if (result.footerReflow.horizontalOverflow || result.footerReflow.clippedColumns) {
     failures.push(`${label}: footer navigation requires horizontal scrolling or clips a column.`);

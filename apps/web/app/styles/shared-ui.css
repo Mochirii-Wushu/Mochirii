@@ -4,6 +4,7 @@
 .glass-card{
   position:relative;
   isolation:isolate;
+  overflow-wrap:anywhere;
   border-radius:var(--radius-card);
   border:1px solid var(--line);
   box-shadow:var(--shadow);
