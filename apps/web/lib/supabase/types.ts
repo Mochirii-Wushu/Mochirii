@@ -316,29 +316,6 @@ export type InstagramApiStatus = {
   missingSecrets?: string[];
 };
 
-export type ApprovedGallerySubmission = {
-  id?: string | null;
-  title?: string | null;
-  caption?: string | null;
-  category?: string | null;
-  mime_type?: string | null;
-  size_bytes?: number | null;
-  created_at?: string | null;
-  reviewed_at?: string | null;
-  uploader_display_name?: string | null;
-  uploader_discord_name?: string | null;
-  full_signed_url?: string | null;
-  thumbnail_signed_url?: string | null;
-  thumbnail_size_bytes?: number | null;
-  preview_error?: string | null;
-};
-
-export type ApprovedGalleryFeed = {
-  submissions: ApprovedGallerySubmission[];
-  count?: number;
-  signedUrlSeconds?: number;
-};
-
 export type PublicMemberProfile = {
   id?: string | null;
   slug?: string | null;
@@ -366,23 +343,6 @@ export type PublicMemberProfileList = {
 
 export type PublicMemberProfileResponse = {
   profile: PublicMemberProfile | null;
-  signedUrlSeconds?: number;
-};
-
-export type VisibleProfileCard = {
-  slug?: string | null;
-  displayName?: string | null;
-  guildTitle?: string | null;
-  avatarUrl?: string | null;
-  profileHref?: string | null;
-  hasApprovedAvatar?: boolean | null;
-  hasVisibleProfile?: boolean | null;
-  hasFilledProfile?: boolean | null;
-};
-
-export type VisibleProfileCardsResponse = {
-  profiles: VisibleProfileCard[];
-  count?: number;
   signedUrlSeconds?: number;
 };
 

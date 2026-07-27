@@ -11,7 +11,6 @@ function assertIncludes(label, text, snippet) {
 }
 
 const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
-const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
 const leaderDashboardParts = read("apps/web/components/member-workflow/LeaderDashboardParts.tsx");
 const approvedFeed = read("supabase/functions/list-approved-gallery-submissions/index.ts");
@@ -21,10 +20,11 @@ const thumbnailParser = read("supabase/functions/_shared/gallery-thumbnail.ts");
 const thumbnailTests = read("supabase/functions/_shared/gallery-thumbnail_test.ts");
 const thumbnailMigration = read("supabase/migrations/20260727145241_add_gallery_submission_thumbnails.sql");
 const thumbnailCloseout = read("supabase/operations/validate_gallery_submission_thumbnails.sql");
+const approvedGalleryFeed = read("apps/web/lib/gallery/approved-feed.ts");
 const runbook = read("docs/vote-reminder-runbook.md");
 
 [
-  'import { listApprovedGallerySubmissions } from "@/lib/supabase/gallery-submissions";',
+  'from "@/lib/gallery/approved-feed";',
   'const memberSubmissionsCategory = "member-submissions";',
   "function approvedSubmissionToGalleryItem",
   "const galleryRenderBatchSize = 24;",
@@ -41,7 +41,7 @@ const runbook = read("docs/vote-reminder-runbook.md");
   "const randomSeed = useMemo(",
   "submission.preview_error",
   "galleryAddedAt: text(submission.created_at || submission.reviewed_at)",
-  "listApprovedGallerySubmissions()",
+  "listApprovedGallerySubmissions(controller.signal)",
   "setApprovedItems",
   "[...items, ...approvedItems]",
 ].forEach((snippet) => assertIncludes("GalleryBrowser approved feed", galleryBrowser, snippet));
@@ -56,7 +56,15 @@ if (galleryBrowser.includes("setRandomSeed") || galleryBrowser.includes("createR
   "list-approved-gallery-submissions",
   "method: \"POST\"",
   "Approved gallery feed could not be loaded.",
-].forEach((snippet) => assertIncludes("gallery submissions public feed", gallerySubmissions, snippet));
+].forEach((snippet) => assertIncludes("SDK-free approved Gallery feed", approvedGalleryFeed, snippet));
+
+[
+  "@supabase/supabase-js",
+  "@/lib/supabase/",
+  "requireBrowserSupabaseClient",
+].forEach((snippet) => {
+  if (approvedGalleryFeed.includes(snippet)) failures.push(`SDK-free approved Gallery feed: forbidden dependency found: ${snippet}`);
+});
 
 [
   'adminClient.rpc(\n    "gallery_publishable_submissions"',

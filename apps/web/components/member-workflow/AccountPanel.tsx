@@ -11,6 +11,7 @@ import {
 } from "@/components/spinner/raffle";
 import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
 import { consumeLiveDrawHandoffIntent } from "@/lib/spinner/viewer-handoff";
+import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
 import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getLinkedIdentities, linkProviderIdentity, openPrivateSpinnerSession, openPrivateSpinnerViewerHandoff } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
@@ -198,9 +199,8 @@ export function AccountPanel() {
   }, [loadSocialAccounts, loadSubmissions, refreshMemberAccess]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => loadAccount());
     const subscription = onAuthStateChange(() => {
-      void loadAccount();
+      void measureAuthenticatedRouteTask("account", loadAccount);
     });
     return () => {
       subscription.data?.subscription?.unsubscribe();

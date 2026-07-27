@@ -96,8 +96,7 @@ assert(
 const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
 const homeGalleryLightbox = read("apps/web/components/HomeGalleryLightbox.tsx");
 const homeGalleryLightboxModal = read("apps/web/components/HomeGalleryLightboxModal.tsx");
-const gallerySubmissions = read("apps/web/lib/supabase/gallery-submissions.ts");
-const galleryTypes = read("apps/web/lib/supabase/types.ts");
+const approvedGalleryFeed = read("apps/web/lib/gallery/approved-feed.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
 const thumbnailParser = read("supabase/functions/_shared/gallery-thumbnail.ts");
 const thumbnailDecoder = read("supabase/functions/_shared/gallery-webp-decoder.ts");
@@ -156,10 +155,10 @@ assert(!galleryBrowser.includes("shuffleWithSeed"), "GalleryBrowser must preserv
 
 assert(!galleryBrowser.includes("storage_path"), "GalleryBrowser must not read raw Supabase storage paths.");
 assert(!galleryBrowser.includes("storage_bucket"), "GalleryBrowser must not read raw Supabase storage buckets.");
-assertIncludes("approved gallery client", gallerySubmissions, "list-approved-gallery-submissions");
-assertIncludes("approved gallery client", gallerySubmissions, "method: \"POST\"");
+assertIncludes("approved gallery client", approvedGalleryFeed, "list-approved-gallery-submissions");
+assertIncludes("approved gallery client", approvedGalleryFeed, "method: \"POST\"");
 
-const approvedTypeMatch = galleryTypes.match(/export type ApprovedGallerySubmission = \{[\s\S]*?\n\};/);
+const approvedTypeMatch = approvedGalleryFeed.match(/export type ApprovedGallerySubmission = \{[\s\S]*?\n\};/);
 assert(Boolean(approvedTypeMatch), "ApprovedGallerySubmission type was not found.");
 if (approvedTypeMatch) {
   const approvedType = approvedTypeMatch[0];

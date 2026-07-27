@@ -1,5 +1,6 @@
 import joinData from "@/public/data/join.json";
 import { BodyPageMarker } from "../BodyPageMarker";
+import { DiscordServerPreview } from "../DiscordServerPreview";
 import { BadgeRow, cleanRoute, MetaRow, monthYearUTC, PageHero, ProseStack, text } from "../common";
 import { badgeItems, linkProps, record, records } from "../page-helpers";
 
@@ -67,18 +68,7 @@ export function JoinPage() {
                 </h3>
                 <ProseStack id="joinQuickBody" lines={quickStart.body} />
                 <BadgeRow id="joinLinks" items={badgeItems(quickStart.links)} label="Join links" />
-                <div className="join-discord-widget" aria-label="Mōchirīī Discord server widget">
-                  <div className="join-discord-widget__frame">
-                    <iframe
-                      title="Mōchirīī Discord server widget"
-                      src="https://discord.com/widget?id=1078630751077142608&theme=dark"
-                      width="350"
-                      height="500"
-                      loading="lazy"
-                      sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-                    />
-                  </div>
-                </div>
+                <DiscordServerPreview />
               </div>
             </aside>
 

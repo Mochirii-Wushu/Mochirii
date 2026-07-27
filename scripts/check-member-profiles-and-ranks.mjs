@@ -23,7 +23,7 @@ const files = {
   profileFormat: "apps/web/components/member-workflow/format.ts",
   accountPanel: "apps/web/components/member-workflow/AccountPanel.tsx",
   leaderDashboard: "apps/web/components/member-workflow/LeaderDashboard.tsx",
-  memberProfilesClient: "apps/web/lib/supabase/member-profiles.ts",
+  memberProfilesClient: "apps/web/lib/member-profiles/visible-profile-cards.ts",
   css: "apps/web/app/mochirii.css",
   supabaseReadme: "supabase/README.md",
   featureDoc: "docs/member-profiles-and-rank-roles.md",

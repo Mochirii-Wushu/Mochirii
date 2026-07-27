@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
 import {
   clearPrivateSpinnerSession,
   openPrivateSpinnerSession,
@@ -226,9 +227,8 @@ export function LeaderDashboard() {
   }, [instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadQueue]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => checkAccess());
     const subscription = onAuthStateChange(() => {
-      void checkAccess();
+      void measureAuthenticatedRouteTask("leader-dashboard", checkAccess);
     });
     return () => {
       subscription.data?.subscription?.unsubscribe();

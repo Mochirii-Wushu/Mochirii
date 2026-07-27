@@ -9,6 +9,7 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - Gallery data lives in `apps/web/public/data/gallery.json`.
 - The current static Gallery source has 73 images in the `general` album.
 - Approved member and Discord submissions are added at runtime through separate short-lived thumbnail and full-image URLs and are not written into `apps/web/public/data/gallery.json`.
+- The public approved-feed request lives in `apps/web/lib/gallery/approved-feed.ts`. That module uses plain `fetch` and browser-safe public configuration only; it must not import the Supabase SDK, authentication, moderation, upload, or private account modules.
 - Do not change image paths unless assets are actually added, replaced, or removed in the same scoped task.
 - Captions and alt text should match visible image content.
 - Do not invent player identities, events, locations, or actions that are not visible or otherwise confirmed.

@@ -4,8 +4,6 @@ import {
   INSTAGRAM_WEBSITE_OPT_IN_COPY_VERSION,
   MAX_UPLOAD_BYTES,
   MEMBER_GALLERY_BUCKET,
-  SUPABASE_PROJECT_REF,
-  SUPABASE_URL,
   SUBMISSION_FIELDS,
 } from "./config";
 import { requireAuth } from "./auth";
@@ -15,7 +13,6 @@ import {
   createResult,
   failedResult,
   okResult,
-  type ApprovedGalleryFeed,
   type GallerySubmission,
   type GallerySubmissionMetadata,
 } from "./types";
@@ -158,49 +155,5 @@ export async function listMyGallerySubmissions() {
     return okResult((Array.isArray(data) ? data : []) as GallerySubmission[]);
   } catch (error) {
     return failedResult<GallerySubmission[]>(error);
-  }
-}
-
-function publicApprovedGalleryFeedUrl() {
-  const baseUrl = SUPABASE_URL || `https://${SUPABASE_PROJECT_REF}.supabase.co`;
-  return `${baseUrl.replace(/\/+$/, "")}/functions/v1/list-approved-gallery-submissions`;
-}
-
-export async function listApprovedGallerySubmissions() {
-  try {
-    const response = await fetch(publicApprovedGalleryFeedUrl(), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: "{}",
-    });
-    const payload = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      return createResult<ApprovedGalleryFeed>({
-        ok: false,
-        status: response.status,
-        statusText: response.statusText,
-        data: (payload?.data as ApprovedGalleryFeed) || null,
-        error: createError(payload, "Approved gallery feed could not be loaded."),
-        message: payload?.message ? String(payload.message) : "Approved gallery feed could not be loaded.",
-      });
-    }
-
-    if (payload && typeof payload === "object" && "ok" in payload && payload.ok === false) {
-      return createResult<ApprovedGalleryFeed>({
-        ok: false,
-        status: response.status,
-        statusText: response.statusText,
-        data: (payload.data as ApprovedGalleryFeed) || null,
-        error: createError(payload, "Approved gallery feed could not be loaded."),
-        message: payload.message ? String(payload.message) : "Approved gallery feed could not be loaded.",
-      });
-    }
-
-    return okResult((payload?.data || payload) as ApprovedGalleryFeed, payload?.message ? String(payload.message) : null);
-  } catch (error) {
-    return failedResult<ApprovedGalleryFeed>(error);
   }
 }
