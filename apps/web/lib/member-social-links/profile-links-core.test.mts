@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildMemberSocialLinksShareUrl,
   isPublicProfileHostname,
   normalizeMemberSocialLinkInput,
   normalizeMemberSocialLinkLabel,
   normalizeMemberSocialLinkUrl,
+  normalizeMemberSocialLinksOwnerId,
 } from "./profile-links-core.ts";
 
 const validProfiles = [
@@ -37,6 +39,10 @@ test("rejects provider-host confusion and non-profile destinations", () => {
     ["bluesky", "https://bsky.app/profile"],
     ["spotify", "https://open.spotify.com/track/123"],
     ["linkedin", "https://linkedin.com/feed"],
+    ["instagram", "https://instagram.com/login"],
+    ["facebook", "https://facebook.com/marketplace"],
+    ["twitch", "https://twitch.tv/directory"],
+    ["x", "https://x.com/home"],
   ] as const;
 
   for (const [provider, input] of invalid) {
@@ -87,4 +93,15 @@ test("known providers use their controlled label", () => {
       profileUrl: "https://instagram.com/mochirii",
     },
   );
+});
+
+test("builds a same-site, user-scoped guild sharing URL", () => {
+  const ownerId = "11111111-1111-4111-8111-111111111111";
+  assert.equal(normalizeMemberSocialLinksOwnerId(ownerId.toUpperCase()), ownerId);
+  assert.equal(
+    buildMemberSocialLinksShareUrl("https://mochirii.com", ownerId),
+    `https://mochirii.com/account?profile-links=${ownerId}`,
+  );
+  assert.equal(normalizeMemberSocialLinksOwnerId("../members"), null);
+  assert.throws(() => buildMemberSocialLinksShareUrl("https://mochirii.com", "not-a-user"));
 });

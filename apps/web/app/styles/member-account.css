@@ -169,6 +169,36 @@
   margin-top:16px;
 }
 
+.member-social-links__shared{
+  display:grid;
+  gap:8px;
+  margin-top:16px;
+  padding:14px;
+  border:1px solid rgba(220,235,255,.16);
+  border-radius:16px;
+  background:rgba(0,0,0,.13);
+}
+
+.member-social-links__shared h3,
+.member-social-links__shared p,
+.member-social-links__shared ul{
+  margin:0;
+}
+
+.member-social-links__shared ul{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 16px;
+  padding-left:20px;
+}
+
+.member-social-links__shared a{
+  overflow-wrap:anywhere;
+  color:var(--ink-0);
+  font-weight:800;
+  text-underline-offset:3px;
+}
+
 .member-social-links__visibility{
   display:flex;
   align-items:flex-start;

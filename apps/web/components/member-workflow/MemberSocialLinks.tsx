@@ -1,16 +1,20 @@
 "use client";
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  buildMemberSocialLinksShareUrl,
   MEMBER_SOCIAL_LINK_LIMIT,
   MEMBER_SOCIAL_LINK_PROVIDERS,
+  MEMBER_SOCIAL_LINKS_QUERY_PARAMETER,
   memberSocialLinkProviderLabel,
+  normalizeMemberSocialLinksOwnerId,
   type MemberSocialLinkProvider,
 } from "@/lib/member-social-links/profile-links-core";
 import {
   createMemberSocialLink,
   deleteMemberSocialLink,
   listMyMemberSocialLinks,
+  listVisibleMemberSocialLinks,
   reorderMemberSocialLinks,
   updateMemberSocialLinkVisibility,
 } from "@/lib/supabase/member-social-links";
@@ -31,6 +35,9 @@ function linkHostname(value: string) {
 
 export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
   const [links, setLinks] = useState<MemberSocialLink[]>([]);
+  const [sharedLinks, setSharedLinks] = useState<MemberSocialLink[]>([]);
+  const [sharedOwnerId, setSharedOwnerId] = useState<string | null>(null);
+  const [sharedState, setSharedState] = useState<"idle" | "loading" | "ready" | "unavailable">("idle");
   const [provider, setProvider] = useState<MemberSocialLinkProvider>("instagram");
   const [profileUrl, setProfileUrl] = useState("");
   const [customLabel, setCustomLabel] = useState("");
@@ -39,6 +46,7 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const listRef = useRef<HTMLDivElement>(null);
 
   const selectedProvider = useMemo(
     () => MEMBER_SOCIAL_LINK_PROVIDERS.find(({ id }) => id === provider) || MEMBER_SOCIAL_LINK_PROVIDERS[0],
@@ -60,6 +68,30 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
     if (!currentUserId) return;
     void Promise.resolve().then(loadLinks);
   }, [currentUserId, loadLinks]);
+
+  useEffect(() => {
+    let active = true;
+    void Promise.resolve().then(async () => {
+      if (!active) return;
+      const ownerId = normalizeMemberSocialLinksOwnerId(
+        new URL(window.location.href).searchParams.get(MEMBER_SOCIAL_LINKS_QUERY_PARAMETER),
+      );
+      setSharedOwnerId(ownerId);
+      setSharedLinks([]);
+      if (!ownerId) {
+        setSharedState("idle");
+        return;
+      }
+
+      setSharedState("loading");
+      const result = await listVisibleMemberSocialLinks(ownerId);
+      if (!active) return;
+      const visibleLinks = result.ok && Array.isArray(result.data) ? result.data : [];
+      setSharedLinks(visibleLinks);
+      setSharedState(visibleLinks.length ? "ready" : "unavailable");
+    });
+    return () => { active = false; };
+  }, [currentUserId]);
 
   async function addLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -121,10 +153,11 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
     setLinks(ordered.map((link, sortOrder) => ({ ...link, sort_order: sortOrder })));
 
     const result = await reorderMemberSocialLinks(ordered.map(({ id }) => id));
-    if (!result.ok) {
+    if (!result.ok || !Array.isArray(result.data)) {
       setError("Profile-link order could not be saved. The current order has been restored.");
       await loadLinks();
     } else {
+      setLinks(result.data);
       setStatus("Profile-link order saved.");
     }
     setBusyId(null);
@@ -142,6 +175,7 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
       setLinks((current) => current.filter(({ id }) => id !== linkId));
       setPendingRemoveId(null);
       setStatus("Profile link removed.");
+      window.requestAnimationFrame(() => listRef.current?.focus());
     }
     setBusyId(null);
   }
@@ -173,6 +207,36 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
     }
   }
 
+  async function shareGuildProfile() {
+    setStatus("");
+    setError("");
+    const shareUrl = buildMemberSocialLinksShareUrl(window.location.origin, currentUserId);
+    const shareData = {
+      title: "Mōchirīī guild profile links",
+      text: "View my shared guild profile links.",
+      url: shareUrl,
+    };
+
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share(shareData);
+        setStatus("Guild profile link shared.");
+        return;
+      } catch (shareError) {
+        if (shareError instanceof DOMException && shareError.name === "AbortError") return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setStatus("Guild profile link copied.");
+    } catch {
+      setError("Copying is unavailable in this browser. Copy the address from your browser instead.");
+    }
+  }
+
+  const hasSharedLinks = links.some((link) => link.is_visible);
+
   return (
     <section className="glass-card glass-card--soft glass-pad auth-panel member-social-links" aria-labelledby="memberSocialLinksTitle">
       <div className="auth-panel__head">
@@ -184,6 +248,25 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
       </div>
 
       <p>Add direct links to profiles you already manage. Links stay private unless you share them with verified guild members.</p>
+
+      {sharedOwnerId ? (
+        <div className="member-social-links__shared" aria-labelledby="sharedProfileLinksTitle">
+          <h3 id="sharedProfileLinksTitle">Shared profile links</h3>
+          {sharedState === "loading" ? <p role="status">Loading shared profile links.</p> : null}
+          {sharedState === "ready" ? (
+            <ul>
+              {sharedLinks.map((link) => (
+                <li key={link.id}>
+                  <a href={link.profile_url} target="_blank" rel="noopener noreferrer nofollow ugc">
+                    {link.display_label || memberSocialLinkProviderLabel(link.provider as MemberSocialLinkProvider)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {sharedState === "unavailable" ? <p>Shared profile links are unavailable.</p> : null}
+        </div>
+      ) : null}
 
       <form className="member-social-links__form" onSubmit={addLink}>
         <label className="form-field">
@@ -245,7 +328,15 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
         </div>
       </form>
 
-      <div className="member-social-links__list" aria-label="Saved profile links">
+      {hasSharedLinks ? (
+        <div className="auth-actions">
+          <button className="hero-cta hero-cta--secondary" type="button" onClick={shareGuildProfile} disabled={Boolean(busyId)}>
+            Share my guild profile links
+          </button>
+        </div>
+      ) : null}
+
+      <div className="member-social-links__list" aria-label="Saved profile links" ref={listRef} tabIndex={-1}>
         {links.length ? links.map((link, index) => (
           <article className="member-social-link" key={link.id}>
             <div className="member-social-link__identity">
@@ -263,14 +354,17 @@ export function MemberSocialLinks({ currentUserId }: MemberSocialLinksProps) {
                 {link.is_visible ? "Hide" : "Share with guild"}
               </button>
               <button type="button" onClick={() => shareLink(link)} disabled={Boolean(busyId)}>Share link</button>
+              <button
+                type="button"
+                onClick={() => pendingRemoveId === link.id ? removeLink(link.id) : setPendingRemoveId(link.id)}
+                disabled={Boolean(busyId)}
+                aria-expanded={pendingRemoveId === link.id}
+              >
+                {pendingRemoveId === link.id ? "Confirm removal" : "Remove"}
+              </button>
               {pendingRemoveId === link.id ? (
-                <span className="member-social-link__remove-confirm">
-                  <button type="button" onClick={() => removeLink(link.id)} disabled={Boolean(busyId)}>Confirm removal</button>
-                  <button type="button" onClick={() => setPendingRemoveId(null)} disabled={Boolean(busyId)}>Keep</button>
-                </span>
-              ) : (
-                <button type="button" onClick={() => setPendingRemoveId(link.id)} disabled={Boolean(busyId)}>Remove</button>
-              )}
+                <button type="button" onClick={() => setPendingRemoveId(null)} disabled={Boolean(busyId)}>Keep</button>
+              ) : null}
             </div>
           </article>
         )) : (

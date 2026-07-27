@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(17);
+SELECT plan(25);
 
 INSERT INTO auth.users (id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
 VALUES
@@ -25,10 +25,13 @@ SELECT ok(
 );
 SELECT ok(
   has_table_privilege('authenticated', 'public.member_social_links', 'select')
-  AND has_any_column_privilege('authenticated', 'public.member_social_links', 'insert')
   AND has_any_column_privilege('authenticated', 'public.member_social_links', 'update')
+  AND has_column_privilege('authenticated', 'public.member_social_links', 'is_visible', 'update')
+  AND NOT has_any_column_privilege('authenticated', 'public.member_social_links', 'insert')
+  AND NOT has_column_privilege('authenticated', 'public.member_social_links', 'sort_order', 'update')
+  AND NOT has_column_privilege('authenticated', 'public.member_social_links', 'profile_url', 'update')
   AND has_table_privilege('authenticated', 'public.member_social_links', 'delete'),
-  'authenticated members receive only the required CRUD grants'
+  'authenticated members receive only read, visibility, and delete table grants'
 );
 SELECT ok(
   has_table_privilege('service_role', 'public.member_social_links', 'select')
@@ -36,6 +39,16 @@ SELECT ok(
   AND has_table_privilege('service_role', 'public.member_social_links', 'update')
   AND has_table_privilege('service_role', 'public.member_social_links', 'delete'),
   'service role retains operational access'
+);
+SELECT ok(
+  has_function_privilege('authenticated', 'public.create_member_social_link(text,text,text,boolean)', 'execute')
+  AND NOT has_function_privilege('anon', 'public.create_member_social_link(text,text,text,boolean)', 'execute'),
+  'only authenticated members can call the bounded create function'
+);
+SELECT ok(
+  has_function_privilege('authenticated', 'public.reorder_member_social_links(uuid[])', 'execute')
+  AND NOT has_function_privilege('anon', 'public.reorder_member_social_links(uuid[])', 'execute'),
+  'only authenticated members can call the atomic reorder function'
 );
 SELECT ok(
   private.member_social_link_url_is_valid('instagram', 'https://instagram.com/mochirii')
@@ -48,6 +61,25 @@ SELECT ok(
   AND NOT private.member_social_link_url_is_valid('custom', 'https://name:secret@example.com/profile'),
   'hostname confusion, local hosts, and embedded credentials fail validation'
 );
+SELECT ok(
+  NOT private.member_social_link_url_is_valid('instagram', 'https://instagram.com/login')
+  AND NOT private.member_social_link_url_is_valid('facebook', 'https://facebook.com/marketplace')
+  AND NOT private.member_social_link_url_is_valid('twitch', 'https://twitch.tv/directory')
+  AND NOT private.member_social_link_url_is_valid('x', 'https://x.com/home'),
+  'known non-profile provider routes fail validation'
+);
+SELECT ok(
+  private.member_social_link_label_is_valid('instagram', 'Instagram')
+  AND private.member_social_link_label_is_valid('custom', 'Guild portfolio'),
+  'controlled and plain custom labels pass validation'
+);
+SELECT ok(
+  NOT private.member_social_link_label_is_valid('instagram', '   ')
+  AND NOT private.member_social_link_label_is_valid('instagram', 'Photo page')
+  AND NOT private.member_social_link_label_is_valid('custom', 'Profile' || chr(8238) || 'txt')
+  AND NOT private.member_social_link_label_is_valid('custom', '<img onerror=alert(1)>'),
+  'blank, misleading, bidi, and markup labels fail validation'
+);
 SELECT is(
   (SELECT count(*)::integer FROM pg_policies WHERE schemaname = 'public' AND tablename = 'member_social_links'),
   5,
@@ -57,20 +89,40 @@ SELECT is(
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub', '11111111-1111-4111-8111-111111111111', true);
 
-SELECT lives_ok(
+SELECT throws_ok(
   $$INSERT INTO public.member_social_links (user_id, provider, display_label, profile_url, sort_order)
-    VALUES ('11111111-1111-4111-8111-111111111111', 'instagram', 'Instagram', 'https://instagram.com/mochirii', 0)$$,
+    VALUES ('11111111-1111-4111-8111-111111111111', 'instagram', 'Instagram', 'https://instagram.com/direct-table', 0)$$,
+  '42501',
+  null,
+  'authenticated members cannot bypass bounded creation with a direct insert'
+);
+SELECT lives_ok(
+  $$SELECT * FROM public.create_member_social_link('instagram', 'Instagram', 'https://instagram.com/mochirii', false)$$,
   'owners can add a private link'
 );
 SELECT lives_ok(
-  $$INSERT INTO public.member_social_links (user_id, provider, display_label, profile_url, sort_order, is_visible)
-    VALUES ('11111111-1111-4111-8111-111111111111', 'custom', 'Portfolio', 'https://mochirii.com/twills', 1, true)$$,
+  $$SELECT * FROM public.create_member_social_link('custom', 'Portfolio', 'https://mochirii.com/twills', true)$$,
   'verified owners can opt a link into guild visibility'
 );
 SELECT is(
   (SELECT count(*)::integer FROM public.member_social_links),
   2,
   'owners can read all of their own links'
+);
+SELECT lives_ok(
+  $$SELECT * FROM public.reorder_member_social_links(
+      ARRAY(
+        SELECT id
+        FROM public.member_social_links
+        ORDER BY sort_order DESC
+      )
+    )$$,
+  'owners can atomically reorder their exact current link set'
+);
+SELECT is(
+  (SELECT array_agg(display_label ORDER BY sort_order) FROM public.member_social_links),
+  ARRAY['Portfolio', 'Instagram']::text[],
+  'atomic reorder persists the requested order'
 );
 
 SELECT set_config('request.jwt.claim.sub', '22222222-2222-4222-8222-222222222222', true);
@@ -93,8 +145,7 @@ SELECT is(
   'an unverified signed-in account cannot read shared links'
 );
 SELECT throws_ok(
-  $$INSERT INTO public.member_social_links (user_id, provider, display_label, profile_url, sort_order, is_visible)
-    VALUES ('33333333-3333-4333-8333-333333333333', 'custom', 'Portfolio', 'https://example.org/profile', 0, true)$$,
+  $$SELECT * FROM public.create_member_social_link('custom', 'Portfolio', 'https://example.org/profile', true)$$,
   '42501',
   null,
   'an unverified owner cannot publish a visible link'

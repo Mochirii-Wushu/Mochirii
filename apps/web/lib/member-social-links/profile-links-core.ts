@@ -51,6 +51,30 @@ const ALLOWED_HOSTS: Record<Exclude<MemberSocialLinkProvider, "custom" | "mastod
   linkedin: ["linkedin.com", "www.linkedin.com"],
 };
 
+const RESERVED_PROVIDER_PATHS: Partial<Record<MemberSocialLinkProvider, ReadonlySet<string>>> = {
+  instagram: new Set(["about", "accounts", "developer", "direct", "emails", "explore", "legal", "login", "oauth", "p", "privacy", "reel", "reels", "stories", "terms"]),
+  facebook: new Set(["about", "business", "events", "groups", "help", "legal", "login", "marketplace", "pages", "privacy", "reel", "settings", "terms", "watch"]),
+  twitch: new Set(["directory", "downloads", "jobs", "login", "settings", "signup", "subscriptions", "videos", "wallet"]),
+  x: new Set(["compose", "explore", "home", "i", "login", "messages", "notifications", "search", "settings"]),
+};
+
+export const MEMBER_SOCIAL_LINKS_QUERY_PARAMETER = "profile-links";
+
+export function normalizeMemberSocialLinksOwnerId(value: string | null | undefined) {
+  const clean = String(value || "").trim();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(clean)
+    ? clean.toLowerCase()
+    : null;
+}
+
+export function buildMemberSocialLinksShareUrl(origin: string, ownerId: string) {
+  const cleanOwnerId = normalizeMemberSocialLinksOwnerId(ownerId);
+  if (!cleanOwnerId) throw new Error("A valid member identifier is required.");
+  const url = new URL("/account", origin);
+  url.searchParams.set(MEMBER_SOCIAL_LINKS_QUERY_PARAMETER, cleanOwnerId);
+  return url.href;
+}
+
 function isIpv4Hostname(hostname: string) {
   const parts = hostname.split(".");
   return parts.length === 4 && parts.every((part) => /^\d{1,3}$/.test(part) && Number(part) <= 255);
@@ -121,6 +145,10 @@ export function normalizeMemberSocialLinkUrl(providerValue: string, value: strin
     const allowedHosts = ALLOWED_HOSTS[provider];
     if (!allowedHosts.includes(hostname)) throw new Error(`Use the direct ${memberSocialLinkProviderLabel(provider)} profile URL.`);
     if (!PATH_RULES[provider].test(url.pathname)) throw new Error(`Use the direct ${memberSocialLinkProviderLabel(provider)} profile URL.`);
+    const firstPathSegment = url.pathname.split("/").filter(Boolean)[0]?.toLowerCase() || "";
+    if (RESERVED_PROVIDER_PATHS[provider]?.has(firstPathSegment)) {
+      throw new Error(`Use the direct ${memberSocialLinkProviderLabel(provider)} profile URL.`);
+    }
     url.hostname = provider === "x" ? "x.com" : allowedHosts[0].replace(/^www\./, "");
   }
 
