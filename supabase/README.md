@@ -43,6 +43,21 @@ Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code ins
 
 The table intentionally does not grant direct insert/delete access to `authenticated`. The trusted write path is the `sync-pixelfed-social-account` Edge Function, which keeps the service-role key inside Supabase and accepts only a narrow Pixelfed host sync secret. Production SSO, federation enablement, broad member uploads, Spaces media migration, and any remote database/Auth/Function setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
 
+## Member-Owned Profile Links
+
+`member_social_links` is the separate member-owned URL surface for optional
+external profiles. It does not extend `social_accounts` and stores no OAuth
+identity, access token, password, imported content, or provider metadata. The
+browser normalizes direct HTTPS profile URLs without contacting the destination
+and the database repeats fail-closed provider/hostname checks.
+
+RLS keeps new rows private, limits all writes to the owner, and allows another
+authenticated user to read an explicitly visible row only when both accounts
+pass the current verified-member predicate. The table has explicit Data API
+grants because new tables are not assumed to be exposed automatically. The
+website retains no member directory; Account is the management and self-preview
+surface.
+
 ## Browser Helper
 
 `supabase.js` attaches `window.MochiriiSupabase` before `site.js` and page scripts run. It preserves:
@@ -113,7 +128,7 @@ Script order on pages with Auth or upload behavior is:
 
 ## Account Page UX
 
-`account.html` summarizes the signed-in member's profile state, Discord verification state, upload eligibility, profile completeness, and recent gallery submission statuses. It uses existing browser-safe helpers and the signed-in user's own RLS-limited `gallery_submissions` rows. Profile completeness is informational only; it does not block saving, Discord verification, or gallery upload eligibility.
+`account.html` summarizes the signed-in member's profile state, Discord verification state, upload eligibility, profile completeness, optional profile links, and recent gallery submission statuses. It uses existing browser-safe helpers and the signed-in user's own RLS-limited rows. Profile completeness is informational only; it does not block saving, Discord verification, or gallery upload eligibility.
 
 The Account page does not expose private Storage URLs. It shows submission text metadata and moderation status only. Upload permission remains enforced by `verify-member-access`, `verify-discord-member`, `member_profiles`, `member_verifications`, `gallery_submissions` RLS, and private `member-gallery` Storage policies.
 

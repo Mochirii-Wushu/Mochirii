@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
+import { MemberSocialLinks } from "@/components/member-workflow/MemberSocialLinks";
 import {
   parseStoredMotion,
   SETTINGS_STORAGE_KEY,
@@ -667,6 +668,8 @@ export function AccountPanel() {
           <WorkflowNotice hidden={!socialStatus}>{socialStatus}</WorkflowNotice>
           <WorkflowNotice tone="danger" role="alert" hidden={!socialError}>{socialError}</WorkflowNotice>
         </section>
+
+        <MemberSocialLinks currentUserId={user.id} />
 
         <form className="glass-card glass-card--soft glass-pad auth-form" id="profileForm" onSubmit={saveProfile}>
           <p className="kicker">Profile</p>

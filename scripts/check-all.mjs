@@ -39,6 +39,8 @@ const checks = [
   ["check:vote-reminder", ["node", "scripts/check-vote-reminder.mjs"]],
   ["check:instagram-gallery-publishing", ["node", "scripts/check-instagram-gallery-publishing.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
+  ["check:member-social-links", ["node", "scripts/check-member-social-links.mjs"]],
+  ["test:member-social-links", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/member-social-links/profile-links-core.test.mts"]],
   ["check:member-workflow-qa", ["node", "scripts/check-member-workflow-qa.mjs"]],
   ["test:member-verification-identity", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/member-verification-identity_test.ts"]],
   ["test:supabase-service-role", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/supabase-service-role_test.ts"]],
