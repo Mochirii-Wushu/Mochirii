@@ -159,10 +159,12 @@ expectIncludes("spotlight lookup", spotlightLookup, "next: { revalidate: 3600 }"
 const lightbox = read("apps/web/components/HomeGalleryLightbox.tsx");
 const lightboxModal = read("apps/web/components/HomeGalleryLightboxModal.tsx");
 expectIncludes("home gallery", lightbox, "lazy(() =>");
-expectIncludes("home gallery", lightbox, "<Suspense fallback={null}>");
-expectExcludes("home gallery", lightbox, "createPortal");
+expectIncludes("home gallery", lightbox, "<HomeGalleryLightboxFallback");
+expectIncludes("home gallery", lightbox, "return createPortal(");
+expectIncludes("home gallery", lightbox, "useBodyScrollLock(openItem !== null && portalRoot !== null);");
+expectExcludes("home gallery", lightbox, "<Suspense fallback={null}>");
 expectIncludes("home gallery modal", lightboxModal, "createPortal");
-expectIncludes("home gallery modal", lightboxModal, "useBodyScrollLock(true)");
+expectExcludes("home gallery modal", lightboxModal, "useBodyScrollLock(");
 
 if (failures.length) {
   console.error(`Next route delivery validation failed (${failures.length} issue${failures.length === 1 ? "" : "s"}).`);

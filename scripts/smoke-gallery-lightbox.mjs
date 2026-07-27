@@ -71,7 +71,10 @@ const surfaces = [
     dialog: "#modalRoot",
     shell: "#modalRoot .lightbox-shell",
     card: "#modalRoot .lightbox-card",
+    media: "#modalRoot .lightbox-media",
     image: "#modalImage",
+    preview: "#modalRoot .lightbox-img--preview",
+    status: "#modalRoot .lightbox-image-status",
     caption: "#modalCaption",
     close: "#modalClose",
     backdrop: "#modalBackdrop",
@@ -85,7 +88,10 @@ const surfaces = [
     dialog: "#lightbox",
     shell: "#lightbox .lightbox-shell",
     card: "#lightbox .lightbox-card",
+    media: "#lightbox .lightbox-media",
     image: "#lightboxImg",
+    preview: "#lightbox .lightbox-img--preview",
+    status: "#lightbox .lightbox-image-status",
     caption: "#lightboxCaption",
     close: "#lightboxClose",
     backdrop: "#lightboxBackdrop",
@@ -339,14 +345,16 @@ async function selectLandscapeTriggerIndex(page, surface) {
 
 async function waitForImage(page, surface) {
   await page.waitForFunction(
-    (selector) => {
-      const image = document.querySelector(selector);
+    ({ imageSelector, mediaSelector }) => {
+      const image = document.querySelector(imageSelector);
+      const media = document.querySelector(mediaSelector);
       return image instanceof HTMLImageElement
         && image.complete
         && image.naturalWidth > 0
-        && image.naturalHeight > 0;
+        && image.naturalHeight > 0
+        && media?.getAttribute("data-image-state") === "ready";
     },
-    surface.image,
+    { imageSelector: surface.image, mediaSelector: surface.media },
   );
   await page.locator(surface.image).evaluate(async (image) => {
     if (typeof image.decode === "function") await image.decode();
@@ -1235,6 +1243,190 @@ async function verifySyntheticSafeAreas(prepared, engineLabel) {
   }
 }
 
+async function waitForViewerShell(page, surface) {
+  await page.waitForSelector(surface.dialog, { state: "visible" });
+  await page.waitForFunction(
+    (selector) => document.activeElement === document.querySelector(selector),
+    surface.close,
+  );
+}
+
+async function prepareLoadingLifecyclePage(context, surface) {
+  const page = await context.newPage();
+  await page.goto(`${baseUrl}${surface.path}`, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(
+    ({ selector, minimum }) => document.querySelectorAll(selector).length >= minimum,
+    { selector: surface.trigger, minimum: surface.minimumTriggers },
+  );
+  await waitUntilInteractive(page, surface);
+  await waitForStableTriggers(page, surface);
+  assert(
+    await page.locator(surface.trigger).count() >= 4,
+    `${surface.label}: loading lifecycle needs four distinct image triggers.`,
+  );
+  return page;
+}
+
+async function inspectLoadingState(page, surface) {
+  return page.evaluate((selectors) => {
+    const media = document.querySelector(selectors.media);
+    const preview = document.querySelector(selectors.preview);
+    const full = document.querySelector(selectors.image);
+    const status = document.querySelector(selectors.status);
+    return {
+      state: media?.getAttribute("data-image-state") || "",
+      busy: media?.getAttribute("aria-busy") || "",
+      previewComplete: preview instanceof HTMLImageElement && preview.complete && preview.naturalWidth > 0,
+      previewOpacity: preview ? getComputedStyle(preview).opacity : "",
+      previewTransition: preview ? getComputedStyle(preview).transitionDuration : "",
+      fullOpacity: full ? getComputedStyle(full).opacity : "",
+      fullTransition: full ? getComputedStyle(full).transitionDuration : "",
+      statusRole: status?.getAttribute("role") || "",
+      statusLive: status?.getAttribute("aria-live") || "",
+      statusText: status?.textContent?.trim() || "",
+    };
+  }, surface);
+}
+
+function hasOnlyNegligibleDurations(value) {
+  return value
+    .split(",")
+    .map((duration) => Number.parseFloat(duration.trim()))
+    .every((duration) => Number.isFinite(duration) && duration <= 0.000001);
+}
+
+async function verifyLoadingLifecycle(browser) {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    reducedMotion: "reduce",
+  });
+  await stubVercelAnalyticsScripts(context);
+  await stubEmptyApprovedGalleryFeed(context);
+
+  try {
+    for (const surface of surfaces) {
+      const page = await prepareLoadingLifecyclePage(context, surface);
+
+      try {
+        const successful = await selectedTriggerState(page, surface, 1);
+        let successfulRequests = 0;
+        let releaseSuccessful;
+        let markSuccessfulStarted;
+        let markSuccessfulFinished;
+        const successfulGate = new Promise((resolve) => { releaseSuccessful = resolve; });
+        const successfulStarted = new Promise((resolve) => { markSuccessfulStarted = resolve; });
+        const successfulFinished = new Promise((resolve) => { markSuccessfulFinished = resolve; });
+
+        await page.route(successful.source.full, async (route) => {
+          successfulRequests += 1;
+          markSuccessfulStarted();
+          await successfulGate;
+          try {
+            const response = await route.fetch();
+            await route.fulfill({ response });
+          } catch {
+            // Closing the viewer is allowed to cancel an in-flight image request.
+          } finally {
+            markSuccessfulFinished();
+          }
+        });
+
+        await page.waitForTimeout(100);
+        assert(successfulRequests === 0, `${surface.label}: full image requested before the viewer opened.`);
+        await page.keyboard.press("Enter");
+        await successfulStarted;
+        await waitForViewerShell(page, surface);
+
+        const loading = await inspectLoadingState(page, surface);
+        assert(loading.state === "loading", `${surface.label}: delayed full image did not expose loading state.`);
+        assert(loading.busy === "true", `${surface.label}: loading image was not marked busy.`);
+        assert(loading.previewComplete, `${surface.label}: cached thumbnail placeholder was not visible while loading.`);
+        assert(loading.previewOpacity === "1", `${surface.label}: thumbnail placeholder was hidden before decode.`);
+        assert(loading.fullOpacity === "0", `${surface.label}: undecoded full image was exposed.`);
+        assert(loading.statusRole === "status" && loading.statusLive === "polite", `${surface.label}: loading status is not accessible.`);
+        assert(loading.statusText === "Loading full image…", `${surface.label}: loading status copy drifted.`);
+        assert(
+          hasOnlyNegligibleDurations(loading.previewTransition)
+            && hasOnlyNegligibleDurations(loading.fullTransition),
+          `${surface.label}: reduced-motion loading state animates (preview=${loading.previewTransition}, full=${loading.fullTransition}).`,
+        );
+        assert(successfulRequests === 1, `${surface.label}: opening should request the full image exactly once.`);
+
+        releaseSuccessful();
+        await successfulFinished;
+        await waitForImage(page, surface);
+        const ready = await inspectLoadingState(page, surface);
+        assert(ready.state === "ready" && ready.busy === "false", `${surface.label}: decoded image did not become ready.`);
+        assert(ready.previewOpacity === "0" && ready.fullOpacity === "1", `${surface.label}: decoded image did not replace its thumbnail.`);
+        assert(!ready.statusText, `${surface.label}: ready image retained loading copy.`);
+        await page.locator(surface.close).click();
+        await waitForClosed(page, surface, successful.before, `${surface.label} delayed-success close`);
+        await page.unroute(successful.source.full);
+
+        const canceled = await selectedTriggerState(page, surface, 2);
+        let releaseCanceled;
+        let markCanceledStarted;
+        let markCanceledFinished;
+        const canceledGate = new Promise((resolve) => { releaseCanceled = resolve; });
+        const canceledStarted = new Promise((resolve) => { markCanceledStarted = resolve; });
+        const canceledFinished = new Promise((resolve) => { markCanceledFinished = resolve; });
+
+        await page.route(canceled.source.full, async (route) => {
+          markCanceledStarted();
+          await canceledGate;
+          try {
+            const response = await route.fetch();
+            await route.fulfill({ response });
+          } catch {
+            // An unmounted image can cancel cleanly without delaying viewer dismissal.
+          } finally {
+            markCanceledFinished();
+          }
+        });
+
+        await page.keyboard.press("Enter");
+        await canceledStarted;
+        await waitForViewerShell(page, surface);
+        const closeStartedAt = Date.now();
+        await page.locator(surface.close).click();
+        await waitForClosed(page, surface, canceled.before, `${surface.label} in-flight close`);
+        const closeDuration = Date.now() - closeStartedAt;
+        assert(closeDuration < 750, `${surface.label}: in-flight close took ${closeDuration}ms.`);
+        releaseCanceled();
+        await canceledFinished;
+        await page.unroute(canceled.source.full);
+
+        const failed = await selectedTriggerState(page, surface, 3);
+        await page.route(failed.source.full, (route) =>
+          route.fulfill({
+            status: 200,
+            contentType: "image/webp",
+            body: "not-a-decodable-image",
+          }),
+        );
+        await page.keyboard.press("Enter");
+        await waitForViewerShell(page, surface);
+        await page.waitForFunction(
+          (selector) => document.querySelector(selector)?.getAttribute("data-image-state") === "error",
+          surface.media,
+        );
+        const failedState = await inspectLoadingState(page, surface);
+        assert(failedState.previewComplete && failedState.previewOpacity === "1", `${surface.label}: failed full image did not retain its thumbnail.`);
+        assert(failedState.statusText === "The full image could not be loaded.", `${surface.label}: error status copy drifted.`);
+        await page.locator(surface.close).click();
+        await waitForClosed(page, surface, failed.before, `${surface.label} decode-error close`);
+        await page.unroute(failed.source.full);
+
+        console.log(`${surface.label} deferred full-image loading, cancellation, and error states OK.`);
+      } finally {
+        await page.close();
+      }
+    }
+  } finally {
+    await context.close();
+  }
+}
+
 async function verifyEngine(engine) {
   let browser;
   try {
@@ -1244,6 +1436,7 @@ async function verifyEngine(engine) {
   }
 
   const viewports = engineViewports(engine);
+  if (engine.key === "chromium") await verifyLoadingLifecycle(browser);
   const context = await browser.newContext({ viewport: viewportSize(viewports[0]) });
   const resolvedBaseUrl = navigationBaseUrl(engine);
   await bridgeWebKitLocalHttps(context, resolvedBaseUrl);

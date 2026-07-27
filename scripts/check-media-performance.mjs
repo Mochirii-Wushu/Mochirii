@@ -118,17 +118,19 @@ const sidePagesGuide = read("docs/side-pages-guide.md");
 [
   "lazy(() =>",
   'import("@/components/HomeGalleryLightboxModal")',
-  "<Suspense fallback={null}>",
-  "{openItem ? (",
+  "<HomeGalleryLightboxFallback",
+  "{openItem && portalRoot ? (",
+  "useBodyScrollLock(openItem !== null && portalRoot !== null);",
 ].forEach((snippet) => assertIncludes("Home gallery deferred lightbox", homeGalleryLightbox, snippet));
-assert(!homeGalleryLightbox.includes("createPortal"), "Home gallery grid must not ship portal implementation before interaction.");
+assertIncludes("Home gallery immediate loading portal", homeGalleryLightbox, "return createPortal(");
+assert(!homeGalleryLightbox.includes("<Suspense fallback={null}>"), "Home gallery first-open loading state must not be blank.");
 [
   'import { createPortal } from "react-dom";',
-  "useBodyScrollLock(true);",
   'role="dialog"',
   'aria-modal="true"',
   'src={item.full}',
 ].forEach((snippet) => assertIncludes("Home gallery deferred modal", homeGalleryLightboxModal, snippet));
+assert(!homeGalleryLightboxModal.includes("useBodyScrollLock("), "Home gallery lazy modal must not replace the parent-owned scroll lock.");
 
 [
   "const galleryRenderBatchSize = 24;",

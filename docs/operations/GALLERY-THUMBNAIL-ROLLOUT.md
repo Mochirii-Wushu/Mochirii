@@ -13,7 +13,9 @@ This packet adds one stored, bounded WebP derivative for each approved member Ga
 - `list-approved-gallery-submissions` returns distinct short-lived thumbnail and full-image URLs and skips historical rows that have not been backfilled.
 - The Leader Dashboard can prepare the same derivative for a historical approved row.
 
-The public feed never returns a raw bucket or Storage path. The Gallery grid loads only the derivative; the private original is requested only after the visitor opens the viewer.
+The public feed never returns a raw bucket or Storage path. The Gallery grid loads only the derivative; the private original is requested only after the visitor opens the viewer. The shared Home/Gallery image surface keeps the cached thumbnail visible while the full image transfers and decodes, exposes an accessible loading or error state, and never blocks viewer dismissal on that request.
+
+The existing member-original limit remains 50 MiB. A second bounded viewer derivative could reduce high-percentile opening time, but it would add another service-owned object, metadata contract, decoder limit, atomic-selection branch, cleanup path, migration, backfill, and rollback surface. Keep that as a separate evidence-gated packet unless production measurements justify the added state.
 
 ## Deployment boundary
 

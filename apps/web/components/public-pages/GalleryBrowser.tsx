@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { LightboxImage } from "@/components/LightboxImage";
 import { useBodyPortalRoot, useBodyScrollLock } from "@/components/useLightboxOverlay";
 import { listApprovedGallerySubmissions } from "@/lib/supabase/gallery-submissions";
 import type { ApprovedGallerySubmission } from "@/lib/supabase/types";
@@ -500,12 +501,12 @@ export function GalleryBrowser({
         </button>
         <figure className="lightbox-card" tabIndex={0}>
           {openItem ? (
-            <img
+            <LightboxImage
+              key={openItem.stableKey}
               id="lightboxImg"
               src={openItem.full}
+              previewSrc={openItem.thumb}
               alt={openItem.alt}
-              className="lightbox-img"
-              decoding="async"
             />
           ) : null}
           <figcaption id="lightboxCaption" className="lightbox-caption">
