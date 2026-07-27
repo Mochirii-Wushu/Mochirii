@@ -10,6 +10,7 @@ import {
   parseSpinnerLiveResult,
   parseSpinnerLiveSnapshot,
   reconcileSpinnerServerClockAnchor,
+  resolveInitialViewerMotion,
   SpinnerLiveRequestError,
   spinnerCountdownSeconds,
   spinnerDrawAnnouncementTransition,
@@ -56,6 +57,7 @@ function idleSnapshot(participants: ParticipantV1[] = []) {
     sessionId: SESSION_ID,
     revision: 0,
     phase: "idle",
+    drawMode: "unclassified",
     participants,
     startedAt: null,
     revealAt: null,
@@ -74,6 +76,7 @@ function spinningSnapshot() {
     ...idleSnapshot(PARTICIPANTS),
     revision: 3,
     phase: "spinning",
+    drawMode: "official",
     startedAt: STARTED_AT,
     revealAt: REVEAL_AT,
     durationMs: 8_000,
@@ -426,11 +429,45 @@ test("pending spin commands recover only valid stable identifiers", () => {
     commandId: DRAW_ID,
     expectedRevision: 7,
     createdAt: SERVER_NOW,
+    drawMode: "test",
   };
   assert.deepEqual(parsePendingSpinnerCommand(command), command);
   assert.equal(parsePendingSpinnerCommand({ ...command, commandId: "invalid" }), null);
   assert.equal(parsePendingSpinnerCommand({ ...command, expectedRevision: -1 }), null);
   assert.equal(parsePendingSpinnerCommand({ ...command, createdAt: "invalid" }), null);
+  assert.equal(parsePendingSpinnerCommand({ ...command, drawMode: "unclassified" }), null);
+  assert.equal(parsePendingSpinnerCommand({ ...command, drawMode: undefined }), null);
+});
+
+test("first-use viewer motion is full unless the operating system requests reduced motion", () => {
+  assert.equal(resolveInitialViewerMotion(null, false), "full");
+  assert.equal(resolveInitialViewerMotion(null, true), "reduced");
+  assert.equal(resolveInitialViewerMotion("full", false), "full");
+  assert.equal(resolveInitialViewerMotion("full", true), "reduced");
+  assert.equal(resolveInitialViewerMotion("reduced", false), "reduced");
+  assert.equal(resolveInitialViewerMotion("off", false), "off");
+  assert.equal(resolveInitialViewerMotion("invalid", false), "full");
+});
+
+test("the default authoritative 4.8 second draw preserves full and reduced viewer timelines", () => {
+  const snapshot = parseSpinnerLiveSnapshot({
+    ...spinningSnapshot(),
+    revealAt: "2026-07-26T18:03:04.800Z",
+    durationMs: 4_800,
+  });
+  assert.ok(snapshot);
+  assert.deepEqual(spinnerLiveTimeline(snapshot, STARTED_AT, "full"), {
+    startDelayMs: 0,
+    revealDelayMs: 4_800,
+    motionDurationMs: 4_800,
+    motionDelayMs: 0,
+  });
+  assert.deepEqual(spinnerLiveTimeline(snapshot, STARTED_AT, "reduced"), {
+    startDelayMs: 3_150,
+    revealDelayMs: 4_800,
+    motionDurationMs: 1_650,
+    motionDelayMs: 3_150,
+  });
 });
 
 test("only an authoritative terminal spin failure permits a fresh command identifier", () => {

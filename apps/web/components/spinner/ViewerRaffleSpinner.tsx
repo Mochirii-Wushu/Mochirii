@@ -9,6 +9,7 @@ import {
   SETTINGS_STORAGE_KEY,
   type MotionMode,
   type ParticipantV1,
+  type SpinnerPersistedDrawMode,
 } from "./raffle";
 import {
   spinnerDrawAnnouncementTransition,
@@ -17,6 +18,7 @@ import {
   spinnerLiveTimeline,
   spinnerServerClockAnchorForSnapshot,
   spinnerServerClockNow,
+  resolveInitialViewerMotion,
   type SpinnerLivePhase,
   type SpinnerLiveResultV1,
   type SpinnerLiveSnapshotV1,
@@ -48,7 +50,7 @@ type CelebrationStyle = CSSProperties & {
 };
 
 function snapshotKey(snapshot: SpinnerLiveSnapshotV1) {
-  return `${snapshot.revision}:${snapshot.phase}:${snapshot.drawId || "idle"}`;
+  return `${snapshot.revision}:${snapshot.phase}:${snapshot.drawMode}:${snapshot.drawId || "idle"}`;
 }
 
 export function ViewerRaffleSpinner() {
@@ -62,7 +64,8 @@ export function ViewerRaffleSpinner() {
   const [celebrationAnimationDelayMs, setCelebrationAnimationDelayMs] = useState(0);
   const [status, setStatus] = useState("Connecting to the shared draw stage.");
   const [drawAnnouncement, setDrawAnnouncement] = useState("");
-  const [motionMode, setMotionMode] = useState<MotionMode>("reduced");
+  const [motionMode, setMotionMode] = useState<MotionMode>("full");
+  const [drawMode, setDrawMode] = useState<SpinnerPersistedDrawMode>("unclassified");
   const [motionPreferenceReady, setMotionPreferenceReady] = useState(false);
   const [countdownStartedAt, setCountdownStartedAt] = useState<string | null>(null);
   const [serverClockAnchor, setServerClockAnchor] = useState<SpinnerServerClockAnchor | null>(null);
@@ -81,8 +84,8 @@ export function ViewerRaffleSpinner() {
   const appliedKeyRef = useRef("");
   const celebratedDrawIdRef = useRef<string | null>(null);
   const liveSnapshotRef = useRef<SpinnerLiveSnapshotV1 | null>(null);
-  const preferredMotionRef = useRef<MotionMode>("reduced");
-  const effectiveMotionRef = useRef<MotionMode>("reduced");
+  const preferredMotionRef = useRef<MotionMode>("full");
+  const effectiveMotionRef = useRef<MotionMode>("full");
   const refreshLiveRef = useRef<(() => void) | null>(null);
   const serverClockAnchorRef = useRef<SpinnerServerClockAnchor | null>(null);
   const countdownAnnouncementDrawIdRef = useRef<string | null>(null);
@@ -194,6 +197,7 @@ export function ViewerRaffleSpinner() {
     appliedKeyRef.current = key;
     liveSnapshotRef.current = snapshot;
     setParticipants(snapshot.participants);
+    setDrawMode(snapshot.drawMode);
 
     if (snapshot.phase === "idle") {
       stopTimeline();
@@ -238,9 +242,13 @@ export function ViewerRaffleSpinner() {
     setWheelMotion(null);
     setWheelRotation(snapshot.startRotation);
     const countdownPending = !spinnerLiveHasStarted(snapshot, serverNowMs);
-    const drawStatus = countdownPending
-      ? "The roster is locked. The moonwheel countdown is underway."
-      : "The shared draw is underway.";
+    const drawStatus = snapshot.drawMode === "test"
+      ? countdownPending
+        ? "Test draw: the roster is locked and the moonwheel countdown is underway."
+        : "Test draw underway."
+      : countdownPending
+        ? "The roster is locked. The moonwheel countdown is underway."
+        : "The shared draw is underway.";
     setStatus(drawStatus);
     const announcement = spinnerDrawAnnouncementTransition(liveDrawId, countdownPending, {
       countdownDrawId: countdownAnnouncementDrawIdRef.current,
@@ -297,12 +305,14 @@ export function ViewerRaffleSpinner() {
     mountedRef.current = true;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const readPreference = (storedValue: string | null) => storedValue == null
-      ? "reduced"
+      ? "full"
       : parseStoredMotion(storedValue);
+    let initialStoredValue: string | null = null;
     try {
-      preferredMotionRef.current = readPreference(window.localStorage.getItem(SETTINGS_STORAGE_KEY));
+      initialStoredValue = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+      preferredMotionRef.current = readPreference(initialStoredValue);
     } catch {
-      preferredMotionRef.current = "reduced";
+      preferredMotionRef.current = "full";
     }
     const updateMotion = () => {
       const nextMotionMode = resolveCelebrationMotionMode(
@@ -321,6 +331,9 @@ export function ViewerRaffleSpinner() {
       preferredMotionRef.current = readPreference(event.newValue);
       updateMotion();
     };
+    effectiveMotionRef.current = resolveInitialViewerMotion(initialStoredValue, media.matches);
+    setMotionMode(effectiveMotionRef.current);
+    setMotionPreferenceReady(true);
     updateMotion();
     media.addEventListener("change", updateMotion);
     window.addEventListener("storage", onStorage);
@@ -411,6 +424,9 @@ export function ViewerRaffleSpinner() {
         <p className={`live-stage-badge ${connected ? "is-connected" : ""}`} role="status">
           {connected ? "Live stage connected" : "Reconnecting to live stage"}
         </p>
+        {drawMode === "test" ? (
+          <p className="spinner-test-badge" role="status">Test draw · no public result</p>
+        ) : null}
       </header>
 
       <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">

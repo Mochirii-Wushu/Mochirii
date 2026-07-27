@@ -16,6 +16,7 @@ const checks = [
   ["test:live-spinner-backend", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/spinner-live-session/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/spinner-live_test.ts", "supabase/functions/_shared/spinner-media_test.ts"]],
   ["check:raffle-public", ["node", "scripts/check-raffle-closed-state.mjs"]],
   ["test:raffle-public", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/raffle/public-view_test.ts"]],
+  ["test:raffle-latest-winner", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/raffle/latest-winner-core.test.mts"]],
   ["check:recruitment-audio-player", ["node", "scripts/check-recruitment-audio-player.mjs"]],
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],
   ["check:apac-content", ["node", "scripts/check-apac-content.mjs"]],

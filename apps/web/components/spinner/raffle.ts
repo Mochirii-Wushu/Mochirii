@@ -13,6 +13,8 @@ const UINT32_RANGE = 0x1_0000_0000;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/i;
+const BIDI_CONTROL_PATTERN = /[\u202a-\u202e\u2066-\u2069]/u;
+const CONTROL_PATTERN = /[\u0000-\u001f\u007f]/u;
 
 export interface ParticipantV1 {
   version: 1;
@@ -26,6 +28,8 @@ export interface RosterStateV1 {
 }
 
 export type MotionMode = "full" | "reduced" | "off";
+export type SpinnerDrawMode = "official" | "test";
+export type SpinnerPersistedDrawMode = "unclassified" | SpinnerDrawMode;
 
 export type RevealReason =
   | "animation-complete"
@@ -37,6 +41,7 @@ export type RevealReason =
 
 export interface DrawReceiptV1 {
   version: 1;
+  drawMode: SpinnerPersistedDrawMode;
   drawId: string;
   timestampIso: string;
   singaporeTime: string;
@@ -168,7 +173,12 @@ export function validateName(
     };
   }
 
-  if (countGraphemes(normalizedName) > MAX_NAME_GRAPHEMES) {
+  if (
+    countGraphemes(normalizedName) > MAX_NAME_GRAPHEMES ||
+    Array.from(normalizedName).length > MAX_NAME_GRAPHEMES ||
+    CONTROL_PATTERN.test(normalizedName) ||
+    BIDI_CONTROL_PATTERN.test(normalizedName)
+  ) {
     return {
       valid: false,
       normalizedName,
@@ -452,6 +462,7 @@ export async function createDrawReceipt(
   randomWord: RandomWordSource = secureRandomWord,
   uuidFactory: () => string = secureUuid,
   now: Date | (() => Date) = () => new Date(),
+  drawMode: SpinnerDrawMode = "official",
 ): Promise<DrawReceiptV1> {
   // Copy synchronously before sampling so later roster edits cannot change the
   // selected participant or receipt.
@@ -477,6 +488,7 @@ export async function createDrawReceipt(
 
   return {
     version: 1,
+    drawMode,
     drawId,
     timestampIso,
     singaporeTime,
@@ -620,8 +632,14 @@ function parseReceiptCandidate(value: unknown): DrawReceiptV1 | null {
   }
 
   const rosterSnapshot = parseRosterCandidate(value.rosterSnapshot);
+  const drawMode = value.drawMode === "official" || value.drawMode === "test"
+    ? value.drawMode
+    : value.drawMode == null
+      ? "unclassified"
+      : null;
   if (
     !rosterSnapshot ||
+    !drawMode ||
     rosterSnapshot.participants.length < MIN_PARTICIPANTS ||
     !isValidParticipant(value.winner)
   ) {
@@ -651,6 +669,7 @@ function parseReceiptCandidate(value: unknown): DrawReceiptV1 | null {
 
   return {
     version: 1,
+    drawMode,
     drawId: value.drawId,
     timestampIso: value.timestampIso,
     singaporeTime: value.singaporeTime,

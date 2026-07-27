@@ -11,11 +11,14 @@ const foreignKeyIndexMigrationPath =
   "supabase/migrations/20260726213000_add_spinner_foreign_key_indexes.sql";
 const mediaMigrationPath =
   "supabase/migrations/20260727033342_add_spinner_media_jobs.sql";
+const officialRaffleMigrationPath =
+  "supabase/migrations/20260727160000_add_official_spinner_raffle_publications.sql";
 const files = {
   migration: migrationPath,
   countdownMigration: countdownMigrationPath,
   foreignKeyIndexMigration: foreignKeyIndexMigrationPath,
   mediaMigration: mediaMigrationPath,
+  officialRaffleMigration: officialRaffleMigrationPath,
   config: "supabase/config.toml",
   index: "supabase/functions/spinner-live-session/index.ts",
   engine: "supabase/functions/_shared/spinner-live.ts",
@@ -29,6 +32,7 @@ const files = {
   test: "supabase/functions/_shared/spinner-live_test.ts",
   sqlTest: "supabase/tests/private_live_spinner_test.sql",
   mediaSqlTest: "supabase/tests/spinner_media_jobs_test.sql",
+  winnerRunbook: "docs/operations/SPINNER-RAFFLE-WINNER-PUBLICATION.md",
 };
 
 function read(rel) {
@@ -54,6 +58,8 @@ const migration = read(files.migration);
 const countdownMigration = read(files.countdownMigration);
 const foreignKeyIndexMigration = read(files.foreignKeyIndexMigration);
 const mediaMigration = read(files.mediaMigration);
+const officialRaffleMigration = read(files.officialRaffleMigration);
+const winnerRunbook = read(files.winnerRunbook);
 const config = read(files.config);
 const index = read(files.index);
 const engine = read(files.engine);
@@ -281,6 +287,47 @@ if (
   "readBoundedSpinnerJsonObject",
 ].forEach((snippet) => includes("server draw engine", engine, snippet));
 
+for (const snippet of [
+  'export type SpinnerDrawMode = "official" | "test"',
+  "drawMode: SpinnerDrawMode",
+  "normalizeDrawMode",
+  "BIDI_CONTROL_PATTERN",
+  "CONTROL_PATTERN",
+  "Array.from(displayName).length > SPINNER_MAX_NAME_GRAPHEMES",
+]) includes("server draw classification", engine, snippet);
+
+for (const snippet of [
+  "spinner_prepare_outbox_draw_mode",
+  "if receipt_mode = 'test' then return null",
+  "spinner_publish_official_raffle_result",
+  "spinner_raffle_result_publications",
+  "get_latest_official_raffle_winner",
+  "publication.reveal_at <= now()",
+  "cycle_month = raffle_month",
+  "else outbox_row.reveal_after",
+  "2026-07-27 15:29:29.763+00",
+  "2026-07-27 15:32:34.563+00",
+  "2026-07-27 15:32:39.181748+00",
+  "receipt.winner ->> 'displayName' = 'Sya'",
+  "char_length(winner_display_name) between 1 and 40",
+  "winner_display_name !~ U&'[\\202A-\\202E\\2066-\\2069]'",
+  "drop function private.spinner_backfill_2026_07_reviewed_result()",
+]) includes("official raffle publication migration", officialRaffleMigration, snippet);
+
+excludes(
+  "official raffle publication migration",
+  officialRaffleMigration,
+  /spinner_complete_official_raffle_result/u,
+  "public visibility must not depend on external delivery completion",
+);
+
+for (const snippet of [
+  "Signed-out and unverified visitors receive exactly `Winner Confirmed`",
+  "A test receipt is durable for private review",
+  "drops the temporary backfill function",
+  "unchanged 33-function inventory and 20/13 JWT parity",
+]) includes("spinner raffle winner runbook", winnerRunbook, snippet);
+
 includes(
   "authoritative Reaper schedule",
   index,
@@ -371,6 +418,8 @@ excludes(
   "rememberModeratorAuthorization(",
   "readBoundedSpinnerJsonObject(req)",
   "rejectUnstagedSpin(moderator.adminClient, commandId)",
+  "const drawMode = normalizeDrawMode(body.drawMode)",
+  "commandInput = { action, expectedRevision, durationMs, drawMode }",
 ].forEach((snippet) => includes("Edge HTTP contract", index, snippet));
 
 includes(

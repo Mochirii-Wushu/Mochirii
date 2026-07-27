@@ -263,7 +263,10 @@ for (const required of [
   'className="roster-panel roster-panel--viewer"',
   'className="roster-scroll" tabIndex={0} role="region"',
   "SETTINGS_STORAGE_KEY",
-  'useState<MotionMode>("reduced")',
+  'useState<MotionMode>("full")',
+  "resolveInitialViewerMotion(initialStoredValue, media.matches)",
+  'drawMode === "test"',
+  "Test draw · no public result",
   'animationName: "spinner-live-wheel-turn"',
   'wheelMotionHasStarted && motionMode === "full"',
   "spinnerLiveMotionRotations(snapshot, motionMode)",
@@ -282,6 +285,10 @@ for (const required of [
   "sendSpinnerLiveCommand",
   'action: "set_roster"',
   'action: "spin"',
+  "pendingCommand.drawMode",
+  "window.confirm",
+  "Test spin",
+  "No guild announcement or public result",
   'action: "reset"',
   'animationName: "spinner-live-wheel-turn"',
   "&& !skipRequestedRef.current",
@@ -583,6 +590,8 @@ includes("spinner CSS", source.css, "@keyframes spinner-celebration-stage-bloom"
 includes("spinner CSS", source.css, "@keyframes spinner-winner-crown");
 includes("spinner CSS", source.css, "animation-delay: var(--spinner-celebration-delay, 0ms)");
 includes("spinner CSS", source.css, ".spinner-page .raffle-app.is-motion-reduced .draw-stage");
+includes("spinner CSS", source.css, ".spinner-page .spinner-test-control");
+includes("spinner CSS", source.css, ".spinner-page .spinner-test-badge");
 excludes("spinner CSS", source.css, "@keyframes wheel-aura");
 
 const assetPath = resolve(root, "apps/web/public/assets/img/spinner/mochirii-banner.webp");

@@ -259,6 +259,26 @@
   box-shadow: 0 0 0.8rem rgb(89 201 165 / 68%);
 }
 
+.spinner-page .spinner-test-badge {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgb(255 125 184 / 58%);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgb(98 27 70 / 88%), rgb(29 44 93 / 86%));
+  color: #ffe1f0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .spinner-page .raffle-brand-lockup h1,
 .spinner-page .stage-heading h2,
 .spinner-page .roster-heading h2,
@@ -313,6 +333,57 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.spinner-page .spinner-test-control {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.08rem 0.5rem;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.42rem 0.68rem;
+  border: 1px solid rgb(220 235 245 / 18%);
+  border-radius: 0.72rem;
+  background: rgb(3 9 15 / 78%);
+  color: #e8f0f3;
+  cursor: pointer;
+}
+
+.spinner-page .spinner-test-control.is-active {
+  border-color: rgb(255 125 184 / 58%);
+  background: linear-gradient(135deg, rgb(98 27 70 / 78%), rgb(29 44 93 / 74%));
+}
+
+.spinner-page .spinner-test-control input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: #e360a0;
+}
+
+.spinner-page .spinner-test-control span,
+.spinner-page .spinner-test-control small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.spinner-page .spinner-test-control span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.spinner-page .spinner-test-control small {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 0.61rem;
+  line-height: 1.25;
+}
+
+.spinner-page .spinner-test-control:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .spinner-page .motion-control select,
@@ -1275,7 +1346,12 @@
 
   .spinner-page .stage-controls {
     align-items: end;
+    flex-wrap: wrap;
     justify-content: space-between;
+  }
+
+  .spinner-page .spinner-test-control {
+    flex: 1 1 13rem;
   }
 
   .spinner-page .motion-control {
@@ -1364,6 +1440,11 @@
 
   .spinner-page .stage-controls {
     display: grid;
+  }
+
+  .spinner-page .spinner-test-badge,
+  .spinner-page .spinner-test-control {
+    width: 100%;
   }
 
   .spinner-page .wheel-frame {

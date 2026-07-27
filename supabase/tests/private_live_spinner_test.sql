@@ -387,6 +387,7 @@ SELECT public.spinner_stage_command(
     jsonb_build_object(
       'receipt', jsonb_build_object(
         'version', 1,
+        'drawMode', 'official',
         'drawId', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbc',
         'timestampIso', now(),
         'singaporeTime', '26 Jul 2026, 20:34:56 SGT',
@@ -450,6 +451,7 @@ SELECT public.spinner_stage_command(
     jsonb_build_object(
       'receipt', jsonb_build_object(
         'version', 1,
+        'drawMode', 'official',
         'drawId', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
         'timestampIso', now(),
         'singaporeTime', '26 Jul 2026, 20:34:56 SGT',
@@ -594,7 +596,7 @@ INSERT INTO public.spinner_draw_receipts (
   )),
   repeat('3', 64), 4294967296, jsonb_build_array(0), 0, 0,
   jsonb_build_object('version', 1, 'id', '11111111-1111-4111-8111-111111111111', 'displayName', 'Lotus'),
-  jsonb_build_object('version', 1, 'drawId', 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'),
+  jsonb_build_object('version', 1, 'drawMode', 'official', 'drawId', 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'),
   now() - interval '31 days', now() - interval '1 day'
 );
 INSERT INTO public.spinner_discord_outbox (

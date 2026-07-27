@@ -82,7 +82,7 @@ export function AccountPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
-  const [spinnerViewerMotion, setSpinnerViewerMotion] = useState<MotionMode>("reduced");
+  const [spinnerViewerMotion, setSpinnerViewerMotion] = useState<MotionMode>("full");
   const [linkedIdentities, setLinkedIdentities] = useState<MemberAccessIdentity[]>([]);
   const [formState, setFormState] = useState<FormState>(emptyFormState);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
@@ -255,7 +255,8 @@ export function AccountPanel() {
         queueMicrotask(() => setSpinnerViewerMotion(storedMotion));
       }
     } catch {
-      // Reduced remains the safe default when browser storage is unavailable.
+      // Full is the explicit first-use preference; the viewer still honors
+      // the operating system's reduced-motion preference.
     }
   }, []);
 
