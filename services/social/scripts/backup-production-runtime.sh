@@ -64,6 +64,13 @@ if [[ "$verify_only" == false ]]; then
     exit 1
   }
 
+  # The root-owned file is the sole authority for provider settings; ignore any
+  # inherited process environment and give static analysis explicit defaults.
+  BACKUP_S3_ACCESS_KEY_ID=""
+  BACKUP_S3_SECRET_ACCESS_KEY=""
+  BACKUP_S3_BUCKET=""
+  BACKUP_S3_ENDPOINT=""
+  BACKUP_S3_REGION=""
   set -a
   # shellcheck source=/dev/null
   source "$BACKUP_ENV"
