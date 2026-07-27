@@ -306,7 +306,7 @@ async function handleCommand(req: Request): Promise<Response> {
         durationMs: Number(commandInput.durationMs),
         startRotation: Number(state.final_rotation || 0),
       });
-      const discord = buildDiscordOutboxPayloads(plan.receipt);
+      const discord = buildDiscordOutboxPayloads(plan.receipt, plan.startAt);
       const animationManifest = await buildAnimationManifest(plan.receipt, plan);
       stagedPayload = {
         receipt: plan.receipt,

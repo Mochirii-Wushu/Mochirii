@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  LIVE_SPINNER_POLL_MS,
   fetchSpinnerLiveSnapshot,
+  spinnerLivePollInterval,
   type SpinnerLiveResultV1,
 } from "./live";
 
-const ACTIVE_POLL_MS = 750;
 const ERROR_POLL_MS = 2_500;
 
 export function useSpinnerLive({
@@ -64,9 +63,7 @@ export function useSpinnerLive({
       if (cancelled) return;
       const delay = !result
         ? ERROR_POLL_MS
-        : result.snapshot.phase === "spinning"
-          ? ACTIVE_POLL_MS
-          : LIVE_SPINNER_POLL_MS;
+        : spinnerLivePollInterval(result.snapshot, result.serverNow);
       timerRef.current = setTimeout(poll, delay);
     };
 

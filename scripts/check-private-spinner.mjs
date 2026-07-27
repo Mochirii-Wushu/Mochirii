@@ -48,12 +48,15 @@ const files = {
   proxy: "apps/web/proxy.ts",
   access: "apps/web/lib/spinner/access.ts",
   policy: "apps/web/lib/spinner/session-policy.ts",
+  viewerHandoff: "apps/web/lib/spinner/viewer-handoff.ts",
+  viewerHandoffAuthority: "apps/web/lib/spinner/viewer-handoff-authority.ts",
   stage: "apps/web/components/spinner/SpinnerStage.tsx",
   clientEntry: "apps/web/components/spinner/SpinnerClientEntry.tsx",
   guard: "apps/web/components/spinner/SpinnerSessionGuard.tsx",
   controller: "apps/web/components/spinner/RaffleSpinner.tsx",
   viewer: "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
   live: "apps/web/components/spinner/live.ts",
+  countdownHook: "apps/web/components/spinner/use-spinner-countdown.ts",
   raffle: "apps/web/components/spinner/raffle.ts",
   celebration: "apps/web/components/spinner/celebration.ts",
   celebrationScene: "apps/web/components/spinner/celebration-scene.ts",
@@ -262,7 +265,7 @@ for (const required of [
   "SETTINGS_STORAGE_KEY",
   'useState<MotionMode>("reduced")',
   'animationName: "spinner-live-wheel-turn"',
-  'motionMode === "full" && wheelMotion',
+  'wheelMotionHasStarted && motionMode === "full"',
   "spinnerLiveMotionRotations(snapshot, motionMode)",
   "resolveCelebrationMotionMode(",
   "if (nextMotionMode !== effectiveMotionRef.current) stopCelebration();",
@@ -284,7 +287,7 @@ for (const required of [
   "&& !skipRequestedRef.current",
   "isTerminalSpinnerSpinFailure(error)",
   "spinnerSkipStateForDraw({",
-  'effectiveMotionMode === "full" && wheelMotion',
+  'wheelMotionHasStarted && effectiveMotionMode === "full"',
   "spinnerLiveMotionRotations(snapshot, selectedMotion)",
   'id="main"',
   'src="/assets/img/brand/emblem.webp"',
@@ -301,10 +304,46 @@ for (const required of [
 excludes("moderator spinner", source.controller, "onTransitionEnd");
 excludes("moderator spinner", source.controller, "document.documentElement.requestFullscreen");
 
+for (const page of [
+  ["moderator spinner", source.controller],
+  ["view-only spinner", source.viewer],
+]) {
+  for (const snippet of [
+    "Mōchirīī Guild · Raffle Wheel",
+    "All members welcome to watch the pretty wheel spin for pretty Mōchī gifts in the monthly guild raffle!",
+    "Mōchi Selection",
+    "useSpinnerCountdown",
+    "spinnerServerClockAnchorForSnapshot(",
+    "serverClockAnchorRef.current,",
+    "setServerClockAnchor(nextClockAnchor)",
+    "spinnerLiveTimeline(snapshot, serverNowMs,",
+    "serverNowMs >= revealAtMs",
+    'role="timer"',
+    'aria-live="off"',
+    "The roster is locked. The moonwheel countdown is underway.",
+    "The shared draw is underway.",
+    'event.animationName === "spinner-live-wheel-turn"',
+  ]) includes(page[0], page[1], snippet);
+  for (const staleCopy of [
+    "Mōchirīī Guild · Fair Draw Studio",
+    "Mōchirīī Guild · Live Draw",
+    "Every name, one equal chance.",
+    "Moonlit selection chamber",
+  ]) excludes(page[0], page[1], staleCopy);
+}
+
+for (const snippet of [
+  "spinnerServerClockNow(serverClockAnchor, performance.now())",
+  "[serverClockAnchor, startedAt]",
+]) includes("monotonic spinner countdown", source.countdownHook, snippet);
+excludes("monotonic spinner countdown", source.countdownHook, "Date.now()");
+
 [
   "getCurrentSession",
   'method: "POST"',
   '"X-Spinner-Mode": requestedMode',
+  '"X-Spinner-Preserve-Session": "true"',
+  "openPrivateSpinnerViewerHandoff",
 ].forEach((snippet) => includes("central spinner launcher", source.auth, snippet));
 includes("leader dashboard launcher", source.dashboard, 'id="spinnerLaunchPanel"');
 includes("leader dashboard launcher", source.dashboard, 'result.mode !== "controller"');
@@ -316,6 +355,29 @@ includes("verified viewer launcher", source.account, "{spinnerViewerAvailable ? 
 includes("verified viewer launcher", source.account, "openSpinnerViewer");
 includes("verified viewer launcher", source.account, 'openPrivateSpinnerSession("viewer")');
 includes("verified viewer launcher", source.account, 'window.location.assign("/spinner")');
+for (const snippet of [
+  'values.length === 1 && values[0] === "live-draw"',
+  'url.searchParams.delete("open")',
+]) includes("verified viewer handoff intent", source.viewerHandoff, snippet);
+for (const snippet of [
+  "decodeSpinnerSessionCookie(encodedSession)",
+  "currentExpiryMs > nowMs",
+  "validateAccess(current.accessToken, current.mode)",
+  'validateAccess(viewerAccessToken, "viewer")',
+]) includes("verified viewer handoff authority", source.viewerHandoffAuthority, snippet);
+for (const snippet of [
+  'preserveSession !== "true" || requestedMode !== "viewer"',
+  "authorizeSpinnerViewerHandoff({",
+  "encodedSession: request.cookies.get(SPINNER_SESSION_COOKIE)?.value",
+  ": opaqueDenied(access.clearCookie)",
+]) includes("atomic viewer handoff route", source.sessionRoute, snippet);
+for (const snippet of [
+  "consumeLiveDrawHandoffIntent(window.location.href)",
+  "window.history.replaceState",
+  "liveDrawHandoffStartedRef.current",
+  "openPrivateSpinnerViewerHandoff()",
+  'window.location.replace("/spinner")',
+]) includes("verified viewer handoff", source.account, snippet);
 includes("verified viewer motion preference", source.account, "updateSpinnerViewerMotion");
 includes("verified viewer motion preference", source.account, "Live draw motion");
 includes("verified viewer motion preference", source.account, "SETTINGS_STORAGE_KEY");
@@ -376,7 +438,8 @@ for (const snippet of [
   "select count(*)::integer as total_rows",
   '"claimed": 0',
   '"results": []',
-  "one disposable two-name draw and no other channel mutation",
+  "Do not create a synthetic guild result.",
+  "https://mochirii.com/account?open=live-draw",
   "reaper_spinner_dispatch_secret",
   "REAPER_SPINNER_DISPATCH_SECRET",
   "The migration is forward-only.",

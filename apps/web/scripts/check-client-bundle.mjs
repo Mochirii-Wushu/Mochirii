@@ -84,7 +84,7 @@ function chunksContaining(marker) {
   return staticChunks.filter((chunk) => chunk.buffer.includes(encoded)).map((chunk) => chunk.file);
 }
 const controllerChunks = chunksContaining("Bulk paste");
-const viewerChunks = chunksContaining("Watching the shared draw in real time.");
+const viewerChunks = chunksContaining("raffle-app--viewer");
 if (controllerChunks.length !== 1) failures.push(`expected one controller-only spinner chunk, found ${controllerChunks.length}`);
 if (viewerChunks.length !== 1) failures.push(`expected one viewer-only spinner chunk, found ${viewerChunks.length}`);
 if (controllerChunks[0] && viewerChunks[0] && controllerChunks[0] === viewerChunks[0]) {

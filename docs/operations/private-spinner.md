@@ -7,7 +7,7 @@ The Mōchirīī raffle spinner is a native Website route at `/spinner`. The Webs
 Both modes use the same URL and are authorized on the server before the stage is imported.
 
 - **Controller:** a moderator enters through the authorized Leader Dashboard. The dashboard requests the exact `controller` intent, and the server delegates the role decision to the existing moderator authority. A viewer session can never promote itself by changing a cookie, header, URL, or client state.
-- **Viewer:** an active, currently verified guild member enters through Account in exact `viewer` mode. A direct `/spinner` link works only while that short-lived private session remains valid; after it expires, the member re-enters through Account. Everyone else keeps the generic 404 surface with no private client or stylesheet preload.
+- **Viewer:** an active, currently verified guild member enters through Account in exact `viewer` mode. The one-shot `/account?open=live-draw` handoff removes its query parameter, preserves an existing viewer or controller session, and otherwise requests viewer-only access before navigating to `/spinner`. A direct `/spinner` link works only while that short-lived private session remains valid; after it expires, the member re-enters through Account. Everyone else keeps the generic 404 surface with no private client or stylesheet preload.
 - **Unauthorized:** the response is HTTP 404, `private, no-store`, and unbranded. It contains no spinner title, artwork, controls, stage stylesheet, analytics destination, or controller/viewer bundle.
 
 Approval creates a rolling cookie whose lifetime is at most ten minutes and never exceeds the access-token expiry. It is `HttpOnly`, `Secure`, `SameSite=Strict`, and limited to `Path=/spinner`. The page and live proxy read that cookie on the server. Session authorization runs immediately, every five minutes, and when focus or visibility returns. Sign-out and session failure clear access; an expired controller returns to Leader Dashboard and an expired viewer returns to Account.
@@ -43,7 +43,7 @@ On Spin, the backend reserves an idempotent command, freezes the exact ordered r
 
 If processing is interrupted after command reservation but before the selected result is durably staged, that command ID becomes terminal and cannot be retried or resampled. The controller reports that no winner was retained and requires a new, explicit Spin action with a new command ID.
 
-The server schedules a short lead-in and returns its current clock with every snapshot. Full viewers use the same animation start, duration, start angle, and final angle; late joiners use a negative animation offset instead of replaying the path faster. Reduced motion starts later but ends at the common reveal. Off and Skip do not point at the winning segment early.
+The server schedules an exact three-minute lead-in and returns its current clock with every snapshot. Both clients derive the visible countdown from the absolute `started_at` value, so refreshes, clock skew, focus changes, and late joins cannot restart it. Full viewers use the same animation start, duration, start angle, and final angle; late joiners use a negative animation offset instead of replaying the path faster. Reduced motion starts later but ends at the common reveal. Off and Skip do not point at the winning segment early.
 
 Ordinary viewer responses withhold the selected index, winner, and receipt until reveal. This is presentation control, not cryptographic secrecy: a technically skilled authorized viewer can infer the target from the frozen roster and deterministic final rotation. Receipts make the selection arithmetic replayable, but they are not independently tamper-proof.
 
@@ -51,7 +51,7 @@ Ordinary viewer responses withhold the selected index, winner, and receipt until
 
 Every accepted draw creates one service-only outbox item for channel `1468667003366674721`.
 
-1. Reaper posts one message containing the live-page link, with a stable enforced nonce and all mentions disabled.
+1. Reaper immediately posts one message containing the authoritative start as a localized relative timestamp and the one-shot Account handoff link, with a stable enforced nonce and all mentions disabled.
 2. At or after the authoritative reveal time, Reaper edits that same message ID with the sanitized winner, draw ID, and roster hash.
 3. Rate limits and transient failures retry with bounded leases and backoff. Invalid channels, unsafe mentions, missing message IDs, or exhausted retries fail closed for operator review.
 
@@ -63,14 +63,16 @@ The dispatcher never receives the participant roster. It receives only prebuilt 
 
 Source, tests, migration, and function code may be reviewed in a PR. The following remain separate owner-approved provider mutations:
 
-- applying `20260726180052_add_private_live_spinner.sql` and its additive
-  `20260726213000_add_spinner_foreign_key_indexes.sql` follow-up;
+- applying `20260727054717_enforce_three_minute_spinner_countdown.sql` after
+  the released spinner and media migrations;
 - allowing the connected production integration to redeploy all 33 Edge Functions declared in `supabase/config.toml`, including the new `spinner-live-session` and `reaper-spinner-dispatch` functions;
 - setting `DISCORD_RAFFLE_CHANNEL_ID`, `REAPER_SPINNER_DISPATCH_SECRET`, or changing any existing bot secret;
 - adding the matching Vault values used by scheduled dispatch;
 - exercising the target channel or promoting a production deployment.
 
 During an approved release, merge the migration and function source from the same validated commit. Configure the channel allowlist to the exact target, generate a distinct dispatcher secret, and store the project URL and matching dispatcher secret in Vault as documented by the dispatcher runbook. Never paste secret values into source, PR text, logs, or command transcripts.
+
+Pause moderator draws before the three-minute timing migration or matching function and Website code begins deploying. Keep draws paused through the compatibility window, and resume only after the production migration, functions, Website deployment, unauthorized 404, and authorized session handoff are verified at the same merged commit.
 
 ## Production Integration Blast Radius
 
@@ -151,11 +153,11 @@ With the exact channel allowlist and server-only configuration already validated
 
 Run the count query again and require zero. This proves configuration and an empty claim without creating, editing, or deleting a channel message. Any nonzero claim, nonempty result, error, or unexpected network action is a stop condition.
 
-## Exact Live Channel Test
+## Genuine Live Channel Canary
 
-The approved acceptance action is one disposable two-name draw and no other channel mutation. Use non-personal Mōchirīī test names, one authorized controller, and one active verified viewer on a second device. Confirm both pages show the same roster, timing, wheel result, and winner.
+Do not create a synthetic guild result. Use the first genuine moderator draw after the synchronized Website and database release as the production canary, with one authorized controller and one active verified viewer on a second device. Confirm both pages show the same roster, `03:00` countdown, timing, wheel result, and winner.
 
-For channel `1468667003366674721`, require exactly one start message containing only the Mōchirīī live-page link and exactly one later edit of that same message ID containing the sanitized winner, draw ID, and roster hash. Confirm the message has no user, role, `@here`, or `@everyone` mention. Do not test another channel, alter channel permissions, register commands, send a second draw, or delete the test message unless those extra actions receive separate approval. Export the disposable receipt, verify the outbox row reaches `completed`, record only no-secret identifiers/status evidence, then clear the disposable roster.
+For channel `1468667003366674721`, require exactly one start message with the localized authoritative start time and `https://mochirii.com/account?open=live-draw`, followed by exactly one later edit of that same message ID containing the sanitized winner, draw ID, and roster hash. Confirm the message has no user, role, `@here`, or `@everyone` mention. Do not test another channel, alter channel permissions, register commands, send an extra draw, or delete the genuine result. Export the receipt when required, verify the outbox row reaches `completed`, and record only no-secret identifiers/status evidence.
 
 ## Emergency Disable And Rollback Boundaries
 
@@ -194,7 +196,7 @@ from public.spinner_discord_outbox
 where draw_id = '<draw UUID>'::uuid;
 ```
 
-Inspect the target channel around `created_at`. Consider only a message authored by Reaper with the exact start copy and `https://mochirii.com/spinner`. Require one unambiguous candidate; record its message ID and timestamp without copying unrelated channel content. If there is no candidate, keep the row paused until a second operator confirms the channel history before authorizing a retry. If there are multiple candidates or authorship is ambiguous, keep delivery disabled and obtain explicit approval for which message to retain; do not edit or delete any candidate automatically.
+Inspect the target channel around `created_at`. Consider only a message authored by Reaper with the exact start copy and `https://mochirii.com/account?open=live-draw`. Require one unambiguous candidate; record its message ID and timestamp without copying unrelated channel content. If there is no candidate, keep the row paused until a second operator confirms the channel history before authorizing a retry. If there are multiple candidates or authorship is ambiguous, keep delivery disabled and obtain explicit approval for which message to retain; do not edit or delete any candidate automatically.
 
 After the claim has expired, an approved operator may adopt the one confirmed message with this targeted transaction. Use an interactive transaction-capable database session, not a one-shot query runner. Replace only the three placeholders, require exactly one returned row, inspect it before commit, and roll back on any mismatch:
 

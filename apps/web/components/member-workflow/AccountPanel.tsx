@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
 import {
   parseStoredMotion,
@@ -9,8 +9,9 @@ import {
   type MotionMode,
 } from "@/components/spinner/raffle";
 import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
+import { consumeLiveDrawHandoffIntent } from "@/lib/spinner/viewer-handoff";
 import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
-import { getLinkedIdentities, linkProviderIdentity, openPrivateSpinnerSession } from "@/lib/supabase/auth";
+import { getLinkedIdentities, linkProviderIdentity, openPrivateSpinnerSession, openPrivateSpinnerViewerHandoff } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
 import { checkLeaderGalleryModerationAccess } from "@/lib/supabase/moderation";
@@ -96,6 +97,8 @@ export function AccountPanel() {
   const [submissionsError, setSubmissionsError] = useState("");
   const [spinnerLaunchBusy, setSpinnerLaunchBusy] = useState(false);
   const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
+  const [liveDrawHandoffRequested, setLiveDrawHandoffRequested] = useState(false);
+  const liveDrawHandoffStartedRef = useRef(false);
 
   const loadSubmissions = useCallback(async () => {
     setSubmissionsError("");
@@ -214,6 +217,37 @@ export function AccountPanel() {
   }, []);
 
   useEffect(() => {
+    const intent = consumeLiveDrawHandoffIntent(window.location.href);
+    if (intent.hadParameter) {
+      window.history.replaceState(window.history.state, "", intent.cleanedLocation);
+    }
+    if (intent.requested) queueMicrotask(() => setLiveDrawHandoffRequested(true));
+  }, []);
+
+  useEffect(() => {
+    if (!liveDrawHandoffRequested || busy || liveDrawHandoffStartedRef.current) return;
+    liveDrawHandoffStartedRef.current = true;
+
+    void Promise.resolve().then(async () => {
+      if (!user) {
+        setSpinnerLaunchMessage("Sign in and complete member verification to open member-only guild pages.");
+        return;
+      }
+
+      setSpinnerLaunchBusy(true);
+      setSpinnerLaunchMessage("Checking member access.");
+      const result = await openPrivateSpinnerViewerHandoff();
+      if (!result.ok) {
+        setSpinnerLaunchMessage("Current member verification is required to open member-only guild pages.");
+        setSpinnerLaunchBusy(false);
+        return;
+      }
+
+      window.location.replace("/spinner");
+    });
+  }, [busy, liveDrawHandoffRequested, user]);
+
+  useEffect(() => {
     try {
       const stored = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (stored != null) {
@@ -315,7 +349,11 @@ export function AccountPanel() {
       <section className="glass-card glass-card--primary glass-pad auth-panel" id="signedOutPanel" aria-busy={busy}>
         <p className="kicker">Sign In Required</p>
         <h2 className="section-title">Choose a Sign-In Method</h2>
-        <WorkflowNotice>A website account is required before member verification and gallery access can be checked.</WorkflowNotice>
+        <WorkflowNotice>
+          {liveDrawHandoffRequested
+            ? "Sign in and complete member verification to open member-only guild pages."
+            : "A website account is required before member verification and gallery access can be checked."}
+        </WorkflowNotice>
         <div className="auth-actions">
           <Link className="hero-cta hero-cta--primary" href="/auth">Login</Link>
         </div>

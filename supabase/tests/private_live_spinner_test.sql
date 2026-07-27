@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(49);
+SELECT plan(50);
 
 INSERT INTO auth.users (
   id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at
@@ -376,6 +376,69 @@ SELECT ok(
 );
 
 SELECT public.spinner_reserve_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5',
+    'spin',
+    '99999999-9999-4999-8999-999999999999',
+    4,
+    repeat('e', 64)
+  );
+SELECT public.spinner_stage_command(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5',
+    jsonb_build_object(
+      'receipt', jsonb_build_object(
+        'version', 1,
+        'drawId', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbc',
+        'timestampIso', now(),
+        'singaporeTime', '26 Jul 2026, 20:34:56 SGT',
+        'appVersion', '1.0.0',
+        'algorithmVersion', 'uniform-uint32-rejection-v1',
+        'rosterSnapshot', jsonb_build_object(
+          'version', 1,
+          'participants', jsonb_build_array(
+            jsonb_build_object('version', 1, 'id', '11111111-1111-4111-8111-111111111111', 'displayName', 'Lotus'),
+            jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
+          )
+        ),
+        'rosterHashSha256', repeat('2', 64),
+        'rejectionLimit', 4294967296,
+        'sampledWords', jsonb_build_array(1),
+        'acceptedWord', 1,
+        'selectedIndex', 1,
+        'winner', jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
+      ),
+      'startAt', now() + interval '2 seconds',
+      'revealAt', now() + interval '6.8 seconds',
+      'durationMs', 4800,
+      'startRotation', 777,
+      'finalRotation', 2757,
+      'discordChannelKey', 'raffle_spins',
+      'discordChannelId', '1468667003366674721',
+      'discordStartPayload', jsonb_build_object(
+        'content', 'Mōchirīī raffle timing test',
+        'nonce', 'bbbbbbbbbbbbbbbbbbbbbbbbc',
+        'enforce_nonce', true,
+        'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+      ),
+      'discordResultPayload', jsonb_build_object(
+        'content', 'Mōchirīī raffle timing result',
+        'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
+      )
+    )
+  );
+SELECT public.spinner_apply_command('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5');
+SELECT ok(
+  (SELECT status = 'rejected' AND error_code = 'invalid_receipt'
+    FROM public.spinner_commands
+    WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa5')
+  AND (SELECT revision = 4 FROM public.spinner_live_state WHERE singleton_id = 1)
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_draw_receipts
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbc')
+  AND NOT EXISTS (SELECT 1 FROM public.spinner_discord_outbox
+    WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbc'),
+  'the released two-second lead is rejected by the forward timing rule'
+);
+
+SELECT public.spinner_reserve_command(
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6',
     'spin',
     '99999999-9999-4999-8999-999999999999',
@@ -406,8 +469,8 @@ SELECT public.spinner_stage_command(
         'selectedIndex', 1,
         'winner', jsonb_build_object('version', 1, 'id', '22222222-2222-4222-8222-222222222222', 'displayName', 'Jade')
       ),
-      'startAt', now() + interval '2 seconds',
-      'revealAt', now() + interval '6.8 seconds',
+      'startAt', now() + interval '3 minutes',
+      'revealAt', now() + interval '3 minutes 4.8 seconds',
       'durationMs', 4800,
       'startRotation', 777,
       'finalRotation', 2757,
@@ -416,7 +479,10 @@ SELECT public.spinner_stage_command(
       'discordChannelKey', 'raffle_spins',
       'discordChannelId', '1468667003366674721',
       'discordStartPayload', jsonb_build_object(
-        'content', 'Mōchirīī raffle is live: https://mochirii.com/spinner',
+        'content', format(
+          E'A Mōchirīī monthly guild raffle begins <t:%s:R>.\nWatch the moonwheel live: https://mochirii.com/account?open=live-draw',
+          floor(extract(epoch from now() + interval '3 minutes'))::bigint
+        ),
         'nonce', 'bbbbbbbbbbbbbbbbbbbbbbbbb',
         'enforce_nonce', true,
         'allowed_mentions', jsonb_build_object('parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false)
@@ -431,7 +497,9 @@ SELECT public.spinner_apply_command('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6');
 SELECT ok(
   (SELECT status = 'applied' FROM public.spinner_commands
     WHERE command_id = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6')
-  AND (SELECT phase = 'start_pending' FROM public.spinner_discord_outbox
+  AND (SELECT phase = 'start_pending' AND next_attempt_at <= now()
+      AND reveal_after = now() + interval '3 minutes 4.8 seconds'
+    FROM public.spinner_discord_outbox
     WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
   'a spin persists first and returns without waiting on Discord delivery'
 );
@@ -451,7 +519,7 @@ SELECT ok(
       AND timestamp_iso = (receipt ->> 'timestampIso')::timestamptz
     FROM public.spinner_draw_receipts
     WHERE draw_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb')
-  AND (SELECT started_at = now() + interval '2 seconds'
+  AND (SELECT started_at = now() + interval '3 minutes'
     FROM public.spinner_live_state WHERE singleton_id = 1),
   'the receipt records selection time separately from the synchronized future start'
 );

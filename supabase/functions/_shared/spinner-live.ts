@@ -6,10 +6,10 @@ export const SPINNER_MAX_PARTICIPANTS = 100;
 export const SPINNER_MAX_NAME_GRAPHEMES = 40;
 export const SPINNER_MAX_COMMAND_BODY_BYTES = 64 * 1_024;
 export const SPINNER_DEFAULT_DURATION_MS = 4_800;
-export const SPINNER_START_DELAY_MS = 2_000;
+export const SPINNER_START_DELAY_MS = 180_000;
 export const SPINNER_DISCORD_CHANNEL_KEY = "raffle_spins";
 export const SPINNER_DISCORD_CHANNEL_ID = "1468667003366674721";
-export const SPINNER_LIVE_URL = "https://mochirii.com/spinner";
+export const SPINNER_LIVE_URL = "https://mochirii.com/account?open=live-draw";
 
 const UINT32_RANGE = 0x1_0000_0000;
 const UUID_PATTERN =
@@ -411,12 +411,20 @@ export function sanitizeDiscordDisplayName(value: string): string {
     "Mōchirīī member";
 }
 
-export function buildDiscordOutboxPayloads(receipt: DrawReceiptV1): {
+export function buildDiscordOutboxPayloads(
+  receipt: DrawReceiptV1,
+  startAt: string,
+): {
   channelKey: string;
   channelId: string;
   startPayload: Record<string, unknown>;
   resultPayload: Record<string, unknown>;
 } {
+  const startAtMs = Date.parse(startAt);
+  if (!Number.isFinite(startAtMs)) {
+    throw new TypeError("The live draw start timestamp is invalid.");
+  }
+  const startAtUnixSeconds = Math.floor(startAtMs / 1_000);
   const winner = sanitizeDiscordDisplayName(receipt.winner.displayName);
   const nonce = receipt.drawId.replace(/-/gu, "").slice(0, 25);
   return {
@@ -424,7 +432,7 @@ export function buildDiscordOutboxPayloads(receipt: DrawReceiptV1): {
     channelId: SPINNER_DISCORD_CHANNEL_ID,
     startPayload: {
       content:
-        `A Mōchirīī raffle is starting.\nWatch live: ${SPINNER_LIVE_URL}`,
+        `A Mōchirīī monthly guild raffle begins <t:${startAtUnixSeconds}:R>.\nWatch the moonwheel live: ${SPINNER_LIVE_URL}`,
       nonce,
       enforce_nonce: true,
       allowed_mentions: { ...NO_MENTIONS, parse: [], users: [], roles: [] },
