@@ -16,6 +16,14 @@ import {
   validateSpinnerViewerToken,
   // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
 } from "../apps/web/lib/spinner/session-policy.ts";
+import {
+  consumeLiveDrawHandoffIntent,
+  // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
+} from "../apps/web/lib/spinner/viewer-handoff.ts";
+import {
+  authorizeSpinnerViewerHandoff,
+  // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
+} from "../apps/web/lib/spinner/viewer-handoff-authority.ts";
 
 function encode(value: unknown) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -314,4 +322,119 @@ test("a later role denial is not hidden by a prior successful heartbeat", async 
   assert.equal((await validate()).ok, true);
   authorized = false;
   assert.deepEqual(await validate(), { ok: false, reason: "denied" });
+});
+
+test("live draw handoff consumes only the exact one-shot intent", () => {
+  assert.deepEqual(
+    consumeLiveDrawHandoffIntent("https://mochirii.com/account?open=live-draw"),
+    {
+      requested: true,
+      hadParameter: true,
+      cleanedLocation: "/account",
+    },
+  );
+  assert.deepEqual(
+    consumeLiveDrawHandoffIntent("https://mochirii.com/account?return=account&open=live-draw#member"),
+    {
+      requested: true,
+      hadParameter: true,
+      cleanedLocation: "/account?return=account#member",
+    },
+  );
+
+  for (const input of [
+    "https://mochirii.com/account?open=Live-Draw",
+    "https://mochirii.com/account?open=live-draw&open=live-draw",
+    "https://mochirii.com/account?open=/spinner",
+  ]) {
+    const intent = consumeLiveDrawHandoffIntent(input);
+    assert.equal(intent.requested, false);
+    assert.equal(intent.hadParameter, true);
+    assert.equal(intent.cleanedLocation, "/account");
+  }
+});
+
+test("live draw handoff atomically preserves existing controller and viewer sessions", async () => {
+  const now = 1_700_000_000_000;
+  for (const mode of ["controller", "viewer"] as const) {
+    const currentToken = jwt(Math.floor(now / 1000) + 1_800);
+    const viewerToken = jwt(Math.floor(now / 1000) + 3_600);
+    const calls: Array<{ accessToken: string; mode: string }> = [];
+    const result = await authorizeSpinnerViewerHandoff({
+      encodedSession: encodeSpinnerSessionCookie(currentToken, mode),
+      viewerAccessToken: viewerToken,
+      nowMs: now,
+      validateAccess: async (accessToken, requestedMode) => {
+        calls.push({ accessToken, mode: requestedMode });
+        return { ok: true, expiresAtMs: now + 600_000, mode: requestedMode };
+      },
+    });
+
+    assert.deepEqual(result, {
+      ok: true,
+      accessToken: currentToken,
+      expiresAtMs: now + 600_000,
+      mode,
+    });
+    assert.deepEqual(calls, [{ accessToken: currentToken, mode }]);
+  }
+});
+
+test("live draw handoff opens viewer access only for an absent, malformed, or expired cookie", async () => {
+  const now = 1_700_000_000_000;
+  const viewerToken = jwt(Math.floor(now / 1000) + 3_600);
+  const expiredToken = jwt(Math.floor(now / 1000) - 1);
+  for (const encodedSession of [null, "broken", encodeSpinnerSessionCookie(expiredToken, "controller")]) {
+    const calls: Array<{ accessToken: string; mode: string }> = [];
+    const result = await authorizeSpinnerViewerHandoff({
+      encodedSession,
+      viewerAccessToken: viewerToken,
+      nowMs: now,
+      validateAccess: async (accessToken, mode) => {
+        calls.push({ accessToken, mode });
+        return { ok: true, expiresAtMs: now + 600_000, mode };
+      },
+    });
+    assert.deepEqual(result, {
+      ok: true,
+      accessToken: viewerToken,
+      expiresAtMs: now + 600_000,
+      mode: "viewer",
+    });
+    assert.deepEqual(calls, [{ accessToken: viewerToken, mode: "viewer" }]);
+  }
+});
+
+test("live draw handoff fails closed without downgrading on current-session or viewer denial", async () => {
+  const now = 1_700_000_000_000;
+  const currentToken = jwt(Math.floor(now / 1000) + 1_800);
+  const viewerToken = jwt(Math.floor(now / 1000) + 3_600);
+  const calls: Array<{ accessToken: string; mode: string }> = [];
+  const renewalFailure = await authorizeSpinnerViewerHandoff({
+    encodedSession: encodeSpinnerSessionCookie(currentToken, "controller"),
+    viewerAccessToken: viewerToken,
+    nowMs: now,
+    validateAccess: async (accessToken, mode) => {
+      calls.push({ accessToken, mode });
+      return { ok: false, reason: "upstream" };
+    },
+  });
+  assert.deepEqual(renewalFailure, { ok: false, clearCookie: false });
+  assert.deepEqual(calls, [{ accessToken: currentToken, mode: "controller" }]);
+
+  const revoked = await authorizeSpinnerViewerHandoff({
+    encodedSession: encodeSpinnerSessionCookie(currentToken, "controller"),
+    viewerAccessToken: viewerToken,
+    nowMs: now,
+    validateAccess: async () => ({ ok: false, reason: "denied" }),
+  });
+  assert.deepEqual(revoked, { ok: false, clearCookie: true });
+
+  const denied = await authorizeSpinnerViewerHandoff({
+    encodedSession: null,
+    viewerAccessToken: viewerToken,
+    nowMs: now,
+    validateAccess: async () => ({ ok: false, reason: "denied" }),
+  });
+  assert.deepEqual(denied, { ok: false, clearCookie: true });
 });

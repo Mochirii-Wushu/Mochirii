@@ -2,15 +2,24 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  createSpinnerServerClockAnchor,
   createSpinnerCommandId,
+  formatSpinnerCountdown,
   isTerminalSpinnerSpinFailure,
   parsePendingSpinnerCommand,
   parseSpinnerLiveResult,
   parseSpinnerLiveSnapshot,
+  reconcileSpinnerServerClockAnchor,
   SpinnerLiveRequestError,
+  spinnerCountdownSeconds,
+  spinnerDrawAnnouncementTransition,
+  spinnerLivePollInterval,
   spinnerLiveMotionRotations,
+  spinnerSkipControlVisible,
   spinnerSkipStateForDraw,
   spinnerLiveTimeline,
+  spinnerServerClockAnchorForSnapshot,
+  spinnerServerClockNow,
   // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
 } from "../apps/web/components/spinner/live.ts";
 import {
@@ -32,8 +41,8 @@ const SESSION_ID = "10000000-0000-4000-8000-000000000001";
 const DRAW_ID = "20000000-0000-4000-8000-000000000002";
 const OTHER_DRAW_ID = "30000000-0000-4000-8000-000000000003";
 const UPDATED_AT = "2026-07-26T18:00:00.000Z";
-const STARTED_AT = "2026-07-26T18:00:02.000Z";
-const REVEAL_AT = "2026-07-26T18:00:10.000Z";
+const STARTED_AT = "2026-07-26T18:03:00.000Z";
+const REVEAL_AT = "2026-07-26T18:03:08.000Z";
 const SERVER_NOW = "2026-07-26T18:00:04.000Z";
 
 const PARTICIPANTS: ParticipantV1[] = [
@@ -183,52 +192,202 @@ test("live timelines preserve a future start and respect every motion mode", () 
   const snapshot = parseSpinnerLiveSnapshot(spinningSnapshot());
   assert.ok(snapshot);
   assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:00.000Z", "full"), {
-    startDelayMs: 2_000,
-    revealDelayMs: 10_000,
+    startDelayMs: 180_000,
+    revealDelayMs: 188_000,
     motionDurationMs: 8_000,
-    motionDelayMs: 2_000,
+    motionDelayMs: 180_000,
   });
   assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:00.000Z", "reduced"), {
-    startDelayMs: 8_350,
-    revealDelayMs: 10_000,
+    startDelayMs: 186_350,
+    revealDelayMs: 188_000,
     motionDurationMs: 1_650,
-    motionDelayMs: 8_350,
+    motionDelayMs: 186_350,
   });
   assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:00.000Z", "off"), {
-    startDelayMs: 10_000,
-    revealDelayMs: 10_000,
+    startDelayMs: 188_000,
+    revealDelayMs: 188_000,
     motionDurationMs: 0,
-    motionDelayMs: 10_000,
+    motionDelayMs: 188_000,
   });
 });
 
 test("live timelines use the server clock for late joins and clock skew", () => {
   const snapshot = parseSpinnerLiveSnapshot(spinningSnapshot());
   assert.ok(snapshot);
-  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:06.000Z", "full"), {
+  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:03:04.000Z", "full"), {
     startDelayMs: 0,
     revealDelayMs: 4_000,
     motionDurationMs: 8_000,
     motionDelayMs: -4_000,
   });
-  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:12.000Z", "full"), {
+  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:03:10.000Z", "full"), {
     startDelayMs: 0,
     revealDelayMs: 0,
     motionDurationMs: 0,
     motionDelayMs: 0,
   });
-  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:09.000Z", "reduced"), {
+  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:03:07.000Z", "reduced"), {
     startDelayMs: 0,
     revealDelayMs: 1_000,
     motionDurationMs: 1_650,
     motionDelayMs: -650,
   });
-  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:00:06.000Z", "off"), {
+  assert.deepEqual(spinnerLiveTimeline(snapshot, "2026-07-26T18:03:04.000Z", "off"), {
     startDelayMs: 4_000,
     revealDelayMs: 4_000,
     motionDurationMs: 0,
     motionDelayMs: 4_000,
   });
+});
+
+test("countdown formatting follows the absolute server start from 03:00 through 00:00", () => {
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, Date.parse("2026-07-26T18:00:00.000Z")), 180);
+  assert.equal(formatSpinnerCountdown(180), "03:00");
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, Date.parse("2026-07-26T18:00:01.000Z")), 179);
+  assert.equal(formatSpinnerCountdown(179), "02:59");
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, Date.parse("2026-07-26T18:02:59.000Z")), 1);
+  assert.equal(formatSpinnerCountdown(1), "00:01");
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, Date.parse(STARTED_AT)), 0);
+  assert.equal(formatSpinnerCountdown(0), "00:00");
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, Date.parse("2026-07-26T18:03:04.000Z")), 0);
+  assert.equal(spinnerCountdownSeconds(null, Date.parse(STARTED_AT)), 0);
+  assert.equal(formatSpinnerCountdown(Number.NaN), "00:00");
+});
+
+test("monotonic server anchors ignore wall-clock jumps and react to fresh polling corrections", () => {
+  const initial = createSpinnerServerClockAnchor("2026-07-26T18:00:00.000Z", 1_000);
+  assert.ok(initial);
+  assert.equal(spinnerServerClockNow(initial, 1_000), Date.parse("2026-07-26T18:00:00.000Z"));
+  assert.equal(
+    spinnerCountdownSeconds(STARTED_AT, spinnerServerClockNow(initial, 2_000)),
+    179,
+  );
+
+  // Local Date changes are intentionally absent from the calculation. A fresh
+  // poll replaces the reactive anchor and corrects the authoritative position.
+  const jittered = reconcileSpinnerServerClockAnchor(
+    initial,
+    "2026-07-26T17:59:59.500Z",
+    2_000,
+  );
+  assert.ok(jittered);
+  assert.equal(
+    spinnerServerClockNow(jittered, 2_000),
+    Date.parse("2026-07-26T18:00:01.000Z"),
+  );
+
+  const corrected = reconcileSpinnerServerClockAnchor(
+    jittered,
+    "2026-07-26T18:00:02.250Z",
+    3_500,
+  );
+  assert.ok(corrected);
+  assert.equal(
+    spinnerServerClockNow(corrected, 3_500),
+    Date.parse("2026-07-26T18:00:02.500Z"),
+  );
+  assert.equal(
+    spinnerCountdownSeconds(STARTED_AT, spinnerServerClockNow(corrected, 3_500)),
+    178,
+  );
+  assert.equal(
+    spinnerCountdownSeconds(STARTED_AT, spinnerServerClockNow(corrected, 4_750)),
+    177,
+  );
+  assert.equal(spinnerServerClockNow(corrected, 3_000), corrected.serverNowMs);
+  assert.equal(reconcileSpinnerServerClockAnchor(corrected, "not-a-clock", 5_000), corrected);
+  assert.equal(createSpinnerServerClockAnchor("not-a-clock", 1), null);
+  assert.equal(createSpinnerServerClockAnchor(SERVER_NOW, Number.NaN), null);
+  assert.equal(Number.isNaN(spinnerServerClockNow(null, 1)), true);
+
+  const snapshot = parseSpinnerLiveSnapshot(spinningSnapshot());
+  assert.ok(snapshot);
+  const atStart = createSpinnerServerClockAnchor(STARTED_AT, 10_000);
+  const staleAtStart = reconcileSpinnerServerClockAnchor(
+    atStart,
+    "2026-07-26T18:02:59.500Z",
+    10_000,
+  );
+  const authoritativeAtStartMs = spinnerServerClockNow(staleAtStart, 10_000);
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, authoritativeAtStartMs), 0);
+  assert.equal(spinnerLiveTimeline(snapshot, authoritativeAtStartMs, "full").motionDelayMs, 0);
+
+  const scheduled = spinnerServerClockAnchorForSnapshot(
+    null,
+    "2026-07-26T18:00:00.000Z",
+    20_000,
+    true,
+  );
+  assert.ok(scheduled);
+  const unchangedPoll = spinnerServerClockAnchorForSnapshot(
+    scheduled,
+    "2026-07-26T18:00:04.000Z",
+    22_000,
+    false,
+  );
+  assert.equal(unchangedPoll, scheduled);
+  const unchangedNowMs = spinnerServerClockNow(unchangedPoll, 22_000);
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, unchangedNowMs), 178);
+  assert.equal(spinnerLiveTimeline(snapshot, unchangedNowMs, "full").motionDelayMs, 178_000);
+
+  const recoveredPoll = spinnerServerClockAnchorForSnapshot(
+    scheduled,
+    "2026-07-26T18:00:04.000Z",
+    22_000,
+    true,
+  );
+  const recoveredNowMs = spinnerServerClockNow(recoveredPoll, 22_000);
+  assert.equal(spinnerCountdownSeconds(STARTED_AT, recoveredNowMs), 176);
+  assert.equal(spinnerLiveTimeline(snapshot, recoveredNowMs, "full").motionDelayMs, 176_000);
+});
+
+test("countdown polling remains normal until the authoritative start", () => {
+  const snapshot = parseSpinnerLiveSnapshot(spinningSnapshot());
+  assert.ok(snapshot);
+  assert.equal(spinnerLivePollInterval(snapshot, "2026-07-26T18:00:00.000Z"), 2_000);
+  assert.equal(spinnerLivePollInterval(snapshot, "2026-07-26T18:02:59.999Z"), 2_000);
+  assert.equal(spinnerLivePollInterval(snapshot, STARTED_AT), 750);
+  assert.equal(spinnerLivePollInterval(snapshot, "2026-07-26T18:03:04.000Z"), 750);
+
+  const idle = parseSpinnerLiveSnapshot(idleSnapshot(PARTICIPANTS));
+  assert.ok(idle);
+  assert.equal(spinnerLivePollInterval(idle, "2026-07-26T18:04:00.000Z"), 2_000);
+});
+
+test("draw announcements occur once per countdown and spin across refresh recovery", () => {
+  const initial = { countdownDrawId: null, spinDrawId: null };
+  const countdown = spinnerDrawAnnouncementTransition(DRAW_ID, true, initial);
+  assert.equal(countdown.announcement, "The roster is locked. The moonwheel countdown is underway.");
+
+  const recovered = spinnerDrawAnnouncementTransition(DRAW_ID, true, countdown.state);
+  assert.equal(recovered.announcement, null);
+  assert.deepEqual(recovered.state, countdown.state);
+
+  const started = spinnerDrawAnnouncementTransition(DRAW_ID, false, recovered.state);
+  assert.equal(started.announcement, "The shared draw is underway.");
+  assert.equal(spinnerDrawAnnouncementTransition(DRAW_ID, false, started.state).announcement, null);
+
+  const lateJoin = spinnerDrawAnnouncementTransition(OTHER_DRAW_ID, false, initial);
+  assert.equal(lateJoin.announcement, "The shared draw is underway.");
+  assert.equal(lateJoin.state.countdownDrawId, null);
+});
+
+test("Skip stays hidden until real wheel motion or celebration effects begin", () => {
+  const base = {
+    phase: "spinning" as const,
+    wheelMotionDrawId: DRAW_ID,
+    motionStartedDrawId: null,
+    effectsActive: false,
+  };
+  assert.equal(spinnerSkipControlVisible(base), false);
+  assert.equal(spinnerSkipControlVisible({ ...base, wheelMotionDrawId: null }), false);
+  assert.equal(spinnerSkipControlVisible({ ...base, motionStartedDrawId: DRAW_ID }), true);
+  assert.equal(spinnerSkipControlVisible({
+    ...base,
+    phase: "revealed",
+    wheelMotionDrawId: null,
+    effectsActive: true,
+  }), true);
 });
 
 test("reduced motion removes full turns while preserving the exact landing angle", () => {

@@ -121,8 +121,8 @@ INSERT INTO public.spinner_commands (
       'height', 720,
       'durationMs', 10600,
       'drawId', '22222222-bbbb-4bbb-8bbb-222222222222',
-      'startAt', '2026-07-26T23:59:55.200Z',
-      'revealAt', '2026-07-27T00:00:00.000Z',
+      'startAt', '2026-07-27T00:02:53.200Z',
+      'revealAt', '2026-07-27T00:02:58.000Z',
       'startRotation', 0,
       'finalRotation', 2160,
       'rosterHashSha256', repeat('b', 64),
@@ -174,7 +174,7 @@ INSERT INTO public.spinner_discord_outbox (
   'raffle_spins',
   '1468667003366674721',
   jsonb_build_object(
-    'content', 'Mōchirīī raffle is starting.',
+    'content', E'A Mōchirīī monthly guild raffle begins <t:1785110573:R>.\nWatch the moonwheel live: https://mochirii.com/account?open=live-draw',
     'nonce', '22222222bbbb4bbb8bbb22222',
     'enforce_nonce', true,
     'allowed_mentions', jsonb_build_object(
@@ -187,7 +187,7 @@ INSERT INTO public.spinner_discord_outbox (
       'parse', '[]'::jsonb, 'users', '[]'::jsonb, 'roles', '[]'::jsonb, 'replied_user', false
     )
   ),
-  '2026-07-27T00:00:00.000Z'
+  '2026-07-27T00:02:58.000Z'
 );
 
 SELECT ok(

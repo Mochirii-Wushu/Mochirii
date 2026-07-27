@@ -8,6 +8,7 @@ import {
 } from "./raffle.ts";
 
 export const LIVE_SPINNER_POLL_MS = 2_000;
+export const LIVE_SPINNER_ACTIVE_POLL_MS = 750;
 export const SPINNER_SESSION_INVALID_EVENT = "mochirii:spinner-session-invalid";
 export const PENDING_SPINNER_COMMAND_STORAGE_KEY = "mochirii.raffle.pending-spin.v1";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -48,6 +49,127 @@ export interface SpinnerLiveTimeline {
 export interface SpinnerLiveMotionRotations {
   startRotation: number;
   finalRotation: number;
+}
+
+export interface SpinnerDrawAnnouncementState {
+  countdownDrawId: string | null;
+  spinDrawId: string | null;
+}
+
+export interface SpinnerServerClockAnchor {
+  serverNowMs: number;
+  monotonicAtMs: number;
+}
+
+export function createSpinnerServerClockAnchor(
+  serverNow: string,
+  monotonicAtMs: number,
+): SpinnerServerClockAnchor | null {
+  const serverNowMs = Date.parse(serverNow);
+  if (!Number.isFinite(serverNowMs) || !Number.isFinite(monotonicAtMs)) return null;
+  return { serverNowMs, monotonicAtMs };
+}
+
+export function spinnerServerClockNow(
+  anchor: SpinnerServerClockAnchor | null,
+  monotonicNowMs: number,
+): number {
+  if (!anchor || !Number.isFinite(monotonicNowMs)) return Number.NaN;
+  return anchor.serverNowMs + Math.max(0, monotonicNowMs - anchor.monotonicAtMs);
+}
+
+export function reconcileSpinnerServerClockAnchor(
+  current: SpinnerServerClockAnchor | null,
+  serverNow: string,
+  monotonicAtMs: number,
+): SpinnerServerClockAnchor | null {
+  const candidate = createSpinnerServerClockAnchor(serverNow, monotonicAtMs);
+  if (!candidate) return current;
+  const currentNowMs = spinnerServerClockNow(current, monotonicAtMs);
+  return {
+    serverNowMs: Number.isFinite(currentNowMs)
+      ? Math.max(candidate.serverNowMs, currentNowMs)
+      : candidate.serverNowMs,
+    monotonicAtMs,
+  };
+}
+
+export function spinnerServerClockAnchorForSnapshot(
+  current: SpinnerServerClockAnchor | null,
+  serverNow: string,
+  monotonicAtMs: number,
+  snapshotChanged: boolean,
+): SpinnerServerClockAnchor | null {
+  return snapshotChanged
+    ? reconcileSpinnerServerClockAnchor(current, serverNow, monotonicAtMs)
+    : current;
+}
+
+export function spinnerDrawAnnouncementTransition(
+  drawId: string,
+  countdownPending: boolean,
+  state: SpinnerDrawAnnouncementState,
+): { announcement: string | null; state: SpinnerDrawAnnouncementState } {
+  if (countdownPending) {
+    if (state.countdownDrawId === drawId) return { announcement: null, state };
+    return {
+      announcement: "The roster is locked. The moonwheel countdown is underway.",
+      state: { ...state, countdownDrawId: drawId },
+    };
+  }
+  if (state.spinDrawId === drawId) return { announcement: null, state };
+  return {
+    announcement: "The shared draw is underway.",
+    state: { ...state, spinDrawId: drawId },
+  };
+}
+
+export function spinnerSkipControlVisible({
+  phase,
+  wheelMotionDrawId,
+  motionStartedDrawId,
+  effectsActive,
+}: {
+  phase: SpinnerLivePhase;
+  wheelMotionDrawId: string | null;
+  motionStartedDrawId: string | null;
+  effectsActive: boolean;
+}): boolean {
+  return effectsActive || (
+    phase === "spinning"
+    && wheelMotionDrawId != null
+    && motionStartedDrawId === wheelMotionDrawId
+  );
+}
+
+export function spinnerCountdownSeconds(startedAt: string | null, authoritativeNowMs: number): number {
+  const startedAtMs = startedAt ? Date.parse(startedAt) : Number.NaN;
+  if (!Number.isFinite(startedAtMs) || !Number.isFinite(authoritativeNowMs)) return 0;
+  return Math.max(0, Math.ceil((startedAtMs - authoritativeNowMs) / 1_000));
+}
+
+export function formatSpinnerCountdown(seconds: number): string {
+  const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainder = safeSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+}
+
+export function spinnerLiveHasStarted(
+  snapshot: SpinnerLiveSnapshotV1,
+  authoritativeNowMs: number,
+): boolean {
+  if (snapshot.phase !== "spinning" || !snapshot.startedAt) return false;
+  const startedAtMs = Date.parse(snapshot.startedAt);
+  return Number.isFinite(authoritativeNowMs)
+    && Number.isFinite(startedAtMs)
+    && authoritativeNowMs >= startedAtMs;
+}
+
+export function spinnerLivePollInterval(snapshot: SpinnerLiveSnapshotV1, serverNow: string): number {
+  return spinnerLiveHasStarted(snapshot, Date.parse(serverNow))
+    ? LIVE_SPINNER_ACTIVE_POLL_MS
+    : LIVE_SPINNER_POLL_MS;
 }
 
 export interface PendingSpinnerCommandV1 {
@@ -216,10 +338,12 @@ export function parseSpinnerLiveResult(value: unknown): SpinnerLiveResultV1 | nu
 
 export function spinnerLiveTimeline(
   snapshot: SpinnerLiveSnapshotV1,
-  serverNow: string,
+  authoritativeNow: string | number,
   motionMode: MotionMode,
 ): SpinnerLiveTimeline {
-  const serverNowMs = Date.parse(serverNow);
+  const serverNowMs = typeof authoritativeNow === "number"
+    ? authoritativeNow
+    : Date.parse(authoritativeNow);
   const startedAtMs = snapshot.startedAt ? Date.parse(snapshot.startedAt) : serverNowMs;
   const revealAtMs = snapshot.revealAt ? Date.parse(snapshot.revealAt) : serverNowMs;
   const revealDelayMs = Math.max(0, revealAtMs - serverNowMs);

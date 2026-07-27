@@ -5,12 +5,15 @@ const root = process.cwd();
 const failures = [];
 const migrationPath =
   "supabase/migrations/20260726180052_add_private_live_spinner.sql";
+const countdownMigrationPath =
+  "supabase/migrations/20260727054717_enforce_three_minute_spinner_countdown.sql";
 const foreignKeyIndexMigrationPath =
   "supabase/migrations/20260726213000_add_spinner_foreign_key_indexes.sql";
 const mediaMigrationPath =
   "supabase/migrations/20260727033342_add_spinner_media_jobs.sql";
 const files = {
   migration: migrationPath,
+  countdownMigration: countdownMigrationPath,
   foreignKeyIndexMigration: foreignKeyIndexMigrationPath,
   mediaMigration: mediaMigrationPath,
   config: "supabase/config.toml",
@@ -48,6 +51,7 @@ function excludes(label, text, pattern, message) {
 }
 
 const migration = read(files.migration);
+const countdownMigration = read(files.countdownMigration);
 const foreignKeyIndexMigration = read(files.foreignKeyIndexMigration);
 const mediaMigration = read(files.mediaMigration);
 const config = read(files.config);
@@ -202,6 +206,20 @@ for (
   includes("immutable 30-day receipts", migration, snippet)
 );
 
+for (const snippet of [
+  "create or replace function public.spinner_apply_command(",
+  "started_at_value <> receipt_timestamp_value + interval '3 minutes'",
+  "revoke all on function public.spinner_apply_command(uuid) from public, anon, authenticated",
+  "grant execute on function public.spinner_apply_command(uuid) to service_role",
+])
+  includes("three-minute countdown migration", countdownMigration, snippet);
+excludes(
+  "three-minute countdown migration",
+  countdownMigration,
+  /interval '2 seconds'/u,
+  "the forward migration must replace the released two-second timing rule.",
+);
+
 if (
   /delete from public\.spinner_discord_outbox[\s\S]*?spinner_live_state[\s\S]*?get diagnostics outbox_count/i
     .test(migration)
@@ -248,11 +266,12 @@ if (
   "Math.floor(UINT32_RANGE / count) * count",
   "sampledWords.push(word)",
   "word < rejectionLimit",
-  "SPINNER_START_DELAY_MS = 2_000",
+  "SPINNER_START_DELAY_MS = 180_000",
   "SPINNER_DEFAULT_DURATION_MS = 4_800",
   "startRotation",
   "finalRotation",
-  "https://mochirii.com/spinner",
+  "https://mochirii.com/account?open=live-draw",
+  "A Mōchirīī monthly guild raffle begins <t:${startAtUnixSeconds}:R>.",
   "allowed_mentions",
   "A live roster supports 0–",
   "A draw requires",
@@ -261,6 +280,17 @@ if (
   "SPINNER_MAX_COMMAND_BODY_BYTES = 64 * 1_024",
   "readBoundedSpinnerJsonObject",
 ].forEach((snippet) => includes("server draw engine", engine, snippet));
+
+includes(
+  "authoritative Reaper schedule",
+  index,
+  "buildDiscordOutboxPayloads(plan.receipt, plan.startAt)",
+);
+includes(
+  "former timing rejection coverage",
+  sqlTest,
+  "the released two-second lead is rejected by the forward timing rule",
+);
 
 for (const snippet of [
   "AnimationManifestV1",
@@ -490,7 +520,7 @@ for (const snippet of [
 [
   "records rejection retries without modulo bias",
   "future synchronized timeline",
-  "default live draw stays below five seconds",
+  "three-minute lead preserves the existing wheel duration",
   "controller polling can recover the current receipt while viewer polling cannot",
   "withhold winner fields",
   "no mentions",
@@ -502,7 +532,7 @@ for (const snippet of [
   "normalization matches the browser Unicode and whitespace contract",
   "repeated live spins keep rotations bounded and preserve winner geometry",
   "spinner polling preserves authorization and mode variance when CORS adds origin",
-  "posts the live link once with an enforced nonce",
+  "posts the scheduled handoff once with an enforced nonce",
   "retries rate limits",
   "compares secrets without an early mismatch and caps request bodies",
 ].forEach((snippet) => includes("focused Deno tests", denoTest, snippet));

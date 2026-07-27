@@ -140,8 +140,8 @@ Deno.test("one live draw plan freezes a compatible receipt and future synchroniz
   const expectedHash = await sha256Hex(canonicalRosterPayload(PARTICIPANTS));
 
   assertEquals(calls, 1);
-  assertEquals(result.startAt, "2026-07-26T12:34:58.000Z");
-  assertEquals(result.revealAt, "2026-07-26T12:35:06.000Z");
+  assertEquals(result.startAt, "2026-07-26T12:37:56.000Z");
+  assertEquals(result.revealAt, "2026-07-26T12:38:04.000Z");
   assertEquals(result.receipt.version, 1);
   assertEquals(result.receipt.rosterSnapshot, {
     version: 1,
@@ -178,15 +178,15 @@ Deno.test("repeated live spins keep rotations bounded and preserve winner geomet
   assertEquals((240 + second.finalRotation) % 360, 0);
 });
 
-Deno.test("the default live draw stays below five seconds for passive viewers", async () => {
+Deno.test("the three-minute lead preserves the existing wheel duration", async () => {
   const result = await createLiveDrawPlan(PARTICIPANTS, {
     now: new Date("2026-07-26T12:34:56.000Z"),
     uuidFactory: () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     randomWord: () => 0,
   });
   assertEquals(result.durationMs, 4_800);
-  assertEquals(result.startAt, "2026-07-26T12:34:58.000Z");
-  assertEquals(result.revealAt, "2026-07-26T12:35:02.800Z");
+  assertEquals(result.startAt, "2026-07-26T12:37:56.000Z");
+  assertEquals(result.revealAt, "2026-07-26T12:38:00.800Z");
 });
 
 Deno.test("Discord outbox uses the raffle channel, live page, one safe message contract, and no mentions", async () => {
@@ -198,21 +198,21 @@ Deno.test("Discord outbox uses the raffle channel, live page, one safe message c
       displayName: "<@123> @everyone **X**",
     },
   ];
-  const { receipt } = await createLiveDrawPlan(malicious, {
+  const { receipt, startAt } = await createLiveDrawPlan(malicious, {
     now: new Date("2026-07-26T12:34:56.000Z"),
     randomWord: () => 1,
     uuidFactory: () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   });
-  const outbox = buildDiscordOutboxPayloads(receipt);
+  const outbox = buildDiscordOutboxPayloads(receipt, startAt);
   const start = outbox.startPayload as Record<string, unknown>;
   const result = outbox.resultPayload as Record<string, unknown>;
   const startMentions = start.allowed_mentions as Record<string, unknown>;
   const resultMentions = result.allowed_mentions as Record<string, unknown>;
 
   assertEquals(outbox.channelId, SPINNER_DISCORD_CHANNEL_ID);
-  assert(
-    String(start.content).includes(SPINNER_LIVE_URL),
-    "start message should contain the live page",
+  assertEquals(
+    start.content,
+    `A Mōchirīī monthly guild raffle begins <t:1785069476:R>.\nWatch the moonwheel live: ${SPINNER_LIVE_URL}`,
   );
   assert(
     !String(result.content).includes("<@"),
@@ -568,13 +568,13 @@ Deno.test("spinner polling preserves authorization and mode variance when CORS a
   );
 });
 
-Deno.test("Reaper posts the live link once with an enforced nonce, then edits that same message", async () => {
-  const { receipt } = await createLiveDrawPlan(PARTICIPANTS, {
+Deno.test("Reaper posts the scheduled handoff once with an enforced nonce, then edits that same message", async () => {
+  const { receipt, startAt } = await createLiveDrawPlan(PARTICIPANTS, {
     now: new Date("2026-07-26T12:34:56.000Z"),
     randomWord: () => 1,
     uuidFactory: () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   });
-  const payloads = buildDiscordOutboxPayloads(receipt);
+  const payloads = buildDiscordOutboxPayloads(receipt, startAt);
   const calls: Array<
     { path: string; method: string; body: Record<string, unknown> }
   > = [];
@@ -638,12 +638,11 @@ Deno.test("Reaper posts the live link once with an enforced nonce, then edits th
 });
 
 Deno.test("Reaper retries rate limits without losing the idempotent outbox claim", async () => {
-  const payloads = buildDiscordOutboxPayloads(
-    (await createLiveDrawPlan(PARTICIPANTS, {
-      randomWord: () => 0,
-      uuidFactory: () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
-    })).receipt,
-  );
+  const plan = await createLiveDrawPlan(PARTICIPANTS, {
+    randomWord: () => 0,
+    uuidFactory: () => "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  });
+  const payloads = buildDiscordOutboxPayloads(plan.receipt, plan.startAt);
   const finishes: Array<
     { outcome: string; errorCode?: string; retryAt?: string }
   > = [];

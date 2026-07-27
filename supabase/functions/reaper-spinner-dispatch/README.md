@@ -18,7 +18,8 @@ Provider changes remain approval-gated. During an approved Supabase release:
 
 1. Apply `20260726180052_add_private_live_spinner.sql`, the additive
    `20260726213000_add_spinner_foreign_key_indexes.sql` follow-up, and
-   `20260727033342_add_spinner_media_jobs.sql` from validated
+   `20260727033342_add_spinner_media_jobs.sql`, followed by
+   `20260727054717_enforce_three_minute_spinner_countdown.sql`, from validated
    protected commits. Keep `spinner-live-session` and
    `reaper-spinner-dispatch` on the matching protected source. The connected
    production integration redeploys all 33 functions declared in
@@ -42,8 +43,10 @@ Provider changes remain approval-gated. During an approved Supabase release:
    with `{ "limit": 1 }`. Require HTTP 200 with zero claimed, completed,
    retried, and failed rows plus an empty results array; query the table again
    and require zero. This empty claim must not make a Discord request. Then
-   perform one approved production acceptance draw. Verify that one message links to
-   `https://mochirii.com/spinner` and that the same message ID is edited after
+   use the first genuine moderator draw as the production canary; do not send a
+   synthetic guild result. Verify that one message links to
+   `https://mochirii.com/account?open=live-draw`, displays the authoritative
+   start time, and that the same message ID is edited after
    reveal. Confirm no users, roles, `@here`, or `@everyone` were mentioned.
 
 ## Optional replay media

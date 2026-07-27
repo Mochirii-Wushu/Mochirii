@@ -209,6 +209,34 @@ export async function openPrivateSpinnerSession(requestedMode: SpinnerAccessMode
   }
 }
 
+export async function openPrivateSpinnerViewerHandoff(): Promise<
+  { ok: true; mode: SpinnerAccessMode } | { ok: false }
+> {
+  if (typeof window === "undefined") return { ok: false };
+
+  try {
+    const sessionResult = await getCurrentSession();
+    const accessToken = sessionResult.data?.session?.access_token || "";
+    if (!sessionResult.ok || !accessToken) return { ok: false };
+
+    const response = await requestPrivateSpinnerSession({
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+        "X-Spinner-Mode": "viewer",
+        "X-Spinner-Preserve-Session": "true",
+      },
+    }, 8_000);
+    const mode = response.headers.get("X-Spinner-Mode");
+    return response.status === 204 && (mode === "controller" || mode === "viewer")
+      ? { ok: true, mode }
+      : { ok: false };
+  } catch {
+    return { ok: false };
+  }
+}
+
 export async function clearPrivateSpinnerSession() {
   if (typeof window === "undefined") return;
   try {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateSpinnerAccessToken } from "@/lib/spinner/access";
+import { authorizeSpinnerViewerHandoff } from "@/lib/spinner/viewer-handoff-authority";
 import {
   SPINNER_PRIVATE_RESPONSE_HEADERS,
   SPINNER_SESSION_COOKIE,
@@ -9,6 +10,7 @@ import {
   spinnerCookieOptions,
   spinnerRequestIsSameOrigin,
   type SpinnerAccessMode,
+  type SpinnerAccessValidation,
 } from "@/lib/spinner/session-policy";
 
 export const dynamic = "force-dynamic";
@@ -55,10 +57,10 @@ function emptySuccess(mode?: SpinnerAccessMode) {
   });
 }
 
-async function authorizeAndSetCookie(accessToken: string, requestedMode: SpinnerAccessMode) {
-  const access = await validateSpinnerAccessToken(accessToken, requestedMode);
-  if (!access.ok) return opaqueDenied(true);
-
+function setAuthorizedCookie(
+  accessToken: string,
+  access: Extract<SpinnerAccessValidation, { ok: true }>,
+) {
   const options = spinnerCookieOptions(access.expiresAtMs);
   if (!options) return opaqueDenied(true);
   const cookieValue = encodeSpinnerSessionCookie(accessToken, access.mode);
@@ -73,11 +75,28 @@ async function authorizeAndSetCookie(accessToken: string, requestedMode: Spinner
   return response;
 }
 
+async function authorizeAndSetCookie(accessToken: string, requestedMode: SpinnerAccessMode) {
+  const access = await validateSpinnerAccessToken(accessToken, requestedMode);
+  return access.ok ? setAuthorizedCookie(accessToken, access) : opaqueDenied(true);
+}
+
 export async function POST(request: NextRequest) {
   if (!requestIsSameOrigin(request, true)) return opaqueDenied(false);
   const accessToken = readBearerToken(request.headers.get("authorization"));
   const requestedMode = request.headers.get("X-Spinner-Mode");
   if (!accessToken || (requestedMode !== "controller" && requestedMode !== "viewer")) return opaqueDenied(true);
+  const preserveSession = request.headers.get("X-Spinner-Preserve-Session");
+  if (preserveSession != null) {
+    if (preserveSession !== "true" || requestedMode !== "viewer") return opaqueDenied(true);
+    const access = await authorizeSpinnerViewerHandoff({
+      encodedSession: request.cookies.get(SPINNER_SESSION_COOKIE)?.value,
+      viewerAccessToken: accessToken,
+      validateAccess: validateSpinnerAccessToken,
+    });
+    return access.ok
+      ? setAuthorizedCookie(access.accessToken, access)
+      : opaqueDenied(access.clearCookie);
+  }
   return authorizeAndSetCookie(accessToken, requestedMode);
 }
 
