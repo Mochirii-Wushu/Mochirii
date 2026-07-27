@@ -78,6 +78,18 @@ export type SocialAccount = {
   updated_at?: string | null;
 };
 
+export type MemberSocialLink = {
+  id: string;
+  user_id: string;
+  provider: "instagram" | "facebook" | "tiktok" | "twitch" | "youtube" | "x" | "bluesky" | "mastodon" | "spotify" | "linkedin" | "custom" | string;
+  display_label: string;
+  profile_url: string;
+  sort_order: number;
+  is_visible: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 export type EditableProfilePayload = {
   display_name?: string | null;
   game_uid?: string | null;
@@ -213,6 +225,10 @@ export type GalleryReviewSubmission = {
   rejectionReason?: string | null;
   storageBucket?: string | null;
   storagePath?: string | null;
+  thumbnailRevisionId?: string | null;
+  thumbnailStoragePath?: string | null;
+  thumbnailMimeType?: string | null;
+  thumbnailSizeBytes?: number | null;
   signedPreviewUrl?: string | null;
   previewError?: string | null;
   instagramOptIn?: boolean | null;
@@ -226,8 +242,17 @@ export type GalleryReviewQueue = {
   submissions: GalleryReviewSubmission[];
   count?: number;
   status?: string;
+  thumbnailState?: string;
   signedUrlSeconds?: number;
   summary?: Record<string, number | string | undefined>;
+  pagination?: {
+    page?: number;
+    pageSize?: number;
+    total?: number;
+    totalPages?: number;
+    hasPrevious?: boolean;
+    hasNext?: boolean;
+  };
 };
 
 export type RejectedGalleryCleanupResponse = {
@@ -291,27 +316,6 @@ export type InstagramApiStatus = {
   missingSecrets?: string[];
 };
 
-export type ApprovedGallerySubmission = {
-  id?: string | null;
-  title?: string | null;
-  caption?: string | null;
-  category?: string | null;
-  mime_type?: string | null;
-  size_bytes?: number | null;
-  created_at?: string | null;
-  reviewed_at?: string | null;
-  uploader_display_name?: string | null;
-  uploader_discord_name?: string | null;
-  signed_url?: string | null;
-  preview_error?: string | null;
-};
-
-export type ApprovedGalleryFeed = {
-  submissions: ApprovedGallerySubmission[];
-  count?: number;
-  signedUrlSeconds?: number;
-};
-
 export type PublicMemberProfile = {
   id?: string | null;
   slug?: string | null;
@@ -339,23 +343,6 @@ export type PublicMemberProfileList = {
 
 export type PublicMemberProfileResponse = {
   profile: PublicMemberProfile | null;
-  signedUrlSeconds?: number;
-};
-
-export type VisibleProfileCard = {
-  slug?: string | null;
-  displayName?: string | null;
-  guildTitle?: string | null;
-  avatarUrl?: string | null;
-  profileHref?: string | null;
-  hasApprovedAvatar?: boolean | null;
-  hasVisibleProfile?: boolean | null;
-  hasFilledProfile?: boolean | null;
-};
-
-export type VisibleProfileCardsResponse = {
-  profiles: VisibleProfileCard[];
-  count?: number;
   signedUrlSeconds?: number;
 };
 

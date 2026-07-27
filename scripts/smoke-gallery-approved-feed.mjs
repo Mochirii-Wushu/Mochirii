@@ -1,9 +1,11 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 
-const baseUrl = process.env.SMOKE_BASE_URL || "http://127.0.0.1:8765";
-const galleryDataUrl = new URL("../data/gallery.json", import.meta.url);
+const baseUrl = (process.env.SMOKE_BASE_URL || "http://127.0.0.1:8765").replace(/\/+$/, "");
+const galleryDataUrl = new URL("../apps/web/public/data/gallery.json", import.meta.url);
 const galleryData = JSON.parse(await readFile(galleryDataUrl, "utf8"));
-const staticItems = Array.isArray(galleryData?.albums?.[0]?.items) ? galleryData.albums[0].items : [];
+const staticItems = (Array.isArray(galleryData?.albums) ? galleryData.albums : []).flatMap((album) =>
+  Array.isArray(album?.items) ? album.items : [],
+);
 
 let chromium;
 try {
@@ -26,22 +28,73 @@ const getCategories = (item) => {
   return [...new Set(values.map(normalizeSlug).filter(Boolean))];
 };
 
+const text = (value, fallback = "") => {
+  const clean = String(value ?? "").trim();
+  return clean || fallback;
+};
+
 const sortTime = (item) => {
-  const time = Date.parse(item?.galleryAddedAt || item?.sortTimestamp || "");
+  const time = Date.parse(text(item?.galleryAddedAt));
   return Number.isFinite(time) ? time : 0;
 };
 
-const compareId = (a, b) => String(a?.id || "").localeCompare(String(b?.id || ""));
+const extractNumericSequence = (value) => {
+  const clean = text(value);
+  if (!clean) return null;
+
+  const named = clean.match(/(?:^|[\\/_-])(?:shot|image|img)[-_]?(\d+)(?=$|[.\\/_-])/i);
+  if (named) return Number.parseInt(named[1], 10);
+
+  const matches = [...clean.matchAll(/(\d+)/g)];
+  const fallback = matches.at(-1)?.[1];
+  return fallback ? Number.parseInt(fallback, 10) : null;
+};
+
+const stableSequence = (item, originalIndex) => {
+  for (const candidate of [item?.id, item?.full, item?.src, item?.thumb]) {
+    const sequence = extractNumericSequence(candidate);
+    if (sequence !== null && Number.isFinite(sequence)) return sequence;
+  }
+
+  return originalIndex + 1;
+};
+
+const stableKey = (item, originalIndex) =>
+  text(item?.id || item?.full || item?.src || item?.thumb, `gallery-${originalIndex}`);
 
 const orderItems = (items, mode) =>
-  [...items].sort((a, b) => {
-    const aTime = sortTime(a);
-    const bTime = sortTime(b);
-    if (aTime !== bTime) return mode === "newest" ? bTime - aTime : aTime - bTime;
-    return compareId(a, b);
-  });
+  items
+    .map((item, originalIndex) => ({
+      item,
+      originalIndex,
+      sortTimestamp: sortTime(item),
+      stableKey: stableKey(item, originalIndex),
+      stableSequence: stableSequence(item, originalIndex),
+    }))
+    .sort((a, b) => {
+      const direction = mode === "newest" ? -1 : 1;
+      const timeDelta = a.sortTimestamp - b.sortTimestamp;
+      if (timeDelta !== 0) return direction * timeDelta;
 
-const fullPath = (item) => String(item?.full || item?.src || "");
+      const sequenceDelta = a.stableSequence - b.stableSequence;
+      if (sequenceDelta !== 0) return direction * sequenceDelta;
+
+      const indexDelta = a.originalIndex - b.originalIndex;
+      if (indexDelta !== 0) return direction * indexDelta;
+
+      return a.stableKey.localeCompare(b.stableKey);
+    })
+    .map(({ item }) => item);
+
+const publicPath = (value) => {
+  const raw = text(value);
+  if (!raw) return "";
+  if (/^(https?:|\/)/i.test(raw)) return raw;
+  if (raw.startsWith("./")) return `/${raw.slice(2)}`;
+  return `/${raw}`;
+};
+
+const fullPath = (item) => publicPath(item?.full || item?.src);
 const staticTotal = staticItems.length;
 const portraitsTotal = staticItems.filter((item) => getCategories(item).includes("portraits")).length;
 const galleryBatchSize = 24;
@@ -50,87 +103,88 @@ const initialPortraitsCount = Math.min(portraitsTotal, galleryBatchSize);
 const newestFirst = fullPath(orderItems(staticItems, "newest")[0]);
 const oldestFirst = fullPath(orderItems(staticItems, "oldest")[0]);
 
-const mockSignedUrl = `${baseUrl}/assets/img/gallery/shot-01.webp?mockSignedUrl=approved-member`;
+const mockApprovedCount = galleryBatchSize;
+const mockFullSignedUrl = `${baseUrl}/assets/img/gallery/shot-24.webp?mockSignedUrl=approved-member-full-01`;
+const mockThumbnailSignedUrl = `${baseUrl}/assets/img/gallery/thumbs/shot-24.webp?mockSignedUrl=approved-member-thumbnail-01`;
+const mockThumbnailSizeBytes = (await stat(new URL("../apps/web/public/assets/img/gallery/thumbs/shot-24.webp", import.meta.url))).size;
 const mockApprovedTitle = "Approved Smoke Submission";
 const mockApprovedCaption = "Shared from smoke automation";
 const mockUploader = "QA Member";
-const mockSupabaseClient = `
-window.__galleryApprovedFeedInvocations = [];
-window.__galleryApprovedFeedBackend = [
-  {
-    id: "approved-smoke-submission",
+const mockApprovedRows = Array.from({ length: mockApprovedCount }, (_, index) => {
+  const sequence = String(index + 1).padStart(2, "0");
+  return {
+    id: `approved-smoke-submission-${sequence}`,
     status: "approved",
-    signed_url: ${JSON.stringify(mockSignedUrl)},
-    title: ${JSON.stringify(mockApprovedTitle)},
-    caption: ${JSON.stringify(mockApprovedCaption)},
+    full_signed_url: `${baseUrl}/assets/img/gallery/shot-24.webp?mockSignedUrl=approved-member-full-${sequence}`,
+    thumbnail_signed_url: `${baseUrl}/assets/img/gallery/thumbs/shot-24.webp?mockSignedUrl=approved-member-thumbnail-${sequence}`,
+    thumbnail_size_bytes: mockThumbnailSizeBytes,
+    title: index === 0 ? mockApprovedTitle : `${mockApprovedTitle} ${sequence}`,
+    caption: mockApprovedCaption,
     category: "portraits",
-    uploader_display_name: ${JSON.stringify(mockUploader)},
-    created_at: "2030-01-02T03:04:05.000Z",
-    reviewed_at: "2030-01-02T04:04:05.000Z"
-  },
+    uploader_display_name: mockUploader,
+    created_at: new Date(Date.UTC(2030, 0, 31 - index, 3, 4, 5)).toISOString(),
+    reviewed_at: new Date(Date.UTC(2030, 0, 31 - index, 4, 4, 5)).toISOString(),
+  };
+});
+const mockFullSignedUrls = mockApprovedRows.map((submission) => submission.full_signed_url);
+const mockThumbnailSignedUrls = mockApprovedRows.map((submission) => submission.thumbnail_signed_url);
+const mockGalleryBackend = [
+  ...mockApprovedRows,
   {
     id: "pending-smoke-submission",
     status: "pending",
-    signed_url: "pending-should-not-render",
+    full_signed_url: "pending-full-should-not-render",
+    thumbnail_signed_url: "pending-thumbnail-should-not-render",
+    thumbnail_size_bytes: 1,
     title: "Pending Should Not Render",
     caption: "Pending hidden caption",
     category: "portraits",
-    created_at: "2030-01-03T03:04:05.000Z"
+    created_at: "2030-01-03T03:04:05.000Z",
   },
   {
     id: "rejected-smoke-submission",
     status: "rejected",
-    signed_url: "rejected-should-not-render",
+    full_signed_url: "rejected-full-should-not-render",
+    thumbnail_signed_url: "rejected-thumbnail-should-not-render",
+    thumbnail_size_bytes: 1,
     title: "Rejected Should Not Render",
     caption: "Rejected hidden caption",
     category: "portraits",
-    created_at: "2030-01-04T03:04:05.000Z"
-  }
+    created_at: "2030-01-04T03:04:05.000Z",
+  },
 ];
-window.supabase = {
-  createClient() {
-    return {
-      auth: {
-        getSession: async () => ({ data: { session: null }, error: null }),
-        getUser: async () => ({ data: { user: null }, error: null }),
-        onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
-      },
-      functions: {
-        invoke: async (name, options = {}) => {
-          window.__galleryApprovedFeedInvocations.push({ name, body: options.body || null });
-          if (name !== "list-approved-gallery-submissions") {
-            return { data: null, error: { message: "Unexpected mock function: " + name } };
-          }
-          if (window.__galleryApprovedFeedMode === "fail") {
-            return {
-              data: null,
-              error: {
-                message: "Mock approved feed failure",
-                context: {
-                  status: 503,
-                  statusText: "Mock Failure",
-                  json: async () => ({ message: "Mock approved feed failure" })
-                }
-              }
-            };
-          }
-          const approved = window.__galleryApprovedFeedBackend
-            .filter((submission) => submission.status === "approved")
-            .map(({ status, ...submission }) => submission);
-          return {
-            data: {
-              ok: true,
-              data: { submissions: approved },
-              message: "Mock approved feed returned approved submissions only."
-            },
-            error: null
-          };
-        }
-      }
-    };
-  }
+
+const approvedSubmissions = mockGalleryBackend
+  .filter((submission) => submission.status === "approved")
+  .map(({ status: _status, ...submission }) => submission);
+
+const feedFixtures = {
+  empty: {
+    ok: true,
+    data: { submissions: [] },
+    message: "Mock approved feed returned no submissions.",
+  },
+  success: {
+    ok: true,
+    data: { submissions: approvedSubmissions },
+    message: "Mock approved feed returned approved submissions only.",
+  },
+  fail: {
+    ok: false,
+    data: null,
+    message: "Mock approved feed failure.",
+  },
 };
-`;
+const approvedFeedRoutePattern = "**/functions/v1/list-approved-gallery-submissions*";
+const vercelAnalyticsScriptPaths = new Set([
+  "/_vercel/insights/script.js",
+  "/_vercel/speed-insights/script.js",
+]);
+const corsHeaders = {
+  "access-control-allow-headers": "content-type",
+  "access-control-allow-methods": "POST, OPTIONS",
+  "access-control-allow-origin": "*",
+};
 
 function fail(message) {
   throw new Error(message);
@@ -140,39 +194,285 @@ function assert(condition, message) {
   if (!condition) fail(message);
 }
 
+async function stubVercelAnalyticsScripts(context) {
+  const appOrigin = new URL(baseUrl).origin;
+  await context.route(
+    (url) => url.origin === appOrigin && vercelAnalyticsScriptPaths.has(url.pathname),
+    (route) =>
+    route.fulfill({ status: 200, contentType: "application/javascript", body: "" }),
+  );
+}
+
+async function stubApprovedGalleryFeedFixture(page, fixture, feedRequests, onHandled, waitForRelease) {
+  await page.route(approvedFeedRoutePattern, async (route) => {
+    const request = route.request();
+    if (request.method() === "OPTIONS") {
+      await route.fulfill({ status: 204, headers: corsHeaders, body: "" });
+      return;
+    }
+
+    feedRequests.push({
+      method: request.method(),
+      postData: request.postData() || "",
+      url: request.url(),
+    });
+    await waitForRelease;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: corsHeaders,
+      body: JSON.stringify(fixture),
+    });
+    onHandled();
+  });
+}
+
 async function prepareContext(browser) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  await context.route("**/@supabase/supabase-js@2*", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "application/javascript",
-      body: mockSupabaseClient,
-    }),
-  );
+  await stubVercelAnalyticsScripts(context);
   return context;
 }
 
-async function newCheckedPage(context, mode = "success") {
+async function newCheckedPage(context, feedMode = null, { holdFixture = false } = {}) {
   const page = await context.newPage();
   const errors = [];
+  const feedRequests = [];
+  const galleryAssetRequests = [];
+  await page.addInitScript(() => {
+    window.__galleryCls = 0;
+    if (typeof PerformanceObserver !== "function") return;
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (!entry.hadRecentInput) window.__galleryCls += entry.value;
+      }
+    });
+    observer.observe({ type: "layout-shift", buffered: true });
+  });
+  let resolveFixture;
+  const fixtureHandled = new Promise((resolve) => {
+    resolveFixture = resolve;
+  });
+  const fixture = feedFixtures[feedMode || "empty"];
+  assert(fixture, `Unknown approved-feed fixture: ${feedMode}`);
+  let releaseFixture;
+  const fixtureRelease = holdFixture
+    ? new Promise((resolve) => {
+        releaseFixture = resolve;
+      })
+    : Promise.resolve();
 
-  await page.addInitScript((feedMode) => {
-    window.__galleryApprovedFeedMode = feedMode;
-  }, mode);
+  await stubApprovedGalleryFeedFixture(page, fixture, feedRequests, () => resolveFixture?.(), fixtureRelease);
 
-  page.on("pageerror", (err) => errors.push(err.message));
+  page.on("pageerror", (err) => errors.push(`Page error: ${err.message}`));
   page.on("console", (msg) => {
-    const text = msg.text();
-    if (msg.type() === "error" && !text.includes("Failed to load resource: net::ERR_FAILED")) {
-      errors.push(text);
+    if (msg.type() === "error") errors.push(`Console error: ${msg.text()}`);
+  });
+  page.on("requestfailed", (request) => {
+    const url = new URL(request.url());
+    const failure = request.failure()?.errorText || "unknown error";
+    const appRouterPrefetchWasCanceled = request.method() === "GET"
+      && request.resourceType() === "fetch"
+      && url.host === new URL(baseUrl).host
+      && url.searchParams.has("_rsc")
+      && ["net::ERR_ABORTED", "NS_BINDING_ABORTED", "cancelled"].includes(failure);
+    if (appRouterPrefetchWasCanceled) return;
+    errors.push(
+      `Failed request: ${request.method()} ${request.url()} (${failure})`,
+    );
+  });
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.pathname.includes("/assets/img/gallery/")) galleryAssetRequests.push(request.url());
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      errors.push(`HTTP ${response.status()}: ${response.request().method()} ${response.url()}`);
     }
   });
 
-  return { page, errors };
+  const waitForFeedFixture = async (label) => {
+    assert(feedMode, `${label}: no approved-feed fixture was configured.`);
+
+    let timeout;
+    try {
+      await Promise.race([
+        fixtureHandled,
+        new Promise((_, reject) => {
+          timeout = setTimeout(() => reject(new Error(`${label}: approved-feed request timed out.`)), 10000);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    assertFeedRequestContract(feedRequests, label);
+  };
+
+  return {
+    page,
+    errors,
+    feedRequests,
+    galleryAssetRequests,
+    releaseFeedFixture: () => releaseFixture?.(),
+    waitForFeedFixture,
+  };
 }
 
-async function waitForGallery(page) {
-  await page.waitForSelector("#galleryGrid .gallery-thumb img", { timeout: 10000 });
+async function assertGalleryPerformanceEnvelope(page, label, expectedAssetUrls = null) {
+  await page.waitForTimeout(250);
+  const metrics = await page.evaluate((expectedUrls) => {
+    const expected = Array.isArray(expectedUrls) ? new Set(expectedUrls) : null;
+    return {
+      cls: Number(window.__galleryCls || 0),
+      imageTransferBytes: performance
+        .getEntriesByType("resource")
+        .filter((entry) => expected ? expected.has(entry.name) : new URL(entry.name).pathname.includes("/assets/img/gallery/"))
+        .reduce((total, entry) => total + Number(entry.transferSize || entry.encodedBodySize || 0), 0),
+    };
+  }, expectedAssetUrls);
+  assert(metrics.cls <= 0.1, `${label}: Gallery CLS ${metrics.cls} exceeded 0.1.`);
+  assert(metrics.imageTransferBytes < 2 * 1024 * 1024, `${label}: initial Gallery image transfer ${metrics.imageTransferBytes} bytes reached 2 MiB.`);
+}
+
+async function assertRepresentativeMemberThumbnailBatch(page, galleryAssetRequests) {
+  const images = page.locator("#galleryGrid .gallery-thumb img");
+  assert(await images.count() === mockApprovedCount, `Representative member batch expected ${mockApprovedCount} images.`);
+
+  for (let index = 0; index < mockApprovedCount; index += 1) {
+    const image = images.nth(index);
+    await image.scrollIntoViewIfNeeded();
+    await image.evaluate((node) => {
+      if (!(node instanceof HTMLImageElement) || !node.complete || node.naturalWidth < 1) {
+        return new Promise((resolve, reject) => {
+          node.addEventListener("load", () => resolve(undefined), { once: true });
+          node.addEventListener("error", () => reject(new Error("Member thumbnail failed to load.")), { once: true });
+        });
+      }
+      return undefined;
+    });
+  }
+
+  const requestedThumbnailUrls = new Set(
+    galleryAssetRequests.filter((url) => mockThumbnailSignedUrls.includes(url)),
+  );
+  assert(
+    requestedThumbnailUrls.size === mockApprovedCount,
+    `Representative member batch requested ${requestedThumbnailUrls.size} of ${mockApprovedCount} thumbnails.`,
+  );
+  assert(
+    mockFullSignedUrls.every((url) => !galleryAssetRequests.includes(url)),
+    "Representative member batch requested an original before viewer opening.",
+  );
+
+  const transferBytes = await page.evaluate((expectedUrls) => {
+    const expected = new Set(expectedUrls);
+    return performance
+      .getEntriesByType("resource")
+      .filter((entry) => expected.has(entry.name))
+      .reduce((total, entry) => total + Number(entry.transferSize || entry.encodedBodySize || 0), 0);
+  }, mockThumbnailSignedUrls);
+  assert(
+    transferBytes < 2 * 1024 * 1024,
+    `Representative 24-member thumbnail transfer ${transferBytes} bytes reached 2 MiB.`,
+  );
+}
+
+function assertFeedRequestContract(feedRequests, label) {
+  assert(feedRequests.length === 1, `${label}: expected exactly one approved-feed POST, got ${feedRequests.length}.`);
+  const [request] = feedRequests;
+  assert(request.method === "POST", `${label}: expected approved-feed POST, got ${request.method}.`);
+  assert(
+    request.url.includes("/functions/v1/list-approved-gallery-submissions"),
+    `${label}: unexpected approved-feed URL ${request.url}.`,
+  );
+
+  let body;
+  try {
+    body = JSON.parse(request.postData || "null");
+  } catch {
+    fail(`${label}: approved-feed request body was not valid JSON.`);
+  }
+  assert(body && typeof body === "object" && !Array.isArray(body), `${label}: approved-feed request body must be an object.`);
+  assert(Object.keys(body).length === 0, `${label}: approved-feed request body must remain empty.`);
+}
+
+function normalizeAccessibleText(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+async function assertGalleryFilterAccessibleNames(page) {
+  const filters = page.locator("#galleryFilters .gallery-filter");
+  for (let index = 0; index < await filters.count(); index += 1) {
+    const filter = filters.nth(index);
+    const expectedName = normalizeAccessibleText(await filter.textContent());
+    assert(await filter.getAttribute("aria-label") === null, `Gallery filter ${index + 1} must use rendered content.`);
+    assert(
+      await filter.and(page.getByRole("button", { name: expectedName, exact: true })).count() === 1,
+      `Gallery filter ${index + 1} computed accessible name mismatch: ${expectedName}.`,
+    );
+  }
+}
+
+async function waitForGalleryState(
+  page,
+  {
+    activeCategory,
+    expectedFirstFull = "",
+    renderedCount,
+    sortValue,
+    totalCount,
+  },
+) {
+  await page.waitForFunction(
+    (expected) => {
+      const thumbs = [...document.querySelectorAll("#galleryGrid .gallery-thumb")];
+      const filters = [...document.querySelectorAll("#galleryFilters .gallery-filter")];
+      const activeFilter = filters.find((filter) => filter.getAttribute("aria-pressed") === "true");
+      const allFilter = filters.find((filter) => filter.dataset.category === "all");
+      const allCount = Number.parseInt(allFilter?.textContent?.match(/(\d+)(?:\s+images?)?\s*$/)?.[1] || "", 10);
+      const firstFull = thumbs[0]?.getAttribute("data-full") || "";
+      const sort = document.querySelector("#gallerySort")?.value || "";
+      const params = new URLSearchParams(window.location.search);
+      const categoryParam = params.get("category") || "";
+      const sortParam = params.get("sort") || "";
+      const categoryUrlMatches = expected.activeCategory === "all"
+        ? categoryParam === ""
+        : categoryParam === expected.activeCategory;
+      const sortUrlMatches = expected.sortValue === "random"
+        ? sortParam === ""
+        : sortParam === expected.sortValue;
+
+      return thumbs.length === expected.renderedCount
+        && allCount === expected.totalCount
+        && sort === expected.sortValue
+        && activeFilter?.dataset.category === expected.activeCategory
+        && categoryUrlMatches
+        && sortUrlMatches
+        && (!expected.expectedFirstFull || firstFull === expected.expectedFirstFull);
+    },
+    { activeCategory, expectedFirstFull, renderedCount, sortValue, totalCount },
+  );
+  await assertGalleryFilterAccessibleNames(page);
+}
+
+async function waitForHomeGallery(page) {
+  let previousSignature = "";
+  let stablePolls = 0;
+
+  for (let poll = 0; poll < 60; poll += 1) {
+    const signature = await page.locator("#galleryGrid .home-thumb img[data-full]").evaluateAll((images) =>
+      images.map((image) => `${image.getAttribute("src") || ""}|${image.getAttribute("data-full") || ""}`).join("||"),
+    );
+
+    if (signature && signature === previousSignature) stablePolls += 1;
+    else stablePolls = 0;
+
+    if (stablePolls >= 3 && signature.split("||").length === 4) return;
+    previousSignature = signature;
+    await page.waitForTimeout(100);
+  }
+
+  fail("Home Gallery Spotlight did not settle after hydration.");
 }
 
 async function visibleState(page) {
@@ -194,7 +494,6 @@ async function visibleState(page) {
         text: button.textContent.trim(),
         pressed: button.getAttribute("aria-pressed") || "",
       })),
-      invocations: window.__galleryApprovedFeedInvocations || [],
     };
   });
 }
@@ -207,15 +506,21 @@ async function waitForLightboxOpen(page) {
   await page.waitForFunction(() => {
     const root = document.querySelector("#lightbox");
     const img = document.querySelector("#lightboxImg");
+    const close = document.querySelector("#lightboxClose");
     const rect = root?.getBoundingClientRect();
 
     return Boolean(
       root &&
-        img?.getAttribute("src") &&
+        img instanceof HTMLImageElement &&
+        img.getAttribute("src") &&
+        img.complete &&
+        img.naturalWidth > 0 &&
+        img.naturalHeight > 0 &&
         !root.classList.contains("hidden") &&
         root.getAttribute("aria-hidden") === "false" &&
         rect?.width &&
-        rect?.height,
+        rect?.height &&
+        document.activeElement === close,
     );
   });
 }
@@ -226,16 +531,26 @@ try {
   const context = await prepareContext(browser);
 
   {
-    const { page, errors } = await newCheckedPage(context);
-    await page.goto(`${baseUrl}/gallery.html`, { waitUntil: "domcontentloaded" });
-    await waitForGallery(page);
+    const { page, errors, feedRequests, galleryAssetRequests, waitForFeedFixture } = await newCheckedPage(context, "empty");
+    await page.goto(`${baseUrl}/gallery`, { waitUntil: "domcontentloaded" });
+    await waitForFeedFixture("static Gallery");
+    await waitForGalleryState(page, {
+      activeCategory: "all",
+      renderedCount: initialStaticCount,
+      sortValue: "random",
+      totalCount: staticTotal,
+    });
 
     let state = await visibleState(page);
     assert(state.count === initialStaticCount, `Static Gallery expected initial ${initialStaticCount} items, got ${state.count}.`);
     assert(state.countText === `Showing ${initialStaticCount} of ${staticTotal} images.`, `Unexpected static count text: ${state.countText}`);
     assert(state.sortValue === "random", `Expected default random sort, got ${state.sortValue}.`);
-    assert(state.invocations.length === 0, "Local static Gallery should not call the approved feed without approvedFeed=1.");
     assert(state.imageSrcs.every((src) => src.includes("/thumbs/")), "Static Gallery grid should use thumbnails.");
+    assert(
+      state.fulls.every((full) => !galleryAssetRequests.some((requestUrl) => requestUrl === new URL(full, baseUrl).href)),
+      "Static Gallery requested a full image before the viewer opened.",
+    );
+    await assertGalleryPerformanceEnvelope(page, "static Gallery");
 
     await page.click("#galleryLoadMore");
     await page.waitForFunction(
@@ -244,17 +559,35 @@ try {
     );
 
     await page.selectOption("#gallerySort", "newest");
-    await page.waitForFunction(() => document.querySelector("#gallerySort")?.value === "newest");
+    await waitForGalleryState(page, {
+      activeCategory: "all",
+      expectedFirstFull: newestFirst,
+      renderedCount: initialStaticCount,
+      sortValue: "newest",
+      totalCount: staticTotal,
+    });
     state = await visibleState(page);
     assert(state.fulls[0] === newestFirst, `Newest sort first item mismatch. Expected ${newestFirst}, got ${state.fulls[0]}.`);
 
     await page.selectOption("#gallerySort", "oldest");
-    await page.waitForFunction(() => document.querySelector("#gallerySort")?.value === "oldest");
+    await waitForGalleryState(page, {
+      activeCategory: "all",
+      expectedFirstFull: oldestFirst,
+      renderedCount: initialStaticCount,
+      sortValue: "oldest",
+      totalCount: staticTotal,
+    });
     state = await visibleState(page);
     assert(state.fulls[0] === oldestFirst, `Oldest sort first item mismatch. Expected ${oldestFirst}, got ${state.fulls[0]}.`);
 
     await page.click('#galleryFilters [data-category="portraits"]');
     await page.waitForURL(/category=portraits/);
+    await waitForGalleryState(page, {
+      activeCategory: "portraits",
+      renderedCount: initialPortraitsCount,
+      sortValue: "oldest",
+      totalCount: staticTotal,
+    });
     state = await visibleState(page);
     assert(state.count === initialPortraitsCount, `Portraits filter expected initial ${initialPortraitsCount} items, got ${state.count}.`);
     assert(state.filters.find((filter) => filter.slug === "portraits")?.pressed === "true", "Portraits filter was not active.");
@@ -268,33 +601,53 @@ try {
     assert(lightbox.src && !lightbox.src.includes("/thumbs/"), `Static lightbox should use full image path, got ${lightbox.src}.`);
     assert(lightbox.focusId === "lightboxClose", `Expected lightbox focus on close button, got ${lightbox.focusId}.`);
 
+    assertFeedRequestContract(feedRequests, "static Gallery");
     await assertNoErrors(errors, "static Gallery");
     await page.close();
   }
 
   {
-    const { page, errors } = await newCheckedPage(context, "success");
-    await page.goto(`${baseUrl}/gallery.html?approvedFeed=1&category=member-submissions&sort=newest`, {
+    const { page, errors, feedRequests, galleryAssetRequests, waitForFeedFixture } = await newCheckedPage(context, "success");
+    await page.goto(`${baseUrl}/gallery?category=member-submissions&sort=newest`, {
       waitUntil: "domcontentloaded",
     });
-    await waitForGallery(page);
+    await waitForFeedFixture("approved feed success");
+    await waitForGalleryState(page, {
+      activeCategory: "member-submissions",
+      expectedFirstFull: mockFullSignedUrl,
+      renderedCount: mockApprovedCount,
+      sortValue: "newest",
+      totalCount: staticTotal + mockApprovedCount,
+    });
 
     let state = await visibleState(page);
-    assert(state.invocations.some((entry) => entry.name === "list-approved-gallery-submissions"), "Approved feed was not invoked.");
-    assert(state.count === 1, `Member Submissions filter expected 1 approved item, got ${state.count}.`);
-    assert(state.countText === "Showing 1 of 1 image in Member Submissions.", `Unexpected member count text: ${state.countText}`);
+    assert(state.count === mockApprovedCount, `Member Submissions filter expected ${mockApprovedCount} approved items, got ${state.count}.`);
+    assert(state.countText === `Showing ${mockApprovedCount} of ${mockApprovedCount} images in Member Submissions.`, `Unexpected member count text: ${state.countText}`);
     const memberFilterText = state.filters.find((filter) => filter.slug === "member-submissions")?.text || "";
-    assert(/^Member Submissions\s+\D\s+1$/.test(memberFilterText), `Member filter count was not rendered: ${memberFilterText}`);
+    assert(new RegExp(`^Member Submissions\\s+\\D\\s+${mockApprovedCount}\\s+images$`).test(memberFilterText), `Member filter count was not rendered: ${memberFilterText}`);
     const allFilterText = state.filters.find((filter) => filter.slug === "all")?.text || "";
-    assert(new RegExp(`^All\\s+\\D\\s+${staticTotal + 1}$`).test(allFilterText), `All filter did not include the approved item: ${allFilterText}`);
-    assert(state.fulls[0] === mockSignedUrl, "Approved item did not use signed_url as data-full.");
-    assert(state.imageSrcs[0] === mockSignedUrl, "Approved item did not use signed_url as image source.");
+    assert(new RegExp(`^All\\s+\\D\\s+${staticTotal + mockApprovedCount}\\s+images$`).test(allFilterText), `All filter did not include the approved items: ${allFilterText}`);
+    assert(state.fulls[0] === mockFullSignedUrl, "Approved item did not use full_signed_url as data-full.");
+    assert(state.imageSrcs[0] === mockThumbnailSignedUrl, "Approved item did not use thumbnail_signed_url as image source.");
+    const renderedPairs = state.fulls.map((full, index) => `${full}|${state.imageSrcs[index] || ""}`);
+    const expectedPairs = approvedSubmissions.map((submission) => `${submission.full_signed_url}|${submission.thumbnail_signed_url}`);
+    assert(new Set(renderedPairs).size === mockApprovedCount, "Representative member batch rendered duplicate URL pairs.");
+    assert(
+      renderedPairs.every((pair) => expectedPairs.includes(pair)),
+      "A representative member card did not bind its matching thumbnail and original URLs.",
+    );
+    assert(
+      approvedSubmissions.reduce((total, submission) => total + Number(submission.thumbnail_size_bytes || 0), 0) < 2 * 1024 * 1024,
+      "The representative 24-member thumbnail contract reached 2 MiB.",
+    );
     assert(state.imageAlts[0] === mockApprovedTitle, "Approved item alt text did not use the submitted title.");
     assert(state.captions[0].includes(mockApprovedTitle), "Approved caption did not include submitted title.");
     assert(state.captions[0].includes(mockApprovedCaption), "Approved caption did not include submitted caption.");
     assert(state.captions[0].includes(mockUploader), "Approved caption did not include uploader display name.");
     assert(!state.bodyText.includes("Pending Should Not Render"), "Pending mock submission leaked into public Gallery text.");
     assert(!state.bodyText.includes("Rejected Should Not Render"), "Rejected mock submission leaked into public Gallery text.");
+    await assertRepresentativeMemberThumbnailBatch(page, galleryAssetRequests);
+    await assertGalleryPerformanceEnvelope(page, "approved feed success", mockThumbnailSignedUrls);
 
     await page.click("#galleryGrid .gallery-thumb");
     await waitForLightboxOpen(page);
@@ -302,48 +655,109 @@ try {
       src: document.querySelector("#lightboxImg")?.getAttribute("src") || "",
       caption: document.querySelector("#lightboxCaption")?.textContent?.trim() || "",
     }));
-    assert(lightbox.src === mockSignedUrl, "Approved lightbox did not use signed_url as image source.");
+    assert(lightbox.src === mockFullSignedUrl, "Approved lightbox did not use full_signed_url as image source.");
+    assert(galleryAssetRequests.includes(mockFullSignedUrl), "Approved original was not requested after the viewer opened.");
+    assert(
+      new Set(galleryAssetRequests.filter((url) => mockFullSignedUrls.includes(url))).size === 1,
+      "Opening one approved item requested more than its selected original.",
+    );
     assert(lightbox.caption.includes(mockApprovedTitle), "Approved lightbox caption missed title.");
     assert(lightbox.caption.includes(mockApprovedCaption), "Approved lightbox caption missed caption.");
     assert(lightbox.caption.includes(mockUploader), "Approved lightbox caption missed uploader.");
 
+    assertFeedRequestContract(feedRequests, "approved feed success");
     await assertNoErrors(errors, "approved feed success");
     await page.close();
   }
 
   {
-    const { page, errors } = await newCheckedPage(context, "fail");
-    await page.goto(`${baseUrl}/gallery.html?approvedFeed=1&sort=newest`, { waitUntil: "domcontentloaded" });
-    await waitForGallery(page);
+    const {
+      page,
+      errors,
+      feedRequests,
+      galleryAssetRequests,
+      releaseFeedFixture,
+      waitForFeedFixture,
+    } = await newCheckedPage(context, "success", { holdFixture: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${baseUrl}/gallery`, { waitUntil: "domcontentloaded" });
+    await waitForGalleryState(page, {
+      activeCategory: "all",
+      renderedCount: initialStaticCount,
+      sortValue: "random",
+      totalCount: staticTotal,
+    });
+    const beforeFeed = await visibleState(page);
+
+    releaseFeedFixture();
+    await waitForFeedFixture("delayed approved feed");
+    await waitForGalleryState(page, {
+      activeCategory: "all",
+      renderedCount: initialStaticCount,
+      sortValue: "random",
+      totalCount: staticTotal + mockApprovedCount,
+    });
+    const afterFeed = await visibleState(page);
+
+    assert(
+      JSON.stringify(afterFeed.fulls) === JSON.stringify(beforeFeed.fulls),
+      "A delayed approved feed response reshuffled or displaced the existing first Gallery batch.",
+    );
+    assert(
+      mockFullSignedUrls.every((url) => !galleryAssetRequests.includes(url)),
+      "Delayed feed requested an approved original before viewer opening.",
+    );
+    await assertGalleryPerformanceEnvelope(page, "delayed approved feed");
+    await assertNoErrors(errors, "delayed approved feed");
+    await page.close();
+  }
+
+  {
+    const { page, errors, feedRequests, waitForFeedFixture } = await newCheckedPage(context, "fail");
+    await page.goto(`${baseUrl}/gallery?sort=newest`, { waitUntil: "domcontentloaded" });
+    await waitForFeedFixture("approved feed failure fallback");
+    await waitForGalleryState(page, {
+      activeCategory: "all",
+      expectedFirstFull: newestFirst,
+      renderedCount: initialStaticCount,
+      sortValue: "newest",
+      totalCount: staticTotal,
+    });
 
     const state = await visibleState(page);
     assert(state.count === initialStaticCount, `Approved-feed failure should fall back to initial ${initialStaticCount} static items, got ${state.count}.`);
     assert(state.filters.every((filter) => filter.slug !== "member-submissions"), "Member Submissions filter should not render when approved feed fails.");
     assert(state.fulls[0] === newestFirst, "Approved-feed failure should preserve static newest sort.");
 
+    assertFeedRequestContract(feedRequests, "approved feed failure fallback");
     await assertNoErrors(errors, "approved feed failure fallback");
     await page.close();
   }
 
   {
-    const { page, errors } = await newCheckedPage(context);
+    const { page, errors, feedRequests } = await newCheckedPage(context);
     await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => document.querySelectorAll("#galleryGrid [data-home-gallery-link] img").length === 4);
+    await waitForHomeGallery(page);
 
     const state = await page.evaluate(() => {
-      const links = [...document.querySelectorAll("#galleryGrid [data-home-gallery-link]")];
+      const buttons = [...document.querySelectorAll("#galleryGrid .home-thumb")];
       return {
-        count: links.length,
-        srcs: links.map((link) => link.querySelector("img")?.getAttribute("src") || ""),
-        hrefs: links.map((link) => link.getAttribute("href") || ""),
+        count: buttons.length,
+        srcs: buttons.map((button) => button.querySelector("img")?.getAttribute("src") || ""),
+        fulls: buttons.map((button) => button.querySelector("img")?.getAttribute("data-full") || ""),
       };
     });
 
-    assert(state.count === 4, `Home Gallery Spotlight expected 4 links, got ${state.count}.`);
+    assert(state.count === 4, `Home Gallery Spotlight expected 4 buttons, got ${state.count}.`);
     assert(new Set(state.srcs).size === 4, "Home Gallery Spotlight should not render duplicate images.");
+    assert(new Set(state.fulls).size === 4, "Home Gallery Spotlight should not render duplicate full images.");
     assert(state.srcs.every((src) => src.includes("/thumbs/")), "Home Gallery Spotlight should use thumbnails.");
-    assert(state.hrefs.every((href) => /gallery\.html\?category=/.test(href)), "Home Gallery Spotlight links should resolve to Gallery category URLs.");
-    assert(state.srcs.every((src) => !src.includes("mockSignedUrl")), "Home Gallery Spotlight should remain static-data based.");
+    assert(state.fulls.every((full) => full && !full.includes("/thumbs/")), "Home Gallery Spotlight should open full images.");
+    assert(
+      state.fulls.every((full) => !mockFullSignedUrls.includes(full)),
+      "Home Gallery Spotlight should remain static-data based.",
+    );
+    assert(feedRequests.length === 0, "Home Gallery Spotlight should not request the approved member feed.");
 
     await assertNoErrors(errors, "Home Gallery Spotlight");
     await page.close();

@@ -17,6 +17,7 @@ import {
   commandRequestHash,
   createLiveDrawPlan,
   normalizeDurationMs,
+  normalizeDrawMode,
   normalizeParticipants,
   readBoundedSpinnerJsonObject,
   serializeSnapshot,
@@ -234,7 +235,8 @@ async function handleCommand(req: Request): Promise<Response> {
       stagedPayload = { participants, rosterHashSha256 };
     } else if (action === "spin") {
       const durationMs = normalizeDurationMs(body.durationMs);
-      commandInput = { action, expectedRevision, durationMs };
+      const drawMode = normalizeDrawMode(body.drawMode);
+      commandInput = { action, expectedRevision, durationMs, drawMode };
     } else {
       commandInput = { action, expectedRevision };
       stagedPayload = {};
@@ -305,6 +307,7 @@ async function handleCommand(req: Request): Promise<Response> {
       const plan = await createLiveDrawPlan(state.participants, {
         durationMs: Number(commandInput.durationMs),
         startRotation: Number(state.final_rotation || 0),
+        drawMode: normalizeDrawMode(commandInput.drawMode),
       });
       const discord = buildDiscordOutboxPayloads(plan.receipt, plan.startAt);
       const animationManifest = await buildAnimationManifest(plan.receipt, plan);

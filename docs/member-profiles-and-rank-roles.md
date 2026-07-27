@@ -13,7 +13,7 @@ This document remains as the durable boundary for shared backend identity data, 
 - Member profile publishing is retired on the website. Account must not show profile publication, member-page links, or avatar/banner upload controls.
 - Shared backend identity data remains in Supabase until a separate Supabase dependency audit/migration is approved.
 - Discord handle is server-owned. `verify-discord-member` writes it from Discord user data, and the Account form must render it read-only.
-- Editable member fields are limited to display name, game UID, region, timezone, and a bio of up to 1,000 characters.
+- Core member-profile fields remain limited to display name, game UID, region, timezone, and a bio of up to 1,000 characters. Optional external profile links are stored in their own table and are not identity or sign-in fields.
 - Legacy `member-profile-media` tables, bucket, and Edge Functions are retained for now because they are historical/shared backend objects; do not deploy removal without a migration plan.
 - No Discord role mutation happens from CI, local validation, Vercel, or browser code. The `/sync-ranks` command performs live Discord role work only when a moderator runs `mode:apply confirm:true`.
 - No service-role key, Discord bot token, Storage signing secret, OAuth secret, or host-private value reaches Vercel, browser code, docs, screenshots, or PR text.
@@ -87,6 +87,7 @@ Account keeps:
 - editable fields for display name, game UID, region, timezone, and bio only
 - gallery submission history
 - Mochirii Social handoff
+- optional owner-managed profile links
 
 Account must not show:
 
@@ -94,6 +95,36 @@ Account must not show:
 - member profile link
 - avatar and banner upload controls
 - profile media review status
+
+## Optional Profile Links
+
+`member_social_links` stores optional HTTPS links to profiles that a member
+already controls. It is intentionally separate from `social_accounts`, which
+remains reserved for the trusted Mochirii Social identity mapping. Profile
+links never contain provider tokens, passwords, OAuth identities, imported
+content, or remote profile metadata.
+
+Account lets the owner add, order, hide, share, and delete links for Instagram,
+Facebook, TikTok, Twitch, YouTube, X, Bluesky, Mastodon, Spotify, LinkedIn, and
+a validated custom profile. New links are private. A currently verified guild
+member may explicitly make a link visible to other currently verified guild
+members. RLS permits owners to read and mutate only their own rows and permits
+member-to-member reads only for links with `is_visible = true`; signed-out and
+unverified accounts cannot read shared links.
+
+Creation and reordering use authenticated database functions so the 20-link
+limit and each complete order are committed atomically. Controlled providers
+retain canonical labels, known non-profile destinations are rejected, and the
+database repeats the browser's URL and plain-label validation. A member with at
+least one shared link may create a user-scoped `/account?profile-links=...`
+address. That authenticated, noindex view has no directory or enumeration
+surface and returns one opaque unavailable state when RLS reveals no links.
+
+The website does not fetch, scrape, verify, embed, or preview these external
+profiles. External navigation happens only after a member activates a normal
+link. Native Web Share is user-activated and falls back to copying the saved
+URL. The retired `/members` routes remain absent; this feature does not restore
+a public profile directory.
 
 Leader Dashboard keeps gallery moderation, member verification review, and Instagram queue controls. It must not show the retired profile media review queue or game-access controls.
 
@@ -117,6 +148,8 @@ Manual preview:
 - `/members/twills` returns 404
 - header, footer, and mobile navigation have no `Members` link
 - Account shows Discord verification, safe editable fields, gallery submission history, and Mochirii Social handoff
+- Account lets the owner manage private-by-default profile links without loading any external profile service
+- `npm run smoke:member-social-links` exercises concurrent-limit enforcement, add/order/visibility/share/delete behavior, keyboard focus, native-share and copy fallbacks, responsive reflow, 200% text, serious accessibility findings, browser/request/HTTP failures, and external-request isolation against the local Supabase stack in Chromium, Firefox, and WebKit; its local route harness strips CSP only so the local HTTP Supabase origin can be exercised, while the repository security checks own the production CSP contract
 - Account does not show profile publishing or avatar/banner upload controls
 - Leader Dashboard does not show the profile media queue
 - `/social` remains a noindex handoff/support page for Mochirii Social

@@ -1,7 +1,7 @@
 import "../styles/public-join.css";
 import "../styles/public-content-shared.css";
 import { metadataFor } from "@/components/public-pages/metadata";
-import { JoinPage } from "@/components/public-pages/pages";
+import { JoinPage } from "@/components/public-pages/route-pages/JoinPage";
 
 export const metadata = metadataFor("join");
 

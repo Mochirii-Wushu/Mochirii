@@ -38,7 +38,7 @@ const workflowState = read("apps/web/components/member-workflow/WorkflowState.ts
 const memberWorkflowFormat = read("apps/web/components/member-workflow/format.ts");
 const gallerySubmit = read("apps/web/components/member-workflow/GallerySubmitForm.tsx");
 const leaderDashboard = read("apps/web/components/member-workflow/LeaderDashboard.tsx");
-const memberProfilesClient = read("apps/web/lib/supabase/member-profiles.ts");
+const memberProfilesClient = read("apps/web/lib/member-profiles/visible-profile-cards.ts");
 const profileClient = read("apps/web/lib/supabase/profile.ts");
 const memberProfileShared = read("supabase/functions/_shared/member-profiles.ts");
 const listMemberProfiles = read("supabase/functions/list-member-profiles/index.ts");
@@ -92,7 +92,7 @@ for (const file of retiredFiles) {
   "public.handle_new_member_profile()",
   "security definer",
   "member-gallery",
-  "Approved submissions become eligible for the approved public Gallery feed",
+  "Approved submissions with a validated derivative become eligible for the approved public Gallery feed",
   "member profile publishing is retired",
   "shared backend identity data",
   "list-visible-profile-cards",
@@ -223,8 +223,9 @@ assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile
 [
   "MEMBER_GALLERY_BUCKET",
   "signedUrlSeconds",
-  "createSignedUrl",
+  "createSignedUrls",
   "storage_path",
+  "thumbnail_storage_path",
 ].forEach((snippet) => assertIncludes("approved gallery feed", approvedFeed, snippet));
 
 [

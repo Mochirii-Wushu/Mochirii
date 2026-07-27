@@ -9,6 +9,7 @@ import {
   type ModerationStatus,
   type RejectedGalleryCleanupResponse,
 } from "./types";
+import type { GalleryThumbnailPayload } from "@/lib/gallery-thumbnail";
 
 export async function checkLeaderGalleryModerationAccess() {
   return invokeEdgeFunction<{ hasAccess?: boolean; moderatorId?: string }>("list-gallery-review-queue", {
@@ -16,16 +17,31 @@ export async function checkLeaderGalleryModerationAccess() {
   });
 }
 
-export async function listGalleryReviewQueue(options: { status?: ModerationStatus | string } = {}) {
+export async function listGalleryReviewQueue(options: {
+  status?: ModerationStatus | string;
+  page?: number;
+  pageSize?: number;
+  thumbnailState?: "all" | "missing" | "ready";
+} = {}) {
   const status = String(options.status || "pending").trim().toLowerCase() || "pending";
-  return invokeEdgeFunction<GalleryReviewQueue>("list-gallery-review-queue", { status });
+  return invokeEdgeFunction<GalleryReviewQueue>("list-gallery-review-queue", {
+    status,
+    page: options.page || 1,
+    page_size: options.pageSize || 25,
+    thumbnail_state: options.thumbnailState || "all",
+  });
 }
 
-export async function moderateGallerySubmission(submissionId: string, action: string, reason = "") {
+export async function moderateGallerySubmission(
+  submissionId: string,
+  action: string,
+  reason = "",
+  thumbnail: GalleryThumbnailPayload | null = null,
+) {
   const cleanSubmissionId = String(submissionId || "").trim();
   const cleanAction = String(action || "").trim().toLowerCase();
-  if (!["approved", "rejected"].includes(cleanAction)) {
-    return failedResult("Moderation action must be approved or rejected.");
+  if (!["approved", "rejected", "thumbnail"].includes(cleanAction)) {
+    return failedResult("Moderation action must be approved, rejected, or thumbnail.");
   }
   if (!cleanSubmissionId) {
     return failedResult("Choose a gallery submission before moderating.");
@@ -35,6 +51,7 @@ export async function moderateGallerySubmission(submissionId: string, action: st
     submission_id: cleanSubmissionId,
     action: cleanAction,
     reason: String(reason || "").trim().slice(0, 500),
+    thumbnail,
   });
 }
 

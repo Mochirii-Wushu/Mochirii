@@ -7,8 +7,57 @@ const manifestPath = path.join(buildRoot, "server", "app", "page_client-referenc
 const spinnerManifestPath = path.join(buildRoot, "server", "app", "spinner", "page_client-reference-manifest.js");
 const layoutLimit = 63 * 1024;
 const homeIncrementalLimit = 5 * 1024;
+const publicRouteLimit = 225 * 1024;
 const forbiddenRuntimeMarkers = ["GoTrueClient", "PostgrestError", "RealtimeClient"];
+const galleryMarker = "Approved gallery feed could not be loaded.";
+const publicRoutes = [
+  "/",
+  "/announcements",
+  "/events",
+  "/gallery",
+  "/games/mochi-pets",
+  "/join",
+  "/leaders",
+  "/raffle",
+  "/raffle/rules",
+  "/raffle/rules/[version]",
+  "/ranks",
+  "/recruitment",
+  "/spotify",
+  "/spotlight",
+  "/tome",
+  "/twills",
+];
+const nonPublicRoutes = [
+  "/[...not-found]",
+  "/account",
+  "/auth",
+  "/gallery-submit",
+  "/leader-dashboard",
+  "/oauth/consent",
+  "/raffle-render-fixtures-internal/[scenario]",
+  "/social",
+  "/spinner",
+  "/spinner/[...not-found]",
+];
 const failures = [];
+
+function appPageRoutes(directory = path.resolve("app"), segments = []) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory()) return appPageRoutes(path.join(directory, entry.name), [...segments, entry.name]);
+    if (entry.name !== "page.tsx") return [];
+    return [segments.length ? `/${segments.join("/")}` : "/"];
+  });
+}
+
+const discoveredRoutes = appPageRoutes();
+const classifiedRoutes = new Set([...publicRoutes, ...nonPublicRoutes]);
+for (const route of discoveredRoutes) {
+  if (!classifiedRoutes.has(route)) failures.push(`app page ${route} is not classified in the client-bundle route inventory`);
+}
+for (const route of classifiedRoutes) {
+  if (!discoveredRoutes.includes(route)) failures.push(`classified route ${route} has no app page`);
+}
 
 function parseManifest(file, route) {
   const source = readFileSync(file, "utf8");
@@ -27,6 +76,35 @@ function entryFiles(entries, suffix) {
 
 function readChunk(relativePath) {
   return readFileSync(path.join(buildRoot, relativePath));
+}
+
+function routeManifestPath(route) {
+  if (route === "/") return manifestPath;
+  return path.join(buildRoot, "server", "app", ...route.slice(1).split("/"), "page_client-reference-manifest.js");
+}
+
+function routeManifestKey(route) {
+  return route === "/" ? "/page" : `${route}/page`;
+}
+
+function routeEntrySuffix(route) {
+  return route === "/" ? "/app/page" : `/app${route}/page`;
+}
+
+function publicRouteBundle(route) {
+  const routeManifest = parseManifest(routeManifestPath(route), routeManifestKey(route));
+  const routeEntries = routeManifest.entryJSFiles || {};
+  const files = [...new Set([
+    ...entryFiles(routeEntries, "/app/layout"),
+    ...entryFiles(routeEntries, routeEntrySuffix(route)),
+  ])];
+  const chunks = files.map((file) => ({ file, buffer: readChunk(file) }));
+  return {
+    files,
+    chunks,
+    clientModules: Object.keys(routeManifest.clientModules || {}),
+    brotliBytes: chunks.reduce((total, chunk) => total + brotliBytes(chunk.buffer), 0),
+  };
 }
 
 function brotliBytes(buffer) {
@@ -99,6 +177,43 @@ for (const marker of forbiddenRuntimeMarkers) {
   if (offenders.length) failures.push(`initial layout contains deferred Supabase marker ${marker}: ${offenders.join(", ")}`);
 }
 
+const routeBundles = new Map();
+for (const route of publicRoutes) {
+  try {
+    const bundle = publicRouteBundle(route);
+    routeBundles.set(route, bundle);
+    if (bundle.brotliBytes > publicRouteLimit) {
+      failures.push(`${route} entry JavaScript is ${formatKiB(bundle.brotliBytes)}; limit is ${formatKiB(publicRouteLimit)}`);
+    }
+
+    for (const marker of forbiddenRuntimeMarkers) {
+      const offenders = bundle.chunks.filter((chunk) => chunk.buffer.includes(Buffer.from(marker))).map((chunk) => chunk.file);
+      if (offenders.length) failures.push(`${route} entry contains Supabase SDK marker ${marker}: ${offenders.join(", ")}`);
+    }
+
+    const supabaseModules = bundle.clientModules.filter((modulePath) => (
+      /[\\/]node_modules[\\/]@supabase[\\/]/.test(modulePath)
+      || /[\\/]lib[\\/]supabase[\\/]/.test(modulePath)
+    ));
+    if (supabaseModules.length) {
+      failures.push(`${route} entry references Supabase client modules: ${supabaseModules.join(", ")}`);
+    }
+
+    const galleryOffenders = bundle.chunks.filter((chunk) => chunk.buffer.includes(Buffer.from(galleryMarker))).map((chunk) => chunk.file);
+    const galleryClientModules = bundle.clientModules.filter((modulePath) => /[\\/]components[\\/]public-pages[\\/]GalleryBrowser\.tsx/.test(modulePath));
+    if (route === "/gallery" && galleryOffenders.length === 0) failures.push("Gallery entry is missing its approved-feed marker");
+    if (route === "/gallery" && galleryClientModules.length === 0) failures.push("Gallery entry is missing its GalleryBrowser client module");
+    if (route !== "/gallery" && galleryOffenders.length) {
+      failures.push(`${route} entry contains Gallery-only code: ${galleryOffenders.join(", ")}`);
+    }
+    if (route !== "/gallery" && galleryClientModules.length) {
+      failures.push(`${route} entry references GalleryBrowser: ${galleryClientModules.join(", ")}`);
+    }
+  } catch (error) {
+    failures.push(`${route} entry bundle could not be inspected: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 if (layoutBrotli > layoutLimit) {
   failures.push(`initial layout JavaScript is ${formatKiB(layoutBrotli)}; limit is ${formatKiB(layoutLimit)}`);
 }
@@ -116,4 +231,11 @@ console.log("Client bundle guard passed.");
 console.log(`- Initial layout: ${formatKiB(layoutBrotli)} across ${layoutFiles.length} chunk(s).`);
 console.log(`- Home incremental: ${formatKiB(homeIncrementalBrotli)} across ${homeIncrementalFiles.length} chunk(s).`);
 console.log("- Supabase Auth, PostgREST, and Realtime markers are absent from the initial layout.");
+for (const route of publicRoutes) {
+  const bundle = routeBundles.get(route);
+  if (bundle) console.log(`- ${route}: ${formatKiB(bundle.brotliBytes)} Brotli across ${bundle.files.length} entry chunk(s).`);
+}
+console.log(`- Every public route entry stays within ${formatKiB(publicRouteLimit)} Brotli.`);
+console.log(`- Route inventory classifies ${publicRoutes.length} public and ${nonPublicRoutes.length} non-public app pages.`);
+console.log("- Gallery-only code is absent from unrelated public entries, and Supabase SDK modules and markers are absent from all public entries.");
 console.log("- Private spinner controller and viewer code remain distinct, lazy chunks.");

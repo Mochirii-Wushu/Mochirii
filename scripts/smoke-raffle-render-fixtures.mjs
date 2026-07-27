@@ -16,8 +16,15 @@ const stateScenarios = [
 
 const commonViewports = [
   { name: "compact-320x256", width: 320, height: 256 },
+  { name: "phone-320x568", width: 320, height: 568 },
+  { name: "phone-360x800", width: 360, height: 800 },
+  { name: "phone-375x812", width: 375, height: 812 },
   { name: "phone-390x844", width: 390, height: 844 },
+  { name: "phone-393x852", width: 393, height: 852 },
+  { name: "phone-412x915", width: 412, height: 915 },
+  { name: "phone-430x932", width: 430, height: 932 },
   { name: "landscape-640x360", width: 640, height: 360 },
+  { name: "tablet-768x1024", width: 768, height: 1024 },
   { name: "breakpoint-980x900", width: 980, height: 900 },
   { name: "breakpoint-981x900", width: 981, height: 900 },
   { name: "desktop-1440x900", width: 1440, height: 900 },
@@ -61,6 +68,7 @@ if (failures.length) {
 console.log("Rendered raffle fixture smoke OK.");
 console.log(`- All ${stateScenarios.length} public state/entry variants passed in Chromium, Firefox, and WebKit.`);
 console.log(`- Active-state geometry passed at ${commonViewports.length} representative viewports, including the 980px breakpoint.`);
+console.log("- The signed-out and verified-member winner feature passed reflow, privacy, and reduced-motion checks.");
 console.log("- Singapore server time, visitor localization, no-JavaScript output, missing-data rejection, and alternating render-fixture isolation passed.");
 console.log("- Authenticated session and shared-cache isolation remain part of the server-integrated core track.");
 
@@ -109,6 +117,14 @@ async function verifyGeometryMatrix(browser) {
       if (!inspected) continue;
       if (inspected.horizontalOverflow > 1) failures.push(`${label}: document overflowed horizontally by ${inspected.horizontalOverflow}px.`);
       for (const issue of inspected.geometryIssues) failures.push(`${label}: ${issue}`);
+
+      const winnerLabel = `chromium ${viewport.name} winner geometry`;
+      const winner = await inspectFixture(context, "results-signed-out", winnerLabel, { geometry: true });
+      if (!winner) continue;
+      if (!winner.winnerPresent || winner.winnerNameVisible) failures.push(`${winnerLabel}: signed-out winner privacy state is incorrect.`);
+      if (!winner.text.includes("Winner Confirmed")) failures.push(`${winnerLabel}: generic winner label is missing.`);
+      if (winner.horizontalOverflow > 1) failures.push(`${winnerLabel}: document overflowed horizontally by ${winner.horizontalOverflow}px.`);
+      for (const issue of winner.geometryIssues) failures.push(`${winnerLabel}: ${issue}`);
     } finally {
       await closeContext(context);
     }
@@ -118,12 +134,14 @@ async function verifyGeometryMatrix(browser) {
   try {
     const page = await context.newPage();
     const errors = watchErrors(page);
-    await navigate(page, "open", "chromium phone 200%-text");
+    await navigate(page, "results-verified-a", "chromium phone 200%-text");
     await page.addStyleTag({ content: "html{font-size:200% !important}" });
     await page.waitForTimeout(100);
     const layout = await readGeometry(page);
     if (layout.horizontalOverflow > 1) failures.push("chromium phone 200%-text: document overflowed horizontally.");
     layout.geometryIssues.forEach((issue) => failures.push(`chromium phone 200%-text: ${issue}`));
+    const winnerState = await page.locator(".raffle-monthly-winner").getAttribute("data-member-name-visible");
+    if (winnerState !== "true") failures.push("chromium phone 200%-text: verified winner name is not visible.");
     reportErrors("chromium phone 200%-text", errors);
   } finally {
     await closeContext(context);
@@ -227,12 +245,15 @@ async function inspectFixture(context, scenario, label, options = {}) {
         .map((element) => element.textContent?.trim() || ""),
       controls: [...document.querySelectorAll("#main form,#main button,#main input,#main select,#main textarea")]
         .map((element) => element.tagName.toLowerCase()),
+      winnerPresent: Boolean(document.querySelector(".raffle-monthly-winner")),
+      winnerNameVisible: document.querySelector(".raffle-monthly-winner")?.getAttribute("data-member-name-visible") === "true",
     }));
     const geometry = options.geometry ? await readGeometry(page) : { horizontalOverflow: 0, geometryIssues: [] };
     await page.waitForTimeout(50);
     reportErrors(label, errors);
     return { ...basic, ...geometry, privateRequests: errors.privateRequests };
   } finally {
+    await page.close();
   }
 }
 
@@ -296,9 +317,30 @@ async function readGeometry(page) {
       const rect = element.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) issues.push(`${element.tagName.toLowerCase()} has zero geometry`);
     }
-    for (const element of document.querySelectorAll(".raffle-public-layout .glass-card,.raffle-method-grid > li,.raffle-reward-list > section")) {
-      if (element instanceof HTMLElement && element.scrollWidth - element.clientWidth > 1) {
+    for (const element of document.querySelectorAll(".raffle-public-layout .glass-card,.raffle-monthly-winner,.raffle-method-grid > li,.raffle-reward-list > section")) {
+      if (!(element instanceof HTMLElement)) continue;
+      const overflowX = getComputedStyle(element).overflowX;
+      if (!["hidden", "clip"].includes(overflowX) && element.scrollWidth - element.clientWidth > 1) {
         issues.push(`${element.tagName.toLowerCase()} visibly overflows horizontally`);
+      }
+    }
+
+    const winner = document.querySelector(".raffle-monthly-winner");
+    if (winner instanceof HTMLElement) {
+      const rect = winner.getBoundingClientRect();
+      if (rect.left < -1 || rect.right > innerWidth + 1 || rect.width <= 0 || rect.height <= 0) {
+        issues.push("monthly winner card is outside the viewport or collapsed");
+      }
+      const emblem = winner.querySelector(".raffle-winner-emblem");
+      if (!(emblem instanceof HTMLElement) || emblem.getBoundingClientRect().width <= 0) {
+        issues.push("monthly winner emblem is missing or collapsed");
+      }
+      if (
+        getComputedStyle(winner, "::before").animationName !== "none"
+        || getComputedStyle(winner, "::after").animationName !== "none"
+        || (emblem instanceof HTMLElement && getComputedStyle(emblem).animationName !== "none")
+      ) {
+        issues.push("monthly winner flair ignores reduced-motion preference");
       }
     }
 

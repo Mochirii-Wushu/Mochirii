@@ -14,6 +14,8 @@ export const SPINNER_LIVE_URL = "https://mochirii.com/account?open=live-draw";
 const UINT32_RANGE = 0x1_0000_0000;
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const BIDI_CONTROL_PATTERN = /[\u202a-\u202e\u2066-\u2069]/u;
+const CONTROL_PATTERN = /[\u0000-\u001f\u007f]/u;
 
 export type ParticipantV1 = {
   version: 1;
@@ -26,6 +28,8 @@ export type RosterStateV1 = {
   participants: ParticipantV1[];
 };
 
+export type SpinnerDrawMode = "official" | "test";
+
 export type UniformSample = {
   index: number;
   rejectionLimit: number;
@@ -35,6 +39,7 @@ export type UniformSample = {
 
 export type DrawReceiptV1 = {
   version: 1;
+  drawMode: SpinnerDrawMode;
   drawId: string;
   timestampIso: string;
   singaporeTime: string;
@@ -54,6 +59,7 @@ export type SpinnerSnapshotV1 = {
   sessionId: string;
   revision: number;
   phase: "idle" | "spinning" | "revealed";
+  drawMode: "unclassified" | SpinnerDrawMode;
   participants: ParticipantV1[];
   startedAt: string | null;
   revealAt: string | null;
@@ -181,7 +187,9 @@ function normalizeParticipant(candidate: unknown): ParticipantV1 {
   const displayName = normalizeDisplayName(record.displayName);
   if (
     record.version !== 1 || !UUID_PATTERN.test(id) || !displayName ||
-    graphemes(displayName).length > SPINNER_MAX_NAME_GRAPHEMES
+    graphemes(displayName).length > SPINNER_MAX_NAME_GRAPHEMES ||
+    Array.from(displayName).length > SPINNER_MAX_NAME_GRAPHEMES ||
+    CONTROL_PATTERN.test(displayName) || BIDI_CONTROL_PATTERN.test(displayName)
   ) {
     throw new TypeError("The live roster contains an invalid participant.");
   }
@@ -274,6 +282,13 @@ export function normalizeDurationMs(value: unknown): number {
   return duration;
 }
 
+export function normalizeDrawMode(value: unknown): SpinnerDrawMode {
+  if (value !== "official" && value !== "test") {
+    throw new TypeError("Choose an official or test draw.");
+  }
+  return value;
+}
+
 export function targetRotationDegrees(
   selectedIndex: number,
   count: number,
@@ -317,6 +332,7 @@ export async function createLiveDrawPlan(
     startRotation?: number;
     randomWord?: RandomWordSource;
     uuidFactory?: () => string;
+    drawMode?: SpinnerDrawMode;
   } = {},
 ): Promise<{
   receipt: DrawReceiptV1;
@@ -337,6 +353,7 @@ export async function createLiveDrawPlan(
     throw new TypeError("The draw timestamp is invalid.");
   }
   const durationMs = normalizeDurationMs(options.durationMs);
+  const drawMode = normalizeDrawMode(options.drawMode ?? "official");
   const requestedStartRotation = Number(options.startRotation || 0);
   if (!Number.isFinite(requestedStartRotation)) {
     throw new TypeError("The starting rotation is invalid.");
@@ -372,6 +389,7 @@ export async function createLiveDrawPlan(
   return {
     receipt: {
       version: 1,
+      drawMode,
       drawId,
       timestampIso,
       singaporeTime: formatSingaporeTime(now),
@@ -465,6 +483,12 @@ export function serializeSnapshot(
   const revealedByTime = storedPhase === "spinning" && revealAt !== null &&
     Date.parse(revealAt) <= now.getTime();
   const phase = revealedByTime ? "revealed" : storedPhase;
+  const drawMode = row.drawMode === "official" || row.drawMode === "test"
+    ? row.drawMode
+    : "unclassified";
+  if (phase !== "idle" && drawMode === "unclassified") {
+    throw new TypeError("Live spinner draw classification is unavailable.");
+  }
   const includeWinner = phase === "revealed";
   const winner = includeWinner && row.winner && typeof row.winner === "object"
     ? normalizeParticipant(row.winner)
@@ -475,6 +499,7 @@ export function serializeSnapshot(
     sessionId: String(row.sessionId || ""),
     revision: Number(row.revision || 0),
     phase,
+    drawMode,
     participants,
     startedAt: typeof row.startedAt === "string" ? row.startedAt : null,
     revealAt,

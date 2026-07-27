@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { listVisibleProfileCards } from "@/lib/supabase/member-profiles";
-import type { VisibleProfileCard } from "@/lib/supabase/types";
+import {
+  listVisibleProfileCards,
+  type VisibleProfileCard,
+} from "@/lib/member-profiles/visible-profile-cards";
 
 function clean(value: unknown, fallback = "") {
   const text = String(value ?? "").trim();
@@ -25,14 +27,21 @@ export function useVisibleProfileCards(slugs: string[]) {
   useEffect(() => {
     let alive = true;
     if (!stableSlugs.length) return;
+    const controller = new AbortController();
 
-    listVisibleProfileCards(stableSlugs).then((result) => {
-      if (!alive) return;
-      setProfiles(result.ok && result.data?.profiles ? result.data.profiles : []);
-    });
+    listVisibleProfileCards(stableSlugs, controller.signal)
+      .then((result) => {
+        if (!alive) return;
+        setProfiles(result.ok && result.data?.profiles ? result.data.profiles : []);
+      })
+      .catch((error: unknown) => {
+        if (!alive || (error instanceof DOMException && error.name === "AbortError")) return;
+        setProfiles([]);
+      });
 
     return () => {
       alive = false;
+      controller.abort();
     };
   }, [stableSlugs]);
 

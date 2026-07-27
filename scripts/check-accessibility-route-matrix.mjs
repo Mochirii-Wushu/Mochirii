@@ -14,7 +14,7 @@ const warnings = [];
 
 const routes = [
   { route: "/", label: "Home", file: "apps/web/app/page.tsx", type: "public", workflow: "guild overview", expectsLiveRegion: true },
-  { route: "/join", label: "Join", file: "apps/web/app/join/page.tsx", type: "public", workflow: "website to Discord funnel" },
+  { route: "/join", label: "Join", file: "apps/web/app/join/page.tsx", type: "public", workflow: "website to Discord funnel", componentFiles: ["apps/web/components/public-pages/DiscordServerPreview.tsx"] },
   { route: "/events", label: "Events", file: "apps/web/app/events/page.tsx", type: "public", workflow: "community schedule", componentFiles: ["apps/web/components/public-pages/EventsBoard.tsx"], expectsLiveRegion: true },
   { route: "/gallery", label: "Gallery", file: "apps/web/app/gallery/page.tsx", type: "public", workflow: "media browsing", componentFiles: ["apps/web/components/public-pages/GalleryBrowser.tsx"], expectsLiveRegion: true },
   { route: "/ranks", label: "Ranks", file: "apps/web/app/ranks/page.tsx", type: "public", workflow: "progression reference" },
@@ -64,7 +64,7 @@ const report = {
     "Reduced motion behavior for hover transforms, glints, gallery/home image motion, and scroll behavior.",
     "Screen reader status updates for auth, account verification, gallery submit, gallery filters/share, events filters, and leader queues.",
     "Mochi Pets member-check status, passcode error announcement, signed-out guidance, and unlocked waiting-room facts.",
-    "Iframe keyboard reachability and titles for Discord and Spotify embeds.",
+    "Iframe keyboard reachability and titles for the user-activated Discord preview and deferred Spotify embeds.",
   ],
   warnings,
   failures,
@@ -189,6 +189,13 @@ function routeHasMainTarget(route) {
 function routeSourceEntries(route) {
   const routeText = readRouteText(route);
   const entries = [{ file: route.file, text: routeText }];
+  const directPageMatch = routeText.match(
+    /import\s+\{\s*([A-Za-z0-9_]+)\s*\}\s+from\s+["']@\/components\/public-pages\/route-pages\/([^"']+)["']/,
+  );
+  if (directPageMatch) {
+    const moduleFile = `apps/web/components/public-pages/route-pages/${directPageMatch[2]}.tsx`;
+    entries.push({ file: moduleFile, text: readRequired(moduleFile) });
+  }
   const publicPageMatch = routeText.match(/import\s+\{\s*([A-Za-z0-9_]+)\s*\}\s+from\s+["']@\/components\/public-pages\/pages["']/);
   if (publicPageMatch) {
     entries.push(readPublicPageExport(root, publicPageMatch[1], failures));

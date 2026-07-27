@@ -161,8 +161,62 @@ body[data-page="join"] .join-checklist__link:focus-visible{
 
 body[data-page="join"] .join-discord-widget{
   display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
   justify-content:center;
   margin-top:18px;
+}
+
+body[data-page="join"] .join-discord-widget__placeholder{
+  box-sizing:border-box;
+  width:min(100%, 350px);
+  padding:16px;
+  border:1px solid rgba(220,235,255,.16);
+  border-radius:18px;
+  background:linear-gradient(180deg, rgba(10,13,13,.72), rgba(4,6,7,.8));
+}
+
+body[data-page="join"] .join-discord-widget__placeholder p{
+  margin:0;
+}
+
+body[data-page="join"] .join-discord-widget__actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+}
+
+body[data-page="join"] .join-discord-widget__button,
+body[data-page="join"] .join-discord-widget__actions a{
+  display:inline-flex;
+  min-height:44px;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  padding:9px 13px;
+  border:1px solid rgba(218,181,94,.4);
+  border-radius:999px;
+  color:rgba(244,255,248,.94);
+  background:rgba(10,20,18,.76);
+  font:inherit;
+  line-height:1.2;
+  text-decoration:none;
+  cursor:pointer;
+}
+
+body[data-page="join"] .join-discord-widget__button:hover,
+body[data-page="join"] .join-discord-widget__actions a:hover{
+  border-color:rgba(218,181,94,.72);
+  background:rgba(19,42,35,.86);
+}
+
+body[data-page="join"] .join-discord-widget__button:focus-visible,
+body[data-page="join"] .join-discord-widget__actions a:focus-visible{
+  outline:2px solid rgba(244,255,248,.82);
+  outline-offset:3px;
 }
 
 body[data-page="join"] .join-discord-widget__frame{

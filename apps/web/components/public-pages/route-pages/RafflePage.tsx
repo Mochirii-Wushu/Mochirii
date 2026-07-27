@@ -9,18 +9,24 @@ import {
   type RafflePublicResult,
   type RaffleViewerResultNames,
 } from "@/lib/raffle/public-view";
+import type { LatestOfficialRaffleWinner } from "@/lib/raffle/latest-winner-core";
 import { RaffleDateTime } from "../RaffleDateTime";
+import { RaffleMonthlyWinner } from "../RaffleMonthlyWinner";
 import { BodyPageMarker } from "../BodyPageMarker";
 import { BadgeRow, MetaRow, PageHero } from "../common";
 
 type RafflePageProps = {
   model?: RafflePageModel;
   viewerResultNames?: RaffleViewerResultNames;
+  featuredWinner?: LatestOfficialRaffleWinner | null;
+  enableWinnerRefresh?: boolean;
 };
 
 export function RafflePage({
   model = rafflePublicModel,
   viewerResultNames,
+  featuredWinner = null,
+  enableWinnerRefresh = true,
 }: RafflePageProps = {}) {
   const view = model.publicView;
   const status = raffleStatusForView(view);
@@ -82,6 +88,11 @@ export function RafflePage({
               </div>
             </aside>
           </div>
+
+          <RaffleMonthlyWinner
+            initialWinner={featuredWinner}
+            enableRefresh={enableWinnerRefresh}
+          />
 
           <div className="grid-12 grid-gap u-mt-24 raffle-program-grid">
             <section className="col-7">
@@ -148,7 +159,9 @@ export function RafflePage({
                 <RaffleResults
                   current={model.results.current}
                   previous={model.results.previous}
-                  emptyMessage={model.results.emptyMessage}
+                  emptyMessage={featuredWinner
+                    ? "The latest completed monthly winner is featured above."
+                    : model.results.emptyMessage}
                   evidence={model.results.publicEvidence}
                   entrantCount={view.entrantCount}
                   totalEntryCount={view.totalEntryCount}

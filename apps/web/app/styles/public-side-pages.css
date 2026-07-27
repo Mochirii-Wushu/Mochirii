@@ -208,6 +208,145 @@ body[data-page="raffles"] .raffle-fill-card{
   height:100%;
 }
 
+body[data-page="raffles"] .raffle-monthly-winner{
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  grid-template-columns:minmax(7rem,11rem) minmax(0,1fr);
+  gap:clamp(18px,4vw,44px);
+  align-items:center;
+  min-width:0;
+  margin-top:24px;
+  padding:clamp(24px,5vw,58px);
+  overflow:hidden;
+  border:1px solid transparent;
+  border-radius:clamp(24px,4vw,42px);
+  background:
+    radial-gradient(circle at 12% 20%,rgba(255,105,190,.28),transparent 32%),
+    radial-gradient(circle at 92% 8%,rgba(99,218,255,.24),transparent 34%),
+    radial-gradient(circle at 70% 100%,rgba(87,224,169,.24),transparent 38%),
+    linear-gradient(145deg,rgba(19,12,36,.96),rgba(7,26,31,.94)) padding-box,
+    conic-gradient(from 35deg,#f4d37c,#ff78ba,#7be7ff,#69d9a6,#f4d37c) border-box;
+  box-shadow:
+    0 30px 88px rgba(0,0,0,.48),
+    0 0 42px rgba(255,120,186,.14),
+    inset 0 1px 0 rgba(255,255,255,.14);
+}
+
+body[data-page="raffles"] .raffle-monthly-winner::before,
+body[data-page="raffles"] .raffle-monthly-winner::after{
+  position:absolute;
+  z-index:-1;
+  content:"";
+  pointer-events:none;
+}
+
+body[data-page="raffles"] .raffle-monthly-winner::before{
+  inset:-45%;
+  background:conic-gradient(from 0deg,transparent 0 12%,rgba(244,211,124,.16) 14%,transparent 17% 37%,rgba(123,231,255,.14) 40%,transparent 43% 68%,rgba(255,120,186,.15) 71%,transparent 75%);
+  animation:raffle-winner-aura 18s linear infinite;
+}
+
+body[data-page="raffles"] .raffle-monthly-winner::after{
+  inset:0;
+  background-image:
+    radial-gradient(circle at 8% 82%,rgba(255,255,255,.88) 0 1px,transparent 2px),
+    radial-gradient(circle at 24% 14%,rgba(244,211,124,.9) 0 1.5px,transparent 2.5px),
+    radial-gradient(circle at 56% 20%,rgba(123,231,255,.8) 0 1px,transparent 2px),
+    radial-gradient(circle at 84% 68%,rgba(255,120,186,.86) 0 1.5px,transparent 2.5px),
+    radial-gradient(circle at 94% 30%,rgba(105,217,166,.9) 0 1px,transparent 2px);
+  background-size:130px 110px,180px 160px,150px 130px,210px 190px,170px 150px;
+  opacity:.72;
+  animation:raffle-winner-stars 8s ease-in-out infinite alternate;
+}
+
+body[data-page="raffles"] .raffle-winner-emblem{
+  width:min(100%,11rem);
+  aspect-ratio:1;
+  justify-self:center;
+  border:1px solid rgba(244,211,124,.42);
+  border-radius:50%;
+  background:
+    url("/assets/img/brand/emblem.webp") center/72% auto no-repeat,
+    radial-gradient(circle,rgba(244,211,124,.24),rgba(48,178,143,.13) 48%,rgba(0,0,0,.18) 72%);
+  box-shadow:
+    0 0 0 8px rgba(244,211,124,.04),
+    0 0 42px rgba(244,211,124,.26),
+    inset 0 0 28px rgba(123,231,255,.12);
+  animation:raffle-winner-emblem 5s ease-in-out infinite;
+}
+
+body[data-page="raffles"] .raffle-winner-copy{
+  position:relative;
+  z-index:2;
+  min-width:0;
+}
+
+body[data-page="raffles"] .raffle-winner-copy h2{
+  max-width:100%;
+  margin:2px 0 8px;
+  overflow-wrap:anywhere;
+  color:#fff3bf;
+  font-family:var(--font-display,"Zhi Mang Xing Fallback",cursive);
+  font-size:clamp(3rem,8vw,7.5rem);
+  font-weight:400;
+  letter-spacing:.015em;
+  line-height:.9;
+  text-wrap:balance;
+  text-shadow:
+    0 0 16px rgba(244,211,124,.42),
+    0 0 36px rgba(255,120,186,.2);
+}
+
+body[data-page="raffles"] .raffle-winner-confirmation{
+  margin:0;
+  color:#dffcf1;
+  font-size:clamp(1rem,2vw,1.28rem);
+  font-weight:700;
+  letter-spacing:.04em;
+}
+
+body[data-page="raffles"] .raffle-winner-date{
+  max-width:34rem;
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid rgba(244,211,124,.22);
+}
+
+body[data-page="raffles"] .raffle-winner-flare{
+  position:absolute;
+  width:7rem;
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.74) 0 1%,rgba(244,211,124,.3) 4%,transparent 62%);
+  filter:blur(.2px);
+  pointer-events:none;
+}
+
+body[data-page="raffles"] .raffle-winner-flare--one{
+  top:-2.7rem;
+  right:8%;
+}
+
+body[data-page="raffles"] .raffle-winner-flare--two{
+  right:32%;
+  bottom:-3.8rem;
+  background:radial-gradient(circle,rgba(255,255,255,.68) 0 1%,rgba(123,231,255,.26) 4%,transparent 62%);
+}
+
+@keyframes raffle-winner-aura{
+  to{transform:rotate(1turn)}
+}
+
+@keyframes raffle-winner-stars{
+  from{opacity:.5;transform:translate3d(0,0,0)}
+  to{opacity:.88;transform:translate3d(0,-8px,0)}
+}
+
+@keyframes raffle-winner-emblem{
+  50%{transform:translateY(-5px) scale(1.025);box-shadow:0 0 0 10px rgba(244,211,124,.055),0 0 54px rgba(244,211,124,.34),inset 0 0 30px rgba(123,231,255,.16)}
+}
+
 body[data-page="raffles"] .raffle-status-list{
   display:grid;
   gap:12px;
@@ -350,6 +489,37 @@ body[data-page="raffles"] .raffle-result-list{
   margin:18px 0 0;
   padding:0;
   list-style:none;
+}
+
+@media (max-width:600px){
+  body[data-page="raffles"] .raffle-monthly-winner{
+    grid-template-columns:1fr;
+    gap:18px;
+    padding:24px 18px;
+    text-align:center;
+  }
+
+  body[data-page="raffles"] .raffle-winner-emblem{
+    width:7.5rem;
+  }
+
+  body[data-page="raffles"] .raffle-winner-copy h2{
+    font-size:clamp(2.75rem,18vw,5.2rem);
+  }
+
+  body[data-page="raffles"] .raffle-winner-date{
+    margin-right:auto;
+    margin-left:auto;
+    text-align:left;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  body[data-page="raffles"] .raffle-monthly-winner::before,
+  body[data-page="raffles"] .raffle-monthly-winner::after,
+  body[data-page="raffles"] .raffle-winner-emblem{
+    animation:none;
+  }
 }
 
 body[data-page="raffles"] .raffle-result-group + .raffle-result-group{

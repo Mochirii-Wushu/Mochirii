@@ -8,10 +8,12 @@ import {
   type RafflePublicResult,
   type RaffleViewerResultNames,
 } from "./public-view";
+import type { LatestOfficialRaffleWinner } from "./latest-winner-core";
 
 export type RaffleRenderFixture = {
   model: RafflePageModel;
   viewerResultNames?: RaffleViewerResultNames;
+  featuredWinner?: LatestOfficialRaffleWinner | null;
 };
 
 const cycleDates = {
@@ -23,7 +25,7 @@ const cycleDates = {
 
 export function getRaffleRenderFixture(scenario: string): RaffleRenderFixture | null {
   if (scenario === "missing-data") return null;
-  if (scenario === "previous-only") return { model: previousOnlyModel() };
+  if (scenario === "previous-only") return { model: previousOnlyModel(), featuredWinner: fixtureWinner(null) };
 
   const state = scenario.startsWith("results-") ? "results" : scenario;
   if (!isCycleStatus(state)) return null;
@@ -35,14 +37,23 @@ export function getRaffleRenderFixture(scenario: string): RaffleRenderFixture | 
   );
 
   if (scenario === "results-verified-a") {
-    return { model, viewerResultNames: verifiedNames("Aster Vale", "Mochi Star", "Jade Lantern") };
+    return { model, viewerResultNames: verifiedNames("Aster Vale", "Mochi Star", "Jade Lantern"), featuredWinner: fixtureWinner("Aster Vale") };
   }
   if (scenario === "results-verified-b") {
-    return { model, viewerResultNames: verifiedNames("Briar Moon", "Cloud Ribbon", "Pearl Bell") };
+    return { model, viewerResultNames: verifiedNames("Briar Moon", "Cloud Ribbon", "Pearl Bell"), featuredWinner: fixtureWinner("Briar Moon") };
   }
-  if (["results", "results-signed-out", "results-unverified"].includes(scenario)) return { model };
+  if (["results", "results-signed-out", "results-unverified"].includes(scenario)) return { model, featuredWinner: fixtureWinner(null) };
   if (scenario === state || (scenario === "open-standard" && state === "open-standard")) return { model };
   return null;
+}
+
+function fixtureWinner(displayName: string | null): LatestOfficialRaffleWinner {
+  return {
+    publicLabel: "Winner Confirmed",
+    cycleMonth: "2026-08-01",
+    selectedAt: cycleDates.drawAt,
+    displayName,
+  };
 }
 
 function buildModel(

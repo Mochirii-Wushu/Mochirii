@@ -100,7 +100,7 @@ export function SiteHeader({
       </a>
 
       <div className="header-wrap">
-        <Link className="brand" href="/" aria-label="Mōchirīī Home">
+        <Link className="brand" href="/">
           <span className="brand-mark" aria-hidden="true">
             <Image
               className="brand-emblem"
@@ -322,7 +322,6 @@ export function SiteHeader({
             <Link
               className="brand brand--mobile"
               href="/"
-              aria-label="Mōchirīī Home"
               onClick={() => closeMobile()}
             >
               <span className="brand-mark" aria-hidden="true">

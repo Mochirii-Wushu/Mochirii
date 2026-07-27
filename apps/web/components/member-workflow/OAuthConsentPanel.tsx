@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { requireBrowserSupabaseClient } from "@/lib/supabase/client";
 import { profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
@@ -97,9 +98,8 @@ export function OAuthConsentPanel() {
   }, [authorizationId]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => load());
     const subscription = onAuthStateChange(() => {
-      void load();
+      void measureAuthenticatedRouteTask("oauth-consent", load);
     });
     return () => subscription.data?.subscription?.unsubscribe();
   }, [load]);

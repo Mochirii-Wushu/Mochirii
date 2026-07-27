@@ -8,10 +8,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import type { GallerySpotlightItem } from "@/components/HomeGalleryLightbox";
-import {
-  useBodyPortalRoot,
-  useBodyScrollLock,
-} from "@/components/useLightboxOverlay";
+import { LightboxImage } from "@/components/LightboxImage";
 
 const focusableSelector = [
   "a[href]",
@@ -30,21 +27,18 @@ function getFocusable(root: HTMLElement | null) {
 
 export function HomeGalleryLightboxModal({
   item,
+  portalRoot,
   onClose,
 }: {
   item: GallerySpotlightItem;
+  portalRoot: HTMLElement;
   onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const portalRoot = useBodyPortalRoot();
   const modalCaption = useMemo(() => item.caption || item.alt, [item]);
 
-  useBodyScrollLock(true);
-
   useEffect(() => {
-    if (!portalRoot) return undefined;
-
     const focusTimer = window.setTimeout(
       () => closeRef.current?.focus({ preventScroll: true }),
       0,
@@ -83,8 +77,6 @@ export function HomeGalleryLightboxModal({
     }
   };
 
-  if (!portalRoot) return null;
-
   return createPortal(
     <div
       id="modalRoot"
@@ -112,16 +104,15 @@ export function HomeGalleryLightboxModal({
           aria-label="Close viewer"
           onClick={onClose}
         >
-          âœ•
+          {"\u2715"}
         </button>
 
-        <figure className="lightbox-card">
-          <img
+        <figure className="lightbox-card" tabIndex={0}>
+          <LightboxImage
             id="modalImage"
             src={item.full}
+            previewSrc={item.image}
             alt={item.alt}
-            className="lightbox-img"
-            decoding="async"
           />
           <figcaption id="modalCaption" className="lightbox-caption">
             {modalCaption}

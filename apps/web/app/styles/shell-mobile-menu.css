@@ -35,6 +35,7 @@
   position:fixed;
   right:0;
   top:0;
+  height:100vh;
   height:100dvh;
   width:min(360px,92vw);
   box-sizing:border-box;
@@ -55,6 +56,11 @@
   flex-direction:column;
   overflow:hidden;
   padding:14px 14px 16px;
+  padding:
+    max(14px, var(--safe-area-top))
+    max(14px, var(--safe-area-right))
+    max(16px, var(--safe-area-bottom))
+    max(14px, var(--safe-area-left));
 }
 .mobile-shell[data-open="true"] .mobile-sheet{
   transform:translateX(0);

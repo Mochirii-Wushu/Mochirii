@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ProviderLogo } from "@/components/member-workflow/ProviderLogo";
+import { MemberSocialLinks } from "@/components/member-workflow/MemberSocialLinks";
 import {
   parseStoredMotion,
   SETTINGS_STORAGE_KEY,
@@ -10,6 +11,7 @@ import {
 } from "@/components/spinner/raffle";
 import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
 import { consumeLiveDrawHandoffIntent } from "@/lib/spinner/viewer-handoff";
+import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
 import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getLinkedIdentities, linkProviderIdentity, openPrivateSpinnerSession, openPrivateSpinnerViewerHandoff } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
@@ -82,7 +84,7 @@ export function AccountPanel() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<MemberProfile | null>(null);
   const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
-  const [spinnerViewerMotion, setSpinnerViewerMotion] = useState<MotionMode>("reduced");
+  const [spinnerViewerMotion, setSpinnerViewerMotion] = useState<MotionMode>("full");
   const [linkedIdentities, setLinkedIdentities] = useState<MemberAccessIdentity[]>([]);
   const [formState, setFormState] = useState<FormState>(emptyFormState);
   const [submissions, setSubmissions] = useState<GallerySubmission[]>([]);
@@ -197,9 +199,8 @@ export function AccountPanel() {
   }, [loadSocialAccounts, loadSubmissions, refreshMemberAccess]);
 
   useEffect(() => {
-    void Promise.resolve().then(() => loadAccount());
     const subscription = onAuthStateChange(() => {
-      void loadAccount();
+      void measureAuthenticatedRouteTask("account", loadAccount);
     });
     return () => {
       subscription.data?.subscription?.unsubscribe();
@@ -255,7 +256,8 @@ export function AccountPanel() {
         queueMicrotask(() => setSpinnerViewerMotion(storedMotion));
       }
     } catch {
-      // Reduced remains the safe default when browser storage is unavailable.
+      // Full is the explicit first-use preference; the viewer still honors
+      // the operating system's reduced-motion preference.
     }
   }, []);
 
@@ -667,6 +669,8 @@ export function AccountPanel() {
           <WorkflowNotice hidden={!socialStatus}>{socialStatus}</WorkflowNotice>
           <WorkflowNotice tone="danger" role="alert" hidden={!socialError}>{socialError}</WorkflowNotice>
         </section>
+
+        <MemberSocialLinks currentUserId={user.id} />
 
         <form className="glass-card glass-card--soft glass-pad auth-form" id="profileForm" onSubmit={saveProfile}>
           <p className="kicker">Profile</p>

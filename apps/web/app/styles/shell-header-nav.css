@@ -6,6 +6,11 @@
   top:0;
   z-index:200;
   padding:14px 16px;
+  padding:
+    max(14px, var(--safe-area-top))
+    var(--page-inset-right)
+    14px
+    var(--page-inset-left);
   background:
     radial-gradient(circle at 12% 0%, var(--shell-moon-soft), transparent 34%),
     radial-gradient(circle at 88% 0%, var(--shell-lantern-soft), transparent 30%),

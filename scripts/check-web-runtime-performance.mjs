@@ -1,0 +1,143 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+
+const root = process.cwd();
+const failures = [];
+
+function read(relativePath) {
+  const fullPath = path.join(root, relativePath);
+  if (!existsSync(fullPath)) {
+    failures.push(`${relativePath}: missing required file.`);
+    return "";
+  }
+  return readFileSync(fullPath, "utf8");
+}
+
+function assertIncludes(label, source, snippet) {
+  if (!source.includes(snippet)) failures.push(`${label}: expected snippet not found: ${snippet}`);
+}
+
+function assertNotIncludes(label, source, snippet) {
+  if (source.includes(snippet)) failures.push(`${label}: forbidden snippet found: ${snippet}`);
+}
+
+function pageFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return pageFiles(fullPath);
+    return entry.name === "page.tsx" ? [fullPath] : [];
+  });
+}
+
+for (const file of pageFiles(path.join(root, "apps/web/app"))) {
+  const source = readFileSync(file, "utf8");
+  if (source.includes("@/components/public-pages/pages")) {
+    failures.push(`${path.relative(root, file).replaceAll("\\", "/")}: public route must use a direct route-page import.`);
+  }
+}
+
+const eventsRoute = read("apps/web/app/events/page.tsx");
+const eventsPage = read("apps/web/components/public-pages/route-pages/EventsPage.tsx");
+const eventsBoard = read("apps/web/components/public-pages/EventsBoard.tsx");
+[
+  'import { connection } from "next/server";',
+  "await connection();",
+  "referenceTime={new Date().toISOString()}",
+].forEach((snippet) => assertIncludes("Events server reference", eventsRoute, snippet));
+assertIncludes("Events route page", eventsPage, "<EventsBoard");
+assertIncludes("Events route page", eventsPage, "referenceTime={referenceTime}");
+assertIncludes("Events route page", eventsPage, "websiteEventCardsFromSchedule(guildScheduleData, new Date(referenceTime))");
+assertIncludes("Events board", eventsBoard, "eventStatusAt(item, referenceTimeMs)");
+assertIncludes("Events board", eventsBoard, "parseReferenceTime(referenceTime)");
+assertNotIncludes("Events board", eventsBoard, "Date.now()");
+assertNotIncludes("Events board", eventsBoard, "new Date()");
+
+const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
+const publicGalleryFeed = read("apps/web/lib/gallery/approved-feed.ts");
+const privateGalleryClient = read("apps/web/lib/supabase/gallery-submissions.ts");
+const profileCardLinks = read("apps/web/components/public-pages/ProfileCardLinks.tsx");
+const publicProfileCards = read("apps/web/lib/member-profiles/visible-profile-cards.ts");
+assertIncludes("Gallery browser", galleryBrowser, 'from "@/lib/gallery/approved-feed"');
+assertNotIncludes("Gallery browser", galleryBrowser, 'from "@/lib/supabase/gallery-submissions"');
+assertIncludes("SDK-free Gallery feed", publicGalleryFeed, "list-approved-gallery-submissions");
+assertIncludes("SDK-free Gallery feed", publicGalleryFeed, "export async function listApprovedGallerySubmissions");
+[
+  "@supabase/supabase-js",
+  "@/lib/supabase/",
+  "requireBrowserSupabaseClient",
+  "createClient(",
+].forEach((snippet) => assertNotIncludes("SDK-free Gallery feed", publicGalleryFeed, snippet));
+assertNotIncludes("private Gallery client", privateGalleryClient, "listApprovedGallerySubmissions");
+
+assertIncludes("public profile-card links", profileCardLinks, 'from "@/lib/member-profiles/visible-profile-cards"');
+assertIncludes("SDK-free profile-card feed", publicProfileCards, "list-visible-profile-cards");
+assertIncludes("SDK-free profile-card feed", publicProfileCards, "export async function listVisibleProfileCards");
+[
+  "@supabase/supabase-js",
+  "@/lib/supabase/",
+  "requireBrowserSupabaseClient",
+  "createClient(",
+].forEach((snippet) => assertNotIncludes("SDK-free profile-card feed", publicProfileCards, snippet));
+
+const joinPage = read("apps/web/components/public-pages/route-pages/JoinPage.tsx");
+const discordPreview = read("apps/web/components/public-pages/DiscordServerPreview.tsx");
+const browserRouteMatrix = read("scripts/check-browser-route-matrix.mjs");
+assertIncludes("Join route", joinPage, "<DiscordServerPreview />");
+assertNotIncludes("Join route", joinPage, "<iframe");
+[
+  "const [previewVisible, setPreviewVisible] = useState(false);",
+  "aria-expanded={previewVisible}",
+  "previewVisible ? (",
+  "<iframe",
+  "Open Discord",
+  'rel="noopener noreferrer"',
+].forEach((snippet) => assertIncludes("user-activated Discord preview", discordPreview, snippet));
+[
+  "inspectDiscordPreview(page, discordPreviewRequests)",
+  'getArg("--browser", process.env.BROWSER_ROUTE_MATRIX_BROWSER || "chromium")',
+  '["chromium", "firefox", "webkit"]',
+  'initialRequestCount !== 0',
+  'requestCountAfterActivation <= preview.initialRequestCount',
+  'preview.hidden.expanded !== "false"',
+  'preview?.shown.horizontalOverflow',
+].forEach((snippet) => assertIncludes("Discord preview browser regression", browserRouteMatrix, snippet));
+
+const timing = read("apps/web/lib/observability/authenticated-route-timing.ts");
+[
+  'export type AuthenticatedRoute = "account" | "oauth-consent" | "leader-dashboard";',
+  "authenticatedRouteTimingBucket",
+  "performance.measure",
+  "mochirii:authenticated-route-timing",
+].forEach((snippet) => assertIncludes("authenticated route timing", timing, snippet));
+[
+  "fetch(",
+  "sendBeacon",
+  "XMLHttpRequest",
+  "@vercel/analytics",
+  "userId",
+  "email",
+].forEach((snippet) => assertNotIncludes("authenticated route timing", timing, snippet));
+
+for (const [file, route] of [
+  ["apps/web/components/member-workflow/AccountPanel.tsx", "account"],
+  ["apps/web/components/member-workflow/OAuthConsentPanel.tsx", "oauth-consent"],
+  ["apps/web/components/member-workflow/LeaderDashboard.tsx", "leader-dashboard"],
+]) {
+  const source = read(file);
+  assertIncludes(file, source, 'from "@/lib/observability/authenticated-route-timing"');
+  assertIncludes(file, source, `measureAuthenticatedRouteTask("${route}"`);
+  assertNotIncludes(file, source, `Promise.resolve().then(() => measureAuthenticatedRouteTask("${route}"`);
+}
+
+if (failures.length) {
+  console.error("Web runtime performance contract failed:");
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  process.exit(1);
+}
+
+console.log("Web runtime performance contract OK.");
+console.log("- Public routes use direct route-page imports.");
+console.log("- Events hydration uses one server-generated reference time.");
+console.log("- Public Gallery and profile-card feed code has no Supabase SDK dependency.");
+console.log("- Discord preview is user activated and retains a direct link.");
+console.log("- Authenticated route timings are local, bounded, and identifier-free.");
