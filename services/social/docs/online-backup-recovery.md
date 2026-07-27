@@ -25,6 +25,51 @@ in a `social-recovery` environment secret and in one offline copy inside the
 approved credentials boundary. Backup, media, and temporary administrative
 Spaces keys remain separate.
 
+## Pinned Recovery Tools
+
+Both the Droplet backup installer and the GitHub-hosted recovery workflow use
+`scripts/install-pinned-recovery-tools.sh`. It installs only checksum-verified
+release artifacts for these approved versions:
+
+| Tool | Version | Purpose |
+| --- | --- | --- |
+| `age` and `age-keygen` | `1.3.1` | Encrypt and decrypt recovery payloads |
+| `rclone` | `1.74.4` | Transfer private recovery objects |
+
+The installer supports Linux AMD64 and ARM64, requires HTTPS for the initial
+request and every redirect, verifies an architecture-specific SHA-256 before
+extracting, and checks the reported version before installation. The production
+backup also refuses to run if either installed version drifts from this contract.
+This removes Ubuntu package-repository timing from the backup and recovery path.
+The approved Ubuntu host must already provide `curl`, `install`, `mktemp`,
+`sha256sum`, `tar`, `uname`, and `unzip`; the installer stops with the missing
+prerequisite name before downloading anything.
+
+Repository validation runs syntax checks and ShellCheck, then installs and
+exercises the pinned binaries on native AMD64 and ARM64 Ubuntu 24.04 runners.
+Each runner verifies the exact versions, completes an `age` encrypt/decrypt
+round trip with a byte-identical payload, and exercises `rclone` `copyto`, `lsf`,
+and `deletefile` against its no-network local backend. The
+[`ubuntu-24.04-arm` runner](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+uses GitHub-hosted native ARM64 hardware. A fail-closed preflight binds each
+matrix entry to GitHub's `runner.arch` value and the host's `uname -m` result, so
+the required `validate-social` result fails closed on an unexpected or
+unavailable architecture and blocks Social image publication. The workflow does
+not silently fall back to emulation, another architecture, or a bypass. This CI
+coverage validates the source and release artifacts; it does not install tools
+on the live Droplet. The live host remains unchanged until a separately approved
+installation packet and post-install version readback are completed.
+
+To update a pin, review the upstream release and its security notes. For `age`,
+verify the [official release](https://github.com/FiloSottile/age/releases) checksum
+through its Sigsum or GitHub artifact attestation. For `rclone`, follow the
+[release-signing procedure](https://rclone.org/release_signing/) and verify the
+signed checksum file with release key fingerprint
+`FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA`. Update both architecture hashes,
+the expected versions, this runbook, and the static contract together; then test
+installation and an encrypt/decrypt round trip on Ubuntu 24.04 before any
+separately approved host installation or recovery dispatch.
+
 ## Host Settings
 
 `/opt/mochirii-social/shared/backup.env` is root-owned mode `600` and contains:

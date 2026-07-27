@@ -56,12 +56,13 @@ jobs:
             [[ "$CONFIRMATION" == "RESTORE social.mochirii.com" ]]
           fi
 
-      - name: Install recovery tools
+      - name: Install pinned recovery tools
         shell: bash
         run: |
           set -Eeuo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends age rclone
+          recovery_tools="$RUNNER_TEMP/recovery-tools"
+          bash services/social/scripts/install-pinned-recovery-tools.sh "$recovery_tools"
+          printf '%s\n' "$recovery_tools" >> "$GITHUB_PATH"
 
       - name: Configure private recovery inputs
         env:

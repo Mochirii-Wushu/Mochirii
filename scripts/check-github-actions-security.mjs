@@ -47,6 +47,46 @@ function workflowJobs(lines) {
   }));
 }
 
+function hasExactRecoveryRunnerMatrix(jobText) {
+  const entries = [...jobText.matchAll(
+    /^\s+- architecture:\s*([^\s#]+)\s*\n\s+runner:\s*([^\s#]+)\s*$/gm,
+  )].map((match) => [match[1], match[2]]);
+  const architectureRows = jobText.match(/^\s+- architecture:/gm) ?? [];
+  const runnerRows = jobText.match(/^\s+runner:/gm) ?? [];
+  return architectureRows.length === 2 &&
+    runnerRows.length === 2 &&
+    JSON.stringify(entries) === JSON.stringify([
+      ["amd64", "ubuntu-24.04"],
+      ["arm64", "ubuntu-24.04-arm"],
+    ]);
+}
+
+function hasExactRecoveryArchitectureGate(jobText) {
+  return [
+    "name: Verify native recovery runner architecture",
+    "RECOVERY_ARCHITECTURE: ${{ matrix.architecture }}",
+    "RUNNER_ARCHITECTURE: ${{ runner.arch }}",
+    'native_architecture="$(uname -m)"',
+    'case "$RECOVERY_ARCHITECTURE:$RUNNER_ARCHITECTURE:$native_architecture" in',
+    "amd64:X64:x86_64 | arm64:ARM64:aarch64)",
+    "Unexpected recovery runner architecture:",
+  ].every((requirement) => jobText.includes(requirement));
+}
+
+const recoveryMatrixCanary = `
+      matrix:
+        include:
+          - architecture: amd64
+            runner: ubuntu-24.04
+          - architecture: arm64
+            runner: ubuntu-24.04-arm
+          - architecture: unreviewed
+            runner: unreviewed-runner
+`;
+if (hasExactRecoveryRunnerMatrix(recoveryMatrixCanary)) {
+  failures.push("Recovery runner-matrix policy canary did not reject an additional runner.");
+}
+
 let totalJobCount = 0;
 
 for (const name of workflowFiles) {
@@ -66,6 +106,7 @@ for (const name of workflowFiles) {
     failures.push(`${file}: workflow must define at least one job.`);
   }
   for (const job of jobs) {
+    const jobText = lines.slice(job.start, job.end).join("\n");
     const runsOn = lines
       .slice(job.start, job.end)
       .map((line, offset) => ({ line, number: job.start + offset + 1 }))
@@ -76,11 +117,17 @@ for (const name of workflowFiles) {
     }
 
     const value = runsOn[0].line.slice("    runs-on:".length).trim();
+    const approvedRecoveryMatrix =
+      name === "validate-social.yml" &&
+      job.id === "validate-recovery-tools" &&
+      value === "${{ matrix.runner }}" &&
+      hasExactRecoveryRunnerMatrix(jobText) &&
+      hasExactRecoveryArchitectureGate(jobText);
     if (value.includes("self-hosted")) {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must not depend on a self-hosted runner.`);
     } else if (value === "ubuntu-latest") {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must pin the Ubuntu 24.04 runner family instead of ubuntu-latest.`);
-    } else if (value !== "ubuntu-24.04") {
+    } else if (value !== "ubuntu-24.04" && !approvedRecoveryMatrix) {
       failures.push(`${file}:${runsOn[0].number}: job ${job.id} must use exact runs-on value ubuntu-24.04.`);
     }
   }

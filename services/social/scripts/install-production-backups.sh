@@ -23,14 +23,7 @@ for public_key_file in "$recipient_public_key" "$recovery_public_key"; do
   }
 done
 
-missing_packages=()
-command -v age >/dev/null || missing_packages+=(age)
-command -v rclone >/dev/null || missing_packages+=(rclone)
-if [[ "${#missing_packages[@]}" -gt 0 ]]; then
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get update -qq
-  apt-get install -y --no-install-recommends "${missing_packages[@]}"
-fi
+bash "$repo_root/scripts/install-pinned-recovery-tools.sh" /usr/local/bin
 
 install -d -m 0700 -o root -g root /opt/mochirii-social/backups
 install -m 0644 -o root -g root \
