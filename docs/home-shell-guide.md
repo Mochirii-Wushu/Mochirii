@@ -62,9 +62,9 @@ The header and footer brand blocks match: the prominent `Mōchirīī` guild name
 
 Current desktop navigation:
 
-- Guild: Home, Spotlight, Gallery.
+- Guild: Home, Spotlight, Gallery, Social, Mochi Pets.
 - Culture: Join, Ranks, Leaders, Tome, Playlists.
-- Updates: Announcements, Events, Raffles.
+- Updates: Announcements, Events, Raffle.
 - Recruitment as a top-level link.
 
 Current mobile navigation:
@@ -92,7 +92,7 @@ The exact game name may remain in header brand text and shared shell metadata co
 
 ## 5. Footer
 
-Footer presentation and links come from `apps/web/components/SiteFooter.tsx`; shared layout ownership remains in `apps/web/app/layout.tsx`.
+Footer presentation and links come from `apps/web/components/SiteFooter.tsx`; `apps/web/components/SiteRouteShell.tsx` owns the ordinary shared shell and omits it only for the isolated Spinner route family.
 
 Current footer content:
 
@@ -109,7 +109,8 @@ Keep the footer compact. It should remain a shared navigation and identity surfa
 
 ## 6. App Router Ownership
 
-- `apps/web/app/layout.tsx` owns root metadata, viewport settings, local fonts, the shared shell styles, `SiteHeader`, and `SiteFooter`.
+- `apps/web/app/layout.tsx` owns root metadata, viewport settings, local fonts, shared shell styles, and the `SiteRouteShell` boundary.
+- `apps/web/components/SiteRouteShell.tsx` owns the ordinary `SiteHeader` and `SiteFooter` composition and the isolated Spinner exception.
 - Route `page.tsx` files import only the styles and server/client components their route needs.
 - Interactive behavior stays in focused client components; do not make the entire layout or a route client-side for one control.
 - Next emits content-hashed application bundles. There is no editable `index.html`, shared `site.js`, or manual public-script ordering in the live application.
