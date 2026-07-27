@@ -119,6 +119,7 @@
     "test:member-verification-identity": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/member-verification-identity_test.ts",
     "test:member-social-links": "node --experimental-default-type=module --experimental-strip-types --test apps/web/lib/member-social-links/profile-links-core.test.mts",
     "test:member-social-links-db": "supabase test db --local supabase/tests/member_social_links_test.sql",
+    "smoke:member-social-links": "node scripts/smoke-member-social-links.mjs",
     "test:header-auth-loader": "deno test --lock=deno.lock --frozen=true apps/web/components/site-header/deferred-task_test.ts",
     "test:spinner": "node --experimental-strip-types --test tests/spinner-raffle.test.ts tests/spinner-session.test.ts tests/spinner-live.test.ts",
     "test:live-spinner-backend": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/spinner-live-session/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/spinner-live_test.ts supabase/functions/_shared/spinner-media_test.ts",

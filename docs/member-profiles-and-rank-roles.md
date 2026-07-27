@@ -112,6 +112,14 @@ members. RLS permits owners to read and mutate only their own rows and permits
 member-to-member reads only for links with `is_visible = true`; signed-out and
 unverified accounts cannot read shared links.
 
+Creation and reordering use authenticated database functions so the 20-link
+limit and each complete order are committed atomically. Controlled providers
+retain canonical labels, known non-profile destinations are rejected, and the
+database repeats the browser's URL and plain-label validation. A member with at
+least one shared link may create a user-scoped `/account?profile-links=...`
+address. That authenticated, noindex view has no directory or enumeration
+surface and returns one opaque unavailable state when RLS reveals no links.
+
 The website does not fetch, scrape, verify, embed, or preview these external
 profiles. External navigation happens only after a member activates a normal
 link. Native Web Share is user-activated and falls back to copying the saved
@@ -141,6 +149,7 @@ Manual preview:
 - header, footer, and mobile navigation have no `Members` link
 - Account shows Discord verification, safe editable fields, gallery submission history, and Mochirii Social handoff
 - Account lets the owner manage private-by-default profile links without loading any external profile service
+- `npm run smoke:member-social-links` exercises concurrent-limit enforcement, add/order/visibility/share/delete behavior, keyboard focus, native-share and copy fallbacks, responsive reflow, 200% text, serious accessibility findings, browser/request/HTTP failures, and external-request isolation against the local Supabase stack in Chromium, Firefox, and WebKit; its local route harness strips CSP only so the local HTTP Supabase origin can be exercised, while the repository security checks own the production CSP contract
 - Account does not show profile publishing or avatar/banner upload controls
 - Leader Dashboard does not show the profile media queue
 - `/social` remains a noindex handoff/support page for Mochirii Social

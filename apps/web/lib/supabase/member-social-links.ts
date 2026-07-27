@@ -90,25 +90,20 @@ export async function listVisibleMemberSocialLinks(userId: string) {
 export async function createMemberSocialLink(payload: CreateMemberSocialLinkPayload) {
   try {
     const client = requireBrowserSupabaseClient();
-    const userId = await requireCurrentUserId();
+    await requireCurrentUserId();
     const current = await listMyMemberSocialLinks();
     if (!current.ok) return current;
     const links = current.data || [];
     if (links.length >= MEMBER_SOCIAL_LINK_LIMIT) throw new Error(`You can save up to ${MEMBER_SOCIAL_LINK_LIMIT} profile links.`);
 
     const normalized = normalizeMemberSocialLinkInput(payload);
-    const sortOrder = links.reduce((maximum, link) => Math.max(maximum, Number(link.sort_order) || 0), -1) + 1;
     const { data, error, status, statusText } = await client
-      .from("member_social_links")
-      .insert({
-        user_id: userId,
-        provider: normalized.provider,
-        display_label: normalized.displayLabel,
-        profile_url: normalized.profileUrl,
-        sort_order: sortOrder,
-        is_visible: payload.isVisible === true,
+      .rpc("create_member_social_link", {
+        link_provider: normalized.provider,
+        link_display_label: normalized.displayLabel,
+        link_profile_url: normalized.profileUrl,
+        link_is_visible: payload.isVisible === true,
       })
-      .select("id,user_id,provider,display_label,profile_url,sort_order,is_visible,created_at,updated_at")
       .single();
 
     if (error) {
@@ -158,22 +153,21 @@ export async function updateMemberSocialLinkVisibility(id: string, isVisible: bo
 export async function reorderMemberSocialLinks(orderedIds: string[]) {
   try {
     const client = requireBrowserSupabaseClient();
-    const userId = await requireCurrentUserId();
+    await requireCurrentUserId();
     const ids = [...new Set(orderedIds.map((id) => String(id || "").trim()).filter(Boolean))];
-    if (!ids.length || ids.length > MEMBER_SOCIAL_LINK_LIMIT) throw new Error("A valid profile-link order is required.");
+    if (
+      !ids.length
+      || ids.length > MEMBER_SOCIAL_LINK_LIMIT
+      || ids.length !== orderedIds.length
+      || ids.some((id) => !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
+    ) throw new Error("A valid profile-link order is required.");
 
-    for (const [sortOrder, id] of ids.entries()) {
-      const { error } = await client
-        .from("member_social_links")
-        .update({ sort_order: sortOrder })
-        .eq("id", id)
-        .eq("user_id", userId);
-      if (error) throw error;
-    }
+    const { data, error } = await client.rpc("reorder_member_social_links", { link_ids: ids });
+    if (error || !Array.isArray(data) || data.length !== ids.length) throw error || new Error("Profile-link order could not be saved.");
 
-    return okResult(ids, "Profile-link order saved.");
+    return okResult(data as MemberSocialLink[], "Profile-link order saved.");
   } catch (error) {
-    return failedResult<string[]>(error);
+    return failedResult<MemberSocialLink[]>(error);
   }
 }
 
