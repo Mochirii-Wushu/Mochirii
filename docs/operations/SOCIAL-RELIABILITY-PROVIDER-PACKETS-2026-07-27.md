@@ -1,6 +1,6 @@
 # Mochirii Social Reliability Provider Packets
 
-Date: 2026-07-27  
+Date: 2026-07-27
 Status: source implementation prepared; every provider write remains unapproved
 
 ## Scope and verified source evidence

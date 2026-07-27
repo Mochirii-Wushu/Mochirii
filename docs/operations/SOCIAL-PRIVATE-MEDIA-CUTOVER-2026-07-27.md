@@ -1,6 +1,6 @@
 # Mochirii Social Private Media Cutover
 
-Date: 2026-07-27  
+Date: 2026-07-27
 Status: source foundation prepared; provider conversion and production rollout are blocked pending exact approval
 
 ## Decision and scope
