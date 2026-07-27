@@ -11,6 +11,7 @@ use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\FrameGuard;
 use App\Http\Middleware\Localization;
 use App\Http\Middleware\MochiriiPrivateSocial;
+use App\Http\Middleware\RejectRetiredPublicRoutes;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
@@ -68,6 +69,7 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         HandleCors::class,
+        RejectRetiredPublicRoutes::class,
         CheckForMaintenanceMode::class,
         ValidatePostSize::class,
         TrustProxies::class,

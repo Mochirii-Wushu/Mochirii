@@ -42,15 +42,6 @@
                 <hr>
             </li>
 
-            @if(Auth::user() && Auth::user()->is_admin && (bool) config_cache('pixelfed.oauth_enabled') == true)
-            <li class="nav-item pl-3 {{request()->is('settings/applications')?'active':''}}">
-                <a class="nav-link font-weight-light text-muted" href="{{route('settings.applications')}}">{{__('settings.applications')}}</a>
-            </li>
-            <li class="nav-item pl-3 {{request()->is('settings/developers')?'active':''}}">
-                <a class="nav-link font-weight-light text-muted" href="{{route('settings.developers')}}">{{__('settings.developers')}}</a>
-            </li>
-            @endif
-
             @if(Auth::user() && Auth::user()->is_admin)
                 <li class="nav-item pl-3 {{request()->is('*import*')?'active':''}}">
                     <a class="nav-link font-weight-light text-muted" href="{{route('settings.import')}}">{{__('settings.import')}}</a>

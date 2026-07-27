@@ -78,8 +78,8 @@ return [
         'token_expiration' => env('OAUTH_TOKEN_DAYS', 365),
         'refresh_expiration' => env('OAUTH_REFRESH_DAYS', 400),
         'pat' => [
-            'enabled' => env('OAUTH_PAT_ENABLED', false),
-            'id' => env('OAUTH_PAT_ID'),
+            'enabled' => false,
+            'id' => null,
         ],
     ],
 
@@ -107,7 +107,7 @@ return [
     ],
 
     'admin_invites' => [
-        'enabled' => env('PF_ADMIN_INVITES_ENABLED', true),
+        'enabled' => false,
     ],
 
     'user_filters' => [

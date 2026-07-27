@@ -30,8 +30,8 @@ Route::middleware('mochirii.federation-disabled')->group(function () {
 Route::redirect('.well-known/change-password', '/settings/password');
 Route::get('api/service/health-check', 'HealthCheckController@get');
 Route::get('api/service/readiness-check', 'HealthCheckController@readiness');
-Route::post('api/auth/app-code-verify', 'AppRegisterController@verifyCode')->middleware('throttle:app-code-verify');
-Route::post('api/auth/onboarding', 'AppRegisterController@onboarding')->middleware('throttle:app-code-verify');
+Route::any('api/auth/app-code-verify', static fn () => abort(404));
+Route::any('api/auth/onboarding', static fn () => abort(404));
 Route::get('storage/m/_v2/{pid}/{mhash}/{uhash}/{f}', 'MediaController@fallbackRedirect')
     ->middleware(['web', 'mochirii.private']);
 
@@ -291,16 +291,8 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
             Route::get('listing', 'PixelfedDirectoryController@get')->middleware($middleware);
         });
 
-        Route::group(['prefix' => 'auth'], function () {
-            Route::get('iarpfc', 'Api\ApiV1Dot1Controller@inAppRegistrationPreFlightCheck');
-            Route::post('iar', 'Api\ApiV1Dot1Controller@inAppRegistration');
-            Route::post('iarc', 'Api\ApiV1Dot1Controller@inAppRegistrationConfirm');
-            Route::get('iarer', 'Api\ApiV1Dot1Controller@inAppRegistrationEmailRedirect');
-
-            Route::post('invite/admin/verify', 'AdminInviteController@apiVerifyCheck')->middleware('throttle:20,120');
-            Route::post('invite/admin/uc', 'AdminInviteController@apiUsernameCheck')->middleware('throttle:20,120');
-            Route::post('invite/admin/ec', 'AdminInviteController@apiEmailCheck')->middleware('throttle:10,1440');
-        });
+        Route::any('auth/{path?}', static fn () => abort(404))
+            ->where('path', '.*');
 
         Route::group(['prefix' => 'push'], function () use ($middleware) {
             Route::get('state', 'Api\ApiV1Dot1Controller@getPushState')->middleware($middleware);

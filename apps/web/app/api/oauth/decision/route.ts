@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { runSocialAuthorizationDecision } from "@/lib/oauth/authorization-decision-core";
 import { approvedSocialOAuthRedirect } from "@/lib/oauth/approved-social-redirect";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
@@ -22,10 +23,30 @@ type MemberAccessPayload = {
 };
 
 const NO_STORE_HEADERS = { "Cache-Control": "private, no-store" };
+const SOCIAL_OAUTH_CLIENT_ID = (process.env.MOCHIRII_SOCIAL_OAUTH_CLIENT_ID || "").trim();
 
 type OAuthConsentPayload = {
   redirect_url?: unknown;
 };
+
+async function loadAuthorizationDetails(authorizationId: string, token: string) {
+  const endpoint = new URL(
+    `/auth/v1/oauth/authorizations/${encodeURIComponent(authorizationId)}`,
+    SUPABASE_URL,
+  );
+  const response = await fetch(endpoint, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) return null;
+  return response.json().catch(() => null) as Promise<unknown>;
+}
 
 function json(payload: Record<string, unknown>, init: ResponseInit = {}) {
   const headers = new Headers(init.headers);
@@ -93,8 +114,8 @@ async function submitAuthorizationDecision({
 }
 
 export async function POST(request: Request) {
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    return json({ error: "Website public configuration is missing." }, { status: 500 });
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY || !SOCIAL_OAUTH_CLIENT_ID) {
+    return json({ error: "Guild social authorization is unavailable." }, { status: 503 });
   }
 
   const token = bearerToken(request);
@@ -127,22 +148,34 @@ export async function POST(request: Request) {
     },
   });
 
-  if (decision === "approve") {
-    const accessResult = await client.functions.invoke("verify-member-access", {
-      body: { refreshDiscord: false },
-    });
-    const access = memberAccessPayload(accessResult.data);
-    const activeMember = memberAccessIsActive(access);
+  const gate = await runSocialAuthorizationDecision({
+    authorizationId,
+    expectedClientId: SOCIAL_OAUTH_CLIENT_ID,
+    decision: decision as "approve" | "deny",
+    loadAuthorization: () => loadAuthorizationDetails(authorizationId, token),
+    verifyMembership: async () => {
+      const accessResult = await client.functions.invoke("verify-member-access", {
+        body: { refreshDiscord: false },
+      });
+      if (accessResult.error) return "unavailable";
 
-    if (accessResult.error || !activeMember) {
-      return json(
-        { error: access.message || accessResult.error?.message || "Active guild membership is required before authorizing guild social access." },
-        { status: 403 },
-      );
-    }
+      const access = memberAccessPayload(accessResult.data);
+      return memberAccessIsActive(access) ? "active" : "inactive";
+    },
+    submitDecision: () => submitAuthorizationDecision({ authorizationId, decision: decision as "approve" | "deny", token }),
+  });
+
+  if (gate.status === "authorization-rejected") {
+    return json({ error: "This guild social request could not be verified." }, { status: 403 });
+  }
+  if (gate.status === "membership-unavailable") {
+    return json({ error: "Guild membership could not be verified." }, { status: 503 });
+  }
+  if (gate.status === "membership-required") {
+    return json({ error: "Active guild membership is required before authorizing guild social access." }, { status: 403 });
   }
 
-  const result = await submitAuthorizationDecision({ authorizationId, decision, token });
+  const result = gate.submission;
   if (!result.ok) return json({ error: result.error }, { status: result.status });
 
   return json({ redirectUrl: result.redirectUrl });

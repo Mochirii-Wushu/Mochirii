@@ -71,7 +71,7 @@
     "check:web-runtime-performance": "node scripts/check-web-runtime-performance.mjs",
     "test:web-runtime-performance": "npm --prefix apps/web run test:web-runtime-performance",
     "check:pixelfed-first-login-readiness": "node scripts/check-pixelfed-first-login-readiness.mjs",
-    "test:social-oauth-consent": "node --experimental-default-type=module --experimental-strip-types --test apps/web/lib/oauth/approved-social-redirect.test.mts apps/web/lib/oauth/authorization-load-queue.test.mts apps/web/lib/oauth/consent-login-url.test.mts apps/web/lib/oauth/prior-consent-redirect.test.mts apps/web/lib/supabase/profile-verification-time.test.mts scripts/lib/runtime-diagnostic-redaction.test.mjs",
+    "test:social-oauth-consent": "node --experimental-default-type=module --experimental-strip-types --test apps/web/lib/oauth/approved-social-redirect.test.mts apps/web/lib/oauth/authorization-decision-core.test.mts apps/web/lib/oauth/authorization-load-queue.test.mts apps/web/lib/oauth/consent-login-url.test.mts apps/web/lib/oauth/prior-consent-redirect.test.mts apps/web/lib/supabase/profile-verification-time.test.mts scripts/lib/runtime-diagnostic-redaction.test.mjs",
     "check:pixelfed-oidc-spike": "node scripts/check-pixelfed-oidc-spike.mjs",
     "check:protected-content": "node scripts/check-protected-content.mjs",
     "check:private-spinner": "node scripts/check-private-spinner.mjs",
