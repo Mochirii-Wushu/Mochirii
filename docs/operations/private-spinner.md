@@ -18,7 +18,9 @@ The route is dynamically rendered, `noindex`, `nofollow`, `noarchive`, excluded 
 
 The controller can add, edit, delete, reorder, bulk-paste, clear, import, and export a 0–100-name live roster. Numbering and equal wheel segments always derive from current order. A draw requires 2–100 unique names and locks roster mutation until the stored result is revealed.
 
-The viewer receives a separate lazy client bundle with the shared wheel, numbered roster, status, winner, and celebration. It has no button, input, select, form, link, mutation request, click handler, or editable control. Its Full, Reduced, or Off preference is saved from Account; Reduced is the safe default and the operating-system reduced-motion preference overrides Full. Reduced motion ends at the same authoritative reveal boundary, while Off holds the pre-draw angle and snaps only at reveal.
+The viewer receives a separate lazy client bundle with the shared wheel, numbered roster, status, winner, and celebration. It has no button, input, select, form, link, mutation request, click handler, or editable control. Its Full, Reduced, or Off preference is saved from Account. First use is Full unless the operating system requests reduced motion; an explicit stored choice remains authoritative, while the operating-system reduced-motion preference still overrides Full. Reduced motion ends at the same authoritative reveal boundary, while Off holds the pre-draw angle and snaps only at reveal.
+
+The moderator's **Test spin** switch is off by default. Starting either mode requires a mode-specific confirmation. Official and test modes are frozen into the command hash, durable receipt, and shared live snapshot before the draw is applied. A test draw remains visible on the private controller and viewer stages, but creates no guild-delivery outbox, rendered media job, public monthly result, or official-month reservation. It cannot be promoted later. See [`SPINNER-RAFFLE-WINNER-PUBLICATION.md`](./SPINNER-RAFFLE-WINNER-PUBLICATION.md) for the public-result boundary.
 
 Full-screen mode is scoped to the controller's spinner container. Decorative canvases are hidden from assistive technology; roster, status, and winner remain persistent DOM text. Every effect run is bounded below five seconds, particle counts and device-pixel ratio are capped, and no production animation dependency is used.
 
@@ -32,6 +34,7 @@ The backend keeps service-only, default-deny state for:
 
 - the current ordered roster and wheel state, retained until explicit clear or replacement;
 - immutable draw receipts, retained for exactly the bounded 30-day window even if the stage still displays that draw;
+- immutable, service-only official monthly result records retained independently of expiring operational receipts, with append-only suppression records for reviewed incidents;
 - idempotent command and delivery records, which may contain protected roster or winner recovery copies and are also removed after 30 days;
 - a moderator authorization cache valid for no more than five minutes.
 
@@ -49,7 +52,7 @@ Ordinary viewer responses withhold the selected index, winner, and receipt until
 
 ## Reaper Delivery
 
-Every accepted draw creates one service-only outbox item for channel `1468667003366674721`.
+Every accepted **official** draw creates one service-only outbox item for channel `1468667003366674721`. Test draws create none.
 
 1. Reaper immediately posts one message containing the authoritative start as a localized relative timestamp and the one-shot Account handoff link, with a stable enforced nonce and all mentions disabled.
 2. At or after the authoritative reveal time, Reaper edits that same message ID with the sanitized winner, draw ID, and roster hash.

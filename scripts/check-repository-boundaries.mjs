@@ -39,6 +39,7 @@ const reviewedDatabaseTestPaths = new Set([
   "supabase/tests/gallery_submission_thumbnails_test.sql",
   "supabase/tests/private_live_spinner_test.sql",
   "supabase/tests/spinner_media_jobs_test.sql",
+  "supabase/tests/official_raffle_publication_test.sql",
 ]);
 const credentialPathPattern = /(^|\/)(?:Mochi Creds|private-evidence|Repository Backups)(\/|$)/i;
 const privateKeyPathPattern = /\.(?:key|p12|pfx|pem)$/i;

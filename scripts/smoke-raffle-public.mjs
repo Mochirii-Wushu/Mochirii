@@ -505,6 +505,7 @@ function isPrivateRaffleRequest(value) {
   } catch {
     return true;
   }
+  if (url.pathname.toLowerCase() === "/api/raffle/latest-winner") return false;
   const target = `${url.hostname}${url.pathname}`.toLowerCase();
   return /(?:\/api\/raffle(?:\/|$)|\/raffle\/claim(?:\/|$)|\/leader-dashboard\/raffle(?:\/|$)|\/functions\/v1\/(?:[^/]*raffle[^/]*|reward-provider-webhook)|\/rest\/v1\/[^/]*(?:raffle|reward|prize)[^/]*|tremendous|reward-relay)/.test(target);
 }

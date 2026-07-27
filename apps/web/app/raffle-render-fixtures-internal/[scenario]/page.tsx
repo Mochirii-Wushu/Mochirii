@@ -37,6 +37,8 @@ export default async function RaffleFixturePage({ params }: RaffleFixturePagePro
     <RafflePage
       model={fixture.model}
       viewerResultNames={fixture.viewerResultNames}
+      featuredWinner={fixture.featuredWinner}
+      enableWinnerRefresh={false}
     />
   );
 }

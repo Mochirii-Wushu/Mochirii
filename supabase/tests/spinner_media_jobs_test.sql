@@ -1,6 +1,13 @@
 BEGIN;
 SELECT plan(22);
 
+INSERT INTO auth.users (
+  id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at
+) VALUES (
+  '60606060-6060-4060-8060-606060606060',
+  'authenticated', 'authenticated', 'spinner-media-test@example.invalid', '', now(), now(), now()
+);
+
 SELECT ok(to_regclass('public.spinner_media_jobs') IS NOT NULL, 'media job table exists');
 
 SELECT ok(
@@ -105,10 +112,11 @@ SELECT ok(
 );
 
 INSERT INTO public.spinner_commands (
-  command_id, action, expected_revision, request_hash_sha256, status, staged_payload
+  command_id, action, actor_id, expected_revision, request_hash_sha256, status, staged_payload
 ) VALUES (
   '11111111-aaaa-4aaa-8aaa-111111111111',
   'spin',
+  '60606060-6060-4060-8060-606060606060',
   0,
   repeat('a', 64),
   'applied',
@@ -138,7 +146,7 @@ INSERT INTO public.spinner_commands (
 );
 
 INSERT INTO public.spinner_draw_receipts (
-  draw_id, command_id, session_id, revision, timestamp_iso, singapore_time,
+  draw_id, command_id, session_id, revision, actor_id, timestamp_iso, singapore_time,
   app_version, algorithm_version, roster_snapshot, roster_hash_sha256,
   rejection_limit, sampled_words, accepted_word, selected_index, winner, receipt
 ) VALUES (
@@ -146,6 +154,7 @@ INSERT INTO public.spinner_draw_receipts (
   '11111111-aaaa-4aaa-8aaa-111111111111',
   '33333333-cccc-4ccc-8ccc-333333333333',
   1,
+  '60606060-6060-4060-8060-606060606060',
   '2026-07-26T23:59:53.200Z',
   '27 Jul 2026, 07:59:53 SGT',
   '1.0.0',
@@ -163,7 +172,12 @@ INSERT INTO public.spinner_draw_receipts (
   1,
   1,
   jsonb_build_object('version', 1, 'id', '55555555-eeee-4eee-8eee-555555555555', 'displayName', 'Jade'),
-  '{}'::jsonb
+  jsonb_build_object(
+    'version', 1,
+    'drawMode', 'official',
+    'drawId', '22222222-bbbb-4bbb-8bbb-222222222222',
+    'winner', jsonb_build_object('version', 1, 'id', '55555555-eeee-4eee-8eee-555555555555', 'displayName', 'Jade')
+  )
 );
 
 INSERT INTO public.spinner_discord_outbox (

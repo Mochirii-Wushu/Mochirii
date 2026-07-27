@@ -71,6 +71,10 @@ test("rejects empty, overlong, and case-insensitive duplicate names", () => {
   const tooLong = "莲".repeat(MAX_NAME_GRAPHEMES + 1);
   assert.equal(validateName(tooLong, current).valid, false);
   assert.equal(validateName("莲".repeat(MAX_NAME_GRAPHEMES), current).valid, true);
+  assert.equal(validateName("月", current).valid, true);
+  assert.equal(validateName("Jade\u202eLantern", current).valid, false);
+  assert.equal(validateName("Jade\u0007Lantern", current).valid, false);
+  assert.equal(validateName("👩🏽‍💻".repeat(14), current).valid, false);
 });
 
 test("enforces the 100-participant limit while allowing an edit at capacity", () => {

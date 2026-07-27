@@ -35,6 +35,8 @@ import {
   type ParticipantV1,
   type RevealReason,
   type RosterStateV1,
+  type SpinnerDrawMode,
+  type SpinnerPersistedDrawMode,
 } from "./raffle";
 import { startCelebration, type CelebrationHandle } from "./celebration";
 import { resolveCelebrationMotionMode } from "./celebration-scene";
@@ -157,6 +159,8 @@ export function RaffleSpinner() {
   const [countdownStartedAt, setCountdownStartedAt] = useState<string | null>(null);
   const [serverClockAnchor, setServerClockAnchor] = useState<SpinnerServerClockAnchor | null>(null);
   const [wheelMotionStartedDrawId, setWheelMotionStartedDrawId] = useState<string | null>(null);
+  const [testMode, setTestMode] = useState(false);
+  const [activeDrawMode, setActiveDrawMode] = useState<SpinnerPersistedDrawMode>("unclassified");
 
   const wheelCanvasRef = useRef<HTMLCanvasElement>(null);
   const wheelFrameRef = useRef<HTMLDivElement>(null);
@@ -227,14 +231,15 @@ export function RaffleSpinner() {
     }
   }, []);
 
-  const pendingSpinCommand = useCallback((expectedRevision: number) => {
+  const pendingSpinCommand = useCallback((expectedRevision: number, drawMode: SpinnerDrawMode) => {
     const existing = pendingSpinCommandRef.current;
-    if (existing?.expectedRevision === expectedRevision) return existing;
+    if (existing?.expectedRevision === expectedRevision && existing.drawMode === drawMode) return existing;
     const next: PendingSpinnerCommandV1 = {
       version: 1,
       commandId: createSpinnerCommandId(),
       expectedRevision,
       createdAt: new Date().toISOString(),
+      drawMode,
     };
     pendingSpinCommandRef.current = next;
     try {
@@ -337,7 +342,7 @@ export function RaffleSpinner() {
     const { snapshot, receipt, commandId, serverNow } = result;
     if (snapshot.revision < liveRevisionRef.current) return;
     liveCommandIdRef.current = snapshot.drawId ? commandId : null;
-    const applyKey = `${snapshot.revision}:${snapshot.phase}:${snapshot.drawId || "idle"}`;
+    const applyKey = `${snapshot.revision}:${snapshot.phase}:${snapshot.drawMode}:${snapshot.drawId || "idle"}`;
     const sameSnapshot = liveApplyKeyRef.current === applyKey;
     const newReceipt = receipt && receivedReceiptDrawIdRef.current !== receiptId(receipt);
     if (sameSnapshot && !newReceipt) return;
@@ -378,6 +383,7 @@ export function RaffleSpinner() {
     liveSnapshotRef.current = snapshot;
     setLiveReady(true);
     setParticipants(snapshot.participants);
+    setActiveDrawMode(snapshot.drawMode);
 
     if (snapshot.phase === "idle") {
       stopScheduledAnimation();
@@ -825,6 +831,12 @@ export function RaffleSpinner() {
 
   const startDraw = async () => {
     if (!canSpin || drawLockedRef.current || commandBusyRef.current) return;
+    const drawMode: SpinnerDrawMode = testMode ? "test" : "official";
+    const confirmed = window.confirm(drawMode === "test"
+      ? "Start a TEST spin? It will appear on the private live stage, but it will not send a guild announcement or publish a monthly winner."
+      : "Start the OFFICIAL monthly draw? This selection can publish the month’s winner after the authoritative reveal."
+    );
+    if (!confirmed) return;
     commandBusyRef.current = true;
     drawLockedRef.current = true;
     preparingDrawRef.current = true;
@@ -840,7 +852,7 @@ export function RaffleSpinner() {
     drawAttemptRef.current = attempt;
     let command: PendingSpinnerCommandV1 | null = null;
     try {
-      const pendingCommand = pendingSpinCommand(liveRevisionRef.current);
+      const pendingCommand = pendingSpinCommand(liveRevisionRef.current, drawMode);
       command = pendingCommand;
       let liveResult: SpinnerLiveResultV1 | null = null;
       const receipt = await attempt.begin(async () => {
@@ -848,6 +860,7 @@ export function RaffleSpinner() {
           action: "spin",
           commandId: pendingCommand.commandId,
           expectedRevision: pendingCommand.expectedRevision,
+          drawMode: pendingCommand.drawMode,
         });
         if (!liveResult.receipt) throw new Error("The secure draw receipt was not returned to the moderator.");
         return liveResult.receipt;
@@ -1019,6 +1032,16 @@ export function RaffleSpinner() {
           <p>All members welcome to watch the pretty wheel spin for pretty Mōchī gifts in the monthly guild raffle!</p>
         </div>
         <div className="stage-controls" role="group" aria-label="Display settings">
+          <label className={`spinner-test-control ${testMode ? "is-active" : ""}`}>
+            <input
+              type="checkbox"
+              checked={testMode}
+              disabled={rosterLocked}
+              onChange={(event) => setTestMode(event.target.checked)}
+            />
+            <span>Test spin</span>
+            <small>{testMode ? "No guild announcement or public result" : "Official monthly draw"}</small>
+          </label>
           <label className="motion-control">
             <span>Celebration</span>
             <select
@@ -1047,6 +1070,9 @@ export function RaffleSpinner() {
           <span className={`live-stage-badge ${liveConnected ? "is-connected" : ""}`} role="status">
             {liveConnected ? "Live stage connected" : "Reconnecting"}
           </span>
+          {activeDrawMode === "test" ? (
+            <span className="spinner-test-badge" role="status">Test draw · no public result</span>
+          ) : null}
         </div>
       </header>
 
@@ -1136,9 +1162,9 @@ export function RaffleSpinner() {
                 className="button button-primary spin-button"
                 disabled={!canSpin}
                 onClick={startDraw}
-                aria-label="Spin the Mōchirīī raffle wheel"
+                aria-label={testMode ? "Start a test Mōchirīī raffle spin" : "Start the official Mōchirīī monthly raffle draw"}
               >
-                <span>Spin the moonwheel</span>
+                <span>{testMode ? "Run test spin" : "Spin official moonwheel"}</span>
                 <small>{participants.length >= MIN_PARTICIPANTS ? `1 of ${participants.length} equal chances` : `Add ${MIN_PARTICIPANTS - participants.length} more`}</small>
               </button>
             ) : null}

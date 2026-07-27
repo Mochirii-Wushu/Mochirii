@@ -101,6 +101,26 @@ Deno.test("live roster normalization matches the browser Unicode and whitespace 
       id: "88888888-8888-4888-8888-888888888888",
       displayName: 123,
     }]), "non-string display names should fail");
+  assertEquals(normalizeParticipants([{
+    version: 1,
+    id: "99999999-9999-4999-8999-999999999999",
+    displayName: "月",
+  }])[0].displayName, "月");
+  assertThrows(() => normalizeParticipants([{
+    version: 1,
+    id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    displayName: "Jade\u202eLantern",
+  }]), "bidirectional controls should fail");
+  assertThrows(() => normalizeParticipants([{
+    version: 1,
+    id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    displayName: "Jade\u0007Lantern",
+  }]), "control characters should fail");
+  assertThrows(() => normalizeParticipants([{
+    version: 1,
+    id: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    displayName: "👩🏽‍💻".repeat(14),
+  }]), "names exceeding the shared code-point bound should fail");
 });
 
 Deno.test("drawing still requires at least two live participants", async () => {
@@ -236,6 +256,7 @@ Deno.test("viewer snapshots withhold winner fields until the authoritative revea
     sessionId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
     revision: 4,
     phase: "spinning",
+    drawMode: "official",
     participants: PARTICIPANTS,
     startedAt: "2026-07-26T12:00:02.000Z",
     revealAt: "2026-07-26T12:00:10.000Z",
@@ -268,6 +289,7 @@ Deno.test("controller polling can recover the current receipt while viewer polli
     sessionId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
     revision: 1,
     phase: "revealed",
+    drawMode: "official",
     participants: PARTICIPANTS,
     startedAt: "2026-07-26T12:34:58.000Z",
     revealAt: "2026-07-26T12:35:02.800Z",

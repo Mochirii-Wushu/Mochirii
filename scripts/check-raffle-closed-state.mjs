@@ -12,6 +12,10 @@ const files = {
   renderFixtureRoute: "apps/web/app/raffle-render-fixtures-internal/[scenario]/page.tsx",
   renderFixtureData: "apps/web/lib/raffle/public-render-fixtures.ts",
   component: "apps/web/components/public-pages/route-pages/RafflePage.tsx",
+  winnerComponent: "apps/web/components/public-pages/RaffleMonthlyWinner.tsx",
+  winnerCore: "apps/web/lib/raffle/latest-winner-core.ts",
+  winnerServer: "apps/web/lib/raffle/latest-winner.ts",
+  winnerApi: "apps/web/app/api/raffle/latest-winner/route.ts",
   contract: "apps/web/lib/raffle/public-view.ts",
   time: "apps/web/lib/raffle/time.ts",
   data: "apps/web/public/data/raffles.json",
@@ -28,7 +32,6 @@ const files = {
 };
 
 const forbiddenOperationalSurfaces = [
-  "apps/web/app/api/raffle",
   "apps/web/app/raffle/claim",
   "apps/web/app/leader-dashboard/raffle",
   "apps/web/app/raffles/page.tsx",
@@ -200,6 +203,18 @@ assertIncludes("grid contract", tokens, ".col-7{grid-column:span 7;}");
 assertIncludes("grid contract", tokens, ".col-5{grid-column:span 5;}");
 assert(/@media \(max-width:980px\)[\s\S]*\.col-8,.col-7,.col-6,.col-5,.col-4\{grid-column:span 12;\}/.test(tokens), "grid contract: 7/5 columns must become full width at 980px");
 assertIncludes("raffle responsive styles", read(files.sideStyles), ".raffle-method-grid");
+const winnerSource = [read(files.winnerComponent), read(files.winnerCore), read(files.winnerServer), read(files.winnerApi)].join("\n");
+assertIncludes("official winner presentation", winnerSource, "Winner Confirmed");
+assertIncludes("official winner presentation", winnerSource, "Monthly guild winner");
+assertIncludes("official winner refresh", winnerSource, 'fetch("/api/raffle/latest-winner"');
+assertIncludes("official winner sign-out privacy", winnerSource, 'event === "SIGNED_OUT"');
+assertIncludes("official winner stale-response privacy", winnerSource, "requestGenerationRef.current");
+assertIncludes("official winner stale-response privacy", winnerSource, "requestControllerRef.current?.abort()");
+assertIncludes("official winner privacy", winnerSource, "displayName: string | null");
+assertIncludes("official winner privacy", winnerSource, "hasExactKeys");
+assert(!/\b(?:source_draw_id|receipt_hash|roster_hash|actor_id|user_id)\b/i.test(read(files.winnerCore)), "official winner DTO must not expose internal identifiers or hashes");
+assertIncludes("official winner reduced motion", read(files.sideStyles), "@media (prefers-reduced-motion:reduce)");
+assertIncludes("official winner narrow reflow", read(files.sideStyles), "@media (max-width:600px)");
 
 const nextConfig = read(files.nextConfig);
 assertIncludes("Next redirects", nextConfig, '["/raffles", "/raffle"]');

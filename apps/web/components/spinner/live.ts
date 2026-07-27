@@ -5,6 +5,8 @@ import {
   type DrawReceiptV1,
   type MotionMode,
   type ParticipantV1,
+  type SpinnerDrawMode,
+  type SpinnerPersistedDrawMode,
 } from "./raffle.ts";
 
 export const LIVE_SPINNER_POLL_MS = 2_000;
@@ -20,6 +22,7 @@ export interface SpinnerLiveSnapshotV1 {
   sessionId: string;
   revision: number;
   phase: SpinnerLivePhase;
+  drawMode: SpinnerPersistedDrawMode;
   participants: ParticipantV1[];
   startedAt: string | null;
   revealAt: string | null;
@@ -177,6 +180,7 @@ export interface PendingSpinnerCommandV1 {
   commandId: string;
   expectedRevision: number;
   createdAt: string;
+  drawMode: SpinnerDrawMode;
 }
 
 export class SpinnerLiveRequestError extends Error {
@@ -226,6 +230,7 @@ export type SpinnerLiveCommand =
       action: "spin";
       commandId: string;
       expectedRevision: number;
+      drawMode: SpinnerDrawMode;
     }
   | {
       action: "reset";
@@ -262,6 +267,11 @@ export function parseSpinnerLiveSnapshot(value: unknown): SpinnerLiveSnapshotV1 
   const sessionId = typeof source.sessionId === "string" ? source.sessionId : "";
   const revision = integer(source.revision);
   const phase = source.phase;
+  const drawMode = source.drawMode === "official" || source.drawMode === "test"
+    ? source.drawMode
+    : source.drawMode === "unclassified"
+      ? source.drawMode
+      : null;
   const roster = parseStoredRoster({ version: 1, participants: rawParticipants });
   if (roster.participants.length !== rawParticipants.length) return null;
   const startedAt = isoOrNull(source.startedAt);
@@ -279,14 +289,15 @@ export function parseSpinnerLiveSnapshot(value: unknown): SpinnerLiveSnapshotV1 
     : null;
 
   if (
-    !UUID_PATTERN.test(sessionId) || revision == null || !["idle", "spinning", "revealed"].includes(String(phase)) ||
+    !UUID_PATTERN.test(sessionId) || revision == null || !drawMode || !["idle", "spinning", "revealed"].includes(String(phase)) ||
     roster.participants.length > MAX_PARTICIPANTS || durationMs == null || startRotation == null || finalRotation == null ||
     !updatedAt || drawId === ""
   ) return null;
 
   if (phase === "idle") {
-    if (durationMs !== 0 || startedAt || revealAt || selectedIndex != null || winner || drawId) return null;
+    if (drawMode !== "unclassified" || durationMs !== 0 || startedAt || revealAt || selectedIndex != null || winner || drawId) return null;
   } else {
+    if (drawMode === "unclassified") return null;
     if (
       !startedAt || !revealAt || !drawId || !UUID_PATTERN.test(drawId) ||
       roster.participants.length < 2 || durationMs < 4_000 || durationMs > 30_000
@@ -304,6 +315,7 @@ export function parseSpinnerLiveSnapshot(value: unknown): SpinnerLiveSnapshotV1 
     sessionId,
     revision,
     phase: phase as SpinnerLivePhase,
+    drawMode,
     participants: roster.participants,
     startedAt,
     revealAt,
@@ -391,8 +403,21 @@ export function parsePendingSpinnerCommand(value: unknown): PendingSpinnerComman
   const createdAt = isoOrNull(source?.createdAt);
   const expectedRevision = integer(source?.expectedRevision);
   const commandId = typeof source?.commandId === "string" ? source.commandId : "";
-  if (source?.version !== 1 || !UUID_PATTERN.test(commandId) || expectedRevision == null || !createdAt) return null;
-  return { version: 1, commandId, expectedRevision, createdAt };
+  const drawMode = source?.drawMode === "official" || source?.drawMode === "test"
+    ? source.drawMode
+    : null;
+  if (source?.version !== 1 || !UUID_PATTERN.test(commandId) || expectedRevision == null || !createdAt || !drawMode) return null;
+  return { version: 1, commandId, expectedRevision, createdAt, drawMode };
+}
+
+export function resolveInitialViewerMotion(
+  storedValue: string | null,
+  prefersReducedMotion: boolean,
+): MotionMode {
+  const preferred = storedValue === "full" || storedValue === "reduced" || storedValue === "off"
+    ? storedValue
+    : "full";
+  return preferred === "full" && prefersReducedMotion ? "reduced" : preferred;
 }
 
 export function createSpinnerCommandId(): string {
