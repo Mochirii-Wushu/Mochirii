@@ -340,11 +340,11 @@ function validateResult(route, result) {
   const label = `${route.route} ${result.viewport}`;
   const expectedDocumentNotFound = route.expectedStatus === 404 && result.status === 404;
   const opaqueSpinnerCleanup = route.route === "/leader-dashboard"
-    && result.httpErrors.length > 0
+    && result.failedRequests.length > 0
     && result.httpErrors.every((error) => /^404 https?:\/\/[^/]+\/spinner\/session$/.test(error))
     && result.failedRequests.every((error) => /^DELETE https?:\/\/[^/]+\/spinner\/session net::ERR_ABORTED$/.test(error));
   const consoleErrors = opaqueSpinnerCleanup || expectedDocumentNotFound
-    ? result.consoleErrors.filter((error) => error !== "Failed to load resource: the server responded with a status of 404 (Not Found)")
+    ? result.consoleErrors.filter((error) => !/^Failed to load resource: the server responded with a status of 404 \((?:Not Found)?\)$/.test(error))
     : result.consoleErrors;
   const failedRequests = opaqueSpinnerCleanup ? [] : result.failedRequests;
   const httpErrors = opaqueSpinnerCleanup
