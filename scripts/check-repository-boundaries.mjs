@@ -35,6 +35,8 @@ const generatedArchivePattern = /\.(?:7z|bak|bundle|dump|gz|rar|tar|tgz|zip)$/i;
 const databaseArtifactPattern = /\.(?:sql|sqlite|sqlite3)$/i;
 const reviewedDatabaseTestPaths = new Set([
   "supabase/tests/member_social_links_test.sql",
+  "supabase/operations/validate_gallery_submission_thumbnails.sql",
+  "supabase/tests/gallery_submission_thumbnails_test.sql",
   "supabase/tests/private_live_spinner_test.sql",
   "supabase/tests/spinner_media_jobs_test.sql",
 ]);

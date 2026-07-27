@@ -528,6 +528,7 @@ The website does not assign Discord roles in this phase.
 - upload source (`website` or `discord`)
 - Discord guild/channel/message/attachment/user IDs for Discord submissions
 - Instagram opt-in boolean, timestamp, source, and copy version
+- private bounded WebP derivative path, MIME type, and byte size
 - moderation status
 - review fields for moderator approval or decline actions
 
@@ -537,7 +538,7 @@ Uploads stay `pending` and do not appear in the public Gallery in this phase.
 
 - submission id
 - moderator id
-- action: `approved`, `rejected`, or `archived`
+- action: `approved`, `rejected`, `archived`, or `thumbnail_refreshed`
 - optional reason
 - event creation time
 
@@ -657,7 +658,9 @@ Both functions require a signed-in Supabase user JWT and then verify Discord ser
 
 `list-gallery-review-queue` is moderator-only. It supports `pending`, `approved`, `rejected`, and `archived` queue filters, returns dashboard counts, joins safe uploader/moderator profile display fields, includes recent `gallery_moderation_events`, and creates short-lived signed URLs for private `member-gallery` objects. The Storage bucket stays private and no public read policy is added.
 
-`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission. It updates `gallery_submissions.status`, `reviewed_by`, `reviewed_at`, and `rejection_reason`, then records a `gallery_moderation_events` row. Approved submissions become eligible for the approved public Gallery feed; they are not written into `data/gallery.json`.
+`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission and `thumbnail` for an approved historical submission. Approval requires a client-prepared WebP derivative that the function validates structurally and fully decodes with pinned libwebp 1.6.0. It must be static, at most 720 pixels on either edge, and at most 80 KiB. Each attempt uses a unique immutable revision under the service-only `_approved/thumbs/{submission}/{revision}.webp` prefix. The row change and `gallery_moderation_events` insert commit through one service-only database function, so an audit failure rolls back moderation. Approved submissions with a validated derivative become eligible for the approved public Gallery feed; they are not written into `data/gallery.json`.
+
+`list-gallery-review-queue` paginates and filters historical approved rows by thumbnail state. `list-approved-gallery-submissions` asks a service-only database function to filter complete rows and matching Storage metadata before applying its limit, then signs paths in bounded batches. Member policies allow updates and deletes only for pending originals; moderated originals and the service-owned derivative prefix are immutable to member sessions.
 
 The website Leader Dashboard uses those functions to show queue tabs, submission details, signed private previews, source metadata, rejection reasons, and compact moderation history. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
 
@@ -834,15 +837,15 @@ Approved member submissions appear on `gallery.html` through the public Edge Fun
 
 This Gallery Edge Function also has `verify_jwt = false`. It is publicly callable because the public Gallery page needs to load without sign-in, but it uses server-side credentials only inside the Edge runtime and queries only `gallery_submissions` rows where `status = 'approved'`.
 
-The function returns public-safe fields, safe uploader display names, and short-lived signed URLs for private `member-gallery` objects. The Storage bucket remains private; no public bucket or anonymous Storage read policy is added.
+The function returns public-safe fields, safe uploader display names, and distinct short-lived URLs for the private bounded thumbnail and original `member-gallery` object. The grid receives the derivative and the viewer receives the original. The Storage bucket remains private; no public bucket or anonymous Storage read policy is added.
 
-Pending, rejected, and archived submissions are not returned by the approved feed. If a private object cannot receive a signed URL, the function returns a safe per-item preview error and the browser skips that item.
+Pending, rejected, archived, and historical approved submissions without a validated derivative are not returned by the approved feed. If either private object cannot receive a signed URL, the function returns a safe per-item preview error and the browser skips that item.
 
-`gallery.js` normalizes approved member submissions into the same item model as the static `data/gallery.json` Gallery before rendering. Static items and approved member submissions are combined, filtered, and shuffled together, so approved uploads participate in the normal random Gallery rotation. Member submissions use their submitted title and/or caption in the existing lightbox, followed by the uploader's public Discord display name when available, and receive a `member-submissions` category in addition to their submitted category when present. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions. Localhost static previews skip the remote approved feed by default; add `?approvedFeed=1` when intentionally testing against a served/deployed feed.
+The Next Gallery browser normalizes approved member submissions into the same item model as the static `data/gallery.json` Gallery before rendering. The default Random mix keeps its server-rendered static order stable and appends runtime submissions, preventing a late feed response from reshuffling cards already on screen. Newest and Oldest sort all matching static and member items together, while the Member Submissions filter provides the direct runtime album. Member submissions use their submitted title and/or caption in the existing lightbox, followed by the uploader's public Discord display name when available. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions.
 
 If an older approved `gallery_submissions` row has blank `title` and `caption` values, the public lightbox will use the `Member submission` fallback until a Moderator or operator updates that row in Supabase. Future uploads preserve non-empty title and caption values from `gallery-submit.html` into `gallery_submissions`.
 
-Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; approved member uploads use their Supabase `created_at` value. The default Gallery order is `Random mix`, preserving the rotating shuffle behavior. Visitors may choose `Newest first` or `Oldest first`; static images and approved member submissions are sorted together. Approved member submissions still render through signed URLs from the private `member-gallery` bucket, and pending or rejected submissions remain hidden.
+Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; approved member uploads use their Supabase `created_at` value. The default Gallery order is `Random mix`, using a deterministic content-derived seed so server output and hydration do not reshuffle after paint. Visitors may choose `Newest first` or `Oldest first`; static images and approved member submissions are sorted together. Approved member submissions still render through signed URLs from the private `member-gallery` bucket, and pending or rejected submissions remain hidden.
 
 ## Local Testing Flow
 

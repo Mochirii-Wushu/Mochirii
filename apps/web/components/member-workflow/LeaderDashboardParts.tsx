@@ -85,6 +85,7 @@ export function QueueSummary({ queue, shown }: { queue: GalleryReviewQueue | nul
   const cards = [
     ["Pending", summary.pending],
     ["Approved", summary.approved],
+    ["Needs thumbnail", summary.missingThumbnails],
     ["Rejected", summary.rejected],
     ["Archived", summary.archived],
     ["Shown", shown],
@@ -120,7 +121,7 @@ export function SubmissionCard({
   reason: string;
   cleanupArmed: boolean;
   onReasonChange: (value: string) => void;
-  onModerate: (item: GalleryReviewSubmission, action: "approved" | "rejected") => void;
+  onModerate: (item: GalleryReviewSubmission, action: "approved" | "rejected" | "thumbnail") => void;
   onArmCleanup: (item: GalleryReviewSubmission) => void;
   onCancelCleanup: (item: GalleryReviewSubmission) => void;
   onDeleteRejected: (item: GalleryReviewSubmission) => void;
@@ -158,6 +159,7 @@ export function SubmissionCard({
             ["Category", item.category || "Uncategorized"],
             ["Type", item.mimeType || "Unknown"],
             ["Size", formatBytes(item.sizeBytes)],
+            ["Gallery thumbnail", item.thumbnailSizeBytes ? formatBytes(item.thumbnailSizeBytes) : "Not prepared"],
             ["Submitted", formatDate(item.createdAt, "Not set")],
             ["Reviewed", item.reviewedAt ? formatDate(item.reviewedAt, "Not reviewed") : "Not reviewed"],
             ["Instagram", instagramConsentLabel(item)],
@@ -210,6 +212,21 @@ export function SubmissionCard({
               <button className="hero-cta" type="button" onClick={() => onModerate(item, "rejected")} disabled={busy}>Decline</button>
             </div>
           </>
+        ) : null}
+        {status === "approved" ? (
+          <section className="review-history" aria-label="Gallery thumbnail preparation">
+            <h4>Gallery Thumbnail</h4>
+            <p className="review-action-note">
+              {item.thumbnailStoragePath
+                ? "Prepare a new immutable thumbnail revision when the current gallery image needs repair."
+                : "Prepare the bounded gallery image before this submission can appear in the public album."}
+            </p>
+            <div className="auth-actions">
+              <button className="hero-cta" type="button" onClick={() => onModerate(item, "thumbnail")} disabled={busy}>
+                {item.thumbnailStoragePath ? "Refresh gallery thumbnail" : "Prepare gallery thumbnail"}
+              </button>
+            </div>
+          </section>
         ) : null}
         {status === "rejected" ? (
           <section className="review-history" aria-label="Rejected submission cleanup">

@@ -12,6 +12,7 @@ const CORS_HEADERS = {
 };
 const SIGNED_URL_SECONDS = 60 * 60;
 const APPROVED_LIMIT = 80;
+const SIGNING_PATH_BATCH = 40;
 const MEMBER_GALLERY_BUCKET = "member-gallery";
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
@@ -65,13 +66,13 @@ Deno.serve(async (req: Request) => {
     },
   });
 
-  const { data: submissionData, error: submissionError } = await adminClient
-    .from("gallery_submissions")
-    .select("id,user_id,storage_bucket,storage_path,original_filename,mime_type,size_bytes,title,caption,category,created_at,reviewed_at")
-    .eq("status", "approved")
-    .order("reviewed_at", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(APPROVED_LIMIT);
+  const { data: submissionData, error: submissionError } = await adminClient.rpc(
+    "gallery_publishable_submissions",
+    {
+      p_limit: APPROVED_LIMIT,
+      p_offset: 0,
+    },
+  );
 
   if (submissionError) {
     console.error("list-approved-gallery-submissions lookup failed", {
@@ -90,6 +91,37 @@ Deno.serve(async (req: Request) => {
   }
 
   const submissions = Array.isArray(submissionData) ? submissionData as JsonRecord[] : [];
+  const signablePaths = [...new Set(submissions.flatMap((submission) => {
+    const originalPath = safeString(submission.storage_path, 1000);
+    const thumbnailPath = safeString(submission.thumbnail_storage_path, 1000);
+    return originalPath && thumbnailPath ? [thumbnailPath, originalPath] : [];
+  }))];
+  const signingBatches = [];
+  for (let offset = 0; offset < signablePaths.length; offset += SIGNING_PATH_BATCH) {
+    signingBatches.push(signablePaths.slice(offset, offset + SIGNING_PATH_BATCH));
+  }
+  const signedUrlsByPath = new Map<string, string>();
+  const signingResults = await Promise.all(
+    signingBatches.map((paths) =>
+      adminClient.storage.from(MEMBER_GALLERY_BUCKET).createSignedUrls(paths, SIGNED_URL_SECONDS)
+    ),
+  );
+
+  signingResults.forEach((result, batchIndex) => {
+    if (result.error) {
+      console.warn("list-approved-gallery-submissions signing batch failed", {
+        batchIndex,
+        message: result.error.message,
+      });
+      return;
+    }
+
+    for (const signed of result.data || []) {
+      const path = safeString(signed.path, 1000);
+      const signedUrl = safeString(signed.signedUrl, 4000);
+      if (path && signedUrl) signedUrlsByPath.set(path, signedUrl);
+    }
+  });
   const userIds = [
     ...new Set(
       submissions
@@ -123,20 +155,31 @@ Deno.serve(async (req: Request) => {
   for (const submission of submissions) {
     const bucket = safeString(submission.storage_bucket, 80) || MEMBER_GALLERY_BUCKET;
     const storagePath = safeString(submission.storage_path, 1000);
+    const thumbnailStoragePath = safeString(submission.thumbnail_storage_path, 1000);
+    const thumbnailMimeType = safeString(submission.thumbnail_mime_type, 80);
+    const thumbnailSizeBytes = Number(submission.thumbnail_size_bytes || 0);
     const id = safeString(submission.id, 80);
 
-    if (bucket !== MEMBER_GALLERY_BUCKET || !storagePath) {
+    if (
+      bucket !== MEMBER_GALLERY_BUCKET ||
+      !storagePath ||
+      !thumbnailStoragePath ||
+      thumbnailMimeType !== "image/webp" ||
+      thumbnailSizeBytes < 1 ||
+      thumbnailSizeBytes > 80 * 1024
+    ) {
       console.warn("list-approved-gallery-submissions skipped invalid storage reference", {
         submissionId: id,
         bucket,
         hasStoragePath: Boolean(storagePath),
+        hasThumbnailStoragePath: Boolean(thumbnailStoragePath),
+        thumbnailSizeValid: thumbnailSizeBytes > 0 && thumbnailSizeBytes <= 80 * 1024,
       });
       continue;
     }
 
-    const { data: signedData, error: signedError } = await adminClient.storage
-      .from(bucket)
-      .createSignedUrl(storagePath, SIGNED_URL_SECONDS);
+    const thumbnailSignedUrl = signedUrlsByPath.get(thumbnailStoragePath) || null;
+    const fullSignedUrl = signedUrlsByPath.get(storagePath) || null;
 
     const userId = safeString(submission.user_id, 80) || "";
     const profile = profilesById.get(userId) || {};
@@ -154,6 +197,13 @@ Deno.serve(async (req: Request) => {
       profileDisplayName ||
       "Mochirii Member";
 
+    if (!thumbnailSignedUrl || !fullSignedUrl) {
+      console.warn("list-approved-gallery-submissions skipped unsigned item", {
+        submissionId: id,
+      });
+      continue;
+    }
+
     const item: JsonRecord = {
       id,
       title: safeString(submission.title, 80),
@@ -165,16 +215,10 @@ Deno.serve(async (req: Request) => {
       reviewed_at: safeString(submission.reviewed_at, 80),
       uploader_display_name: uploaderDisplayName,
       uploader_discord_name: uploaderDiscordName,
-      signed_url: signedData?.signedUrl || null,
+      thumbnail_signed_url: thumbnailSignedUrl,
+      full_signed_url: fullSignedUrl,
+      thumbnail_size_bytes: thumbnailSizeBytes,
     };
-
-    if (signedError || !signedData?.signedUrl) {
-      console.warn("list-approved-gallery-submissions signed URL unavailable", {
-        submissionId: id,
-        message: signedError?.message || "Missing signed URL",
-      });
-      item.preview_error = "preview_unavailable";
-    }
 
     approved.push(item);
   }

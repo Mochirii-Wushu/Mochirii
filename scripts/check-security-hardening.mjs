@@ -283,7 +283,13 @@ const unauthenticatedFunctionGuardSpecs = {
   "list-approved-gallery-submissions": {
     source: approvedFeed,
     kind: "public read-only signed gallery DTO",
-    snippets: ['"Access-Control-Allow-Origin": "*"', ".eq(\"status\", \"approved\")", "createSignedUrl", "signed_url"],
+    snippets: [
+      '"Access-Control-Allow-Origin": "*"',
+      'adminClient.rpc(\n    "gallery_publishable_submissions"',
+      "createSignedUrls",
+      "thumbnail_signed_url",
+      "full_signed_url",
+    ],
   },
   "list-visible-profile-cards": {
     source: visibleProfileCards,
@@ -488,10 +494,12 @@ assertMatches(
 });
 
 [
-  ".eq(\"status\", \"approved\")",
-  "createSignedUrl",
+  'adminClient.rpc(\n    "gallery_publishable_submissions"',
+  "createSignedUrls",
   "SIGNED_URL_SECONDS",
-  "signed_url",
+  "thumbnail_signed_url",
+  "full_signed_url",
+  "thumbnail_size_bytes",
   "signedUrlSeconds",
 ].forEach((snippet) => assertIncludes("list-approved-gallery-submissions", approvedFeed, snippet));
 
@@ -532,7 +540,7 @@ assertMatches(
 assertMatches(
   "list-approved-gallery-submissions",
   approvedFeed,
-  /const item:\s*JsonRecord\s*=\s*\{(?:(?!storage_path|storage_bucket|user_id)[\s\S])*signed_url/s,
+  /const item:\s*JsonRecord\s*=\s*\{(?:(?!storage_path|storage_bucket|user_id)[\s\S])*thumbnail_signed_url[\s\S]*full_signed_url/s,
   "public approved feed item must not expose raw storage path, bucket, or user_id fields.",
 );
 

@@ -134,37 +134,31 @@ function compareGalleryItems(a: NormalizedGalleryItem, b: NormalizedGalleryItem,
   return a.stableKey.localeCompare(b.stableKey);
 }
 
-function createRandomSeed() {
-  const values = new Uint32Array(1);
-  globalThis.crypto?.getRandomValues(values);
-
-  if (values[0]) return values[0];
-
-  return (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
-}
-
-function seededRandom(seed: number) {
-  let state = seed >>> 0;
-
-  return () => {
-    state += 0x6d2b79f5;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function shuffleWithSeed<T>(items: T[], seed: number) {
-  const shuffled = [...items];
-  const random = seededRandom(seed);
-
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+function stableMixSeed(items: Array<{ stableKey: string }>) {
+  let hash = 0x811c9dc5;
+  for (const item of items) {
+    for (const character of item.stableKey) {
+      hash ^= character.codePointAt(0) || 0;
+      hash = Math.imul(hash, 0x01000193);
+    }
   }
+  return hash >>> 0 || 1;
+}
 
-  return shuffled;
+function stableMixRank(stableKey: string, seed: number) {
+  let hash = seed >>> 0;
+  for (const character of stableKey) {
+    hash ^= character.codePointAt(0) || 0;
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+function stableMixOrder(items: NormalizedGalleryItem[], seed: number) {
+  return [...items].sort((a, b) => {
+    const rankDelta = stableMixRank(a.stableKey, seed) - stableMixRank(b.stableKey, seed);
+    return rankDelta || a.stableKey.localeCompare(b.stableKey);
+  });
 }
 
 function getFocusable(root: HTMLElement | null) {
@@ -211,16 +205,25 @@ function approvedSubmissionCaption(submission: ApprovedGallerySubmission) {
 }
 
 function approvedSubmissionToGalleryItem(submission: ApprovedGallerySubmission): GalleryItem | null {
-  const signedUrl = text(submission.signed_url);
-  if (!signedUrl || submission.preview_error) return null;
+  const fullSignedUrl = text(submission.full_signed_url);
+  const thumbnailSignedUrl = text(submission.thumbnail_signed_url);
+  const thumbnailSizeBytes = Number(submission.thumbnail_size_bytes || 0);
+  if (
+    !fullSignedUrl ||
+    !thumbnailSignedUrl ||
+    fullSignedUrl === thumbnailSignedUrl ||
+    thumbnailSizeBytes < 1 ||
+    thumbnailSizeBytes > 80 * 1024 ||
+    submission.preview_error
+  ) return null;
 
   const title = text(submission.title, "Member gallery submission");
 
   return {
-    id: `approved-${text(submission.id, signedUrl)}`,
-    src: signedUrl,
-    full: signedUrl,
-    thumb: signedUrl,
+    id: `approved-${text(submission.id, fullSignedUrl)}`,
+    src: thumbnailSignedUrl,
+    full: fullSignedUrl,
+    thumb: thumbnailSignedUrl,
     alt: title,
     caption: approvedSubmissionCaption(submission) || title,
     category: memberSubmissionsCategory,
@@ -239,7 +242,6 @@ export function GalleryBrowser({
   const [activeCategory, setActiveCategory] = useState(allCategory);
   const [activeSort, setActiveSort] = useState<SortMode>(defaultSort);
   const [approvedItems, setApprovedItems] = useState<GalleryItem[]>([]);
-  const [randomSeed, setRandomSeed] = useState<number | null>(null);
   const [renderWindow, setRenderWindow] = useState({ key: "", limit: galleryRenderBatchSize });
   const [shareStatus, setShareStatus] = useState("");
   const [openItemKey, setOpenItemKey] = useState<string | null>(null);
@@ -272,11 +274,6 @@ export function GalleryBrowser({
         .filter((item) => item.full && item.thumb),
     [galleryItems],
   );
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setRandomSeed(createRandomSeed()), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     let canceled = false;
@@ -319,9 +316,28 @@ export function GalleryBrowser({
     return [{ slug: allCategory, label: "All", count: counts.get(allCategory) || 0 }, ...declared, ...inferred];
   }, [categories, usableItems]);
 
+  const randomSeed = useMemo(
+    () =>
+      stableMixSeed(
+        items.map((item, index) => ({
+          stableKey: text(item.id || item.full || item.src || item.thumb, `gallery-${index}`),
+        })),
+      ),
+    [items],
+  );
+
   const visibleItems = useMemo(() => {
     if (activeSort === defaultSort) {
-      const randomized = randomSeed === null ? usableItems : shuffleWithSeed(usableItems, randomSeed);
+      const randomized = [
+        ...stableMixOrder(
+          usableItems.filter((item) => item.originalIndex < items.length),
+          randomSeed,
+        ),
+        ...stableMixOrder(
+          usableItems.filter((item) => item.originalIndex >= items.length),
+          randomSeed,
+        ),
+      ];
       return activeCategory === allCategory
         ? randomized
         : randomized.filter((item) => item.categories.includes(activeCategory));
@@ -334,9 +350,9 @@ export function GalleryBrowser({
 
     const sortMode = activeSort === "oldest" ? "oldest" : "newest";
     return [...filtered].sort((a, b) => compareGalleryItems(a, b, sortMode));
-  }, [activeCategory, activeSort, randomSeed, usableItems]);
+  }, [activeCategory, activeSort, items.length, randomSeed, usableItems]);
 
-  const renderWindowKey = `${activeCategory}:${activeSort}:${randomSeed ?? "pending"}:${usableItems.length}`;
+  const renderWindowKey = `${activeCategory}:${activeSort}:${randomSeed}:${usableItems.length}`;
   const effectiveRenderLimit = renderWindow.key === renderWindowKey ? renderWindow.limit : galleryRenderBatchSize;
   const renderedItems = useMemo(() => visibleItems.slice(0, effectiveRenderLimit), [effectiveRenderLimit, visibleItems]);
   const hasMoreItems = renderedItems.length < visibleItems.length;
@@ -560,7 +576,7 @@ export function GalleryBrowser({
             key={item.stableKey}
             onClick={(event) => openModal(item, event.currentTarget)}
           >
-            <img src={item.thumb} alt={item.alt} loading="lazy" decoding="async" />
+            <img src={item.thumb} alt={item.alt} width={16} height={10} loading="lazy" decoding="async" />
           </button>
         ))}
       </div>

@@ -225,6 +225,10 @@ export type GalleryReviewSubmission = {
   rejectionReason?: string | null;
   storageBucket?: string | null;
   storagePath?: string | null;
+  thumbnailRevisionId?: string | null;
+  thumbnailStoragePath?: string | null;
+  thumbnailMimeType?: string | null;
+  thumbnailSizeBytes?: number | null;
   signedPreviewUrl?: string | null;
   previewError?: string | null;
   instagramOptIn?: boolean | null;
@@ -238,8 +242,17 @@ export type GalleryReviewQueue = {
   submissions: GalleryReviewSubmission[];
   count?: number;
   status?: string;
+  thumbnailState?: string;
   signedUrlSeconds?: number;
   summary?: Record<string, number | string | undefined>;
+  pagination?: {
+    page?: number;
+    pageSize?: number;
+    total?: number;
+    totalPages?: number;
+    hasPrevious?: boolean;
+    hasNext?: boolean;
+  };
 };
 
 export type RejectedGalleryCleanupResponse = {
@@ -314,7 +327,9 @@ export type ApprovedGallerySubmission = {
   reviewed_at?: string | null;
   uploader_display_name?: string | null;
   uploader_discord_name?: string | null;
-  signed_url?: string | null;
+  full_signed_url?: string | null;
+  thumbnail_signed_url?: string | null;
+  thumbnail_size_bytes?: number | null;
   preview_error?: string | null;
 };
 

@@ -23,7 +23,7 @@ Moderation does not:
 - require `supabase db push`
 - require Edge Function deployment during normal review
 
-Approved submissions are served to the public Gallery by the approved-feed Edge Function as short-lived signed URLs. Pending, rejected, and archived submissions stay out of the public Gallery.
+Approved submissions are served to the public Gallery by the approved-feed Edge Function through distinct short-lived thumbnail and full-image URLs. Pending, rejected, archived, and historical approved rows without a validated thumbnail stay out of the public Gallery.
 
 If a member opted in to Instagram sharing, approving the website Gallery submission creates an Instagram Queue job. It does not publish to Instagram. A moderator must review that separate queue and use a final confirmation before any external public post is sent.
 
@@ -63,6 +63,7 @@ Each submission may show:
 - category
 - MIME type
 - file size
+- prepared Gallery thumbnail size or `Not prepared`
 - submitted date
 - reviewed date
 - Instagram opt-in state
@@ -91,13 +92,16 @@ Use Approve only when the submission is safe for the public Gallery.
 
 After approval:
 
-- the row status changes to `approved`
-- review metadata is recorded
-- a moderation event is recorded
+- the browser prepares a bounded WebP thumbnail from the signed private preview
+- the Edge Function verifies that the derivative is static WebP, no larger than 720 pixels on either edge, no larger than 80 KiB, and fully decodable by the pinned libwebp validator
+- the function uploads a unique immutable revision under the service-only derivative prefix
+- the row status, derivative reference, review metadata, and moderation event commit atomically
 - the approved public Gallery feed may include the item
 - an opted-in image may create an Instagram Queue job for later review
 - no static Gallery JSON is edited
 - no automatic Instagram publishing happens
+
+If an older approved item says `Not prepared`, use the Approved queue's `Needs thumbnail` filter and paginated controls. Choose `Prepare gallery thumbnail` only after confirming the signed preview still matches the approved unit. The item remains absent from the public feed until that backfill succeeds and records a `thumbnail_refreshed` audit event.
 
 If an approved item needs later removal from the public feed, do not edit `apps/web/public/data/gallery.json`. Use the moderation/admin path for changing the submission status, or escalate if that path is unavailable.
 

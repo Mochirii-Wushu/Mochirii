@@ -226,7 +226,8 @@ function summarizeBody(body) {
   if (Array.isArray(submissions)) {
     copy.data.submissions = submissions.map((item) => ({
       ...item,
-      signed_url: item?.signed_url ? "[redacted signed URL]" : item?.signed_url,
+      thumbnail_signed_url: item?.thumbnail_signed_url ? "[redacted signed URL]" : item?.thumbnail_signed_url,
+      full_signed_url: item?.full_signed_url ? "[redacted signed URL]" : item?.full_signed_url,
     }));
   }
   return JSON.stringify(copy).slice(0, 500);
@@ -296,10 +297,17 @@ function validateApprovedFeedBody(body) {
       assert(!forbiddenKeys.has(key), `approved feed submission ${index} exposed private key ${key}.`);
     });
     assert(typeof submission.id === "string" && submission.id, `approved feed submission ${index} missing id.`);
-    if (submission.signed_url != null) {
-      assert(typeof submission.signed_url === "string", `approved feed submission ${index} signed_url must be a string or null.`);
-      assert(/^https?:\/\//.test(submission.signed_url), `approved feed submission ${index} signed_url did not look like an HTTP URL.`);
-    }
+    assert(typeof submission.thumbnail_signed_url === "string", `approved feed submission ${index} thumbnail_signed_url must be a string.`);
+    assert(/^https?:\/\//.test(submission.thumbnail_signed_url), `approved feed submission ${index} thumbnail_signed_url did not look like an HTTP URL.`);
+    assert(typeof submission.full_signed_url === "string", `approved feed submission ${index} full_signed_url must be a string.`);
+    assert(/^https?:\/\//.test(submission.full_signed_url), `approved feed submission ${index} full_signed_url did not look like an HTTP URL.`);
+    assert(submission.thumbnail_signed_url !== submission.full_signed_url, `approved feed submission ${index} reused its original as its thumbnail.`);
+    assert(
+      Number.isFinite(Number(submission.thumbnail_size_bytes)) &&
+        Number(submission.thumbnail_size_bytes) >= 1 &&
+        Number(submission.thumbnail_size_bytes) <= 80 * 1024,
+      `approved feed submission ${index} thumbnail_size_bytes was outside the bounded contract.`,
+    );
   });
 }
 
