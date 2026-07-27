@@ -381,9 +381,9 @@ export default function Home() {
                 >
                   Join Discord
                 </a>
-                <a className="hero-cta" href="/join">
+                <Link className="hero-cta" href="/join">
                   How to Join
-                </a>
+                </Link>
               </div>
             </section>
 

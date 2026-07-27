@@ -34,6 +34,7 @@ const routes = [
   { route: "/gallery-submit", label: "Gallery Submit", file: "apps/web/app/gallery-submit/page.tsx", type: "member", workflow: "member upload", componentFiles: ["apps/web/components/member-workflow/GallerySubmitForm.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", file: "apps/web/app/leader-dashboard/page.tsx", type: "moderator", workflow: "moderation queues", componentFiles: ["apps/web/components/member-workflow/LeaderDashboard.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
   { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "public-with-protected-entry", workflow: "public concept and private tester doorway", componentFiles: ["apps/web/components/mochi-pets/MochiPetsPublicConcept.tsx", "apps/web/components/mochi-pets/MochiPetsPrivateDoorway.tsx", "apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx", "apps/web/components/mochi-pets/MochiPetsTesterWaitingRoom.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true },
+  { route: "/__mochirii-unknown-route__", label: "Not Found", file: "apps/web/app/not-found.tsx", type: "public", workflow: "unknown-route recovery", expectsHeading: true },
 ];
 
 const shell = inspectShell();
@@ -143,6 +144,7 @@ function inspectRoute(route) {
     workflow: route.workflow,
     files,
     mainTarget: combined.includes('id="main"'),
+    headings1: countMatches(combined, /<h1\b/g),
     protectedNoindex: route.protectedNoindex ? /robots:\s*\{[\s\S]*index:\s*false/.test(readRouteText(route)) : false,
     liveRegions: countMatches(combined, /aria-live=/g),
     statusRoles: countMatches(combined, /role=["']status["']/g),
@@ -159,6 +161,7 @@ function inspectRoute(route) {
   };
 
   if (!routeResult.mainTarget) failures.push(`${route.route}: page must expose id="main" for skip-link target.`);
+  if (route.expectsHeading && routeResult.headings1 !== 1) failures.push(`${route.route}: expected exactly one h1, found ${routeResult.headings1}.`);
   if (route.protectedNoindex && !routeResult.protectedNoindex) failures.push(`${route.route}: protected/member route must be noindex.`);
   if (route.expectsLiveRegion && routeResult.liveRegions === 0) failures.push(`${route.route}: expected an aria-live status/update region.`);
   if (route.expectsAlert && routeResult.alerts === 0) failures.push(`${route.route}: expected role="alert" for error feedback.`);

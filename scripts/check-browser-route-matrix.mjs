@@ -28,6 +28,18 @@ const routes = [
   { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/leader-dashboard", label: "Leader Dashboard", expectMain: true, expectLiveRegion: true, expectAlert: true },
   { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectNoForm: true, expectNoIframe: true },
+  {
+    route: "/__mochirii-unknown-route__",
+    label: "Not Found",
+    expectedStatus: 404,
+    expectedH1: "Page not found",
+    expectNoindex: true,
+    expectBrandEmblem: true,
+    expectMain: true,
+    expectNoForm: true,
+    expectNoIframe: true,
+    requireOpaquePanels: [".not-found-card"],
+  },
 ];
 
 const viewports = [
@@ -158,7 +170,8 @@ async function inspectRoute(context, route, viewport) {
   }
 
   const status = response?.status() || 0;
-  const statusOk = status >= 200 && status < 400 && !gotoError;
+  const expectedStatus = route.expectedStatus ?? 200;
+  const statusOk = status === expectedStatus && !gotoError;
   const browserState = await page.evaluate((readabilitySelectors) => {
     const doc = document.documentElement;
     const body = document.body;
@@ -210,6 +223,8 @@ async function inspectRoute(context, route, viewport) {
     return {
       title: document.title,
       h1: document.querySelector("h1")?.textContent?.trim() || "",
+      robots: document.querySelector('meta[name="robots"]')?.getAttribute("content") || "",
+      brandEmblem: Boolean(document.querySelector(".not-found-emblem")),
       main: Boolean(document.querySelector("#main")),
       liveRegions: document.querySelectorAll("[aria-live]").length,
       alerts: document.querySelectorAll('[role="alert"]').length,
@@ -251,6 +266,8 @@ async function inspectRoute(context, route, viewport) {
     statusOk,
     title: safeText(browserState.title || ""),
     h1: safeText(browserState.h1 || ""),
+    robots: safeText(browserState.robots || ""),
+    brandEmblem: Boolean(browserState.brandEmblem),
     main: Boolean(browserState.main),
     liveRegions: browserState.liveRegions || 0,
     alerts: browserState.alerts || 0,
@@ -321,16 +338,24 @@ async function inspectKeyboardTrap(page) {
 
 function validateResult(route, result) {
   const label = `${route.route} ${result.viewport}`;
+  const expectedDocumentNotFound = route.expectedStatus === 404 && result.status === 404;
   const opaqueSpinnerCleanup = route.route === "/leader-dashboard"
     && result.httpErrors.length > 0
     && result.httpErrors.every((error) => /^404 https?:\/\/[^/]+\/spinner\/session$/.test(error))
     && result.failedRequests.every((error) => /^DELETE https?:\/\/[^/]+\/spinner\/session net::ERR_ABORTED$/.test(error));
-  const consoleErrors = opaqueSpinnerCleanup
+  const consoleErrors = opaqueSpinnerCleanup || expectedDocumentNotFound
     ? result.consoleErrors.filter((error) => error !== "Failed to load resource: the server responded with a status of 404 (Not Found)")
     : result.consoleErrors;
   const failedRequests = opaqueSpinnerCleanup ? [] : result.failedRequests;
-  const httpErrors = opaqueSpinnerCleanup ? [] : result.httpErrors;
-  if (!result.statusOk) failures.push(`${label}: expected a successful route load, got status ${result.status}${result.gotoError ? ` (${result.gotoError})` : ""}.`);
+  const httpErrors = opaqueSpinnerCleanup
+    ? []
+    : expectedDocumentNotFound
+      ? result.httpErrors.filter((error) => error !== `404 ${result.url}`)
+      : result.httpErrors;
+  if (!result.statusOk) failures.push(`${label}: expected HTTP ${route.expectedStatus ?? 200}, got status ${result.status}${result.gotoError ? ` (${result.gotoError})` : ""}.`);
+  if (route.expectedH1 && result.h1 !== route.expectedH1) failures.push(`${label}: expected h1 ${JSON.stringify(route.expectedH1)}, got ${JSON.stringify(result.h1)}.`);
+  if (route.expectNoindex && !/(?:^|,)\s*noindex\s*(?:,|$)/i.test(result.robots)) failures.push(`${label}: expected an automatic noindex robots directive.`);
+  if (route.expectBrandEmblem && !result.brandEmblem) failures.push(`${label}: branded page emblem is missing.`);
   if (route.expectMain && !result.main) failures.push(`${label}: missing #main skip-link target.`);
   if (result.horizontalOverflow) failures.push(`${label}: horizontal overflow (${result.widths.document}px document vs ${result.widths.viewport}px viewport).`);
   if (!result.footerReflow.present) failures.push(`${label}: footer navigation is missing.`);

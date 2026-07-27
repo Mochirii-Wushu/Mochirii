@@ -1,0 +1,24 @@
+.not-found-main{
+  display:grid;
+  align-items:center;
+  min-height:max(18rem, calc(100vh - 14rem));
+  min-height:max(18rem, calc(100dvh - 14rem));
+}
+
+.not-found-shell{width:100%;}
+
+.not-found-card{
+  max-width:44rem;
+  margin-inline:auto;
+  overflow-wrap:anywhere;
+}
+
+.not-found-emblem{
+  width:clamp(72px, 15vw, 112px);
+  height:auto;
+  margin-bottom:18px;
+}
+
+.not-found-card .hero-cta-row{justify-content:center;}
+
+.not-found-card .hero-cta{min-height:44px;}
