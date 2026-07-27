@@ -112,6 +112,57 @@
   min-height:0;
 }
 
+.lightbox-media{
+  display:grid;
+  place-items:center;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  flex:0 0 auto;
+}
+
+.lightbox-media .lightbox-img{
+  grid-area:1 / 1;
+}
+
+.lightbox-img--preview{
+  opacity:1;
+}
+
+.lightbox-img--full{
+  opacity:0;
+}
+
+.lightbox-media[data-image-state="ready"] .lightbox-img--preview{
+  opacity:0;
+}
+
+.lightbox-media[data-image-state="ready"] .lightbox-img--full{
+  opacity:1;
+}
+
+.lightbox-image-status{
+  grid-area:1 / 1;
+  z-index:1;
+  align-self:end;
+  max-width:calc(100% - 24px);
+  margin:12px;
+  padding:7px 11px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(10,12,14,.88);
+  color:var(--ink-0);
+  font-size:.8125rem;
+  line-height:1.35;
+  text-align:center;
+  overflow-wrap:anywhere;
+  pointer-events:none;
+}
+
+.lightbox-image-status:empty{
+  display:none;
+}
+
 .lightbox-caption{
   box-sizing:border-box;
   flex:0 0 auto;
@@ -142,14 +193,13 @@
   cursor:pointer;
 }
 
-/* Prevent dimming of the image itself (gallery + home) */
+/* Keep viewer media unfiltered while shared decode-state opacity controls visibility. */
 #lightboxImg,
 #modalImage,
 #lightbox .lightbox-img,
 #modalRoot .lightbox-img,
 #lightbox img,
 #modalRoot img{
-  opacity:1 !important;
   filter:none !important;
   mix-blend-mode:normal !important;
   max-width:100%;

@@ -23,6 +23,7 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - Every approved runtime submission needs a private WebP derivative no larger than 720 pixels on its longest edge and 80 KiB. The moderator browser prepares it during approval; the Edge Function verifies both the WebP structure and a complete pixel decode before storage.
 - Do not use managed on-the-fly image transformations for this path. They are an optional provider feature with a separate cost/configuration boundary, while the stored derivative has no per-view transform requirement.
 - The worst-case first 24 member derivatives and the representative first 24 static thumbnails must each remain below 2 MiB. Browser tests also require no original request before the viewer opens and CLS no greater than 0.1.
+- When a viewer opens, it keeps the already-loaded thumbnail visible while the full image transfers and decodes. The shared loading status is accessible, a decode failure retains the thumbnail with a plain error message, and Close must work immediately without waiting for the image request.
 - The canonical Next Gallery renders static items in bounded batches of 24; keep the `Show more images` control as the only expansion action unless a later scoped performance pass replaces the pattern. The immutable legacy release remains rollback-only.
 - Approved member and Discord submissions may render with time-limited signed URLs only. Derivatives live below the service-owned `_approved/thumbs/{submission}/{revision}.webp` prefix; members cannot insert, update, read, or delete that prefix. Do not expose raw storage buckets, storage paths, service-role keys, or private media references to browser code.
 - Home Gallery Spotlight must keep using thumbnail paths in its grid and full-size Gallery images in its lightbox.
@@ -34,6 +35,7 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - The viewer uses a fluid safe-area-aware shell, a `1160px` maximum card width, `100vh`/`100dvh` height bounds, and `object-fit: contain` so images keep their natural proportions without crop.
 - If enlarged text or a long caption exceeds the available height, the keyboard-focusable card scrolls vertically while the image remains visible. The viewer must never introduce horizontal scrolling.
 - Keep the existing dialog semantics, 44px close target, Escape handling, focus containment and return, backdrop close, and body-scroll restoration.
+- The current private-original contract permits uploads up to 50 MiB. If measured production opens remain slow after the thumbnail/loading release, review a second service-owned viewer derivative sized for the `1160px` viewer and high-density displays. That requires a separate migration, decoded-image policy, atomic selection, cleanup, and rollout review; do not fold it into the thumbnail contract informally.
 
 ## 4. Categories
 

@@ -6,8 +6,10 @@ const sharedCssPath = "apps/web/app/styles/shell-lightbox.css";
 const galleryCssPath = "apps/web/app/styles/public-gallery.css";
 const homePagePath = "apps/web/app/page.tsx";
 const galleryPagePath = "apps/web/app/gallery/page.tsx";
+const homeLightboxPath = "apps/web/components/HomeGalleryLightbox.tsx";
 const homeModalPath = "apps/web/components/HomeGalleryLightboxModal.tsx";
 const galleryBrowserPath = "apps/web/components/public-pages/GalleryBrowser.tsx";
+const lightboxImagePath = "apps/web/components/LightboxImage.tsx";
 const lightboxOverlayPath = "apps/web/components/useLightboxOverlay.ts";
 const layoutPath = "apps/web/app/layout.tsx";
 const tokensPath = "apps/web/app/styles/tokens-base.css";
@@ -20,8 +22,10 @@ const sharedCss = readFileSync(sharedCssPath, "utf8").replace(/\r\n/g, "\n");
 const galleryCss = readFileSync(galleryCssPath, "utf8").replace(/\r\n/g, "\n");
 const homePage = readFileSync(homePagePath, "utf8").replace(/\r\n/g, "\n");
 const galleryPage = readFileSync(galleryPagePath, "utf8").replace(/\r\n/g, "\n");
+const homeLightbox = readFileSync(homeLightboxPath, "utf8").replace(/\r\n/g, "\n");
 const homeModal = readFileSync(homeModalPath, "utf8").replace(/\r\n/g, "\n");
 const galleryBrowser = readFileSync(galleryBrowserPath, "utf8").replace(/\r\n/g, "\n");
+const lightboxImage = readFileSync(lightboxImagePath, "utf8").replace(/\r\n/g, "\n");
 const lightboxOverlay = readFileSync(lightboxOverlayPath, "utf8").replace(/\r\n/g, "\n");
 const layout = readFileSync(layoutPath, "utf8").replace(/\r\n/g, "\n");
 const tokens = readFileSync(tokensPath, "utf8").replace(/\r\n/g, "\n");
@@ -154,6 +158,20 @@ expectIncludes("Gallery shared lightbox import", galleryPage, 'import "../styles
 expectIncludes("Gallery visual treatment import", galleryPage, 'import "../styles/public-gallery.css";', galleryPagePath);
 expectIncludes("Home keyboard-scrollable lightbox card", homeModal, '<figure className="lightbox-card" tabIndex={0}>', homeModalPath);
 expectIncludes("Gallery keyboard-scrollable lightbox card", galleryBrowser, '<figure className="lightbox-card" tabIndex={0}>', galleryBrowserPath);
+expectIncludes("Home deferred modal import", homeLightbox, "const LazyHomeGalleryLightboxModal = lazy(() =>", homeLightboxPath);
+expectIncludes("Home prepared body portal", homeLightbox, "const portalRoot = useBodyPortalRoot();", homeLightboxPath);
+expectIncludes("Home immediate loading fallback", homeLightbox, "<HomeGalleryLightboxFallback", homeLightboxPath);
+expectIncludes("Home fallback loading status", homeLightbox, "Loading full image…", homeLightboxPath);
+if (homeLightbox.includes("<Suspense fallback={null}>")) {
+  fail(`${homeLightboxPath} must not hide the first-open loading state.`);
+}
+expectIncludes("Home shared full-image loader", homeModal, "<LightboxImage", homeModalPath);
+expectIncludes("Home thumbnail placeholder", homeModal, "previewSrc={item.image}", homeModalPath);
+expectIncludes("Gallery shared full-image loader", galleryBrowser, "<LightboxImage", galleryBrowserPath);
+expectIncludes("Gallery thumbnail placeholder", galleryBrowser, "previewSrc={openItem.thumb}", galleryBrowserPath);
+expectIncludes("Decode-aware image state", lightboxImage, "data-image-state={imageState}", lightboxImagePath);
+expectIncludes("User-requested full-image priority", lightboxImage, 'fetchPriority="high"', lightboxImagePath);
+expectIncludes("Accessible full-image status", lightboxImage, 'role="status" aria-live="polite"', lightboxImagePath);
 [
   "const scrollbarWidth = Math.max(0, window.innerWidth - documentElement.clientWidth);",
   "const currentPaddingRight = Number.parseFloat(window.getComputedStyle(body).paddingRight) || 0;",
@@ -247,6 +265,22 @@ expectRuleContract(".lightbox-img", {
   "max-width": "100%",
   "object-fit": "contain",
   flex: "0 0 auto",
+});
+expectRuleContract(".lightbox-media", {
+  display: "grid",
+  "place-items": "center",
+  width: "100%",
+  "max-width": "100%",
+  "min-width": "0",
+  flex: "0 0 auto",
+});
+expectRuleContract(".lightbox-media .lightbox-img", {
+  "grid-area": "1 / 1",
+});
+expectRuleContract(".lightbox-image-status", {
+  "grid-area": "1 / 1",
+  "pointer-events": "none",
+  "overflow-wrap": "anywhere",
 });
 expectPropertySequence(".lightbox-img", "max-height", [
   "min(82vh, calc(100vh - 48px - var(--lightbox-close-size) - var(--lightbox-control-gap) - var(--lightbox-card-copy-reserve)))",
