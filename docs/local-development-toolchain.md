@@ -77,11 +77,15 @@ longer part of local development.
   install workflow.
 - Lighthouse audits use the local package instead of `npx --yes` so the audit
   version is locked.
-- Social image validation uses Docker Buildx `v0.35.0`, digest-pinned BuildKit
-  `v0.31.2`, and the official Syft `v1.49.0` container pinned by digest in
-  GitHub Actions. These workflow-managed versions are validated as part of the
-  repository's action-security contract without downloading an installer
-  script at runtime.
+- Social image validation installs the official Docker Buildx `v0.35.0` Linux
+  AMD64 release only after its exact SHA-256 and Sigstore bundle identity pass,
+  then starts digest-pinned BuildKit `v0.31.2`. The official Syft `v1.49.0`
+  binary is accepted only after the release checksum file's Anchore Sigstore
+  identity and both pinned SHA-256 values pass. Cosign itself is installed by a
+  full-SHA-pinned Sigstore action at exact version `v3.0.6`.
+- The full-SHA-pinned Deno setup action installs `2.9.4`; validation then checks
+  the installed Linux AMD64 binary against the immutable official release
+  SHA-256 before any repository tests run.
 - Hosted jobs use `ubuntu-24.04` to keep the runner OS family explicit while
   receiving GitHub's maintained image updates. The exact image and installed
   software versions remain recorded in each job's `Set up job` log.

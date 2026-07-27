@@ -56,6 +56,10 @@ This is the short source-of-truth index for the current Mochirii production post
 - Privileged keys and tokens stay in Supabase Edge Function secrets or Vault only.
 - Current Supabase guidance and local guardrails are in `supabase/README.md` and `docs/member-profiles-and-rank-roles.md`.
 - Supabase migration and function-list readback was refreshed on 2026-07-05 for project `deyvmtncimmcinldjyqe`; that historical readback included the now-retired game functions. Their source, registrations, and security checks remain temporarily quarantined until an exact provider packet removes the deployed functions and confirms the remote endpoints are absent.
+- Protected-main production readback after PR #524 confirmed exactly `33`
+  ACTIVE Edge Functions with `20` configured as `verify_jwt = true` and `13`
+  configured as `false`. Earlier 31-function and 19/12 approval packets are
+  historical evidence, not current release authorization.
 - The repository toolchain pins Supabase CLI `2.109.1`. Use the repo-local binary on Windows (`node_modules/.bin/supabase.cmd`) and run Supabase CLI calls serially to avoid telemetry-file `EPERM` races.
 - Supabase hardening PR #315 documents intentional service-only RLS/no-policy tables and adds high-value foreign-key indexes. Applied game-schema history remains preserved until a separately approved retention migration is designed.
 - Supabase linked advisor snapshot on 2026-07-12: security advisors returned 14 findings (`13` service-only `rls_enabled_no_policy` info findings plus `1` leaked-password protection warning). The focused migration `20260712164503_service_only_default_deny_policies.sql` is the protected-preview remediation for the 13 service-only tables; production remains unchanged until that PR is approved and deployed. Leaked-password protection is intentionally cost-deferred while the project remains on Free. Performance `unused_index` findings remain observation-only. See `docs/supabase-advisor-remediation-plan.md`.
@@ -116,9 +120,11 @@ This is the short source-of-truth index for the current Mochirii production post
 - Do not edit `main` directly.
 - Release workflows use reviewed full-SHA action references, read-only minimum
   permissions, checkout with credential persistence disabled, the maintained
-  `ubuntu-24.04` runner family, Node `22.23.1`, Deno `2.9.4`, Docker Buildx
-  `v0.35.0`, digest-pinned BuildKit `v0.31.2`, and the official Syft `v1.49.0`
-  container pinned by digest. Repository-level full-SHA action pinning is
+  `ubuntu-24.04` runner family, Node `22.23.1`, and Deno `2.9.4` with an explicit
+  official-release binary checksum. Social image jobs verify the exact Docker
+  Buildx `v0.35.0` binary and Sigstore bundle before setup, retain digest-pinned
+  BuildKit `v0.31.2`, and verify Syft `v1.49.0` through Anchore's signed release
+  checksums before SBOM generation. Repository-level full-SHA action pinning is
   enabled; changes to that setting remain separately approval-gated.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
 - Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
