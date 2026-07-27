@@ -13,6 +13,8 @@ const defaultFileBudget = 10 * mib;
 const hardFileBudget = 50 * mib;
 const repositoryBudget = 900 * mib;
 const reviewedFileBudgets = new Map([
+  ["apps/web/server-assets/spinner-fonts/NotoColorEmoji-Regular.ttf", 26 * mib],
+  ["apps/web/server-assets/spinner-fonts/NotoSerifSC-Variable.ttf", 26 * mib],
   ["services/social/storage/app/cities.json", 15 * mib],
 ]);
 const formerTokens = [
@@ -33,6 +35,7 @@ const generatedArchivePattern = /\.(?:7z|bak|bundle|dump|gz|rar|tar|tgz|zip)$/i;
 const databaseArtifactPattern = /\.(?:sql|sqlite|sqlite3)$/i;
 const reviewedDatabaseTestPaths = new Set([
   "supabase/tests/private_live_spinner_test.sql",
+  "supabase/tests/spinner_media_jobs_test.sql",
 ]);
 const credentialPathPattern = /(^|\/)(?:Mochi Creds|private-evidence|Repository Backups)(\/|$)/i;
 const privateKeyPathPattern = /\.(?:key|p12|pfx|pem)$/i;

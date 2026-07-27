@@ -7,9 +7,12 @@ const migrationPath =
   "supabase/migrations/20260726180052_add_private_live_spinner.sql";
 const foreignKeyIndexMigrationPath =
   "supabase/migrations/20260726213000_add_spinner_foreign_key_indexes.sql";
+const mediaMigrationPath =
+  "supabase/migrations/20260727033342_add_spinner_media_jobs.sql";
 const files = {
   migration: migrationPath,
   foreignKeyIndexMigration: foreignKeyIndexMigrationPath,
+  mediaMigration: mediaMigrationPath,
   config: "supabase/config.toml",
   index: "supabase/functions/spinner-live-session/index.ts",
   engine: "supabase/functions/_shared/spinner-live.ts",
@@ -17,8 +20,12 @@ const files = {
   cors: "supabase/functions/_shared/cors.ts",
   dispatcher: "supabase/functions/reaper-spinner-dispatch/index.ts",
   dispatcherShared: "supabase/functions/_shared/spinner-discord-outbox.ts",
+  media: "supabase/functions/_shared/spinner-media.ts",
+  mediaDispatch: "supabase/functions/_shared/spinner-media-dispatch.ts",
+  mediaTest: "supabase/functions/_shared/spinner-media_test.ts",
   test: "supabase/functions/_shared/spinner-live_test.ts",
   sqlTest: "supabase/tests/private_live_spinner_test.sql",
+  mediaSqlTest: "supabase/tests/spinner_media_jobs_test.sql",
 };
 
 function read(rel) {
@@ -42,6 +49,7 @@ function excludes(label, text, pattern, message) {
 
 const migration = read(files.migration);
 const foreignKeyIndexMigration = read(files.foreignKeyIndexMigration);
+const mediaMigration = read(files.mediaMigration);
 const config = read(files.config);
 const index = read(files.index);
 const engine = read(files.engine);
@@ -49,8 +57,47 @@ const authority = read(files.authority);
 const cors = read(files.cors);
 const dispatcher = read(files.dispatcher);
 const dispatcherShared = read(files.dispatcherShared);
+const media = read(files.media);
+const mediaDispatch = read(files.mediaDispatch);
+const mediaTest = read(files.mediaTest);
 const denoTest = read(files.test);
 const sqlTest = read(files.sqlTest);
+const mediaSqlTest = read(files.mediaSqlTest);
+
+for (const snippet of [
+  "create table if not exists public.spinner_media_jobs",
+  "alter table public.spinner_media_jobs enable row level security",
+  "revoke all on table public.spinner_media_jobs from public, anon, authenticated",
+  "grant all on table public.spinner_media_jobs to service_role",
+  "spinner_discord_outbox_create_media_job",
+  "exception when others then",
+  "Spinner media job was skipped.",
+  "render_attempt_count between 0 and 12",
+  "outbox.phase = 'completed'",
+  "for update of job skip locked",
+  "media_size_bytes between 1 and case when media_type = 'image/png' then 3000000 else 4250000 end",
+  "discord_message_id !~ '^[0-9]{16,22}$'",
+])
+  includes("service-only media migration", mediaMigration, snippet);
+
+for (const signature of [
+  "spinner_claim_media_jobs(uuid, text, integer)",
+  "spinner_bind_media_capability(uuid, uuid, text, timestamptz)",
+  "spinner_authorize_media_manifest(uuid, text)",
+  "spinner_reserve_media_attachment(uuid, text, uuid, text, integer, text, text)",
+  "spinner_finish_media_attachment(uuid, uuid, text, text, text, timestamptz)",
+]) {
+  includes(
+    "service-only media RPC",
+    mediaMigration,
+    `revoke all on function public.${signature} from public, anon, authenticated`,
+  );
+  includes(
+    "service-only media RPC",
+    mediaMigration,
+    `grant execute on function public.${signature} to service_role`,
+  );
+}
 
 [
   "create index spinner_commands_actor_id_idx\non public.spinner_commands (actor_id);",
@@ -215,6 +262,36 @@ if (
   "readBoundedSpinnerJsonObject",
 ].forEach((snippet) => includes("server draw engine", engine, snippet));
 
+for (const snippet of [
+  "AnimationManifestV1",
+  "mochirii-raffle-film-v1",
+  "SPINNER_MEDIA_DURATION_MS = 10_600",
+  "SPINNER_MEDIA_MAX_MP4_BYTES = 4_250_000",
+  "SPINNER_MEDIA_MAX_PNG_BYTES = 3 * 1_000_000",
+  "wheelSegmentLabel",
+  "mochirii-spinner-visual-v1\\0",
+  "createSpinnerMediaToken",
+  "verifySpinnerMediaToken",
+  "validateSpinnerMedia",
+])
+  includes("immutable media contract", media, snippet);
+excludes(
+  "immutable media contract",
+  media,
+  /receipt\.acceptedWord/u,
+  "visual presentation must not reuse raffle RNG output.",
+);
+
+for (const snippet of [
+  "attachSpinnerMedia",
+  "already_attached",
+  "reconciled",
+  '"files[0]"',
+  "allowed_mentions",
+  "SPINNER_DISCORD_CHANNEL_ID",
+])
+  includes("idempotent media attachment", mediaDispatch, snippet);
+
 excludes(
   "server draw engine",
   engine,
@@ -285,6 +362,14 @@ if (
   );
 }
 
+for (const snippet of [
+  "buildAnimationManifest(plan.receipt, plan)",
+  "animationManifestHash(animationManifest)",
+  "animationManifest,",
+  "animationManifestHashSha256",
+])
+  includes("durable media staging", index, snippet);
+
 [
   'member_status === "active"',
   "RECENT_VERIFICATION_MS",
@@ -316,6 +401,8 @@ if (
 
 [
   "REAPER_SPINNER_DISPATCH_SECRET",
+  "dispatchSecret.length < 32",
+  "dispatchSecret.length > 512",
   "DISCORD_RAFFLE_CHANNEL_ID",
   "spinner_claim_discord_outbox",
   "spinner_finish_discord_outbox_claim",
@@ -325,6 +412,66 @@ if (
 ].forEach((snippet) =>
   includes("authorized Reaper dispatcher", dispatcher, snippet)
 );
+
+for (const snippet of [
+  "x-mochirii-spinner-media-capability",
+  'actionBody.value.action !== "manifest"',
+  "spinner_claim_media_jobs",
+  "spinner_bind_media_capability",
+  "spinner_authorize_media_manifest",
+  "spinner_reserve_media_attachment",
+  "spinner_finish_media_attachment",
+  "requestRenderedMedia",
+  'mediaType !== "image/png" && mediaType !== "video/mp4"',
+  'MEDIA_RENDER_URL = "https://mochirii.com/spinner/media/render"',
+  "RENDER_TIMEOUT_MS = 55_000",
+  "EdgeRuntime.waitUntil",
+  "scheduleMediaBackgroundTask",
+  "provisionFallbackMediaJobs",
+])
+  includes("capability-scoped media dispatcher", dispatcher, snippet);
+excludes(
+  "capability-scoped media dispatcher",
+  dispatcher,
+  /x-mochirii-spinner-media-action/u,
+  "manifest requests must use the single bounded JSON action contract.",
+);
+
+const fallbackProvisionerStart = dispatcher.indexOf(
+  "async function provisionFallbackMediaJobs(",
+);
+const rendererRequestStart = dispatcher.indexOf(
+  "async function requestRenderedMedia(",
+  fallbackProvisionerStart,
+);
+if (fallbackProvisionerStart < 0 || rendererRequestStart < 0) {
+  failures.push(
+    "fallback media backgrounding: provisioner boundary is missing.",
+  );
+} else {
+  const fallbackProvisioner = dispatcher.slice(
+    fallbackProvisionerStart,
+    rendererRequestStart,
+  );
+  includes(
+    "fallback media backgrounding",
+    fallbackProvisioner,
+    "scheduleMediaBackgroundTask(",
+  );
+  excludes(
+    "fallback media backgrounding",
+    fallbackProvisioner,
+    /await\s+(?:requestRenderedMedia|renderAndAttach|attachWithAdminClient)\s*\(/u,
+    "fallback rendering or attachment must not block the dispatcher response.",
+  );
+}
+
+for (const snippet of [
+  'response.headers.get("retry-after")',
+  "error.retry_after",
+  "Math.max(...retrySeconds)",
+])
+  includes("media rate-limit retry", mediaDispatch, snippet);
 
 [
   'method: "POST"',
@@ -360,6 +507,21 @@ if (
   "compares secrets without an early mismatch and caps request bodies",
 ].forEach((snippet) => includes("focused Deno tests", denoTest, snippet));
 
+for (const snippet of [
+  "animation manifest is deterministic",
+  "Unicode-safe page truncation",
+  "signed, bound, expiring",
+  "platform-safe byte ceilings",
+  "lost response is reconciled without posting twice",
+  "winner message is not ready",
+  "same-message multipart edit",
+  "message lookup 429 honors",
+  "media upload 429 honors",
+  "deleted winner message",
+  "malformed media never reserves",
+])
+  includes("focused media tests", mediaTest, snippet);
+
 [
   "RLS is enabled on every authoritative spinner table",
   "browser roles cannot apply moderator commands",
@@ -370,6 +532,15 @@ if (
   "exhausted delivery is failed deterministically instead of violating its attempt bound",
   "retention cleanup removes expired evidence after 30 days even when the live stage still points at that draw",
 ].forEach((snippet) => includes("focused pgTAP tests", sqlTest, snippet));
+
+for (const snippet of [
+  "browser roles have no direct media job access",
+  "service role can invoke every atomic media transition",
+  "pre-reserve renderer failures consume a bounded claim budget",
+  "render work cannot begin before the winner message is complete",
+  "type-bound filename",
+])
+  includes("focused media pgTAP tests", mediaSqlTest, snippet);
 
 if (failures.length) {
   console.error("Live spinner backend validation failed.");

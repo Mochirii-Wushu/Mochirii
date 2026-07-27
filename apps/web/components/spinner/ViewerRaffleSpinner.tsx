@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { startCelebration, type CelebrationHandle } from "./celebration";
+import { resolveCelebrationMotionMode } from "./celebration-scene";
 import {
   parseStoredMotion,
   SETTINGS_STORAGE_KEY,
@@ -36,6 +37,9 @@ type WheelMotionStyle = CSSProperties & {
   "--spinner-wheel-start"?: string;
   "--spinner-wheel-finish"?: string;
 };
+type CelebrationStyle = CSSProperties & {
+  "--spinner-celebration-delay"?: string;
+};
 
 function snapshotKey(snapshot: SpinnerLiveSnapshotV1) {
   return `${snapshot.revision}:${snapshot.phase}:${snapshot.drawId || "idle"}`;
@@ -48,19 +52,29 @@ export function ViewerRaffleSpinner() {
   const [wheelRotation, setWheelRotation] = useState(0);
   const [wheelMotion, setWheelMotion] = useState<WheelMotion | null>(null);
   const [effectsActive, setEffectsActive] = useState(false);
+  const [celebrationRequestId, setCelebrationRequestId] = useState(0);
+  const [celebrationAnimationDelayMs, setCelebrationAnimationDelayMs] = useState(0);
   const [status, setStatus] = useState("Connecting to the shared draw stage.");
   const [motionMode, setMotionMode] = useState<MotionMode>("reduced");
+  const [motionPreferenceReady, setMotionPreferenceReady] = useState(false);
 
   const wheelCanvasRef = useRef<HTMLCanvasElement>(null);
   const wheelFrameRef = useRef<HTMLDivElement>(null);
   const celebrationCanvasRef = useRef<HTMLCanvasElement>(null);
+  const winnerRevealRef = useRef<HTMLDivElement>(null);
+  const pendingCelebrationRef = useRef<{
+    drawId: string;
+    revealAt: string | null;
+  } | null>(null);
   const celebrationRef = useRef<CelebrationHandle | null>(null);
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const appliedKeyRef = useRef("");
   const celebratedDrawIdRef = useRef<string | null>(null);
   const liveSnapshotRef = useRef<SpinnerLiveSnapshotV1 | null>(null);
   const preferredMotionRef = useRef<MotionMode>("reduced");
+  const effectiveMotionRef = useRef<MotionMode>("reduced");
   const refreshLiveRef = useRef<(() => void) | null>(null);
+  const serverClockOffsetRef = useRef(0);
   const mountedRef = useRef(true);
 
   const numberedParticipants = useMemo(
@@ -73,13 +87,34 @@ export function ViewerRaffleSpinner() {
     revealTimerRef.current = null;
   }, []);
 
-  const playWinnerCelebration = useCallback((drawId: string) => {
-    if (celebratedDrawIdRef.current === drawId || document.hidden || motionMode === "off") return;
-    celebratedDrawIdRef.current = drawId;
+  const stopCelebration = useCallback(() => {
+    pendingCelebrationRef.current = null;
     celebrationRef.current?.stop();
+    celebrationRef.current = null;
+    setEffectsActive(false);
+  }, []);
+
+  const playWinnerCelebration = useCallback((drawId: string, revealAt: string | null) => {
+    const selectedMode = effectiveMotionRef.current;
+    if (celebratedDrawIdRef.current === drawId || document.hidden || selectedMode === "off") return;
+    stopCelebration();
     const canvas = celebrationCanvasRef.current;
     if (!canvas) return;
-    const handle = startCelebration(canvas, motionMode);
+    celebratedDrawIdRef.current = drawId;
+    const authoritativeNowMs = Date.now() + serverClockOffsetRef.current;
+    const parsedRevealAtMs = revealAt ? Date.parse(revealAt) : Number.NaN;
+    const handleRevealAtMs = Number.isFinite(parsedRevealAtMs)
+      ? parsedRevealAtMs
+      : authoritativeNowMs;
+    const handle = startCelebration(canvas, {
+      mode: selectedMode,
+      drawId,
+      revealAtMs: handleRevealAtMs,
+      authoritativeNowMs,
+      protectedRegion: winnerRevealRef.current?.getBoundingClientRect() ?? null,
+    });
+    if (!handle.active) return;
+    setCelebrationAnimationDelayMs(-Math.min(4_800, Math.max(0, authoritativeNowMs - handleRevealAtMs)));
     celebrationRef.current = handle;
     setEffectsActive(true);
     void handle.finished.then(() => {
@@ -87,7 +122,23 @@ export function ViewerRaffleSpinner() {
       celebrationRef.current = null;
       setEffectsActive(false);
     });
-  }, [motionMode]);
+  }, [stopCelebration]);
+
+  const queueWinnerCelebration = useCallback((drawId: string, revealAt: string | null) => {
+    pendingCelebrationRef.current = { drawId, revealAt };
+    setCelebrationRequestId((current) => current + 1);
+  }, []);
+
+  useEffect(() => {
+    const pending = pendingCelebrationRef.current;
+    if (!pending || phase !== "revealed") return;
+    const animationFrame = requestAnimationFrame(() => {
+      if (pendingCelebrationRef.current !== pending) return;
+      pendingCelebrationRef.current = null;
+      playWinnerCelebration(pending.drawId, pending.revealAt);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [celebrationRequestId, phase, playWinnerCelebration]);
 
   const revealSnapshot = useCallback((snapshot: SpinnerLiveSnapshotV1) => {
     if (!snapshot.winner || snapshot.selectedIndex == null || !snapshot.drawId) return;
@@ -102,11 +153,15 @@ export function ViewerRaffleSpinner() {
       participantCount: snapshot.participants.length,
     });
     setStatus(`Winner: ${snapshot.winner.displayName}.`);
-    playWinnerCelebration(snapshot.drawId);
-  }, [playWinnerCelebration, stopTimeline]);
+    queueWinnerCelebration(snapshot.drawId, snapshot.revealAt);
+  }, [queueWinnerCelebration, stopTimeline]);
 
   const applyLiveResult = useCallback((result: SpinnerLiveResultV1) => {
     const { snapshot, serverNow } = result;
+    const serverNowMs = Date.parse(serverNow);
+    if (Number.isFinite(serverNowMs)) {
+      serverClockOffsetRef.current = serverNowMs - Date.now();
+    }
     const key = snapshotKey(snapshot);
     if (appliedKeyRef.current === key) return;
     appliedKeyRef.current = key;
@@ -115,9 +170,7 @@ export function ViewerRaffleSpinner() {
 
     if (snapshot.phase === "idle") {
       stopTimeline();
-      celebrationRef.current?.stop();
-      celebrationRef.current = null;
-      setEffectsActive(false);
+      stopCelebration();
       setWinner(null);
       setPhase("idle");
       setWheelMotion(null);
@@ -156,9 +209,12 @@ export function ViewerRaffleSpinner() {
       appliedKeyRef.current = "";
       refreshLiveRef.current?.();
     }, timeline.revealDelayMs + 60);
-  }, [motionMode, revealSnapshot, stopTimeline]);
+  }, [motionMode, revealSnapshot, stopCelebration, stopTimeline]);
 
-  const { connected, error, refresh } = useSpinnerLive({ onResult: applyLiveResult });
+  const { connected, error, refresh } = useSpinnerLive({
+    enabled: motionPreferenceReady,
+    onResult: applyLiveResult,
+  });
 
   useEffect(() => {
     refreshLiveRef.current = () => void refresh();
@@ -179,15 +235,14 @@ export function ViewerRaffleSpinner() {
       preferredMotionRef.current = "reduced";
     }
     const updateMotion = () => {
-      const nextMotionMode = media.matches && preferredMotionRef.current === "full"
-        ? "reduced"
-        : preferredMotionRef.current;
-      if (nextMotionMode !== "full") {
-        celebrationRef.current?.stop();
-        celebrationRef.current = null;
-        setEffectsActive(false);
-      }
+      const nextMotionMode = resolveCelebrationMotionMode(
+        preferredMotionRef.current,
+        media.matches,
+      );
+      if (nextMotionMode !== effectiveMotionRef.current) stopCelebration();
+      effectiveMotionRef.current = nextMotionMode;
       setMotionMode(nextMotionMode);
+      setMotionPreferenceReady(true);
       appliedKeyRef.current = "";
       void refreshLiveRef.current?.();
     };
@@ -204,7 +259,7 @@ export function ViewerRaffleSpinner() {
       media.removeEventListener("change", updateMotion);
       window.removeEventListener("storage", onStorage);
     };
-  }, []);
+  }, [stopCelebration]);
 
   useEffect(() => {
     const canvas = wheelCanvasRef.current;
@@ -222,13 +277,25 @@ export function ViewerRaffleSpinner() {
 
   useEffect(() => {
     const onVisibilityChange = () => {
+      if (document.hidden) stopCelebration();
       const snapshot = liveSnapshotRef.current;
       if (snapshot?.phase !== "spinning") return;
       if (!document.hidden) appliedKeyRef.current = "";
     };
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
-  }, [stopTimeline]);
+  }, [stopCelebration]);
+
+  useEffect(() => {
+    if (!error) return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) stopCelebration();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [error, stopCelebration]);
 
   useEffect(() => () => {
     stopTimeline();
@@ -250,8 +317,14 @@ export function ViewerRaffleSpinner() {
   };
 
   return (
-    <main className="raffle-app raffle-app--viewer" id="main">
-      <canvas ref={celebrationCanvasRef} className="celebration-canvas" aria-hidden="true" />
+    <main
+      className={`raffle-app raffle-app--viewer ${effectsActive ? "is-celebrating" : ""} ${motionMode === "reduced" ? "is-motion-reduced" : ""}`}
+      id="main"
+      style={{ "--spinner-celebration-delay": `${celebrationAnimationDelayMs}ms` } as CelebrationStyle}
+    >
+      {motionPreferenceReady && motionMode !== "off" ? (
+        <canvas ref={celebrationCanvasRef} className="celebration-canvas" aria-hidden="true" />
+      ) : null}
 
       <header className="raffle-masthead">
         <div className="raffle-brand-lockup">
@@ -291,7 +364,10 @@ export function ViewerRaffleSpinner() {
             </div>
           </div>
 
-          <div className={`winner-reveal ${phase === "revealed" && winner ? "is-visible" : ""}`}>
+          <div
+            ref={winnerRevealRef}
+            className={`winner-reveal ${phase === "revealed" && winner ? "is-visible" : ""}`}
+          >
             {phase === "revealed" && winner ? (
               <>
                 <span className="eyebrow">The moonwheel has spoken</span>

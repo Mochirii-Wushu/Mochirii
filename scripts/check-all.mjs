@@ -13,7 +13,7 @@ const checks = [
   ["check:private-spinner", ["node", "scripts/check-private-spinner.mjs"]],
   ["test:spinner", ["node", "--experimental-strip-types", "--test", "tests/spinner-raffle.test.ts", "tests/spinner-session.test.ts", "tests/spinner-live.test.ts"]],
   ["check:live-spinner-backend", ["node", "scripts/check-live-spinner-backend.mjs"]],
-  ["test:live-spinner-backend", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/spinner-live-session/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/spinner-live_test.ts"]],
+  ["test:live-spinner-backend", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/spinner-live-session/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/spinner-live_test.ts", "supabase/functions/_shared/spinner-media_test.ts"]],
   ["check:raffle-closed-state", ["node", "scripts/check-raffle-closed-state.mjs"]],
   ["check:recruitment-audio-player", ["node", "scripts/check-recruitment-audio-player.mjs"]],
   ["check:content", ["node", "scripts/check-content-guardrails.mjs"]],

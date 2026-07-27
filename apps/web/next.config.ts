@@ -94,7 +94,21 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  skipTrailingSlashRedirect: true,
   outputFileTracingRoot: workspaceRoot,
+  outputFileTracingIncludes: {
+    "/spinner/media/render": [
+      "./server-assets/spinner-fonts/**/*",
+      "./app/fonts/OFL-Noto-Serif-SC.txt",
+      "./node_modules/@napi-rs/canvas/LICENSE",
+      "./node_modules/@napi-rs/webcodecs/LICENSE",
+      "./public/assets/img/backgrounds/main.webp",
+      "./public/assets/img/brand/emblem.webp",
+      "./public/assets/img/raffles/hero.webp",
+      "./public/assets/img/spinner/mochirii-banner.webp",
+    ],
+  },
+  serverExternalPackages: ["@napi-rs/canvas", "@napi-rs/webcodecs"],
   turbopack: {
     root: workspaceRoot,
   },
