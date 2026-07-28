@@ -24,10 +24,12 @@ Rules:
 - Events are external scheduled events. Most Discord event locations point to `https://mochirii.com/events`, but schedule items may provide a Discord-specific location such as `Guild Base Pool`.
 - Event cover images come from `discordCoverImage` paths in `apps/web/public/data/guild-schedule.json`, are mirrored under `apps/web/public/assets/`, and should stay at the 5:2 Discord cover ratio.
 - Reaper records managed Discord event IDs in `discord_resources` with `managedBy: "reaper-event-sync"`.
+- Exactly one enabled managed registry row may exist for each `siteEventKey`. Preview fails closed if a key has ambiguous enabled mappings or multiple exact Discord matches.
+- When a completed or missing Discord event is replaced, Reaper records the replacement first and then disables only the superseded managed registry row for the same key.
 
 ## Schedule Rules
 
-- Monthly gathering: next upcoming first Saturday in UTC+8.
+- Monthly gathering: first Wednesday monthly, 9:30 PM - 10 PM UTC+8, using Discord's first-Wednesday recurrence rule.
 - Monthly raffle: first Saturday monthly, 9:30 PM - 10 PM UTC+8, synced as the recurring Discord event `1479507429598302268` with location `Guild Base Pool`.
 - Guild Party: every day, 9:30 PM - 10 PM UTC+8.
 - Breaking Army: Mondays and Wednesdays, 10 PM - 12 AM UTC+8.
@@ -36,19 +38,12 @@ Rules:
 - Guild Hero's Realm: Fridays, 10 PM - 11 PM UTC+8.
 - United Resolve: Fridays, 11 PM - 12 AM UTC+8.
 
-## Deployment
+## Release and Provider Gate
 
-After the website PR is merged and Vercel production is Ready:
-
-```sh
-supabase functions deploy list-visible-profile-cards
-supabase functions deploy reaper-discord-interactions
-```
-
-Register or update the guild-scoped Discord command with:
-
-- string option `mode`: `preview` or `apply`
-- boolean option `confirm`
+- Merge only after exact release approval names the reviewed head, normal Vercel publication, and the protected-main Supabase Git integration deployment.
+- Never deploy these functions manually. The existing integration redeploys the 33 functions declared in `supabase/config.toml`; post-merge readback must show every function advancing exactly once, all active, with 20 `verify_jwt=true` and 13 false.
+- Before any Discord preview, verify that Vercel production is exactly bound to the merged Website commit and that the automatic Supabase deployment and 20/13 parity readback passed.
+- The existing guild-scoped `/sync-events` command retains its `mode` (`preview` or `apply`) and `confirm` options; this schedule change does not require command re-registration.
 
 Run:
 
@@ -56,9 +51,9 @@ Run:
 /sync-events mode:preview confirm:false
 ```
 
-The preview should show one canonical `Monthly Guild Raffle` update and no duplicate creation. If the explicit duplicate one-off raffle event `1513742240760070144` still exists, preview reports it as a duplicate removal. Only after the preview output is clean and owner approval is current, run:
+The preview should show exactly one recurring `Monthly Guild Gathering` on the first Wednesday from 9:30 PM to 10 PM UTC+8, one canonical `Monthly Guild Raffle` update, and no duplicate creation. If the explicit duplicate one-off raffle event `1513742240760070144` still exists, preview reports it as a duplicate removal. Only after the preview output is clean and owner approval is current, run:
 
-Do not run `apply` if preview shows duplicate creates, unexpected missing managed events, unexpected title/time drift, or any unmanaged Discord event that would be touched.
+Do not run `apply` if preview shows duplicate creates, ambiguous registry mappings, multiple exact matches, unexpected missing managed events, unexpected title/time/recurrence drift, or any unmanaged Discord event that would be touched.
 
 ```text
 /sync-events mode:apply confirm:true

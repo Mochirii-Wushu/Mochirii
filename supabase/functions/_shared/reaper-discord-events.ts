@@ -20,6 +20,10 @@ export type ScheduleEvent = {
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const eventCoverImageCache = new Map<string, string>();
+const MONTHLY_RULE_WEEKDAYS: Readonly<Record<string, number>> = {
+  "next-first-saturday": 6,
+  "next-first-wednesday": 3,
+};
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -133,19 +137,24 @@ function eventEndDate(startDate: string, startTime: string, endTime: string): st
   return crossesMidnight ? addDays(startDate, 1) : startDate;
 }
 
-function firstSaturday(year: number, month: number): string {
+function firstWeekdayOfMonth(year: number, month: number, weekday: number): string {
   const first = new Date(Date.UTC(year, month - 1, 1));
-  const delta = (6 - first.getUTCDay() + 7) % 7;
+  const delta = (weekday - first.getUTCDay() + 7) % 7;
   return dateKey(year, month, 1 + delta);
 }
 
-function nextFirstSaturday(schedule: JsonRecord, now: Date): string {
+function nextFirstWeekday(schedule: JsonRecord, weekday: number, now: Date): string {
   const parts = localParts(now, scheduleOffsetMinutes(schedule));
-  const current = firstSaturday(parts.year, parts.month);
+  const current = firstWeekdayOfMonth(parts.year, parts.month, weekday);
   const today = dateKey(parts.year, parts.month, parts.day);
   if (today <= current) return current;
   const nextMonth = new Date(Date.UTC(parts.year, parts.month, 1));
-  return firstSaturday(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1);
+  return firstWeekdayOfMonth(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1, weekday);
+}
+
+function monthlyDateForRule(schedule: JsonRecord, rule: unknown, now: Date): string | null {
+  const weekday = MONTHLY_RULE_WEEKDAYS[safeString(rule, 40) || ""];
+  return Number.isInteger(weekday) ? nextFirstWeekday(schedule, weekday, now) : null;
 }
 
 function nextWeeklyDate(schedule: JsonRecord, item: JsonRecord, day: number, now: Date): string {
@@ -202,7 +211,8 @@ export function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()
   Object.entries(monthly).forEach(([fallbackKey, value]) => {
     const item = asRecord(value);
     const key = safeString(item.id, 80) || fallbackKey;
-    const localDate = nextFirstSaturday(schedule, now);
+    const localDate = monthlyDateForRule(schedule, item.rule, now);
+    if (!localDate) return;
     const event = scheduleEventFromDate(schedule, key, item, localDate);
     if (event) events.push(event);
   });

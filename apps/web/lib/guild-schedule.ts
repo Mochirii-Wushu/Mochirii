@@ -69,6 +69,14 @@ export type WebsiteEventCard = Omit<
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MONTHLY_RULE_WEEKDAYS: Readonly<Record<string, number>> = {
+  "next-first-saturday": 6,
+  "next-first-wednesday": 3,
+};
+const MONTHLY_RULE_LABELS: Readonly<Record<string, string>> = {
+  "next-first-saturday": "First Saturday",
+  "next-first-wednesday": "First Wednesday",
+};
 
 function offsetMinutes(schedule: GuildScheduleData): number {
   const value = Number(schedule.timezone?.offsetMinutes);
@@ -168,20 +176,28 @@ function addDays(dateKey: string, days: number): string {
   return localDateKeyFromParts(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate());
 }
 
-function firstSaturday(year: number, month: number): string {
+function firstWeekdayOfMonth(year: number, month: number, weekday: number): string {
   const first = new Date(Date.UTC(year, month - 1, 1));
-  const offset = (6 - first.getUTCDay() + 7) % 7;
+  const offset = (weekday - first.getUTCDay() + 7) % 7;
   return localDateKeyFromParts(year, month, 1 + offset);
 }
 
-export function nextFirstSaturday(schedule: GuildScheduleData, now = new Date()): string {
+function nextFirstWeekday(schedule: GuildScheduleData, weekday: number, now: Date): string {
   const parts = localParts(now, offsetMinutes(schedule));
-  const currentMonth = firstSaturday(parts.year, parts.month);
+  const currentMonth = firstWeekdayOfMonth(parts.year, parts.month, weekday);
   const today = localDateKeyFromParts(parts.year, parts.month, parts.day);
   if (today <= currentMonth) return currentMonth;
 
   const nextMonthDate = new Date(Date.UTC(parts.year, parts.month, 1));
-  return firstSaturday(nextMonthDate.getUTCFullYear(), nextMonthDate.getUTCMonth() + 1);
+  return firstWeekdayOfMonth(nextMonthDate.getUTCFullYear(), nextMonthDate.getUTCMonth() + 1, weekday);
+}
+
+export function nextFirstSaturday(schedule: GuildScheduleData, now = new Date()): string {
+  return nextFirstWeekday(schedule, 6, now);
+}
+
+export function nextFirstWednesday(schedule: GuildScheduleData, now = new Date()): string {
+  return nextFirstWeekday(schedule, 3, now);
 }
 
 export function firstDayOfCurrentMonth(schedule: GuildScheduleData, now = new Date()): string {
@@ -197,7 +213,8 @@ export function monthlyScheduleDate(
 ): string {
   const id = String(scheduleId || "");
   const item = Object.values(schedule.monthly || {}).find((entry) => entry.id === id);
-  if (item?.rule === "next-first-saturday") return nextFirstSaturday(schedule, now);
+  const weekday = MONTHLY_RULE_WEEKDAYS[String(item?.rule || "")];
+  if (Number.isInteger(weekday)) return nextFirstWeekday(schedule, weekday, now);
   return String(fallback || "");
 }
 
@@ -305,7 +322,7 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
         endTime,
         startIso: localToUtcIso(date, startTime, schedule),
         endIso: localToUtcIso(endDate, endTime, schedule),
-        dayText: item.rule === "next-first-saturday" ? "First Saturday" : item.rule,
+        dayText: MONTHLY_RULE_LABELS[String(item.rule || "")] || item.rule,
         timeText,
         timezone,
         location: item.location,
