@@ -14,5 +14,8 @@ social.mochirii.com {
 		not path /storage/avatars/default.jpg /storage/avatars/default.png
 	}
 	respond @privateMemberStorage 404
-	reverse_proxy 127.0.0.1:8080
+	reverse_proxy 127.0.0.1:8080 {
+		header_up X-Request-ID {http.request.uuid}
+		header_down X-Request-ID {http.request.uuid}
+	}
 }

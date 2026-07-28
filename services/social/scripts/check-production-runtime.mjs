@@ -241,9 +241,14 @@ requireIncludes(caddyPath, caddy, [
   'header @dependencyReadiness Cache-Control "private, no-store"',
   "respond @dependencyReadiness 404",
   "reverse_proxy 127.0.0.1:8080",
+  "header_up X-Request-ID {http.request.uuid}",
+  "header_down X-Request-ID {http.request.uuid}",
 ]);
 if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
   failures.push(`${caddyPath} must reject the dependency readiness route before the public reverse proxy`);
+}
+if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
+  failures.push(`${caddyPath} must never trust a caller-supplied request ID`);
 }
 
 const caddyInstallerPath = "scripts/install-production-caddy.sh";

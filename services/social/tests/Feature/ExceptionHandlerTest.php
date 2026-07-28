@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Exceptions\Handler;
+use App\Http\Middleware\MochiriiRequestId;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +16,8 @@ use Tests\TestCase;
 class ExceptionHandlerTest extends TestCase
 {
     private const SENTINEL = 'SQLSTATE password=secret-token C:\\private\\runtime.env';
+
+    private const REQUEST_ID = '75000dc3-89ca-43f1-b9b6-6ba6e535b2a4';
 
     protected function setUp(): void
     {
@@ -66,6 +69,10 @@ class ExceptionHandlerTest extends TestCase
     #[Test]
     public function production_reporting_logs_only_redacted_metadata(): void
     {
+        $request = $this->jsonRequest();
+        $request->attributes->set(MochiriiRequestId::ATTRIBUTE, self::REQUEST_ID);
+        $this->app->instance('request', $request);
+
         Log::shouldReceive('error')
             ->once()
             ->with('Unhandled application exception.', Mockery::on(function (array $context): bool {
@@ -73,6 +80,7 @@ class ExceptionHandlerTest extends TestCase
 
                 return $context['exception_type'] === RuntimeException::class
                     && $context['http_status'] === 500
+                    && $context['request_id'] === self::REQUEST_ID
                     && ! str_contains($encoded, self::SENTINEL)
                     && ! str_contains($encoded, 'secret-token');
             }));

@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Http\Middleware\MochiriiRequestId;
 use GuzzleHttp\Exception\ConnectException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -54,12 +55,21 @@ class Handler extends ExceptionHandler
                 || $exception->getStatusCode() >= 500;
 
             if ($isServerError) {
-                Log::error('Unhandled application exception.', [
+                $context = [
                     'exception_type' => get_class($exception),
                     'http_status' => $this->isHttpException($exception)
                         ? $exception->getStatusCode()
                         : 500,
-                ]);
+                ];
+
+                if (app()->bound('request') && app('request') instanceof Request) {
+                    $context = array_merge(
+                        $context,
+                        MochiriiRequestId::logContext(app('request')),
+                    );
+                }
+
+                Log::error('Unhandled application exception.', $context);
 
                 return;
             }

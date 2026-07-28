@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\MochiriiRequestId;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Mockery;
@@ -11,6 +12,8 @@ use Tests\TestCase;
 
 class HealthCheckTest extends TestCase
 {
+    private const REQUEST_ID = '8c455f20-91a6-4a4d-8f96-40f5c6d9494e';
+
     #[Test]
     public function service_health_check_is_bounded_and_not_cacheable(): void
     {
@@ -21,6 +24,37 @@ class HealthCheckTest extends TestCase
             'no-store',
             (string) $response->headers->get('Cache-Control'),
         );
+    }
+
+    #[Test]
+    public function health_responses_propagate_a_valid_proxy_request_id(): void
+    {
+        $response = $this
+            ->withHeader(MochiriiRequestId::HEADER, self::REQUEST_ID)
+            ->get('/api/service/health-check');
+
+        $response->assertOk();
+        $this->assertSame(self::REQUEST_ID, $response->headers->get(MochiriiRequestId::HEADER));
+    }
+
+    #[Test]
+    public function malformed_request_ids_are_discarded_without_echoing_their_value(): void
+    {
+        $untrusted = 'member-private-secret';
+        $response = $this
+            ->withHeader(MochiriiRequestId::HEADER, $untrusted)
+            ->get('/api/service/health-check');
+
+        $requestId = (string) $response->headers->get(MochiriiRequestId::HEADER);
+
+        $response->assertOk();
+        $this->assertMatchesRegularExpression(
+            '/\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/',
+            $requestId,
+        );
+        $this->assertNotSame($untrusted, $requestId);
+        $this->assertStringNotContainsString('member', $requestId);
+        $this->assertStringNotContainsString('secret', $requestId);
     }
 
     #[Test]

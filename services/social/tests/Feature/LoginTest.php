@@ -28,7 +28,11 @@ class LoginTest extends TestCase
             ->assertDontSee('name="password"', false)
             ->assertDontSee('Direct account login')
             ->assertDontSee('maximum-scale=1', false)
-            ->assertDontSee('padding-inline: 0.75rem', false);
+            ->assertDontSee('padding-inline: 0.75rem', false)
+            ->assertSee('viewport-fit=cover', false)
+            ->assertSee('mochirii-social-entry-page--login', false);
+
+        $this->assertResponsiveEntryContract((string) $response->getContent());
 
         $rendered = strtolower((string) $response->getContent());
         $this->assertStringNotContainsString('pixelfed', $rendered);
@@ -53,7 +57,11 @@ class LoginTest extends TestCase
             ->assertSee('href="https://mochirii.com/"', false)
             ->assertSee('>Return to Mōchirīī</a>', false)
             ->assertDontSee('https://mochirii.com/social', false)
-            ->assertDontSee('Pixelfed');
+            ->assertDontSee('Pixelfed')
+            ->assertSee('viewport-fit=cover', false)
+            ->assertSee('mochirii-social-entry-page--landing', false);
+
+        $this->assertResponsiveEntryContract((string) $response->getContent());
 
         $rendered = strtolower((string) $response->getContent());
         $this->assertStringNotContainsString('pixelfed', $rendered);
@@ -82,5 +90,19 @@ class LoginTest extends TestCase
             'pixelfed.domain.app' => 'Mochirii Social',
             'remote-auth.oidc.enabled' => true,
         ]);
+    }
+
+    private function assertResponsiveEntryContract(string $rendered): void
+    {
+        $legacyViewportHeight = strpos($rendered, 'min-height: 100vh;');
+        $dynamicViewportHeight = strpos($rendered, 'min-height: 100dvh;');
+
+        $this->assertNotFalse($legacyViewportHeight);
+        $this->assertNotFalse($dynamicViewportHeight);
+        $this->assertLessThan($dynamicViewportHeight, $legacyViewportHeight);
+        $this->assertStringContainsString('env(safe-area-inset-top, 0px)', $rendered);
+        $this->assertStringContainsString('overflow-y: auto;', $rendered);
+        $this->assertStringContainsString('overscroll-behavior-y: contain;', $rendered);
+        $this->assertStringContainsString('scroll-margin-bottom:', $rendered);
     }
 }

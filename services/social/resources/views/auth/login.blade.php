@@ -1,4 +1,7 @@
-@extends('layouts.app', ['title' => config('mochirii-branding.display_name') . ' Login'])
+@extends('layouts.app', [
+    'title' => config('mochirii-branding.display_name') . ' Login',
+    'bodyClass' => 'mochirii-social-entry-page mochirii-social-entry-page--login',
+])
 
 @push('meta')
 <meta name="description" content="{{ config('mochirii-branding.description') }}">
@@ -7,10 +10,9 @@
 @endpush
 
 @section('content')
-<div class="container mt-4 mochirii-social-login">
-    <div class="row justify-content-center">
-        <div class="col-lg-5">
-            <div class="card shadow-none border mochirii-social-card">
+<div class="mochirii-social-entry-shell mochirii-social-login">
+    <div class="mochirii-social-login__frame">
+        <div class="card shadow-none border mochirii-social-card">
                 <div class="card-header bg-transparent p-4 text-center mochirii-social-card__head">
                     <img src="{{ config('app.logo') }}" width="64" height="64" alt="Mōchirīī Social emblem">
                     <p class="mochirii-social-kicker">Guild Social</p>
@@ -119,16 +121,15 @@
                     </p>
                     @endif
                 </div>
-            </div>
         </div>
     </div>
 </div>
 @endsection
 
 @push('styles')
+@include('site.partial.social-entry-viewport')
 <style>
     body {
-        min-height: 100vh;
         color: #f4ead8;
         background:
             linear-gradient(180deg, rgba(8, 15, 14, 0.76), rgba(8, 15, 14, 0.92)),
@@ -168,8 +169,12 @@
     }
 
     .mochirii-social-login {
-        padding-top: clamp(2rem, 5vw, 4rem);
-        padding-bottom: clamp(3rem, 8vw, 6rem);
+        margin: 0 auto;
+    }
+
+    .mochirii-social-login__frame {
+        width: min(100%, 32rem);
+        min-width: 0;
     }
 
     .mochirii-social-card {
@@ -244,6 +249,22 @@
     @media (max-width: 640px) {
         .mochirii-social-card {
             border-radius: 18px;
+        }
+    }
+
+    @media (max-height: 600px) {
+        .mochirii-social-card__head {
+            padding: 1rem !important;
+        }
+
+        .mochirii-social-card__head img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 0.4rem;
+        }
+
+        .mochirii-social-card h1 {
+            font-size: 1.5rem;
         }
     }
 </style>

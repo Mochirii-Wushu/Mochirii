@@ -567,12 +567,29 @@ requireIncludes("caddy/Caddyfile", caddy, [
   "@retiredCreationAndTokenManagement path /installer /installer/*",
   "respond @retiredCreationAndTokenManagement 404",
   "reverse_proxy 127.0.0.1:8080",
+  "header_up X-Request-ID {http.request.uuid}",
+  "header_down X-Request-ID {http.request.uuid}",
 ]);
 if (caddy.split(/\s+/u).includes("/installer*")) {
   failures.push("caddy/Caddyfile must not use the overbroad /installer* matcher");
 }
 if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
   failures.push("caddy/Caddyfile must reject readiness before the public reverse proxy");
+}
+if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
+  failures.push("caddy/Caddyfile must overwrite rather than trust a caller-supplied request ID");
+}
+
+const requestIdMiddleware = read("app/Http/Middleware/MochiriiRequestId.php");
+requireIncludes("app/Http/Middleware/MochiriiRequestId.php", requestIdMiddleware, [
+  "public const HEADER = 'X-Request-ID'",
+  "Log::withContext(['request_id' => $requestId])",
+  "Log::withoutContext(['request_id'])",
+  "preg_match(self::UUID_PATTERN",
+]);
+const httpKernel = read("app/Http/Kernel.php");
+if (httpKernel.indexOf("MochiriiRequestId::class") > httpKernel.indexOf("HandleCors::class")) {
+  failures.push("app/Http/Kernel.php must establish request correlation before other HTTP middleware");
 }
 
 const caddyInstaller = read("scripts/install-production-caddy.sh");
@@ -960,12 +977,19 @@ requireIncludes("scripts/smoke-social-login.mjs", socialLoginSmoke, [
   '{ label: "320 portrait", width: 320, height: 568 }',
   '{ label: "320 landscape", width: 568, height: 320 }',
   '{ label: "360 portrait", width: 360, height: 800 }',
-  '{ label: "390 portrait", width: 390, height: 844 }',
+  'label: "390 portrait"',
+  "width: 390",
+  "height: 844",
+  "safeArea: { top: 47, right: 0, bottom: 34, left: 0 }",
+  "keyboardResize: true",
   "Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.",
   'APP_NAME: "Mochirii"',
   "public navigation exposes upstream branding",
   "document overflows horizontally",
   "primary control is shorter than 44px",
+  "100dvh does not follow the 100vh fallback",
+  "keyboard-like viewport resize",
+  "physical Safari remains a separate gate",
   "verifyConsentAuthorizationIdRoundTrip",
   "browser login round trip changes the authorization id",
 ]);

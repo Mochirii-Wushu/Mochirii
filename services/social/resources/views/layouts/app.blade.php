@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 
 	<meta name="mobile-web-app-capable" content="yes">
@@ -41,7 +41,7 @@
 	<script type="text/javascript">window._sharedData = {curUser: {}, version: 0}; window.App = {config: {!!App\Util\Site\Config::json()!!}};</script>
 
 </head>
-<body class="loggedIn">
+<body class="{{ $bodyClass ?? 'loggedIn' }}">
 	@include('layouts.partial.nav')
 	<main id="content">
 		@yield('content')
@@ -67,7 +67,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<meta name="mobile-web-app-capable" content="yes">
 
@@ -90,7 +90,7 @@
 	<script type="text/javascript">window._sharedData = {curUser: {}, version: 0}; window.App = {config: {!!App\Util\Site\Config::json()!!}};</script>
 	@stack('styles')
 </head>
-<body>
+<body class="{{ $bodyClass ?? '' }}">
 	@include('layouts.partial.nav')
 	<main id="content">
 		@yield('content')

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\MochiriiRequestId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use RuntimeException;
 use Throwable;
@@ -38,6 +40,14 @@ class HealthCheckController extends Controller
                 throw new RuntimeException('Redis readiness failed.');
             }
         } catch (Throwable) {
+            Log::warning('Social dependency readiness probe failed.', array_merge(
+                MochiriiRequestId::logContext($request),
+                [
+                    'probe' => 'readiness',
+                    'http_status' => 503,
+                ],
+            ));
+
             return response('NOT READY', 503)->withHeaders([
                 'Content-Type' => 'text/plain',
                 'Cache-Control' => 'max-age=0, must-revalidate, no-cache, no-store',

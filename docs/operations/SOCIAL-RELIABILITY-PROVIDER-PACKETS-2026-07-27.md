@@ -61,20 +61,41 @@ federation routes have both disabled defaults and an unconditional 404 route
 boundary. No public Website or Social navigation source contains the upstream
 platform name.
 
-Local browser verification passed 18 of 18 login cases across Chromium,
-Firefox, and WebKit at 320, 360, and 390 CSS-pixel portrait widths and their
-landscape counterparts. The checks cover horizontal reflow, a 44 CSS-pixel
-primary target, zoomable viewport metadata, CSRF metadata, absence of the
-password form, exact Mochirii copy, and absence of upstream branding in public
-navigation. A production-build browser check also preserved the exact OAuth
-authorization ID through the nested Website login return URL in Chromium,
-Firefox, and WebKit. This is source verification only and does not claim a
-production rollout.
+Local browser verification passed 56 of 56 landing/login route and viewport
+cases across Chromium, Firefox, and WebKit, including 320, 360, and 390
+CSS-pixel portrait widths, short landscape, asymmetric synthetic safe areas,
+and a keyboard-like viewport resize. The checks cover horizontal reflow, a 44
+CSS-pixel primary target, zoomable viewport metadata, CSRF metadata, absence of
+the password form, exact Mochirii copy, and absence of upstream branding in
+public navigation. A production-build browser check also preserved the exact
+OAuth authorization ID through the nested Website login return URL in all
+three engines. This is emulated source verification only and does not claim a
+production rollout or a physical Safari result.
+
+The completed responsive source contract now uses a `100vh` fallback followed
+by `100dvh`, all four safe-area insets, short-height vertical reflow, and a
+scrollable focus boundary that remains usable when a software keyboard reduces
+the visual viewport. Browser emulation covers representative current iPhone
+CSS viewports, asymmetric synthetic safe areas, short landscape, and a
+keyboard-like viewport resize in Chromium, Firefox, and WebKit. This evidence
+does not claim a physical Safari result; real iPhone and iPad checks remain a
+separate release gate.
+
+The tracked Caddy source also overwrites every inbound `X-Request-ID` with one
+request-scoped UUID before proxying and sets the same UUID on the response.
+Laravel accepts only one canonical UUID-shaped value, replaces a missing,
+duplicated, or malformed value without echoing it, and adds only the validated
+UUID to HTTP log context. Production exception metadata and dependency-failure
+health logs can therefore be correlated without recording a member identity,
+cookie, authorization value, URL query, request body, secret, or raw exception
+message.
 
 ## Read-only correlation procedure
 
-Use one UTC window and record only status, duration, route category, Cloudflare
-Ray/colo metadata, container state, and resource measurements. Do not capture
+Use one UTC window and record only status, duration, route category, the
+generated response request ID, Cloudflare Ray/colo metadata, container state,
+and resource measurements. Treat the response request ID as an opaque
+correlation value and never reuse or accept a caller-supplied value. Do not capture
 cookies, authorization codes, URL fragments, request bodies, environment
 variables, database contents, member identifiers, or OAuth credentials.
 
@@ -139,12 +160,18 @@ five-second-bounded `/api/service/readiness-check` dependency probe.
   4. The landing, login, health, and OIDC start/callback boundary pass bounded
      checks.
   5. Desktop and mobile landing/login surfaces show only Mochirii branding,
-     have no horizontal overflow, and produce no deterministic CSRF console
-     error.
-  6. A fresh active-member flow preserves one authorization request through
+     have no horizontal overflow, remain vertically reachable across safe-area,
+     short-height, and keyboard-reduced viewports, and produce no deterministic
+     CSRF console error. Emulated WebKit evidence does not replace the physical
+     Safari gate.
+  6. The response exposes one UUID request ID matching the redacted application
+     exception/health context when an error is deliberately exercised in a
+     local or Preview fixture. A malformed caller header is overwritten and is
+     absent from retained output.
+  7. A fresh active-member flow preserves one authorization request through
      website login, shows consent once, and returns to the canonical Social
      callback.
-  7. Anonymous requests to both the direct media object and its CDN form are
+  8. Anonymous requests to both the direct media object and its CDN form are
      denied, private-media configuration is enabled on readback, and one
      authorized application media request succeeds. Only then may the operator
      select `ANONYMOUS DENIAL AND CUTOVER VERIFIED`.
@@ -224,13 +251,17 @@ text, screenshots, or provider tickets.
 - Verification:
   1. The active target SHA-256 exactly equals the reviewed source SHA-256.
   2. `caddy validate` passes before and after the atomic rename.
-  3. `docker exec pixelfed-app curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8080/api/service/readiness-check`
+  3. An arbitrary malformed inbound `X-Request-ID` is not forwarded or echoed;
+     the response contains one generated UUID and the same UUID appears in the
+     redacted application log fixture without any request query, member data,
+     cookie, authorization value, body, or secret.
+  4. `docker exec pixelfed-app curl --fail --silent --show-error --max-time 5 http://127.0.0.1:8080/api/service/readiness-check`
      succeeds, while the public readiness route returns `404`.
-  4. Every reviewed retired installer, registration, client-management,
+  5. Every reviewed retired installer, registration, client-management,
      personal-token, token-management, and invite path returns opaque `404`.
-  5. `/oauth/token` and `/oauth/authorize` are not caught by a Caddy `404`;
+  6. `/oauth/token` and `/oauth/authorize` are not caught by a Caddy `404`;
      the first-party authorization-code boundary remains reachable.
-  6. Landing, login, health, and one fresh first-party authorization flow pass
+  7. Landing, login, health, and one fresh first-party authorization flow pass
      without exposing upstream branding or diagnostic detail.
 - Rollback: validate the captured root-owned backup, atomically rename a copy
   over the target, reload Caddy, and repeat the same direct/public gates.
@@ -276,6 +307,7 @@ text, screenshots, or provider tickets.
 - [Docker Compose healthcheck reference](https://docs.docker.com/reference/compose-file/services/#healthcheck)
 - [Cloudflare 522 guidance](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-522/)
 - [Caddy reverse proxy health checks](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#active-health-checks)
+- [Caddy reverse proxy header manipulation](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#headers)
 - [DigitalOcean metrics agent](https://docs.digitalocean.com/products/monitoring/how-to/install-metrics-agent/)
 - [Caddy command-line validation](https://caddyserver.com/docs/command-line#caddy-validate)
 - [Next.js environment variables](https://nextjs.org/docs/app/guides/environment-variables)

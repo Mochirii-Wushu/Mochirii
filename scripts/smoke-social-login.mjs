@@ -17,12 +17,23 @@ const viewports = [
   { label: "320 landscape", width: 568, height: 320 },
   { label: "360 portrait", width: 360, height: 800 },
   { label: "360 landscape", width: 800, height: 360 },
-  { label: "390 portrait", width: 390, height: 844 },
+  {
+    label: "390 portrait",
+    width: 390,
+    height: 844,
+    safeArea: { top: 47, right: 0, bottom: 34, left: 0 },
+    keyboardResize: true,
+  },
   { label: "393 portrait", width: 393, height: 852 },
   { label: "412 portrait", width: 412, height: 915 },
   { label: "430 portrait", width: 430, height: 932 },
   { label: "640 short landscape", width: 640, height: 360 },
-  { label: "390 landscape", width: 844, height: 390 },
+  {
+    label: "390 landscape",
+    width: 844,
+    height: 390,
+    safeArea: { top: 0, right: 47, bottom: 21, left: 47 },
+  },
   { label: "tablet portrait", width: 768, height: 1024 },
   { label: "tablet landscape", width: 1024, height: 768 },
   { label: "desktop", width: 1440, height: 900 },
@@ -119,7 +130,10 @@ try {
           // Production CSP upgrades insecure requests. This harness uses a
           // loopback HTTP server, so bypass CSP here and validate the production
           // policy in the repository's dedicated CSP checks.
-          const context = await browser.newContext({ viewport, bypassCSP: true });
+          const context = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            bypassCSP: true,
+          });
           const page = await context.newPage();
           const failures = [];
           const caseLabel = `${browserName} ${viewport.label} ${publicRoute.label}`;
@@ -135,8 +149,20 @@ try {
 
           const response = await page.goto(`${baseUrl}${publicRoute.path}`, { waitUntil: "networkidle" });
           assert(response?.status() === 200, `${caseLabel}: returned ${response?.status()}`);
+          const emulationStyles = [];
           if (viewport.textScale) {
-            await page.addStyleTag({ content: `html { font-size: ${viewport.textScale * 100}% !important; }` });
+            emulationStyles.push(`html { font-size: ${viewport.textScale * 100}% !important; }`);
+          }
+          if (viewport.safeArea) {
+            emulationStyles.push(`body {
+              --mochirii-safe-top: ${viewport.safeArea.top}px !important;
+              --mochirii-safe-right: ${viewport.safeArea.right}px !important;
+              --mochirii-safe-bottom: ${viewport.safeArea.bottom}px !important;
+              --mochirii-safe-left: ${viewport.safeArea.left}px !important;
+            }`);
+          }
+          if (emulationStyles.length) {
+            await page.addStyleTag({ content: emulationStyles.join("\n") });
           }
 
           const geometry = await page.evaluate(({ cardSelector, primarySelector }) => {
@@ -144,16 +170,40 @@ try {
             const primary = document.querySelector(primarySelector);
             const rect = card?.getBoundingClientRect();
             const buttonRect = primary?.getBoundingClientRect();
+            const shell = document.querySelector(".mochirii-social-entry-shell");
+            const bodyStyle = getComputedStyle(document.body);
             const interactive = [...document.querySelectorAll("a, button, input")].map((element) => {
               const item = element.getBoundingClientRect();
-              return { left: item.left, right: item.right, width: item.width, text: element.textContent || "" };
+              return {
+                left: item.left,
+                right: item.right,
+                top: item.top,
+                bottom: item.bottom,
+                width: item.width,
+                height: item.height,
+                text: element.textContent || "",
+              };
             });
             return {
-              card: rect ? { left: rect.left, right: rect.right, width: rect.width, height: rect.height } : null,
+              card: rect ? {
+                left: rect.left,
+                right: rect.right,
+                top: rect.top,
+                bottom: rect.bottom,
+                width: rect.width,
+                height: rect.height,
+              } : null,
               button: buttonRect ? { width: buttonRect.width, height: buttonRect.height } : null,
               clientWidth: document.documentElement.clientWidth,
+              clientHeight: document.documentElement.clientHeight,
               documentWidth: document.documentElement.scrollWidth,
+              documentHeight: document.documentElement.scrollHeight,
               bodyWidth: document.body.scrollWidth,
+              bodyOverflowX: bodyStyle.overflowX,
+              bodyOverflowY: bodyStyle.overflowY,
+              bodyOverscrollY: bodyStyle.overscrollBehaviorY,
+              bodyOverscrollSupported: CSS.supports("overscroll-behavior-y", "contain"),
+              shellMinHeight: shell ? getComputedStyle(shell).minHeight : "",
               bodyText: document.body.innerText,
               publicText: [
                 document.title,
@@ -180,7 +230,16 @@ try {
           assert(geometry.documentWidth <= geometry.clientWidth + 1, `${caseLabel}: document overflows horizontally ${JSON.stringify(geometry.overflowing)}`);
           assert(geometry.bodyWidth <= geometry.clientWidth + 1, `${caseLabel}: body overflows horizontally ${JSON.stringify(geometry.overflowing)}`);
           assert(geometry.card.left >= -1 && geometry.card.right <= viewport.width + 1, `${caseLabel}: card escapes viewport`);
+          if (viewport.safeArea) {
+            assert(geometry.card.left >= viewport.safeArea.left - 1, `${caseLabel}: card overlaps the emulated left safe area`);
+            assert(geometry.card.right <= viewport.width - viewport.safeArea.right + 1, `${caseLabel}: card overlaps the emulated right safe area`);
+          }
           assert(geometry.button && geometry.button.height >= 44, `${caseLabel}: primary control is shorter than 44px`);
+          assert(geometry.bodyOverflowX === "hidden", `${caseLabel}: horizontal overflow is not contained`);
+          assert(geometry.bodyOverflowY === "auto", `${caseLabel}: vertical overflow is not scrollable`);
+          if (geometry.bodyOverscrollSupported) {
+            assert(geometry.bodyOverscrollY === "contain", `${caseLabel}: vertical overscroll is not contained (${geometry.bodyOverscrollY})`);
+          }
           assert(geometry.hasCsrf, `${caseLabel}: CSRF metadata is missing`);
           assert(!/maximum-scale|user-scalable\s*=\s*no/i.test(geometry.viewportMeta), `${caseLabel}: zoom is restricted`);
           assert(!geometry.hasPasswordForm, `${caseLabel}: direct password form is visible`);
@@ -191,6 +250,46 @@ try {
           for (const item of geometry.interactive) {
             if (item.width === 0) continue;
             assert(item.left >= -1 && item.right <= viewport.width + 1, `${caseLabel}: interactive control escapes viewport`);
+          }
+
+          const entrySource = await page.locator("style").allTextContents().then((parts) => parts.join("\n"));
+          const legacyViewportHeight = entrySource.indexOf("min-height: 100vh");
+          const dynamicViewportHeight = entrySource.indexOf("min-height: 100dvh");
+          assert(legacyViewportHeight >= 0, `${caseLabel}: 100vh fallback is missing`);
+          assert(dynamicViewportHeight > legacyViewportHeight, `${caseLabel}: 100dvh does not follow the 100vh fallback`);
+
+          const lastInteractive = page.locator("a:visible, button:visible, input:visible").last();
+          await lastInteractive.scrollIntoViewIfNeeded();
+          const lastRect = await lastInteractive.evaluate((element) => {
+            const rect = element.getBoundingClientRect();
+            return { top: rect.top, bottom: rect.bottom, viewportHeight: window.innerHeight };
+          });
+          assert(lastRect.bottom > 0 && lastRect.top < lastRect.viewportHeight, `${caseLabel}: final control is not reachable by vertical scrolling`);
+
+          const primary = page.locator(publicRoute.primarySelector);
+          await primary.focus();
+          await primary.evaluate((element) => element.scrollIntoView({ block: "nearest", inline: "nearest" }));
+          assert(await primary.evaluate((element) => document.activeElement === element), `${caseLabel}: primary control does not retain focus`);
+
+          if (viewport.keyboardResize) {
+            await page.setViewportSize({ width: viewport.width, height: 360 });
+            await primary.focus();
+            await primary.evaluate((element) => element.scrollIntoView({ block: "nearest", inline: "nearest" }));
+            const resized = await page.evaluate((selector) => {
+              const element = document.querySelector(selector);
+              const rect = element?.getBoundingClientRect();
+              return {
+                active: document.activeElement === element,
+                top: rect?.top ?? -1,
+                bottom: rect?.bottom ?? -1,
+                viewportHeight: window.innerHeight,
+                documentWidth: document.documentElement.scrollWidth,
+                clientWidth: document.documentElement.clientWidth,
+              };
+            }, publicRoute.primarySelector);
+            assert(resized.active, `${caseLabel}: focus is lost after the keyboard-like viewport resize`);
+            assert(resized.top >= -1 && resized.bottom <= resized.viewportHeight + 1, `${caseLabel}: focused control is obscured after the keyboard-like viewport resize`);
+            assert(resized.documentWidth <= resized.clientWidth + 1, `${caseLabel}: keyboard-like viewport resize introduces horizontal overflow`);
           }
           assert(failures.length === 0, `${caseLabel}: ${failures.join(" | ")}`);
 
@@ -203,7 +302,7 @@ try {
     }
   }
 
-  console.log(`Mōchirīī Social entry smoke passed ${passed}/${expected} browser-route-viewport cases.`);
+  console.log(`Mōchirīī Social emulated entry smoke passed ${passed}/${expected} browser-route-viewport cases; physical Safari remains a separate gate.`);
   await verifyConsentAuthorizationIdRoundTrip();
 } catch (error) {
   if (serverOutput.length) console.error(serverOutput.join("\n"));

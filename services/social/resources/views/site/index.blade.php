@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 
 	<meta name="mobile-web-app-capable" content="yes">
@@ -31,11 +31,11 @@
 	<link rel="icon" type="image/png" href="{{url('/img/mochirii-icon.png')}}">
 	<link rel="apple-touch-icon" type="image/png" href="{{url('/img/mochirii-icon.png')}}">
 	<link rel="preload" as="image" href="{{ url('/img/mochirii-social-card.png')}}" />
+	@include('site.partial.social-entry-viewport')
 	<style>
 		:root { color-scheme: dark; }
 		* { box-sizing: border-box; }
 		body {
-			min-height: 100vh;
 			margin: 0;
 			color: #f7eddd;
 			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -43,12 +43,6 @@
 				linear-gradient(180deg, rgba(8, 15, 14, 0.72), rgba(8, 15, 14, 0.92)),
 				url('/img/mochirii-social-card.png') center / cover fixed,
 				#101c19;
-		}
-		main {
-			min-height: 100vh;
-			display: grid;
-			place-items: center;
-			padding: clamp(1.25rem, 4vw, 3rem);
 		}
 		.social-landing {
 			width: min(680px, 100%);
@@ -117,8 +111,8 @@
 		}
 	</style>
 </head>
-	<body>
-		<main id="content">
+	<body class="mochirii-social-entry-page mochirii-social-entry-page--landing">
+		<main id="content" class="mochirii-social-entry-shell">
 			<section class="social-landing" aria-labelledby="socialLandingTitle">
 				<img src="{{ config('app.logo') }}" alt="Mōchirīī Social emblem">
 				<p class="social-landing__kicker">Guild Social</p>
