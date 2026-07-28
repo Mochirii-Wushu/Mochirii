@@ -20,6 +20,8 @@ use Purify;
 
 class RemoteOidcController extends Controller
 {
+    private const OIDC_TRANSACTION_TTL_SECONDS = 300;
+
     protected $fractal;
 
     public function start(UserOidcService $provider, Request $request)
@@ -33,8 +35,11 @@ class RemoteOidcController extends Controller
             'scope' => $provider->getDefaultScopes(),
         ]);
 
-        $request->session()->put('oauth2state', $provider->getState());
-        $request->session()->put('oauth2pkceCode', $provider->getPkceCode());
+        $request->session()->put([
+            'oauth2state' => $provider->getState(),
+            'oauth2pkceCode' => $provider->getPkceCode(),
+            'oauth2issuedAt' => now()->getTimestamp(),
+        ]);
 
         return redirect($url);
     }
@@ -52,11 +57,18 @@ class RemoteOidcController extends Controller
         $code = $request->input('code');
         $expectedState = $request->session()->pull('oauth2state');
         $pkceCode = $request->session()->pull('oauth2pkceCode');
+        $issuedAt = $request->session()->pull('oauth2issuedAt');
+        $transactionAge = is_int($issuedAt)
+            ? now()->getTimestamp() - $issuedAt
+            : null;
 
         $validCallback = is_string($state) && $state !== ''
             && is_string($code) && $code !== ''
             && is_string($expectedState) && $expectedState !== ''
             && is_string($pkceCode) && $pkceCode !== ''
+            && is_int($transactionAge)
+            && $transactionAge >= 0
+            && $transactionAge <= self::OIDC_TRANSACTION_TTL_SECONDS
             && hash_equals($expectedState, $state);
 
         if ($request->user()) {

@@ -75,7 +75,10 @@ class RemoteOidcTest extends TestCase
 
         $state = session()->get('oauth2state');
         $pkceVerifier = session()->get('oauth2pkceCode');
+        $issuedAt = session()->get('oauth2issuedAt');
         $this->assertIsString($pkceVerifier);
+        $this->assertIsInt($issuedAt);
+        $this->assertLessThanOrEqual(1, abs(now()->getTimestamp() - $issuedAt));
         $expectedChallenge = rtrim(strtr(base64_encode(hash('sha256', $pkceVerifier, true)), '+/', '-_'), '=');
         $response->assertRedirectContains('http://fakeserver.oidc/authorizeURL?');
 
@@ -144,6 +147,7 @@ class RemoteOidcTest extends TestCase
             ->withSession([
                 'oauth2state' => 'abc123',
                 'oauth2pkceCode' => 'inner-pkce-verifier',
+                'oauth2issuedAt' => now()->getTimestamp(),
                 'url.intended' => $intendedUrl,
             ])
             ->get('auth/oidc/callback?state=abc123&code=1');
@@ -156,6 +160,7 @@ class RemoteOidcTest extends TestCase
             ->withSession([
                 'oauth2state' => 'expected-state',
                 'oauth2pkceCode' => 'inner-pkce-verifier',
+                'oauth2issuedAt' => now()->getTimestamp(),
                 'url.intended' => $intendedUrl,
             ])
             ->get('auth/oidc/callback?state=wrong-state&code=1');
@@ -196,6 +201,7 @@ class RemoteOidcTest extends TestCase
         $this->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
         ]);
         $previousSessionId = session()->getId();
         $response = $this->withoutExceptionHandling()->get('auth/oidc/callback?state=abc123&code=1');
@@ -248,6 +254,7 @@ class RemoteOidcTest extends TestCase
         $response = $this->withoutExceptionHandling()->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
             'url.intended' => $intendedUrl,
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
@@ -309,6 +316,7 @@ class RemoteOidcTest extends TestCase
         $response = $this->withoutExceptionHandling()->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
             'url.intended' => $intendedUrl,
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
@@ -365,6 +373,7 @@ class RemoteOidcTest extends TestCase
         $response = $this->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
             'mochirii_oidc_verified' => true,
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
@@ -411,6 +420,7 @@ class RemoteOidcTest extends TestCase
         $response = $this->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
             'mochirii_oidc_verified' => true,
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
@@ -450,6 +460,7 @@ class RemoteOidcTest extends TestCase
         $response = $this->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
         $response->assertRedirect('/login');
@@ -471,6 +482,7 @@ class RemoteOidcTest extends TestCase
 
         $response = $this->withSession([
             'oauth2state' => 'abc123',
+            'oauth2issuedAt' => now()->getTimestamp(),
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
         $response->assertStatus(400);
@@ -488,6 +500,7 @@ class RemoteOidcTest extends TestCase
 
         $response = $this->withSession([
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
         ])->get('auth/oidc/callback?state=abc123&code=1');
 
         $response->assertStatus(400);
@@ -506,7 +519,26 @@ class RemoteOidcTest extends TestCase
         $response = $this->withSession([
             'oauth2state' => 'expected-state',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
         ])->get('auth/oidc/callback?state=wrong-state&code=1');
+
+        $response->assertStatus(400);
+    }
+
+    #[Test]
+    public function oidc_callback_rejects_a_transaction_without_an_issuance_time(): void
+    {
+        config(['remote-auth.oidc.enabled' => true]);
+
+        $this->partialMock(UserOidcService::class, function (MockInterface $mock) {
+            $mock->shouldNotReceive('setPkceCode');
+            $mock->shouldNotReceive('getAccessToken');
+        });
+
+        $response = $this->withSession([
+            'oauth2state' => 'abc123',
+            'oauth2pkceCode' => 'test-verifier',
+        ])->get('auth/oidc/callback?state=abc123&code=1');
 
         $response->assertStatus(400);
     }
@@ -524,8 +556,57 @@ class RemoteOidcTest extends TestCase
         $response = $this->withSession([
             'oauth2state' => 'abc123',
             'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
         ])->get('auth/oidc/callback?state%5B%5D=abc123&code%5B%5D=1');
 
         $response->assertStatus(400);
+    }
+
+    #[Test]
+    public function oidc_callback_rejects_an_expired_transaction_before_token_exchange(): void
+    {
+        config(['remote-auth.oidc.enabled' => true]);
+
+        $this->partialMock(UserOidcService::class, function (MockInterface $mock) {
+            $mock->shouldNotReceive('setPkceCode');
+            $mock->shouldNotReceive('getAccessToken');
+        });
+
+        $response = $this->withSession([
+            'oauth2state' => 'abc123',
+            'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->subSeconds(301)->getTimestamp(),
+        ])->get('auth/oidc/callback?state=abc123&code=1');
+
+        $response->assertStatus(400);
+        $response->assertSessionMissing('oauth2state');
+        $response->assertSessionMissing('oauth2pkceCode');
+        $response->assertSessionMissing('oauth2issuedAt');
+    }
+
+    #[Test]
+    public function oidc_callback_consumes_the_transaction_after_the_first_attempt(): void
+    {
+        config(['remote-auth.oidc.enabled' => true]);
+
+        $this->partialMock(UserOidcService::class, function (MockInterface $mock) {
+            $mock->shouldNotReceive('setPkceCode');
+            $mock->shouldNotReceive('getAccessToken');
+        });
+
+        $firstAttempt = $this->withSession([
+            'oauth2state' => 'expected-state',
+            'oauth2pkceCode' => 'test-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
+        ])->get('auth/oidc/callback?state=wrong-state&code=1');
+
+        $firstAttempt->assertStatus(400);
+        $firstAttempt->assertSessionMissing('oauth2state');
+        $firstAttempt->assertSessionMissing('oauth2pkceCode');
+        $firstAttempt->assertSessionMissing('oauth2issuedAt');
+
+        $replay = $this->get('auth/oidc/callback?state=expected-state&code=1');
+
+        $replay->assertStatus(400);
     }
 }
