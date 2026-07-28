@@ -21,9 +21,10 @@ const checkedAt = new Date().toISOString();
 const failures = [];
 const warnings = [];
 
-const routes = [
+const allRoutes = [
   { route: "/", label: "Home", expectMain: true, expectLiveRegion: true },
   { route: "/join", label: "Join", expectMain: true, expectNoIframe: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
+  { route: "/events", label: "Events", expectMain: true, expectNoIframe: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
   { route: "/raffle", label: "Raffle", expectMain: true, expectNoIframe: true, expectNoForm: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
   { route: "/raffle/rules", label: "Raffle Rules Status", expectMain: true, expectNoIframe: true, expectNoForm: true, requireOpaquePanels: [".page-main .glass-card"] },
   { route: "/gallery", label: "Gallery", expectMain: true, expectLiveRegion: true },
@@ -46,6 +47,9 @@ const routes = [
     requireOpaquePanels: [".not-found-card"],
   },
 ];
+const routeFilter = getArg("--route", "");
+const routes = routeFilter ? allRoutes.filter((entry) => entry.route === routeFilter) : allRoutes;
+if (!routes.length) throw new Error(`Unknown route filter ${routeFilter}.`);
 
 const viewports = [
   { name: "mobile-360x800", width: 360, height: 800 },
