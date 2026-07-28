@@ -80,8 +80,8 @@ GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
 `Supabase Preview`. The post-PR-#534 readback found one open canonical pull
 request: draft Social PR #532 at exact head
-`4f157d7c1adc7ba530044c35a83c12c102fd9810`, one commit
-behind its base and currently conflicting. Its Supabase Preview did not pass or
+`4f157d7c1adc7ba530044c35a83c12c102fd9810`, two commits
+behind current `main` and currently conflicting. Its Supabase Preview did not pass or
 skip: it was cancelled/failed because the provider preview-branch concurrency
 limit had been reached. That lane remains unreleased and must be reconciled and
 rechecked at an exact replacement head. A local replacement has been rebased on
