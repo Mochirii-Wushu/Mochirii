@@ -32,6 +32,7 @@ const moderationClient = read("apps/web/lib/supabase/moderation.ts");
 const supabaseConfig = read("supabase/config.toml");
 const migration = read("supabase/migrations/20260615041842_add_multi_provider_member_verification.sql");
 const verifyMemberAccess = read("supabase/functions/verify-member-access/index.ts");
+const oauthDecisionRoute = read("apps/web/app/api/oauth/decision/route.ts");
 const verifyDiscordMember = read("supabase/functions/verify-discord-member/index.ts");
 const memberVerificationIdentity = read("supabase/functions/_shared/member-verification-identity.ts");
 const memberVerificationIdentityTest = read("supabase/functions/_shared/member-verification-identity_test.ts");
@@ -47,11 +48,13 @@ const reviewMemberVerification = read("supabase/functions/review-member-verifica
   '"check:multi-provider-auth": "node scripts/check-multi-provider-auth.mjs"',
   '"test:member-verification-identity": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/member-verification-identity_test.ts"',
   '"test:supabase-service-role": "deno test --lock=deno.lock --frozen=true supabase/functions/_shared/supabase-service-role_test.ts"',
+  '"test:member-access-refresh": "deno test --allow-env --node-modules-dir=auto --import-map=supabase/functions/verify-member-access/deno.json',
 ].forEach((snippet) => assertIncludes("package scripts", packageJson, snippet));
 
 assertIncludes("check-all", checkAll, '["check:multi-provider-auth", ["node", "scripts/check-multi-provider-auth.mjs"]]');
 assertIncludes("check-all", checkAll, '["test:member-verification-identity", ["deno", "test"');
 assertIncludes("check-all", checkAll, '["test:supabase-service-role", ["deno", "test"');
+assertIncludes("check-all", checkAll, '["test:member-access-refresh", ["deno", "test"');
 
 [
   '"discord"',
@@ -235,10 +238,25 @@ assertIncludes("check-all", checkAll, '["test:supabase-service-role", ["deno", "
   assertIncludes(label, source, "resolveDiscordIdentity(");
 });
 
+assertIncludes(
+  "verify-discord-member bounded Discord lookup",
+  verifyDiscordMember,
+  "AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT_MS)",
+);
+
 [
   '../_shared/member-access-policy.ts',
   'currentMemberAccess({',
+  "discordVerificationNeedsRefresh(profile, discordUserId)",
+  "AbortSignal.timeout(",
+  "discordResult.status === 429 ? 429 : 503",
 ].forEach((snippet) => assertIncludes("verify-member-access shared access policy", verifyMemberAccess, snippet));
+
+assertIncludes(
+  "Social authorization decision membership refresh",
+  oauthDecisionRoute,
+  'body: { refreshDiscord: true }',
+);
 
 [
   "profileMatchesTrustedDiscordIdentity(",
@@ -246,6 +264,10 @@ assertIncludes("check-all", checkAll, '["test:supabase-service-role", ["deno", "
   "profile?.discord_verified_at",
   "timestamp <= nowMs",
   "MEMBER_VERIFICATION_MAX_AGE_MS",
+  "discordVerificationNeedsRefresh(",
+  "DISCORD_NEGATIVE_RECHECK_AFTER_MS",
+  "profile?.discord_checked_at",
+  "nowMs - timestamp >= MEMBER_VERIFICATION_MAX_AGE_MS",
   'status !== "approved"',
   "verifiedTimestamp > nowMs",
   "expiry >= nowMs",

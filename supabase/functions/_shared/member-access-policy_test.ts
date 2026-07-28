@@ -1,5 +1,7 @@
 import {
   currentMemberAccess,
+  DISCORD_NEGATIVE_RECHECK_AFTER_MS,
+  discordVerificationNeedsRefresh,
   MEMBER_VERIFICATION_MAX_AGE_MS,
 } from "./member-access-policy.ts";
 
@@ -7,10 +9,101 @@ const now = Date.parse("2026-07-27T12:00:00.000Z");
 const activeDiscordProfile = {
   member_status: "active",
   discord_user_id: "1234567890",
+  discord_checked_at: new Date(now - MEMBER_VERIFICATION_MAX_AGE_MS)
+    .toISOString(),
   has_required_discord_roles: true,
   discord_verified_at: new Date(now - MEMBER_VERIFICATION_MAX_AGE_MS)
     .toISOString(),
 };
+
+Deno.test("Social access refreshes stale Discord evidence without polling recent checks", () => {
+  assert(
+    !discordVerificationNeedsRefresh(
+      {
+        ...activeDiscordProfile,
+        discord_checked_at: new Date(now - MEMBER_VERIFICATION_MAX_AGE_MS + 1)
+          .toISOString(),
+      },
+      "1234567890",
+      now,
+    ),
+    "recent matching Discord evidence should not refresh",
+  );
+
+  for (
+    const profile of [
+      { ...activeDiscordProfile, discord_checked_at: null },
+      {
+        ...activeDiscordProfile,
+        discord_checked_at: new Date(now - MEMBER_VERIFICATION_MAX_AGE_MS)
+          .toISOString(),
+      },
+      { ...activeDiscordProfile, discord_checked_at: "not-a-time" },
+      {
+        ...activeDiscordProfile,
+        discord_checked_at: new Date(now + 1).toISOString(),
+      },
+      { ...activeDiscordProfile, discord_user_id: "different-user" },
+      { ...activeDiscordProfile, discord_verified_at: null },
+      { ...activeDiscordProfile, discord_verified_at: "not-a-time" },
+      {
+        ...activeDiscordProfile,
+        discord_verified_at: new Date(now + 1).toISOString(),
+      },
+      {
+        ...activeDiscordProfile,
+        discord_verified_at: new Date(now - MEMBER_VERIFICATION_MAX_AGE_MS - 1)
+          .toISOString(),
+      },
+    ]
+  ) {
+    assert(
+      discordVerificationNeedsRefresh(profile, "1234567890", now),
+      `Discord evidence should refresh: ${JSON.stringify(profile)}`,
+    );
+  }
+
+  assert(
+    !discordVerificationNeedsRefresh(
+      {
+        ...activeDiscordProfile,
+        has_required_discord_roles: false,
+        discord_verified_at: null,
+        discord_checked_at: new Date(now - 1).toISOString(),
+      },
+      "1234567890",
+      now,
+    ),
+    "a recent role-missing result should not poll Discord repeatedly",
+  );
+
+  assert(
+    discordVerificationNeedsRefresh(
+      {
+        ...activeDiscordProfile,
+        has_required_discord_roles: false,
+        discord_verified_at: null,
+        discord_checked_at: new Date(
+          now - DISCORD_NEGATIVE_RECHECK_AFTER_MS,
+        ).toISOString(),
+      },
+      "1234567890",
+      now,
+    ),
+    "a role-missing result should become refreshable after the negative cooldown",
+  );
+
+  for (const member_status of ["suspended", "archived"]) {
+    assert(
+      !discordVerificationNeedsRefresh(
+        { ...activeDiscordProfile, member_status, discord_checked_at: null },
+        "1234567890",
+        now,
+      ),
+      `${member_status} members should fail closed without a Discord refresh`,
+    );
+  }
+});
 
 Deno.test("current Social access accepts an exact recently verified Discord identity", () => {
   const access = currentMemberAccess({

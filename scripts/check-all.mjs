@@ -56,6 +56,7 @@ const checks = [
   ["check:mochi-pets-edge-authority", ["node", "scripts/check-mochi-pets-edge-authority.mjs"]],
   ["test:mochi-pets-alpha", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/mochi-pets-unity-auth/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/mochi-pets-alpha_test.ts"]],
   ["test:pixelfed-social-sync", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/sync-pixelfed-social-account/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/pixelfed-social-sync_test.ts", "supabase/functions/_shared/member-access-policy_test.ts"]],
+  ["test:member-access-refresh", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/verify-member-access/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/verify-member-access/index_test.ts"]],
   ["check:supabase-edge-types", ["node", "scripts/check-supabase-edge-types.mjs"]],
   ["check:cutover-validators", ["node", "scripts/check-cutover-validator-self-tests.mjs"]],
   ["check:gallery-approved-feed", ["node", "scripts/check-gallery-approved-feed.mjs"]],

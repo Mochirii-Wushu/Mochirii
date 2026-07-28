@@ -155,7 +155,7 @@ export async function POST(request: Request) {
     loadAuthorization: () => loadAuthorizationDetails(authorizationId, token),
     verifyMembership: async () => {
       const accessResult = await client.functions.invoke("verify-member-access", {
-        body: { refreshDiscord: false },
+        body: { refreshDiscord: true },
       });
       if (accessResult.error) return "unavailable";
 
