@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, relative, resolve } from "node:path";
+import { enforceProductionGalleryMatrixGuard } from "./lib/live-gallery-media-smoke-guard.mjs";
 import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const root = process.cwd();
@@ -11,6 +12,7 @@ const getArg = (name, fallback) => {
 };
 const writeReport = argSet.has("--write") || process.env.BROWSER_ROUTE_MATRIX_WRITE === "true";
 const baseUrl = getArg("--base-url", process.env.BROWSER_ROUTE_MATRIX_BASE_URL || SITE_ORIGIN).replace(/\/$/, "");
+enforceProductionGalleryMatrixGuard({ baseUrl, siteOrigin: SITE_ORIGIN });
 const browserName = getArg("--browser", process.env.BROWSER_ROUTE_MATRIX_BROWSER || "chromium").toLowerCase();
 const navigationBaseUrl = localWebKitNavigationUrl(baseUrl, browserName);
 const reportJsonPath = resolve(root, "reports/browser-route-matrix.json");

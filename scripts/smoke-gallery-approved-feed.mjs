@@ -1,6 +1,9 @@
 import { readFile, stat } from "node:fs/promises";
+import { enforceProductionGalleryMatrixGuard } from "./lib/live-gallery-media-smoke-guard.mjs";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const baseUrl = (process.env.SMOKE_BASE_URL || "http://127.0.0.1:8765").replace(/\/+$/, "");
+enforceProductionGalleryMatrixGuard({ baseUrl, siteOrigin: SITE_ORIGIN });
 const galleryDataUrl = new URL("../apps/web/public/data/gallery.json", import.meta.url);
 const galleryData = JSON.parse(await readFile(galleryDataUrl, "utf8"));
 const staticItems = (Array.isArray(galleryData?.albums) ? galleryData.albums : []).flatMap((album) =>
