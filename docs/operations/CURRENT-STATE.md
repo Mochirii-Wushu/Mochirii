@@ -78,17 +78,15 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The post-PR-#534 readback found one open canonical pull
-request: draft Social PR #532 at exact head
-`4f157d7c1adc7ba530044c35a83c12c102fd9810`, two commits
-behind current `main` and currently conflicting. Its Supabase Preview did not pass or
-skip: it was cancelled/failed because the provider preview-branch concurrency
-limit had been reached. That lane remains unreleased and must be reconciled and
-rechecked at an exact replacement head. A local replacement has been rebased on
-the current protected-main baseline and validated without provider writes; its
-exact review head must be read from the future replacement PR. Security and
-dependency alert counts are mutable provider state and must be read back at
-release time rather than inferred from the earlier closeout.
+`Supabase Preview`. The current readback finds one open canonical pull request:
+Social replacement PR #535. Conflicting draft PR #532 was closed unmerged and
+its remote `agent/social-reliability` branch was deleted only after replacement
+traceability, exact-head checks, Vercel Preview, and a non-skipped Supabase
+Preview passed. PR #535 remains unreleased and must be rechecked at its current
+exact head after every update; the pull request is the authoritative source for
+that mutable head. Security and dependency alert counts are mutable provider
+state and must be read back at release time rather than inferred from the
+earlier closeout.
 
 ## Website Reliability Release
 
@@ -133,27 +131,30 @@ release time rather than inferred from the earlier closeout.
   `ghcr.io/mochirii-wushu/mochirii-pixelfed-ops`.
 - The deployed canonical image digest is
   `sha256:1fd27c8f76595595912e6f12f1677c7f108aa50f64b38a85089006b47ad395f1`.
-- A replacement Social hardening source lane is prepared locally on the current
-  protected-main baseline. It contains no database migration or
-  `supabase/config.toml` change, but it changes reviewed source consumed by
-  existing declared functions. Its Supabase Preview must therefore be
-  non-skipped. A protected-main merge requires separate exact authorization to
-  redeploy the same 33 functions while preserving 20/13 JWT parity; any
-  inventory or parity drift is a stop condition. It also refreshes expired
-  Discord role evidence on demand so an otherwise valid member cannot become
-  stranded at Social consent when the bounded verification window expires.
-- Read-only Vercel environment inventory confirms that the required server-only
-  `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding is currently absent from both
-  Preview and Production. The live Social authorization redirect still uses a
-  nonempty first-party client identifier, the exact approved callback, and S256
-  PKCE. No identifier value was recorded. Packet E must be approved and applied
-  before an end-to-end OAuth Preview can pass; until then the Website consent
-  decision route intentionally fails closed.
-- The replacement has not been pushed, previewed, merged, published to GHCR, or
-  deployed to DigitalOcean. Those effects remain separately exact-gated. The
-  private-media runtime remains blocked until anonymous object/CDN denial and
-  one authorized application-media read are proven in the separately approved
-  cutover packet.
+- Social hardening replacement PR #535 is based on the current protected-main
+  baseline. It contains no database migration or `supabase/config.toml` change,
+  but it changes reviewed source consumed by existing declared functions. Its
+  Supabase Preview must therefore remain non-skipped. A protected-main merge
+  requires separate exact authorization to redeploy the same 33 functions while
+  preserving 20/13 JWT parity; any inventory or parity drift is a stop
+  condition. It also refreshes expired Discord role evidence on demand so an
+  otherwise valid member cannot become stranded at Social consent when the
+  bounded verification window expires.
+- The approved Packet E write set only the server-side
+  `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding as Sensitive for Vercel Preview and
+  Production. The exact registered first-party identifier, callback, and S256
+  PKCE request were reconciled without printing or recording the identifier.
+  No public variable, client secret, OAuth registration, callback, or other
+  provider setting changed, and the existing Production deployment remained
+  bound to protected `main` without a deployment solely for this setting.
+- PR #535 has been pushed and reviewed through exact-head GitHub, Vercel, and
+  non-skipped Supabase Preview gates. Protected Preview checks reached the
+  application authorization boundary, preserved private/no-store rejection,
+  and found no identifier in rendered HTML or client assets. The replacement
+  has not been merged, published to GHCR, or deployed to DigitalOcean; those
+  effects remain separately exact-gated. The private-media runtime remains
+  blocked until anonymous object/CDN denial and one authorized
+  application-media read are proven in the separately approved cutover packet.
 - Image workflow run `29664477462`, protected deployment run `29664673632`,
   and hosted verification run `29664734313` completed successfully.
 - Caddy, Pixelfed, MariaDB, Redis, Horizon, scheduler, Spaces access, public

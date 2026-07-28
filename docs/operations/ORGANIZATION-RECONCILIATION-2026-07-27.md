@@ -10,7 +10,7 @@ release gate.
 
 | Repository | Visibility/state | Default branch and exact SHA | Current work | Latest recorded `main` workflow | Production ownership and merge effect |
 | --- | --- | --- | --- | --- | --- |
-| `Mochirii-Wushu/Mochirii` | Public, active | `main` at `21f195458a87ae96eea84af51d0e1420b770ca74` | PR #534 is released; draft PR #532 remains conflicting until the independently reviewed Social replacement passes exact-head checks; issues #443 and #475 remain classified trackers | Repository run `30332558304` and CodeQL run `30332557922`: success | Owns Website, Shopify theme, Social source, and Supabase. Protected-`main` merges publish Website through Vercel and invoke the connected Supabase deployment. Social-source merges also publish an immutable GHCR image; neither Shopify nor DigitalOcean is deployed automatically. |
+| `Mochirii-Wushu/Mochirii` | Public, active | `main` at `21f195458a87ae96eea84af51d0e1420b770ca74` | PR #534 is released; conflicting PR #532 is closed unmerged; reviewed Social replacement PR #535 is the only open organization PR and remains production-gated; issues #443 and #475 remain classified trackers | PR #535 exact-head repository, CodeQL, Vercel, Supabase Preview, and Social production-image checks: success before the current documentation reconciliation | Owns Website, Shopify theme, Social source, and Supabase. Protected-`main` merges publish Website through Vercel and invoke the connected Supabase deployment. Social-source merges also publish an immutable GHCR image; neither Shopify nor DigitalOcean is deployed automatically. |
 | `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, active/dormant | `main` at `7e840fe337a425b659b065abf7e04e5256614cba` | PR #17 closed unmerged at preserved head `2bcab5e7f58ebcae087dc07de81ca15fcd20a2e4`; issue #9 is classified | Dependency workflow run `30242819447`: success | Source validation only. No Apple build, submission, or provider mutation follows from `main`. |
 | `Mochirii-Wushu/Mochirii-Pets` | Private, active/dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | Issue #3 is classified as dormant future work | Dependency workflow run `30273752691`: success | Fresh future Unity source only. No hosted runtime, deployment, Apple submission, or recurring provider cost. |
 | `Mochirii-Wushu/Reaper` | Private, active | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 merged from reviewed head `8179c80af5a16c14911a99f6d199edbbe834116e`; only `main` remains | CI run `30329689062`: success | The source merge ran CI only. It did not deploy the Discord Gateway worker or send a Discord message. |
@@ -40,10 +40,13 @@ bypass and record accountable review.
 - `fix/universal-lightbox` at
   `73e17b945b09f7ba4806880c0182b50b943e8de5`: merged through PR #533;
   remove after final patch-parity readback.
-- `agent/social-reliability` at
-  `4f157d7c1adc7ba530044c35a83c12c102fd9810`: conflicting PR #532; preserve
-  until the reviewed Social replacement passes exact-head checks, then close
-  #532 as superseded and remove this branch.
+- `agent/social-reliability` at reviewed head
+  `4f157d7c1adc7ba530044c35a83c12c102fd9810`: PR #532 was closed unmerged and
+  the remote branch was deleted after PR #535 proved replacement traceability
+  and passed exact-head checks and both provider previews.
+- `agent/social-hardening-replacement-20260727`: active PR #535. Preserve until
+  its separately authorized production merge and post-release readbacks are
+  complete; use the pull request as the authoritative exact-head record.
 
 ### Other repositories
 
@@ -89,10 +92,9 @@ worktree, ref, credential, or archive was changed during that audit.
   the reviewed reliability lane merged through PR #534 and must pass final
   patch-parity proof before this worktree is removed.
 - `Website-social-hardening-replacement-20260727`: active Social replacement
-  candidate rebased on current `main` at
-  `21f195458a87ae96eea84af51d0e1420b770ca74`. Its exact review head is not
-  recorded here because final local review changes are still being sealed; use
-  the future PR head as the authoritative release identity.
+  PR #535 based on current `main` at
+  `21f195458a87ae96eea84af51d0e1420b770ca74`. Use the pull request head as the
+  authoritative release identity and rerun every exact-head gate after changes.
 - `Website` at `b41fb46b987bde86a70add27e612a0a492e441cb`: intentionally dirty
   Social OAuth source material; preserve until the Social replacement is
   reviewed and merged.
@@ -125,6 +127,10 @@ eligible for cleanup only after the owning replacement release is complete:
 - `Website-tooling-security` — `a0d1fa0367c1bcf29827fca2f9ac6e22fe2373a8`.
 - `Website-universal-lightbox` — `38d31f1ce2e6e62c462ccc5eb54d576dccb5ef20`.
 - `Website-web-runtime-20260727` — `4c9ff637e455984b5bb8776eb2f6c2fae6354e1c`.
+
+The superseded Social reliability remote branch is deleted, but its local
+worktree remains preserved until PR #535 completes its production release and
+the final cleanup packet revalidates the exact target list.
 
 The dirty universal-lightbox worktree contains only two stale generated Mochi
 Pets hygiene reports, not unique implementation. Preserve those files until an

@@ -36,7 +36,7 @@ reliability release. It grants no new provider-write authority.
   responses, all on `/spinner/live`, and no grouped application runtime-error cluster.
   Signed-out or unauthorized access remains an intentional opaque 404 and is not counted as
   a runtime failure.
-- One Website PR was open at the latest readback: draft PR #532 for the earlier Social reliability
+- One Website PR was open at this lane's source-preparation readback: draft PR #532 for the earlier Social reliability
   lane, exact head `4f157d7c1adc7ba530044c35a83c12c102fd9810`, two commits behind current `main` and conflicting. Its Supabase Preview was
   cancelled/failed at the provider preview-branch concurrency limit; it was not a green or
   intentionally skipped result. Its replacement belongs to the separate Social hardening

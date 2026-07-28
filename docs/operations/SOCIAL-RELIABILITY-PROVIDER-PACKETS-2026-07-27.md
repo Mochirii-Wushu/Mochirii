@@ -294,27 +294,32 @@ boundaries below.
 
 ## Packet E: server-only Website OAuth client binding
 
-**Separate exact approval required; no action was performed.**
+**Applied under exact approval on 2026-07-28; production deployment unchanged.**
 
 - Target: only the `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` variable in the existing
   Vercel Website project, for Production and Preview. It is an identifier, not
   a client secret, but its value must not be copied into Git, PRs, logs, docs,
   screenshots, tickets, or customer responses.
-- Read-only before capture on 2026-07-27: the variable is absent from both
+- Read-only before capture on 2026-07-27: the variable was absent from both
   Preview and Production in the existing Website project. The live Social
   authorization redirect contains a nonempty first-party client identifier,
   the exact callback `https://social.mochirii.com/auth/oidc/callback`, and S256
-  PKCE. The identifier value was not printed or recorded. Confirm the exact
-  registered client inventory and that no implicit or out-of-band redirect is
-  registered before writing.
-- Intended after value: the exact registered first-party client ID in the
-  server-only variable for Production and Preview. Do not create any
+  PKCE. The identifier value was not printed or recorded. The exact registered
+  client inventory was reconciled before writing; no implicit or out-of-band
+  redirect was accepted.
+- Applied after value: the exact registered first-party client ID is present as
+  a Sensitive server-only variable for Production and Preview. No
   `NEXT_PUBLIC_` equivalent, client secret, OAuth client, redirect, or provider
-  setting.
-- Verification: deploy a reviewed Preview; a missing or mismatched ID fails
-  closed without rendering consent; the exact matching client completes one
-  authorization-code plus S256 PKCE flow; browser bundles and rendered HTML do
-  not contain the identifier; and no provider error detail reaches members.
+  setting was created or changed. The existing Production deployment was not
+  redeployed solely for this setting.
+- Verification: reviewed PR #535 produced an exact-head Vercel Preview and a
+  non-skipped Supabase Preview. The live authorization redirect and registered
+  client readback agreed on the first-party client, exact callback, and S256
+  PKCE request. An unsigned decision reached the configured application route
+  and failed with its private/no-store `401`; the identifier was absent from
+  rendered HTML and all loaded client assets. A genuine active-member approval
+  or denial remains a post-release manual acceptance gate and must not be
+  simulated with a real authorization request during source verification.
 - Rollback: restore the captured previous value and scopes, or remove the
   variable if it was previously absent, then redeploy the prior Website
   commit and repeat the fail-closed checks.
