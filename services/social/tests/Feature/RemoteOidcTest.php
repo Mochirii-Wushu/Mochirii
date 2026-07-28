@@ -2,20 +2,25 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\RemoteOidcController;
 use App\Models\UserOidcMapping;
+use App\Services\MochiriiSocialSyncService;
 use App\Services\UserOidcService;
 use App\User;
 use Auth;
-use League\OAuth2\Client\Provider\GenericResourceOwner;
-use League\OAuth2\Client\Token\AccessToken;
-use App\Services\MochiriiSocialSyncService;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Routing\Route as RoutingRoute;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use League\OAuth2\Client\Provider\GenericResourceOwner;
+use League\OAuth2\Client\Token\AccessToken;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Tests\TestCase;
 
 class RemoteOidcTest extends TestCase
@@ -96,6 +101,110 @@ class RemoteOidcTest extends TestCase
         $this->assertMatchesRegularExpression('/^[A-Za-z0-9_-]{43}$/', $query['code_challenge'] ?? '');
         $this->assertNotEmpty($pkceVerifier);
         $this->assertArrayNotHasKey('client_secret', $query);
+    }
+
+    #[Test]
+    public function oidc_routes_use_bounded_same_session_locks(): void
+    {
+        foreach (['auth/oidc/start', 'auth/oidc/callback'] as $uri) {
+            $route = $this->oidcRoute($uri);
+
+            $this->assertSame(RemoteOidcController::SESSION_LOCK_SECONDS, $route->locksFor());
+            $this->assertSame(RemoteOidcController::SESSION_WAIT_SECONDS, $route->waitsFor());
+        }
+    }
+
+    #[Test]
+    public function oidc_provider_requests_and_session_lock_have_a_bounded_budget(): void
+    {
+        config([
+            'remote-auth.oidc.clientId' => 'fake',
+            'remote-auth.oidc.clientSecret' => 'fakeSecret',
+            'remote-auth.oidc.authorizeURL' => 'http://fakeserver.oidc/authorizeURL',
+            'remote-auth.oidc.tokenURL' => 'http://fakeserver.oidc/tokenURL',
+            'remote-auth.oidc.profileURL' => 'http://fakeserver.oidc/profile',
+            'remote-auth.oidc.request_timeout' => 15,
+            'remote-auth.social_sync.timeout' => 10,
+        ]);
+
+        $provider = UserOidcService::build();
+
+        $this->assertSame(15, $provider->getHttpClient()->getConfig('timeout'));
+        $maximumOutboundSeconds = (2 * (int) config('remote-auth.oidc.request_timeout'))
+            + (int) config('remote-auth.social_sync.timeout');
+        $this->assertLessThanOrEqual(
+            RemoteOidcController::SESSION_LOCK_SECONDS - 15,
+            $maximumOutboundSeconds,
+        );
+    }
+
+    #[Test]
+    public function same_session_callback_contention_permits_exactly_one_token_exchange(): void
+    {
+        config(['remote-auth.oidc.enabled' => true]);
+
+        $this->mock(UserOidcService::class, function (MockInterface $mock) {
+            $mock->shouldReceive('setPkceCode')->once()->with('one-time-verifier');
+            $mock->shouldReceive('getAccessToken')
+                ->once()
+                ->with('authorization_code', ['code' => 'one-time-code'])
+                ->andThrow(new RuntimeException('token exchange reached'));
+            $mock->shouldNotReceive('getResourceOwner');
+        });
+
+        $this->withSession([
+            'oauth2state' => 'one-time-state',
+            'oauth2pkceCode' => 'one-time-verifier',
+            'oauth2issuedAt' => now()->getTimestamp(),
+        ]);
+        $sessionId = session()->getId();
+        session()->save();
+        $this->withCookie((string) config('session.cookie'), $sessionId);
+
+        $callbackRoute = $this->oidcRoute('auth/oidc/callback');
+        $competingLock = Cache::lock(
+            'session:'.$sessionId,
+            RemoteOidcController::SESSION_LOCK_SECONDS,
+        );
+        $this->assertTrue($competingLock->get());
+
+        // Avoid waiting five wall-clock seconds while still exercising the
+        // actual StartSession lock path with this request's session cookie.
+        $callbackRoute->block(RemoteOidcController::SESSION_LOCK_SECONDS, 0);
+        $blocked = null;
+        $this->withoutExceptionHandling();
+        try {
+            try {
+                $this->get('auth/oidc/callback?state=one-time-state&code=one-time-code');
+            } catch (LockTimeoutException $error) {
+                $blocked = $error;
+            }
+        } finally {
+            $competingLock->release();
+            $callbackRoute->block(
+                RemoteOidcController::SESSION_LOCK_SECONDS,
+                RemoteOidcController::SESSION_WAIT_SECONDS,
+            );
+            $this->withExceptionHandling();
+        }
+        $this->assertInstanceOf(LockTimeoutException::class, $blocked);
+
+        $exchangeReached = null;
+        $this->withoutExceptionHandling();
+        try {
+            $this->get('auth/oidc/callback?state=one-time-state&code=one-time-code');
+        } catch (RuntimeException $error) {
+            $exchangeReached = $error;
+        } finally {
+            $this->withExceptionHandling();
+        }
+        $this->assertSame('token exchange reached', $exchangeReached?->getMessage());
+
+        // The controller persists transaction consumption before making the
+        // exchange, so even an exchange failure cannot reopen the callback.
+        $replay = $this->get('auth/oidc/callback?state=one-time-state&code=one-time-code');
+        $replay->assertStatus(400);
+        $replay->assertSeeText('Invalid authorization response.');
     }
 
     #[Test]
@@ -608,5 +717,16 @@ class RemoteOidcTest extends TestCase
         $replay = $this->get('auth/oidc/callback?state=expected-state&code=1');
 
         $replay->assertStatus(400);
+    }
+
+    private function oidcRoute(string $uri): RoutingRoute
+    {
+        foreach (app('router')->getRoutes()->getRoutes() as $route) {
+            if ($route->uri() === $uri && in_array('GET', $route->methods(), true)) {
+                return $route;
+            }
+        }
+
+        $this->fail("OIDC route not found: {$uri}");
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RemoteOidcController;
 use Illuminate\Support\Facades\Route;
 
 Route::domain(config('pixelfed.domain.app'))->group(function () {
@@ -36,8 +37,10 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
 
     Auth::routes(['register' => false]);
 
-    Route::get('auth/oidc/start', 'RemoteOidcController@start');
-    Route::get('auth/oidc/callback', 'RemoteOidcController@handleCallback');
+    Route::get('auth/oidc/start', 'RemoteOidcController@start')
+        ->block(RemoteOidcController::SESSION_LOCK_SECONDS, RemoteOidcController::SESSION_WAIT_SECONDS);
+    Route::get('auth/oidc/callback', 'RemoteOidcController@handleCallback')
+        ->block(RemoteOidcController::SESSION_LOCK_SECONDS, RemoteOidcController::SESSION_WAIT_SECONDS);
 
     Route::get('auth/forgot/email', 'UserEmailForgotController@index')->name('email.forgot');
     Route::post('auth/forgot/email', 'UserEmailForgotController@store')->middleware('throttle:10,900,forgotEmail');

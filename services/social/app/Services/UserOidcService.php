@@ -32,6 +32,7 @@ class UserOidcService extends GenericProvider
             'urlResourceOwnerDetails' => config('remote-auth.oidc.profileURL'),
             'scopes' => config('remote-auth.oidc.scopes'),
             'responseResourceOwnerId' => config('remote-auth.oidc.field_id'),
+            'timeout' => (int) config('remote-auth.oidc.request_timeout', 10),
         ]);
     }
 }

@@ -22,6 +22,13 @@ class RemoteOidcController extends Controller
 {
     private const OIDC_TRANSACTION_TTL_SECONDS = 300;
 
+    // The callback performs two OIDC requests (15 seconds each at most) and
+    // one membership-sync request (10 seconds at most). The remaining margin
+    // covers local account and session work without leaving an orphaned lock.
+    public const SESSION_LOCK_SECONDS = 60;
+
+    public const SESSION_WAIT_SECONDS = 5;
+
     protected $fractal;
 
     public function start(UserOidcService $provider, Request $request)
@@ -58,6 +65,10 @@ class RemoteOidcController extends Controller
         $expectedState = $request->session()->pull('oauth2state');
         $pkceCode = $request->session()->pull('oauth2pkceCode');
         $issuedAt = $request->session()->pull('oauth2issuedAt');
+        // Persist one-time consumption before any validation response or
+        // outbound exchange. Laravel otherwise does not save session changes
+        // when an exception escapes the session middleware.
+        $request->session()->save();
         $transactionAge = is_int($issuedAt)
             ? now()->getTimestamp() - $issuedAt
             : null;
@@ -77,7 +88,9 @@ class RemoteOidcController extends Controller
                 : redirect('/');
         }
 
-        abort_unless($validCallback, 400, 'Invalid authorization response.');
+        if (! $validCallback) {
+            return response('Invalid authorization response.', 400);
+        }
 
         $provider->setPkceCode($pkceCode);
 
