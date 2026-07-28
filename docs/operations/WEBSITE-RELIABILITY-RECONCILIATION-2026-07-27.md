@@ -132,3 +132,20 @@ Post-merge acceptance must prove exact source binding, the exact 33-name functio
 classification readback, public and authenticated spinner behavior, responsive route checks,
 and no new runtime-error cluster. Any mismatch stops the release and requires a reviewed forward
 fix or rollback; immutable raffle evidence must not be deleted or rewritten.
+
+## Local Database Verification
+
+Run the database gates serially against the local Supabase stack:
+
+```text
+supabase db reset --local
+npm run test:supabase-db
+supabase db lint --local --level warning --fail-on error
+supabase db advisors --local --type all --level info --fail-on none
+npm run test:reviewed-sya-spinner-classification
+```
+
+`test:supabase-db` discovers only top-level `*_test.sql` files. It deliberately
+does not pass the entire `supabase/tests` directory to `pg_prove`, because that
+directory also contains data fixtures that are not TAP programs and must never
+be executed as independent persistent tests.

@@ -8,6 +8,7 @@ import {
   type SpinnerDrawMode,
   type SpinnerPersistedDrawMode,
 } from "./raffle.ts";
+import { SPINNER_BROWSER_REQUEST_TIMEOUT_MS } from "../../lib/spinner/request-timeouts.ts";
 
 export const LIVE_SPINNER_POLL_MS = 2_000;
 export const LIVE_SPINNER_ACTIVE_POLL_MS = 750;
@@ -462,7 +463,7 @@ export function createSpinnerCommandId(): string {
 
 async function spinnerLiveRequest(init: RequestInit): Promise<SpinnerLiveResultV1> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+  const timeout = window.setTimeout(() => controller.abort(), SPINNER_BROWSER_REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch("/spinner/live", {
       credentials: "same-origin",

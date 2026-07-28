@@ -12,13 +12,13 @@ import {
   parseJwtExpiryMs,
   spinnerRequestIsSameOrigin,
 } from "@/lib/spinner/session-policy";
+import { SPINNER_PROXY_UPSTREAM_TIMEOUT_MS } from "@/lib/spinner/request-timeouts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const MAX_COMMAND_BYTES = 64 * 1024;
 const MAX_RESPONSE_BYTES = 256 * 1024;
-const UPSTREAM_TIMEOUT_MS = 12_000;
 const SPINNER_OUTCOME_HEADER = "X-Mochirii-Spinner-Outcome";
 
 function recordProxyError(classification: string, upstreamStatus?: number) {
@@ -92,7 +92,7 @@ async function forwardLiveRequest({
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), UPSTREAM_TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), SPINNER_PROXY_UPSTREAM_TIMEOUT_MS);
   try {
     const response = await fetch(`${SUPABASE_URL}/functions/v1/spinner-live-session`, {
       method,

@@ -150,6 +150,35 @@ assertOrdered(
 );
 assertIncludes("Account stale optional-read guard", accountPanel, "loadSubmissions(loadGeneration)");
 assertIncludes("Leader optional queues", leaderDashboard, "void Promise.allSettled([");
+assertIncludes("Leader load generation", leaderDashboard, "beginAuthLoadGeneration(leaderLoadGenerationRef)");
+assertIncludes(
+  "Leader stale access guard",
+  leaderDashboard,
+  "isCurrentAuthLoadGeneration(leaderLoadGenerationRef, loadGeneration)",
+);
+assertIncludes(
+  "Leader stale queue guard",
+  leaderDashboard,
+  "loadQueue({ status: \"pending\", page: 1, thumbnailState: \"all\", loadGeneration })",
+);
+assertIncludes(
+  "Leader stale Social queue guard",
+  leaderDashboard,
+  "loadInstagramQueue({ status: instagramActiveStatus, loadGeneration })",
+);
+assertIncludes(
+  "Leader stale provider-status guard",
+  leaderDashboard,
+  "loadInstagramApiStatus(\"\", loadGeneration)",
+);
+assertIncludes("Leader sensitive-state reset", leaderDashboard, "clearModeratorState();");
+assertIncludes("Leader unmount invalidation", leaderDashboard, "invalidateAuthLoadGeneration(leaderLoadGenerationRef);");
+assertIncludes("Leader stale spinner-launch guard", leaderDashboard, "const loadGeneration = leaderLoadGenerationRef.current;");
+assertIncludes(
+  "Leader denied spinner-session cleanup",
+  leaderDashboard.replaceAll("\r\n", "\n"),
+  "if (!access.ok) {\n      void clearPrivateSpinnerSession();",
+);
 assertOrdered(
   "Leader access before optional queues",
   leaderDashboard,

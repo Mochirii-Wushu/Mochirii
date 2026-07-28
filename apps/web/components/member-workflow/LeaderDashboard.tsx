@@ -1,7 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  beginAuthLoadGeneration,
+  invalidateAuthLoadGeneration,
+  isCurrentAuthLoadGeneration,
+} from "@/lib/auth-load-generation";
 import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
 import {
   clearPrivateSpinnerSession,
@@ -91,18 +96,55 @@ export function LeaderDashboard() {
   } | null>(null);
   const [spinnerLaunchBusy, setSpinnerLaunchBusy] = useState(false);
   const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
+  const leaderLoadGenerationRef = useRef(0);
+
+  const clearModeratorState = useCallback(() => {
+    setQueue(null);
+    setReviewStatus("");
+    setReviewError("");
+    setAccessDeniedMessage("Gallery moderation requires Discord membership, completed onboarding, and the Moderator role.");
+    setReasons({});
+    setCleanupConfirmations({});
+    setCleanupBusyId("");
+    setInstagramQueue(null);
+    setInstagramApiStatus(null);
+    setInstagramBusy(false);
+    setInstagramApiBusy(false);
+    setInstagramBusyJobId("");
+    setInstagramStatus("Instagram queue has not loaded yet.");
+    setInstagramError("");
+    setInstagramCaptions({});
+    setInstagramAltTexts({});
+    setInstagramPermalinks({});
+    setInstagramNotes({});
+    setInstagramConfirmations({});
+    setInstagramJobMessages({});
+    setMemberVerificationUserId("");
+    setMemberVerificationReason("");
+    setMemberVerificationExpiresAt("");
+    setMemberVerificationBusy(false);
+    setMemberVerificationStatus("Member verification review is ready.");
+    setMemberVerificationError("");
+    setMemberVerificationLast(null);
+    setSpinnerLaunchBusy(false);
+    setSpinnerLaunchMessage("");
+  }, []);
 
   const loadQueue = useCallback(async ({
     status = "pending",
     page = 1,
     thumbnailState = "all",
     successMessage = "",
+    loadGeneration,
   }: {
     status?: ModerationStatus;
     page?: number;
     thumbnailState?: GalleryThumbnailState;
     successMessage?: string;
+    loadGeneration?: number;
   } = {}) => {
+    const requestGeneration = loadGeneration ?? leaderLoadGenerationRef.current;
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     const nextStatus = normalizeStatus(status);
     const nextPage = Math.max(1, Math.trunc(page));
     const nextThumbnailState = nextStatus === "approved" ? thumbnailState : "all";
@@ -120,6 +162,7 @@ export function LeaderDashboard() {
       pageSize: 25,
       thumbnailState: nextThumbnailState,
     });
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     if (!result.ok) {
       setQueue(null);
       setReviewError(result.message || "Gallery moderation submissions could not be loaded.");
@@ -139,7 +182,17 @@ export function LeaderDashboard() {
     setBusy(false);
   }, []);
 
-  const loadInstagramQueue = useCallback(async ({ status = instagramActiveStatus, successMessage = "" }: { status?: string; successMessage?: string } = {}) => {
+  const loadInstagramQueue = useCallback(async ({
+    status = instagramActiveStatus,
+    successMessage = "",
+    loadGeneration,
+  }: {
+    status?: string;
+    successMessage?: string;
+    loadGeneration?: number;
+  } = {}) => {
+    const requestGeneration = loadGeneration ?? leaderLoadGenerationRef.current;
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     const nextStatus = instagramStatusConfig(status).id;
     const config = instagramStatusConfig(nextStatus);
     setInstagramActiveStatus(nextStatus);
@@ -149,6 +202,7 @@ export function LeaderDashboard() {
 
     const requestedStatus = nextStatus === "shared_manually" ? "all" : nextStatus;
     const result = await listInstagramPublishQueue({ status: requestedStatus });
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     if (!result.ok) {
       setInstagramQueue(null);
       setInstagramError(result.message || "Instagram publishing queue could not be loaded.");
@@ -181,9 +235,12 @@ export function LeaderDashboard() {
     setInstagramBusy(false);
   }, [instagramActiveStatus]);
 
-  const loadInstagramApiStatus = useCallback(async (successMessage = "") => {
+  const loadInstagramApiStatus = useCallback(async (successMessage = "", loadGeneration?: number) => {
+    const requestGeneration = loadGeneration ?? leaderLoadGenerationRef.current;
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     setInstagramApiBusy(true);
     const result = await checkInstagramApiStatus();
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     if (!result.ok) {
       setInstagramApiStatus(null);
       setInstagramError(result.message || "Meta API status could not be checked.");
@@ -201,10 +258,14 @@ export function LeaderDashboard() {
   }, []);
 
   const checkAccess = useCallback(async () => {
+    const loadGeneration = beginAuthLoadGeneration(leaderLoadGenerationRef);
+    clearModeratorState();
+    setPanel("signed-out");
     setBusy(true);
     setReviewError("");
     setReviewStatus("Checking moderator access.");
     const auth = await requireAuth();
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, loadGeneration)) return;
     if (!auth.ok) {
       void clearPrivateSpinnerSession();
       setPanel("signed-out");
@@ -213,7 +274,9 @@ export function LeaderDashboard() {
     }
 
     const access = await checkLeaderGalleryModerationAccess();
+    if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, loadGeneration)) return;
     if (!access.ok) {
+      void clearPrivateSpinnerSession();
       setAccessDeniedMessage(access.message || "Gallery moderation requires Discord membership, completed onboarding, and the Moderator role.");
       setPanel("denied");
       setBusy(false);
@@ -226,17 +289,18 @@ export function LeaderDashboard() {
     // Access to the moderator spinner is established above. Queue and provider
     // reads are independent review tools and must not hold that doorway open.
     void Promise.allSettled([
-      loadQueue({ status: "pending", page: 1, thumbnailState: "all" }),
-      loadInstagramQueue({ status: instagramActiveStatus }),
-      loadInstagramApiStatus(),
+      loadQueue({ status: "pending", page: 1, thumbnailState: "all", loadGeneration }),
+      loadInstagramQueue({ status: instagramActiveStatus, loadGeneration }),
+      loadInstagramApiStatus("", loadGeneration),
     ]);
-  }, [instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadQueue]);
+  }, [clearModeratorState, instagramActiveStatus, loadInstagramApiStatus, loadInstagramQueue, loadQueue]);
 
   useEffect(() => {
     const subscription = onAuthStateChange(() => {
       void measureAuthenticatedRouteTask("leader-dashboard", checkAccess);
     });
     return () => {
+      invalidateAuthLoadGeneration(leaderLoadGenerationRef);
       subscription.data?.subscription?.unsubscribe();
     };
   }, [checkAccess]);
@@ -253,14 +317,23 @@ export function LeaderDashboard() {
 
   async function openSpinner() {
     if (spinnerLaunchBusy) return;
+    const loadGeneration = leaderLoadGenerationRef.current;
     setSpinnerLaunchBusy(true);
     setSpinnerLaunchMessage("Opening the private draw stage.");
 
     try {
       const result = await openPrivateSpinnerSession("controller");
+      if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, loadGeneration)) {
+        void clearPrivateSpinnerSession();
+        return;
+      }
       if (!result.ok || result.mode !== "controller") throw new Error("Access unavailable.");
       window.location.assign("/spinner");
     } catch {
+      if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, loadGeneration)) {
+        void clearPrivateSpinnerSession();
+        return;
+      }
       setSpinnerLaunchMessage("Private draw access could not be opened. Refresh your session and try again.");
       setSpinnerLaunchBusy(false);
     }

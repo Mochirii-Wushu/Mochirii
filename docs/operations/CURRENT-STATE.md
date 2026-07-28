@@ -123,6 +123,9 @@ inferred from the earlier closeout.
   notices remain observation items and are not evidence for deletion.
 - Detailed scope, advisor rationale, worktree disposition, and release gates are
   in [`WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md`](./WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md).
+- The complete public-safe organization, branch, issue, and 28-worktree
+  classification is recorded in
+  [`ORGANIZATION-RECONCILIATION-2026-07-27.md`](./ORGANIZATION-RECONCILIATION-2026-07-27.md).
 
 ## Social Release
 
