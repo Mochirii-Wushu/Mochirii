@@ -54,3 +54,17 @@ test("monthly rules keep the gathering on Wednesday and the raffle on Saturday",
   assert.equal(gathering?.endIso, "2026-08-05T14:00:00.000Z");
   assert.equal(gathering?.timezone, "UTC+8");
 });
+
+test("the monthly gathering takes its exact slot and advances the next Guild Party card", () => {
+  const cards = websiteEventCardsFromSchedule(guildScheduleData, new Date("2026-08-04T14:00:00.000Z"));
+  const slot = cards.filter((item) =>
+    item.startIso === "2026-08-05T13:30:00.000Z" &&
+    item.endIso === "2026-08-05T14:00:00.000Z" &&
+    item.location === "https://mochirii.com/events"
+  );
+
+  assert.deepEqual(slot.map((item) => item.id), ["monthly-gathering"]);
+  const guildParty = cards.find((item) => item.id === "guild-party");
+  assert.equal(guildParty?.date, "2026-08-06");
+  assert.equal(guildParty?.startIso, "2026-08-06T13:30:00.000Z");
+});

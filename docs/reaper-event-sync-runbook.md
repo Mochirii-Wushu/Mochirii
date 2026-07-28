@@ -51,7 +51,7 @@ Run:
 /sync-events mode:preview confirm:false
 ```
 
-The preview should show exactly one recurring `Monthly Guild Gathering` on the first Wednesday from 9:30 PM to 10 PM UTC+8, one canonical `Monthly Guild Raffle` update, and no duplicate creation. If the explicit duplicate one-off raffle event `1513742240760070144` still exists, preview reports it as a duplicate removal. Only after the preview output is clean and owner approval is current, run:
+The preview should show exactly one recurring `Monthly Guild Gathering` on the first Wednesday from 9:30 PM to 10 PM UTC+8, advance the exact overlapping Guild Party occurrence to its next non-conflicting weekly slot, show one canonical `Monthly Guild Raffle` update, and create no duplicates. If the explicit duplicate one-off raffle event `1513742240760070144` still exists, preview reports it as a duplicate removal. Only after the preview output is clean and owner approval is current, run:
 
 Do not run `apply` if preview shows duplicate creates, ambiguous registry mappings, multiple exact matches, unexpected missing managed events, unexpected title/time/recurrence drift, or any unmanaged Discord event that would be touched.
 

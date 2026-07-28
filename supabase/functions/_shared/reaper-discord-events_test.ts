@@ -95,6 +95,44 @@ Deno.test("desiredEventsFromSchedule shapes monthly and weekly website schedule 
   assertEquals(weekly.endIso, "2026-07-03T23:00:00.000Z");
 });
 
+Deno.test("the monthly gathering takes its exact slot and advances the colliding Guild Party event", () => {
+  const events = desiredEventsFromSchedule(
+    {
+      timezone: { offsetMinutes: 480 },
+      monthly: {
+        gathering: {
+          id: "monthly-gathering",
+          title: "Monthly Guild Gathering",
+          rule: "next-first-wednesday",
+          location: siteUrl("events"),
+          startTime: "21:30",
+          endTime: "22:00",
+          discordRecurrenceRule: {
+            frequency: 1,
+            interval: 1,
+            by_n_weekday: [{ n: 1, day: 2 }],
+          },
+        },
+      },
+      weekly: [{
+        id: "guild-party",
+        discord: true,
+        title: "Guild Party",
+        location: siteUrl("events"),
+        startTime: "21:30",
+        endTime: "22:00",
+        days: [3],
+      }],
+    },
+    new Date("2026-08-04T14:00:00.000Z"),
+  );
+
+  assertEquals(events.map((event) => event.key), ["monthly-gathering", "guild-party-3"]);
+  const guildParty = events.find((event) => event.key === "guild-party-3");
+  assertEquals(guildParty?.startIso, "2026-08-12T13:30:00.000Z");
+  assertEquals(guildParty?.endIso, "2026-08-12T14:00:00.000Z");
+});
+
 Deno.test("scheduledEventBody preserves Discord event contract and limits text fields", async () => {
   const body = await scheduledEventBody(
     {

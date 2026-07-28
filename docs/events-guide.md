@@ -52,6 +52,7 @@ Not currently implemented:
 - Event-board dates are rendered with `MochiriiUtils.formatDateUTC`.
 - Featured event dates in the Next app derive from the first upcoming schedule card; `featured.date` is fallback shell data only.
 - Monthly schedule items declare their own supported rule (`next-first-saturday` or `next-first-wednesday`); Website and Reaper helpers must derive each item independently rather than applying one shared weekday.
+- If a monthly event and weekly event share the exact start, end, and Website location, the monthly event owns that slot. The Website selects the weekly event's next non-conflicting day, while Reaper advances that stable weekday event key by seven days so an existing managed Discord event can be updated rather than orphaned.
 - Reaper's `/sync-events` command reads the mirrored guild schedule JSON and must stay aligned with the website schedule helpers.
 - The Next `/events` route waits for a real request, generates one ISO reference time on the server, and passes it through the complete Event Board render. This keeps status current without calling `Date.now()` or a no-argument `new Date()` during client hydration.
 

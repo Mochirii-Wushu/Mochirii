@@ -161,6 +161,7 @@ function eventInstance(schedule, item, key, typeId, localDate) {
     startIso: localToUtcIso(schedule, localDate, startTime),
     endIso: localToUtcIso(schedule, eventEndDate(localDate, startTime, endTime), endTime),
     location: String(item.discordLocation || item.location || ""),
+    websiteLocation: String(item.location || ""),
     cover: String(item.discordCoverImage || ""),
     recurrenceRule: item.discordRecurrenceRule || null,
     duplicateEventIds: asArray(item.discordDuplicateEventIds),
@@ -169,7 +170,7 @@ function eventInstance(schedule, item, key, typeId, localDate) {
 }
 
 function localEventInstances(schedule, now) {
-  const instances = [];
+  const monthlyInstances = [];
   const monthly = asObject(schedule.monthly);
 
   for (const value of Object.values(monthly)) {
@@ -177,19 +178,31 @@ function localEventInstances(schedule, now) {
     const id = String(item.id || "");
     const weekday = monthlyRuleWeekdays[String(item.rule || "")];
     if (!id || !Number.isInteger(weekday)) continue;
-    instances.push(eventInstance(schedule, item, id, id, nextFirstWeekday(schedule, weekday, now)));
+    monthlyInstances.push(eventInstance(schedule, item, id, id, nextFirstWeekday(schedule, weekday, now)));
   }
+
+  const monthlySlots = new Set(
+    monthlyInstances.map((event) => [event.startIso, event.endIso, event.websiteLocation].join("\n")),
+  );
+  const weeklyInstances = [];
 
   for (const value of asArray(schedule.weekly)) {
     const item = asObject(value);
     if (item.discord !== true) continue;
     const id = String(item.id || "");
     for (const day of asArray(item.days)) {
-      instances.push(eventInstance(schedule, item, `${id}-${day}`, id, nextWeeklyDate(schedule, item, Number(day), now)));
+      const localDate = nextWeeklyDate(schedule, item, Number(day), now);
+      const event = eventInstance(schedule, item, `${id}-${day}`, id, localDate);
+      const slot = [event.startIso, event.endIso, event.websiteLocation].join("\n");
+      if (monthlySlots.has(slot)) {
+        weeklyInstances.push(eventInstance(schedule, item, `${id}-${day}`, id, addDays(localDate, 7)));
+      } else {
+        weeklyInstances.push(event);
+      }
     }
   }
 
-  return instances;
+  return [...monthlyInstances, ...weeklyInstances];
 }
 
 function normalizedRecurrence(value) {
@@ -293,6 +306,8 @@ expectedEventTypes.forEach((id) => assert(typeIds.has(id), `Missing managed even
 
 const keys = instances.map((event) => event.key);
 assert(keys.length === new Set(keys).size, "Managed event instance keys must be unique.");
+const slots = instances.map((event) => [event.startIso, event.endIso, event.websiteLocation].join("\n"));
+assert(slots.length === new Set(slots).size, "Managed event instances must not share an exact Website time-and-location slot.");
 
 instances.forEach((event) => {
   assert(event.title, `${event.key}: title is required.`);

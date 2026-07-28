@@ -204,6 +204,10 @@ function scheduleEventFromDate(schedule: JsonRecord, key: string, item: JsonReco
   };
 }
 
+function eventSlotKey(event: ScheduleEvent): string {
+  return [event.startIso, event.endIso, event.websiteLocation].join("\n");
+}
+
 export function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()): ScheduleEvent[] {
   const monthly = asRecord(schedule.monthly);
   const events: ScheduleEvent[] = [];
@@ -217,6 +221,8 @@ export function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()
     if (event) events.push(event);
   });
 
+  const monthlySlots = new Set(events.map(eventSlotKey));
+
   asArray(schedule.weekly).map(asRecord).forEach((item) => {
     if (item.discord !== true) return;
     const key = safeString(item.id, 80);
@@ -225,8 +231,12 @@ export function desiredEventsFromSchedule(schedule: JsonRecord, now = new Date()
       .map((day) => Number(day))
       .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
       .forEach((day) => {
-        const localDate = nextWeeklyDate(schedule, item, day, now);
-        const event = scheduleEventFromDate(schedule, `${key}-${day}`, item, localDate);
+        let localDate = nextWeeklyDate(schedule, item, day, now);
+        let event = scheduleEventFromDate(schedule, `${key}-${day}`, item, localDate);
+        if (event && monthlySlots.has(eventSlotKey(event))) {
+          localDate = addDays(localDate, 7);
+          event = scheduleEventFromDate(schedule, `${key}-${day}`, item, localDate);
+        }
         if (event) events.push(event);
       });
   });
