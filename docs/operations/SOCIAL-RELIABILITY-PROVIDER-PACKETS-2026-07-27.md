@@ -300,10 +300,13 @@ boundaries below.
   Vercel Website project, for Production and Preview. It is an identifier, not
   a client secret, but its value must not be copied into Git, PRs, logs, docs,
   screenshots, tickets, or customer responses.
-- Before capture: presence/absence and scope of the existing variable; the
-  registered first-party client inventory; exact allowed callback
-  `https://social.mochirii.com/auth/oidc/callback`; authorization-code flow;
-  S256 PKCE; and confirmation that no out-of-band redirect is registered.
+- Read-only before capture on 2026-07-27: the variable is absent from both
+  Preview and Production in the existing Website project. The live Social
+  authorization redirect contains a nonempty first-party client identifier,
+  the exact callback `https://social.mochirii.com/auth/oidc/callback`, and S256
+  PKCE. The identifier value was not printed or recorded. Confirm the exact
+  registered client inventory and that no implicit or out-of-band redirect is
+  registered before writing.
 - Intended after value: the exact registered first-party client ID in the
   server-only variable for Production and Preview. Do not create any
   `NEXT_PUBLIC_` equivalent, client secret, OAuth client, redirect, or provider

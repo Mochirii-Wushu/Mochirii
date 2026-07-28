@@ -142,6 +142,13 @@ release time rather than inferred from the earlier closeout.
   inventory or parity drift is a stop condition. It also refreshes expired
   Discord role evidence on demand so an otherwise valid member cannot become
   stranded at Social consent when the bounded verification window expires.
+- Read-only Vercel environment inventory confirms that the required server-only
+  `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding is currently absent from both
+  Preview and Production. The live Social authorization redirect still uses a
+  nonempty first-party client identifier, the exact approved callback, and S256
+  PKCE. No identifier value was recorded. Packet E must be approved and applied
+  before an end-to-end OAuth Preview can pass; until then the Website consent
+  decision route intentionally fails closed.
 - The replacement has not been pushed, previewed, merged, published to GHCR, or
   deployed to DigitalOcean. Those effects remain separately exact-gated. The
   private-media runtime remains blocked until anonymous object/CDN denial and
