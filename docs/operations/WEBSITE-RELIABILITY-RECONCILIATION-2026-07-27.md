@@ -1,7 +1,27 @@
 # Website Reliability Reconciliation — 2026-07-27
 
-This public-safe ledger records the reviewed source lane for Website reliability. It is
-not a deployment record and grants no provider-write authority.
+This public-safe ledger records the reviewed source lane and completed Website
+reliability release. It grants no new provider-write authority.
+
+## Release Result
+
+- PR #534 was squash-merged through protected `main` as
+  `21f195458a87ae96eea84af51d0e1420b770ca74` after the recorded exact-head
+  repository, CodeQL, Vercel Preview, non-skipped Supabase Preview, database,
+  browser and release-readiness gates passed.
+- Vercel production deployment `dpl_6nHjx2vKA9wBgyDEGf4cRdpUESiJ` reached
+  `READY` and is exactly bound to the merge SHA.
+- Supabase applied only migrations
+  `20260727211442_classify_reviewed_sya_spinner_draw.sql` and
+  `20260727212838_consolidate_member_social_links_select_policy.sql`.
+- The reviewed Sya aggregate readback reports `all_checks_pass=true`; the
+  profile-link duplicate-policy warning cleared and exactly one SELECT policy
+  remains.
+- Exactly the same 33 ACTIVE Edge Functions redeployed once, every version
+  advanced exactly one, and JWT configuration remained 20 true / 13 false.
+- Production route, runtime, responsive and raffle/spinner acceptance passed,
+  so the recorded prior Vercel deployment was not restored. Immutable raffle
+  evidence was not rewritten or deleted.
 
 ## Verified Baseline
 

@@ -10,6 +10,10 @@ URL or a direct local-storage path. Static application assets, including the
 default avatar, may remain public. No provider write described here has been
 performed.
 
+The separately applied installer-only Caddy block changed no media route,
+object ACL, Spaces/CDN state, or application image and satisfies none of this
+private-media cutover's preconditions.
+
 The reviewed source foundation does the following:
 
 - writes future member posts, avatars, stories, group images, and group videos

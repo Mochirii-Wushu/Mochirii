@@ -1,7 +1,10 @@
 # Mochirii Social Reliability Provider Packets
 
 Date: 2026-07-27
-Status: source implementation prepared; every provider write remains unapproved
+Status: source implementation prepared; only the separately approved emergency
+installer-path Caddy block is live. Image rollout, full Caddy alignment,
+Cloudflare, callback containment, OAuth binding, and private-media work remain
+unapproved.
 
 ## Scope and verified source evidence
 
@@ -45,12 +48,26 @@ Read-only production checks established the following:
   PKCE and the canonical social.mochirii.com callback. It also confirmed that
   the live landing page still links its secondary action to `/social`, so the
   source correction in this packet is not yet live.
+- The separately approved emergency Caddy boundary was installed without an
+  image or container change. Readback returned 200 for Social root and login,
+  and an empty 404 with `Cache-Control: private, no-store` for `/installer`,
+  `/installer/`, and a descendant. No Docker, Cloudflare, DNS, database,
+  secret, image, or other provider setting changed with that narrow block.
 
 The source release also separates process liveness from a bounded container
 readiness route that requires both MariaDB and Redis, removes the mobile login gutter mismatch,
 adds the missing guest CSRF metadata, and removes public fallback references to
 the upstream product name. The exact requested Mochirii description is shared
 by the landing and login surfaces.
+
+Member-access source also closes the stale-verification dead end. Positive
+Discord role evidence is refreshed when its seven-day bound expires; a recent
+negative result is cached for only five minutes to avoid provider polling while
+still allowing prompt recovery after onboarding. Approval performs a fresh
+check. Every Discord lookup has a five-second timeout, preserves rate-limit
+responses, maps temporary upstream failure to unavailable rather than inactive,
+and refuses to retain old access if a definitive negative state cannot be
+written.
 
 The reviewed source boundary is private by default: only the Mochirii landing,
 login, OIDC/OAuth handshake, health, and legal routes are reachable while
@@ -232,6 +249,11 @@ text, screenshots, or provider tickets.
 ## Packet D: atomic production Caddy boundary
 
 **Separate exact approval required; no action was performed.**
+
+The live emergency installer-only matcher is a strict subset of this packet.
+It does not align the full reviewed source Caddyfile and does not establish the
+request-ID, dependency-readiness, private-storage, or complete retired-route
+boundaries below.
 
 - Target: only `/etc/caddy/Caddyfile` on the current Social host, sourced from
   the exact reviewed `services/social/caddy/Caddyfile`. Do not change DNS,

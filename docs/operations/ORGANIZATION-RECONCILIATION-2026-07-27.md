@@ -10,7 +10,7 @@ release gate.
 
 | Repository | Visibility/state | Default branch and exact SHA | Current work | Latest recorded `main` workflow | Production ownership and merge effect |
 | --- | --- | --- | --- | --- | --- |
-| `Mochirii-Wushu/Mochirii` | Public, active | `main` at `5b2ad686c9c4bf47035893b170ea8d3d659fd4ea` | Draft PR #532 is conflicting and must be superseded; issues #443 and #475 remain classified trackers | CodeQL run `30300064235`: success | Owns Website, Shopify theme, Social source, and Supabase. Protected-`main` merges publish Website through Vercel and invoke the connected Supabase deployment. Social-source merges also publish an immutable GHCR image; neither Shopify nor DigitalOcean is deployed automatically. |
+| `Mochirii-Wushu/Mochirii` | Public, active | `main` at `21f195458a87ae96eea84af51d0e1420b770ca74` | PR #534 is released; draft PR #532 remains conflicting until the independently reviewed Social replacement passes exact-head checks; issues #443 and #475 remain classified trackers | Repository run `30332558304` and CodeQL run `30332557922`: success | Owns Website, Shopify theme, Social source, and Supabase. Protected-`main` merges publish Website through Vercel and invoke the connected Supabase deployment. Social-source merges also publish an immutable GHCR image; neither Shopify nor DigitalOcean is deployed automatically. |
 | `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, active/dormant | `main` at `7e840fe337a425b659b065abf7e04e5256614cba` | PR #17 closed unmerged at preserved head `2bcab5e7f58ebcae087dc07de81ca15fcd20a2e4`; issue #9 is classified | Dependency workflow run `30242819447`: success | Source validation only. No Apple build, submission, or provider mutation follows from `main`. |
 | `Mochirii-Wushu/Mochirii-Pets` | Private, active/dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | Issue #3 is classified as dormant future work | Dependency workflow run `30273752691`: success | Fresh future Unity source only. No hosted runtime, deployment, Apple submission, or recurring provider cost. |
 | `Mochirii-Wushu/Reaper` | Private, active | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 merged from reviewed head `8179c80af5a16c14911a99f6d199edbbe834116e`; only `main` remains | CI run `30329689062`: success | The source merge ran CI only. It did not deploy the Discord Gateway worker or send a Discord message. |
@@ -85,11 +85,14 @@ worktree, ref, credential, or archive was changed during that audit.
 ### Active integration lanes
 
 - `Website-reliability-20260727` at
-  `2b78b228de33c78dad548a12557e7e953d009005`: clean Website reliability
-  candidate, based on the exact current `main` baseline.
-- `Website-social-hardening-replacement-20260727` at
-  `9f05eafda0e78229b7ef988cd0c854187a31dcce`: clean Social replacement
-  candidate before the exact Caddy source-alignment follow-up.
+  `2b78b228de33c78dad548a12557e7e953d009005`: superseded local preparation;
+  the reviewed reliability lane merged through PR #534 and must pass final
+  patch-parity proof before this worktree is removed.
+- `Website-social-hardening-replacement-20260727`: active Social replacement
+  candidate rebased on current `main` at
+  `21f195458a87ae96eea84af51d0e1420b770ca74`. Its exact review head is not
+  recorded here because final local review changes are still being sealed; use
+  the future PR head as the authoritative release identity.
 - `Website` at `b41fb46b987bde86a70add27e612a0a492e441cb`: intentionally dirty
   Social OAuth source material; preserve until the Social replacement is
   reviewed and merged.
@@ -155,15 +158,18 @@ prototype, or activate a provider/runtime.
 - Reaper PR #7 merged after accountable exact-head authorization. The merge and
   successful `main` CI did not authorize or perform a Discord send or runtime
   deployment; any future runtime change remains separately gated.
-- The Website reliability PR may merge only after exact-head repository,
-  browser, Vercel Preview, and non-skipped Supabase Preview checks plus exact
-  authorization naming both migrations, the Vercel production effect, and the
-  current 33-function redeployment with 20 JWT-verified and 13 non-JWT
-  functions. Never deploy Supabase manually.
+- Website reliability PR #534 completed as
+  `21f195458a87ae96eea84af51d0e1420b770ca74`. Vercel production is exactly
+  bound to that SHA; only the two approved migrations applied; and the same 33
+  ACTIVE functions advanced once with 20 JWT-verified and 13 non-JWT
+  functions. No manual Supabase deployment occurred.
 - The Social hardening PR follows only after the reliability production binding
-  is verified. Its merge requires separate authorization for Vercel, Supabase,
-  and GHCR effects. Deploying its immutable image to DigitalOcean is a later,
-  separately approved packet.
+  is verified. It is expected to add no migration and make no function-inventory
+  or JWT-configuration change. Its merge still requires separate authorization
+  for Vercel, the unavoidable redeployment of the same 33 functions with 20/13
+  parity, and GHCR effects; inventory or parity drift stops the release.
+  Deploying its immutable image to DigitalOcean is a later, separately approved
+  packet.
 - Shopify, payments, ActivityPub, Apple, Unity, Discord sends, Cloudflare, DNS,
   Spaces, secrets, schedules, and paid resources remain unchanged.
 - Stop on any head drift, unexpected provider effect, changed function inventory
