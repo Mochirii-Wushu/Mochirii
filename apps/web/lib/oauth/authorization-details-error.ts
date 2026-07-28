@@ -11,7 +11,7 @@ function errorField(error: unknown, key: "code" | "message" | "status") {
 }
 
 /**
- * Converts provider errors into stable Mochirii copy without exposing raw
+ * Converts provider errors into stable Mōchirīī copy without exposing raw
  * implementation details. Only the provider's explicit not-found response is
  * treated as an expired authorization; transient failures remain retryable.
  */
