@@ -46,7 +46,8 @@ class RetiredSurfaceSourceContractTest extends TestCase
         $matcher = $this->lineContaining($caddy, '@retiredCreationAndTokenManagement path ');
 
         foreach ([
-            '/installer*',
+            '/installer',
+            '/installer/*',
             '/register*',
             '/auth/sign_up*',
             '/api/v1.1/auth*',
@@ -60,6 +61,10 @@ class RetiredSurfaceSourceContractTest extends TestCase
         }
 
         $tokens = preg_split('/\s+/', trim($matcher));
+        $this->assertContains('/installer', $tokens);
+        $this->assertContains('/installer/*', $tokens);
+        $this->assertNotContains('/installer*', $tokens);
+        $this->assertNotContains('/installer-helper', $tokens);
         $this->assertNotContains('/oauth/token', $tokens);
         $this->assertNotContains('/oauth/authorize', $tokens);
         $this->assertLessThan(

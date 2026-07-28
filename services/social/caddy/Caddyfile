@@ -3,7 +3,7 @@ social.mochirii.com {
 	request_body {
 		max_size 100MB
 	}
-	@retiredCreationAndTokenManagement path /installer* /register* /auth/sign_up* /auth/invite* /auth/pci* /auth/raw/mastodon* /auth/mastodon* /i/app-email-verify* /i/app-email-resend* /api/auth/app-code-verify /api/auth/onboarding /api/v1.1/auth* /oauth/clients* /oauth/personal-access-tokens* /oauth/scopes /oauth/token/refresh* /oauth/tokens* /settings/developers* /settings/applications* /settings/invites*
+	@retiredCreationAndTokenManagement path /installer /installer/* /register* /auth/sign_up* /auth/invite* /auth/pci* /auth/raw/mastodon* /auth/mastodon* /i/app-email-verify* /i/app-email-resend* /api/auth/app-code-verify /api/auth/onboarding /api/v1.1/auth* /oauth/clients* /oauth/personal-access-tokens* /oauth/scopes /oauth/token/refresh* /oauth/tokens* /settings/developers* /settings/applications* /settings/invites*
 	header @retiredCreationAndTokenManagement Cache-Control "private, no-store"
 	respond @retiredCreationAndTokenManagement 404
 	@dependencyReadiness path /api/service/readiness-check

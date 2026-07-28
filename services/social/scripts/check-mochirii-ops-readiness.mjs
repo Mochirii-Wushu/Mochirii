@@ -564,10 +564,13 @@ requireIncludes("caddy/Caddyfile", caddy, [
   "@dependencyReadiness path /api/service/readiness-check",
   'header @dependencyReadiness Cache-Control "private, no-store"',
   "respond @dependencyReadiness 404",
-  "@retiredCreationAndTokenManagement path /installer*",
+  "@retiredCreationAndTokenManagement path /installer /installer/*",
   "respond @retiredCreationAndTokenManagement 404",
   "reverse_proxy 127.0.0.1:8080",
 ]);
+if (caddy.split(/\s+/u).includes("/installer*")) {
+  failures.push("caddy/Caddyfile must not use the overbroad /installer* matcher");
+}
 if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
   failures.push("caddy/Caddyfile must reject readiness before the public reverse proxy");
 }
