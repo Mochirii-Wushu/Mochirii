@@ -8,6 +8,11 @@ import {
   recurrenceRule,
   scheduledEventBody,
 } from "./reaper-discord-events.ts";
+import {
+  indexManagedEventResources,
+  selectExistingScheduledEvent,
+  supersededManagedEventResources,
+} from "./reaper-event-sync-workflow.ts";
 import { siteUrl } from "./public-origins.ts";
 
 Deno.test("desiredEventsFromSchedule shapes monthly and weekly website schedule events", () => {
@@ -16,9 +21,24 @@ Deno.test("desiredEventsFromSchedule shapes monthly and weekly website schedule 
       timezone: { offsetMinutes: 0 },
       discordCoverVersion: "v2",
       monthly: {
+        gathering: {
+          id: "monthly-gathering",
+          title: "Monthly Gathering",
+          rule: "next-first-wednesday",
+          description: "Guild monthly gathering",
+          location: siteUrl("events#gathering"),
+          startTime: "21:30",
+          endTime: "22:00",
+          discordRecurrenceRule: {
+            frequency: 1,
+            interval: 1,
+            by_n_weekday: [{ n: 1, day: 2 }],
+          },
+        },
         raffle: {
           id: "monthly-raffle",
           title: "Monthly Raffle",
+          rule: "next-first-saturday",
           description: "Guild monthly raffle",
           location: siteUrl("events#raffle"),
           discordLocation: "Mochirii Hall",
@@ -51,7 +71,13 @@ Deno.test("desiredEventsFromSchedule shapes monthly and weekly website schedule 
     new Date("2026-07-02T12:00:00.000Z"),
   );
 
-  assertEquals(events.length, 2);
+  assertEquals(events.length, 3);
+
+  const gathering = events.find((event) => event.key === "monthly-gathering");
+  assert(gathering, "monthly gathering should exist");
+  assertEquals(gathering.startIso, "2026-08-05T21:30:00.000Z");
+  assertEquals(gathering.endIso, "2026-08-05T22:00:00.000Z");
+  assertEquals(gathering.recurrenceRule?.by_n_weekday, [{ n: 1, day: 2 }]);
 
   const monthly = events.find((event) => event.key === "monthly-raffle");
   assert(monthly, "monthly event should exist");
@@ -67,6 +93,44 @@ Deno.test("desiredEventsFromSchedule shapes monthly and weekly website schedule 
   assert(weekly, "weekly event should exist");
   assertEquals(weekly.startIso, "2026-07-03T22:00:00.000Z");
   assertEquals(weekly.endIso, "2026-07-03T23:00:00.000Z");
+});
+
+Deno.test("the monthly gathering takes its exact slot and advances the colliding Guild Party event", () => {
+  const events = desiredEventsFromSchedule(
+    {
+      timezone: { offsetMinutes: 480 },
+      monthly: {
+        gathering: {
+          id: "monthly-gathering",
+          title: "Monthly Guild Gathering",
+          rule: "next-first-wednesday",
+          location: siteUrl("events"),
+          startTime: "21:30",
+          endTime: "22:00",
+          discordRecurrenceRule: {
+            frequency: 1,
+            interval: 1,
+            by_n_weekday: [{ n: 1, day: 2 }],
+          },
+        },
+      },
+      weekly: [{
+        id: "guild-party",
+        discord: true,
+        title: "Guild Party",
+        location: siteUrl("events"),
+        startTime: "21:30",
+        endTime: "22:00",
+        days: [3],
+      }],
+    },
+    new Date("2026-08-04T14:00:00.000Z"),
+  );
+
+  assertEquals(events.map((event) => event.key), ["monthly-gathering", "guild-party-3"]);
+  const guildParty = events.find((event) => event.key === "guild-party-3");
+  assertEquals(guildParty?.startIso, "2026-08-12T13:30:00.000Z");
+  assertEquals(guildParty?.endIso, "2026-08-12T14:00:00.000Z");
 });
 
 Deno.test("scheduledEventBody preserves Discord event contract and limits text fields", async () => {
@@ -143,6 +207,59 @@ Deno.test("eventLocation and managedEventLine preserve Reaper summary formatting
   assertEquals(managedEventLine("Created", eventStub("Training")), "Created: Training");
 });
 
+Deno.test("managed event registry indexing fails closed on duplicate enabled mappings", () => {
+  const resource = (id: string, discordId: string) => ({
+    id,
+    discord_id: discordId,
+    metadata: {
+      managedBy: "reaper-event-sync",
+      siteEventKey: "monthly-gathering",
+    },
+  });
+
+  assertThrows(() =>
+    indexManagedEventResources([
+      resource("row-1", "123456789012345678"),
+      resource("row-2", "223456789012345678"),
+    ]), "duplicate enabled registry mappings should reject");
+});
+
+Deno.test("scheduled event selection rejects ambiguous exact matches", () => {
+  const desired = eventStub("Training");
+  const matchingEvent = (id: string) => ({
+    id,
+    name: desired.title,
+    scheduled_start_time: desired.startIso,
+    entity_type: DISCORD_EVENT_ENTITY_EXTERNAL,
+    entity_metadata: { location: desired.location },
+  });
+
+  assertThrows(
+    () =>
+      selectExistingScheduledEvent(
+        [
+          matchingEvent("123456789012345678"),
+          matchingEvent("223456789012345678"),
+        ],
+        desired,
+        undefined,
+      ),
+    "multiple exact Discord events should reject",
+  );
+});
+
+Deno.test("superseded managed event resources exclude the current event", () => {
+  const resources = [
+    { id: "current-row", discord_id: "123456789012345678" },
+    { id: "stale-row", discord_id: "223456789012345678" },
+  ];
+
+  assertEquals(
+    supersededManagedEventResources(resources, "123456789012345678"),
+    [{ id: "stale-row", discord_id: "223456789012345678" }],
+  );
+});
+
 function eventStub(title: string) {
   return {
     key: "event",
@@ -176,6 +293,15 @@ function assertEquals(actual: unknown, expected: unknown): void {
 async function assertRejects(fn: () => Promise<unknown>, message: string): Promise<void> {
   try {
     await fn();
+  } catch {
+    return;
+  }
+  throw new Error(message);
+}
+
+function assertThrows(fn: () => unknown, message: string): void {
+  try {
+    fn();
   } catch {
     return;
   }

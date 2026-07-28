@@ -69,6 +69,14 @@ export type WebsiteEventCard = Omit<
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const MONTHLY_RULE_WEEKDAYS: Readonly<Record<string, number>> = {
+  "next-first-saturday": 6,
+  "next-first-wednesday": 3,
+};
+const MONTHLY_RULE_LABELS: Readonly<Record<string, string>> = {
+  "next-first-saturday": "First Saturday",
+  "next-first-wednesday": "First Wednesday",
+};
 
 function offsetMinutes(schedule: GuildScheduleData): number {
   const value = Number(schedule.timezone?.offsetMinutes);
@@ -168,20 +176,28 @@ function addDays(dateKey: string, days: number): string {
   return localDateKeyFromParts(next.getUTCFullYear(), next.getUTCMonth() + 1, next.getUTCDate());
 }
 
-function firstSaturday(year: number, month: number): string {
+function firstWeekdayOfMonth(year: number, month: number, weekday: number): string {
   const first = new Date(Date.UTC(year, month - 1, 1));
-  const offset = (6 - first.getUTCDay() + 7) % 7;
+  const offset = (weekday - first.getUTCDay() + 7) % 7;
   return localDateKeyFromParts(year, month, 1 + offset);
 }
 
-export function nextFirstSaturday(schedule: GuildScheduleData, now = new Date()): string {
+function nextFirstWeekday(schedule: GuildScheduleData, weekday: number, now: Date): string {
   const parts = localParts(now, offsetMinutes(schedule));
-  const currentMonth = firstSaturday(parts.year, parts.month);
+  const currentMonth = firstWeekdayOfMonth(parts.year, parts.month, weekday);
   const today = localDateKeyFromParts(parts.year, parts.month, parts.day);
   if (today <= currentMonth) return currentMonth;
 
   const nextMonthDate = new Date(Date.UTC(parts.year, parts.month, 1));
-  return firstSaturday(nextMonthDate.getUTCFullYear(), nextMonthDate.getUTCMonth() + 1);
+  return firstWeekdayOfMonth(nextMonthDate.getUTCFullYear(), nextMonthDate.getUTCMonth() + 1, weekday);
+}
+
+export function nextFirstSaturday(schedule: GuildScheduleData, now = new Date()): string {
+  return nextFirstWeekday(schedule, 6, now);
+}
+
+export function nextFirstWednesday(schedule: GuildScheduleData, now = new Date()): string {
+  return nextFirstWeekday(schedule, 3, now);
 }
 
 export function firstDayOfCurrentMonth(schedule: GuildScheduleData, now = new Date()): string {
@@ -197,7 +213,8 @@ export function monthlyScheduleDate(
 ): string {
   const id = String(scheduleId || "");
   const item = Object.values(schedule.monthly || {}).find((entry) => entry.id === id);
-  if (item?.rule === "next-first-saturday") return nextFirstSaturday(schedule, now);
+  const weekday = MONTHLY_RULE_WEEKDAYS[String(item?.rule || "")];
+  if (Number.isInteger(weekday)) return nextFirstWeekday(schedule, weekday, now);
   return String(fallback || "");
 }
 
@@ -284,6 +301,46 @@ function firstParagraph(value: unknown): string {
     .find(Boolean) || "";
 }
 
+function eventSlotKey(event: Pick<WebsiteEventCard, "startIso" | "endIso" | "location">): string {
+  return [event.startIso, event.endIso, event.location || ""].join("\n");
+}
+
+function shiftWeeklyOccurrence(
+  schedule: GuildScheduleData,
+  occurrence: ScheduledEventOccurrence,
+  days: number,
+): ScheduledEventOccurrence {
+  const date = addDays(occurrence.date, days);
+  const startTime = occurrence.startTime || "00:00";
+  const endTime = occurrence.endTime || "00:00";
+  const endDate = eventEndDate(date, startTime, endTime);
+  return {
+    ...occurrence,
+    date,
+    startIso: localToUtcIso(date, startTime, schedule),
+    endIso: localToUtcIso(endDate, endTime, schedule),
+  };
+}
+
+function nextNonOverlappingWeeklyOccurrence(
+  schedule: GuildScheduleData,
+  item: GuildWeeklyScheduleItem,
+  monthlySlots: ReadonlySet<string>,
+  now: Date,
+): ScheduledEventOccurrence | null {
+  const candidates = (item.days || [])
+    .map((day) => nextWeeklyOccurrence(schedule, { ...item, days: [day] }, now))
+    .filter((occurrence): occurrence is ScheduledEventOccurrence => Boolean(occurrence))
+    .map((occurrence) =>
+      monthlySlots.has(eventSlotKey(occurrence))
+        ? shiftWeeklyOccurrence(schedule, occurrence, 7)
+        : occurrence
+    )
+    .sort((a, b) => new Date(a.startIso).getTime() - new Date(b.startIso).getTime());
+
+  return candidates[0] || null;
+}
+
 export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now = new Date()): WebsiteEventCard[] {
   const timezone = scheduleTimezoneLabel(schedule);
   const monthlyCards: WebsiteEventCard[] = Object.values(schedule.monthly || {})
@@ -305,7 +362,7 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
         endTime,
         startIso: localToUtcIso(date, startTime, schedule),
         endIso: localToUtcIso(endDate, endTime, schedule),
-        dayText: item.rule === "next-first-saturday" ? "First Saturday" : item.rule,
+        dayText: MONTHLY_RULE_LABELS[String(item.rule || "")] || item.rule,
         timeText,
         timezone,
         location: item.location,
@@ -317,10 +374,11 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
       }];
     });
 
+  const monthlySlots = new Set(monthlyCards.map(eventSlotKey));
   const weeklyCards: WebsiteEventCard[] = (schedule.weekly || [])
     .filter((item) => item.discord === true)
     .flatMap((item) => {
-      const occurrence = nextWeeklyOccurrence(schedule, item, now);
+      const occurrence = nextNonOverlappingWeeklyOccurrence(schedule, item, monthlySlots, now);
       const id = occurrence?.id;
       const title = occurrence?.title;
       if (!occurrence || !id || !title) return [];
@@ -344,39 +402,4 @@ export function websiteEventCardsFromSchedule(schedule: GuildScheduleData, now =
     const delta = new Date(a.startIso).getTime() - new Date(b.startIso).getTime();
     return delta || String(a.id || a.title).localeCompare(String(b.id || b.title));
   });
-}
-
-export function discordScheduledEventsFromSchedule(schedule: GuildScheduleData, now = new Date()): ScheduledEventOccurrence[] {
-  const monthlyEvents = Object.values(schedule.monthly || {}).map((item) => {
-    const date = monthlyScheduleDate(schedule, item.id, "", now);
-    const startIso = localToUtcIso(date, item.startTime || "00:00", schedule);
-    const endDate = eventEndDate(date, item.startTime || "00:00", item.endTime || "00:00");
-    const endIso = localToUtcIso(endDate, item.endTime || "00:00", schedule);
-    return {
-      id: item.id,
-      title: item.title,
-      startTime: item.startTime,
-      endTime: item.endTime,
-      timeText: item.time,
-      location: item.location,
-      discordLocation: item.discordLocation,
-      discordCoverImage: item.discordCoverImage,
-      discordEventId: item.discordEventId,
-      discordDuplicateEventIds: item.discordDuplicateEventIds,
-      discordRecurrenceRule: item.discordRecurrenceRule,
-      summary: item.description,
-      discord: true,
-      date,
-      startIso,
-      endIso,
-    };
-  });
-
-  const weeklyEvents = (schedule.weekly || [])
-    .filter((item) => item.discord === true)
-    .flatMap((item) =>
-      (item.days || []).map((day) => nextWeeklyOccurrence(schedule, { ...item, days: [day] }, now)).filter(Boolean),
-    ) as ScheduledEventOccurrence[];
-
-  return [...monthlyEvents, ...weeklyEvents].filter((item) => item.id && item.title && item.startIso && item.endIso);
 }

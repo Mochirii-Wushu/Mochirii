@@ -1,7 +1,10 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
+import { enforceProductionGalleryMatrixGuard } from "./lib/live-gallery-media-smoke-guard.mjs";
+import { SITE_ORIGIN } from "./lib/public-urls.mjs";
 
 const baseUrl = process.env.SMOKE_BASE_URL || "http://127.0.0.1:8765";
+enforceProductionGalleryMatrixGuard({ baseUrl, siteOrigin: SITE_ORIGIN });
 const screenshotDirectory = path.resolve(
   process.env.SMOKE_SCREENSHOT_DIR || ".artifacts/operations/universal-lightbox",
 );

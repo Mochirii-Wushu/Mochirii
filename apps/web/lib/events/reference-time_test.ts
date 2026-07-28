@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import guildScheduleData from "../../public/data/guild-schedule.json" with { type: "json" };
-import { websiteEventCardsFromSchedule } from "../guild-schedule.ts";
+import {
+  monthlyScheduleDate,
+  nextFirstSaturday,
+  nextFirstWednesday,
+  websiteEventCardsFromSchedule,
+} from "../guild-schedule.ts";
 import { eventStatusAt, parseReferenceTime } from "./reference-time.ts";
 
 const referenceTime = parseReferenceTime("2026-07-27T01:30:00.000Z");
@@ -31,4 +36,35 @@ test("the schedule generator uses the supplied reference at an occurrence bounda
 
   assert.equal(beforeEnd.find((item) => item.id === "guild-party")?.date, "2026-07-27");
   assert.equal(atEnd.find((item) => item.id === "guild-party")?.date, "2026-07-28");
+});
+
+test("monthly rules keep the gathering on Wednesday and the raffle on Saturday", () => {
+  const now = new Date("2026-07-28T12:00:00.000Z");
+
+  assert.equal(nextFirstSaturday(guildScheduleData, now), "2026-08-01");
+  assert.equal(nextFirstWednesday(guildScheduleData, now), "2026-08-05");
+  assert.equal(monthlyScheduleDate(guildScheduleData, "monthly-gathering", "", now), "2026-08-05");
+  assert.equal(monthlyScheduleDate(guildScheduleData, "monthly-raffle", "", now), "2026-08-01");
+
+  const gathering = websiteEventCardsFromSchedule(guildScheduleData, now)
+    .find((item) => item.id === "monthly-gathering");
+  assert.equal(gathering?.dayText, "First Wednesday");
+  assert.equal(gathering?.timeText, "9:30 PM - 10 PM");
+  assert.equal(gathering?.startIso, "2026-08-05T13:30:00.000Z");
+  assert.equal(gathering?.endIso, "2026-08-05T14:00:00.000Z");
+  assert.equal(gathering?.timezone, "UTC+8");
+});
+
+test("the monthly gathering takes its exact slot and advances the next Guild Party card", () => {
+  const cards = websiteEventCardsFromSchedule(guildScheduleData, new Date("2026-08-04T14:00:00.000Z"));
+  const slot = cards.filter((item) =>
+    item.startIso === "2026-08-05T13:30:00.000Z" &&
+    item.endIso === "2026-08-05T14:00:00.000Z" &&
+    item.location === "https://mochirii.com/events"
+  );
+
+  assert.deepEqual(slot.map((item) => item.id), ["monthly-gathering"]);
+  const guildParty = cards.find((item) => item.id === "guild-party");
+  assert.equal(guildParty?.date, "2026-08-06");
+  assert.equal(guildParty?.startIso, "2026-08-06T13:30:00.000Z");
 });

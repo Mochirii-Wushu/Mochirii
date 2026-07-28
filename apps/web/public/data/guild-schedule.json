@@ -1,7 +1,7 @@
 {
   "timezone": {
     "label": "UTC+8",
-    "displayLabel": "Singapore Time (UTC+8)",
+    "displayLabel": "UTC+8",
     "ianaZone": "Asia/Singapore",
     "offsetMinutes": 480
   },
@@ -10,12 +10,22 @@
     "gathering": {
       "id": "monthly-gathering",
       "title": "Monthly Guild Gathering",
-      "rule": "next-first-saturday",
-      "time": "8:00 PM",
-      "startTime": "20:00",
-      "endTime": "21:00",
+      "rule": "next-first-wednesday",
+      "time": "9:30 PM",
+      "startTime": "21:30",
+      "endTime": "22:00",
       "location": "https://mochirii.com/events",
       "discordCoverImage": "./assets/img/discord-events/monthly-gathering.png",
+      "discordRecurrenceRule": {
+        "frequency": 1,
+        "interval": 1,
+        "by_n_weekday": [
+          {
+            "n": 1,
+            "day": 2
+          }
+        ]
+      },
       "description": "A monthly gathering where every member can discuss anything they'd like with the guild."
     },
     "raffle": {

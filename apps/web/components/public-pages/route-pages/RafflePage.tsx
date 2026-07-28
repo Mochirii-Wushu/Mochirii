@@ -46,7 +46,7 @@ export function RafflePage({
         meta={
           <MetaRow
             label="Raffle program details"
-            items={[model.meta.frequency, "Singapore time"]}
+            items={[model.meta.frequency, "UTC+8"]}
           />
         }
         intro={<p className="lede" id="rafflesIntro">{model.meta.intro}</p>}

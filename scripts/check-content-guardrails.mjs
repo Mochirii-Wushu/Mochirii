@@ -354,22 +354,26 @@ function isTime24(value) {
 function validateGuildSchedule(data) {
   const filePath = "apps/web/public/data/guild-schedule.json";
   if (data?.timezone?.label !== "UTC+8") addFailure(`${filePath}.timezone.label: expected UTC+8.`);
-  if (data?.timezone?.displayLabel !== "Singapore Time (UTC+8)") {
-    addFailure(`${filePath}.timezone.displayLabel: expected Singapore Time (UTC+8).`);
+  if (data?.timezone?.displayLabel !== "UTC+8") {
+    addFailure(`${filePath}.timezone.displayLabel: expected UTC+8.`);
   }
   if (data?.timezone?.ianaZone !== "Asia/Singapore") {
     addFailure(`${filePath}.timezone.ianaZone: expected Asia/Singapore.`);
   }
   if (data?.timezone?.offsetMinutes !== 480) addFailure(`${filePath}.timezone.offsetMinutes: expected 480.`);
 
-  ["gathering", "raffle"].forEach((key) => {
+  const monthlyRules = {
+    gathering: "next-first-wednesday",
+    raffle: "next-first-saturday",
+  };
+  Object.entries(monthlyRules).forEach(([key, expectedRule]) => {
     const item = data?.monthly?.[key];
     if (!item) {
       addFailure(`${filePath}.monthly.${key}: expected monthly schedule item.`);
       return;
     }
     if (!isKebab(item.id)) addFailure(`${filePath}.monthly.${key}.id: expected kebab-case id.`);
-    if (item.rule !== "next-first-saturday") addFailure(`${filePath}.monthly.${key}.rule: expected next-first-saturday.`);
+    if (item.rule !== expectedRule) addFailure(`${filePath}.monthly.${key}.rule: expected ${expectedRule}.`);
     if (!isTime24(item.startTime)) addFailure(`${filePath}.monthly.${key}.startTime: expected HH:MM.`);
     if (!isTime24(item.endTime)) addFailure(`${filePath}.monthly.${key}.endTime: expected HH:MM.`);
   });

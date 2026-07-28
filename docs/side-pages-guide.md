@@ -211,7 +211,7 @@ When no drawing is active:
 - Set `publicView.cycleStatus` to `inactive`.
 - Set both public entry states to `closed`.
 - Set all cycle dates, reward, active rules URL, aggregate counts, and result to
-  `null` or `none` as defined by the contract.
+`null` or `none` as defined by the contract.
 - Set `rules.currentRulesState` to `inactive` and show `No active drawing rules`.
 - State plainly that no raffle is active and no submissions are being accepted.
 - Keep standing entry, eligibility, reward-category, fairness, and no-purchase
@@ -221,9 +221,9 @@ When no drawing is active:
 
 An approved active cycle supplies UTC instants for opening, closing, drawing,
 and claim deadlines plus cycle-specific eligibility, reward copy, and a local
-immutable `/raffle/rules/...` route. `Asia/Singapore` remains the authoritative
-program time zone. Store instants as ISO 8601 UTC values, show Singapore time as
-the governing time, and progressively enhance with the visitor's localized
+immutable `/raffle/rules/...` route. `Asia/Singapore` remains the internal IANA
+calculation zone. Store instants as ISO 8601 UTC values, show UTC+8 as the
+governing public time, and progressively enhance with the visitor's localized
 equivalent without replacing or obscuring the governing time. Invalid or
 missing dates fail closed, and every non-inactive cycle must satisfy
 `opensAt < closesAt < drawAt < claimEndsAt`.
@@ -442,7 +442,7 @@ Use `npm run smoke:gallery` as a general regression check if shared behavior cou
 - `/raffle/rules` distinguishes standing principles, current official drawing rules, and immutable archived rules; it shows `No active drawing rules` while inactive.
 - A versioned rules URL renders only reviewed local `rules.versions[]` content; unavailable versions return not found.
 - Signed-out raffle results use only `Winner confirmed` or `Community honor confirmed`; verified-member result-name behavior is tested at the server boundary.
-- Singapore time remains authoritative for active-cycle dates and visitor-local equivalents do not replace it.
+- UTC+8 remains authoritative for active-cycle dates and visitor-local equivalents do not replace it.
 - Inactive raffle pages render no submission, claim, sign-in, moderation, reward, disabled, or dead controls and make no private request.
 - `/raffles` and `/raffles.html` permanently redirect to `/raffle`.
 - `/spotify.html` loads.

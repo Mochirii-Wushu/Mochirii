@@ -18,8 +18,8 @@ Keep this page focused on times, RSVP notes, runs, and the rhythm of gathering.
 
 - Events shell copy lives in `apps/web/public/data/events.json`.
 - Rolling event timing and the live Next Events board live in `apps/web/public/data/guild-schedule.json`.
-- The live Next Events board is schedule-first: it renders one card per Discord/Reaper-managed event type from `websiteEventCardsFromSchedule`, using schedule-derived dates, Singapore Time (UTC+8), and `discordCoverImage` art.
-- `apps/web/public/data/guild-schedule.json` keeps `timezone.label` as `UTC+8` and `offsetMinutes` as `480` for Discord and machine compatibility. Website rendering uses `timezone.displayLabel` (`Singapore Time (UTC+8)`) and `timezone.ianaZone` (`Asia/Singapore`).
+- The live Next Events board is schedule-first: it renders one card per Discord/Reaper-managed event type from `websiteEventCardsFromSchedule`, using schedule-derived dates, the public `UTC+8` label, and `discordCoverImage` art.
+- `apps/web/public/data/guild-schedule.json` keeps `timezone.label` and `timezone.displayLabel` as `UTC+8`, plus `offsetMinutes` as `480`, for public display and machine compatibility. `timezone.ianaZone` remains `Asia/Singapore` as the internal IANA calculation zone and is not rendered as the public time label.
 - `apps/web/public/data/events.json` is page-shell copy only for the Next app: meta, hero, featured lead/bullets fallback, recurring intro, participation text, and fallback content.
 - Keep JSON valid: no trailing commas, comments, or unquoted keys.
 - Preserve the current schema unless the matching renderer is updated in the same scoped task.
@@ -51,6 +51,8 @@ Not currently implemented:
 - Invalid or missing event dates are treated as upcoming by the current renderer.
 - Event-board dates are rendered with `MochiriiUtils.formatDateUTC`.
 - Featured event dates in the Next app derive from the first upcoming schedule card; `featured.date` is fallback shell data only.
+- Monthly schedule items declare their own supported rule (`next-first-saturday` or `next-first-wednesday`); Website and Reaper helpers must derive each item independently rather than applying one shared weekday.
+- If a monthly event and weekly event share the exact start, end, and Website location, the monthly event owns that slot. The Website selects the weekly event's next non-conflicting day, while Reaper advances that stable weekday event key by seven days so an existing managed Discord event can be updated rather than orphaned.
 - Reaper's `/sync-events` command reads the mirrored guild schedule JSON and must stay aligned with the website schedule helpers.
 - The Next `/events` route waits for a real request, generates one ISO reference time on the server, and passes it through the complete Event Board render. This keeps status current without calling `Date.now()` or a no-argument `new Date()` during client hydration.
 

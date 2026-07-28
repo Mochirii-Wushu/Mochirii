@@ -41,19 +41,27 @@ function addDays(value, days) {
   return key(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
 }
 
-function firstSaturday(year, month) {
+function firstWeekdayOfMonth(year, month, weekday) {
   const first = new Date(Date.UTC(year, month - 1, 1));
-  const delta = (6 - first.getUTCDay() + 7) % 7;
+  const delta = (weekday - first.getUTCDay() + 7) % 7;
   return key(year, month, 1 + delta);
 }
 
-function nextFirstSaturday(now) {
+function nextFirstWeekday(now, weekday) {
   const parts = localParts(now);
-  const current = firstSaturday(parts.year, parts.month);
+  const current = firstWeekdayOfMonth(parts.year, parts.month, weekday);
   const today = key(parts.year, parts.month, parts.day);
   if (today <= current) return current;
   const nextMonth = new Date(Date.UTC(parts.year, parts.month, 1));
-  return firstSaturday(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1);
+  return firstWeekdayOfMonth(nextMonth.getUTCFullYear(), nextMonth.getUTCMonth() + 1, weekday);
+}
+
+function nextFirstSaturday(now) {
+  return nextFirstWeekday(now, 6);
+}
+
+function nextFirstWednesday(now) {
+  return nextFirstWeekday(now, 3);
 }
 
 function firstDayOfMonth(now) {
@@ -101,13 +109,16 @@ function assertEqual(label, actual, expected) {
 }
 
 assertEqual("timezone label", schedule.timezone?.label, "UTC+8");
-assertEqual("timezone display label", schedule.timezone?.displayLabel, "Singapore Time (UTC+8)");
+assertEqual("timezone display label", schedule.timezone?.displayLabel, "UTC+8");
 assertEqual("timezone IANA zone", schedule.timezone?.ianaZone, "Asia/Singapore");
 assertEqual("timezone offset", offsetMinutes(), 480);
 assertEqual("Discord cover version", schedule.discordCoverVersion, "2026-06-10-event-panels");
 assertEqual("first Saturday before rollover", nextFirstSaturday(new Date("2026-06-03T12:00:00Z")), "2026-06-06");
 assertEqual("first Saturday on rollover", nextFirstSaturday(new Date("2026-06-05T17:00:00Z")), "2026-06-06");
 assertEqual("first Saturday after rollover", nextFirstSaturday(new Date("2026-06-07T01:00:00Z")), "2026-07-04");
+assertEqual("first Wednesday before rollover", nextFirstWednesday(new Date("2026-06-02T12:00:00Z")), "2026-06-03");
+assertEqual("first Wednesday on rollover", nextFirstWednesday(new Date("2026-06-03T12:00:00Z")), "2026-06-03");
+assertEqual("first Wednesday after rollover", nextFirstWednesday(new Date("2026-06-04T01:00:00Z")), "2026-07-01");
 assertEqual("spotlight current month first", firstDayOfMonth(new Date("2026-06-21T12:00:00Z")), "2026-06-01");
 
 const monthlyGathering = schedule.monthly?.gathering;
@@ -119,6 +130,16 @@ else {
     monthlyGathering.description,
     "A monthly gathering where every member can discuss anything they'd like with the guild.",
   );
+  assertEqual("monthly gathering rule", monthlyGathering.rule, "next-first-wednesday");
+  assertEqual("monthly gathering time", monthlyGathering.time, "9:30 PM");
+  assertEqual("monthly gathering start", monthlyGathering.startTime, "21:30");
+  assertEqual("monthly gathering end", monthlyGathering.endTime, "22:00");
+  assertEqual("monthly gathering recurrence frequency", monthlyGathering.discordRecurrenceRule?.frequency, 1);
+  assertEqual("monthly gathering recurrence interval", monthlyGathering.discordRecurrenceRule?.interval, 1);
+  assertEqual("monthly gathering first Wednesday recurrence n", monthlyGathering.discordRecurrenceRule?.by_n_weekday?.[0]?.n, 1);
+  assertEqual("monthly gathering first Wednesday recurrence day", monthlyGathering.discordRecurrenceRule?.by_n_weekday?.[0]?.day, 2);
+  assertEqual("monthly gathering UTC start", localToUtcIso("2026-08-05", monthlyGathering.startTime), "2026-08-05T13:30:00.000Z");
+  assertEqual("monthly gathering UTC end", localToUtcIso("2026-08-05", monthlyGathering.endTime), "2026-08-05T14:00:00.000Z");
   assertEqual("monthly gathering cover", monthlyGathering.discordCoverImage, "./assets/img/discord-events/monthly-gathering.png");
 }
 

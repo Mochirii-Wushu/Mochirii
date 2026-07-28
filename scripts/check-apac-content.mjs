@@ -10,9 +10,9 @@ const expected = {
   spotlight: "Pretty guild member who's always so lovely, beautiful & keeping the guild a wonderful place for everyone.",
   gatheringTitle: "Monthly Guild Gathering",
   gatheringDescription: "A monthly gathering where every member can discuss anything they'd like with the guild.",
-  footer: "An Asia Pacific Where Winds Meet guild, with events scheduled in Singapore Time (UTC+8).",
+  footer: "An Asia Pacific Where Winds Meet guild, with events scheduled in UTC+8.",
   join: "Mōchirīī welcomes all pretty new members across Asia Pacific or anywhere else in the world if you don't mind the ping.",
-  displayTimezone: "Singapore Time (UTC+8)",
+  displayTimezone: "UTC+8",
   brandSubtitle: "Asia Pacific Guild",
 };
 
@@ -50,13 +50,14 @@ const schedule = readJson("apps/web/public/data/guild-schedule.json");
 const join = readJson("apps/web/public/data/join.json");
 const events = readJson("apps/web/public/data/events.json");
 const raffles = readJson("apps/web/public/data/raffles.json");
+const twills = readJson("apps/web/public/data/twills.json");
 
 assert(home.hero?.subtitle === expected.subtitle, "home.hero.subtitle must match the approved APAC subtitle.");
 assert(home.copy?.spotlightIntro === expected.spotlight, "home Spotlight text must match the approved copy.");
 assert(schedule.timezone?.label === "UTC+8", "the Discord-facing schedule label must remain UTC+8.");
 assert(schedule.timezone?.offsetMinutes === 480, "the schedule offset must remain 480 minutes.");
 assert(schedule.timezone?.ianaZone === "Asia/Singapore", "the schedule IANA zone must be Asia/Singapore.");
-assert(schedule.timezone?.displayLabel === expected.displayTimezone, "the website timezone label must remain Singapore Time (UTC+8).");
+assert(schedule.timezone?.displayLabel === expected.displayTimezone, "the website timezone label must remain UTC+8.");
 assert(schedule.monthly?.gathering?.title === expected.gatheringTitle, "the gathering title must match the approved copy.");
 assert(schedule.monthly?.gathering?.description === expected.gatheringDescription, "the gathering description must match the approved copy.");
 
@@ -69,9 +70,17 @@ for (const item of events.upcoming || []) {
   assert(item.timezone === expected.displayTimezone, `events.${item.scheduleId || "unknown"}.timezone must use the website label.`);
 }
 assert(raffles.publicView?.cycleStatus === "inactive", "the Raffle page must remain inactive when no drawing is active.");
-assert(raffles.publicView?.timezone === "Asia/Singapore", "the Raffle page must use Singapore as its authoritative time zone.");
+assert(raffles.publicView?.timezone === "Asia/Singapore", "the Raffle page must retain Asia/Singapore as its internal IANA calculation zone.");
 assert(raffles.publicView?.standardEntryStatus === "closed", "the Raffle page must keep standard entries closed while inactive.");
 assert(raffles.publicView?.bonusEntryStatus === "closed", "the Raffle page must keep bonus entries closed while inactive.");
+assert(raffles.standingPrinciples?.includes("UTC+8 governs each drawing."), "the Raffle page must use the public UTC+8 label.");
+assert(twills.profile?.timezone === expected.displayTimezone, "the public Twills profile must use the UTC+8 label.");
+
+const raffleDateTime = read("apps/web/components/public-pages/RaffleDateTime.tsx");
+const rafflePage = read("apps/web/components/public-pages/route-pages/RafflePage.tsx");
+assertIncludes("Raffle date/time", raffleDateTime, "{singaporeTime} UTC+8");
+assert(!raffleDateTime.includes("Singapore time"), "the Raffle date/time component must not render a location-specific timezone label.");
+assertIncludes("Raffle page", rafflePage, 'items={[model.meta.frequency, "UTC+8"]}');
 
 const siteMetadata = read("apps/web/lib/site-metadata.ts");
 assertIncludes("site metadata", siteMetadata, `SITE_DESCRIPTION =\n  ${JSON.stringify(expected.description)}`);

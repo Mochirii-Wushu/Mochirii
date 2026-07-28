@@ -18,17 +18,24 @@ function assertNotIncludes(label, source, snippet) {
 }
 
 const eventsSource = readPublicPageExport(repoRoot, "EventsPage", failures).text;
+const homeSource = readText("apps/web/app/page.tsx");
 const boardSource = readText("apps/web/components/public-pages/EventsBoard.tsx");
 const referenceTimeSource = readText("apps/web/lib/events/reference-time.ts");
 const cssSource = readAppCss().replace(/\r\n/g, "\n");
 const scheduleSource = readText("apps/web/lib/guild-schedule.ts");
 const schedule = readJsonFile("apps/web/public/data/guild-schedule.json");
 const legacyEvents = readJsonFile("apps/web/public/data/events.json");
+const home = readJsonFile("apps/web/public/data/home.json");
 
 if (!eventsSource) fail("EventsPage source block not found.");
 assertIncludes("EventsPage", eventsSource, "websiteEventCardsFromSchedule(guildScheduleData, new Date(referenceTime))");
 assertNotIncludes("EventsPage", eventsSource, "records(data.upcoming)");
 assertNotIncludes("EventsPage", eventsSource, "eventBoardItemsFromSchedule");
+
+assertIncludes("Home", homeSource, "monthlyScheduleDate(guildScheduleData, optionalText(item, \"scheduleId\"), item.date)");
+assertIncludes("Home", homeSource, "monthlyScheduleDate(guildScheduleData, optionalText(featured, \"scheduleId\"), featured.date)");
+const homeGathering = (home.bulletins || []).find((item) => item.scheduleId === "monthly-gathering");
+if (!homeGathering) fail("Home must keep its gathering bulletin bound to monthly-gathering.");
 
 assertIncludes("guild schedule helper", scheduleSource, "export function websiteEventCardsFromSchedule");
 assertIncludes("guild schedule helper", scheduleSource, '.filter((item) => item.id !== "monthly-raffle")');

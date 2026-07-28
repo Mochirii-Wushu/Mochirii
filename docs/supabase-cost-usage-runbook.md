@@ -1,6 +1,6 @@
 # Supabase Cost Usage Runbook
 
-Date checked: 2026-05-14
+Date checked: 2026-07-28
 
 This runbook gives leaders a safe way to monitor Supabase usage for the member Gallery, Discord verification, approved Gallery feed, and moderation workflows. It is operational guidance, not a billing quote. Before making billing or quota decisions, check the current Supabase dashboard and the live Supabase pricing/docs pages.
 
@@ -16,9 +16,31 @@ Official Supabase references checked for this runbook:
 - Egress usage: <https://supabase.com/docs/guides/platform/manage-your-usage/egress>
 - Monthly Active Users usage: <https://supabase.com/docs/guides/platform/manage-your-usage/monthly-active-users>
 - Storage file limits: <https://supabase.com/docs/guides/storage/uploads/file-limits>
+- Storage bandwidth and request attribution: <https://supabase.com/docs/guides/storage/serving/bandwidth>
+- Storage CDN behavior: <https://supabase.com/docs/guides/storage/cdn/fundamentals>
 - Supabase changelog index: <https://supabase.com/changelog.md>
 
-The 2026-05-14 changelog scan did not show a G13 blocker for member Gallery cost monitoring. Recent platform notes still matter for future work: Postgres 14 support ends on 2026-07-01, Supabase is dropping Node.js 20 support, and Edge Function recursive/nested call limits should remain in mind if future functions call other functions.
+The 2026-07-28 changelog scan did not show a Storage egress breaking change
+that alters this response. Cached and origin Storage egress remain separately
+metered, and the current repository already uses Node.js 22.
+
+## July 2026 Egress Incident Snapshot
+
+The read-only dashboard snapshot on 2026-07-28 showed:
+
+- current-cycle egress: `9.623 GB` used from `5 GB` included in the Free plan;
+- current-cycle overage: approximately `4.623 GB`;
+- 2026-07-06: `2.483 GB` Storage egress, `99.8%` of that day's displayed service breakdown;
+- 2026-07-27: `2.75 GB` Storage egress, `98.1%` of that day's displayed service breakdown;
+- cached egress remained much smaller than origin egress; and
+- Database, Auth, Edge Functions, and Realtime did not account for the two large days.
+
+This proves that Storage delivery, not database traffic or function count, is
+the immediate cost driver. It does not identify a member, object, requestor, or
+single automation job. Free-plan log retention did not provide object-level
+results for the full incident window, so do not guess an object path or delete
+data as a response. Usage already accrued in the billing cycle cannot be
+reversed; containment protects the remaining cycle and future cycles.
 
 ## What Can Drive Usage
 
@@ -36,6 +58,29 @@ Supabase usage comes from the member workflows:
 - Logs: function logs, moderation troubleshooting, and dashboard observability.
 
 Expected normal use is small, human-paced, and tied to guild activity. Runaway use usually looks like sudden public approved-feed traffic, repeated verification attempts, automated upload attempts, Instagram queue retries, unexpected Storage growth, or repeated function errors.
+
+## Current Delivery Protections
+
+The current approved Gallery delivery path limits the byte multiplier before
+an original is requested:
+
+- approved member images have bounded thumbnail derivatives of at most `80 KB`;
+- the browser displays at most `24` new Gallery cards per batch, so a full
+  member-thumbnail batch is bounded to `1.92 MB` before page/static overhead;
+- the browser does not request an approved original until a visitor opens its
+  viewer;
+- pending, rejected, and archived objects remain outside the public feed;
+- the private bucket and short-lived signed URL model remain unchanged; and
+- local and Preview gallery/browser matrices intercept the approved feed with
+  deterministic fixtures.
+
+Broad gallery and browser matrices now refuse the canonical production Website
+origin by default. A deliberately approved bounded production canary requires
+the exact process-scoped variable
+`MOCHIRII_ALLOW_LIVE_GALLERY_MEDIA_SMOKE_ONCE=true`. Do not save that variable
+in a shell profile, `.env` file, CI configuration, or provider setting. Normal
+development and release verification should use a local origin or the exact
+reviewed Vercel Preview.
 
 ## Current Member Gallery Policy
 
@@ -86,7 +131,9 @@ Those require explicit owner approval and a scoped branch or admin task.
 
 ## Thresholds
 
-Use these bands to decide whether to keep observing or escalate.
+Use these internal operating bands to decide whether to keep observing or
+escalate. They are deliberately below the provider limit and are not a billing
+quote.
 
 Normal:
 
@@ -95,6 +142,9 @@ Normal:
 - Function invocations roughly match sign-ins, queue checks, moderation actions, and Gallery approved-feed loads.
 - Function errors are rare and tied to expected signed-out or unauthorized states.
 - Monthly Active Users resemble the current active Discord/member population.
+- Current-cycle egress is below `2.5 GB` (50% of the current Free allowance),
+  and the projected cycle total remains below `3.75 GB`.
+- The three-day Storage egress average is at or below `100 MB` per day.
 
 Watch:
 
@@ -106,6 +156,9 @@ Watch:
 - Function `429`, `5xx`, or signed URL errors repeat.
 - Egress rises without a matching public traffic explanation.
 - Billing dashboard shows quota or overage warnings.
+- Current-cycle egress reaches `2.5 GB`, projected cycle use reaches `3.75 GB`,
+  a single day exceeds `250 MB`, or the three-day Storage average exceeds
+  `100 MB` per day.
 
 Stop and escalate:
 
@@ -115,6 +168,14 @@ Stop and escalate:
 - Protected functions accept anonymous mutation requests.
 - Billing shows unexpected overage risk or runaway usage.
 - Fixing the problem appears to require database mutation, Storage deletion, Edge Function deployment, or secret rotation.
+- Current-cycle egress reaches `3.75 GB` before the final seven days, the
+  projected cycle total reaches the included limit, or an unexplained day
+  reaches `500 MB`.
+
+At the stop threshold, stop nonessential live media matrices immediately and
+move validation to local/Preview fixtures. Do not make the bucket public,
+delete objects, rotate URLs, resize infrastructure, or change plans as an
+unreviewed containment shortcut.
 
 ## Cleanup Implications
 
@@ -148,16 +209,23 @@ After a guild event or traffic spike:
 4. Check whether new uploads match known member activity.
 5. If growth is abnormal, stop and open a scoped QA/admin branch.
 
+While a Storage egress incident is active, review the dashboard daily until
+the billing cycle resets and three consecutive daily samples return to the
+normal band. Record only service totals, dates, percentages, and status; never
+record object paths, signed URLs, or member data.
+
 ## Incident Response
 
 For unexpected usage:
 
 1. Capture the symptom: affected service, time window, rough magnitude, and dashboard page.
 2. Redact all private values before sharing.
-3. Confirm whether public site traffic, Discord event activity, or moderation work explains the change.
-4. Inspect function logs without copying tokens or private identifiers into public channels.
-5. If a bug is likely, open a scoped QA branch and reproduce locally or with safe mocks.
-6. If data mutation is needed, stop and get explicit owner approval.
+3. Stop broad production-origin media matrices and use local or reviewed Preview fixtures.
+4. Confirm whether public site traffic, Discord event activity, moderation work, or a release verification window explains the change.
+5. Use the dashboard service breakdown and the Logs Explorer Storage Egress Requests template when retained data is available; aggregate by request count and bytes without copying paths.
+6. Inspect function logs without copying tokens or private identifiers into public channels.
+7. If a bug is likely, open a scoped QA branch and reproduce locally or with safe mocks.
+8. If data mutation or provider configuration is needed, stop and get explicit owner approval.
 
 For suspected credential exposure:
 
@@ -201,5 +269,7 @@ The member Gallery cost posture is healthy when:
 - approved public images are served through short-lived signed URLs
 - protected functions fail closed for anonymous users
 - usage growth matches member activity
+- broad gallery/browser matrices use local or reviewed Preview fixtures unless a bounded live canary has exact approval
+- projected egress remains below the internal watch and stop thresholds
 - dashboard checks show no quota, invoice, or error surprises
 - cleanup decisions are planned before Storage is deleted
