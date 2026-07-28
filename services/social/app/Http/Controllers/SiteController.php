@@ -84,13 +84,7 @@ class SiteController extends Controller
 
     public function privacy(Request $request)
     {
-        $page = Cache::remember('site:privacy', now()->addDays(120), function () {
-            $slug = '/site/privacy';
-
-            return Page::whereSlug($slug)->whereActive(true)->first();
-        });
-
-        return View::make('site.privacy')->with(compact('page'))->render();
+        return View::make('site.privacy')->render();
     }
 
     public function terms(Request $request)

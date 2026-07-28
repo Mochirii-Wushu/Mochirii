@@ -22,12 +22,6 @@ class MobileController extends Controller
 
     public function privacy(Request $request)
     {
-        $page = Cache::remember('site:privacy', now()->addDays(120), function () {
-            $slug = '/site/privacy';
-
-            return Page::whereSlug($slug)->whereActive(true)->first();
-        });
-
-        return View::make('mobile.privacy')->with(compact('page'))->render();
+        return View::make('mobile.privacy')->render();
     }
 }
