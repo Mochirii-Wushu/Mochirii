@@ -38,7 +38,7 @@ export function RaffleDateTime({ instant, label }: RaffleDateTimeProps) {
     <div>
       <dt>{label}</dt>
       <dd>
-        <time dateTime={instant}>{singaporeTime} Singapore time</time>
+        <time dateTime={instant}>{singaporeTime} UTC+8</time>
         {visitorTime ? (
           <span className="raffle-visitor-time">
             Your time: {visitorTime} ({timeZone})
