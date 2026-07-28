@@ -13,7 +13,7 @@ release gate.
 | `Mochirii-Wushu/Mochirii` | Public, active | `main` at `5b2ad686c9c4bf47035893b170ea8d3d659fd4ea` | Draft PR #532 is conflicting and must be superseded; issues #443 and #475 remain classified trackers | CodeQL run `30300064235`: success | Owns Website, Shopify theme, Social source, and Supabase. Protected-`main` merges publish Website through Vercel and invoke the connected Supabase deployment. Social-source merges also publish an immutable GHCR image; neither Shopify nor DigitalOcean is deployed automatically. |
 | `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, active/dormant | `main` at `7e840fe337a425b659b065abf7e04e5256614cba` | PR #17 closed unmerged at preserved head `2bcab5e7f58ebcae087dc07de81ca15fcd20a2e4`; issue #9 is classified | Dependency workflow run `30242819447`: success | Source validation only. No Apple build, submission, or provider mutation follows from `main`. |
 | `Mochirii-Wushu/Mochirii-Pets` | Private, active/dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | Issue #3 is classified as dormant future work | Dependency workflow run `30273752691`: success | Fresh future Unity source only. No hosted runtime, deployment, Apple submission, or recurring provider cost. |
-| `Mochirii-Wushu/Reaper` | Private, active | `main` at `d114c58590c695490c168ee7c750b66bf03229ae` | PR #7 is ready for review at `8179c80af5a16c14911a99f6d199edbbe834116e`; merge is approval-gated | CI run `30154903605`: success | Source merge runs CI only. It does not deploy the Discord Gateway worker or send a Discord message. |
+| `Mochirii-Wushu/Reaper` | Private, active | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 merged from reviewed head `8179c80af5a16c14911a99f6d199edbbe834116e`; only `main` remains | CI run `30329689062`: success | The source merge ran CI only. It did not deploy the Discord Gateway worker or send a Discord message. |
 | `Mochirii-Wushu/Mochirii-Raffle-Spinner` | Private, archived | `main` at `95e917357517faeb43be9e2da6551baec213aed8` | No PRs or issues; two historical Dependabot branches are intentionally retained | Dependency workflow run `30231800839`: success | Historical source only. No current deployment or schedule depends on this repository. |
 
 Private-repository plan limits leave Social Mobile, Mochi Pets, Reaper, and the
@@ -50,12 +50,12 @@ bypass and record accountable review.
 - Social Mobile has only `main`; the closed PR #17 branch was removed after its
   pull-request head remained retrievable.
 - Mochi Pets has only `main`.
-- Reaper `agent/reaper-pending-verification-resilience` at
-  `8179c80af5a16c14911a99f6d199edbbe834116e` is the reviewed replacement
-  candidate. The legacy
-  `codex/pending-verification-forwarder-resilience` head
-  `79fbabd9bd0c0528d7c0f331d195088c3410dcff` must not be restored and may be
-  removed only after PR #7 is merged under exact approval.
+- Reaper PR #7 merged as `79023914ee5c6502520b88aebe861904af9c2472`.
+  Its final tree exactly matches reviewed head
+  `8179c80af5a16c14911a99f6d199edbbe834116e`; push CI passed. The reviewed
+  branch and superseded legacy head
+  `79fbabd9bd0c0528d7c0f331d195088c3410dcff` were deleted only after both PR
+  heads remained retrievable. Reaper now has only `main`.
 - The archived spinner retains
   `dependabot/github_actions/main/github-actions-901392d03b` at
   `46fe90ceeea592888eec49b9135ef8f43dcd9f0e` and
@@ -152,8 +152,9 @@ prototype, or activate a provider/runtime.
 
 ## Release And Rollback Boundaries
 
-- Reaper PR #7 may merge only after accountable review and exact authorization.
-  A source merge does not authorize a Discord send or runtime deployment.
+- Reaper PR #7 merged after accountable exact-head authorization. The merge and
+  successful `main` CI did not authorize or perform a Discord send or runtime
+  deployment; any future runtime change remains separately gated.
 - The Website reliability PR may merge only after exact-head repository,
   browser, Vercel Preview, and non-skipped Supabase Preview checks plus exact
   authorization naming both migrations, the Vercel production effect, and the
