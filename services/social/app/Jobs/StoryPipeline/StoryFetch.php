@@ -500,7 +500,7 @@ class StoryFetch implements ShouldQueue
             }
 
             $disk = Storage::disk(config('filesystems.default'));
-            $path = $disk->putFileAs($storagePath, new File($tmpName), $fileName, 'public');
+            $path = $disk->putFileAs($storagePath, new File($tmpName), $fileName, 'private');
             $size = filesize($tmpName);
 
             unlink($tmpName);

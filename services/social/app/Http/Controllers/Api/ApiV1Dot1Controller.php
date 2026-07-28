@@ -677,7 +677,7 @@ class ApiV1Dot1Controller extends Controller
         $user->last_active_at = now();
         $user->save();
 
-        $token = $user->createToken('Pixelfed', ['read', 'write', 'follow', 'push']);
+        $token = $user->createToken('Mochirii Social', ['read', 'write', 'follow', 'push']);
 
         return response()->json([
             'access_token' => $token->accessToken,
@@ -1274,7 +1274,7 @@ class ApiV1Dot1Controller extends Controller
         abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $license = null;
         $mime = $photo->getMimeType();
 

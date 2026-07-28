@@ -19,9 +19,9 @@ if($s['content_text']) {
 }
 $desc = false;
 if($displayName && $captionPreview) {
-    $desc = $displayName . ': "' . $captionPreview . '" - Mochirii Social';
+    $desc = $displayName . ': "' . $captionPreview . '" - Mōchirīī Social';
 } else if($displayName) {
-    $desc = $displayName . ': Shared a new post - Mochirii Social';
+    $desc = $displayName . ': Shared a new post - Mōchirīī Social';
 }
 
 @endphp

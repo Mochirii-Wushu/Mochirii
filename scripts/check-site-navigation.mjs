@@ -87,9 +87,9 @@ assertIncludes("SiteFooter authenticated Spinner", footer, "hidden={!authState.s
 
 assertIncludes("SocialHubPanel public URL config", socialPanel, `"@/lib/public-urls"`);
 assertIncludes("SocialHubPanel", socialPanel, `href={SOCIAL_HOST}`);
-assertIncludes("SocialHubPanel", socialPanel, "Mōchirīī Social Handoff");
+assertIncludes("SocialHubPanel", socialPanel, "Mōchirīī Social Access");
 assertIncludes("SocialHubPanel redirect", socialPanel, "window.location.assign(SOCIAL_HOST)");
-assertIncludes("SocialHubPanel signed-out copy", socialPanel, "Sign in on Mōchirīī before opening the guild social platform.");
+assertIncludes("SocialHubPanel signed-out copy", socialPanel, "Sign in to Mōchirīī before opening the guild social platform.");
 assertNotIncludes("SocialHubPanel", socialPanel, "target=\"_blank\"");
 assertNotIncludes("SocialHubPanel", socialPanel, "href={text(account?.profile_url)}");
 assertNotIncludes("SocialHubPanel stale status query", socialPanel, "listMySocialAccounts");
@@ -101,8 +101,8 @@ assertNotIncludes("AccountPanel retired members link", accountPanel, `href={\`/m
 assertNotIncludes("AccountPanel retired publish title", accountPanel, "Published Page");
 assertNotIncludes("AccountPanel retired profile media upload", accountPanel, "profile-media-upload");
 
-assertIncludes("social page metadata", socialPage, "Mōchirīī Social Handoff");
-assertIncludes("social page intro", socialPage, "Signed-in members continue to Mōchirīī Social");
+assertIncludes("social page metadata", socialPage, "Mōchirīī Social Access");
+assertIncludes("social page intro", socialPage, "Verified guild members can continue to the private guild social platform.");
 assertIncludes("current live state", currentState, "public website information surface");
 assertIncludes("integration runbook", runbook, "public information site");
 

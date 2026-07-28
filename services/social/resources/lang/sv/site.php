@@ -5,7 +5,7 @@ return [
 	'about'			=> 'Om',
 	'help'			=> 'Hjälp',
 	'language'		=> 'Språk',
-	'fediverse'		=> 'Fediversum',
+	'fediverse'		=> 'Mōchirīī Social',
 	'opensource'	=> 'Öppen källkod',
 	'terms'			=> 'Villkor',
 	'privacy'		=> 'Integritet',

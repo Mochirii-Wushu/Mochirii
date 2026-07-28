@@ -887,11 +887,11 @@ window.App.util = {
       u += layout == 'compact' ? 'layout=compact&' : 'layout=full&';
       u += uiMode == 'system' ? 'ui-mode=system' : uiMode === 'light'  ? 'ui-mode=light' :
       'ui-mode=dark';
-      return '<iframe title="Mochirii Social Post Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
+      return '<iframe title="Mōchirīī Social Post Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
     }),
     profile: (function(url) {
       let u = url + '/embed';
-      return '<iframe title="Mochirii Social Profile Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
+      return '<iframe title="Mōchirīī Social Profile Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
     })
   },
 
@@ -911,4 +911,4 @@ window.App.util = {
 const warningTitleCSS = 'color:red; font-size:60px; font-weight: bold; -webkit-text-stroke: 1px black;';
 const warningDescCSS = 'font-size: 18px;';
 console.log('%cStop!', warningTitleCSS);
-console.log("%cThis is a browser feature intended for developers. If someone told you to copy and paste something here to enable a Mochirii Social feature or \"hack\" someone's account, it is a scam and will give them access to your Mochirii Social account.", warningDescCSS);
+console.log("%cThis is a browser feature intended for developers. If someone told you to copy and paste something here to enable a Mōchirīī Social feature or \"hack\" someone's account, it is a scam and will give them access to your Mōchirīī Social account.", warningDescCSS);

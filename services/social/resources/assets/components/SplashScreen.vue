@@ -1,6 +1,6 @@
 <template>
   <div class="splash-screen" :class="{ 'fade-out': fadeOut }">
-    <img src="/img/mochirii-icon.png" alt="Mochirii Social emblem" class="logo">
+    <img src="/img/mochirii-icon.png" alt="Mōchirīī Social emblem" class="logo">
   </div>
 </template>
 

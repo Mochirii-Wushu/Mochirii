@@ -118,6 +118,9 @@ Pending validation:
   signed in as the admin account.
 - Verify post-image optimized derivatives are served from Spaces and the local
   original/temp files are cleaned up after successful queue processing.
+- Before every Social runtime publication, repeat the anonymous direct-object
+  and CDN denial checks and read back the private-media cutover. The protected
+  deployment workflow must remain blocked until those same-window checks pass.
 
 ## Smoke Tests
 

@@ -11,7 +11,7 @@
                 </div>
                 <hr>
                 <section>
-                    <p class="lead">Account import is disabled during Mochirii Social staging.</p>
+                    <p class="lead">Account import is unavailable.</p>
                 </section>
                 <section class="mt-4">
                     <ul class="list-group">
@@ -21,7 +21,7 @@
                                     <p class="font-weight-bold mb-1">Data Import</p>
                                     <p v-if="showDisabledWarning" class="small mb-0">This feature has been disabled by the administrators.</p>
                                     <p v-else-if="showNotAllowedWarning" class="small mb-0">You have not been permitted to use this feature, or have reached the maximum limits.</p>
-                                    <p v-else class="small mb-0">Data import is reserved for administrators while Mochirii Social is in staging.</p>
+                                    <p v-else class="small mb-0">Data import is reserved for administrators.</p>
                                 </div>
                                 <div v-if="!showDisabledWarning && !showNotAllowedWarning">
                                     <button

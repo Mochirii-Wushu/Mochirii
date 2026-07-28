@@ -12,7 +12,7 @@
 	        <div class="col-xl-6 col-lg-5 col-md-7 col-12">
 		<div class="text-center">
 	                <a href="/">
-                        <img src="{{ config('app.logo') }}" height="60px" alt="Mochirii Social emblem">
+                        <img src="{{ config('app.logo') }}" height="60px" alt="Mōchirīī Social emblem">
 		</a>
 	                <h1 class="pt-4 pb-1">Reset Password</h1>
 	                <p class="font-weight-light pb-2">Use this form to reset your password.</p>

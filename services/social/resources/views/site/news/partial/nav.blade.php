@@ -4,7 +4,7 @@
 			<p class="h4 mb-0"><a href="/site/newsroom" class="text-dark text-decoration-none">Newsroom</a></p>
 		</div>
 		<div>
-			<a class="btn btn-outline-secondary btn-sm py-1" href="/"><i class="fas fa-chevron-left fa-sm text-lighter mr-2"></i> Back to Mochirii Social</a>
+			<a class="btn btn-outline-secondary btn-sm py-1" href="/"><i class="fas fa-chevron-left fa-sm text-lighter mr-2"></i> Back to Mōchirīī Social</a>
 		</div>
 		{{-- <div>
 			<a href="/site/newsroom/search" class="small text-muted mr-4 text-decoration-none">Search Newsroom</a>

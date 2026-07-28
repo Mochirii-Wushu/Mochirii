@@ -2,24 +2,38 @@
 
 use App\Http\Controllers\Api\V1\TagsController;
 
-$middleware = ['auth:api', 'validemail'];
+$middleware = ['mochirii.private:api', 'auth:api', 'validemail'];
 
-Route::post('/f/inbox', 'FederationController@sharedInbox');
-Route::post('/users/{username}/inbox', 'FederationController@userInbox');
-Route::get('i/actor', 'InstanceActorController@profile');
-Route::post('i/actor/inbox', 'InstanceActorController@inbox');
-Route::get('i/actor/outbox', 'InstanceActorController@outbox');
-Route::get('/stories/{username}/{id}', 'StoryController@getActivityObject');
+// Browsers use their encrypted server session; native clients send their
+// reviewed Passport bearer token on this identical same-origin URL.
+Route::get('media/private/{kind}/{id}/{variant?}', 'MochiriiPrivateMediaController@show')
+    ->where([
+        'kind' => 'media|avatar|story|group|group-media',
+        'id' => '[0-9]+',
+        'variant' => 'original|preview|optimized|avatar|header',
+    ])
+    ->middleware(['private-media', 'mochirii.private:private-media', 'validemail'])
+    ->name('mochirii.private-media.show');
 
-Route::get('.well-known/webfinger', 'FederationController@webfinger')->name('well-known.webfinger');
-Route::get('.well-known/nodeinfo', 'FederationController@nodeinfoWellKnown')->name('well-known.nodeinfo');
-Route::get('.well-known/host-meta', 'FederationController@hostMeta')->name('well-known.hostMeta');
+Route::middleware('mochirii.federation-disabled')->group(function () {
+    Route::post('/f/inbox', 'FederationController@sharedInbox');
+    Route::post('/users/{username}/inbox', 'FederationController@userInbox');
+    Route::get('i/actor', 'InstanceActorController@profile');
+    Route::post('i/actor/inbox', 'InstanceActorController@inbox');
+    Route::get('i/actor/outbox', 'InstanceActorController@outbox');
+    Route::get('/stories/{username}/{id}', 'StoryController@getActivityObject');
+    Route::get('.well-known/webfinger', 'FederationController@webfinger')->name('well-known.webfinger');
+    Route::get('.well-known/nodeinfo', 'FederationController@nodeinfoWellKnown')->name('well-known.nodeinfo');
+    Route::get('.well-known/host-meta', 'FederationController@hostMeta')->name('well-known.hostMeta');
+    Route::get('api/nodeinfo/2.0.json', 'FederationController@nodeinfo');
+});
 Route::redirect('.well-known/change-password', '/settings/password');
-Route::get('api/nodeinfo/2.0.json', 'FederationController@nodeinfo');
 Route::get('api/service/health-check', 'HealthCheckController@get');
-Route::post('api/auth/app-code-verify', 'AppRegisterController@verifyCode')->middleware('throttle:app-code-verify');
-Route::post('api/auth/onboarding', 'AppRegisterController@onboarding')->middleware('throttle:app-code-verify');
-Route::get('storage/m/_v2/{pid}/{mhash}/{uhash}/{f}', 'MediaController@fallbackRedirect');
+Route::get('api/service/readiness-check', 'HealthCheckController@readiness');
+Route::any('api/auth/app-code-verify', static fn () => abort(404));
+Route::any('api/auth/onboarding', static fn () => abort(404));
+Route::get('storage/m/_v2/{pid}/{mhash}/{uhash}/{f}', 'MediaController@fallbackRedirect')
+    ->middleware(['web', 'mochirii.private']);
 
 Route::prefix('api/v0/groups')->middleware($middleware)->group(function () {
     Route::get('config', 'Groups\GroupsApiController@getConfig');
@@ -91,16 +105,22 @@ Route::prefix('api/v0/groups')->middleware($middleware)->group(function () {
 Route::group(['prefix' => 'api'], function () use ($middleware) {
 
     Route::group(['prefix' => 'v1'], function () use ($middleware) {
-        Route::post('apps', 'Api\ApiV1Controller@apps');
+        // Mochirii Social uses reviewed, pre-registered first-party clients.
+        // Anonymous dynamic client registration remains unavailable.
+        Route::post('apps', fn () => abort(404));
         Route::get('apps/verify_credentials', 'Api\ApiV1Controller@getApp')->middleware($middleware);
-        Route::get('instance', 'Api\ApiV1Controller@instance');
-        Route::get('instance/peers', 'Api\ApiV1Controller@instancePeers');
+        Route::delete('tokens/current', 'Api\CurrentAccessTokenController@destroy')
+            ->middleware(['auth:api', 'throttle:oauth-token-revoke']);
+        Route::get('instance', 'Api\ApiV1Controller@instance')->middleware($middleware);
+        Route::get('instance/peers', 'Api\ApiV1Controller@instancePeers')->middleware($middleware);
         Route::get('bookmarks', 'Api\ApiV1Controller@bookmarks')->middleware($middleware);
 
         Route::get('accounts/verify_credentials', 'Api\ApiV1Controller@verifyCredentials')->middleware($middleware);
         Route::match(['post', 'patch'], 'accounts/update_credentials', 'Api\ApiV1Controller@accountUpdateCredentials')->middleware($middleware);
         Route::get('accounts/relationships', 'Api\ApiV1Controller@accountRelationshipsById')->middleware($middleware);
-        Route::get('accounts/lookup', 'Api\ApiV1Controller@accountLookupById')->middleware('throttle:account-lookup');
+        Route::get('accounts/lookup', 'Api\ApiV1Controller@accountLookupById')
+            ->middleware($middleware)
+            ->middleware('throttle:account-lookup');
         Route::get('accounts/search', 'Api\ApiV1Controller@accountSearch')->middleware($middleware);
         Route::get('accounts/{id}/statuses', 'Api\ApiV1Controller@accountStatusesById')->middleware($middleware);
         Route::get('accounts/{id}/following', 'Api\ApiV1Controller@accountFollowingById')->middleware($middleware);
@@ -121,7 +141,7 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
         Route::post('avatar/update', 'ApiController@avatarUpdate')->middleware($middleware);
         Route::get('blocks', 'Api\ApiV1Controller@accountBlocks')->middleware($middleware);
         Route::get('conversations', 'Api\ApiV1Controller@conversations')->middleware($middleware);
-        Route::get('custom_emojis', 'Api\ApiV1Controller@customEmojis');
+        Route::get('custom_emojis', 'Api\ApiV1Controller@customEmojis')->middleware($middleware);
         Route::get('domain_blocks', 'Api\V1\DomainBlockController@index')->middleware($middleware);
         Route::post('domain_blocks', 'Api\V1\DomainBlockController@store')->middleware($middleware);
         Route::delete('domain_blocks', 'Api\V1\DomainBlockController@delete')->middleware($middleware);
@@ -187,8 +207,8 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
     Route::group(['prefix' => 'v2'], function () use ($middleware) {
         Route::get('search', 'Api\ApiV2Controller@search')->middleware($middleware);
         Route::post('media', 'Api\ApiV2Controller@mediaUploadV2')->middleware($middleware);
-        Route::get('streaming/config', 'Api\ApiV2Controller@getWebsocketConfig');
-        Route::get('instance', 'Api\ApiV2Controller@instance');
+        Route::get('streaming/config', 'Api\ApiV2Controller@getWebsocketConfig')->middleware($middleware);
+        Route::get('instance', 'Api\ApiV2Controller@instance')->middleware($middleware);
 
         Route::get('filters', 'CustomFilterController@index')->middleware($middleware);
         Route::get('filters/{id}', 'CustomFilterController@show')->middleware($middleware);
@@ -267,20 +287,12 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
             Route::get('posts/network/trending', 'DiscoverController@discoverNetworkTrending')->middleware($middleware);
         });
 
-        Route::group(['prefix' => 'directory'], function () {
-            Route::get('listing', 'PixelfedDirectoryController@get');
+        Route::group(['prefix' => 'directory'], function () use ($middleware) {
+            Route::get('listing', 'PixelfedDirectoryController@get')->middleware($middleware);
         });
 
-        Route::group(['prefix' => 'auth'], function () {
-            Route::get('iarpfc', 'Api\ApiV1Dot1Controller@inAppRegistrationPreFlightCheck');
-            Route::post('iar', 'Api\ApiV1Dot1Controller@inAppRegistration');
-            Route::post('iarc', 'Api\ApiV1Dot1Controller@inAppRegistrationConfirm');
-            Route::get('iarer', 'Api\ApiV1Dot1Controller@inAppRegistrationEmailRedirect');
-
-            Route::post('invite/admin/verify', 'AdminInviteController@apiVerifyCheck')->middleware('throttle:20,120');
-            Route::post('invite/admin/uc', 'AdminInviteController@apiUsernameCheck')->middleware('throttle:20,120');
-            Route::post('invite/admin/ec', 'AdminInviteController@apiEmailCheck')->middleware('throttle:10,1440');
-        });
+        Route::any('auth/{path?}', static fn () => abort(404))
+            ->where('path', '.*');
 
         Route::group(['prefix' => 'push'], function () use ($middleware) {
             Route::get('state', 'Api\ApiV1Dot1Controller@getPushState')->middleware($middleware);
@@ -290,7 +302,7 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
         });
 
         Route::post('status/create', 'Api\ApiV1Dot1Controller@statusCreate')->middleware($middleware);
-        Route::get('nag/state', 'Api\ApiV1Dot1Controller@nagState');
+        Route::get('nag/state', 'Api\ApiV1Dot1Controller@nagState')->middleware($middleware);
     });
 
     Route::group(['prefix' => 'v1.2'], function () use ($middleware) {
@@ -341,8 +353,8 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
         Route::get('instance/stats', 'Api\AdminApiController@getAllStats')->middleware($middleware);
     });
 
-    Route::group(['prefix' => 'landing/v1'], function () {
-        Route::get('directory', 'LandingController@getDirectoryApi');
+    Route::group(['prefix' => 'landing/v1'], function () use ($middleware) {
+        Route::get('directory', 'LandingController@getDirectoryApi')->middleware($middleware);
     });
 
     Route::group(['prefix' => 'pixelfed'], function () use ($middleware) {
@@ -399,8 +411,8 @@ Route::group(['prefix' => 'api'], function () use ($middleware) {
                 Route::get('posts/hashtags', 'DiscoverController@trendingHashtags')->middleware($middleware);
             });
 
-            Route::group(['prefix' => 'directory'], function () {
-                Route::get('listing', 'PixelfedDirectoryController@get');
+            Route::group(['prefix' => 'directory'], function () use ($middleware) {
+                Route::get('listing', 'PixelfedDirectoryController@get')->middleware($middleware);
             });
 
             Route::group(['prefix' => 'places'], function () use ($middleware) {

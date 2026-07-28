@@ -61,13 +61,13 @@ class ApiV2Controller extends Controller
                     ->toArray() : [];
         });
 
-        $res = Cache::remember('api:v2:instance-data-response-v2', 1800, function () use ($contact, $rules) {
+        $res = Cache::remember('api:v2:instance-data-response-v3', 1800, function () use ($contact, $rules) {
             return [
                 'domain' => config('pixelfed.domain.app'),
-                'title' => config_cache('app.name'),
-                'version' => '3.5.3 (compatible; Pixelfed '.config('pixelfed.version').')',
-                'source_url' => 'https://github.com/pixelfed/pixelfed',
-                'description' => config_cache('app.short_description'),
+                'title' => config('mochirii-branding.display_name'),
+                'version' => '3.5.3 (compatible; Mōchirīī Social)',
+                'source_url' => 'https://github.com/Mochirii-Wushu/Mochirii',
+                'description' => config('mochirii-branding.description'),
                 'usage' => [
                     'users' => [
                         'active_month' => (int) Nodeinfo::activeUsersMonthly(),
@@ -261,7 +261,7 @@ class ApiV2Controller extends Controller
         }
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $hash = \hash_file('sha256', $photo);
         $license = null;
         $mime = $photo->getMimeType();

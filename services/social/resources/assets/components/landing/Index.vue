@@ -31,7 +31,7 @@
 						<div class="server-header">
 							<p class="server-header-domain">{{ config.domain }}</p>
 							<p class="server-header-attribution">
-								Members-only Mochirii image hall for guild profiles, gallery posts, and quiet sharing.
+								Members-only Mōchirīī image hall for guild profiles, gallery posts, and quiet sharing.
 							</p>
 						</div>
 

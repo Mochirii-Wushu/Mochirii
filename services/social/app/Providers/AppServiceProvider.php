@@ -112,6 +112,15 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perDay(50)->by($request->ip());
         });
 
+        RateLimiter::for('oauth-token-revoke', function (Request $request) {
+            $user = $request->user('api');
+            $actor = $user
+                ? 'u:'.$user->getAuthIdentifier()
+                : 'ip:'.$request->ip();
+
+            return Limit::perMinute(10)->by($actor);
+        });
+
         RateLimiter::for('oauth-pat', function (Request $request) {
             $user = $request->user('web');
 
@@ -145,11 +154,6 @@ class AppServiceProvider extends ServiceProvider
         Passport::useTokenModel(OAuthToken::class);
         Passport::tokensExpireIn(now()->addDays(config('instance.oauth.token_expiration', 356)));
         Passport::refreshTokensExpireIn(now()->addDays(config('instance.oauth.refresh_expiration', 400)));
-        Passport::enableImplicitGrant();
-        if (config('instance.oauth.pat.enabled')) {
-            Passport::personalAccessClientId(config('instance.oauth.pat.id'));
-        }
-
         Passport::tokensCan([
             'read' => 'Full read access to your account',
             'write' => 'Full write access to your account',

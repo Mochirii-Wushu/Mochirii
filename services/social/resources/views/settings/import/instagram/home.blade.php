@@ -8,7 +8,7 @@
   <hr>
   <section>
     <div class="alert alert-info">
-      <p class="mb-0 font-weight-bold">Data import is reserved for administrators while Mochirii Social is in staging.</p>
+      <p class="mb-0 font-weight-bold">Data import is reserved for administrators.</p>
     </div>
     <p class="lead font-weight-bold mb-1">Requirements:</p>
     <ul class="lead mb-4">

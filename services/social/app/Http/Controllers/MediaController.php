@@ -34,6 +34,9 @@ class MediaController extends Controller
             return redirect('/storage/no-preview.png', 302);
         }
 
-        return redirect()->away($media->cdn_url, 302);
+        return redirect($media->url(), 302, [
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'Referrer-Policy' => 'no-referrer',
+        ]);
     }
 }

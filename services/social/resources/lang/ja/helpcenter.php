@@ -16,7 +16,7 @@ return [
 
 	'embed'	=> '埋め込む',
 	'communityGuidelines' => 'コミュニティガイドライン',
-	'whatIsTheFediverse' => 'fediverseとは',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => '公開範囲のコントロール',
 	'blockingAccounts' => 'ブロックしたアカウント',
 	'safetyTips' => '安全のためのヒント',

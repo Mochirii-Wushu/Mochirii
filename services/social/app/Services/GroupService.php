@@ -35,6 +35,17 @@ class GroupService
                 }
 
                 $admin = $group->profile_id ? AccountService::get($group->profile_id) : null;
+                $metadata = is_array($group->metadata) ? $group->metadata : [];
+                foreach (['avatar', 'header'] as $variant) {
+                    if (! isset($metadata[$variant]) || ! is_array($metadata[$variant])) {
+                        continue;
+                    }
+
+                    $metadata[$variant] = [
+                        'url' => app(MochiriiPrivateMedia::class)->group($group, $variant),
+                        'updated_at' => $metadata[$variant]['updated_at'] ?? null,
+                    ];
+                }
 
                 return [
                     'id' => (string) $group->id,
@@ -57,7 +68,7 @@ class GroupService
                         'is_nsfw' => (bool) $group->is_nsfw,
                         'dms' => (bool) $group->dms,
                     ],
-                    'metadata' => $group->metadata,
+                    'metadata' => $metadata,
                     'created_at' => $group->created_at->toAtomString(),
                 ];
             }

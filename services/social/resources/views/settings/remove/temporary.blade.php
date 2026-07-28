@@ -14,7 +14,7 @@
 	<p class="pb-1">You can only disable your account once a week.</p>
 
 	<p class="font-weight-bold">Keeping Your Data Safe</p>
-	<p class="pb-3">Nothing is more important to us than the safety and security of this community. Members put their trust in us by sharing moments on Mochirii Social, so we will never make compromises when it comes to safeguarding your data.</p>
+	<p class="pb-3">Nothing is more important to us than the safety and security of this community. Members put their trust in us by sharing moments on Mōchirīī Social, so we will never make compromises when it comes to safeguarding your data.</p>
 
 	<p class="pb-2">When you press the button below, your photos, comments and likes will be hidden until you reactivate your account by logging back in.</p>
 

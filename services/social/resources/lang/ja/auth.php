@@ -39,7 +39,7 @@ return [
     'sendReset'        =>   'パスワードリセット用のリンクを送信する',
     'backLogin'        =>   'ログイン画面に戻る',
 
-    'signInMastodon'  => 'Mastodonでログインする',
+    'signInMastodon'  => 'Continue with Mōchirīī',
 
 
 ];

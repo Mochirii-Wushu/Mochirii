@@ -36,7 +36,7 @@
 											<i class="fas fa-exclamation-triangle text-danger fa-lg mr-3"></i>
 										</div>
 										<div>
-											<p class="small warning-text mb-0 font-weight-bold"><span class="d-inline d-lg-none">DMs</span><span class="d-none d-lg-inline">Direct messages on Mochirii Social</span> are not end-to-end encrypted.
+											<p class="small warning-text mb-0 font-weight-bold"><span class="d-inline d-lg-none">DMs</span><span class="d-none d-lg-inline">Direct messages on Mōchirīī Social</span> are not end-to-end encrypted.
 											</p>
 											<p class="small warning-text mb-0 font-weight-bold">
 												Use caution when sharing sensitive data.
@@ -257,7 +257,7 @@
 							<p class="mb-0"><i class="far fa-user-plus mr-2"></i> You both follow each other</p>
 						</div>
 						<div class="list-group-item border-0">
-							<p class="mb-0"><i class="far fa-users mr-2"></i> You both follow <a class="font-weight-bold">&commat;pixelfed</a>,<a class="font-weight-bold">&commat;pixeldev</a> and <a class="font-weight-bold">&commat;pixel</a></p>
+							<p class="mb-0"><i class="far fa-users mr-2"></i> You both follow <a class="font-weight-bold">&commat;guildmate</a>, <a class="font-weight-bold">&commat;friend</a> and <a class="font-weight-bold">&commat;member</a></p>
 						</div>
 					</div> -->
 				</div>

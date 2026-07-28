@@ -3,7 +3,7 @@
 @section('content')
 <div style="width:100%;height:100vh;" class="d-flex justify-content-center align-items-center">
 	<div class="text-center">
-		<img src="/img/mochirii-icon.png" alt="Mochirii Social" width="72" height="72">
+		<img src="/img/mochirii-icon.png" alt="Mōchirīī Social" width="72" height="72">
 		<p class="mt-3 py-4">Redirecting to <span class="font-weight-bold">{{$url}}</span></p>
 		<div class="spinner-border text-lighter" role="status">
 			<span class="sr-only">Loading...</span>

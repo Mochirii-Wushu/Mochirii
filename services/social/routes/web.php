@@ -1,6 +1,32 @@
 <?php
 
+use App\Http\Controllers\RemoteOidcController;
 use Illuminate\Support\Facades\Route;
+
+Route::domain(config('pixelfed.domain.app'))->group(function () {
+    foreach ([
+        'installer',
+        'register',
+        'auth/sign_up',
+        'auth/invite',
+        'auth/pci',
+        'auth/raw/mastodon',
+        'auth/mastodon',
+        'i/app-email-verify',
+        'i/app-email-resend',
+        'oauth/clients',
+        'oauth/personal-access-tokens',
+        'oauth/scopes',
+        'oauth/token/refresh',
+        'oauth/tokens',
+        'settings/developers',
+        'settings/applications',
+        'settings/invites',
+    ] as $retiredPath) {
+        Route::any("{$retiredPath}/{path?}", static fn () => abort(404))
+            ->where('path', '.*');
+    }
+});
 
 Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofactor', 'localization'])->group(function () {
     Route::get('/', 'SiteController@home')->name('timeline.personal');
@@ -9,45 +35,13 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
     Route::get('web/explore', 'LandingController@exploreRedirect');
     Route::get('authorize_interaction', 'AuthorizeInteractionController@get');
 
-    Auth::routes();
+    Auth::routes(['register' => false]);
 
-    Route::get('auth/oidc/start', 'RemoteOidcController@start');
-    Route::get('auth/oidc/callback', 'RemoteOidcController@handleCallback');
+    Route::get('auth/oidc/start', 'RemoteOidcController@start')
+        ->block(RemoteOidcController::SESSION_LOCK_SECONDS, RemoteOidcController::SESSION_WAIT_SECONDS);
+    Route::get('auth/oidc/callback', 'RemoteOidcController@handleCallback')
+        ->block(RemoteOidcController::SESSION_LOCK_SECONDS, RemoteOidcController::SESSION_WAIT_SECONDS);
 
-    Route::redirect('auth/raw/mastodon/start', '/login');
-    Route::post('auth/raw/mastodon/config', 'RemoteAuthController@getConfig');
-    Route::post('auth/raw/mastodon/domains', 'RemoteAuthController@getAuthDomains');
-    Route::post('auth/raw/mastodon/start', 'RemoteAuthController@start');
-    Route::post('auth/raw/mastodon/redirect', 'RemoteAuthController@redirect');
-    Route::redirect('auth/raw/mastodon/preflight', '/login');
-    Route::redirect('auth/mastodon/callback', '/login');
-    Route::redirect('auth/mastodon/getting-started', '/login');
-    Route::post('auth/raw/mastodon/s/check', 'RemoteAuthController@sessionCheck');
-    Route::post('auth/raw/mastodon/s/prefill', 'RemoteAuthController@sessionGetMastodonData');
-    Route::post('auth/raw/mastodon/s/username-check', 'RemoteAuthController@sessionValidateUsername');
-    Route::post('auth/raw/mastodon/s/email-check', 'RemoteAuthController@sessionValidateEmail');
-    Route::post('auth/raw/mastodon/s/following', 'RemoteAuthController@sessionGetMastodonFollowers');
-    Route::post('auth/raw/mastodon/s/submit', 'RemoteAuthController@handleSubmit');
-    Route::post('auth/raw/mastodon/s/store-bio', 'RemoteAuthController@storeBio');
-    Route::post('auth/raw/mastodon/s/store-avatar', 'RemoteAuthController@storeAvatar');
-    Route::post('auth/raw/mastodon/s/account-to-id', 'RemoteAuthController@accountToId');
-    Route::post('auth/raw/mastodon/s/finish-up', 'RemoteAuthController@finishUp');
-    Route::post('auth/raw/mastodon/s/login', 'RemoteAuthController@handleLogin');
-    Route::get('auth/pci/{id}/{code}', 'ParentalControlsController@inviteRegister');
-    Route::post('auth/pci/{id}/{code}', 'ParentalControlsController@inviteRegisterStore');
-
-    Route::get('auth/sign_up', 'SiteController@curatedOnboarding')->name('auth.curated-onboarding');
-    Route::post('auth/sign_up', 'CuratedRegisterController@proceed');
-    Route::get('auth/sign_up/concierge/response-sent', 'CuratedRegisterController@conciergeResponseSent');
-    Route::get('auth/sign_up/concierge', 'CuratedRegisterController@concierge');
-    Route::post('auth/sign_up/concierge', 'CuratedRegisterController@conciergeStore');
-    Route::get('auth/sign_up/concierge/form', 'CuratedRegisterController@conciergeFormShow');
-    Route::post('auth/sign_up/concierge/form', 'CuratedRegisterController@conciergeFormStore');
-    Route::get('auth/sign_up/confirm', 'CuratedRegisterController@confirmEmail');
-    Route::post('auth/sign_up/confirm', 'CuratedRegisterController@confirmEmailHandle');
-    Route::get('auth/sign_up/confirmed', 'CuratedRegisterController@emailConfirmed');
-    Route::get('auth/sign_up/resend-confirmation', 'CuratedRegisterController@resendConfirmation');
-    Route::post('auth/sign_up/resend-confirmation', 'CuratedRegisterController@resendConfirmationProcess');
     Route::get('auth/forgot/email', 'UserEmailForgotController@index')->name('email.forgot');
     Route::post('auth/forgot/email', 'UserEmailForgotController@store')->middleware('throttle:10,900,forgotEmail');
 
@@ -63,19 +57,14 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
         ]);
 
         Route::get('/authorize', [
-            'uses' => '\Laravel\Passport\Http\Controllers\AuthorizationController@authorize',
+            'uses' => '\App\Http\Controllers\OAuth\FirstPartyAuthorizationController@authorize',
             'as' => 'authorizations.authorize',
             'middleware' => ['throttle:10,1'],
         ]);
 
         Route::middleware(['auth:web', 'validemail'])->group(function () {
-            Route::post('/token/refresh', [
-                'uses' => '\Laravel\Passport\Http\Controllers\TransientTokenController@refresh',
-                'as' => 'token.refresh',
-            ]);
-
             Route::post('/authorize', [
-                'uses' => '\App\Http\Controllers\OAuth\OobAuthorizationController@approve',
+                'uses' => '\App\Http\Controllers\OAuth\FirstPartyApproveAuthorizationController@approve',
                 'as' => 'authorizations.approve',
             ]);
 
@@ -84,60 +73,6 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
                 'as' => 'authorizations.deny',
             ]);
 
-            Route::get('/tokens', [
-                'uses' => '\Laravel\Passport\Http\Controllers\AuthorizedAccessTokenController@forUser',
-                'as' => 'tokens.index',
-            ]);
-
-            Route::delete('/tokens/{token_id}', [
-                'uses' => '\Laravel\Passport\Http\Controllers\AuthorizedAccessTokenController@destroy',
-                'as' => 'tokens.destroy',
-            ]);
-
-            Route::get('/clients', [
-                'uses' => '\Laravel\Passport\Http\Controllers\ClientController@forUser',
-                'as' => 'clients.index',
-            ]);
-
-            Route::post('/clients', [
-                'uses' => '\Laravel\Passport\Http\Controllers\ClientController@store',
-                'as' => 'clients.store',
-            ]);
-
-            Route::put('/clients/{client_id}', [
-                'uses' => '\Laravel\Passport\Http\Controllers\ClientController@update',
-                'as' => 'clients.update',
-            ]);
-
-            Route::delete('/clients/{client_id}', [
-                'uses' => '\Laravel\Passport\Http\Controllers\ClientController@destroy',
-                'as' => 'clients.destroy',
-            ]);
-
-            Route::get('/scopes', [
-                'uses' => 'PersonalAccessTokenController@scopes',
-                'as' => 'scopes.index',
-            ]);
-
-            Route::get('/personal-access-tokens', [
-                'uses' => 'PersonalAccessTokenController@index',
-                'as' => 'personal.tokens.index',
-            ]);
-
-            Route::post('/personal-access-tokens', [
-                'uses' => 'PersonalAccessTokenController@store',
-                'as' => 'personal.tokens.store',
-            ])->middleware(['throttle:oauth-pat']);
-
-            Route::post('/personal-access-tokens/{token_id}/renew', [
-                'uses' => 'PersonalAccessTokenController@renew',
-                'as' => 'personal.tokens.renew',
-            ])->middleware(['throttle:oauth-pat']);
-
-            Route::delete('/personal-access-tokens/{token_id}', [
-                'uses' => 'PersonalAccessTokenController@destroy',
-                'as' => 'personal.tokens.destroy',
-            ]);
         });
     });
 
@@ -147,11 +82,6 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
     Route::get('discover/places', 'PlaceController@directoryHome')->name('discover.places')->middleware('admin.notfound');
     Route::get('discover/places/{id}/{slug}', 'PlaceController@show')->middleware('admin.notfound');
     Route::get('discover/location/country/{country}', 'PlaceController@directoryCities')->middleware('admin.notfound');
-
-    Route::get('/i/app-email-verify', 'AppRegisterController@index');
-    Route::post('/i/app-email-verify', 'AppRegisterController@store')->middleware('throttle:app-signup');
-    Route::get('/i/app-email-resend', 'AppRegisterController@resendVerification');
-    Route::post('/i/app-email-resend', 'AppRegisterController@resendVerificationStore')->middleware('throttle:app-code-resend');
 
     Route::group(['prefix' => 'i'], function () {
         Route::redirect('/', '/');
@@ -325,14 +255,12 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
         Route::get('parental-controls/manage/{id}/stop-managing', 'ParentalControlsController@stopManaging')->name('settings.pc.stop-managing')->middleware('dangerzone');
         Route::post('parental-controls/manage/{id}/stop-managing', 'ParentalControlsController@stopManagingHandle')->middleware('dangerzone');
 
-        Route::get('applications', 'SettingsController@applications')->name('settings.applications')->middleware(['dangerzone', 'admin.notfound']);
         Route::get('data-export', 'SettingsController@dataExport')->name('settings.dataexport')->middleware(['dangerzone', 'admin.notfound']);
         Route::post('data-export/following', 'SettingsController@exportFollowing')->middleware(['dangerzone', 'admin.notfound']);
         Route::post('data-export/followers', 'SettingsController@exportFollowers')->middleware(['dangerzone', 'admin.notfound']);
         Route::post('data-export/mute-block-list', 'SettingsController@exportMuteBlockList')->middleware(['dangerzone', 'admin.notfound']);
         Route::post('data-export/account', 'SettingsController@exportAccount')->middleware(['dangerzone', 'admin.notfound']);
         Route::post('data-export/statuses', 'SettingsController@exportStatuses')->middleware(['dangerzone', 'admin.notfound']);
-        Route::get('developers', 'SettingsController@developers')->name('settings.developers')->middleware(['dangerzone', 'admin.notfound']);
         Route::get('labs', 'SettingsController@labs')->name('settings.labs')->middleware('admin.notfound');
         Route::post('labs', 'SettingsController@labsStore')->middleware('admin.notfound');
 
@@ -343,9 +271,6 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
             Route::redirect('/', '/settings/relationships/home');
             Route::get('home', 'SettingsController@relationshipsHome')->name('settings.relationships');
         });
-        Route::get('invites/create', 'UserInviteController@create')->name('settings.invites.create');
-        Route::post('invites/create', 'UserInviteController@store');
-        Route::get('invites', 'UserInviteController@show')->name('settings.invites');
         // Route::get('sponsor', 'SettingsController@sponsor')->name('settings.sponsor');
         // Route::post('sponsor', 'SettingsController@sponsorStore');
         Route::group(['prefix' => 'import', 'middleware' => ['dangerzone', 'admin.notfound']], function () {
@@ -438,28 +363,17 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
 
     Route::group(['prefix' => 'users'], function () {
         Route::redirect('/', '/');
-        Route::get('{user}.atom', 'ProfileController@showAtomFeed')->where('user', '.*');
-        Route::get('{username}/outbox', 'FederationController@userOutbox');
-        Route::get('{username}/followers', 'FederationController@userFollowers');
-        Route::get('{username}/following', 'FederationController@userFollowing');
+        Route::get('{user}.atom', 'ProfileController@showAtomFeed')->where('user', '.*')->middleware('mochirii.federation-disabled');
+        Route::get('{username}/outbox', 'FederationController@userOutbox')->middleware('mochirii.federation-disabled');
+        Route::get('{username}/followers', 'FederationController@userFollowers')->middleware('mochirii.federation-disabled');
+        Route::get('{username}/following', 'FederationController@userFollowing')->middleware('mochirii.federation-disabled');
         Route::get('{username}', 'ProfileController@permalinkRedirect');
-    });
-
-    Route::group(['prefix' => 'installer'], function () {
-        Route::get('api/requirements', 'InstallController@getRequirements')->withoutMiddleware(['web']);
-        Route::post('precheck/database', 'InstallController@precheckDatabase')->withoutMiddleware(['web']);
-        Route::post('store', 'InstallController@store')->withoutMiddleware(['web']);
-        Route::redirect('/', '/');
-        Route::redirect('/{q}', '/')->where('q', '.*');
     });
 
     Route::group(['prefix' => 'e'], function () {
         Route::get('terms', 'MobileController@terms');
         Route::get('privacy', 'MobileController@privacy');
     });
-
-    Route::get('auth/invite/a/{code}', 'AdminInviteController@index');
-    Route::post('api/v1.1/auth/invite/admin/re', 'AdminInviteController@apiRegister')->middleware('throttle:5,1440');
 
     Route::redirect('groups/', '/groups/home');
     Route::redirect('groups/home', '/groups/feed');
@@ -470,13 +384,13 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
         Route::get('{id}/invite', 'GroupController@groupInviteLanding');
         Route::get('{id}/settings', 'GroupController@groupSettings');
         Route::get('{gid}/topics/{topic}', 'Groups\GroupsTopicController@showTopicFeed');
-        Route::get('{gid}/p/{sid}.json', 'GroupController@getStatusObject');
+        Route::get('{gid}/p/{sid}.json', 'GroupController@getStatusObject')->middleware('mochirii.federation-disabled');
         Route::get('{gid}/p/{sid}', 'GroupController@showStatus');
         Route::get('{id}/user/{pid}', 'GroupController@showProfile');
         Route::get('{id}/un/{pid}', 'GroupController@showProfile');
         Route::get('{id}/username/{pid}', 'GroupController@showProfileByUsername');
         Route::get('{id}/{path}', 'GroupController@show');
-        Route::get('{id}.json', 'GroupController@getGroupObject');
+        Route::get('{id}.json', 'GroupController@getGroupObject')->middleware('mochirii.federation-disabled');
         Route::get('feed', 'GroupController@index');
         Route::get('create', 'GroupController@index');
         Route::get('discover', 'GroupController@index');
@@ -494,11 +408,11 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
     Route::get('p/{username}/{id}/embed', 'StatusController@showEmbed');
     Route::get('p/{username}/{id}/edit', 'StatusController@edit');
     Route::post('p/{username}/{id}/edit', 'StatusController@editStore');
-    Route::get('p/{username}/{id}.json', 'StatusController@showObject');
+    Route::get('p/{username}/{id}.json', 'StatusController@showObject')->middleware('mochirii.federation-disabled');
     Route::get('p/{username}/{id}', 'StatusController@show');
     Route::get('{username}/embed', 'ProfileController@embed');
     Route::get('{username}/live', 'LiveStreamController@showProfilePlayer');
-    Route::get('@{username}@{domain}', 'SiteController@legacyWebfingerRedirect');
-    Route::get('@{username}', 'SiteController@legacyProfileRedirect');
+    Route::get('@{username}@{domain}', 'SiteController@legacyWebfingerRedirect')->middleware('mochirii.federation-disabled');
+    Route::get('@{username}', 'SiteController@legacyProfileRedirect')->middleware('mochirii.federation-disabled');
     Route::get('{username}', 'ProfileController@show');
 });

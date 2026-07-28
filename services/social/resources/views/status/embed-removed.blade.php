@@ -7,15 +7,15 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>Mochirii Social | 404 Embed Not Found</title>
+	<title>Mōchirīī Social | 404 Embed Not Found</title>
 
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'pixelfed') }}">
-	<meta property="og:title" content="{{ $title ?? config_cache('app.name', 'pixelfed') }}">
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+	<meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">
 	<meta name="medium" content="image">
-	<meta name="theme-color" content="#10c5f8">
+	<meta name="theme-color" content="#172a23">
 	<meta name="apple-mobile-web-app-capable" content="yes">
-	<link rel="shortcut icon" type="image/png" href="/img/favicon.png?v=2">
-	<link rel="apple-touch-icon" type="image/png" href="/img/favicon.png?v=2">
+	<link rel="shortcut icon" type="image/png" href="/img/mochirii-icon.png?v=3">
+	<link rel="apple-touch-icon" type="image/png" href="/img/mochirii-icon.png?v=3">
 	<link href="{{ mix('css/app.css') }}" rel="stylesheet">
 	<style type="text/css">
 		.embed-card {
@@ -41,9 +41,9 @@
 		<div class="card status-card-embed card-md-rounded-0 card-body shadow-none rounded-0">
 			<div class="text-center p-5">
 				<img src="{{ config('app.logo') }}" width="40px" height="40px">
-				<p class="h2 py-3 font-weight-bold">Mochirii Social</p>
+				<p class="h2 py-3 font-weight-bold">Mōchirīī Social</p>
 				<p style="font-size:14px;font-weight: 500;" class="p-2">The link to this photo or video may be broken, or the post may have been removed.</p>
-				<p><a href="{{config('app.url')}}" class="font-weight-bold" target="_blank">Visit Mochirii Social</a></p>
+				<p><a href="{{config('app.url')}}" class="font-weight-bold" target="_blank">Visit Mōchirīī Social</a></p>
 			</div>
 		</div>
 	</div>

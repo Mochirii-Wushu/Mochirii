@@ -2,22 +2,13 @@
 
 namespace App\Providers;
 
-use App\Passport\CachedPersonalAccessClientRepository;
 use Laravel\Passport\Bridge;
-use Laravel\Passport\ClientRepository;
 use Laravel\Passport\Passport;
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface;
 
 class PassportServiceProvider extends \Laravel\Passport\PassportServiceProvider
 {
-    public function register(): void
-    {
-        parent::register();
-
-        $this->app->singleton(ClientRepository::class, CachedPersonalAccessClientRepository::class);
-    }
-
     /**
      * Make the authorization service instance.
      */

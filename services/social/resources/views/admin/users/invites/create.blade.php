@@ -44,7 +44,7 @@
                             class="form-control{{ $errors->has('message') ? ' is-invalid' : '' }}"
                             rows="2"
                             name="message"
-                            maxlength="1000">{{ old('message', "You've been invited to join " . config('app.name')) }}</textarea>
+                            maxlength="1000">{{ old('message', "You've been invited to join " . config('mochirii-branding.display_name')) }}</textarea>
                         @error('message')
                         <span class="invalid-feedback">{{ $message }}</span>
                         @enderror

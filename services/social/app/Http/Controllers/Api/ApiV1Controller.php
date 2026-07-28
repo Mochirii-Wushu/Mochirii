@@ -324,7 +324,7 @@ class ApiV1Controller extends Controller
                 $file = $request->file('avatar');
                 $path = "public/avatars/{$profile->id}";
                 $name = strtolower(str_random(6)).'.'.$file->guessExtension();
-                $request->file('avatar')->storePubliclyAs($path, $name);
+                $request->file('avatar')->storeAs($path, $name, ['visibility' => 'private']);
                 $av->media_path = "{$path}/{$name}";
                 $av->save();
                 Cache::forget("avatar:{$profile->id}");
@@ -1830,11 +1830,11 @@ class ApiV1Controller extends Controller
 
             return [
                 'uri' => config('pixelfed.domain.app'),
-                'title' => config_cache('app.name'),
-                'short_description' => config_cache('app.short_description'),
-                'description' => config_cache('app.description'),
+                'title' => config('mochirii-branding.display_name'),
+                'short_description' => config('mochirii-branding.description'),
+                'description' => config('mochirii-branding.description'),
                 'email' => config('instance.email'),
-                'version' => '3.5.3 (compatible; Pixelfed '.config('pixelfed.version').')',
+                'version' => '3.5.3 (compatible; Mōchirīī Social)',
                 'urls' => [
                     'streaming_api' => null,
                 ],
@@ -1982,7 +1982,7 @@ class ApiV1Controller extends Controller
         abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $license = null;
         $mime = $photo->getMimeType();
 
@@ -2054,7 +2054,7 @@ class ApiV1Controller extends Controller
 
     protected function unsupportedImageUploadMessage(): string
     {
-        return 'Mochirii Social supports JPEG, JPG, PNG, and WebP images. Please choose a file whose contents match one of those image types.';
+        return 'Mōchirīī Social supports JPEG, JPG, PNG, and WebP images. Please choose a file whose contents match one of those image types.';
     }
 
     /**
@@ -2214,7 +2214,7 @@ class ApiV1Controller extends Controller
         abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         $storagePath = MediaPathService::get($user, 2);
-        $path = $photo->storePublicly($storagePath);
+        $path = $photo->store($storagePath, ['visibility' => 'private']);
         $license = null;
         $mime = $photo->getMimeType();
 

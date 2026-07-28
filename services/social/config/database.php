@@ -77,7 +77,27 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
+            ], static fn ($value) => $value !== null) : [],
+        ],
+
+        'readiness' => [
+            'driver' => env('DB_CONNECTION', 'mysql'),
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'pixelfed'),
+            'username' => env('DB_USERNAME', 'pixelfed'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+            'options' => in_array(env('DB_CONNECTION', 'mysql'), ['mysql', 'mariadb'], true) && extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => max(1, (int) env('MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS', 2)),
+            ], static fn ($value) => $value !== null) : [],
         ],
 
         'pgsql' => [
@@ -159,6 +179,18 @@ return [
             'password' => env('REDIS_PASSWORD', null),
             'port'     => env('REDIS_PORT', 6379),
             'database' => env('REDIS_DATABASE_PULSE', 2),
+        ],
+
+        'readiness' => [
+            'scheme' => env('REDIS_SCHEME', 'tcp'),
+            'path' => env('REDIS_PATH'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => env('REDIS_DATABASE', 0),
+            'timeout' => max(1, (float) env('MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS', 2)),
+            'read_write_timeout' => max(1, (float) env('MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS', 2)),
+            'read_timeout' => max(1, (float) env('MOCHIRII_READINESS_DEPENDENCY_TIMEOUT_SECONDS', 2)),
         ],
     ],
 ];

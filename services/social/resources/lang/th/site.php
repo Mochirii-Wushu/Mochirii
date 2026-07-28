@@ -5,7 +5,7 @@ return [
     'about'             => 'เกี่ยวกับ',
     'help'              => 'ช่วยเหลือ',
     'language'          => 'ภาษา',
-    'fediverse'         => 'Fediverse',
+    'fediverse'         => 'Mōchirīī Social',
     'opensource'        => 'Open Source',
     'terms'             => 'ข้อกำหนด',
     'privacy'           => 'ความเป็นส่วนตัว',

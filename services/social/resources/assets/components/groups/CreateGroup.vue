@@ -5,7 +5,7 @@
 
                 <div class="bg-dark p-5 mx-n3">
                     <p class="h1 font-weight-bold text-light mb-2">Create Group</p>
-                    <p class="text-lighter mb-0">Create a new Mochirii Social group for members</p>
+                    <p class="text-lighter mb-0">Create a new Mōchirīī Social group for members</p>
                 </div>
 				<div class="px-2 mb-5">
 					<div class="mt-4">

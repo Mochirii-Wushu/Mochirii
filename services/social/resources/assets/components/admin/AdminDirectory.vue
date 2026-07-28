@@ -62,7 +62,7 @@
                                         <div class="card card-body shadow-none border d-flex align-items-center justify-content-center py-5">
                                             <p class="display-3 mb-1">Awaiting Approval</p>
                                             <p class="text-primary mb-1">Awaiting submission approval from social.mochirii.com, please check back later!</p>
-                                            <p class="small text-muted mb-0">If you are still waiting for approval after 24 hours please contact the Mochirii Social team.</p>
+                                            <p class="small text-muted mb-0">If you are still waiting for approval after 24 hours please contact the Mōchirīī Social team.</p>
                                         </div>
                                     </div>
 
@@ -70,7 +70,7 @@
                                         <div class="card card-body shadow-none border d-flex align-items-center justify-content-center py-5">
                                             <p class="display-3 mb-1">Awaiting Update Approval</p>
                                             <p class="text-primary mb-1">Awaiting updated submission approval from social.mochirii.com, please check back later!</p>
-                                            <p class="small text-muted mb-0">If you are still waiting for approval after 24 hours please contact the Mochirii Social team.</p>
+                                            <p class="small text-muted mb-0">If you are still waiting for approval after 24 hours please contact the Mōchirīī Social team.</p>
                                         </div>
                                     </div>
 
@@ -100,7 +100,7 @@
                                     <div v-else>
                                         <div class="card card-body shadow-none border d-flex align-items-center justify-content-center py-5">
                                             <p class="display-3 mb-1">Oops! An unexpected error occured</p>
-                                            <p class="text-primary mb-1">Ask the Mochirii Social team for assistance.</p>
+                                            <p class="text-primary mb-1">Ask the Mōchirīī Social team for assistance.</p>
                                         </div>
                                     </div>
 

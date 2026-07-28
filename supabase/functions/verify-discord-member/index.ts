@@ -30,6 +30,7 @@ const CORS_HEADERS = {
 };
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";
+const DISCORD_REQUEST_TIMEOUT_MS = 5_000;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
 const LOCKED_STATUSES = new Set(["suspended", "archived"]);
@@ -264,15 +265,37 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
-  const discordResponse = await fetch(
-    `${DISCORD_API_BASE}/guilds/${encodeURIComponent(guildId)}/members/${encodeURIComponent(discordUserId)}`,
-    {
-      headers: {
-        Authorization: `Bot ${botToken}`,
-        Accept: "application/json",
+  let discordResponse: Response;
+  try {
+    discordResponse = await fetch(
+      `${DISCORD_API_BASE}/guilds/${encodeURIComponent(guildId)}/members/${encodeURIComponent(discordUserId)}`,
+      {
+        headers: {
+          Authorization: `Bot ${botToken}`,
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT_MS),
       },
-    },
-  );
+    );
+  } catch (error) {
+    console.warn("verify-discord-member Discord lookup unavailable", {
+      cause: error instanceof DOMException && error.name === "TimeoutError"
+        ? "timeout"
+        : "network",
+    });
+    return jsonResponse(
+      verificationBody({
+        verified: false,
+        hasGuildMembership: false,
+        hasRequiredRoles: false,
+        pending: false,
+        missingRoleIds: requiredRoleIds,
+        memberStatus: currentStatus,
+        message: "Discord verification is temporarily unavailable. Please try again.",
+      }),
+      503,
+    );
+  }
 
   if (discordResponse.status === 429) {
     const retryAfter = discordResponse.headers.get("retry-after");

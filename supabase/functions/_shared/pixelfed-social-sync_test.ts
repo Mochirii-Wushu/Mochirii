@@ -21,6 +21,11 @@ Deno.test("Pixelfed social sync payload accepts the expected first-login shape",
   assert(parsed.event === "login", "event should be login");
 });
 
+Deno.test("Pixelfed social sync payload accepts a bounded access recheck", () => {
+  const parsed = parsePixelfedSocialSyncPayload({ ...validPayload, event: "access_check" }, now);
+  assert(parsed.event === "access_check", "event should preserve the access check");
+});
+
 Deno.test("Pixelfed social sync payload rejects stale timestamps", () => {
   assertThrowsMessage(
     () =>

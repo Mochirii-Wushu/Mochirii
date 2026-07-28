@@ -2,7 +2,7 @@
 {{-- Header --}}
 @slot('header')
 @component('mail::header', ['url' => config('app.url')])
-{{ config_cache('app.name') }}
+{{ config('mochirii-branding.display_name') }}
 @endcomponent
 @endslot
 
@@ -21,7 +21,7 @@
 {{-- Footer --}}
 @slot('footer')
 @component('mail::footer')
-© {{ date('Y') }} {{ config_cache('app.name') }}. @lang('All rights reserved.')
+© {{ date('Y') }} {{ config('mochirii-branding.display_name') }}. @lang('All rights reserved.')
 @endcomponent
 @endslot
 @endcomponent

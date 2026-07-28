@@ -3,24 +3,24 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{{ config_cache('app.name', 'Mochirii Social') }}</title>
+	<title>{{ config('mochirii-branding.display_name') }}</title>
 
 	<link rel="canonical" href="{{ request()->url() }}" />
 
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'Mochirii Social') }}" />
-	<meta property="og:title" content="{{ config_cache('app.name', 'Mochirii Social') }}" />
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}" />
+	<meta property="og:title" content="{{ config('mochirii-branding.display_name') }}" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="{{request()->url()}}" />
 	<meta property="og:image" content="{{ url('/img/mochirii-social-card.png') }}" />
-	<meta property="og:description" content="{{ config_cache('app.short_description') ?? 'A members-only Mochirii social hall for guild image posts and profiles.' }}" />
-	<meta name="description" content="{{ config_cache('app.short_description') ?? 'A members-only Mochirii social hall for guild image posts and profiles.' }}" />
-	<meta name="twitter:title" content="{{ config_cache('app.name', 'Mochirii Social') }}" />
-    <meta name="twitter:description" content="{{ config_cache('app.short_description') ?? 'A members-only Mochirii social hall for guild image posts and profiles.' }}" />
+	<meta property="og:description" content="{{ config('mochirii-branding.description') }}" />
+	<meta name="description" content="{{ config('mochirii-branding.description') }}" />
+	<meta name="twitter:title" content="{{ config('mochirii-branding.display_name') }}" />
+    <meta name="twitter:description" content="{{ config('mochirii-branding.description') }}" />
     <meta name="twitter:image" content="{{ url('/img/mochirii-social-card.png') }}" />
     <meta name="twitter:card" content="summary_large_image" />
 
@@ -31,11 +31,11 @@
 	<link rel="icon" type="image/png" href="{{url('/img/mochirii-icon.png')}}">
 	<link rel="apple-touch-icon" type="image/png" href="{{url('/img/mochirii-icon.png')}}">
 	<link rel="preload" as="image" href="{{ url('/img/mochirii-social-card.png')}}" />
+	@include('site.partial.social-entry-viewport')
 	<style>
 		:root { color-scheme: dark; }
 		* { box-sizing: border-box; }
 		body {
-			min-height: 100vh;
 			margin: 0;
 			color: #f7eddd;
 			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -44,14 +44,9 @@
 				url('/img/mochirii-social-card.png') center / cover fixed,
 				#101c19;
 		}
-		main {
-			min-height: 100vh;
-			display: grid;
-			place-items: center;
-			padding: clamp(1.25rem, 4vw, 3rem);
-		}
 		.social-landing {
 			width: min(680px, 100%);
+			min-width: 0;
 			padding: clamp(1.5rem, 5vw, 3rem);
 			border: 1px solid rgba(223, 190, 113, 0.28);
 			border-radius: 24px;
@@ -77,6 +72,7 @@
 			margin: 0;
 			font-size: clamp(2.2rem, 8vw, 4.8rem);
 			line-height: 0.95;
+			overflow-wrap: anywhere;
 		}
 		p {
 			max-width: 54ch;
@@ -100,6 +96,10 @@
 			color: #fff8e9;
 			font-weight: 800;
 			text-decoration: none;
+			max-width: 100%;
+			white-space: normal;
+			text-align: center;
+			overflow-wrap: anywhere;
 		}
 		.social-landing__primary {
 			border: 1px solid rgba(246, 218, 147, 0.55);
@@ -111,16 +111,20 @@
 		}
 	</style>
 </head>
-	<body>
-		<main id="content">
+	<body class="mochirii-social-entry-page mochirii-social-entry-page--landing">
+		<main id="content" class="mochirii-social-entry-shell">
 			<section class="social-landing" aria-labelledby="socialLandingTitle">
-				<img src="{{ config('app.logo') }}" alt="Mochirii Social emblem">
+				<img src="{{ config('app.logo') }}" alt="Mōchirīī Social emblem">
 				<p class="social-landing__kicker">Guild Social</p>
-				<h1 id="socialLandingTitle">Mochirii Social</h1>
-				<p>A members-only image hall for Mochirii profiles, gallery posts, and quiet guild sharing. Active members enter through the Mochirii doorway.</p>
+				<h1 id="socialLandingTitle">Mōchirīī Social</h1>
+				<p>{{ config('mochirii-branding.description') }}</p>
 				<div class="social-landing__actions">
+					@if(config('remote-auth.oidc.enabled'))
+					<a class="social-landing__primary" href="/auth/oidc/start">Continue with Mōchirīī</a>
+					@else
 					<a class="social-landing__primary" href="/login">Login</a>
-					<a class="social-landing__secondary" href="https://mochirii.com/social">Return to Mochirii</a>
+					@endif
+					<a class="social-landing__secondary" href="https://mochirii.com/">Return to Mōchirīī</a>
 				</div>
 			</section>
 		</main>

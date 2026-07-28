@@ -1,7 +1,27 @@
 # Website Reliability Reconciliation — 2026-07-27
 
-This public-safe ledger records the reviewed source lane for Website reliability. It is
-not a deployment record and grants no provider-write authority.
+This public-safe ledger records the reviewed source lane and completed Website
+reliability release. It grants no new provider-write authority.
+
+## Release Result
+
+- PR #534 was squash-merged through protected `main` as
+  `21f195458a87ae96eea84af51d0e1420b770ca74` after the recorded exact-head
+  repository, CodeQL, Vercel Preview, non-skipped Supabase Preview, database,
+  browser and release-readiness gates passed.
+- Vercel production deployment `dpl_6nHjx2vKA9wBgyDEGf4cRdpUESiJ` reached
+  `READY` and is exactly bound to the merge SHA.
+- Supabase applied only migrations
+  `20260727211442_classify_reviewed_sya_spinner_draw.sql` and
+  `20260727212838_consolidate_member_social_links_select_policy.sql`.
+- The reviewed Sya aggregate readback reports `all_checks_pass=true`; the
+  profile-link duplicate-policy warning cleared and exactly one SELECT policy
+  remains.
+- Exactly the same 33 ACTIVE Edge Functions redeployed once, every version
+  advanced exactly one, and JWT configuration remained 20 true / 13 false.
+- Production route, runtime, responsive and raffle/spinner acceptance passed,
+  so the recorded prior Vercel deployment was not restored. Immutable raffle
+  evidence was not rewritten or deleted.
 
 ## Verified Baseline
 
@@ -16,8 +36,8 @@ not a deployment record and grants no provider-write authority.
   responses, all on `/spinner/live`, and no grouped application runtime-error cluster.
   Signed-out or unauthorized access remains an intentional opaque 404 and is not counted as
   a runtime failure.
-- One Website PR was open at the snapshot: draft PR #532 for the earlier Social reliability
-  lane, exact head `4f157d7c1adc7ba530044c35a83c12c102fd9810`, one commit behind and conflicting. Its Supabase Preview was
+- One Website PR was open at this lane's source-preparation readback: draft PR #532 for the earlier Social reliability
+  lane, exact head `4f157d7c1adc7ba530044c35a83c12c102fd9810`, two commits behind current `main` and conflicting. Its Supabase Preview was
   cancelled/failed at the provider preview-branch concurrency limit; it was not a green or
   intentionally skipped result. Its replacement belongs to the separate Social hardening
   lane; this Website lane must not mix Social runtime or provider changes into its diff.

@@ -18,7 +18,7 @@
 
                                         <div>
                                             <h1 class="h3 font-weight-bold text-light mb-0">New Update Available</h1>
-                                            <p class="mb-0 text-white" style="font-size:18px;">Update your Mochirii Social server as soon as possible!</p>
+                                            <p class="mb-0 text-white" style="font-size:18px;">Update your Mōchirīī Social server as soon as possible!</p>
                                             <p class="mb-n1 text-white small" style="opacity:.7">Once you update, this message will disappear.</p>
                                             <p class="mb-0 text-white small d-flex" style="opacity:.5;gap:1rem;">
                                                 <span>Current version: <strong>{{ updateInfo?.current ?? 'Unknown' }}</strong></span>

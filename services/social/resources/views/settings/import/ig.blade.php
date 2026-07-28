@@ -7,7 +7,7 @@
   </div>
   <hr>
   <section>
-    <p class="lead">Data import is reserved for administrators while Mochirii Social is in staging.</p>
+    <p class="lead">Data import is reserved for administrators.</p>
   </section>
   <section class="mt-5 col-md-8 offset-md-2">
     <div class="card mb-3 step-one">

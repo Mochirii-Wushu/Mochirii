@@ -2,7 +2,7 @@
 
 return [
     'enabled' => env('GROUPS_ENABLED', false),
-    'federation' => env('GROUPS_FEDERATION', true),
+    'federation' => env('GROUPS_FEDERATION', false),
 
     'acl' => [
         'create_group' => [

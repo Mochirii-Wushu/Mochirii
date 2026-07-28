@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Enkorpigi',
 
 	'communityGuidelines' => 'Konumumaj Gvidiloj',
-	'whatIsTheFediverse' => 'Kio Estas la Fediverso?',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => 'Kontroli Videbleco',
 	'blockingAccounts' => 'Bloki Kontoj',
 	'safetyTips' => 'Sekurecaj Konsiletoj',

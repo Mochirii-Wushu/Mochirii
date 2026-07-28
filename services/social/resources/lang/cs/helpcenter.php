@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Vkládání',
 
 	'communityGuidelines' => 'Komunitní pokyny',
-	'whatIsTheFediverse' => 'Co je fedivesmír?',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => 'Ovládání viditelnosti',
 	'blockingAccounts' => 'Blokování účtů',
 	'safetyTips' => 'Tipy pro bezpečnost',

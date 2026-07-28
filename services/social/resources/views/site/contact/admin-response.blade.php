@@ -6,7 +6,7 @@
         <div class="col-12 col-lg-8">
             <div class="card shadow-none border">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <a class="btn btn-link font-weight-bold" href="/i/web">Back to Mochirii Social</a>
+                    <a class="btn btn-link font-weight-bold" href="/i/web">Back to Mōchirīī Social</a>
                     <h1 class="h4 mb-0">Contact Form Response</h1>
                     <p class="d-none d-md-block mb-0 text-muted">Ticket ID #{{$contact->id}}</p>
                 </div>

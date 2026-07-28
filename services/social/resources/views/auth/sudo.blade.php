@@ -12,7 +12,7 @@
 	        <div class="col-lg-5">
 	            <div class="text-center">
 	                <a href="/">
-																		<img src="/img/mochirii-icon.png" height="60px" alt="Mochirii Social emblem">
+																		<img src="/img/mochirii-icon.png" height="60px" alt="Mōchirīī Social emblem">
 		</a>
 	                <h1 class="pt-4 pb-1">Sudo Mode</h1>
 	                <p class="font-weight-light lead pb-2">Confirm password to continue</p>

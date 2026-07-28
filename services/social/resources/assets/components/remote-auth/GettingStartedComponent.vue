@@ -5,7 +5,7 @@
             <div v-if="!error" class="card shadow-none border" style="border-radius: 20px;">
                 <div v-if="!loaded && !existing && !maxUsesReached" class="card-body d-flex align-items-center flex-column" style="min-height: 400px;">
                     <div class="w-100">
-                        <p class="lead text-center font-weight-bold">Continue with Mochirii</p>
+                        <p class="lead text-center font-weight-bold">Continue with Mōchirīī</p>
                         <hr />
                     </div>
                     <div class="w-100 d-flex align-items-center justify-content-center flex-grow-1 flex-column gap-1">
@@ -24,7 +24,7 @@
 
                 <div v-else-if="!loaded && !existing && maxUsesReached" class="card-body d-flex align-items-center flex-column" style="min-height: 660px;">
                     <div class="w-100">
-                        <p class="lead text-center font-weight-bold">Continue with Mochirii</p>
+                        <p class="lead text-center font-weight-bold">Continue with Mōchirīī</p>
                         <hr />
                     </div>
                     <div class="w-100 d-flex align-items-center justify-content-center flex-grow-1 flex-column gap-1">
@@ -32,7 +32,7 @@
                         <p class="lead text-center font-weight-bold mt-3">Oops!</p>
 
                         <p class="mb-2 text-center">We cannot complete your request at this time</p>
-                        <p class="mb-3 text-center text-xs">It appears that you've signed-in on other Mochirii Social instances and reached the max limit that we accept.</p>
+                        <p class="mb-3 text-center text-xs">It appears that you've signed-in on other Mōchirīī Social instances and reached the max limit that we accept.</p>
                     </div>
 
                     <div class="w-100">
@@ -48,7 +48,7 @@
 
                 <div v-else-if="!loaded && existing" class="card-body d-flex align-items-center flex-column" style="min-height: 660px;">
                     <div class="w-100">
-                        <p class="lead text-center font-weight-bold">Continue with Mochirii</p>
+                        <p class="lead text-center font-weight-bold">Continue with Mōchirīī</p>
                         <hr />
                     </div>
                     <div class="w-100 d-flex align-items-center justify-content-center flex-grow-1 flex-column gap-1">
@@ -65,7 +65,7 @@
             <div v-else class="card shadow-none border">
                 <div class="card-body d-flex align-items-center flex-column" style="min-height: 660px;">
                     <div class="w-100">
-                        <p class="lead text-center font-weight-bold">Continue with Mochirii</p>
+                        <p class="lead text-center font-weight-bold">Continue with Mōchirīī</p>
                         <hr />
                     </div>
                     <div class="w-100 d-flex align-items-center justify-content-center flex-grow-1 flex-column gap-1">

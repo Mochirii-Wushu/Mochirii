@@ -6,13 +6,16 @@ import {
   asStringArray,
   defaultDisplayName,
   discordAvatarUrl,
-  profileMatchesTrustedDiscordIdentity,
   providerSubject,
   resolveDiscordIdentity,
   safeString,
   type JsonRecord,
 } from "../_shared/member-verification-identity.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
+import {
+  currentMemberAccess,
+  discordVerificationNeedsRefresh,
+} from "../_shared/member-access-policy.ts";
 
 type SyncedIdentity = {
   provider: string;
@@ -34,12 +37,12 @@ const CORS_HEADERS = {
 };
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";
+const DISCORD_REQUEST_TIMEOUT_MS = 5_000;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
 const APPROVED_PROVIDER_IDS = new Set(["discord", "phone", "apple", "facebook", "google", "kakao", "twitch", "spotify"]);
 const NON_DISCORD_METHODS = new Set(["manual_review", "phone", "apple", "facebook", "google", "kakao", "twitch", "spotify"]);
 const LOCKED_STATUSES = new Set(["suspended", "archived"]);
-const RECENT_VERIFICATION_MS = 7 * 24 * 60 * 60 * 1000;
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -133,23 +136,6 @@ function phoneIdentity(user: JsonRecord, now: string): SyncedIdentity | null {
     active: true,
     last_observed_at: now,
   };
-}
-
-function recentDiscordVerification(profile: JsonRecord | null): boolean {
-  const verifiedAt = safeString(profile?.discord_verified_at, 80);
-  if (!verifiedAt) return false;
-  const timestamp = Date.parse(verifiedAt);
-  return Number.isFinite(timestamp) && Date.now() - timestamp <= RECENT_VERIFICATION_MS;
-}
-
-function approvedManualVerification(verification: JsonRecord | null): boolean {
-  const status = safeString(verification?.gallery_access_status, 40);
-  const verifiedAt = safeString(verification?.gallery_access_verified_at, 80);
-  const expiresAt = safeString(verification?.gallery_access_expires_at, 80);
-  if (status !== "approved" || !verifiedAt) return false;
-  if (!expiresAt) return true;
-  const expiry = Date.parse(expiresAt);
-  return Number.isFinite(expiry) && expiry >= Date.now();
 }
 
 function publicIdentity(identity: JsonRecord): JsonRecord {
@@ -285,13 +271,17 @@ async function ensureMemberProfile(
   return data as JsonRecord | null;
 }
 
-async function updateDiscordProfile(
+export async function updateDiscordProfile(
   adminClient: SupabaseClient,
   userId: string,
   user: JsonRecord,
   profile: JsonRecord | null,
   discordUserId: string,
   now: string,
+  options: {
+    fetchImpl?: typeof fetch;
+    requestTimeoutMs?: number;
+  } = {},
 ): Promise<{ ok: boolean; status?: number; message?: string }> {
   const configuredGuildId = Deno.env.get("DISCORD_GUILD_ID") || "";
   const botToken = Deno.env.get("DISCORD_BOT_TOKEN") || "";
@@ -305,15 +295,32 @@ async function updateDiscordProfile(
     return { ok: false, status: 500, message: "Discord verification is not configured yet. Please contact leadership." };
   }
 
-  const discordResponse = await fetch(
-    `${DISCORD_API_BASE}/guilds/${encodeURIComponent(EXPECTED_DISCORD_GUILD_ID)}/members/${encodeURIComponent(discordUserId)}`,
-    {
-      headers: {
-        Authorization: `Bot ${botToken}`,
-        Accept: "application/json",
+  let discordResponse: Response;
+  try {
+    discordResponse = await (options.fetchImpl || fetch)(
+      `${DISCORD_API_BASE}/guilds/${encodeURIComponent(EXPECTED_DISCORD_GUILD_ID)}/members/${encodeURIComponent(discordUserId)}`,
+      {
+        headers: {
+          Authorization: `Bot ${botToken}`,
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(
+          options.requestTimeoutMs || DISCORD_REQUEST_TIMEOUT_MS,
+        ),
       },
-    },
-  );
+    );
+  } catch (error) {
+    console.warn("verify-member-access Discord lookup unavailable", {
+      cause: error instanceof DOMException && error.name === "TimeoutError"
+        ? "timeout"
+        : "network",
+    });
+    return {
+      ok: false,
+      status: 503,
+      message: "Discord verification is temporarily unavailable. Please try again.",
+    };
+  }
 
   if (discordResponse.status === 429) {
     const retryAfter = discordResponse.headers.get("retry-after");
@@ -338,7 +345,7 @@ async function updateDiscordProfile(
   };
 
   if (discordResponse.status === 404) {
-    await adminClient.from("member_profiles").upsert(
+    const { error } = await adminClient.from("member_profiles").upsert(
       {
         id: userId,
         ...basePayload,
@@ -347,6 +354,13 @@ async function updateDiscordProfile(
       },
       { onConflict: "id" },
     );
+    if (error) {
+      console.error("verify-member-access Discord profile upsert failed", {
+        code: error.code,
+        message: error.message,
+      });
+      throw new Error("Discord verification could not update this profile.");
+    }
     return { ok: true, message: "Discord account is linked, but this member is not in the Discord server yet." };
   }
 
@@ -403,7 +417,9 @@ async function updateDiscordProfile(
   return { ok: true, message: "Discord roles were found, but this website account is not active. Please contact leadership." };
 }
 
-Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+if (import.meta.main) {
+  Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
+}
 
 async function handleRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -460,22 +476,28 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   const discordUserId = resolveDiscordIdentity(user, syncedIdentities);
-  const profileDiscordUserId = safeString(profile?.discord_user_id, 40);
   let verificationMessage: string | null = null;
   if (
     discordUserId &&
     (body.refreshDiscord === true ||
-      !profile?.discord_checked_at ||
-      profileDiscordUserId !== discordUserId)
+      discordVerificationNeedsRefresh(profile, discordUserId))
   ) {
     try {
       const discordResult = await updateDiscordProfile(adminClient, userId, user, profile, discordUserId, now);
       verificationMessage = discordResult.message || null;
-      if (!discordResult.ok && discordResult.status && discordResult.status >= 500) {
+      if (!discordResult.ok) {
         console.warn("verify-member-access Discord refresh warning", {
           status: discordResult.status,
           message: discordResult.message,
         });
+        return jsonResponse(
+          {
+            ok: false,
+            message: discordResult.message ||
+              "Discord verification is temporarily unavailable. Please try again.",
+          },
+          discordResult.status === 429 ? 429 : 503,
+        );
       }
     } catch (error) {
       console.error("verify-member-access Discord refresh failed", {
@@ -558,14 +580,13 @@ async function handleRequest(req: Request): Promise<Response> {
     user,
     (Array.isArray(identityRows) ? identityRows : []) as SyncedIdentity[],
   );
-  const discordVerified = memberStatus === "active" &&
-    profileMatchesTrustedDiscordIdentity(
-      latestProfile?.discord_user_id,
-      trustedDiscordUserId,
-    ) &&
-    recentDiscordVerification(latestProfile);
-  const manualApproved = memberStatus === "active" && approvedManualVerification(verification);
-  const galleryEligible = discordVerified || manualApproved;
+  const access = currentMemberAccess({
+    profile: latestProfile,
+    verification,
+    trustedDiscordUserId,
+  });
+  const { discordVerified, manualApproved } = access;
+  const galleryEligible = access.eligible;
   const method = discordVerified
     ? "discord"
     : manualApproved

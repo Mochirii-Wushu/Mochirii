@@ -161,7 +161,7 @@
                                                 <label for="form-summary" class="font-weight-bold">Server Name</label>
                                                 <input
                                                     class="form-control form-control-muted"
-                                                    placeholder="Mochirii Social"
+                                                    placeholder="Mōchirīī Social"
                                                     v-model="branding.name" />
                                             </div>
                                             <p class="help-text small text-muted mb-0">
@@ -174,7 +174,7 @@
                                                 <label for="form-summary" class="font-weight-bold">Short Description</label>
                                                 <textarea
                                                     class="form-control form-control-muted"
-                                                    placeholder="Mochirii Social"
+                                                    placeholder="Mōchirīī Social"
                                                     rows="4"
                                                     v-model="branding.short_description"></textarea>
                                             </div>
@@ -188,7 +188,7 @@
                                                 <label for="form-summary" class="font-weight-bold">Long Description</label>
                                                 <textarea
                                                     class="form-control form-control-muted"
-                                                    placeholder="Mochirii Social"
+                                                    placeholder="Mōchirīī Social"
                                                     rows="8"
                                                     v-model="branding.long_description"></textarea>
                                             </div>
@@ -331,14 +331,14 @@
                                                     <label class="custom-control-label font-weight-bold" for="platform1">Allow App Registrations</label>
                                                 </div>
                                                 <p v-if="features.registration_status !== 'open'" class="mb-0 small text-muted">Requires open registration to be enabled.</p>
-                                                <p v-else class="mb-0 small">Allow users to register via the official Mochirii Social mobile application.</p>
+                                                <p v-else class="mb-0 small">Allow users to register via the official Mōchirīī Social mobile application.</p>
                                             </div>
                                         </div>
 
                                         <checkbox
                                             name="Custom Emoji"
                                             :value="platform.custom_emoji_enabled"
-                                            description="Enable federated custom emoji that is compatible with Mochirii Social, Pleroma and others."
+                                            description="Enable federated custom emoji that is compatible with Mōchirīī Social, Pleroma and others."
                                             @change="handleChange($event, 'platform', 'custom_emoji_enabled')"
                                         />
 

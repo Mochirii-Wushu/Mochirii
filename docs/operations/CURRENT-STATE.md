@@ -78,49 +78,47 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The 2026-07-27 source-preparation readback found one open
-canonical pull request: draft Social PR #532 at exact head
-`4f157d7c1adc7ba530044c35a83c12c102fd9810`, one commit
-behind its base and currently conflicting. Its Supabase Preview did not pass or
-skip: it was cancelled/failed because the provider preview-branch concurrency
-limit had been reached. That lane remains unreleased and must be reconciled and
-rechecked at an exact replacement head. Security and dependency alert counts
-are mutable provider state and must be read back at release time rather than
-inferred from the earlier closeout.
+`Supabase Preview`. The current readback finds one open canonical pull request:
+Social replacement PR #535. Conflicting draft PR #532 was closed unmerged and
+its remote `agent/social-reliability` branch was deleted only after replacement
+traceability, exact-head checks, Vercel Preview, and a non-skipped Supabase
+Preview passed. PR #535 remains unreleased and must be rechecked at its current
+exact head after every update; the pull request is the authoritative source for
+that mutable head. Security and dependency alert counts are mutable provider
+state and must be read back at release time rather than inferred from the
+earlier closeout.
 
-## Unreleased Website Reliability Source
+## Website Reliability Release
 
-- Protected-main source baseline: `5b2ad686c9c4bf47035893b170ea8d3d659fd4ea`.
-- Focused local branch: `agent/website-reliability-reconciliation-20260727`.
-- The source is not merged or deployed. Production behavior and provider state
-  are unchanged by its local preparation.
-- The lane covers public `Mōchirīī` / `Mōchī` wording enforcement, authenticated
+- PR #534 was squash-merged through protected `main` as
+  `21f195458a87ae96eea84af51d0e1420b770ca74` after its exact-head repository,
+  CodeQL, Vercel Preview, non-skipped Supabase Preview, database, browser and
+  release-readiness gates passed.
+- Vercel production deployment `dpl_6nHjx2vKA9wBgyDEGf4cRdpUESiJ` reached
+  `READY` and is exactly bound to that merge SHA.
+- The release covers public `Mōchirīī` / `Mōchī` wording enforcement, authenticated
   route readiness, bounded live-spinner polling/proxy behavior, exact reviewed
   Sya draw classification, and one behavior-preserving profile-link SELECT-policy
-  consolidation. The local Supabase CLI remains exact-pinned to 2.109.1.
+  consolidation. The repository-local Supabase CLI remains exact-pinned to 2.109.1.
   Version 2.110.0 registry integrity/signatures were verified but its release
   was still inside the enforced Deno dependency-age window, so it was correctly
   deferred rather than bypassing the supply-chain gate. This development-tool
   decision does not change the hosted Supabase runtime.
-- A future merge requires exact approval for the normal Vercel publication,
-  migrations `20260727211442_classify_reviewed_sya_spinner_draw.sql` and
-  `20260727212838_consolidate_member_social_links_select_policy.sql`, and the
-  unavoidable automatic redeployment of the current 33 Supabase functions while
-  preserving 20 `verify_jwt=true` / 13 false. No manual Supabase deploy is allowed.
-- The Sya classification is intentionally bound to the reviewed publication,
-  receipt, completed delivery record, and current revealed live state. Its
-  aggregate-only readback must report `migration_ready=true` immediately before
-  merge and `all_checks_pass=true` after deployment. A later live or
-  test draw changes that state and therefore blocks this migration until a
-  separately reviewed and authorized replacement is prepared.
-- Read-only advisors at source preparation showed five security warnings: four
+- The connected Supabase release applied exactly
+  `20260727211442_classify_reviewed_sya_spinner_draw.sql` and
+  `20260727212838_consolidate_member_social_links_select_policy.sql`. The Sya
+  aggregate-only readback reports `all_checks_pass=true`, and
+  `member_social_links` now has exactly one reviewed SELECT policy.
+- The existing Git integration redeployed exactly the same 33 ACTIVE Edge
+  Functions once. Every version advanced by exactly one and JWT configuration
+  remained 20 `verify_jwt=true` / 13 false. No manual Supabase deployment or
+  unrelated provider configuration change occurred.
+- Post-release advisors report five security warnings: four
   executable-function findings across three reviewed least-privilege
   `SECURITY DEFINER` RPC boundaries, plus disabled leaked-password protection.
-  The separate performance advisor showed one duplicate-policy warning and 54
-  unused-index information notices. The source clears the duplicate-policy
-  warning. Leaked-password protection
-  remains a separately approval-gated Auth setting. Fifty-four unused-index
-  notices remain observation items and are not evidence for deletion.
+  The duplicate-policy warning is cleared and 53 unused-index information
+  notices remain observation items, not evidence for deletion. Leaked-password
+  protection remains a separately approval-gated Auth setting.
 - Detailed scope, advisor rationale, worktree disposition, and release gates are
   in [`WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md`](./WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md).
 - The complete public-safe organization, branch, issue, and 28-worktree
@@ -133,6 +131,30 @@ inferred from the earlier closeout.
   `ghcr.io/mochirii-wushu/mochirii-pixelfed-ops`.
 - The deployed canonical image digest is
   `sha256:1fd27c8f76595595912e6f12f1677c7f108aa50f64b38a85089006b47ad395f1`.
+- Social hardening replacement PR #535 is based on the current protected-main
+  baseline. It contains no database migration or `supabase/config.toml` change,
+  but it changes reviewed source consumed by existing declared functions. Its
+  Supabase Preview must therefore remain non-skipped. A protected-main merge
+  requires separate exact authorization to redeploy the same 33 functions while
+  preserving 20/13 JWT parity; any inventory or parity drift is a stop
+  condition. It also refreshes expired Discord role evidence on demand so an
+  otherwise valid member cannot become stranded at Social consent when the
+  bounded verification window expires.
+- The approved Packet E write set only the server-side
+  `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding as Sensitive for Vercel Preview and
+  Production. The exact registered first-party identifier, callback, and S256
+  PKCE request were reconciled without printing or recording the identifier.
+  No public variable, client secret, OAuth registration, callback, or other
+  provider setting changed, and the existing Production deployment remained
+  bound to protected `main` without a deployment solely for this setting.
+- PR #535 has been pushed and reviewed through exact-head GitHub, Vercel, and
+  non-skipped Supabase Preview gates. Protected Preview checks reached the
+  application authorization boundary, preserved private/no-store rejection,
+  and found no identifier in rendered HTML or client assets. The replacement
+  has not been merged, published to GHCR, or deployed to DigitalOcean; those
+  effects remain separately exact-gated. The private-media runtime remains
+  blocked until anonymous object/CDN denial and one authorized
+  application-media read are proven in the separately approved cutover packet.
 - Image workflow run `29664477462`, protected deployment run `29664673632`,
   and hosted verification run `29664734313` completed successfully.
 - Caddy, Pixelfed, MariaDB, Redis, Horizon, scheduler, Spaces access, public

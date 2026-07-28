@@ -13,7 +13,7 @@
 
 	<p class="pb-1">If you're just looking to take a break, you can always <a href="{{route('settings.remove.temporary')}}">temporarily disable</a> your account instead.</p>
 
-    <p class="">When you press the button below, your photos, comments, likes, friendships and all other data will be removed permanently and will not be recoverable. If you decide to create another Mochirii Social account in the future, you cannot sign up with the same username again on this community.</p>
+    <p class="">When you press the button below, your photos, comments, likes, friendships and all other data will be removed permanently and will not be recoverable. If you decide to create another Mōchirīī Social account in the future, you cannot sign up with the same username again on this community.</p>
 
     <div class="alert alert-danger my-5">
       <span class="font-weight-bold">Warning:</span> Deletion is permanent. Review your saved media before continuing.

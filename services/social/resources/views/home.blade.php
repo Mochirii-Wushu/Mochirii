@@ -1,4 +1,4 @@
-@extends('layouts.app',['title' => 'Welcome to ' . config_cache('app.name')])
+@extends('layouts.app',['title' => 'Welcome to ' . config('mochirii-branding.display_name')])
 
 @section('content')
 <div class="container mt-4">
@@ -14,7 +14,7 @@
                         </div>
                     @endif
 
-                    <p class="lead mb-0">Welcome to {{config_cache('app.name')}}!</p>
+                    <p class="lead mb-0">Welcome to {{config('mochirii-branding.display_name')}}!</p>
                 </div>
             </div>
 
@@ -29,7 +29,7 @@
 @endsection
 
 @push('meta')
-<meta property="og:description" content="">
+<meta property="og:description" content="{{ config('mochirii-branding.description') }}">
 @endpush
 
 

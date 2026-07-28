@@ -106,6 +106,12 @@ return [
         'profileURL' => env('PF_OIDC_PROFILE_URL', ''),
 
         /*
+         * Bound each server-to-server OIDC request. The callback performs at
+         * most one token request and one profile request.
+         */
+        'request_timeout' => max(1, min(15, (int) env('PF_OIDC_REQUEST_TIMEOUT', 10))),
+
+        /*
          *   Logout URL
          *
          *   The endpoint used to log the user out of the OIDC provider
@@ -140,6 +146,6 @@ return [
          */
         'endpoint' => env('MOCHIRII_SOCIAL_SYNC_URL', ''),
         'secret' => env('MOCHIRII_SOCIAL_SYNC_SECRET', ''),
-        'timeout' => env('MOCHIRII_SOCIAL_SYNC_TIMEOUT', 5),
+        'timeout' => max(1, min(10, (int) env('MOCHIRII_SOCIAL_SYNC_TIMEOUT', 5))),
     ],
 ];

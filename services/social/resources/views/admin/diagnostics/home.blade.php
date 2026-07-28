@@ -239,7 +239,7 @@
 	<tr>
 		<td><span class="badge badge-primary">APP</span></td>
 		<td><strong>APP_NAME</strong></td>
-		<td><span>"{{config_cache('app.name')}}"</span></td>
+		<td><span>"{{config('mochirii-branding.display_name')}}"</span></td>
 	</tr>
 	<tr>
 		<td><span class="badge badge-primary">APP</span></td>

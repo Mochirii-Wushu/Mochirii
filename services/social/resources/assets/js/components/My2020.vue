@@ -19,13 +19,13 @@
 
 		<div v-if="page == 1" class="text-center">
 			<p class="h1 font-weight-light">Hello {{user.username}}!</p>
-			<p class="h1 py-4">Your 2020 on Mochirii Social.</p>
+			<p class="h1 py-4">Your 2020 on Mōchirīī Social.</p>
 			<p class="h4 font-weight-light mb-0 animate__animated animate__bounceInDown">Use the buttons below to navigate.</p>
 		</div>
 
 		<div v-if="page == 2" class="text-center mw-500">
 			<p class="display-4">User #<span class="font-weight-bold">{{stats.account.user_id}}</span></p>
-			<p class="h3 font-weight-light mb-0">You joined Mochirii Social on {{stats.account.created_at}}</p>
+			<p class="h3 font-weight-light mb-0">You joined Mōchirīī Social on {{stats.account.created_at}}</p>
 		</div>
 
 		<div v-if="page == 3" class="text-center mw-500">
@@ -83,14 +83,14 @@
 	</div>
 	<div v-if="loaded" class="fixed-top">
 		<p class="text-center mt-3 d-flex justify-content-center align-items-center mb-0">
-			<img src="/img/pixelfed-icon-grey.svg" width="60" height="60">
+			<img src="/img/mochirii-icon.png" width="60" height="60" alt="Mōchirīī emblem">
 			<span class="text-light font-weight-bold ml-3" style="font-size: 22px;">#my2020</span>
 		</p>
 	</div>
 	<div v-if="loaded" class="fixed-bottom">
 		<p class="text-center">
 			<a v-if="!notEnoughData" :class="prevClass()" href="#" @click.prevent="prevPage()" :disabled="page == 1"><i class="fas fa-chevron-left"></i> Back</a>
-			<a class="btn btn-outline-light rounded-pill mx-3" href="/">Back to Mochirii Social</a>
+			<a class="btn btn-outline-light rounded-pill mx-3" href="/">Back to Mōchirīī Social</a>
 			<a v-if="!notEnoughData" :class="nextClass()" href="#" @click.prevent="nextPage()">Next <i class="fas fa-chevron-right"></i></a>
 		</p>
 	</div>

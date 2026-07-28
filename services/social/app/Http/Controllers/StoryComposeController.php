@@ -77,13 +77,11 @@ class StoryComposeController extends Controller
         $story->expires_at = now()->addMinutes(1440);
         $story->save();
 
-        $url = $story->path;
-
         $res = [
             'code' => 200,
             'msg' => 'Successfully added',
             'media_id' => (string) $story->id,
-            'media_url' => $localFs ? url(Storage::url($url)).'?v='.time() : $disk->url($url).'?v='.time(),
+            'media_url' => $story->mediaUrl(),
             'media_type' => $story->type,
         ];
 
@@ -135,7 +133,7 @@ class StoryComposeController extends Controller
 
         $storagePath = MediaPathService::story($user->profile);
         $filename = Str::random(random_int(2, 12)).'_'.Str::random(random_int(32, 35)).'_'.Str::random(random_int(1, 14)).'.'.$photo->extension();
-        $path = $photo->storePubliclyAs($storagePath, $filename);
+        $path = $photo->storeAs($storagePath, $filename, ['visibility' => 'private']);
 
         if (in_array($photo->getMimeType(), ['image/jpeg', 'image/jpg', 'image/png'])) {
             $localFs = config('filesystems.default') === 'local';
@@ -512,10 +510,7 @@ class StoryComposeController extends Controller
         ]);
         $status->save();
 
-        $localFs = config('filesystems.default') === 'local';
-        $mediaUrl = $localFs
-            ? url(Storage::url($story->path))
-            : Storage::disk(config('filesystems.default'))->url($story->path);
+        $mediaUrl = $story->mediaUrl();
 
         $dm = new DirectMessage;
         $dm->to_id = $story->profile_id;
@@ -589,10 +584,7 @@ class StoryComposeController extends Controller
         ]);
         $status->save();
 
-        $localFs = config('filesystems.default') === 'local';
-        $mediaUrl = $localFs
-            ? url(Storage::url($story->path))
-            : Storage::disk(config('filesystems.default'))->url($story->path);
+        $mediaUrl = $story->mediaUrl();
 
         $dm = new DirectMessage;
         $dm->to_id = $story->profile_id;

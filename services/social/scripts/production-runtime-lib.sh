@@ -32,6 +32,21 @@ validate_digest() {
   }
 }
 
+redact_runtime_diagnostics() {
+  sed -E \
+    -e 's#(/auth/oidc/callback)[?#][^[:space:]]+#\1?[redacted]#gi' \
+    -e 's#((authorization|proxy-authorization):[[:space:]]*(bearer|basic)[[:space:]]+)[^[:space:]]+#\1[redacted]#gi' \
+    -e 's#((cookie|set-cookie):)[^[:cntrl:]]+#\1 [redacted]#gi' \
+    -e 's#([?&#](authorization_id|code|code_verifier|state|access_token|refresh_token|id_token|client_secret)=)[^&#[:space:]]+#\1[redacted]#gi' \
+    -e 's#("?(authorization_id|code|code_verifier|state|access_token|refresh_token|id_token|client_secret)"?[[:space:]]*[:=][[:space:]]*"?)[^",}&[:space:]]+#\1[redacted]#gi'
+}
+
+emit_container_diagnostics() {
+  local container_name="$1"
+  { docker logs --tail 100 "$container_name" 2>&1 || true; } \
+    | redact_runtime_diagnostics >&2
+}
+
 release_dir_for() {
   printf '%s/%s\n' "$RELEASES_ROOT" "$1"
 }
@@ -75,7 +90,7 @@ wait_for_container_health() {
         ;;
       unhealthy | exited | dead)
         echo "$container_name entered terminal state: $status" >&2
-        docker logs --tail 100 "$container_name" >&2 || true
+        emit_container_diagnostics "$container_name"
         return 1
         ;;
     esac
@@ -84,7 +99,35 @@ wait_for_container_health() {
   done
 
   echo "$container_name did not become healthy within ${timeout_seconds}s." >&2
-  docker logs --tail 100 "$container_name" >&2 || true
+  emit_container_diagnostics "$container_name"
+  return 1
+}
+
+wait_for_container_running() {
+  local container_name="$1"
+  local timeout_seconds="$2"
+  local deadline=$((SECONDS + timeout_seconds))
+
+  while ((SECONDS < deadline)); do
+    local status
+    status="$(docker inspect --format '{{.State.Status}}' "$container_name" 2>/dev/null || true)"
+
+    case "$status" in
+      running)
+        return 0
+        ;;
+      exited | dead)
+        echo "$container_name entered terminal state: $status" >&2
+        emit_container_diagnostics "$container_name"
+        return 1
+        ;;
+    esac
+
+    sleep 2
+  done
+
+  echo "$container_name did not enter running state within ${timeout_seconds}s." >&2
+  emit_container_diagnostics "$container_name"
   return 1
 }
 
@@ -97,6 +140,12 @@ verify_runtime() {
 
   docker exec pixelfed-horizon php artisan horizon:status --no-ansi
   docker exec pixelfed-scheduler php artisan schedule:list --no-ansi >/dev/null
+  docker exec pixelfed-app curl \
+    --fail \
+    --silent \
+    --show-error \
+    --max-time 5 \
+    http://127.0.0.1:8080/api/service/readiness-check >/dev/null
   curl \
     --fail \
     --silent \
@@ -111,6 +160,19 @@ verify_runtime() {
     --location \
     --max-time 30 \
     https://social.mochirii.com/ >/dev/null
+
+  local public_readiness_status
+  public_readiness_status="$(curl \
+    --silent \
+    --show-error \
+    --max-time 20 \
+    --output /dev/null \
+    --write-out '%{http_code}' \
+    https://social.mochirii.com/api/service/readiness-check)"
+  [[ "$public_readiness_status" == "404" ]] || {
+    echo "Public dependency readiness route returned HTTP $public_readiness_status instead of 404." >&2
+    return 1
+  }
 
   docker exec pixelfed-app php artisan tinker --execute="
     if (

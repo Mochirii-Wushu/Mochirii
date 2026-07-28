@@ -40,6 +40,22 @@ After admin OIDC login:
 If the sync fails, login should not expose secrets. Check private host logs for
 HTTP status only, then verify the Supabase function secret and host env.
 
+## Access Decision Cache
+
+Every request rechecks the local account's current suspension/deletion state
+and the requested resource audience. A successful external guild-membership
+decision may be reused for at most 300 seconds; it is a bounded positive cache,
+not evidence that the external provider is queried on every request. Denied,
+malformed, timed-out, or unavailable decisions fail closed and must not create
+a positive cache entry.
+
+Before promising lower-latency external revocation, add a separately reviewed
+authenticated invalidation hook that identifies one member, evicts only that
+member's cached decision, is replay-safe and rate-limited, and records only
+redacted operational metadata. Do not expose the hook publicly, flush the whole
+cache, add polling, or change provider/runtime configuration without a separate
+approval and rollback packet.
+
 ## Federation And Media
 
 Keep ActivityPub federation disabled until a separate fediverse hub approval

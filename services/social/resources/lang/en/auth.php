@@ -28,7 +28,7 @@ return [
     'sendReset'        =>   'Send Password Reset Link',
     'backLogin'        =>   'Back to Login',
 
-    'signInMastodon'  => 'Continue with Mochirii Social',
+    'signInMastodon'  => 'Continue with Mōchirīī Social',
 
 
 ];

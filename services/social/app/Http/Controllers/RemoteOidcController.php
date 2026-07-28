@@ -7,53 +7,95 @@ use App\Rules\EmailNotBanned;
 use App\Rules\PixelfedUsername;
 use App\Services\EmailService;
 use App\Services\MochiriiSocialSyncService;
+use App\Services\MochiriiLocalAccountPolicy;
 use App\Services\UserOidcService;
 use App\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Purify;
 
 class RemoteOidcController extends Controller
 {
+    private const OIDC_TRANSACTION_TTL_SECONDS = 300;
+
+    // The callback performs two OIDC requests (15 seconds each at most) and
+    // one membership-sync request (10 seconds at most). The remaining margin
+    // covers local account and session work without leaving an orphaned lock.
+    public const SESSION_LOCK_SECONDS = 60;
+
+    public const SESSION_WAIT_SECONDS = 5;
+
     protected $fractal;
 
     public function start(UserOidcService $provider, Request $request)
     {
         abort_unless((bool) config('remote-auth.oidc.enabled'), 404);
         if ($request->user()) {
-            return redirect('/');
+            return redirect()->intended('/');
         }
 
         $url = $provider->getAuthorizationUrl([
             'scope' => $provider->getDefaultScopes(),
         ]);
 
-        $request->session()->put('oauth2state', $provider->getState());
-        $request->session()->put('oauth2pkceCode', $provider->getPkceCode());
+        $request->session()->put([
+            'oauth2state' => $provider->getState(),
+            'oauth2pkceCode' => $provider->getPkceCode(),
+            'oauth2issuedAt' => now()->getTimestamp(),
+        ]);
 
         return redirect($url);
     }
 
-    public function handleCallback(UserOidcService $provider, MochiriiSocialSyncService $socialSync, Request $request)
+    public function handleCallback(
+        UserOidcService $provider,
+        MochiriiSocialSyncService $socialSync,
+        MochiriiLocalAccountPolicy $localAccountPolicy,
+        Request $request
+    )
     {
         abort_unless((bool) config('remote-auth.oidc.enabled'), 404);
 
+        $state = $request->input('state');
+        $code = $request->input('code');
+        $expectedState = $request->session()->pull('oauth2state');
+        $pkceCode = $request->session()->pull('oauth2pkceCode');
+        $issuedAt = $request->session()->pull('oauth2issuedAt');
+        // Persist one-time consumption before any validation response or
+        // outbound exchange. Laravel otherwise does not save session changes
+        // when an exception escapes the session middleware.
+        $request->session()->save();
+        $transactionAge = is_int($issuedAt)
+            ? now()->getTimestamp() - $issuedAt
+            : null;
+
+        $validCallback = is_string($state) && $state !== ''
+            && is_string($code) && $code !== ''
+            && is_string($expectedState) && $expectedState !== ''
+            && is_string($pkceCode) && $pkceCode !== ''
+            && is_int($transactionAge)
+            && $transactionAge >= 0
+            && $transactionAge <= self::OIDC_TRANSACTION_TTL_SECONDS
+            && hash_equals($expectedState, $state);
+
         if ($request->user()) {
-            return redirect('/');
+            return $validCallback
+                ? redirect()->intended('/')
+                : redirect('/');
         }
 
-        abort_unless($request->input('state'), 400);
-        abort_unless($request->input('code'), 400);
+        if (! $validCallback) {
+            return response('Invalid authorization response.', 400);
+        }
 
-        abort_unless(hash_equals($request->session()->pull('oauth2state'), $request->input('state')), 400, 'invalid state');
-
-        $provider->setPkceCode($request->session()->pull('oauth2pkceCode'));
+        $provider->setPkceCode($pkceCode);
 
         $accessToken = $provider->getAccessToken('authorization_code', [
-            'code' => $request->get('code'),
+            'code' => $code,
         ]);
 
         $userInfo = $provider->getResourceOwner($accessToken);
@@ -62,30 +104,73 @@ class RemoteOidcController extends Controller
 
         $mappedUser = UserOidcMapping::where('oidc_id', $userInfoId)->first();
         if ($mappedUser) {
-            $this->guarder()->login($mappedUser->user);
-            $socialSync->sync($mappedUser->user, $userInfoId, 'login');
+            $user = $mappedUser->user;
+            if (
+                ! $user ||
+                ! $localAccountPolicy->mayAuthenticate($user) ||
+                ! $socialSync->sync($user, $userInfoId, 'login')
+            ) {
+                return $this->denyCurrentMemberAccess($request);
+            }
 
-            return redirect('/');
+            $this->completeLogin($request, $user);
+
+            return redirect()->intended('/');
         }
 
         abort_if(EmailService::isBanned($userInfoData['email']), 400, 'Banned email.');
 
         $username = $this->usernameFromUserInfo($userInfoData, $userInfoId);
 
-        $user = $this->createUser([
-            'username' => $username,
-            'name' => $userInfoData['name'] ?? $userInfoData['display_name'] ?? $username,
-            'email' => $userInfoData['email'],
+        DB::beginTransaction();
+        try {
+            $user = $this->createUser([
+                'username' => $username,
+                'name' => $userInfoData['name'] ?? $userInfoData['display_name'] ?? $username,
+                'email' => $userInfoData['email'],
+            ]);
+
+            UserOidcMapping::create([
+                'user_id' => $user->id,
+                'oidc_id' => $userInfoId,
+            ]);
+
+            if (! $socialSync->sync($user, $userInfoId, 'account_created')) {
+                DB::rollBack();
+
+                return $this->denyCurrentMemberAccess($request);
+            }
+
+            DB::commit();
+        } catch (\Throwable $error) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            throw $error;
+        }
+
+        event(new Registered($user));
+        $this->completeLogin($request, $user);
+
+        return redirect()->intended('/');
+    }
+
+    private function completeLogin(Request $request, User $user): void
+    {
+        $this->guarder()->login($user);
+        $request->session()->regenerate();
+        $request->session()->forget('mochirii_oidc_verified');
+        $request->session()->put('mochirii_oidc_verified_at', now()->getTimestamp());
+    }
+
+    private function denyCurrentMemberAccess(Request $request)
+    {
+        $request->session()->forget(['mochirii_oidc_verified', 'mochirii_oidc_verified_at']);
+
+        return redirect('/login')->withErrors([
+            'login' => 'Current verified guild membership is required to enter Mōchirīī Social.',
         ]);
-
-        UserOidcMapping::create([
-            'user_id' => $user->id,
-            'oidc_id' => $userInfoId,
-        ]);
-
-        $socialSync->sync($user, $userInfoId, 'account_created');
-
-        return redirect('/');
     }
 
     protected function usernameFromUserInfo(array $userInfoData, $userInfoId)
@@ -169,7 +254,7 @@ class RemoteOidcController extends Controller
             'name' => 'nullable|max:30',
         ]);
 
-        event(new Registered($user = User::create([
+        return User::create([
             'name' => Purify::clean($data['name']),
             'username' => $data['username'],
             'email' => $data['email'],
@@ -177,11 +262,7 @@ class RemoteOidcController extends Controller
             'email_verified_at' => now(),
             'app_register_ip' => request()->ip(),
             'register_source' => 'oidc',
-        ])));
-
-        $this->guarder()->login($user);
-
-        return $user;
+        ]);
     }
 
     protected function guarder()

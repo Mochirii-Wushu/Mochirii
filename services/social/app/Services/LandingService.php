@@ -47,7 +47,7 @@ class LandingService
         $openReg = (bool) config_cache('pixelfed.open_registration');
 
         $res = [
-            'name' => config_cache('app.name'),
+            'name' => config('mochirii-branding.display_name'),
             'url' => config_cache('app.url'),
             'domain' => config('pixelfed.domain.app'),
             'show_directory' => (bool) config_cache('instance.landing.show_directory'),
@@ -59,8 +59,8 @@ class LandingService
             'logo' => config('app.logo'),
             'about' => [
                 'banner_image' => config_cache('app.banner_image') ?? url('/storage/headers/default.jpg'),
-                'short_description' => config_cache('app.short_description'),
-                'description' => config_cache('app.description'),
+                'short_description' => config('mochirii-branding.description'),
+                'description' => config('mochirii-branding.description'),
             ],
             'stats' => [
                 'active_users' => (int) $activeMonth,

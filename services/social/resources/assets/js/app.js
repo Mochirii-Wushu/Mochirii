@@ -271,11 +271,11 @@ window.App.util = {
 			u += caption ? 'caption=true&' : 'caption=false&';
 			u += likes ? 'likes=true&' : 'likes=false&';
 			u += layout == 'compact' ? 'layout=compact' : 'layout=full';
-			return '<iframe title="Mochirii Social Post Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
+			return '<iframe title="Mōchirīī Social Post Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
 		}),
 		profile: (function(url) {
 			let u = url + '/embed';
-			return '<iframe title="Mochirii Social Profile Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
+			return '<iframe title="Mōchirīī Social Profile Embed" src="'+u+'" class="pixelfed__embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script async defer src="'+window.location.origin +'/embed.js"><\/script>';
 		})
 	},
 

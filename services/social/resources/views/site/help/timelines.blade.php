@@ -16,7 +16,7 @@
 		<li class="lead mb-2">
 			<span class="font-weight-bold"><i class="fas fa-stream mr-2"></i> Guild Feed</span>
 			<span class="px-2">&mdash;</span>
-			<span class="font-weight-light">Timeline with public posts from Mochirii members</span>
+			<span class="font-weight-light">Timeline with public posts from Mōchirīī members</span>
 		</li>
 		@auth
 		@if(Auth::user()->is_admin)

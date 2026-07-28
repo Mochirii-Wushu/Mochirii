@@ -5,7 +5,7 @@ return [
     'about'             => 'درباره',
     'help'              => 'راهنما',
     'language'          => 'زبان‌ها',
-    'fediverse'         => 'فدیورس',
+    'fediverse'         => 'Mōchirīī Social',
     'opensource'        => 'آزاد/متن‌باز',
     'terms'             => 'قوانین',
     'privacy'           => 'حریم خصوصی',

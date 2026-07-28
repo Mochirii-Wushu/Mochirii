@@ -78,9 +78,9 @@
 			<div v-if="status && status.local == true && !status.in_reply_to_id" class="list-group-item rounded cursor-pointer" @click="ctxMenuEmbed()">Embed</div>
 			<!-- <div class="list-group-item rounded cursor-pointer border-top-0">Email</div>
 			<div class="list-group-item rounded cursor-pointer">Facebook</div>
-			<div class="list-group-item rounded cursor-pointer">Mochirii Social</div>
+			<div class="list-group-item rounded cursor-pointer">Mōchirīī Social</div>
 			<div class="list-group-item rounded cursor-pointer">Pinterest</div>
-			<div class="list-group-item rounded cursor-pointer">Mochirii Social</div>
+			<div class="list-group-item rounded cursor-pointer">Mōchirīī Social</div>
 			<div class="list-group-item rounded cursor-pointer">Twitter</div>
 			<div class="list-group-item rounded cursor-pointer">VK</div> -->
 			<div class="list-group-item rounded cursor-pointer text-lighter" @click="closeCtxShareMenu()">Cancel</div>

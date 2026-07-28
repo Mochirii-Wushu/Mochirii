@@ -20,13 +20,13 @@
   <p>
     <a class="text-dark font-weight-bold" data-toggle="collapse" href="#collapse0" role="button" aria-expanded="false" aria-controls="collapse0">
       <i class="fas fa-chevron-down mr-2"></i>
-      How do I use a hashtag on Mochirii Social?
+      How do I use a hashtag on Mōchirīī Social?
     </a>
     <div class="collapse" id="collapse0">
       <div>
         <ul>
           <li>You can add hashtags to post captions, if the post is public the hashtag will be discoverable.</li>
-          <li>You can follow hashtags on Mochirii Social to stay connected with interests you care about.</li>
+          <li>You can follow hashtags on Mōchirīī Social to stay connected with interests you care about.</li>
         </ul>
       </div>
     </div>
@@ -38,10 +38,10 @@
     </a>
     <div class="collapse" id="collapse1">
       <div>
-        <p>You can follow hashtags on Mochirii Social to stay connected with interests you care about.</p>
+        <p>You can follow hashtags on Mōchirīī Social to stay connected with interests you care about.</p>
         <p class="mb-0">To follow a hashtag:</p>
         <ol>
-          <li>Tap any hashtag (example: #art) you see on Mochirii Social.</li>
+          <li>Tap any hashtag (example: #art) you see on Mōchirīī Social.</li>
           <li>Tap <span class="font-weight-bold">Follow</span>. Once you follow a hashtag, you'll see its photos and videos appear in feed.</li>
         </ol>
         <p>To unfollow a hashtag, tap the hashtag and then tap Unfollow to confirm.</p>

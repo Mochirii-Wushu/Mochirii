@@ -78,7 +78,7 @@ class StoryApiV1Controller extends Controller
                 'id' => (string) $s->id,
                 'pid' => (string) $s->profile_id,
                 'type' => $s->type,
-                'src' => url(Storage::url($s->path)),
+                'src' => url('/media/private/story/'.$s->id.'/original'),
                 'duration' => $s->duration ?? 3,
                 'seen' => StoryService::hasSeen($pid, $s->id),
                 'created_at' => $s->created_at->format('c'),
@@ -122,7 +122,7 @@ class StoryApiV1Controller extends Controller
                     return [
                         'id' => (string) $s->id,
                         'type' => $s->type,
-                        'src' => url(Storage::url($s->path)),
+                        'src' => $s->mediaUrl(),
                         'duration' => $s->duration,
                         'seen' => true,
                         'created_at' => $s->created_at->format('c'),
@@ -190,7 +190,7 @@ class StoryApiV1Controller extends Controller
                 'id' => (string) $s->id,
                 'pid' => (string) $s->profile_id,
                 'type' => $s->type,
-                'src' => url(Storage::url($s->path)),
+                'src' => url('/media/private/story/'.$s->id.'/original'),
                 'duration' => $s->duration ?? 3,
                 'seen' => StoryService::hasSeen($pid, $s->id),
                 'created_at' => $s->created_at->format('c'),
@@ -245,7 +245,7 @@ class StoryApiV1Controller extends Controller
                     return [
                         'id' => (string) $s->id,
                         'type' => $s->type,
-                        'src' => url(Storage::url($s->path)),
+                        'src' => $s->mediaUrl(),
                         'duration' => $s->duration,
                         'seen' => true,
                         'created_at' => $s->created_at->format('c'),
@@ -298,13 +298,11 @@ class StoryApiV1Controller extends Controller
         $story->expires_at = now()->addMinutes(1440);
         $story->save();
 
-        $url = $story->path;
-
         $res = [
             'code' => 200,
             'msg' => 'Successfully added',
             'media_id' => (string) $story->id,
-            'media_url' => url(Storage::url($url)).'?v='.time(),
+            'media_url' => $story->mediaUrl(),
             'media_type' => $story->type,
         ];
 
@@ -691,7 +689,7 @@ class StoryApiV1Controller extends Controller
             'story_username' => $story->profile->username,
             'story_actor_username' => $request->user()->username,
             'story_id' => $story->id,
-            'story_media_url' => url(Storage::url($story->path)),
+            'story_media_url' => $story->mediaUrl(),
             'caption' => $text,
         ]);
         $dm->save();
@@ -741,7 +739,11 @@ class StoryApiV1Controller extends Controller
         }
 
         $storagePath = MediaPathService::story($user->profile);
-        $path = $photo->storePubliclyAs($storagePath, Str::random(random_int(2, 12)).'_'.Str::random(random_int(32, 35)).'_'.Str::random(random_int(1, 14)).'.'.$photo->extension());
+        $path = $photo->storeAs(
+            $storagePath,
+            Str::random(random_int(2, 12)).'_'.Str::random(random_int(32, 35)).'_'.Str::random(random_int(1, 14)).'.'.$photo->extension(),
+            ['visibility' => 'private'],
+        );
 
         return $path;
     }

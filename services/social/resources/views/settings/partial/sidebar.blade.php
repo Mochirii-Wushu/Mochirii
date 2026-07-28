@@ -9,11 +9,6 @@
             <li class="nav-item pl-3 {{request()->is('settings/email')?'active':''}}">
                 <a class="nav-link font-weight-light text-muted" href="{{route('settings.email')}}">{{__('settings.email')}}</a>
             </li>
-            {{-- @if(config('pixelfed.user_invites.enabled'))
-            <li class="nav-item pl-3 {{request()->is('settings/invites*')?'active':''}}">
-                <a class="nav-link font-weight-light text-muted" href="{{route('settings.invites')}}">{{__('settings.invites')}}</a>
-            </li>
-            @endif --}}
             <li class="nav-item pl-3 {{request()->is('settings/media*')?'active':''}}">
                 <a class="nav-link font-weight-light text-muted" href="{{route('settings.media')}}">{{__('settings.media')}}</a>
             </li>
@@ -41,15 +36,6 @@
             <li class="nav-item">
                 <hr>
             </li>
-
-            @if(Auth::user() && Auth::user()->is_admin && (bool) config_cache('pixelfed.oauth_enabled') == true)
-            <li class="nav-item pl-3 {{request()->is('settings/applications')?'active':''}}">
-                <a class="nav-link font-weight-light text-muted" href="{{route('settings.applications')}}">{{__('settings.applications')}}</a>
-            </li>
-            <li class="nav-item pl-3 {{request()->is('settings/developers')?'active':''}}">
-                <a class="nav-link font-weight-light text-muted" href="{{route('settings.developers')}}">{{__('settings.developers')}}</a>
-            </li>
-            @endif
 
             @if(Auth::user() && Auth::user()->is_admin)
                 <li class="nav-item pl-3 {{request()->is('*import*')?'active':''}}">

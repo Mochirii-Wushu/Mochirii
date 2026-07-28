@@ -35,11 +35,16 @@ bundle_path="${1:-}"
 commit="${2:-}"
 digest="${3:-}"
 migration_approval="${4:-NONE}"
+private_media_approval="${5:-NOT_VERIFIED}"
 
 validate_commit "$commit"
 validate_digest "$digest"
 [[ "$migration_approval" == "NONE" || "$migration_approval" == "MIGRATIONS_APPROVED" ]] || {
   echo "Migration approval must be NONE or MIGRATIONS_APPROVED." >&2
+  exit 1
+}
+[[ "$private_media_approval" == "ANONYMOUS_DENIAL_AND_CUTOVER_VERIFIED" ]] || {
+  echo "Deployment requires anonymous object/CDN denial and private-media cutover readback." >&2
   exit 1
 }
 [[ -f "$bundle_path" ]] || {
@@ -192,7 +197,9 @@ if ! compose_release "$release_dir" up \
 fi
 
 if [[ "$migrations_applied" == true ]]; then
-  wait_for_container_health pixelfed-app 300
+  # The HTTP readiness check intentionally stays unhealthy during maintenance.
+  # Wait only for the process before lifting maintenance, then verify readiness.
+  wait_for_container_running pixelfed-app 120
   docker exec pixelfed-app php artisan up --no-ansi
 fi
 if ! verify_runtime; then

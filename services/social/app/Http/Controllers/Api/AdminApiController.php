@@ -372,7 +372,7 @@ class AdminApiController extends Controller
         return collect([
             [
                 'name' => 'ActivityPub Federation',
-                'description' => 'Enable activitypub federation support, compatible with Pixelfed, Mastodon and other platforms.',
+                'description' => 'Enable external federation support.',
                 'key' => 'federation.activitypub.enabled',
             ],
 
@@ -438,7 +438,7 @@ class AdminApiController extends Controller
         return collect([
             [
                 'name' => 'ActivityPub Federation',
-                'description' => 'Enable activitypub federation support, compatible with Pixelfed, Mastodon and other platforms.',
+                'description' => 'Enable external federation support.',
                 'key' => 'federation.activitypub.enabled',
             ],
 

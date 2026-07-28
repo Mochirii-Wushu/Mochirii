@@ -10,6 +10,9 @@ use App\Http\Middleware\EmailVerificationCheck;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\FrameGuard;
 use App\Http\Middleware\Localization;
+use App\Http\Middleware\MochiriiPrivateSocial;
+use App\Http\Middleware\MochiriiRequestId;
+use App\Http\Middleware\RejectRetiredPublicRoutes;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
@@ -38,6 +41,27 @@ use Laravel\Passport\Http\Middleware\CreateFreshApiToken;
 class Kernel extends HttpKernel
 {
     /**
+     * Keep the private Social boundary ahead of controller authentication so
+     * signed-out member routes return an opaque response instead of redirecting.
+     *
+     * @var string[]
+     */
+    protected $middlewarePriority = [
+        \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        MochiriiPrivateSocial::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,
+        \Illuminate\Contracts\Session\Middleware\AuthenticatesSessions::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Auth\Middleware\Authorize::class,
+    ];
+
+    /**
      * The application's global HTTP middleware stack.
      *
      * These middleware are run during every request to your application.
@@ -45,7 +69,9 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
+        MochiriiRequestId::class,
         HandleCors::class,
+        RejectRetiredPublicRoutes::class,
         CheckForMaintenanceMode::class,
         ValidatePostSize::class,
         TrustProxies::class,
@@ -65,6 +91,7 @@ class Kernel extends HttpKernel
             AddQueuedCookiesToResponse::class,
             StartSession::class,
             AuthenticateSession::class,
+            MochiriiPrivateSocial::class,
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
@@ -86,6 +113,16 @@ class Kernel extends HttpKernel
         'api' => [
             'bindings',
         ],
+
+        // Private media must accept the existing browser session as well as a
+        // native Passport bearer token. This deliberately omits the complete
+        // web group so native requests are not rejected by the web guard.
+        'private-media' => [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            SubstituteBindings::class,
+        ],
     ];
 
     /**
@@ -106,6 +143,8 @@ class Kernel extends HttpKernel
         'can' => Authorize::class,
         'dangerzone' => DangerZone::class,
         'localization' => Localization::class,
+        'mochirii.federation-disabled' => Middleware\MochiriiFederationDisabled::class,
+        'mochirii.private' => MochiriiPrivateSocial::class,
         'guest' => RedirectIfAuthenticated::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,

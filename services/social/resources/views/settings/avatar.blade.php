@@ -25,7 +25,7 @@
               <label class="custom-file-label" for="fileInput">Upload New Avatar</label>
             </div>
             <small class="form-text text-muted">
-              Upload JPEG, PNG, or WebP up to {{round($avatarPolicy['max_size'] / 1024)}} MB. Mochirii optimizes profile photos automatically into {{$avatarPolicy['primary_size']}}px and {{$avatarPolicy['thumbnail_size']}}px images.
+              Upload JPEG, PNG, or WebP up to {{round($avatarPolicy['max_size'] / 1024)}} MB. Mōchirīī optimizes profile photos automatically into {{$avatarPolicy['primary_size']}}px and {{$avatarPolicy['thumbnail_size']}}px images.
             </small>
           </div>
         </form>

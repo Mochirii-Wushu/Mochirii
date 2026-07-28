@@ -495,7 +495,7 @@ class StoryIndexService
                 $storyItems[] = [
                     'id' => (string) $sid,
                     'type' => $h['type'],
-                    'url' => url(Storage::url($h['path'])),
+                    'url' => url('/media/private/story/'.$sid.'/original'),
                     'overlays' => json_decode($h['overlays'] ?? '[]', true) ?: [],
                     'duration' => $durationMs,
                     'viewed' => $viewed,
@@ -588,7 +588,7 @@ class StoryIndexService
                 $storyItems[] = [
                     'id' => (string) $story->id,
                     'type' => $story->type,
-                    'url' => url(Storage::url($story->path)),
+                    'url' => $story->mediaUrl(),
                     'overlays' => json_decode($story->story ?? '{}', true)['overlays'] ?? [],
                     'duration' => $durationMs,
                     'viewed' => false,

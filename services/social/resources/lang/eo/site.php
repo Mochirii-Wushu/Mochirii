@@ -5,7 +5,7 @@ return [
     'about'             => 'Pri',
     'help'              => 'Helpejo',
     'language'          => 'Lingvo',
-    'fediverse'         => 'Fediverso',
+    'fediverse'         => 'Mōchirīī Social',
     'opensource'        => 'Libera Programaro',
     'terms'             => 'Kondiĉoj',
     'privacy'           => 'Privateco',

@@ -5,7 +5,7 @@ return [
     'about'             => 'About',
     'help'              => 'Help',
     'language'          => 'Language',
-    'fediverse'         => 'Fediverse',
+    'fediverse'         => 'Mōchirīī Social',
     'opensource'        => 'Open Source',
     'terms'             => 'Terms',
     'privacy'           => 'Privacy',
@@ -31,7 +31,7 @@ return [
 
     // site/about
     'photo_sharing_for_everyone'                            => 'Photo Sharing. For Everyone',
-    'pixelfed_is_an_image_sharing_platform_etc'             => 'Pixelfed is an image sharing platform, an ethical alternative to centralized platforms.', // this is actually never used because it's a fallback for config_cache('app.description') and config_cache('app.short_description') which seem to be impossible to set to empty when saved via /admin/settings?t=branding
+    'pixelfed_is_an_image_sharing_platform_etc'             => 'Mōchirīī Social is the guild community for member profiles and photos.', // this is actually never used because it's a fallback for config_cache('app.description') and config_cache('app.short_description') which seem to be impossible to set to empty when saved via /admin/settings?t=branding
     'feature_packed'                                        => 'Feature Packed.',
     'the_best_for_the_brightest'                            => 'The best for the brightest 📸',
     'albums'                                                => 'Albums',
@@ -54,8 +54,8 @@ return [
 
     // site/fediverse
     'is_a_portmanteau_of_federation_and_universe_etc'       => 'is a portmanteau of “federation” and “universe”. It is a common, informal name for a federation of social network servers, specializing in different types of media.',
-    'supported_fediverse_projects'                          => 'Supported Fediverse Projects',
-    'some_of_the_better_known_fediverse_projects_include'   => 'Some of the better known fediverse projects include:',
+    'supported_fediverse_projects'                          => 'Mōchirīī Social',
+    'some_of_the_better_known_fediverse_projects_include'   => 'Mōchirīī Social is available only to verified guild members.',
     'a_federated_microblogging_alternative'                 => 'A federated microblogging alternative.',
 
     // site/opensource
@@ -65,5 +65,5 @@ return [
     'opensource.or'                                         => 'or',
     'view'                                                  => 'view',
     'the_source_code_and_run_their_own_instance'            => 'the source code and run their own instance!',
-    'open_source_in_pixelfed'                               => 'Open source in Pixelfed',
+    'open_source_in_pixelfed'                               => 'About Mōchirīī Social',
 ];

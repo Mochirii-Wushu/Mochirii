@@ -5,7 +5,7 @@
         <div class="row min-vh-100 align-items-center justify-content-center">
             <div class="col-12 col-md-6 col-lg-5">
                 <div class="text-center mb-5">
-                    <img src="{{ config('app.logo') }}" width="90" alt="Mochirii Social emblem">
+                    <img src="{{ config('app.logo') }}" width="90" alt="Mōchirīī Social emblem">
                 </div>
 
                 <div class="card shadow-sm">

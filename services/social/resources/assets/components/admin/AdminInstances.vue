@@ -782,7 +782,7 @@
 
 				swal(
 					'Instance Backup Downloading',
-					'Your instance moderation backup is downloading. Use this to import auto_cw, banned and unlisted instances to supported Mochirii Social instances.',
+					'Your instance moderation backup is downloading. Use this to import auto_cw, banned and unlisted instances to supported Mōchirīī Social instances.',
 					'success'
 				)
 				})

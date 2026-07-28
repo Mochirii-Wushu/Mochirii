@@ -6,12 +6,12 @@
 	<h3 class="font-weight-bold">{{__('helpcenter.gettingStarted')}}</h3>
 </div>
 <hr>
-<p class="lead ">Welcome to Mochirii Social.</p>
+<p class="lead ">Welcome to Mōchirīī Social.</p>
 <hr>
 <p>
 	<a class="text-dark font-weight-bold" data-toggle="collapse" href="#collapse1" role="button" aria-expanded="false" aria-controls="collapse1">
 		<i class="fas fa-chevron-down mr-2"></i>
-		How do I create a Mochirii Social account?
+		How do I create a Mōchirīī Social account?
 	</a>
 	<div class="collapse" id="collapse1">
 		<div>
@@ -56,7 +56,7 @@
 	</a>
 	<div class="collapse" id="collapse4">
 		<div class="mt-2">
-			Your username is part of your guild social identity, so username changes are not supported during staging. Please contact an admin if a correction is needed.
+			Your username is part of your guild social identity, so username changes are not supported. Please contact an administrator if a correction is needed.
 		</div>
 	</div>
 </p>

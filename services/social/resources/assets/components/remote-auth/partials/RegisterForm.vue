@@ -1,18 +1,18 @@
 <template>
     <div class="card-body">
-        <p class="lead text-center font-weight-bold">Continue with Mochirii</p>
+        <p class="lead text-center font-weight-bold">Continue with Mōchirīī</p>
         <hr>
 
         <template v-if="step === 1">
             <div class="wrapper-mh">
                 <div class="flex-grow-1">
                     <p class="text-dark">Hello {{ initialData['_webfinger'] }},</p>
-                    <p class="lead font-weight-bold">Welcome to Mochirii Social!</p>
+                    <p class="lead font-weight-bold">Welcome to Mōchirīī Social!</p>
 
                     <p>You are moments away from joining our vibrant photo and video focused community with members from around the world.</p>
                 </div>
 
-                <p class="text-xs text-lighter">Your Mochirii account <strong>avatar</strong>, <strong>bio</strong>, <strong>display name</strong>, <strong>followed accounts</strong> and <strong>username</strong> will be imported to speed up the sign-up process. We will never post on your behalf, we only access your public profile data (avatar, bio, display name, followed accounts and username).</p>
+                <p class="text-xs text-lighter">Your Mōchirīī account <strong>avatar</strong>, <strong>bio</strong>, <strong>display name</strong>, <strong>followed accounts</strong> and <strong>username</strong> will be imported to speed up the sign-up process. We will never post on your behalf, we only access your public profile data (avatar, bio, display name, followed accounts and username).</p>
             </div>
         </template>
 
@@ -37,7 +37,7 @@
 
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" id="customCheck1" v-model="form.importAvatar">
-                            <label class="custom-control-label text-xs font-weight-bold" style="line-height: 24px;" for="customCheck1">Import my Mochirii avatar</label>
+                            <label class="custom-control-label text-xs font-weight-bold" style="line-height: 24px;" for="customCheck1">Import my Mōchirīī avatar</label>
                         </div>
                     </div>
                 </div>

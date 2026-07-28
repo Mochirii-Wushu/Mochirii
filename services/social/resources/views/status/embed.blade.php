@@ -5,16 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>{{ $title ?? config_cache('app.name', 'Mochirii Social') }}</title>
-    <meta property="og:site_name" content="{{ config_cache('app.name', 'pixelfed') }}">
-    <meta property="og:title" content="{{ $title ?? config_cache('app.name', 'pixelfed') }}">
+    <title>{{ $title ?? config('mochirii-branding.display_name') }}</title>
+    <meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+    <meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">
     <meta property="og:type" content="article">
     <meta property="og:url" content="{{$status['url']}}">
     <meta name="medium" content="image">
-    <meta name="theme-color" content="#10c5f8">
+    <meta name="theme-color" content="#172a23">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="shortcut icon" type="image/png" href="/img/favicon.png?v=2">
-    <link rel="apple-touch-icon" type="image/png" href="/img/favicon.png?v=2">
+    <link rel="shortcut icon" type="image/png" href="/img/mochirii-icon.png?v=3">
+    <link rel="apple-touch-icon" type="image/png" href="/img/mochirii-icon.png?v=3">
     <style type="text/css">
     :root {
         --dark: #000;
@@ -79,7 +79,7 @@
             @if($layout != 'compact')
             <div class="card-body">
                 <div class="view-more mb-2">
-                    <a class="font-weight-bold" href="{{$status['url']}}" target="_blank">View More on Mochirii Social</a>
+                    <a class="font-weight-bold" href="{{$status['url']}}" target="_blank">View More on Mōchirīī Social</a>
                 </div>
                 <hr>
                 <div class="caption">

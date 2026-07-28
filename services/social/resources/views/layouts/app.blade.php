@@ -4,16 +4,16 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 	<meta name="csrf-token" content="{{ csrf_token() }}">
 
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{{ $title ?? config_cache('app.name') }}</title>
+	<title>{{ $title ?? config('mochirii-branding.display_name') }}</title>
 	<link rel="manifest" href="{{url('/manifest.json')}}">
 	<meta property="og:logo" content="{{ url('/img/mochirii-icon.png')}}" />
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'Mochirii Social') }}">
-	<meta property="og:title" content="{{ $ogTitle ?? $title ?? config_cache('app.name') }}">
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+	<meta property="og:title" content="{{ $ogTitle ?? $title ?? config('mochirii-branding.display_name') }}">
 	<meta property="og:type" content="{{ $ogType ?? 'article' }}">
 	<meta property="og:url" content="{{url(request()->url())}}">
 	@stack('meta')
@@ -41,7 +41,7 @@
 	<script type="text/javascript">window._sharedData = {curUser: {}, version: 0}; window.App = {config: {!!App\Util\Site\Config::json()!!}};</script>
 
 </head>
-<body class="loggedIn">
+<body class="{{ $bodyClass ?? 'loggedIn' }}">
 	@include('layouts.partial.nav')
 	<main id="content">
 		@yield('content')
@@ -67,14 +67,15 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<meta name="csrf-token" content="{{ csrf_token() }}">
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{{ $title ?? config_cache('app.name', 'Mochirii Social') }}</title>
+	<title>{{ $title ?? config('mochirii-branding.display_name') }}</title>
 	<link rel="manifest" href="/manifest.json">
 	<meta property="og:logo" content="{{ url('/img/mochirii-icon.png')}}" />
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'Mochirii Social') }}">
-	<meta property="og:title" content="{{ $ogTitle ?? $title ?? config_cache('app.name', 'Mochirii Social') }}">
+	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
+	<meta property="og:title" content="{{ $ogTitle ?? $title ?? config('mochirii-branding.display_name') }}">
 	<meta property="og:type" content="{{ $ogType ?? 'article' }}">
 	<meta property="og:url" content="{{url(request()->url())}}">
 	@stack('meta')
@@ -89,7 +90,7 @@
 	<script type="text/javascript">window._sharedData = {curUser: {}, version: 0}; window.App = {config: {!!App\Util\Site\Config::json()!!}};</script>
 	@stack('styles')
 </head>
-<body>
+<body class="{{ $bodyClass ?? '' }}">
 	@include('layouts.partial.nav')
 	<main id="content">
 		@yield('content')

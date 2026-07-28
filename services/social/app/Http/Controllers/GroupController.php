@@ -199,8 +199,8 @@ class GroupController extends GroupFederationController
                 }
 
                 $fileName = 'avatar_'.strtolower(str_random($len)).'.'.$avatar->extension();
-                $path = $avatar->storePubliclyAs('public/g/'.$group->id.'/meta', $fileName);
-                $url = url(Storage::url($path));
+                $path = $avatar->storeAs('public/g/'.$group->id.'/meta', $fileName, ['visibility' => 'private']);
+                $url = app(\App\Services\MochiriiPrivateMedia::class)->group($group, 'avatar');
                 $metadata['avatar'] = [
                     'path' => $path,
                     'url' => $url,
@@ -221,8 +221,8 @@ class GroupController extends GroupFederationController
                 }
 
                 $fileName = 'header_'.strtolower(str_random($len)).'.'.$header->extension();
-                $path = $header->storePubliclyAs('public/g/'.$group->id.'/meta', $fileName);
-                $url = url(Storage::url($path));
+                $path = $header->storeAs('public/g/'.$group->id.'/meta', $fileName, ['visibility' => 'private']);
+                $url = app(\App\Services\MochiriiPrivateMedia::class)->group($group, 'header');
                 $metadata['header'] = [
                     'path' => $path,
                     'url' => $url,

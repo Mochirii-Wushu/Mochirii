@@ -1,5 +1,5 @@
 @extends('layouts.blank', [
-    'title' => $profile->name . ' (@' . $acct . ') - Mochirii Social',
+    'title' => $profile->name . ' (@' . $acct . ') - Mōchirīī Social',
     'ogTitle' => $profile->name . ' (@' . $acct . ')',
     'ogType' => 'profile'
 ])
@@ -27,10 +27,10 @@ $metaDescription = \App\Services\AccountService::getMetaDescription($profile->id
     <meta property="og:image:height" content="200">
     <meta property="twitter:card" content="summary">
     <meta property="profile:username" content="{{$acct}}">
-    <link href="{{$profile->permalink('.atom')}}" rel="alternate" title="{{$profile->username}} on Mochirii Social" type="application/atom+xml">
+    <link href="{{$profile->permalink('.atom')}}" rel="alternate" title="{{$profile->username}} on Mōchirīī Social" type="application/atom+xml">
     <link href="{{$profile->permalink()}}" rel="alternate" type="application/activity+json">
-    <meta name="application-name" content="Mochirii Social">
-    <meta name="generator" content="Mochirii Social">
+    <meta name="application-name" content="Mōchirīī Social">
+    <meta name="generator" content="Mōchirīī Social">
     <link href="{{ mix('css/profile.css') }}" rel="stylesheet">
     @if($profile->website)<link href="{{$profile->website}}" rel="me" type="text/html">
 @endif

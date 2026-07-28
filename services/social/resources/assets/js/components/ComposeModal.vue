@@ -506,7 +506,7 @@
                         <autocomplete
                             v-show="taggedUsernames.length < 10"
                             :search="tagSearch"
-                            placeholder="@pixelfed"
+                            placeholder="@mochirii"
                             aria-label="Search usernames"
                             :get-result-value="getTagResultValue"
                             @submit="onTagSubmitLocation"
@@ -1104,7 +1104,7 @@ export default {
         },
 
         uploadValidationMessage(errObject) {
-            const fallback = 'Mochirii Social supports JPEG, JPG, PNG, and WebP images. Please choose a file whose contents match one of those image types.';
+            const fallback = 'Mōchirīī Social supports JPEG, JPG, PNG, and WebP images. Please choose a file whose contents match one of those image types.';
             const data = errObject.response && errObject.response.data ? errObject.response.data : {};
 
             if (data.message) {

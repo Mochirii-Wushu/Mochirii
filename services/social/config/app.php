@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Mochirii Social'),
+    'name' => env('APP_NAME', 'Mochirii'),
 
     /*
     |--------------------------------------------------------------------------
@@ -101,8 +101,8 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'short_description' => env('PF_SHORT_DESCRIPTION', 'A members-only Mochirii social hall for guild image posts and profiles.'),
-    'description' => env('PF_DESCRIPTION', 'Mochirii Social is a members-only image hall for guild profiles, gallery posts, and quiet sharing between active Mochirii members.'),
+    'short_description' => env('PF_SHORT_DESCRIPTION', 'Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.'),
+    'description' => env('PF_DESCRIPTION', 'Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.'),
     'rules' => env('PF_RULES', null),
     'logo' => '/img/mochirii-emblem.webp',
     'banner_image' => '/storage/headers/default.jpg',

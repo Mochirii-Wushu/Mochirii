@@ -16,7 +16,7 @@ return [
 	'embed'	=> 'Bädda in',
 
 	'communityGuidelines' => 'Riktlinjer för communityt',
-	'whatIsTheFediverse' => 'Vad är fediversumet?',
+	'whatIsTheFediverse' => 'About Mōchirīī Social',
 	'controllingVisibility' => 'Kontrollera synlighet',
 	'blockingAccounts' => 'Blocka konton',
 	'safetyTips' => 'Säkerhetstips',

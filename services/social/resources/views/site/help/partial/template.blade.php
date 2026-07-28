@@ -1,4 +1,4 @@
-@extends('layouts.anon', ['title' => 'Mochirii Social Help Center'])
+@extends('layouts.anon', ['title' => 'Mōchirīī Social Help Center'])
 
 @section('content')
 

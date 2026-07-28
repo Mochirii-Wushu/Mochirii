@@ -336,7 +336,7 @@
             </div>
 
             <div class="d-none d-md-block sidebar-attribution">
-                <a href="/site/about" class="font-weight-bold">Mochirii Social</a>
+                <a href="/site/about" class="font-weight-bold">Mōchirīī Social</a>
             </div>
         </div>
 

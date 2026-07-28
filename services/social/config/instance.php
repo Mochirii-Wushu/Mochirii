@@ -3,7 +3,7 @@
 return [
     'force_https_urls' => env('FORCE_HTTPS_URLS', true),
 
-    'description' => env('INSTANCE_DESCRIPTION', 'Mochirii Social - guild image sharing for Mochirii members'),
+    'description' => env('INSTANCE_DESCRIPTION', 'Internal guild social platform for profiles, photos & staying connected. Only verified members can access here & everything is private with no data sharing outside.'),
 
     'contact' => [
         'enabled' => env('INSTANCE_CONTACT_FORM', false),
@@ -18,7 +18,7 @@ return [
         'tags' => [
             'is_public' => env('INSTANCE_PUBLIC_HASHTAGS', false),
         ],
-        'beagle_api' => env('PF_INSTANCE_USE_BEAGLE_API', true),
+        'beagle_api' => env('PF_INSTANCE_USE_BEAGLE_API', false),
     ],
 
     'email' => env('INSTANCE_CONTACT_EMAIL'),
@@ -78,8 +78,8 @@ return [
         'token_expiration' => env('OAUTH_TOKEN_DAYS', 365),
         'refresh_expiration' => env('OAUTH_REFRESH_DAYS', 400),
         'pat' => [
-            'enabled' => env('OAUTH_PAT_ENABLED', false),
-            'id' => env('OAUTH_PAT_ID'),
+            'enabled' => false,
+            'id' => null,
         ],
     ],
 
@@ -107,7 +107,7 @@ return [
     ],
 
     'admin_invites' => [
-        'enabled' => env('PF_ADMIN_INVITES_ENABLED', true),
+        'enabled' => false,
     ],
 
     'user_filters' => [
@@ -154,7 +154,7 @@ return [
         ],
 
         'nag' => [
-            'enabled' => (bool) env('INSTANCE_NOTIFY_APP_GATEWAY', true),
+            'enabled' => (bool) env('INSTANCE_NOTIFY_APP_GATEWAY', false),
             'api_key' => env('PIXELFED_PUSHGATEWAY_KEY', false),
             'endpoint' => 'push.pixelfed.net',
         ],
@@ -178,7 +178,7 @@ return [
                     'enabled' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY', false),
                     'bundle' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY_BUNDLE', false),
                     'max_per_day' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY_MPD', 10),
-                    // Set to a CSV of admin usernames like 'admin,dansup,test'
+                    // Set to a CSV of admin usernames like 'admin,moderator,operator'
                     'to_usernames' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_TO_USERNAMES'),
                     'cc_addresses' => env('INSTANCE_CUR_REG_NOTIFY_ADMIN_ON_VERIFY_CC'),
                 ],

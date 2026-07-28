@@ -1,9 +1,9 @@
-@extends('site.help.partial.template', ['breadcrumb'=>'Mochirii Social network'])
+@extends('site.help.partial.template', ['breadcrumb'=>'Mōchirīī Social network'])
 
 @section('section')
 
   <div class="title">
-    <h3 class="font-weight-bold">Mochirii Social Network</h3>
+    <h3 class="font-weight-bold">Mōchirīī Social Network</h3>
   </div>
   <hr>
   <div class="card">

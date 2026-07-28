@@ -23,7 +23,9 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers {
+        login as passwordLogin;
+    }
 
     /**
      * Where to redirect users after login.
@@ -53,6 +55,13 @@ class LoginController extends Controller
         }
 
         return view('auth.login');
+    }
+
+    public function login(Request $request)
+    {
+        abort_if((bool) config('remote-auth.oidc.enabled'), 404);
+
+        return $this->passwordLogin($request);
     }
 
     /**

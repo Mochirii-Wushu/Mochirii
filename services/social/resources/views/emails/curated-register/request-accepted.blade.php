@@ -26,7 +26,7 @@ Need help getting started? Visit our [Help Center]({{url('site/help')}}) for tip
 
 If you have any questions or need assistance, feel free to reach out to [our support team]({{url('/site/contact')}}).
 
-Happy posting, and once again, welcome to Mochirii Social!
+Happy posting, and once again, welcome to Mōchirīī Social!
 
 Warm regards,<br>
 <strong>{{ config('pixelfed.domain.app') }}</strong>

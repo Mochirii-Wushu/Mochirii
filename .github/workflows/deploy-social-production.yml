@@ -23,6 +23,14 @@ on:
         options:
           - NONE
           - MIGRATIONS APPROVED
+      private_media_approval:
+        description: Confirm anonymous object/CDN denial and private-media cutover readback
+        required: true
+        default: NOT VERIFIED
+        type: choice
+        options:
+          - NOT VERIFIED
+          - ANONYMOUS DENIAL AND CUTOVER VERIFIED
 
 permissions:
   contents: read
@@ -58,6 +66,7 @@ jobs:
           RELEASE_DIGEST: ${{ inputs.image_digest }}
           RELEASE_CONFIRMATION: ${{ inputs.confirmation }}
           MIGRATION_APPROVAL: ${{ inputs.migration_approval }}
+          PRIVATE_MEDIA_APPROVAL: ${{ inputs.private_media_approval }}
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -65,14 +74,17 @@ jobs:
           [[ "$RELEASE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
           [[ "$RELEASE_CONFIRMATION" == "DEPLOY social.mochirii.com" ]]
           [[ "$MIGRATION_APPROVAL" == "NONE" || "$MIGRATION_APPROVAL" == "MIGRATIONS APPROVED" ]]
+          [[ "$PRIVATE_MEDIA_APPROVAL" == "ANONYMOUS DENIAL AND CUTOVER VERIFIED" ]]
           git cat-file -e "$RELEASE_COMMIT^{commit}"
           git merge-base --is-ancestor "$RELEASE_COMMIT" origin/main
 
           migration_token="${MIGRATION_APPROVAL// /_}"
+          private_media_token="${PRIVATE_MEDIA_APPROVAL// /_}"
           {
             echo "commit=$RELEASE_COMMIT"
             echo "digest=$RELEASE_DIGEST"
             echo "migration_token=$migration_token"
+            echo "private_media_token=$private_media_token"
           } >> "$GITHUB_OUTPUT"
 
       - name: Log in to GitHub Container Registry
@@ -130,6 +142,7 @@ jobs:
           RELEASE_COMMIT: ${{ steps.release.outputs.commit }}
           RELEASE_DIGEST: ${{ steps.release.outputs.digest }}
           MIGRATION_TOKEN: ${{ steps.release.outputs.migration_token }}
+          PRIVATE_MEDIA_TOKEN: ${{ steps.release.outputs.private_media_token }}
           DEPLOY_HOST: ${{ vars.SOCIAL_DEPLOY_HOST }}
           DEPLOY_USER: ${{ vars.SOCIAL_DEPLOY_USER }}
         shell: bash
@@ -143,7 +156,7 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -o UserKnownHostsFile=~/.ssh/known_hosts \
             "$DEPLOY_USER@$DEPLOY_HOST" \
-            "deploy $RELEASE_COMMIT $RELEASE_DIGEST DEPLOY_social.mochirii.com $MIGRATION_TOKEN" \
+            "deploy $RELEASE_COMMIT $RELEASE_DIGEST DEPLOY_social.mochirii.com $MIGRATION_TOKEN $PRIVATE_MEDIA_TOKEN" \
             < release-bundle.tar.gz
 
       - name: Verify public edge
