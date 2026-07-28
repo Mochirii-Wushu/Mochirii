@@ -37,9 +37,9 @@ export function RafflePage({
       <BodyPageMarker page="raffles" />
       <PageHero
         page="raffles"
-        ariaLabel="Mochirii monthly raffle"
+        ariaLabel="Mōchirīī monthly raffle"
         image={model.meta.hero.image}
-        imageAlt="Mochirii raffle banner artwork"
+        imageAlt="Mōchirīī raffle banner artwork"
         atmosphere={model.meta.hero.atmosphere}
         kicker={model.meta.kicker}
         title={model.meta.title}

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The website member profile surface is retired. `/members` and `/members/[slug]` should stay absent from the Next app and resolve through normal 404 behavior with no redirect. Mochirii Social is now the member social/profile destination.
+The website member profile surface is retired. `/members` and `/members/[slug]` should stay absent from the Next app and resolve through normal 404 behavior with no redirect. Mōchirīī Social is now the member social/profile destination.
 
 This document remains as the durable boundary for shared backend identity data, Discord verification, and vanity rank-role behavior. Do not delete or migrate backend profile/media objects from this document alone.
 
@@ -86,7 +86,7 @@ Account keeps:
 - read-only Discord handle from verified Discord identity
 - editable fields for display name, game UID, region, timezone, and bio only
 - gallery submission history
-- Mochirii Social handoff
+- Mōchirīī Social handoff
 - optional owner-managed profile links
 
 Account must not show:
@@ -100,7 +100,7 @@ Account must not show:
 
 `member_social_links` stores optional HTTPS links to profiles that a member
 already controls. It is intentionally separate from `social_accounts`, which
-remains reserved for the trusted Mochirii Social identity mapping. Profile
+remains reserved for the trusted Mōchirīī Social identity mapping. Profile
 links never contain provider tokens, passwords, OAuth identities, imported
 content, or remote profile metadata.
 
@@ -147,12 +147,12 @@ Manual preview:
 - `/members` returns 404
 - `/members/twills` returns 404
 - header, footer, and mobile navigation have no `Members` link
-- Account shows Discord verification, safe editable fields, gallery submission history, and Mochirii Social handoff
+- Account shows Discord verification, safe editable fields, gallery submission history, and Mōchirīī Social handoff
 - Account lets the owner manage private-by-default profile links without loading any external profile service
 - `npm run smoke:member-social-links` exercises concurrent-limit enforcement, add/order/visibility/share/delete behavior, keyboard focus, native-share and copy fallbacks, responsive reflow, 200% text, serious accessibility findings, browser/request/HTTP failures, and external-request isolation against the local Supabase stack in Chromium, Firefox, and WebKit; its local route harness strips CSP only so the local HTTP Supabase origin can be exercised, while the repository security checks own the production CSP contract
 - Account does not show profile publishing or avatar/banner upload controls
 - Leader Dashboard does not show the profile media queue
-- `/social` remains a noindex handoff/support page for Mochirii Social
-- Mochirii Social remains the member social/profile destination
+- `/social` remains a noindex handoff/support page for Mōchirīī Social
+- Mōchirīī Social remains the member social/profile destination
 
 Live Discord role sync is not part of automated tests. Run `/sync-ranks mode:preview` first, then use `mode:apply confirm:true` only after owner approval and Discord role hierarchy verification.

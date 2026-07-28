@@ -8,9 +8,12 @@ import {
   type SpinnerDrawMode,
   type SpinnerPersistedDrawMode,
 } from "./raffle.ts";
+import { SPINNER_BROWSER_REQUEST_TIMEOUT_MS } from "../../lib/spinner/request-timeouts.ts";
 
 export const LIVE_SPINNER_POLL_MS = 2_000;
 export const LIVE_SPINNER_ACTIVE_POLL_MS = 750;
+export const LIVE_SPINNER_ERROR_RETRY_BASE_MS = 2_500;
+export const LIVE_SPINNER_ERROR_RETRY_MAX_MS = 30_000;
 export const SPINNER_SESSION_INVALID_EVENT = "mochirii:spinner-session-invalid";
 export const PENDING_SPINNER_COMMAND_STORAGE_KEY = "mochirii.raffle.pending-spin.v1";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -62,6 +65,24 @@ export interface SpinnerDrawAnnouncementState {
 export interface SpinnerServerClockAnchor {
   serverNowMs: number;
   monotonicAtMs: number;
+}
+
+export function spinnerLiveErrorRetryDelay(
+  consecutiveFailures: number,
+  jitterUnit = 0.5,
+): number {
+  const attempt = Number.isFinite(consecutiveFailures)
+    ? Math.max(1, Math.trunc(consecutiveFailures))
+    : 1;
+  const exponent = Math.min(4, attempt - 1);
+  const boundedJitter = Number.isFinite(jitterUnit)
+    ? Math.min(1, Math.max(0, jitterUnit))
+    : 0.5;
+  const jitterFactor = 0.8 + (boundedJitter * 0.4);
+  return Math.min(
+    LIVE_SPINNER_ERROR_RETRY_MAX_MS,
+    Math.round(LIVE_SPINNER_ERROR_RETRY_BASE_MS * (2 ** exponent) * jitterFactor),
+  );
 }
 
 export function createSpinnerServerClockAnchor(
@@ -442,7 +463,7 @@ export function createSpinnerCommandId(): string {
 
 async function spinnerLiveRequest(init: RequestInit): Promise<SpinnerLiveResultV1> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 10_000);
+  const timeout = window.setTimeout(() => controller.abort(), SPINNER_BROWSER_REQUEST_TIMEOUT_MS);
   try {
     const response = await fetch("/spinner/live", {
       credentials: "same-origin",

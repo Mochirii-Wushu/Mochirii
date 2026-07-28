@@ -8,8 +8,8 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { PageHero } from "@/components/public-pages/common";
 
 export const metadata: Metadata = {
-  title: "Mochirii OAuth Consent - Guild Social",
-  description: "Approve or deny guild social OAuth access for active Mochirii members.",
+  title: "Mōchirīī OAuth Consent - Guild Social",
+  description: "Approve or deny guild social OAuth access for active Mōchirīī members.",
   robots: {
     index: false,
     follow: false,

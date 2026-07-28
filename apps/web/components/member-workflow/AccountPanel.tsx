@@ -101,10 +101,13 @@ export function AccountPanel() {
   const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
   const [liveDrawHandoffRequested, setLiveDrawHandoffRequested] = useState(false);
   const liveDrawHandoffStartedRef = useRef(false);
+  const accountLoadGenerationRef = useRef(0);
 
-  const loadSubmissions = useCallback(async () => {
+  const loadSubmissions = useCallback(async (loadGeneration?: number) => {
+    if (loadGeneration !== undefined && accountLoadGenerationRef.current !== loadGeneration) return;
     setSubmissionsError("");
     const result = await listMyGallerySubmissions();
+    if (loadGeneration !== undefined && accountLoadGenerationRef.current !== loadGeneration) return;
     if (!result.ok) {
       setSubmissions([]);
       setSubmissionsError(result.message || "Gallery submissions could not be loaded.");
@@ -113,9 +116,11 @@ export function AccountPanel() {
     setSubmissions(Array.isArray(result.data) ? result.data : []);
   }, []);
 
-  const loadSocialAccounts = useCallback(async () => {
+  const loadSocialAccounts = useCallback(async (loadGeneration?: number) => {
+    if (loadGeneration !== undefined && accountLoadGenerationRef.current !== loadGeneration) return;
     setSocialError("");
     const result = await listMySocialAccounts();
+    if (loadGeneration !== undefined && accountLoadGenerationRef.current !== loadGeneration) return;
     if (!result.ok) {
       setSocialAccounts([]);
       setSocialError(result.message || "Guild social status could not be loaded.");
@@ -124,8 +129,14 @@ export function AccountPanel() {
     setSocialAccounts(Array.isArray(result.data) ? result.data : []);
   }, []);
 
-  const refreshMemberAccess = useCallback(async (options: { refreshDiscord?: boolean } = {}) => {
+  const refreshMemberAccess = useCallback(async (options: {
+    refreshDiscord?: boolean;
+    loadGeneration?: number;
+  } = {}) => {
+    const isCurrentLoad = () => options.loadGeneration === undefined
+      || accountLoadGenerationRef.current === options.loadGeneration;
     const result = await verifyMemberAccess({ refreshDiscord: options.refreshDiscord === true });
+    if (!isCurrentLoad()) return result;
     if (result.ok) {
       const nextAccess = result.data || null;
       setMemberAccess(nextAccess);
@@ -135,6 +146,7 @@ export function AccountPanel() {
     }
 
     const identities = await getLinkedIdentities();
+    if (!isCurrentLoad()) return result;
     if (identities.ok && Array.isArray(identities.data)) {
       setLinkedIdentities(
         identities.data
@@ -154,6 +166,8 @@ export function AccountPanel() {
   }, []);
 
   const loadAccount = useCallback(async () => {
+    const loadGeneration = accountLoadGenerationRef.current + 1;
+    accountLoadGenerationRef.current = loadGeneration;
     setBusy(true);
     setVerifyError("");
     setProfileError("");
@@ -161,8 +175,10 @@ export function AccountPanel() {
     setSocialError("");
     setProfileStatus("");
     setSocialStatus("");
+    setModeratorAvailable(false);
 
     const auth = await requireAuth();
+    if (accountLoadGenerationRef.current !== loadGeneration) return;
     if (!auth.ok || !auth.data?.user) {
       setUser(null);
       setProfile(null);
@@ -176,26 +192,37 @@ export function AccountPanel() {
     }
 
     setUser(auth.data.user);
-    const profileResult = await getCurrentProfile();
-    if (!profileResult.ok) {
-      setProfile(null);
-      setModeratorAvailable(false);
-      setVerifyError(profileResult.message || "Profile could not be loaded.");
-      setBusy(false);
-      return;
-    }
-
-    const nextProfile = profileResult.data || null;
+    const [profileResult, accessResult] = await Promise.all([
+      getCurrentProfile(),
+      refreshMemberAccess({ loadGeneration }),
+    ]);
+    if (accountLoadGenerationRef.current !== loadGeneration) return;
+    const accessProfile = accessResult.ok ? accessResult.data?.profile || null : null;
+    const nextProfile = accessProfile || (profileResult.ok ? profileResult.data || null : null);
     setProfile(nextProfile);
     setFormState(formStateFromProfile(nextProfile));
-    const accessResult = await refreshMemberAccess();
+    if (!profileResult.ok && !accessProfile) {
+      setVerifyError(profileResult.message || "Profile could not be loaded.");
+    }
     if (!accessResult.ok) setVerifyError(accessResult.message || "Member verification state could not be loaded.");
-    await loadSubmissions();
-    await loadSocialAccounts();
-
-    const moderation = await checkLeaderGalleryModerationAccess();
-    setModeratorAvailable(moderation.ok === true);
     setBusy(false);
+
+    // Moderator discovery, submission history, and the Social mapping are
+    // useful but do not gate ordinary verified-member actions. The generation
+    // guard prevents an earlier account's result from replacing current state.
+    void checkLeaderGalleryModerationAccess().then((moderation) => {
+      if (accountLoadGenerationRef.current === loadGeneration) {
+        setModeratorAvailable(moderation.ok === true);
+      }
+    }).catch(() => {
+      if (accountLoadGenerationRef.current === loadGeneration) {
+        setModeratorAvailable(false);
+      }
+    });
+    void Promise.allSettled([
+      loadSubmissions(loadGeneration),
+      loadSocialAccounts(loadGeneration),
+    ]);
   }, [loadSocialAccounts, loadSubmissions, refreshMemberAccess]);
 
   useEffect(() => {
@@ -203,6 +230,7 @@ export function AccountPanel() {
       void measureAuthenticatedRouteTask("account", loadAccount);
     });
     return () => {
+      accountLoadGenerationRef.current += 1;
       subscription.data?.subscription?.unsubscribe();
     };
   }, [loadAccount]);
@@ -641,7 +669,7 @@ export function AccountPanel() {
           <div className="auth-panel__head">
             <div>
               <p className="kicker">Guild Social</p>
-              <h2 className="section-title section-title--sm" id="socialProfileTitle">Mochirii Social</h2>
+              <h2 className="section-title section-title--sm" id="socialProfileTitle">Mōchirīī Social</h2>
             </div>
             <StatusPill tone={pixelfedReady ? "active" : "muted"}>{pixelfedReady ? "Linked" : "Pending"}</StatusPill>
           </div>
@@ -658,12 +686,12 @@ export function AccountPanel() {
             </div>
           ) : (
             <WorkflowEmptyState title="Not linked yet">
-              Open Mochirii Social to start or continue the guild social sign-in. This card updates after the account link is recorded.
+              Open Mōchirīī Social to start or continue the guild social sign-in. This card updates after the account link is recorded.
             </WorkflowEmptyState>
           )}
 
           <div className="auth-actions">
-            <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
+            <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mōchirīī Social</a>
           </div>
 
           <WorkflowNotice hidden={!socialStatus}>{socialStatus}</WorkflowNotice>

@@ -87,8 +87,8 @@ const snippetChecks = [
     snippets: [
       "requireAuth",
       "window.location.assign(SOCIAL_HOST)",
-      "Sign in on Mochirii before opening the guild social platform.",
-      "Open Mochirii Social",
+      "Sign in on Mōchirīī before opening the guild social platform.",
+      "Open Mōchirīī Social",
     ],
   },
   {

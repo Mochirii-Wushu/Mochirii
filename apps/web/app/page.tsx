@@ -37,7 +37,7 @@ const homeStructuredData = {
       "@id": websiteId,
       url: `${SITE_ORIGIN}/`,
       name: "Mōchirīī",
-      alternateName: "Mochirii",
+      alternateName: "Mōchī",
       description: SITE_DESCRIPTION,
       inLanguage: SITE_LANGUAGE,
       publisher: { "@id": organizationId },
@@ -47,7 +47,7 @@ const homeStructuredData = {
       "@id": organizationId,
       url: `${SITE_ORIGIN}/`,
       name: "Mōchirīī",
-      alternateName: "Mochirii",
+      alternateName: "Mōchī",
       logo: {
         "@type": "ImageObject",
         url: `${SITE_ORIGIN}/assets/img/brand/social-card.png`,

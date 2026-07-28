@@ -1,6 +1,6 @@
 # Current Mochirii State
 
-Updated: 2026-07-25 PDT
+Updated: 2026-07-27 PDT
 
 This no-secret file records the current hosted and repository state. Update it
 after a completed release or ownership change; do not place credentials,
@@ -23,10 +23,10 @@ provider exports, customer data, signed URLs, or mutable access details here.
   server-verified active Website
   membership and the current tester passcode; its single signed cookie is
   HTTP-only and bound to that verified member. The internal disconnected game
-  contract is not included in the public page payload. The former
-  prototype repository and local checkout are deleted and must not be restored.
-  The fresh private game-source owner is `Mochirii-Wushu/Mochirii-Pets`; no Web
-  or iOS playable artifact is connected.
+  contract is not included in the public page payload. Retired prototype source
+  is not a supported owner and must not be restored. The fresh private
+  game-source owner is `Mochirii-Wushu/Mochirii-Pets`; no Web or iOS playable
+  artifact is connected.
 
 The duplicate root static website is retired. Release
 `legacy-static-final-2026-07-18` contains its final restorable artifact;
@@ -53,10 +53,6 @@ asset and data sources.
 - PR #478 completed the consolidation closeout documentation and made
   `validate-theme` an always-reporting path-aware check; it merged as
   `b0c117e855375a2b1a1a7ff2110c2d60f6733015`.
-- The former game repository's final observed default SHA before retirement is
-  `8c1d26dd497c54a5c205b8577194879a129fda50`. Deletion verification belongs in
-  the post-release record; this source commit does not claim provider deletion.
-
 The superseded Shopify and Social repositories were exported as mirror clones,
 verified `--all` bundles, and no-secret provider metadata. Their encrypted
 archives and manifests are pinned and synchronized under the approved private
@@ -82,8 +78,54 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The latest closeout readback found no open canonical pull
-requests, Dependabot alerts, code-scanning alerts, or secret-scanning alerts.
+`Supabase Preview`. The 2026-07-27 source-preparation readback found one open
+canonical pull request: draft Social PR #532 at exact head
+`4f157d7c1adc7ba530044c35a83c12c102fd9810`, one commit
+behind its base and currently conflicting. Its Supabase Preview did not pass or
+skip: it was cancelled/failed because the provider preview-branch concurrency
+limit had been reached. That lane remains unreleased and must be reconciled and
+rechecked at an exact replacement head. Security and dependency alert counts
+are mutable provider state and must be read back at release time rather than
+inferred from the earlier closeout.
+
+## Unreleased Website Reliability Source
+
+- Protected-main source baseline: `5b2ad686c9c4bf47035893b170ea8d3d659fd4ea`.
+- Focused local branch: `agent/website-reliability-reconciliation-20260727`.
+- The source is not merged or deployed. Production behavior and provider state
+  are unchanged by its local preparation.
+- The lane covers public `Mōchirīī` / `Mōchī` wording enforcement, authenticated
+  route readiness, bounded live-spinner polling/proxy behavior, exact reviewed
+  Sya draw classification, and one behavior-preserving profile-link SELECT-policy
+  consolidation. The local Supabase CLI remains exact-pinned to 2.109.1.
+  Version 2.110.0 registry integrity/signatures were verified but its release
+  was still inside the enforced Deno dependency-age window, so it was correctly
+  deferred rather than bypassing the supply-chain gate. This development-tool
+  decision does not change the hosted Supabase runtime.
+- A future merge requires exact approval for the normal Vercel publication,
+  migrations `20260727211442_classify_reviewed_sya_spinner_draw.sql` and
+  `20260727212838_consolidate_member_social_links_select_policy.sql`, and the
+  unavoidable automatic redeployment of the current 33 Supabase functions while
+  preserving 20 `verify_jwt=true` / 13 false. No manual Supabase deploy is allowed.
+- The Sya classification is intentionally bound to the reviewed publication,
+  receipt, completed delivery record, and current revealed live state. Its
+  aggregate-only readback must report `migration_ready=true` immediately before
+  merge and `all_checks_pass=true` after deployment. A later live or
+  test draw changes that state and therefore blocks this migration until a
+  separately reviewed and authorized replacement is prepared.
+- Read-only advisors at source preparation showed five security warnings: four
+  executable-function findings across three reviewed least-privilege
+  `SECURITY DEFINER` RPC boundaries, plus disabled leaked-password protection.
+  The separate performance advisor showed one duplicate-policy warning and 54
+  unused-index information notices. The source clears the duplicate-policy
+  warning. Leaked-password protection
+  remains a separately approval-gated Auth setting. Fifty-four unused-index
+  notices remain observation items and are not evidence for deletion.
+- Detailed scope, advisor rationale, worktree disposition, and release gates are
+  in [`WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md`](./WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md).
+- The complete public-safe organization, branch, issue, and 28-worktree
+  classification is recorded in
+  [`ORGANIZATION-RECONCILIATION-2026-07-27.md`](./ORGANIZATION-RECONCILIATION-2026-07-27.md).
 
 ## Social Release
 
@@ -200,31 +242,22 @@ generated archives belong only in ignored `.artifacts/operations`.
 - All twenty release dispositions remain blocked until their evidence and
   provider fields are reviewed. Unknown private or external facts are recorded
   as Pending rather than inferred.
-- The focused foundation revision on draft PR #480 passed the clean lockfile
-  install, complete repository check, Shopify theme check and package,
-  release-safety guards, JavaScript syntax, Theme Check with zero offenses,
-  `git diff --check`, and all fresh required remote checks on 2026-07-19;
-  Supabase Preview reported Skipped without blocking the check rollup. The pull
-  request has no accountable human review and remains draft and unmerged. The
-  downstream product and storefront implementation is now reconciled on a
-  local, unpushed branch based on the exact PR #480 head. An
-  independent code review identified and the local source remediated archive,
-  freshness, source-copy, search, privacy, shipping, price-provenance,
-  SKU-identity, media, quantity, wordmark, escaping and mobile-navigation
-  false-pass paths. The final local clean-install validation passed 145
-  adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme
-  Check across 45 files with zero offenses, exact packaging, and the complete
-  repository check. The resulting
-  provisional 0.6.0 package has SHA-256
-  `0A3681C59C6AFE0BDBF909ED38F911A4DF489E8F1C79C3609B123B48AB64CFAB`
-  and size 75,251 bytes.
-  This is technical validation, not accountable human review, merge or
-  provider acceptance. Remote required checks must run after an approved push,
-  and a merged-main package must be rebuilt and rebound before candidate
-  staging.
-  The optional local toolchain audit found Docker Desktop's Linux engine was
-  not running; no system service or provider state was changed to work around
-  that workstation-only limitation.
+- The focused foundation revision was squash-merged through PR #480 on
+  2026-07-24 as `d8a4b578cdf3619e886de415ee403fda220d9a60`. Its exact head passed
+  the clean lockfile install, complete repository check, Shopify theme check,
+  release-safety guards, JavaScript syntax, Theme Check across 45 files with
+  zero offenses, 145 adversarial contract tests, 12 generic-tooling tests,
+  SBOM validation, exact packaging, `git diff --check`, and required remote
+  checks. Supabase Preview was correctly skipped because that PR had no
+  `supabase/` diff.
+- PR #480 merged source and contracts only. Its 75,251-byte review package was
+  explicitly provisional and was not authorized for provider upload. The
+  candidate package still must be rebuilt from the eventual approved release
+  commit, rebound to that commit/tree/digest, reviewed against complete private
+  product evidence and authenticated provider readback, and separately
+  authorized before candidate staging. Theme publication, password removal,
+  checkout, payment, product/provider writes, and downstream launch operations
+  remain unreleased.
 - The revised plan authorizes a single reversible upload of the exact
   human-reviewed, merged-main package to unpublished candidate theme
   `141514408011` while `checkout_enabled` stays false. The required rollback

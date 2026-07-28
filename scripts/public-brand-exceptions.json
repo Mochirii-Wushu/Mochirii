@@ -1,0 +1,42 @@
+[
+  {
+    "path": "apps/web/app/spinner/live/route.ts",
+    "fragment": "X-Mochirii-Spinner-Mode",
+    "reason": "Stable internal same-origin response header."
+  },
+  {
+    "path": "apps/web/app/spinner/live/route.ts",
+    "fragment": "X-Mochirii-Spinner-Outcome",
+    "reason": "Stable internal same-origin observability header."
+  },
+  {
+    "path": "apps/web/lib/brand.ts",
+    "fragment": "technical: \"Mochirii\"",
+    "reason": "Canonical ASCII technical identity."
+  },
+  {
+    "path": "apps/web/lib/brand.ts",
+    "fragment": "commerce: \"Mochirii Cosmetics\"",
+    "reason": "Canonical ASCII Shopify and cosmetics identity."
+  },
+  {
+    "path": "apps/web/lib/mochi-pets/connection.ts",
+    "fragment": "Mochirii-Wushu/Mochirii-Pets",
+    "reason": "Stable GitHub repository slug."
+  },
+  {
+    "path": "apps/web/lib/spinner/replay/encoder.ts",
+    "fragment": "Mochirii replay",
+    "reason": "Technical fallback byte marker inside replay encoding."
+  },
+  {
+    "path": "apps/web/lib/spinner/replay/renderer.ts",
+    "fragment": "Mochirii Serif",
+    "reason": "Stable internal canvas font-family identifier."
+  },
+  {
+    "path": "apps/web/lib/spinner/replay/renderer.ts",
+    "fragment": "Mochirii Emoji",
+    "reason": "Stable internal canvas font-family identifier."
+  }
+]

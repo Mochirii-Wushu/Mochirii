@@ -356,14 +356,14 @@ All items in this section must be Ready before payment setup begins.
 
 | ID | Required decision | Accountable role | Status |
 | --- | --- | --- | --- |
-| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — the reconciled local branch based on the exact PR #480 head passed clean lockfile installs, the complete repository check, 145 adversarial contract tests, 12 generic-tooling tests, SBOM validation, Theme Check across 45 files with zero offenses, exact packaging and independent P0-P2 review on 2026-07-20; it remains local and unpushed, so accountable human review, remote required checks, protected merge, and a rebuilt merged-main package remain Pending |
+| QA-01 | Pass npm ci, npm run check, npm run theme:package and git diff --check on the reviewed commit | Theme engineer | Blocked — PR #480 was squash-merged through protected `main` on 2026-07-24 as `d8a4b578cdf3619e886de415ee403fda220d9a60` after its source checks passed. GitHub records no formal PR review. A fresh candidate package still must be rebuilt from the eventual approved release commit, rerun through the complete current checks, and receive accountable review before upload. |
 | QA-02 | Verify all twenty PDPs expose the reviewed facts without generic warning or other evidence fallbacks | Theme engineer plus product evidence custodian | Blocked — the local source removes generic fact, INCI and warning fallbacks, but the 2026-07-18 candidate baseline still rendered a generic warning on 15 PDPs; all twenty fact records and the revised candidate rendering remain Pending |
 | QA-03 | Verify five collections, filters, ingredient search, misspellings, sold-out state, cart, contact form, policies, privacy choices and branded 404 | Theme engineer | Blocked — the source now pins reviewed expected sets for `moisturizer`, `moisturiser`, `niacinimide`, `hyaluronic`, `retinol` and `cleanser`, plus a zero-result fixture; candidate readbacks, configured Privacy Choices parity, sold-out and server-error observations remain Pending because the branch is not on the candidate theme |
 | QA-04 | Pass keyboard, screen-reader announcements, 200 percent zoom, focus order, error handling, contrast and touch navigation at 360x800, 390x844, 768x1024 and 1440x900 | Theme engineer | Blocked — viewport, overflow, broken-image and code-level contrast checks passed; assistive-technology and 200 percent zoom acceptance remain Pending |
 | QA-05 | Run authenticated-preview Lighthouse checks for home, collection, PDP and cart; resolve confirmed LCP-priority and unnecessary-script problems | Theme engineer | Blocked — branch removes unnecessary eager/high product-card images; authenticated Lighthouse evidence remains Pending |
 | QA-06 | Verify canonical URLs, metadata, Product and Breadcrumb structured data, social cards, sitemap and password-safe robots behavior | Theme engineer plus Shopify operator | Blocked — all 20 PDP canonicals and JSON-LD parsed, and representative home, collection and PDP metadata and social cards passed; sitemap, password-safe robots and branch-candidate acceptance remain Pending |
 | QA-07 | Capture fresh provider readbacks and a restorable export of the current live theme plus the existing candidate theme before the checkout-disabled candidate upload; capture scoped shared records/settings separately when their own mutation packet is approved | Shopify operator | Blocked — live/candidate theme IDs and sanitized settings were read back, but no approved rollback export packet was created |
-| QA-08 | Record exact candidate theme 141514408011, human-reviewed merged commit, source tree, package artifact and rollback theme in the private release packet | Shopify operator plus theme engineer | Blocked — draft PR #480, candidate 141514408011, rollback theme 141422395467 and provisional local package Mochirii Cosmetics-0.6.0.zip (SHA-256 DBB772F5AA07ADED833E27F9CE435DE8DB0CA60A087D6ABFC54E6EE939C9806F; 75,251 bytes) are recorded; PR #480 has no accountable human review, is not merged, and this package is explicitly non-final, unuploaded and not bound to merged main |
+| QA-08 | Record exact candidate theme 141514408011, human-reviewed merged commit, source tree, package artifact and rollback theme in the private release packet | Shopify operator plus theme engineer | Blocked — PR #480 is merged as `d8a4b578cdf3619e886de415ee403fda220d9a60`; candidate 141514408011, rollback theme 141422395467 and provisional local package Mochirii Cosmetics-0.6.0.zip (SHA-256 DBB772F5AA07ADED833E27F9CE435DE8DB0CA60A087D6ABFC54E6EE939C9806F; 75,251 bytes) are recorded. GitHub records no formal PR review, and the provisional package remains explicitly non-final, unuploaded and not bound to the eventual approved release commit. |
 | QA-09 | Upload only the exact merged-source package to unpublished candidate theme 141514408011 with checkout_enabled false, preserve Draft status, and verify the source binding, route matrix, disabled checkout and no out-of-scope shared-record changes | Shopify operator plus theme engineer | Blocked — the staging boundary is authorized, but the reviewed merged package, rollback capture, upload and post-write readback remain Pending |
 
 ## Approval Gates
@@ -393,10 +393,11 @@ cannot make any launch gate Ready by itself. QA-09 may therefore be performed
 early only under the entry conditions below; Gate E still cannot become Ready
 until Gate D is Ready and QA-07 through QA-09 all pass.
 
-- **Entry:** PR #480 or its scoped successor has accountable human review, is
-  merged through protected `main`, required checks are green at the merge
-  commit, and a new package is built from that merged source with its commit,
-  tree and SHA-256 recorded privately.
+- **Entry:** PR #480 satisfied the protected source-merge portion on 2026-07-24,
+  but did not make the provisional package releasable. Before any candidate
+  upload, the exact release commit or scoped successor has accountable review,
+  current required checks are green, and a new package is built from that
+  merged source with its commit, tree and SHA-256 recorded privately.
 - **Before state:** theme `141514408011` is Draft; the current candidate and
   live-theme exports are restorable; storefront password protection is on;
   `checkout_enabled` is false; and the current live theme is identified without

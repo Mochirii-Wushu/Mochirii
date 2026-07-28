@@ -78,7 +78,7 @@ for (const file of retiredFiles) {
   "Discord handle is server-owned.",
   "bio of up to 1,000 characters",
   "shared backend identity data",
-  "Mochirii Social",
+  "Mōchirīī Social",
 ].forEach((snippet) => assertIncludes("member profile guide", profileGuide, snippet));
 
 [
@@ -117,7 +117,7 @@ assertRegex(
   "Discord handle must remain read-only and server-derived on Account.",
 );
 assertRegex("AccountPanel", accountPanel, /id="bio"[\s\S]*?maxLength=\{1000\}[\s\S]*?\{bioLength\} \/ 1000 characters/, "Bio must stay capped at 1,000 characters with visible counter.");
-assertIncludes("AccountPanel", accountPanel, "Open Mochirii Social");
+assertIncludes("AccountPanel", accountPanel, "Open Mōchirīī Social");
 assertIncludes("AccountPanel", accountPanel, "Leader Dashboard");
 [
   "Published profiles are visible only to active verified members",

@@ -42,6 +42,23 @@ The pre-classification production draw is handled inside migration `202607271600
 
 Zero or multiple matches abort the populated-database migration. IDs are never hardcoded or guessed. No manual production data statement is part of the release procedure.
 
+The original backfill predates the later official/test classification fields. Migration
+`20260727211442_classify_reviewed_sya_spinner_draw.sql` repairs only that already-reviewed
+draw by deriving its identifier from the immutable publication and requiring the exact
+publication, receipt, completed guild delivery, and revealed live-state evidence. It
+accepts either the wholly unclassified state or the already-complete official state;
+partial, missing, duplicated, changed, or revoked evidence aborts the migration. A fresh
+Preview database has no historical publication and is left unchanged.
+
+This classification does not publish, announce, redraw, or create a reward. It only makes
+the existing reviewed receipt readable through the same official live-state contract as
+future official draws. The release readback is the aggregate-only, read-only operation
+`supabase/operations/validate_reviewed_sya_spinner_classification.sql`; it returns no draw,
+member, receipt, roster, command, or delivery identifiers. Before merge it must return
+`migration_ready=true`, which accepts only an exact wholly-unclassified state or an already
+complete wholly-official state. After deployment it must additionally return
+`all_checks_pass=true`.
+
 ## Release And Readback Gate
 
 The migration adds tables and therefore needs an exact schema-change approval. A protected-main merge also invokes the existing Supabase Git integration, which applies migrations and redeploys every function in `supabase/config.toml`; this source does not change that 33-function inventory or its 20 `verify_jwt=true` / 13 false contract. Never deploy this migration manually.
@@ -50,6 +67,8 @@ Before merge, require the exact-head Vercel and non-skipped Supabase Preview che
 
 - exactly the expected publication and revocation tables, RLS, grants, constraints, triggers, and RPC;
 - exactly one reviewed July publication and no duplicate month;
+- official classification parity across that publication's receipt, completed delivery,
+  and current revealed live state;
 - anonymous RPC output with a null display name;
 - verified-member output with the reviewed guild display name;
 - unchanged 33-function inventory and 20/13 JWT parity; and

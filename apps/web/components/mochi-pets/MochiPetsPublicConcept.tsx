@@ -20,7 +20,7 @@ export function MochiPetsPublicConcept() {
           </div>
           <h1 id="mochi-pets-title">Mochi Pets</h1>
           <p>
-            A shared 3D guild home beyond the Jianghu, bringing Mochirii members together with a Mochi companion of their own across iPhone and desktop.
+            A shared 3D guild home beyond the Jianghu, bringing Mōchirīī members together with a Mochi companion of their own across iPhone and desktop.
           </p>
         </div>
       </header>

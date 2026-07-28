@@ -1,4 +1,6 @@
-export const SITE_TITLE = "Mōchirīī • Where Winds Meet Guild";
+import { BRAND_NAMES } from "./brand";
+
+export const SITE_TITLE = `${BRAND_NAMES.publicGuild} • Where Winds Meet Guild`;
 export const SITE_DESCRIPTION =
   "Join Mōchirīī, an Asia Pacific Where Winds Meet guild full of yummy cupcakes for everyone & pretty people to share them all with.";
 export const SITE_LANGUAGE = "en-SG";

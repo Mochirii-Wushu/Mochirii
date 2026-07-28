@@ -210,7 +210,7 @@ async function verifyDoorway(browser, browserName, viewport) {
     await waitForHeading(page, "Website sign-in required");
     await assertPublicConcept(page, contextLabel);
     await assertResponsiveLayout(page, contextLabel);
-    assert(await page.getByRole("link", { name: "Sign in to Mochirii" }).isVisible(), `${contextLabel} sign-in action is hidden`);
+    assert(await page.getByRole("link", { name: "Sign in to Mōchirīī" }).isVisible(), `${contextLabel} sign-in action is hidden`);
     assert(await page.locator('input[name="testerPassword"]').count() === 0, `${contextLabel} exposes the passcode form while signed out`);
 
     const nonmemberToken = syntheticToken("nonmember", nextMemberId());

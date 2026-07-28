@@ -13,7 +13,7 @@ function GateMessage({ title, message }: { title: string; message: string }) {
       <h2 className="section-title">{title}</h2>
       <p className="muted">{message}</p>
       <div className="auth-actions">
-        <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
+        <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mōchirīī Social</a>
         <Link className="hero-cta" href="/auth?redirect=/social">Website Login</Link>
       </div>
     </section>
@@ -23,7 +23,7 @@ function GateMessage({ title, message }: { title: string; message: string }) {
 export function SocialHubPanel() {
   const [busy, setBusy] = useState(true);
   const [signedIn, setSignedIn] = useState(false);
-  const [message, setMessage] = useState("Checking website sign-in before opening Mochirii Social.");
+  const [message, setMessage] = useState("Checking website sign-in before opening Mōchirīī Social.");
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -33,12 +33,12 @@ export function SocialHubPanel() {
     const auth = await requireAuth();
     setSignedIn(Boolean(auth.ok));
     if (!auth.ok) {
-      setMessage("Sign in on Mochirii before opening the guild social platform.");
+      setMessage("Sign in on Mōchirīī before opening the guild social platform.");
       setBusy(false);
       return;
     }
 
-    setMessage("Opening Mochirii Social.");
+    setMessage("Opening Mōchirīī Social.");
     window.location.assign(SOCIAL_HOST);
   }, []);
 
@@ -59,7 +59,7 @@ export function SocialHubPanel() {
       <div className="auth-panel__head">
         <div>
           <p className="kicker">Guild Social</p>
-          <h2 className="section-title">Mochirii Social Handoff</h2>
+          <h2 className="section-title">Mōchirīī Social Handoff</h2>
         </div>
         <p className={`status-pill status-pill--${signedIn ? "active" : "pending"}`}>
           {signedIn ? "Opening" : "Checking"}
@@ -67,12 +67,12 @@ export function SocialHubPanel() {
       </div>
 
       <WorkflowNotice>{message}</WorkflowNotice>
-      <WorkflowEmptyState title="Opening Mochirii Social">
+      <WorkflowEmptyState title="Opening Mōchirīī Social">
         Signed-in members are sent to the guild social platform automatically. Use the button if your browser does not continue.
       </WorkflowEmptyState>
 
       <div className="auth-actions">
-        <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mochirii Social</a>
+        <a className="hero-cta hero-cta--primary" href={SOCIAL_HOST}>Open Mōchirīī Social</a>
         <Link className="hero-cta" href="/account">Account</Link>
       </div>
 

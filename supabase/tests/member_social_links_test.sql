@@ -85,8 +85,8 @@ SELECT ok(
 );
 SELECT is(
   (SELECT count(*)::integer FROM pg_policies WHERE schemaname = 'public' AND tablename = 'member_social_links'),
-  5,
-  'five explicit RLS policies protect the table'
+  4,
+  'four explicit RLS policies protect the table without duplicate permissive SELECT policies'
 );
 
 SET LOCAL ROLE authenticated;

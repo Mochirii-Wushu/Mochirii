@@ -15,6 +15,7 @@ import {
   spinnerCountdownSeconds,
   spinnerDrawAnnouncementTransition,
   spinnerLivePollInterval,
+  spinnerLiveErrorRetryDelay,
   spinnerLiveMotionRotations,
   spinnerSkipControlVisible,
   spinnerSkipStateForDraw,
@@ -37,6 +38,12 @@ import {
   resolveCelebrationMotionMode,
   // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
 } from "../apps/web/components/spinner/celebration-scene.ts";
+import {
+  SPINNER_BROWSER_REQUEST_TIMEOUT_MS,
+  SPINNER_PROXY_UPSTREAM_TIMEOUT_MS,
+  SPINNER_RESPONSE_MARGIN_MS,
+  // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
+} from "../apps/web/lib/spinner/request-timeouts.ts";
 
 const SESSION_ID = "10000000-0000-4000-8000-000000000001";
 const DRAW_ID = "20000000-0000-4000-8000-000000000002";
@@ -50,6 +57,13 @@ const PARTICIPANTS: ParticipantV1[] = [
   { version: 1, id: "40000000-0000-4000-8000-000000000004", displayName: "Lotus" },
   { version: 1, id: "50000000-0000-4000-8000-000000000005", displayName: "明月" },
 ];
+
+test("browser spinner requests outlive the proxy upstream deadline with response margin", () => {
+  assert.equal(SPINNER_PROXY_UPSTREAM_TIMEOUT_MS, 12_000);
+  assert.equal(SPINNER_BROWSER_REQUEST_TIMEOUT_MS, 16_000);
+  assert.equal(SPINNER_RESPONSE_MARGIN_MS, 4_000);
+  assert.ok(SPINNER_BROWSER_REQUEST_TIMEOUT_MS > SPINNER_PROXY_UPSTREAM_TIMEOUT_MS);
+});
 
 function idleSnapshot(participants: ParticipantV1[] = []) {
   return {
@@ -355,6 +369,18 @@ test("countdown polling remains normal until the authoritative start", () => {
   const idle = parseSpinnerLiveSnapshot(idleSnapshot(PARTICIPANTS));
   assert.ok(idle);
   assert.equal(spinnerLivePollInterval(idle, "2026-07-26T18:04:00.000Z"), 2_000);
+});
+
+test("live polling failures back off with bounded jitter and reset-ready delays", () => {
+  assert.equal(spinnerLiveErrorRetryDelay(1, 0.5), 2_500);
+  assert.equal(spinnerLiveErrorRetryDelay(2, 0.5), 5_000);
+  assert.equal(spinnerLiveErrorRetryDelay(3, 0.5), 10_000);
+  assert.equal(spinnerLiveErrorRetryDelay(4, 0.5), 20_000);
+  assert.equal(spinnerLiveErrorRetryDelay(5, 0.5), 30_000);
+  assert.equal(spinnerLiveErrorRetryDelay(99, 1), 30_000);
+  assert.equal(spinnerLiveErrorRetryDelay(1, 0), 2_000);
+  assert.equal(spinnerLiveErrorRetryDelay(1, 1), 3_000);
+  assert.equal(spinnerLiveErrorRetryDelay(Number.NaN, Number.NaN), 2_500);
 });
 
 test("draw announcements occur once per countdown and spin across refresh recovery", () => {

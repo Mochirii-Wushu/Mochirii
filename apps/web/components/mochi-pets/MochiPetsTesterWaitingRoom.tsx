@@ -30,7 +30,7 @@ export function MochiPetsTesterWaitingRoom() {
           </div>
           <h1 id="mochi-pets-title" ref={titleRef} tabIndex={-1}>Mochi Pets</h1>
           <p>
-            Your verified Mochirii membership and current tester passcode have opened the private tester space.
+            Your verified Mōchirīī membership and current tester passcode have opened the private tester space.
           </p>
         </div>
         <form className="mochi-lock-form" method="post" action="/games/mochi-pets/tester-logout">
@@ -66,7 +66,7 @@ export function MochiPetsTesterWaitingRoom() {
       <aside className="mochi-game-panel mochi-waiting-notes" aria-label="Mochi Pets private access guidance">
         <h2>Keep tester access private</h2>
         <ul>
-          <li>Use this space only with your own verified Mochirii website account.</li>
+          <li>Use this space only with your own verified Mōchirīī website account.</li>
           <li>Keep the current tester passcode within the approved guild tester group.</li>
           <li>Lock the tester space when you finish.</li>
         </ul>

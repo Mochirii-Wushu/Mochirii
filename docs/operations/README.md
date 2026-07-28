@@ -26,6 +26,8 @@ Web or iOS artifact is connected.
 - `CURRENT-STATE.md`: current hosted state and exact resume point.
 - `deployment.md`: release, verification, and rollback boundaries.
 - `integration-operations-runbook.md`: provider-adjacent operating rules.
+- `ORGANIZATION-RECONCILIATION-2026-07-27.md`: public-safe repository,
+  branch, issue, worktree, provider-effect, and cleanup disposition ledger.
 - `private-spinner.md`: role-separated live-spinner operation, privacy,
   delivery, release, and recovery boundaries.
 - `repository-ownership.md`: source and hosted ownership matrix.
