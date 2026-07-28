@@ -4,8 +4,8 @@
   "locale": "en-US",
   "brand": "Mochirii Cosmetics",
   "provenance": {
-    "sourceRepository": "Mochirii-Wushu/Mochirii",
-    "sourcePullRequest": "https://github.com/Mochirii-Wushu/Mochirii/pull/459",
+    "sourceRepository": "Mochirii-Wushu/Mochirii-Website",
+    "sourcePullRequest": "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/459",
     "sourceRevision": "2026-07-18-v2",
     "providerWriteHistory": "content/customer-facing-copy-approval-packet.md"
   },

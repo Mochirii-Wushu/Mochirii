@@ -259,7 +259,7 @@ assertNotMatches(
 ].forEach((snippet) => assertIncludes("moderation runbook", moderationRunbook, snippet));
 
 [
-  "Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>",
+  "Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/198>",
   "/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]",
   "No real Instagram post may be created without explicit action-time owner approval.",
   "DISCORD_GALLERY_CHANNEL_ID",

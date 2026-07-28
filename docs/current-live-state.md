@@ -21,7 +21,7 @@ This is the short source-of-truth index for the current Mochirii production post
   index.
 - Active website worktree on this workstation is
   `C:\Github Repo's\Mochirii Website\Website`.
-- Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii` as public. Keep this public state unless the owner separately approves making the repo private again.
+- Repository visibility readback on 2026-07-05 reports `Mochirii-Wushu/Mochirii-Website` as public. Keep this public state unless the owner separately approves making the repo private again.
 - Website closeout ledger for 2026-07-12: PR #433 documented the canonical
   credential boundary; PR #434 hardened GitHub Actions and Dependabot policy;
   PR #437 updated `@supabase/supabase-js` and Node types; PR #439 updated the
@@ -85,7 +85,7 @@ This is the short source-of-truth index for the current Mochirii production post
 - Identity boundary: Supabase OAuth Server and `/oauth/consent` remain the website consent doorway; Discord remains guild verification, not the social identity authority.
 - Website boundary: header dropdown/footer Social is the direct guild social handoff to `https://social.mochirii.com`; `/social` is only a noindex handoff route that redirects signed-in members and gives signed-out visitors login/help options.
 - Launch posture: admin-first testing, closed registration, SSO-only, federation disabled, public discovery minimized.
-- Source control: `services/social` in `Mochirii-Wushu/Mochirii` is the sole
+- Source control: `services/social` in `Mochirii-Wushu/Mochirii-Website` is the sole
   Social application source. Do not commit host `.env`, DB/Redis state, media,
   backups, cache files, host IPs, or host-private evidence.
 - PR #461 imported the reviewed sanitized current tree and established
@@ -127,7 +127,7 @@ This is the short source-of-truth index for the current Mochirii production post
   checksums before SBOM generation. Repository-level full-SHA action pinning is
   enabled; changes to that setting remain separately approval-gated.
 - Keep provider dashboard mutations separate from ordinary docs/content/theme work unless a packet explicitly calls for them.
-- Current public-repo release posture: `Mochirii-Wushu/Mochirii` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
+- Current public-repo release posture: `Mochirii-Wushu/Mochirii-Website` is public. Do not change repository visibility without explicit approval. Stale Vercel failures that point at the old private-organization plan limitation must be rerun or refreshed before merge decisions; do not treat them as current evidence after the public visibility change.
 - ESLint 10 and TypeScript 7 remain intentionally deferred in issue #443.
   ESLint 10 failed the React lint rule context used by `eslint-config-next`;
   TypeScript 7 failed the TypeScript-ESTree integration and its hosted Vercel

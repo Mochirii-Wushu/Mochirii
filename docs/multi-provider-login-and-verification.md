@@ -16,7 +16,7 @@ This feature separates four layers that must stay distinct:
 
 This is an operational activation list, not a destructive schema list. Existing code and database constraints may retain historical/future provider values so linked identity history and future Apple work do not need a migration churn pass.
 
-Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-Wushu/Mochirii/pull/300>, at commit `850a13df22853778d8a48ad6b5a319ae029739bc`. Keep it closed/deferred unless the Phone lane is explicitly resumed with SMS provider, CAPTCHA, rate-limit, cost, and abuse controls.
+Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/300>, at commit `850a13df22853778d8a48ad6b5a319ae029739bc`. Keep it closed/deferred unless the Phone lane is explicitly resumed with SMS provider, CAPTCHA, rate-limit, cost, and abuse controls.
 
 ## Provider Setup
 

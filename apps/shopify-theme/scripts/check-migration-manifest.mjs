@@ -130,7 +130,7 @@ const expectedApprovedPublicCopy = [
 ];
 const approvedPublicCopyFiles = manifest.approvedPublicCopy?.files ?? [];
 if (manifest.approvedPublicCopy?.status !== "customer-copy-v2-content-locked-provider-write-applied" ||
-    manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459" ||
+    manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/459" ||
     manifest.approvedPublicCopy?.providerWriteHistory?.record !== "apps/shopify-theme/content/customer-facing-copy-approval-packet.md" ||
     manifest.approvedPublicCopy?.providerWriteHistory?.status !== "applied-readback-verified" ||
     manifest.approvedPublicCopy?.providerWriteHistory?.appliedDate !== "2026-07-18" ||

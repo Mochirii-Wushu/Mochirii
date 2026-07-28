@@ -1,6 +1,6 @@
 FROM serversideup/php:8.4-fpm-nginx@sha256:8eec7ce8d9d6a38bbc6f0f70ef439aab2279646bc01d74cbe538dbeada4da828
 
-LABEL org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii"
+LABEL org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii-Website"
 
 # Set working directory
 WORKDIR /var/www/html

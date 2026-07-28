@@ -2,7 +2,7 @@
 
 This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images. Current launch mode is manual sharing through the Leader Dashboard. Direct API publishing remains diagnostic-gated until Meta credentials are present in Supabase secrets and the moderator-only Meta status check passes.
 
-Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
+Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/198>
 
 Do not paste secrets, access tokens, signed Storage URLs, private payloads, or dashboard screenshots with sensitive values into GitHub, Discord, public docs, or reports. No real Instagram post may be created without explicit action-time owner approval.
 

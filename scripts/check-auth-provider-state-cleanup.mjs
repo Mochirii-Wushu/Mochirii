@@ -43,7 +43,7 @@ assertIncludes(
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple",
   "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=",
   "PR #300",
-  "https://github.com/Mochirii-Wushu/Mochirii/pull/300",
+  "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/300",
   "850a13df22853778d8a48ad6b5a319ae029739bc",
   "Apple: active identity evidence",
   "Kakao: deferred",

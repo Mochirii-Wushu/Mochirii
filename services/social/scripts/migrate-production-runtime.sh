@@ -39,7 +39,7 @@ install -m 0644 -o root -g root \
 cat >"$release_dir/release.meta" <<EOF
 commit=$commit
 digest=$digest
-repository=Mochirii-Wushu/Mochirii
+repository=Mochirii-Wushu/Mochirii-Website
 EOF
 cat >"$release_dir/release.env" <<EOF
 PIXELFED_IMAGE=$REGISTRY_IMAGE@$digest

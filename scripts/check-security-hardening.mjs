@@ -593,8 +593,8 @@ assertMatches(
 ].forEach((snippet) => assertIncludes("current live state docs", currentLiveState, snippet));
 
 [
-  "Contact: https://github.com/Mochirii-Wushu/Mochirii/security/policy",
-  "Policy: https://github.com/Mochirii-Wushu/Mochirii/security/policy",
+  "Contact: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy",
+  "Policy: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy",
   "Preferred-Languages: en",
   `Canonical: ${siteUrl("/.well-known/security.txt")}`,
   "Expires: 2027-06-10T00:00:00Z",
@@ -603,7 +603,7 @@ assertMatches(
 assertMatches(
   "security.txt",
   securityTxt,
-  /^Contact:\s+https:\/\/github\.com\/Mochirii-Wushu\/Mochirii\/security\/policy/m,
+  /^Contact:\s+https:\/\/github\.com\/Mochirii-Wushu\/Mochirii-Website\/security\/policy/m,
   "Contact must use the HTTPS GitHub security policy URL.",
 );
 

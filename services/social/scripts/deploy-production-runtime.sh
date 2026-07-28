@@ -86,7 +86,7 @@ tar -xzf "$bundle_path" --no-same-owner --no-same-permissions -C "$stage_dir"
 }
 grep -Fxq "commit=$commit" "$stage_dir/release.meta"
 grep -Fxq "digest=$digest" "$stage_dir/release.meta"
-grep -Fxq "repository=Mochirii-Wushu/Mochirii" "$stage_dir/release.meta"
+grep -Fxq "repository=Mochirii-Wushu/Mochirii-Website" "$stage_dir/release.meta"
 
 accepted_compose="$SHARED_ROOT/docker-compose.production.yml"
 [[ -f "$accepted_compose" ]] || {

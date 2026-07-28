@@ -25,7 +25,7 @@ reliability release. It grants no new provider-write authority.
 
 ## Verified Baseline
 
-- Canonical repository: `Mochirii-Wushu/Mochirii`.
+- Canonical repository: `Mochirii-Wushu/Mochirii-Website`.
 - Protected-main baseline at source preparation: commit
   `5b2ad686c9c4bf47035893b170ea8d3d659fd4ea`.
 - Already merged at that baseline: Playwright 1.62, the branded global 404, stable

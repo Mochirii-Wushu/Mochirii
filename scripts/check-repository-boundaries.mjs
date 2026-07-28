@@ -75,6 +75,16 @@ const renderedRoots = [
   "services/social/resources/lang/",
   "services/social/resources/views/",
 ];
+const formerWebsiteRepository = ["Mochirii-Wushu", "Mochirii"].join("/");
+const formerWebsiteRepositoryPattern = new RegExp(
+  `${formerWebsiteRepository.replaceAll("/", "\\/")}(?![-A-Za-z0-9_])`,
+  "i",
+);
+const formerWebsiteRepositoryAllowedRoots = [
+  "docs/operations/evidence/",
+  "docs/operations/history/",
+  "reports/",
+];
 const failures = [];
 
 function git(args, options = {}) {
@@ -143,6 +153,13 @@ function renderedTextContainsProvider(relativePath, content) {
   return findings;
 }
 
+function normalizedRepositoryReferences(content) {
+  return content
+    .replaceAll("\\/", "/")
+    .replaceAll(/%252f/gi, "/")
+    .replaceAll(/%2f/gi, "/");
+}
+
 if (!existsSync(path.join(repoRoot, ".git"))) {
   console.error("Repository boundary check failed: Git repository not found.");
   process.exit(1);
@@ -191,6 +208,15 @@ for (const relativePath of files) {
 
   if (!isTextCandidate(normalizedPath, stats.size)) continue;
   const content = readFileSync(absolutePath, "utf8");
+
+  const mayPreserveFormerWebsiteRepository = formerWebsiteRepositoryAllowedRoots
+    .some((root) => normalizedPath.startsWith(root));
+  if (
+    !mayPreserveFormerWebsiteRepository &&
+    formerWebsiteRepositoryPattern.test(normalizedRepositoryReferences(content))
+  ) {
+    failures.push(`${normalizedPath}: contains the former Website repository slug`);
+  }
 
   for (const rule of formerTokens) {
     if (normalized(normalizedPath).includes(rule.value) || normalized(content).includes(rule.value)) {

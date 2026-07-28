@@ -34,7 +34,7 @@ export const PREPAYMENT_GATE_POLICY = Object.freeze({
   gate: "mochirii-prepayment-complete",
   schema_version: 2,
   maximum_capture_age_hours: 24,
-  repository: "Mochirii-Wushu/Mochirii",
+  repository: "Mochirii-Wushu/Mochirii-Website",
   branch: "main",
   market_country: "US",
   market_currency: "USD",

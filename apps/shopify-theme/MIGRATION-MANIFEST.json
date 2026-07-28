@@ -82,7 +82,7 @@
   },
   "approvedPublicCopy": {
     "status": "customer-copy-v2-content-locked-provider-write-applied",
-    "sourceReview": "https://github.com/Mochirii-Wushu/Mochirii/pull/459",
+    "sourceReview": "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/459",
     "providerWriteHistory": {
       "record": "apps/shopify-theme/content/customer-facing-copy-approval-packet.md",
       "status": "applied-readback-verified",

@@ -173,7 +173,7 @@ function gitRemote(args) {
 }
 
 function isCanonicalRemote(remote) {
-  return /github\.com[:/]Mochirii-Wushu\/Mochirii(?:\.git)?\/?$/i.test(remote);
+  return /github\.com[:/]Mochirii-Wushu\/Mochirii-Website(?:\.git)?\/?$/i.test(remote);
 }
 
 for (const doc of requiredDocs) {
@@ -657,7 +657,7 @@ requireIncludes("scripts/check-clean-database-migrations.sh", cleanDatabaseCheck
 const dockerfile = read("Dockerfile");
 requireIncludes("Dockerfile", dockerfile, [
   "serversideup/php:8.4-fpm-nginx@sha256:8eec7ce8d9d6a38bbc6f0f70ef439aab2279646bc01d74cbe538dbeada4da828",
-  'org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii"',
+  'org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii-Website"',
   "COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/",
   "composer install --no-ansi --no-interaction --no-dev --optimize-autoloader",
   "php scripts/check-production-composer-dependencies.php",
@@ -732,7 +732,7 @@ const deploymentWorkflow = readRepository(".github/workflows/deploy-social-produ
 requireIncludes(".github/workflows/deploy-social-production.yml", deploymentWorkflow, [
   "environment: social-production",
   "services/social/docker-compose.production.yml",
-  "repository=Mochirii-Wushu/Mochirii",
+  "repository=Mochirii-Wushu/Mochirii-Website",
   "DEPLOY social.mochirii.com",
   "ANONYMOUS DENIAL AND CUTOVER VERIFIED",
   "persist-credentials: false",
@@ -923,7 +923,7 @@ requireIncludes("app/Http/Controllers/Api/ApiV1Controller.php", instanceApiV1, [
 ]);
 requireIncludes("app/Http/Controllers/Api/ApiV2Controller.php", instanceApiV2, [
   "3.5.3 (compatible; Mōchirīī Social)",
-  "https://github.com/Mochirii-Wushu/Mochirii",
+  "https://github.com/Mochirii-Wushu/Mochirii-Website",
 ]);
 for (const [file, text] of [
   ["app/Http/Controllers/Api/ApiV1Controller.php", instanceApiV1],

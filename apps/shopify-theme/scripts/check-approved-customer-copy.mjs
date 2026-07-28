@@ -80,8 +80,8 @@ exactKeys(content.provenance, [
   "sourceRevision",
   "providerWriteHistory",
 ], "provenance");
-if (content.provenance?.sourceRepository !== "Mochirii-Wushu/Mochirii" ||
-    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii/pull/459" ||
+if (content.provenance?.sourceRepository !== "Mochirii-Wushu/Mochirii-Website" ||
+    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/459" ||
     content.provenance?.sourceRevision !== "2026-07-18-v2" ||
     content.provenance?.providerWriteHistory !== "content/customer-facing-copy-approval-packet.md") {
   failures.push("provenance must identify the immutable public content source and separate provider-write history");

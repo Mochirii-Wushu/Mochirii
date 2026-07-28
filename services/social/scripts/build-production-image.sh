@@ -7,7 +7,7 @@ cd "$repo_root"
 
 image="${PIXELFED_IMAGE:-mochirii-pixelfed:production-check}"
 revision="${GITHUB_SHA:-$(git rev-parse HEAD)}"
-source_url="${GITHUB_SERVER_URL:-https://github.com}/${GITHUB_REPOSITORY:-Mochirii-Wushu/Mochirii}"
+source_url="${GITHUB_SERVER_URL:-https://github.com}/${GITHUB_REPOSITORY:-Mochirii-Wushu/Mochirii-Website}"
 
 build_args=(
   docker buildx build

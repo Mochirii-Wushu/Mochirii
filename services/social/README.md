@@ -8,7 +8,7 @@ cache/queue workers, scheduler, media storage, backups, and monitoring.
 
 ## Repository Workspace
 
-The canonical source is `services/social` in `Mochirii-Wushu/Mochirii`.
+The canonical source is `services/social` in `Mochirii-Wushu/Mochirii-Website`.
 Production deploys use protected GitHub workflows and the existing private GHCR
 package; the workstation is not a runtime dependency.
 

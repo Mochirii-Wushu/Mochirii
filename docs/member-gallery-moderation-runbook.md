@@ -4,7 +4,7 @@ This runbook is for leaders reviewing member Gallery submissions through the web
 
 It does not contain secrets, tokens, private URLs, or deployment credentials.
 
-Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/123>
+Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/123>
 
 Instagram deployment and Reaper rollout steps are separate from routine moderation and are tracked in [`instagram-gallery-publishing-deployment-runbook.md`](./instagram-gallery-publishing-deployment-runbook.md).
 

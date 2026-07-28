@@ -1,6 +1,6 @@
 # Mochirii System Architecture
 
-`Mochirii-Wushu/Mochirii` is the source repository for the public website,
+`Mochirii-Wushu/Mochirii-Website` is the source repository for the public website,
 storefront theme, hosted guild-social application, and shared backend. Production
 systems deploy from reviewed commits; the workstation is never a serving or job
 processing dependency.

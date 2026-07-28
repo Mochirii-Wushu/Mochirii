@@ -119,7 +119,7 @@ jobs:
           {
             printf 'commit=%s\n' "$RELEASE_COMMIT"
             printf 'digest=%s\n' "$RELEASE_DIGEST"
-            printf '%s\n' 'repository=Mochirii-Wushu/Mochirii'
+            printf '%s\n' 'repository=Mochirii-Wushu/Mochirii-Website'
           } > release-bundle/release.meta
           tar -czf release-bundle.tar.gz -C release-bundle \
             docker-compose.production.yml release.meta

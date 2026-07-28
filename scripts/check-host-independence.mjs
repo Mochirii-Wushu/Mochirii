@@ -187,7 +187,7 @@ const expectedOrigins = new Map([
   ["backend", [`https://${publicUrls?.supabaseProjectRef}.supabase.co`]],
   ["social", [publicUrls?.socialHost]],
   ["discord-interactions", ["https://discord.com", `https://${publicUrls?.supabaseProjectRef}.supabase.co`]],
-  ["release-automation", ["https://github.com/Mochirii-Wushu/Mochirii"]],
+  ["release-automation", ["https://github.com/Mochirii-Wushu/Mochirii-Website"]],
 ]);
 
 for (const runtime of runtimes) {
