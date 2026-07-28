@@ -30,6 +30,9 @@ Web or iOS artifact is connected.
   branch, issue, worktree, provider-effect, and cleanup disposition ledger.
 - `private-spinner.md`: role-separated live-spinner operation, privacy,
   delivery, release, and recovery boundaries.
+- `GALLERY-THUMBNAIL-ROLLOUT.md`: immutable Gallery publication revisions,
+  bounded display/thumbnail media, schema-v2 feed, explicit historical
+  republication, retention, release, and rollback gates.
 - `repository-ownership.md`: source and hosted ownership matrix.
 - `REPOSITORY-SEPARATION-ADR-2026-07-29.md`: proposed, non-activating repository
   boundary decision for review.

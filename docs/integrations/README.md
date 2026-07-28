@@ -34,3 +34,7 @@ reviewable, no-secret evidence for future repository boundaries. They do not
 activate a cutover or delegate shared Supabase ownership: Website remains the
 sole source and deployer for the shared project, while Reaper consumes the
 published contracts.
+
+See [Gallery public media delivery](gallery-public-media-delivery.md) for the
+versioned thumbnail-only list, opaque-ID original resolution, keyset snapshot,
+and private Storage boundary.
