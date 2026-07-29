@@ -2,6 +2,7 @@ import type { SpinnerAccessMode } from "@/lib/spinner/session-policy";
 import {
   AUTH_PROVIDER_REGISTRY,
   isOAuthProviderId,
+  phoneAuthReady,
   providerToSupabaseProvider,
   type OAuthProviderId,
 } from "./auth-providers";
@@ -13,6 +14,7 @@ import {
 } from "./client";
 import { getCurrentSession, getCurrentUser } from "./auth-session";
 export { getCurrentSession, getCurrentUser, onAuthStateChange, requireAuth } from "./auth-session";
+import { normalizePhoneForOtp, normalizePhoneOtpCode, requirePhoneCaptchaToken } from "./phone-auth-policy";
 import { failedResult, okResult } from "./types";
 
 function resolveRedirectTo(value = "/account") {
@@ -88,22 +90,21 @@ export async function getLinkedIdentities() {
 export async function signInWithPhoneOtp({
   phone,
   captchaToken,
-  shouldCreateUser = true,
 }: {
   phone: string;
-  captchaToken?: string;
-  shouldCreateUser?: boolean;
+  captchaToken: string;
 }) {
   try {
-    const cleanPhone = String(phone || "").trim();
-    if (!cleanPhone) throw new Error("Enter a phone number before requesting a code.");
+    if (!phoneAuthReady()) throw new Error("Phone sign-in is unavailable.");
+    const cleanPhone = normalizePhoneForOtp(phone);
+    const cleanCaptchaToken = requirePhoneCaptchaToken(captchaToken);
 
     const client = await requireReadyBrowserSupabaseClient();
     const { data, error } = await client.auth.signInWithOtp({
       phone: cleanPhone,
       options: {
-        shouldCreateUser,
-        ...(captchaToken ? { captchaToken } : {}),
+        shouldCreateUser: false,
+        captchaToken: cleanCaptchaToken,
       },
     });
     if (error) return failedResult(error);
@@ -115,9 +116,9 @@ export async function signInWithPhoneOtp({
 
 export async function verifyPhoneOtp({ phone, token }: { phone: string; token: string }) {
   try {
-    const cleanPhone = String(phone || "").trim();
-    const cleanToken = String(token || "").trim();
-    if (!cleanPhone || !cleanToken) throw new Error("Enter the phone number and verification code.");
+    if (!phoneAuthReady()) throw new Error("Phone sign-in is unavailable.");
+    const cleanPhone = normalizePhoneForOtp(phone);
+    const cleanToken = normalizePhoneOtpCode(token);
 
     const client = await requireReadyBrowserSupabaseClient();
     const { data, error } = await client.auth.verifyOtp({
