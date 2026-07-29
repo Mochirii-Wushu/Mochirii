@@ -1,15 +1,15 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-05T12:11:58.375Z",
+  "checkedAt": "2026-07-29T22:41:41.959Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
-  "providerReadsEnabled": true,
+  "providerReadsEnabled": false,
   "strictProviders": false,
   "git": {
-    "branch": "main",
-    "head": "f1b2b354c9b8",
-    "upstream": "origin/main",
-    "upstreamStatus": "configured",
+    "branch": "agent/full-stack-integration-rehearsal-20260729",
+    "head": "9b5e17afda55",
+    "upstream": "",
+    "upstreamStatus": "none",
     "ahead": 0,
     "behind": 0,
     "dirty": [],
@@ -23,8 +23,8 @@
       "missing": []
     },
     "requiredFiles": {
-      "total": 10,
-      "present": 10,
+      "total": 12,
+      "present": 12,
       "missing": []
     },
     "workflowWhitespace": {
@@ -33,76 +33,18 @@
     }
   },
   "vercel": {
-    "status": "checked",
-    "cli": {
-      "available": true,
-      "version": "54.18.1"
-    },
-    "production": {
-      "name": "mochirii",
-      "target": "production",
-      "readyState": "READY",
-      "url": "https://mochirii-8uf57959o-mochirii.vercel.app",
-      "aliases": [
-        "mochirii.com",
-        "mochirii.vercel.app",
-        "www.mochirii.com",
-        "mochirii-mochirii.vercel.app",
-        "mochirii-git-main-mochirii.vercel.app"
-      ],
-      "createdAt": 1783252828356
-    },
-    "environmentNames": {
-      "production": {
-        "status": "checked",
-        "target": "production",
-        "names": [
-          "MOCHI_PETS_ALPHA_ACCESS_MODE",
-          "MOCHI_PETS_TESTER_PASSWORD",
-          "NEXT_PUBLIC_AUTH_PROVIDER_IDS",
-          "NEXT_PUBLIC_MOCHI_PETS_URL",
-          "NEXT_PUBLIC_SITE_URL",
-          "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-          "NEXT_PUBLIC_SUPABASE_URL",
-          "POSTGRES_DATABASE",
-          "POSTGRES_HOST",
-          "POSTGRES_PASSWORD",
-          "POSTGRES_PRISMA_URL",
-          "POSTGRES_URL",
-          "POSTGRES_URL_NON_POOLING",
-          "POSTGRES_USER",
-          "SUPABASE_ANON_KEY",
-          "SUPABASE_JWT_SECRET",
-          "SUPABASE_PUBLISHABLE_KEY",
-          "SUPABASE_SECRET_KEY",
-          "SUPABASE_SERVICE_ROLE_KEY",
-          "SUPABASE_URL"
-        ],
-        "count": 21
-      },
-      "preview": {
-        "status": "checked",
-        "target": "preview",
-        "names": [
-          "MOCHI_SOCIAL_TESTER_PASSWORD_SHA256",
-          "NEXT_PUBLIC_SITE_URL",
-          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-          "NEXT_PUBLIC_SUPABASE_URL"
-        ],
-        "count": 6
-      }
-    }
+    "status": "skipped",
+    "reason": "provider reads disabled"
   },
   "supabase": {
-    "status": "skipped",
+    "status": "local-only",
+    "projectRef": "deyvmtncimmcinldjyqe",
     "cli": {
       "available": true,
-      "version": "2.108.0"
+      "version": "2.109.1"
     },
-    "projectRef": "deyvmtncimmcinldjyqe",
     "localMigrations": {
-      "total": 23,
+      "total": 49,
       "versions": [
         "20260513081523",
         "20260513193110",
@@ -126,7 +68,33 @@
         "20260622204823",
         "20260702043644",
         "20260702080720",
-        "20260704120856"
+        "20260704120856",
+        "20260712164503",
+        "20260726180052",
+        "20260726213000",
+        "20260727033342",
+        "20260727054717",
+        "20260727144954",
+        "20260727145241",
+        "20260727153226",
+        "20260727160000",
+        "20260727211442",
+        "20260727212838",
+        "20260728130000",
+        "20260728132000",
+        "20260728140000",
+        "20260729042835",
+        "20260729054645",
+        "20260729062000",
+        "20260729064000",
+        "20260729064500",
+        "20260729065000",
+        "20260729070000",
+        "20260729071000",
+        "20260729071146",
+        "20260729072000",
+        "20260729130654",
+        "20260729183000"
       ],
       "files": [
         "20260513081523_create_discord_role_gated_gallery_uploads.sql",
@@ -151,21 +119,53 @@
         "20260622204823_add_mochi_social_alpha_explicit_grants.sql",
         "20260702043644_harden_mochi_social_advisor_findings.sql",
         "20260702080720_add_pixelfed_social_accounts.sql",
-        "20260704120856_rename_mochi_pets_internal_prefix.sql"
+        "20260704120856_rename_mochi_pets_internal_prefix.sql",
+        "20260712164503_service_only_default_deny_policies.sql",
+        "20260726180052_add_private_live_spinner.sql",
+        "20260726213000_add_spinner_foreign_key_indexes.sql",
+        "20260727033342_add_spinner_media_jobs.sql",
+        "20260727054717_enforce_three_minute_spinner_countdown.sql",
+        "20260727144954_add_member_social_links.sql",
+        "20260727145241_add_gallery_submission_thumbnails.sql",
+        "20260727153226_harden_member_social_links.sql",
+        "20260727160000_add_official_spinner_raffle_publications.sql",
+        "20260727211442_classify_reviewed_sya_spinner_draw.sql",
+        "20260727212838_consolidate_member_social_links_select_policy.sql",
+        "20260728130000_add_gallery_public_feed_v2.sql",
+        "20260728132000_add_gallery_publication_revisions.sql",
+        "20260728140000_add_disabled_monthly_raffle_foundation.sql",
+        "20260729042835_add_facebook_page_gallery_publishing.sql",
+        "20260729054645_harden_instagram_gallery_publishing.sql",
+        "20260729062000_add_sanitized_social_derivatives.sql",
+        "20260729064000_enforce_social_publish_claim_consent.sql",
+        "20260729064500_reassert_facebook_publish_claim_scope.sql",
+        "20260729065000_enforce_instagram_consent_contract_handshake.sql",
+        "20260729070000_bind_social_derivatives_to_consent_source.sql",
+        "20260729071000_allow_audited_instagram_legacy_reconciliation.sql",
+        "20260729071146_enforce_facebook_consent_contract_and_permalink_integrity.sql",
+        "20260729072000_randomize_social_derivative_paths_and_reduce_facebook_privileges.sql",
+        "20260729130654_add_discord_gallery_ingest_hmac_replay_guard.sql",
+        "20260729183000_harden_disabled_monthly_raffle_foundation.sql"
       ]
     },
     "localFunctions": {
-      "total": 30,
+      "total": 45,
       "names": [
+        "check-facebook-page-api-status",
         "check-instagram-api-status",
+        "delete-rejected-gallery-submission",
+        "get-current-raffle",
         "get-current-spotlight-winner",
         "get-member-profile",
         "list-approved-gallery-submissions",
+        "list-facebook-page-publish-queue",
         "list-gallery-review-queue",
         "list-instagram-publish-queue",
         "list-member-profile-media-queue",
         "list-member-profiles",
         "list-visible-profile-cards",
+        "manage-raffle-claim",
+        "manage-raffle-entry",
         "mark-instagram-gallery-submission-shared",
         "mochi-pets-alpha-action",
         "mochi-pets-alpha-admin",
@@ -174,13 +174,22 @@
         "mochi-pets-unity-auth",
         "moderate-gallery-submission",
         "moderate-member-profile-media",
+        "moderate-raffle",
+        "publish-facebook-page-gallery-submission",
         "publish-instagram-gallery-submission",
         "publish-member-spotlight-winner",
         "reaper-discord-interactions",
         "reaper-discord-member-sync",
+        "reaper-spinner-dispatch",
+        "resolve-facebook-page-publish-reconciliation",
+        "resolve-instagram-publish-reconciliation",
         "review-member-verification",
+        "reward-provider-webhook",
+        "run-raffle-fulfillment",
+        "run-raffle-schedule",
         "send-member-spotlight-poll",
         "send-vote-reminder",
+        "spinner-live-session",
         "submit-discord-gallery-image",
         "submit-member-profile-media",
         "submit-mochi-pets-feedback",
@@ -193,19 +202,34 @@
         "verify-member-access": true,
         "review-member-verification": true,
         "list-gallery-review-queue": true,
+        "spinner-live-session": true,
         "moderate-gallery-submission": true,
+        "delete-rejected-gallery-submission": true,
         "list-approved-gallery-submissions": false,
         "submit-discord-gallery-image": false,
         "reaper-discord-interactions": false,
+        "reaper-spinner-dispatch": false,
         "reaper-discord-member-sync": false,
         "send-vote-reminder": false,
         "send-member-spotlight-poll": false,
         "publish-member-spotlight-winner": false,
         "get-current-spotlight-winner": false,
+        "get-current-raffle": false,
+        "manage-raffle-entry": true,
+        "moderate-raffle": true,
+        "run-raffle-schedule": false,
+        "manage-raffle-claim": true,
+        "run-raffle-fulfillment": false,
+        "reward-provider-webhook": false,
         "list-instagram-publish-queue": true,
         "publish-instagram-gallery-submission": true,
+        "resolve-instagram-publish-reconciliation": true,
         "mark-instagram-gallery-submission-shared": true,
         "check-instagram-api-status": true,
+        "list-facebook-page-publish-queue": true,
+        "publish-facebook-page-gallery-submission": true,
+        "resolve-facebook-page-publish-reconciliation": true,
+        "check-facebook-page-api-status": true,
         "list-member-profiles": true,
         "list-visible-profile-cards": false,
         "get-member-profile": true,
@@ -223,9 +247,7 @@
     },
     "remoteMigrations": null,
     "remoteFunctions": null,
-    "secrets": "not read by this no-secret evidence command",
-    "reason": "supabase linked migration list failed",
-    "error": "Initialising login role... 2026/07/05 05:12:03 Access token not provided. Supply an access token by running supabase login or setting the SUPABASE_ACCESS_TOKEN environment variable."
+    "secrets": "not read by this no-secret evidence command"
   },
   "discordReaper": {
     "status": "static-checked",
@@ -259,41 +281,6 @@
       "docs/vote-reminder-runbook.md"
     ]
   },
-  "mochiPets": {
-    "status": "static-checked",
-    "previewReadyReportPresent": false,
-    "previewReadyReport": null,
-    "packageScripts": {
-      "alpha": true,
-      "bridgeState": true,
-      "edgeAuthority": true,
-      "reportHygiene": true,
-      "gameContract": true
-    },
-    "hostedFlyDeployRequiresSeparateApproval": true
-  },
-  "enjin": {
-    "status": "static-checked",
-    "previewOnlyExpected": true,
-    "fundedChainActionsAuthorized": false,
-    "evidence": [
-      {
-        "file": "docs/mochi-pets-visual-polish.md",
-        "configuredPreviewStub": false,
-        "fundedChainGate": false
-      },
-      {
-        "file": "scripts/check-mochi-pets-alpha.mjs",
-        "configuredPreviewStub": true,
-        "fundedChainGate": true
-      },
-      {
-        "file": "scripts/check-mochi-pets-edge-authority.mjs",
-        "configuredPreviewStub": false,
-        "fundedChainGate": false
-      }
-    ]
-  },
   "codexAgents": {
     "status": "static-checked",
     "agentsGuidancePresent": true,
@@ -303,7 +290,8 @@
   },
   "warnings": [],
   "skipped": [
-    "supabase linked migration list failed"
+    "provider reads disabled",
+    "supabase provider reads disabled"
   ],
   "failures": []
 }
