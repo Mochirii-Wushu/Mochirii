@@ -144,7 +144,7 @@ closeout.
 ## Local Full-Stack Integration Candidate
 
 - The clean source union at integration baseline
-  `dedc0a15926588b148906d685a87d61ce1a1e607` contains exactly 49 migrations
+  `efc216d9e1e90cfd89f1896a1eaddbd5dceeb8a8` contains exactly 49 migrations
   and 45 functions declared in `supabase/config.toml`, with a source-expected
   JWT split of 28 `verify_jwt=true` / 17 false. These figures describe local
   source only; hosted production remains at the 34-migration, 33-function,

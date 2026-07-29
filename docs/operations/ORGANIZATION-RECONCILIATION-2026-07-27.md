@@ -47,9 +47,12 @@ checks, accountable review, and no owner bypass.
   checks.
 - Website draft PR #539, `feat(meta): add public privacy and deletion
   readiness`, remains at remote head
-  `5469b53ce13153f382f71b69a2f7c51f76fa4be0`. Its public privacy/deletion
-  routes and validation contracts are replayed in the union; #539 remains open
-  until replacement parity and exact-head checks are proved.
+  `71d71d092d87be4dab4f6eb733dec36980cdd545`. Its public privacy/deletion
+  routes and its latest union-alignment corrections are replayed in the union.
+  The branch-specific `validate` failure is limited to canonical-origin checks
+  that depend on PR #538; the integrated union passes the complete repository
+  check. #539 remains open until replacement parity and exact-head checks are
+  proved.
 - Mochirii Pets PR #4 remains at naming-only head
   `aadaaedc19aaf6e85d7bd742102c616c35b3c77f`. The automatic repository
   contract succeeds, while exact-editor fails before running Unity because the
@@ -83,7 +86,7 @@ separately approved removal.
 | Worktree | Exact head | Classification |
 | --- | --- | --- |
 | `Website` | `2eec9e467b4679fd77648ef61e77cf246ec9589b` | HEAD equals `origin/main` while the checked-out branch is `mochi/vendor-mcp-setup`; preserve its two user-owned `.codex/` paths. |
-| `Website-full-stack-integration-rehearsal-20260729` | Integration baseline `dedc0a15926588b148906d685a87d61ce1a1e607` before this mutable ledger update. | Authoritative clean local union: 49 migrations, 45 functions, 28/17 source JWT expectation, bounded server-auth transport, and preserved #536/#538/#539 intent. It is unpushed and has no PR or provider effect. |
+| `Website-full-stack-integration-rehearsal-20260729` | Integration baseline `efc216d9e1e90cfd89f1896a1eaddbd5dceeb8a8` before this mutable ledger update. | Authoritative clean local union: 49 migrations, 45 functions, 28/17 source JWT expectation, bounded server-auth transport, and preserved #536/#538/#539 intent. It is unpushed and has no PR or provider effect. |
 | `Website-repository-name-reconciliation-20260728` | `661afd9299221f521e2f1bf805728442ff6be4c1` | Canonical-name reconciliation source for PR #538; retain until replacement parity is proved. |
 | `Website-repository-separation-adrs-20260729` | `331ed1e91e8cee65b4b1478b30fc545f41b57dd0` | Architecture/governance candidate; no provider or source-ownership transfer. |
 | `Website-shopify-prepayment-safety-20260729` | `5b3834ca2558df9bc5063119f673662b04e5bb62` | Storefront prepayment-safety candidate; preserves sealed copy evidence and authorizes no Shopify mutation or publication. |
@@ -94,7 +97,7 @@ separately approved removal.
 | `Website-meta-gallery-publishing-20260728` | `db6aac31a58f054c6ad9491d7274153890984955` | Intentional concurrent Meta publishing worktree; preserve all tracked and untracked work. |
 | `Website-meta-gallery-backend-20260729` | `71d71d092d87be4dab4f6eb733dec36980cdd545` | Parallel Meta backend source lane; provider state and the shared Supabase stack remain outside this documentation task. |
 | `Website-meta-gallery-release-20260729` | `c9e1da01524b2721a7a88e385c07c94501a6b78f` | Source-only Meta handoff; both publish flags remain false and no post was created. |
-| `Website-meta-public-readiness-20260729` | `5469b53ce13153f382f71b69a2f7c51f76fa4be0` | Draft PR #539 source; retained until union replacement parity is proved. |
+| `Website-meta-public-readiness-20260729` | `71d71d092d87be4dab4f6eb733dec36980cdd545` | Draft PR #539 source; retained until union replacement parity is proved. |
 | `Website-gallery-full-stack-p0-20260728` | `9d0303250fdbc99d99b87af8ff2ddf8ccbf127ad` | Superseded candidate; retain until Gallery replacement parity is proved. |
 | `Website-gallery-raffle-integration-20260728` | `e920f7b93070f2c25fa343405f8957aab5052747` | Ordered Gallery/raffle verification composition; not a production branch. |
 | `Website-raffle-consolidation-utc8-20260728` | `313ef528f73cbf1f629d703aa0eb8a2f0fc8bf21` | Superseded candidate; retain until integrated raffle parity is proved. |
