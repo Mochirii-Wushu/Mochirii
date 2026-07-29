@@ -128,7 +128,7 @@ Local and network validation after merge:
 
 Notes:
 
-- Running `scripts/check-all.mjs` without the bundled Node directory on PATH fails on this workstation because child `node` lookup is unavailable; rerunning with `C:\Users\xtyty\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin` prepended passes.
+- Running `scripts/check-all.mjs` without the bundled Node directory on PATH fails on this workstation because child `node` lookup is unavailable; rerunning with `%USERPROFILE%\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin` prepended passes.
 - Supabase CLI `2.105.0` is installed, but this checkout is not locally linked, so direct `supabase migration list --linked` was not available from the shell. Production Supabase behavior was verified through the live Edge Function contract smoke and live browser behavior instead.
 - Stale PRs #178, #180, and #1 were closed after confirming they were superseded or obsolete.
 - Remote-tracking refs were pruned and stale local branches were removed. The only remaining local and remote branch is `main`.
@@ -136,5 +136,5 @@ Notes:
 ## Verification Notes
 
 - GitHub CLI is authenticated as a repository administrator account.
-- Supabase CLI `2.105.0` is available at `C:\Users\xtyty\.bun\install\cache\@supabase\cli-windows-x64@2.105.0@@@1\bin\supabase.exe`, but local CLI auth is not configured in this shell.
+- Supabase CLI `2.105.0` is available under `%USERPROFILE%\.bun\install\cache`, but local CLI auth is not configured in this shell.
 - Because the CLI has no local Supabase access token, remote migration history was confirmed through the logged-in Supabase SQL Editor and guarded through local files.

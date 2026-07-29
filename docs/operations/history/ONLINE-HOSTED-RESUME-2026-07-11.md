@@ -22,7 +22,7 @@ keys, passwords, signed URLs, cookies, or provider recovery material.
 
 ## Website State
 
-Repository: `C:\Users\xtyty\CodexWork\Mochirii\repo`
+Repository: `%USERPROFILE%\CodexWork\Mochirii\repo`
 
 - Clean, synchronized `main` at
   `b9dee3f90bd564242068872c9ad485f830515590`.
@@ -49,7 +49,7 @@ Repository: `C:\Users\xtyty\CodexWork\Mochirii\repo`
 
 ## Social Runtime State
 
-Repository: `C:\Users\xtyty\CodexWork\Mochirii\pixelfed-ops`
+Repository: `%USERPROFILE%\CodexWork\Mochirii\pixelfed-ops`
 
 - Production `main` before the current PR is
   `a1183448575b3089d64ac568544441b61a2c5286`.

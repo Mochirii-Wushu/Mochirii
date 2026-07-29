@@ -6,12 +6,12 @@ This report records Packet 1 of the six-packet Mochirii full-stack polish, secur
 
 ## Working Branch
 
-- Worktree: `C:\Users\xtyty\Documents\Mochirii-release-hygiene`
+- Worktree: `Mochirii-release-hygiene`
 - Branch: `codex/release-hygiene-live-state`
 - Base: `origin/main` at `5103ba4fb11709240ffe38d560e0b322f20b2320`
 - Commit message on base: `Resolve web audit advisories`
 
-The primary checkout at `C:\Users\xtyty\Documents\Mochirii` is intentionally untouched because it contains unrelated Reaper and Mochi Social work.
+The primary Website checkout is intentionally untouched because it contains unrelated Reaper and Mochirii Social work.
 
 ## Production Evidence
 
@@ -88,9 +88,9 @@ Current worktrees include the primary checkout, the release-hygiene checkout, ac
 
 Known cleanup candidates after review:
 
-- `C:\Users\xtyty\Documents\Mochirii-csp-cors-polish`
-- `C:\Users\xtyty\Documents\Mochirii-twills-avatar`
-- `C:\Users\xtyty\Documents\Mochirii-web-audit-advisories`
+- `Mochirii-csp-cors-polish`
+- `Mochirii-twills-avatar`
+- `Mochirii-web-audit-advisories`
 
 Do not delete active Mochi Social or Reaper worktrees as part of general site cleanup.
 

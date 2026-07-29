@@ -9,12 +9,14 @@ const formerRepositoryOwner = ["anthy", "phera"].join("");
 const formerManufacturingPartner = ["self", "named"].join("");
 const formerManufacturerBrand = ["ma", "dara"].join("");
 const personalAccountIdentity = ["xart", "aiusx"].join("");
+const privateWorkstationIdentity = ["xty", "ty"].join("");
 const forbiddenTokens = [
   { label: "former company brand", value: formerCompanyBrand },
   { label: "former repository owner", value: formerRepositoryOwner },
   { label: "manufacturing-partner identity or domain", value: formerManufacturingPartner },
   { label: "manufacturer brand identity or domain", value: formerManufacturerBrand },
   { label: "personal account identity", value: personalAccountIdentity },
+  { label: "private workstation identity", value: privateWorkstationIdentity },
 ];
 const forbiddenContentPatterns = [
   { label: "internal price multiplier", pattern: /\b2[.]2\s*(?:x|times)\b/i },
@@ -133,6 +135,7 @@ const extensionlessGovernanceCanary = {
   path: ".github/CODEOWNERS",
   content: `* @${["xart", "aiusx"].join("")}`,
 };
+const privateWorkstationCanary = `C:/Users/${["xty", "ty"].join("")}/workspace`;
 if (separationMetadataFailures(sourceReferenceCanary).length < 2 ||
     separationMetadataFailures(providerIdentifierCanary).length !== 1) {
   console.error("Brand boundary check failed: separation-metadata canary did not trigger.");
@@ -143,6 +146,10 @@ if (
   || !forbiddenTokens.some((rule) => normalized(extensionlessGovernanceCanary.content).includes(rule.value))
 ) {
   console.error("Brand boundary check failed: extensionless governance canary was not scanned.");
+  process.exit(1);
+}
+if (!forbiddenTokens.some((rule) => normalized(privateWorkstationCanary).includes(rule.value))) {
+  console.error("Brand boundary check failed: private workstation canary was not scanned.");
   process.exit(1);
 }
 

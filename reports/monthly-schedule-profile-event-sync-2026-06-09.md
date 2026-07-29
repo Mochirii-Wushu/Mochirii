@@ -35,7 +35,7 @@
   - Command ID: `1513739224376152084`
   - Options: `mode` string with `preview`/`apply`, optional `confirm` boolean
   - Default member permissions: `17600775979008`
-- The Reaper token was supplied from `C:\Users\xtyty\Desktop\DC Bot.docx` and used only as a local secret input for Discord API registration/verification.
+- The Reaper token was supplied from the private credential boundary and used only as a local secret input for Discord API registration/verification.
 - Non-mutating Discord API preview completed:
   - Bot user: `Reaper`
   - Bot can manage events: `true`

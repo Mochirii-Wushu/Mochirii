@@ -27,7 +27,7 @@ Verified by `npm run toolchain:check` and `cd apps/web && npm run toolchain:chec
 - Playwright package and Chromium dependencies installed.
 - App-local Vercel CLI `54.18.1`.
 
-Credential note: WSL `gh auth status` is not persistently logged in. That is intentional for this pass because credentials are constrained to `C:\Users\xtyty\Documents\Creds`; GitHub reads/pushes used authenticated Windows `gh` or one-shot child-process environment only, without printing or writing token values.
+Credential note: WSL `gh auth status` is not persistently logged in. That is intentional for this pass because credentials are constrained to the private credential boundary; GitHub reads/pushes used authenticated Windows `gh` or one-shot child-process environment only, without printing or writing token values.
 
 ## Provider Evidence
 
