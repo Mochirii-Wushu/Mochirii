@@ -1,5 +1,10 @@
 # Pixelfed First Login Testing Runbook
 
+> **Superseded on 2026-07-29.** This dated packet is retained unchanged as
+> historical evidence and must not be used as current operational guidance.
+> Current operations are governed by the
+> [Mochirii Social Delivery Contract](integrations/mochirii-social-delivery.md).
+
 Status: admin-first staging readiness packet. Provider mutations remain approval-gated.
 
 This runbook prepares the first Pixelfed login test without committing Pixelfed

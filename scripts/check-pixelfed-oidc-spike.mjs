@@ -31,6 +31,8 @@ const snippetChecks = [
       "PKCE compatibility as unproven",
       `Approve enabling Supabase OAuth 2.1 Server for project ${SUPABASE_PROJECT_REF} and setting Authorization Path /oauth/consent.`,
       "Approve registering the Pixelfed OAuth client for the approved staging Pixelfed URL with its exact OIDC callback URI.",
+      "Superseded on 2026-07-29",
+      "integrations/mochirii-social-delivery.md",
     ],
   },
   {
@@ -39,6 +41,17 @@ const snippetChecks = [
     snippets: [
       "docs/pixelfed-oidc-spike.md",
       "npm run check:pixelfed-oidc-spike",
+      "Superseded on 2026-07-29",
+      "integrations/mochirii-social-delivery.md",
+    ],
+  },
+  {
+    label: "historical Pixelfed ADR routing",
+    file: "docs/pixelfed-guild-social-adr.md",
+    snippets: [
+      "Superseded on 2026-07-29",
+      "historical evidence",
+      "integrations/mochirii-social-delivery.md",
     ],
   },
   {

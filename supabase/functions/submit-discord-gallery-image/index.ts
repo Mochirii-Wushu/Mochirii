@@ -386,7 +386,7 @@ async function handleRequest(req: Request): Promise<Response> {
       {
         ok: false,
         error: "profile_lookup_failed",
-        message: "Mochirii account status could not be checked.",
+        message: "Mōchirīī account status could not be checked.",
       },
       500,
     );
@@ -415,8 +415,8 @@ async function handleRequest(req: Request): Promise<Response> {
           : "discord_gallery_not_eligible",
         missingRoleIds: missingStoredRoleIds,
         message: !userId
-          ? "Link your Mochirii website account with Discord before submitting gallery images."
-          : "Refresh Discord verification on mochirii.com/account before submitting gallery images.",
+          ? "Link your Mōchirīī website account with Discord before submitting gallery images."
+          : "Refresh Discord verification on [mochirii.com](https://mochirii.com/account) before submitting gallery images.",
       },
       403,
     );

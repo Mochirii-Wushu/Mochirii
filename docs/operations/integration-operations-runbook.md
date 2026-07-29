@@ -45,8 +45,8 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Historical static recovery: GitHub release `legacy-static-final-2026-07-18`; it is not an editable or live rollback surface.
 - Supabase project: `deyvmtncimmcinldjyqe`; browser code may only receive public URL and publishable key.
 - Vercel project: production-serving `mochirii/mochirii` with root directory `apps/web`.
-- Pixelfed guild social: planned as a separate `social.mochirii.com` runtime on the DigitalOcean Droplet plus DigitalOcean Spaces. The website repo owns only the member doorway, Supabase OAuth consent surface, `social_accounts` mapping, the trusted sync Edge Function, and no-secret runbooks; do not add Pixelfed application code, host secrets, media credentials, or infrastructure state to this repo. See `docs/pixelfed-guild-social-adr.md`.
-- Pixelfed staging: `social.mochirii.com` exists as an admin-first staging target outside Vercel. Federation and broad member upload testing remain disabled until separate gates pass. First-admin login is not complete until the Pixelfed OIDC callback writes one active `social_accounts` row through the sync bridge.
+- Mochirii Social: `services/social` is the canonical application source for the private `social.mochirii.com` runtime hosted on the DigitalOcean Droplet with Spaces-backed media. The Website repository also owns the member doorway, Supabase OAuth consent surface, `social_accounts` mapping, trusted sync Edge Function, and no-secret delivery runbooks. Host secrets, media credentials, database or Redis state, backups, and infrastructure-private evidence must remain outside Git.
+- Hosted Social posture: registration is closed, access is SSO-only, and federation remains disabled. Runtime changes, broad member-media activation, deployment, and provider configuration remain separately gated. Use `docs/integrations/mochirii-social-delivery.md` as the current delivery contract; the older Pixelfed planning and staging packets are historical evidence only.
 - GitHub Pages: no repository Pages configuration is active. Website rollback uses a prior ready Vercel deployment; restoring the archived static release would require a separate provider packet.
 - Supabase Preview: acceptable as skipped on PRs without `supabase/` changes; schema/function PRs must either produce green Supabase Preview evidence or document the integration blocker.
 - GitHub security alerts: code scanning, Dependabot, and secret scanning should remain at zero before release-sensitive merges.
@@ -58,4 +58,4 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Use one scoped branch per task.
 - Keep reports no-secret and reviewable.
 - Prefer squash/merge through protected-branch policy after checks are green.
-- After merge, sync local `main`, run the approved manual Vercel production deploy when the change is production-bound, verify a clean worktree, and only then start the next scoped branch.
+- After an approved production-bound merge, allow the normal Vercel Git integration to publish from protected `main`, verify the deployment is exactly bound to the merge SHA, sync local `main`, verify a clean worktree, and only then start the next scoped branch. Manual Vercel deployment is a separately approved exception or rollback path, not the normal release flow.

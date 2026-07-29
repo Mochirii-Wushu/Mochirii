@@ -129,7 +129,7 @@ function recentVerification(value: unknown, now = Date.now()): boolean {
   return Number.isFinite(verifiedAt) && now - verifiedAt <= RECENT_MEMBER_VERIFICATION_MS;
 }
 
-function cleanPollText(value: unknown, fallback = "Mochirii Member"): string {
+function cleanPollText(value: unknown, fallback = "Mōchirīī Member"): string {
   return (safeString(value, 160) || fallback)
     .replace(/\s+/g, " ")
     .replace(/@/g, "at ")

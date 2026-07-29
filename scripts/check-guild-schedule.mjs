@@ -150,7 +150,7 @@ else {
   assertEqual("monthly raffle time", monthlyRaffle.time, "9:30 PM");
   assertEqual("monthly raffle start", monthlyRaffle.startTime, "21:30");
   assertEqual("monthly raffle end", monthlyRaffle.endTime, "22:00");
-  assertEqual("monthly raffle website location", monthlyRaffle.location, siteUrl("/raffles"));
+  assertEqual("monthly raffle website location", monthlyRaffle.location, siteUrl("/raffle"));
   assertEqual("monthly raffle Discord location", monthlyRaffle.discordLocation, "Guild Base Pool");
   assertEqual("monthly raffle cover", monthlyRaffle.discordCoverImage, "./assets/img/discord-events/monthly-raffle.png");
   assertEqual("monthly raffle canonical Discord event ID", monthlyRaffle.discordEventId, "1479507429598302268");

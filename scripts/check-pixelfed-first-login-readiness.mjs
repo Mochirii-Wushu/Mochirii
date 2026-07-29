@@ -17,6 +17,7 @@ const stagingReady = process.env.PIXELFED_FIRST_LOGIN_STAGING_READY === "1";
 const requiredFiles = [
   "docs/pixelfed-guild-social-adr.md",
   "docs/pixelfed-first-login-testing.md",
+  "docs/pixelfed-staging-ops.md",
   "apps/web/app/social/page.tsx",
   "apps/web/app/oauth/consent/page.tsx",
   "apps/web/app/api/oauth/decision/route.ts",
@@ -49,6 +50,8 @@ const snippetChecks = [
       "Authorization Path is `/oauth/consent`",
       "provider mutations",
       "federation disabled",
+      "Superseded on 2026-07-29",
+      "integrations/mochirii-social-delivery.md",
     ],
   },
   {
@@ -63,6 +66,17 @@ const snippetChecks = [
       "Federation disabled.",
       "Negative Smokes",
       "Never paste OAuth client secrets",
+      "Superseded on 2026-07-29",
+      "integrations/mochirii-social-delivery.md",
+    ],
+  },
+  {
+    label: "historical staging operations packet",
+    file: "docs/pixelfed-staging-ops.md",
+    snippets: [
+      "Superseded on 2026-07-29",
+      "historical evidence",
+      "integrations/mochirii-social-delivery.md",
     ],
   },
   {
@@ -541,6 +555,7 @@ if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("p
 [
   "docs/pixelfed-guild-social-adr.md",
   "docs/pixelfed-first-login-testing.md",
+  "docs/pixelfed-staging-ops.md",
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
   "apps/web/lib/oauth/authorization-details-error.ts",

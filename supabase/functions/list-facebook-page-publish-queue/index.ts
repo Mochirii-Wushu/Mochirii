@@ -26,7 +26,7 @@ function displayName(profile: JsonRecord | null | undefined): string {
   return safeString(profile?.discord_global_name, 100) ||
     safeString(profile?.display_name, 40) ||
     safeString(profile?.discord_username, 80) ||
-    "Mochirii Member";
+    "Mōchirīī Member";
 }
 
 function profileSummary(

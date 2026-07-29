@@ -297,7 +297,12 @@ for (const snippet of socialAccountSnippets) {
   assertIncludes("Pixelfed social account mapping migration", migrationText, snippet);
 }
 
-assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_accounts` maps a signed-in website member");
+[
+  "`services/social` is the canonical application source",
+  "`social_accounts` maps a signed-in website member to their current Mochirii",
+  "../docs/integrations/mochirii-social-delivery.md",
+  "superseded historical evidence",
+].forEach((snippet) => assertIncludes("Supabase README Social mapping docs", readme, snippet));
 
 [
   "import { SITE_ORIGIN } from \"./public-origins.ts\"",

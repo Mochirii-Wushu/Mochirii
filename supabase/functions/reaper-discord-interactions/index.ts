@@ -645,7 +645,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (guildId !== EXPECTED_DISCORD_GUILD_ID || !discordUserId) {
-      return interactionMessage("Use this command in the Mochirii Discord server.");
+      return interactionMessage("Use this command in the Mōchirīī Discord server.");
     }
 
     try {
@@ -664,7 +664,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
-      return interactionMessage("Use this command in the Mochirii Discord server.");
+      return interactionMessage("Use this command in the Mōchirīī Discord server.");
     }
 
     try {
@@ -715,7 +715,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
-      return interactionMessage("Use this command in the Mochirii Discord server.");
+      return interactionMessage("Use this command in the Mōchirīī Discord server.");
     }
 
     if (!discordUserId || !hasModeratorRole) {
@@ -742,7 +742,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (guildId !== EXPECTED_DISCORD_GUILD_ID) {
-      return interactionMessage("Use this command in the Mochirii Discord server.");
+      return interactionMessage("Use this command in the Mōchirīī Discord server.");
     }
 
     if (!discordUserId || !hasModeratorRole) {
@@ -889,7 +889,7 @@ Deno.serve(async (req: Request) => {
   }
 
   if (!discordUserId || missingRequestRoleIds.length > 0) {
-    return interactionMessage("Refresh Discord verification on mochirii.com/account before submitting gallery images.");
+    return interactionMessage("Refresh Discord verification on [mochirii.com](https://mochirii.com/account) before submitting gallery images.");
   }
 
   if (

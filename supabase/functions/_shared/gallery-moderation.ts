@@ -368,7 +368,7 @@ export async function requireModeratorAccess(req: Request): Promise<ModeratorAcc
           ok: false,
           hasAccess: false,
           error: "not_guild_member",
-          message: "Moderator access requires membership in the Mochirii Discord server.",
+          message: "Moderator access requires membership in the Mōchirīī Discord server.",
         },
         403,
       ),

@@ -28,20 +28,61 @@ Functions, and schema changes migration-based. Do not commit real secrets or
 Every deployed function owns a local `deno.json` with exact direct dependency
 versions, following [Supabase's function dependency guidance](https://supabase.com/docs/guides/functions/dependencies).
 The Supabase CLI uses that file as Deno configuration when bundling a function;
-it does not upload the repository root `deno.lock`. Accordingly,
-`npm run check:supabase-edge-types` checks all 31 entrypoints with their real
-function-local configuration and no deployment lock, records and audits each
-entrypoint's current resolution in its own temporary lock, and separately audits
-the repository lock used by local tooling. Never describe the root lock as
-freezing the deployed transitive graph.
+it does not use the repository root `deno.lock` as the deployment lock.
+Accordingly, `npm run check:supabase-edge-types` checks all 45 entrypoints with
+their real function-local configuration. It requires the exact reviewed set of
+18 committed function-local locks:
 
-## Pixelfed Guild Social Mapping
+```text
+check-facebook-page-api-status
+get-current-raffle
+list-approved-gallery-submissions
+list-facebook-page-publish-queue
+list-gallery-review-queue
+manage-raffle-claim
+manage-raffle-entry
+moderate-gallery-submission
+moderate-raffle
+publish-facebook-page-gallery-submission
+reaper-spinner-dispatch
+resolve-facebook-page-publish-reconciliation
+resolve-instagram-publish-reconciliation
+reward-provider-webhook
+run-raffle-fulfillment
+run-raffle-schedule
+spinner-live-session
+submit-discord-gallery-image
+```
 
-Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow. The staging runtime exists outside Vercel; first authenticated testing is admin-only until the source-control, OIDC, media, backup, and moderation gates pass.
+Those entrypoints are checked against their committed locks. The remaining
+entrypoints have their current resolution recorded and audited in temporary
+function-local locks, and the repository lock used by local tooling is audited
+separately. Never describe the root lock as freezing the deployed transitive
+graph.
 
-`social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`; that field is retained for backend compatibility while website member profile publishing is retired.
+## Mochirii Social Account Mapping
 
-The table intentionally does not grant direct insert/delete access to `authenticated`. The trusted write path is the `sync-pixelfed-social-account` Edge Function, which keeps the service-role key inside Supabase and accepts only a narrow Pixelfed host sync secret. Production SSO, federation enablement, broad member uploads, Spaces media migration, and any remote database/Auth/Function setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
+`services/social` is the canonical application source for the private
+`social.mochirii.com` runtime hosted on DigitalOcean and Spaces. Supabase remains
+the identity and membership authority for the website doorway and OAuth consent
+flow. ActivityPub federation remains disabled, and runtime or provider changes
+remain separately approval-gated.
+
+`social_accounts` maps a signed-in website member to their current Mochirii
+Social account. Trusted server/operator workflows own provider identity fields
+such as `provider_subject`, `provider_user_id`, `username`, `profile_url`,
+`status`, and sync timestamps. Authenticated members may read only their own rows
+and may update only `profile_link_visible`; that field is retained for backend
+compatibility while website member profile publishing is retired.
+
+The table intentionally does not grant direct insert/delete access to
+`authenticated`. The trusted write path is the
+`sync-pixelfed-social-account` Edge Function, which keeps the service-role key
+inside Supabase and accepts only the narrow Social-host sync secret. Current
+source, deployment, recovery, and runtime boundaries are defined in the
+[`Mochirii Social Delivery Contract`](../docs/integrations/mochirii-social-delivery.md).
+The older Pixelfed planning, spike, and first-login packets are retained only as
+superseded historical evidence.
 
 ## Member-Owned Profile Links
 

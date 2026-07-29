@@ -185,7 +185,7 @@ assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
   'const title = stringOption(data, "title", 90);',
   'const caption = stringOption(data, "subtitle", 220);',
   "Use this command in the gallery submissions channel.",
-  "Refresh Discord verification on mochirii.com/account before submitting gallery images.",
+  "Refresh Discord verification on [mochirii.com](https://mochirii.com/account) before submitting gallery images.",
   "sync-ranks",
   "sync-events",
   "sync-pending-verification",

@@ -33,9 +33,9 @@ Deno.test("display names follow metadata then email fallback order", () => {
   );
   assertEquals(
     defaultDisplayName({ user_metadata: { name: "x" } }),
-    "Mochirii Member",
+    "Mōchirīī Member",
   );
-  assertEquals(defaultDisplayName({}), "Mochirii Member");
+  assertEquals(defaultDisplayName({}), "Mōchirīī Member");
 });
 
 Deno.test("provider subjects keep provider field precedence and phone fallback", () => {

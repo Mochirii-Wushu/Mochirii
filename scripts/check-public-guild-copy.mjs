@@ -122,6 +122,21 @@ const directSourceFiles = [
   "supabase/functions/publish-facebook-page-gallery-submission/index.ts",
   "supabase/functions/publish-instagram-gallery-submission/index.ts",
 ];
+const memberFacingBrandSourceFiles = [
+  "supabase/functions/_shared/gallery-moderation.ts",
+  "supabase/functions/_shared/member-verification-identity.ts",
+  "supabase/functions/_shared/spotlight-polls.ts",
+  "supabase/functions/list-facebook-page-publish-queue/index.ts",
+  "supabase/functions/list-gallery-review-queue/index.ts",
+  "supabase/functions/list-instagram-publish-queue/index.ts",
+  "supabase/functions/manage-raffle-entry/index.ts",
+  "supabase/functions/reaper-discord-interactions/index.ts",
+  "supabase/functions/submit-discord-gallery-image/index.ts",
+];
+const discordWebsiteLabelSourceFiles = [
+  "supabase/functions/reaper-discord-interactions/index.ts",
+  "supabase/functions/submit-discord-gallery-image/index.ts",
+];
 
 const sourceFiles = directSourceFiles.map((relative) => path.join(root, relative));
 const sourceText = new Map();
@@ -168,6 +183,34 @@ if (/mochirii\.com/iu.test(socialPublicationSources)) {
   failures.push("Instagram and Facebook publication copy must not contain or link mochirii.com.");
 }
 
+for (const relative of memberFacingBrandSourceFiles) {
+  const source = readFileSync(path.join(root, relative), "utf8");
+  source.split(/\r?\n/u).forEach((line, index) => {
+    const hasUnaccentedPublicBrand = /\bMochirii\b|\bMochi\b/u.test(line);
+    const isReviewedTechnicalIdentifier = /Mochirii-Reaper-/u.test(line);
+    if (hasUnaccentedPublicBrand && !isReviewedTechnicalIdentifier) {
+      failures.push(`${relative}:${index + 1}: member-facing brand text must use Mōchirīī or Mōchī.`);
+    }
+  });
+}
+
+for (const relative of discordWebsiteLabelSourceFiles) {
+  const source = readFileSync(path.join(root, relative), "utf8");
+  const reviewedAccountLink = "[mochirii.com](https://mochirii.com/account)";
+  if (!source.includes(reviewedAccountLink)) {
+    failures.push(`${relative}: Discord account guidance must display mochirii.com while linking to the account destination.`);
+  }
+
+  const visibleCopy = source.replaceAll(reviewedAccountLink, "mochirii.com");
+  const displayedSiteValues = visibleCopy.match(
+    /(?:https?:\/\/)?(?:www\.)?mochirii\.com(?:[/?#][^\s"'`)]+)?/giu,
+  ) || [];
+  const invalidDisplayedSiteValue = displayedSiteValues.find((value) => value !== "mochirii.com");
+  if (invalidDisplayedSiteValue) {
+    failures.push(`${relative}: visible website labels must be exactly mochirii.com; found ${JSON.stringify(invalidDisplayedSiteValue)}.`);
+  }
+}
+
 const canonicalPublicCopyText = [...canonicalPublicCopy, sharedSocialCaption].join("\n");
 const accentCounts = new Map();
 for (const { label, pattern, minimum, maximum } of brandAccents) {
@@ -200,3 +243,4 @@ console.log("- Canonical public copy includes recruitment, events, builds, guide
 console.log(`- Where Winds Meet remains limited to ${exactGameNameCount} approved title, metadata, Home subtitle and primary footer occurrences.`);
 console.log("- Facebook and Instagram publication surfaces retain the reviewed shared social caption.");
 console.log("- Public website display is exactly mochirii.com; Instagram and Facebook publication copy contain no site link.");
+console.log("- Discord account guidance displays mochirii.com and reviewed member-facing fallbacks use Mōchirīī/Mōchī branding.");

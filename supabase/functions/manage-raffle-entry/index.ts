@@ -74,7 +74,7 @@ async function handleRequest(req: Request): Promise<Response> {
             access.userId,
           ),
         },
-        message: "The Mochirii Monthly Raffle is not open.",
+        message: "The Mōchirīī Monthly Raffle is not open.",
       });
     }
 

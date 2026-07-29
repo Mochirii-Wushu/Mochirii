@@ -36,11 +36,11 @@ export function defaultDisplayName(user: JsonRecord): string {
       metadata.user_name ||
       metadata.username ||
       emailPrefix ||
-      "Mochirii Member",
+      "Mōchirīī Member",
     40,
   );
 
-  return display && display.length >= 2 ? display : "Mochirii Member";
+  return display && display.length >= 2 ? display : "Mōchirīī Member";
 }
 
 export function providerSubject(
