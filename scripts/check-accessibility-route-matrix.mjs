@@ -24,6 +24,8 @@ const accessibilityOverrides = new Map([
   ["/recruitment", { label: "Recruitment", type: "public", workflow: "recruiting copy", expectsDescribedBy: true }],
   ["/announcements", { label: "Announcements", type: "public", workflow: "updates" }],
   ["/raffle", { label: "Raffle", type: "public", workflow: "monthly raffle program and inactive drawing status", componentFiles: ["apps/web/components/public-pages/route-pages/RafflePage.tsx"] }],
+  ["/privacy", { label: "Privacy", type: "public", workflow: "privacy notice", componentFiles: ["apps/web/components/public-pages/common.tsx"], expectsHeading: true }],
+  ["/meta-data-deletion", { label: "Meta Data Deletion", type: "public", workflow: "data deletion instructions", componentFiles: ["apps/web/components/public-pages/common.tsx"], expectsHeading: true }],
   ["/spotify", { label: "Spotify", type: "public", workflow: "embedded playlists", componentFiles: ["apps/web/components/public-pages/SpotifyBrowser.tsx"], expectsIframe: true }],
   ["/spotlight", { label: "Spotlight", type: "public", workflow: "member spotlight" }],
   ["/twills", { label: "Twills", type: "public", workflow: "profile reference", componentFiles: ["apps/web/components/public-pages/ProfileDisplay.tsx"] }],

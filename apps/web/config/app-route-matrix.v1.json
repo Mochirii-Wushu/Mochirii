@@ -182,11 +182,25 @@
       "productionSmoke": true
     },
     {
+      "path": "/meta-data-deletion",
+      "kind": "page",
+      "source": "app/meta-data-deletion/page.tsx",
+      "surface": "public",
+      "productionSmoke": true
+    },
+    {
       "path": "/oauth/consent",
       "kind": "page",
       "source": "app/oauth/consent/page.tsx",
       "surface": "member",
       "productionSmoke": false
+    },
+    {
+      "path": "/privacy",
+      "kind": "page",
+      "source": "app/privacy/page.tsx",
+      "surface": "public",
+      "productionSmoke": true
     },
     {
       "path": "/raffle",

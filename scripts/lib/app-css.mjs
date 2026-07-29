@@ -20,6 +20,7 @@ export const appCssFiles = [
   "apps/web/app/styles/public-gallery.css",
   "apps/web/app/styles/shell-gallery-media.css",
   "apps/web/app/styles/public-not-found.css",
+  "apps/web/app/styles/public-legal.css",
   "apps/web/app/styles/member-workflow.css",
   "apps/web/app/styles/member-account.css",
   "apps/web/app/styles/member-forms.css",

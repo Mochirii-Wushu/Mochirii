@@ -24,6 +24,8 @@ const publicMetadataOverrides = new Map([
   ["/recruitment", { key: "recruitment" }],
   ["/announcements", { key: "announcements" }],
   ["/raffle", { key: "raffle" }],
+  ["/privacy", { key: "privacy" }],
+  ["/meta-data-deletion", { key: "metaDataDeletion" }],
   ["/spotify", { key: "spotify" }],
   ["/spotlight", { key: "spotlight" }],
   ["/twills", { key: "twills" }],
@@ -203,7 +205,7 @@ function checkProductionSmokeCoverage() {
     assert(productionSmokeRoutes.has(route), `production route matrix: expected route ${route}`);
   }
 
-  for (const route of ["/auth", "/account", "/gallery-submit", "/leader-dashboard", "/games/mochi-pets"]) {
+  for (const route of ["/privacy", "/meta-data-deletion", "/auth", "/account", "/gallery-submit", "/leader-dashboard", "/games/mochi-pets"]) {
     assert(smoke.includes(`["${route}",`) || smoke.includes(`['${route}',`), `production body smoke: expected content check for ${route}`);
   }
 }

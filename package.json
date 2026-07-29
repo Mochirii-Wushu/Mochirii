@@ -84,6 +84,7 @@
     "test:social-publication-copy": "node --experimental-default-type=module --experimental-strip-types --test apps/web/lib/gallery/social-publication-copy.test.mts",
     "check:facebook-page-gallery-publishing": "node scripts/check-facebook-page-gallery-publishing.mjs",
     "test:facebook-page-publishing": "deno test --node-modules-dir=auto --import-map=supabase/functions/publish-facebook-page-gallery-submission/deno.json --lock=deno.lock --frozen=true supabase/functions/_shared/facebook-page-publishing_test.ts",
+    "check:meta-public-readiness": "node scripts/check-meta-public-readiness.mjs",
     "check:js": "node scripts/check-js.mjs",
     "check:json": "node scripts/check-json.mjs",
     "check:live-member-cleanup-note": "node scripts/check-live-member-cleanup-note.mjs",

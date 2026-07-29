@@ -55,6 +55,7 @@ const checks = [
   ["test:social-publication-copy", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/gallery/social-publication-copy.test.mts"]],
   ["check:facebook-page-gallery-publishing", ["node", "scripts/check-facebook-page-gallery-publishing.mjs"]],
   ["test:facebook-page-publishing", ["deno", "test", "--node-modules-dir=auto", "--import-map=supabase/functions/publish-facebook-page-gallery-submission/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/facebook-page-publishing_test.ts"]],
+  ["check:meta-public-readiness", ["node", "scripts/check-meta-public-readiness.mjs"]],
   ["check:member-profiles-and-ranks", ["node", "scripts/check-member-profiles-and-ranks.mjs"]],
   ["check:member-social-links", ["node", "scripts/check-member-social-links.mjs"]],
   ["test:member-social-links", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/member-social-links/profile-links-core.test.mts"]],
