@@ -20,8 +20,23 @@ select ok(
   )
   and not has_table_privilege(
     'service_role', 'private.gallery_social_derivatives', 'select'
+  )
+  and exists (
+    select 1
+    from pg_catalog.pg_index indexes
+    join pg_catalog.pg_class index_classes
+      on index_classes.oid = indexes.indexrelid
+    join pg_catalog.pg_class table_classes
+      on table_classes.oid = indexes.indrelid
+    join pg_catalog.pg_namespace namespaces
+      on namespaces.oid = table_classes.relnamespace
+    where namespaces.nspname = 'private'
+      and table_classes.relname = 'gallery_social_derivatives'
+      and index_classes.relname = 'gallery_social_derivatives_created_by_idx'
+      and pg_catalog.pg_get_indexdef(indexes.indexrelid)
+        like '% (created_by)'
   ),
-  'social evidence has no browser or direct service-role table access'
+  'social evidence has no direct API table access and keeps its actor foreign key indexed'
 );
 
 select ok(

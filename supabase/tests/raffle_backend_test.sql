@@ -203,8 +203,19 @@ select ok(
     'service_role',
     'private.raffle_leaderboard_nonces',
     'SELECT'
+  )
+  and exists (
+    select 1
+    from pg_catalog.pg_policies
+    where schemaname = 'private'
+      and tablename = 'raffle_leaderboard_nonces'
+      and policyname = 'api_roles_default_deny'
+      and permissive = 'RESTRICTIVE'
+      and cmd = 'ALL'
+      and roles @> array['anon'::name, 'authenticated'::name]
+      and array['anon'::name, 'authenticated'::name] @> roles
   ),
-  'the service role cannot read the private replay ledger directly'
+  'the private replay ledger is unreadable directly and has an explicit restrictive API-role deny policy'
 );
 
 select ok(

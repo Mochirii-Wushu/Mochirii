@@ -77,6 +77,9 @@ create table private.gallery_social_derivatives (
     check (metadata_policy = 'jfif-only-no-app-metadata-v1')
 );
 
+create index gallery_social_derivatives_created_by_idx
+on private.gallery_social_derivatives (created_by);
+
 alter table private.gallery_social_derivatives enable row level security;
 revoke all on table private.gallery_social_derivatives
 from public, anon, authenticated, service_role;

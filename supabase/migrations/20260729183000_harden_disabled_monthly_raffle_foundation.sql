@@ -473,6 +473,12 @@ grant select on table public.raffle_rule_snapshots to service_role;
 create policy service_only_default_deny on public.raffle_rule_snapshots
   as restrictive for all to anon, authenticated using (false) with check (false);
 
+-- Keep the private one-use nonce ledger explicitly closed to API roles. The
+-- security-definer nonce RPC runs as the table owner and remains the sole
+-- access path; the policy also makes the deny-by-default intent auditable.
+create policy api_roles_default_deny on private.raffle_leaderboard_nonces
+  as restrictive for all to anon, authenticated using (false) with check (false);
+
 revoke all on function public.prevent_raffle_rule_snapshot_mutation()
 from public, anon, authenticated, service_role;
 revoke all on function public.archive_raffle_rules_snapshot(text, jsonb, text, uuid, timestamptz)
