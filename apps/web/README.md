@@ -159,9 +159,11 @@ removing, or moving an `app/**/page.*` or `app/**/route.*` file. The check
 derives the implemented inventory from the filesystem, fails on undocumented
 or stale entries and handler-method drift, and requires the redirect matrix to
 match `next.config.ts`. `npm run test:app-route-inventory` covers the fail-closed
-discovery and redirect parser. The production smoke consumes this same matrix,
-including `/tome.html` and `/social.html`, instead of maintaining another route
-list.
+discovery and redirect parser. Browser, accessibility, observability, client-
+bundle, and production-smoke route classification all consume this same matrix;
+their keyed overrides contain behavior assertions only. Legacy redirects such as
+`/tome.html` and `/social.html` come from the same contract. Retired
+`/raffle/rules` paths are intentionally absent and must remain not found.
 
 ## Mochi Pets Tester Doorway
 

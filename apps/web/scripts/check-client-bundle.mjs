@@ -21,36 +21,10 @@ const galleryMarker = "galleryMemberFeedStatus";
 const ordinaryShellMarker = "/assets/bg/wuxia-bg.webp";
 const ordinaryHeaderMarker = "Profile & Settings";
 const authCutoverMarker = "cookie-v1";
-const publicRoutes = [
-  "/",
-  "/announcements",
-  "/events",
-  "/gallery",
-  "/games/mochi-pets",
-  "/join",
-  "/leaders",
-  "/raffle",
-  "/ranks",
-  "/recruitment",
-  "/spotify",
-  "/spotlight",
-  "/tome",
-  "/twills",
-];
-const nonPublicRoutes = [
-  "/[...not-found]",
-  "/account",
-  "/auth",
-  "/gallery-submit",
-  "/leader-dashboard",
-  "/oauth/consent",
-  "/leader-dashboard/raffle",
-  "/raffle/claim",
-  "/raffle-render-fixtures-internal/[scenario]",
-  "/social",
-  "/spinner",
-  "/spinner/[...not-found]",
-];
+const routeMatrix = JSON.parse(readFileSync(new URL("../config/app-route-matrix.v1.json", import.meta.url), "utf8"));
+const pageRouteEntries = routeMatrix.routes.filter((entry) => entry.kind === "page");
+const publicRoutes = pageRouteEntries.filter((entry) => entry.surface === "public").map((entry) => entry.path);
+const nonPublicRoutes = pageRouteEntries.filter((entry) => entry.surface !== "public").map((entry) => entry.path);
 const failures = [];
 
 function appPageRoutes(directory = path.resolve("app"), segments = []) {

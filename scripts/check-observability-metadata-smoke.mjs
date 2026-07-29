@@ -13,39 +13,77 @@ const productionSmokeRoutes = new Set(
     .map((route) => route.path),
 );
 
-const publicRoutes = [
-  { route: "/", label: "home", file: "apps/web/app/page.tsx", metadataFile: "apps/web/app/layout.tsx" },
-  { route: "/join", key: "join", file: "apps/web/app/join/page.tsx" },
-  { route: "/events", key: "events", file: "apps/web/app/events/page.tsx" },
-  { route: "/gallery", key: "gallery", file: "apps/web/app/gallery/page.tsx" },
-  { route: "/ranks", key: "ranks", file: "apps/web/app/ranks/page.tsx" },
-  { route: "/leaders", key: "leaders", file: "apps/web/app/leaders/page.tsx" },
-  { route: "/tome", key: "tome", file: "apps/web/app/tome/page.tsx" },
-  { route: "/recruitment", key: "recruitment", file: "apps/web/app/recruitment/page.tsx" },
-  { route: "/announcements", key: "announcements", file: "apps/web/app/announcements/page.tsx" },
-  { route: "/raffle", key: "raffle", file: "apps/web/app/raffle/page.tsx" },
-  { route: "/spotify", key: "spotify", file: "apps/web/app/spotify/page.tsx" },
-  { route: "/spotlight", key: "spotlight", file: "apps/web/app/spotlight/page.tsx" },
-  { route: "/twills", key: "twills", file: "apps/web/app/twills/page.tsx" },
-  { route: "/games/mochi-pets", key: "mochiPets", file: "apps/web/app/games/mochi-pets/page.tsx" },
-];
+const publicMetadataOverrides = new Map([
+  ["/", { label: "home", metadataFile: "apps/web/app/layout.tsx" }],
+  ["/join", { key: "join" }],
+  ["/events", { key: "events" }],
+  ["/gallery", { key: "gallery" }],
+  ["/ranks", { key: "ranks" }],
+  ["/leaders", { key: "leaders" }],
+  ["/tome", { key: "tome" }],
+  ["/recruitment", { key: "recruitment" }],
+  ["/announcements", { key: "announcements" }],
+  ["/raffle", { key: "raffle" }],
+  ["/spotify", { key: "spotify" }],
+  ["/spotlight", { key: "spotlight" }],
+  ["/twills", { key: "twills" }],
+  ["/games/mochi-pets", { key: "mochiPets" }],
+]);
+const publicPageEntries = routeMatrix.routes.filter(
+  (entry) => entry.kind === "page" && entry.surface === "public" && !entry.path.includes("["),
+);
+const publicPagePaths = new Set(publicPageEntries.map((entry) => entry.path));
+for (const entry of publicPageEntries) {
+  if (!publicMetadataOverrides.has(entry.path)) fail(`public metadata behavior is missing for classified route: ${entry.path}`);
+}
+for (const routePath of publicMetadataOverrides.keys()) {
+  if (!publicPagePaths.has(routePath)) fail(`public metadata behavior references an unclassified route: ${routePath}`);
+}
+const publicRoutes = publicPageEntries.map((entry) => ({
+  route: entry.path,
+  file: `apps/web/${entry.source}`,
+  ...(publicMetadataOverrides.get(entry.path) || {}),
+}));
 
-const protectedRoutes = [
-  { route: "/auth", file: "apps/web/app/auth/page.tsx", expectedFollow: true },
-  { route: "/account", file: "apps/web/app/account/page.tsx", expectedFollow: true },
-  { route: "/gallery-submit", file: "apps/web/app/gallery-submit/page.tsx", expectedFollow: true },
-  { route: "/leader-dashboard", file: "apps/web/app/leader-dashboard/page.tsx", expectedFollow: true },
-];
+const protectedMetadataOverrides = new Map([
+  ["/auth", { expectedFollow: true, expectedCanonical: "self" }],
+  ["/account", { expectedFollow: true, expectedCanonical: "self" }],
+  ["/gallery-submit", { expectedFollow: true, expectedCanonical: "self" }],
+  ["/leader-dashboard", { expectedFollow: true, expectedCanonical: "self" }],
+  ["/leader-dashboard/raffle", { expectedFollow: false, expectedCanonical: "null" }],
+  ["/oauth/consent", { expectedFollow: false, expectedCanonical: "self" }],
+  ["/raffle/claim", { expectedFollow: false, expectedCanonical: "null" }],
+  ["/social", { expectedFollow: false, expectedCanonical: "self" }],
+]);
+const protectedPageEntries = routeMatrix.routes.filter(
+  (entry) => entry.kind === "page"
+    && ["member", "moderator"].includes(entry.surface)
+    && !entry.path.includes("["),
+);
+const protectedPagePaths = new Set(protectedPageEntries.map((entry) => entry.path));
+for (const entry of protectedPageEntries) {
+  if (!protectedMetadataOverrides.has(entry.path)) fail(`protected metadata behavior is missing for classified route: ${entry.path}`);
+}
+for (const routePath of protectedMetadataOverrides.keys()) {
+  if (!protectedPagePaths.has(routePath)) fail(`protected metadata behavior references an unclassified route: ${routePath}`);
+}
+const protectedRoutes = protectedPageEntries.map((entry) => ({
+  route: entry.path,
+  file: `apps/web/${entry.source}`,
+  ...(protectedMetadataOverrides.get(entry.path) || {}),
+}));
 
 const retiredRoutes = [
   { route: "/members", file: "apps/web/app/members/page.tsx" },
   { route: "/members/twills", file: "apps/web/app/members/[slug]/page.tsx" },
   { route: `/games/${retiredGameSlug}`, file: `apps/web/app/games/${retiredGameSlug}/page.tsx` },
+  { route: "/raffle/rules", file: "apps/web/app/raffle/rules/page.tsx" },
+  { route: "/raffle/rules/example-cycle", file: "apps/web/app/raffle/rules/[version]/page.tsx" },
 ];
 
 const noindexRoutes = [...protectedRoutes];
 
-const allSmokeRoutes = [...publicRoutes.map((item) => item.route), ...noindexRoutes.map((item) => item.route)];
+const allSmokeRoutes = [...productionSmokeRoutes];
 
 function read(relativePath) {
   return readFileSync(path.join(root, relativePath), "utf8");
@@ -118,8 +156,8 @@ function checkProtectedNoindex() {
     assertIncludes(item.file, source, "robots:");
     assertIncludes(item.file, source, "index: false");
     assertIncludes(item.file, source, `follow: ${item.expectedFollow ? "true" : "false"}`);
-
-    assertIncludes(item.file, source, `canonical: "${item.route}"`);
+    if (item.expectedCanonical === "null") assertIncludes(item.file, source, "canonical: null");
+    else assertIncludes(item.file, source, `canonical: "${item.route}"`);
   }
 }
 
@@ -127,7 +165,7 @@ function checkRetiredRoutes() {
   const smoke = read("scripts/smoke-vercel-production.mjs");
 
   for (const item of retiredRoutes) {
-    assert(!existsSync(path.join(root, item.file)), `${item.file}: retired members route file must stay removed.`);
+    assert(!existsSync(path.join(root, item.file)), `${item.file}: retired route file must stay removed.`);
     if (item.route === `/games/${retiredGameSlug}`) {
       assertIncludes("production retired route smoke", smoke, "retiredGameRoute");
     } else {

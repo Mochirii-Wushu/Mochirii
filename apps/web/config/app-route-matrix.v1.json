@@ -31,6 +31,22 @@
       "productionSmoke": true
     },
     {
+      "path": "/api/gallery/moderation-preview",
+      "kind": "handler",
+      "source": "app/api/gallery/moderation-preview/route.ts",
+      "surface": "moderator",
+      "productionSmoke": false,
+      "methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS"
+      ]
+    },
+    {
       "path": "/api/oauth/decision",
       "kind": "handler",
       "source": "app/api/oauth/decision/route.ts",
@@ -51,10 +67,21 @@
       ]
     },
     {
+      "path": "/api/raffle/leaderboard",
+      "kind": "handler",
+      "source": "app/api/raffle/leaderboard/route.ts",
+      "surface": "member",
+      "productionSmoke": false,
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    },
+    {
       "path": "/auth",
       "kind": "page",
       "source": "app/auth/page.tsx",
-      "surface": "public",
+      "surface": "member",
       "productionSmoke": true
     },
     {
@@ -141,6 +168,13 @@
       "productionSmoke": true
     },
     {
+      "path": "/leader-dashboard/raffle",
+      "kind": "page",
+      "source": "app/leader-dashboard/raffle/page.tsx",
+      "surface": "moderator",
+      "productionSmoke": true
+    },
+    {
       "path": "/leaders",
       "kind": "page",
       "source": "app/leaders/page.tsx",
@@ -169,18 +203,11 @@
       "productionSmoke": false
     },
     {
-      "path": "/raffle/rules",
+      "path": "/raffle/claim",
       "kind": "page",
-      "source": "app/raffle/rules/page.tsx",
-      "surface": "public",
+      "source": "app/raffle/claim/page.tsx",
+      "surface": "member",
       "productionSmoke": true
-    },
-    {
-      "path": "/raffle/rules/[version]",
-      "kind": "page",
-      "source": "app/raffle/rules/[version]/page.tsx",
-      "surface": "public",
-      "productionSmoke": false
     },
     {
       "path": "/ranks",
@@ -200,7 +227,7 @@
       "path": "/social",
       "kind": "page",
       "source": "app/social/page.tsx",
-      "surface": "public",
+      "surface": "member",
       "productionSmoke": true
     },
     {

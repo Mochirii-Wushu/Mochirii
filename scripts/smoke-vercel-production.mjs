@@ -14,6 +14,8 @@ const retiredRoutes = [
   "/members",
   "/members/twills",
   retiredGameRoute,
+  "/raffle/rules",
+  "/raffle/rules/example-cycle",
 ];
 
 const legacyRedirects = new Map(
@@ -25,6 +27,8 @@ const bodyChecks = new Map([
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
+  ["/leader-dashboard/raffle", /Mochirii Login|Choose a Sign-In Method|Sign In Required/i],
+  ["/raffle/claim", /Mochirii Login|Choose a Sign-In Method|Sign In Required/i],
   ["/games/mochi-pets", /Mochi Pets|tester doorway|fresh Unity project/i],
 ]);
 

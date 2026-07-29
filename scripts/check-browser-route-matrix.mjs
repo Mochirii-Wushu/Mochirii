@@ -20,19 +20,35 @@ const reportMdPath = resolve(root, "reports/browser-route-matrix.md");
 const checkedAt = new Date().toISOString();
 const failures = [];
 const warnings = [];
+const routeMatrix = JSON.parse(readFileSync(resolve(root, "apps/web/config/app-route-matrix.v1.json"), "utf8"));
 
+const browserRouteOverrides = new Map([
+  ["/", { label: "Home", expectLiveRegion: true }],
+  ["/join", { label: "Join", expectNoIframe: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] }],
+  ["/events", { label: "Events", expectNoIframe: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] }],
+  ["/raffle", { label: "Raffle", expectNoIframe: true, expectNoForm: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] }],
+  ["/gallery", { label: "Gallery", expectLiveRegion: true }],
+  ["/tome", { label: "Tome", requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] }],
+  ["/auth", { label: "Auth", expectLiveRegion: true, expectAlert: true }],
+  ["/account", { label: "Account", expectLiveRegion: true, expectAlert: true }],
+  ["/social", { label: "Social", expectLiveRegion: true, expectAlert: true }],
+  ["/leader-dashboard", { label: "Leader Dashboard", expectLiveRegion: true, expectAlert: true }],
+  ["/games/mochi-pets", { label: "Mochi Pets", expectNoForm: true, expectNoIframe: true }],
+]);
+const browserPageRoutes = routeMatrix.routes.filter(
+  (entry) => entry.kind === "page" && entry.productionSmoke === true && !entry.path.includes("["),
+);
+const browserPagePaths = new Set(browserPageRoutes.map((entry) => entry.path));
+for (const routePath of browserRouteOverrides.keys()) {
+  if (!browserPagePaths.has(routePath)) failures.push(`browser override references an unclassified route: ${routePath}`);
+}
 const allRoutes = [
-  { route: "/", label: "Home", expectMain: true, expectLiveRegion: true },
-  { route: "/join", label: "Join", expectMain: true, expectNoIframe: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
-  { route: "/events", label: "Events", expectMain: true, expectNoIframe: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
-  { route: "/raffle", label: "Raffle", expectMain: true, expectNoIframe: true, expectNoForm: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
-  { route: "/gallery", label: "Gallery", expectMain: true, expectLiveRegion: true },
-  { route: "/tome", label: "Tome", expectMain: true, requireOpaquePanels: [".hero-intro", ".page-main .glass-card"] },
-  { route: "/auth", label: "Auth", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/account", label: "Account", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/social", label: "Social", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/leader-dashboard", label: "Leader Dashboard", expectMain: true, expectLiveRegion: true, expectAlert: true },
-  { route: "/games/mochi-pets", label: "Mochi Pets", expectMain: true, expectNoForm: true, expectNoIframe: true },
+  ...browserPageRoutes.map((entry) => ({
+    route: entry.path,
+    label: routeLabel(entry.path),
+    expectMain: true,
+    ...(browserRouteOverrides.get(entry.path) || {}),
+  })),
   {
     route: "/__mochirii-unknown-route__",
     label: "Not Found",
@@ -46,6 +62,15 @@ const allRoutes = [
     requireOpaquePanels: [".not-found-card"],
   },
 ];
+
+function routeLabel(routePath) {
+  if (routePath === "/") return "Home";
+  return routePath
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => segment.split("-").map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`).join(" "))
+    .join(" · ");
+}
 const routeFilter = getArg("--route", "");
 const routes = routeFilter ? allRoutes.filter((entry) => entry.route === routeFilter) : allRoutes;
 if (!routes.length) throw new Error(`Unknown route filter ${routeFilter}.`);

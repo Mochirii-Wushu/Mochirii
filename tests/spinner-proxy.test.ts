@@ -47,12 +47,24 @@ test("the exact page proxy rejects every failed preflight before App Router rend
     // @ts-expect-error Node's type-stripping runner needs the explicit source extension.
     import("../apps/web/proxy.ts"),
   ]);
-  assert.deepEqual(config, { matcher: ["/spinner", "/leader-dashboard", "/oauth/consent"] });
+  assert.deepEqual(config, {
+    matcher: [
+      "/spinner",
+      "/leader-dashboard",
+      "/oauth/consent",
+      "/raffle/claim/:path*",
+      "/leader-dashboard/raffle/:path*",
+    ],
+  });
   const nextConfig = { skipTrailingSlashRedirect: true };
   assert.equal(doesProxyMatch({ config, nextConfig, url: "/spinner" }), true);
   assert.equal(doesProxyMatch({ config, nextConfig, url: "/spinner/" }), true);
   assert.equal(doesProxyMatch({ config, nextConfig, url: "/leader-dashboard" }), true);
   assert.equal(doesProxyMatch({ config, nextConfig, url: "/oauth/consent" }), true);
+  assert.equal(doesProxyMatch({ config, nextConfig, url: "/raffle/claim" }), true);
+  assert.equal(doesProxyMatch({ config, nextConfig, url: "/raffle/claim/example" }), true);
+  assert.equal(doesProxyMatch({ config, nextConfig, url: "/leader-dashboard/raffle" }), true);
+  assert.equal(doesProxyMatch({ config, nextConfig, url: "/leader-dashboard/raffle/example" }), true);
   for (const path of ["/spinner/session", "/spinner/live", "/spinner/media/render", "/spinnerish"]) {
     assert.equal(doesProxyMatch({ config, nextConfig, url: path }), false);
   }
@@ -78,6 +90,16 @@ test("the exact page proxy rejects every failed preflight before App Router rend
       },
     },
   );
+  const privateRouteResponse = await proxy(request("/raffle/claim"));
+  assert.equal(privateRouteResponse.status, 200);
+  assert.equal(privateRouteResponse.headers.get("x-middleware-next"), "1");
+  assert.equal(privateRouteResponse.headers.get("referrer-policy"), "no-referrer");
+  assert.match(privateRouteResponse.headers.get("cache-control") || "", /\bprivate\b/iu);
+  assert.match(privateRouteResponse.headers.get("cache-control") || "", /\bno-store\b/iu);
+  assert.match(privateRouteResponse.headers.get("x-robots-tag") || "", /\bnoindex\b/iu);
+  assert.match(privateRouteResponse.headers.get("content-security-policy") || "", /script-src 'self' 'nonce-[a-f0-9]{32}' 'strict-dynamic'/iu);
+  assert.match(privateRouteResponse.headers.get("x-middleware-request-content-security-policy") || "", /script-src 'self' 'nonce-[a-f0-9]{32}' 'strict-dynamic'/iu);
+  assert.match(privateRouteResponse.headers.get("x-middleware-request-x-nonce") || "", /^[a-f0-9]{32}$/iu);
   const assertOpaqueDenied = async (response: Response) => {
     assert.equal(response.status, 404);
     assert.equal(await response.text(), "");

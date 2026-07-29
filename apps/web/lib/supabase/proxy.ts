@@ -1,26 +1,38 @@
 import { createServerClient } from "@supabase/ssr";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import {
-  isSupabaseConfigured,
-  SUPABASE_AUTH_COOKIE_OPTIONS,
-  SUPABASE_PUBLISHABLE_KEY,
-  SUPABASE_URL,
-} from "./config";
-import { PRIVATE_RAFFLE_HEADERS } from "./raffle-response-policy";
+import type { NextRequest } from "next/server.js";
+import { NextResponse } from "next/server.js";
+import { protectedPageContentSecurityPolicy } from "../security/protected-csp.ts";
+import { SUPABASE_AUTH_COOKIE_OPTIONS } from "./auth-cookie-policy.ts";
+import { PRIVATE_RAFFLE_HEADERS } from "./raffle-response-policy.ts";
 
-function applyPrivateHeaders(response: NextResponse) {
+function applyPrivateHeaders(response: NextResponse, contentSecurityPolicy: string) {
   Object.entries(PRIVATE_RAFFLE_HEADERS).forEach(([name, value]) => {
     response.headers.set(name, value);
   });
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy);
   return response;
 }
 
 export async function refreshSupabaseSession(request: NextRequest) {
-  let response = applyPrivateHeaders(NextResponse.next({ request }));
-  if (!isSupabaseConfigured()) return response;
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
+  const nonce = crypto.randomUUID().replaceAll("-", "");
+  const contentSecurityPolicy = protectedPageContentSecurityPolicy(nonce);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+  requestHeaders.set("x-nonce", nonce);
 
-  const supabase = createServerClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  function protectedResponse() {
+    return applyPrivateHeaders(
+      NextResponse.next({ request: { headers: requestHeaders } }),
+      contentSecurityPolicy,
+    );
+  }
+
+  let response = protectedResponse();
+  if (!supabaseUrl || !publishableKey) return response;
+
+  const supabase = createServerClient(supabaseUrl, publishableKey, {
     cookieOptions: SUPABASE_AUTH_COOKIE_OPTIONS,
     cookies: {
       getAll() {
@@ -28,11 +40,10 @@ export async function refreshSupabaseSession(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
+        response = protectedResponse();
         cookiesToSet.forEach(({ name, value, options }) => {
           response.cookies.set(name, value, options);
         });
-        applyPrivateHeaders(response);
       },
     },
   });
@@ -42,5 +53,5 @@ export async function refreshSupabaseSession(request: NextRequest) {
   } catch {
     // The request-scoped DAL remains authoritative and fails closed.
   }
-  return applyPrivateHeaders(response);
+  return applyPrivateHeaders(response, contentSecurityPolicy);
 }

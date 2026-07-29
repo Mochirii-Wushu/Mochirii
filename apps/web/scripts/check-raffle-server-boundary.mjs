@@ -31,8 +31,10 @@ requireText(browserClient, /createBrowserClient\(/, "Browser auth must use the c
 rejectText(browserClient, /detectSessionInUrl\s*:\s*true/, "Implicit URL session detection must stay disabled.");
 
 const publicConfig = read("lib/supabase/config.ts");
-requireText(publicConfig, /sameSite:\s*"lax"/, "Auth cookies must retain OAuth-compatible SameSite=Lax protection.");
-requireText(publicConfig, /secure:\s*process\.env\.NODE_ENV\s*===\s*"production"/, "Auth cookies must be Secure in production.");
+requireText(publicConfig, /export \{ SUPABASE_AUTH_COOKIE_OPTIONS \} from "\.\/auth-cookie-policy"/, "Public Supabase config must re-export the shared auth-cookie policy.");
+const authCookiePolicy = read("lib/supabase/auth-cookie-policy.ts");
+requireText(authCookiePolicy, /sameSite:\s*"lax"/, "Auth cookies must retain OAuth-compatible SameSite=Lax protection.");
+requireText(authCookiePolicy, /secure:\s*process\.env\.NODE_ENV\s*===\s*"production"/, "Auth cookies must be Secure in production.");
 
 const callback = read("app/auth/callback/route.ts");
 requireText(callback, /exchangeAuthCodeForCookieSession\(supabase\.auth, code\)/, "The PKCE callback must exchange the server auth code through the fail-closed helper.");
@@ -89,6 +91,7 @@ requireText(browserAuthClient, /additionalSimplePaths:\s*PRIVATE_RAFFLE_AUTH_RET
 
 const proxy = read("proxy.ts");
 requireText(proxy, /refreshSupabaseSession\(request\)/, "Protected raffle routes must receive the narrow session refresh.");
+requireText(proxy, /from "\.\/lib\/supabase\/proxy\.ts"/, "Protected raffle routes must reuse the reviewed session-refresh boundary.");
 requireText(proxy, /"\/raffle\/claim\/:path\*"/, "Proxy matcher must include the claim route.");
 requireText(proxy, /"\/leader-dashboard\/raffle\/:path\*"/, "Proxy matcher must include the moderator route.");
 rejectText(proxy, /["']\/raffle["']\s*[,\]]/, "The public raffle route must stay outside the session-refresh matcher.");
@@ -97,6 +100,11 @@ const responsePolicy = read("lib/supabase/raffle-response-policy.ts");
 requireText(responsePolicy, /private, no-cache, no-store/, "Private raffle responses must be non-cacheable.");
 requireText(responsePolicy, /noindex, nofollow/, "Private raffle responses must carry noindex headers.");
 requireText(responsePolicy, /"Referrer-Policy": "no-referrer"/, "Private raffle responses must suppress referrers.");
+const sessionProxy = read("lib/supabase/proxy.ts");
+requireText(sessionProxy, /SUPABASE_AUTH_COOKIE_OPTIONS/, "Session refresh must preserve the reviewed secure-cookie policy.");
+requireText(sessionProxy, /PRIVATE_RAFFLE_HEADERS/, "Session refresh must preserve the complete private response policy.");
+requireText(sessionProxy, /protectedPageContentSecurityPolicy/, "Session refresh must attach the per-request nonce policy.");
+requireText(sessionProxy, /try\s*\{[\s\S]*?auth\.getClaims\(\)[\s\S]*?\}\s*catch/, "Session refresh must fail closed when claims cannot be refreshed.");
 
 const publicRaffle = read("app/raffle/page.tsx");
 rejectText(publicRaffle, /createServerSupabaseClient|getRaffleClaimPageDecision|getRaffleModeratorPageDecision|force-dynamic|cookies\(/, "The public raffle route must stay cacheable and independent from cookie auth.");

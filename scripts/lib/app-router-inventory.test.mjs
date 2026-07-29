@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import {
   compareRedirectContracts,
@@ -54,6 +55,36 @@ test("fails closed when an App Router entry is undocumented", () => {
   }
 });
 
+test("fails closed when an App Router handler is undocumented", () => {
+  const current = fixture();
+  try {
+    writeMatrix(current.matrix, [
+      { path: "/", kind: "page", source: "app/page.tsx", surface: "public", productionSmoke: true },
+      { path: "/article/[slug]", kind: "page", source: "app/(public)/article/[slug]/page.tsx", surface: "public", productionSmoke: false },
+    ]);
+    const result = validateAppRouteMatrix({ appDirectory: current.app, matrixPath: current.matrix });
+    assert(result.failures.some((failure) => failure.includes("undocumented App Router handler /api/status")));
+  } finally {
+    rmSync(current.root, { recursive: true, force: true });
+  }
+});
+
+test("fails closed when the route matrix retains a stale route", () => {
+  const current = fixture();
+  try {
+    writeMatrix(current.matrix, [
+      { path: "/", kind: "page", source: "app/page.tsx", surface: "public", productionSmoke: true },
+      { path: "/api/status", kind: "handler", source: "app/api/status/route.ts", surface: "public", productionSmoke: false, methods: ["GET", "POST"] },
+      { path: "/article/[slug]", kind: "page", source: "app/(public)/article/[slug]/page.tsx", surface: "public", productionSmoke: false },
+      { path: "/retired", kind: "page", source: "app/retired/page.tsx", surface: "public", productionSmoke: false },
+    ]);
+    const result = validateAppRouteMatrix({ appDirectory: current.app, matrixPath: current.matrix });
+    assert(result.failures.some((failure) => failure.includes("documented page:/retired has no filesystem route")));
+  } finally {
+    rmSync(current.root, { recursive: true, force: true });
+  }
+});
+
 test("fails closed when handler method exports drift", () => {
   const current = fixture();
   try {
@@ -85,4 +116,27 @@ test("parses and compares the Next legacy redirect tuple contract", () => {
     compareRedirectContracts(parsed, parsed.slice(0, 1)),
     ["documented redirect /tome.html -> /tome is absent from next.config.ts"],
   );
+});
+
+test("the final source tree discovers every classified route and retires split raffle rules", () => {
+  const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  const result = validateAppRouteMatrix({
+    appDirectory: path.join(repositoryRoot, "apps", "web", "app"),
+    matrixPath: path.join(repositoryRoot, "apps", "web", "config", "app-route-matrix.v1.json"),
+  });
+  assert.deepEqual(result.failures, []);
+
+  const discovered = new Map(result.discovered.map((entry) => [entry.path, entry]));
+  assert.deepEqual(discovered.get("/api/gallery/moderation-preview"), {
+    path: "/api/gallery/moderation-preview",
+    kind: "handler",
+    source: "app/api/gallery/moderation-preview/route.ts",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+  });
+  assert.equal(discovered.has("/api/raffle/leaderboard"), true);
+  assert.equal(discovered.has("/leader-dashboard/raffle"), true);
+  assert.equal(discovered.has("/raffle/claim"), true);
+  assert.equal(discovered.has("/raffle/rules"), false);
+  assert.equal(discovered.has("/raffle/rules/[version]"), false);
+  assert.equal(result.matrix.routes.length, result.discovered.length);
 });
