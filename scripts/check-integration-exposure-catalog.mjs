@@ -148,7 +148,7 @@ const catalogNames = [...functions.keys()];
 if (!sameStrings(configuredNames, catalogNames)) {
   fail("Edge Function IDs must match every function declared in supabase/config.toml exactly");
 }
-if (functions.size !== 33) fail(`Edge Function catalog must contain exactly 33 entries, found ${functions.size}`);
+if (functions.size !== 40) fail(`Edge Function catalog must contain exactly 40 entries, found ${functions.size}`);
 
 let verifyJwtTrue = 0;
 let verifyJwtFalse = 0;
@@ -180,8 +180,8 @@ for (const sourceRef of [
   }
 }
 
-if (verifyJwtTrue !== 20 || verifyJwtFalse !== 13) {
-  fail(`Edge Function JWT split must remain 20 true / 13 false, found ${verifyJwtTrue}/${verifyJwtFalse}`);
+if (verifyJwtTrue !== 23 || verifyJwtFalse !== 17) {
+  fail(`Edge Function JWT split must remain 23 true / 17 false, found ${verifyJwtTrue}/${verifyJwtFalse}`);
 }
 assertExactKeys(catalog?.jwtSummary, ["total", "verifyJwtTrue", "verifyJwtFalse", "trueRationale", "falseRationale"], "JWT summary");
 if (catalog?.jwtSummary?.total !== functions.size) fail("JWT summary total does not match function inventory");

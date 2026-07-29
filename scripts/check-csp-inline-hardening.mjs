@@ -34,14 +34,61 @@ const nextConfig = readRequired(nextConfigPath);
 const policy = inspectPolicy(nextConfig);
 const protectedCspSource = readRequired(resolve(root, "apps/web/lib/security/protected-csp.ts"));
 const proxySource = readRequired(resolve(root, "apps/web/proxy.ts"));
+const sessionProxySource = readRequired(resolve(root, "apps/web/lib/supabase/proxy.ts"));
+const authCookiePolicySource = readRequired(resolve(root, "apps/web/lib/supabase/auth-cookie-policy.ts"));
+const privateResponsePolicySource = readRequired(resolve(root, "apps/web/lib/supabase/raffle-response-policy.ts"));
+const expectedProtectedMatchers = [
+  "/spinner",
+  "/leader-dashboard",
+  "/oauth/consent",
+  "/raffle/claim/:path*",
+  "/leader-dashboard/raffle/:path*",
+];
+const configuredProtectedMatchers = extractQuotedArray(proxySource, /matcher:\s*\[([\s\S]*?)\]/u);
+const configuredSessionPaths = extractQuotedArray(
+  proxySource,
+  /SUPABASE_SESSION_PATHS\s*=\s*new Set\(\[([\s\S]*?)\]\)/u,
+);
+const claimsFailureBoundary = sessionProxySource.match(
+  /try\s*\{[\s\S]*?await supabase\.auth\.getClaims\(\);[\s\S]*?\}\s*catch\s*\{([\s\S]*?)\}/u,
+);
 const protectedRouteHardening = {
-  routes: ["/leader-dashboard", "/oauth/consent"],
+  routes: ["/leader-dashboard", "/oauth/consent", "/raffle/claim", "/leader-dashboard/raffle"],
   nonceBound: protectedCspSource.includes("'nonce-${nonce}'"),
   strictDynamic: protectedCspSource.includes("'strict-dynamic'"),
   scriptUnsafeInline: /script-src[^\n]*unsafe-inline/.test(protectedCspSource),
-  proxyApplied:
-    proxySource.includes('const SUPABASE_SESSION_PATHS = new Set(["/leader-dashboard", "/oauth/consent"])') &&
-    proxySource.includes('requestHeaders.set("Content-Security-Policy", contentSecurityPolicy)'),
+  rootProxyDelegates:
+    proxySource.includes('import { refreshSupabaseSession } from "./lib/supabase/proxy.ts";') &&
+    sameStrings(configuredProtectedMatchers, expectedProtectedMatchers) &&
+    sameStrings(configuredSessionPaths, ["/leader-dashboard", "/oauth/consent"]) &&
+    (proxySource.match(/return refreshSupabaseSession\(request\);/gu) || []).length >= 2 &&
+    !configuredProtectedMatchers.includes("/raffle"),
+  helperAppliesNonceCsp:
+    sessionProxySource.includes('import { protectedPageContentSecurityPolicy } from "../security/protected-csp.ts";') &&
+    sessionProxySource.includes("const nonce = crypto.randomUUID().replaceAll(\"-\", \"\");") &&
+    sessionProxySource.includes("protectedPageContentSecurityPolicy(nonce)") &&
+    sessionProxySource.includes('requestHeaders.set("Content-Security-Policy", contentSecurityPolicy)') &&
+    sessionProxySource.includes('requestHeaders.set("x-nonce", nonce)') &&
+    sessionProxySource.includes("NextResponse.next({ request: { headers: requestHeaders } })") &&
+    sessionProxySource.includes('response.headers.set("Content-Security-Policy", contentSecurityPolicy)'),
+  helperAppliesFullPrivateHeaders:
+    sessionProxySource.includes('import { PRIVATE_RAFFLE_HEADERS } from "./raffle-response-policy.ts";') &&
+    sessionProxySource.includes("Object.entries(PRIVATE_RAFFLE_HEADERS).forEach") &&
+    (sessionProxySource.match(/applyPrivateHeaders\(/gu) || []).length >= 3 &&
+    privateResponsePolicySource.includes('"Cache-Control": "private, no-cache, no-store, must-revalidate, max-age=0"') &&
+    privateResponsePolicySource.includes('Expires: "0"') &&
+    privateResponsePolicySource.includes('Pragma: "no-cache"') &&
+    privateResponsePolicySource.includes('"Referrer-Policy": "no-referrer"') &&
+    privateResponsePolicySource.includes('"X-Content-Type-Options": "nosniff"') &&
+    privateResponsePolicySource.includes('"X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet, noimageindex"'),
+  secureCookiePolicy:
+    sessionProxySource.includes('import { SUPABASE_AUTH_COOKIE_OPTIONS } from "./auth-cookie-policy.ts";') &&
+    sessionProxySource.includes("cookieOptions: SUPABASE_AUTH_COOKIE_OPTIONS") &&
+    authCookiePolicySource.includes('path: "/"') &&
+    authCookiePolicySource.includes('sameSite: "lax"') &&
+    authCookiePolicySource.includes('secure: process.env.NODE_ENV === "production"'),
+  claimsFailureContained:
+    Boolean(claimsFailureBoundary) && !/\bthrow\b/u.test(claimsFailureBoundary?.[1] || ""),
 };
 const sourceInventory = inspectSource(policy.directiveMap);
 for (const origin of sourceInventory.externalOrigins.filter((entry) => entry.allowedBy.length === 0)) {
@@ -57,13 +104,23 @@ if (policy.unsafeEvalDirectives.length) {
 if (policy.unsafeInlineDirectives.some((directive) => !["script-src", "style-src"].includes(directive))) {
   failures.push(`unsafe-inline is only expected in script-src/style-src during this staged pass.`);
 }
-if (
-  !protectedRouteHardening.nonceBound ||
-  !protectedRouteHardening.strictDynamic ||
-  protectedRouteHardening.scriptUnsafeInline ||
-  !protectedRouteHardening.proxyApplied
-) {
+if (!protectedRouteHardening.nonceBound || !protectedRouteHardening.strictDynamic || protectedRouteHardening.scriptUnsafeInline) {
   failures.push("Protected auth routes must use the reviewed nonce-bound strict script policy.");
+}
+if (!protectedRouteHardening.rootProxyDelegates) {
+  failures.push("The root proxy must delegate the exact protected-route matcher contract to the Supabase session helper.");
+}
+if (!protectedRouteHardening.helperAppliesNonceCsp) {
+  failures.push("The Supabase session helper must propagate the nonce-bound CSP through request and response headers.");
+}
+if (!protectedRouteHardening.helperAppliesFullPrivateHeaders) {
+  failures.push("The Supabase session helper must preserve the complete private response-header policy.");
+}
+if (!protectedRouteHardening.secureCookiePolicy) {
+  failures.push("The Supabase session helper must preserve the reviewed secure authentication-cookie policy.");
+}
+if (!protectedRouteHardening.claimsFailureContained) {
+  failures.push("The Supabase session helper must contain claim-refresh failures without bypassing the authoritative DAL.");
 }
 if (sourceInventory.blockingHits.length) {
   for (const hit of sourceInventory.blockingHits) {
@@ -129,6 +186,18 @@ console.log(`- live header check: ${live.status}`);
 if (writeReport) {
   console.log(`- JSON report: ${pathForReport(reportJsonPath)}`);
   console.log(`- Markdown report: ${pathForReport(reportMdPath)}`);
+}
+
+function extractQuotedArray(text, pattern) {
+  const body = text.match(pattern)?.[1] || "";
+  return [...body.matchAll(/["']([^"']+)["']/gu)].map((match) => match[1]);
+}
+
+function sameStrings(actual, expected) {
+  if (actual.length !== expected.length) return false;
+  const sortedActual = [...actual].sort();
+  const sortedExpected = [...expected].sort();
+  return sortedActual.every((value, index) => value === sortedExpected[index]);
 }
 
 function inspectPolicy(text) {

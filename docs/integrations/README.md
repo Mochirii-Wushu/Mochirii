@@ -40,8 +40,8 @@ JWT, destination, or runbook change:
 npm run check:integration-exposure-catalog
 ```
 
-The check fails unless the catalog matches all 33 configured functions and the
-reviewed `20 verify_jwt=true / 13 false` split. A false gateway setting is not
+The check fails unless the catalog matches all 40 configured functions and the
+reviewed `23 verify_jwt=true / 17 false` split. A false gateway setting is not
 synonymous with anonymous access: the catalog must resolve it to either a
 bounded public projection or an explicit in-handler caller boundary.
 

@@ -109,8 +109,8 @@ created by the migration.
 
 This change declares `get-current-raffle` with `verify_jwt=false` because it
 serves a public GET contract and performs explicit token or HMAC verification
-for private POST actions. The exact source inventory becomes 34 functions with
-20 `verify_jwt=true` and 14 false. This parity must be recalculated from the
+for private POST actions. The exact source inventory becomes 40 functions with
+23 `verify_jwt=true` and 17 false. This parity must be recalculated from the
 final reviewed source before any release approval.
 
 Activation requires a separate exact authorization covering all of the
@@ -118,8 +118,8 @@ following:
 
 1. The exact migration and non-skipped Supabase Preview.
 2. The normal protected-main Vercel publication.
-3. The unavoidable automatic redeployment of all 34 functions declared in
-   `supabase/config.toml`, preserving 20/14 JWT parity.
+3. The unavoidable automatic redeployment of all 40 functions declared in
+   `supabase/config.toml`, preserving 23/17 JWT parity.
 4. The immutable Social image publication and its SBOM/provenance.
 5. Setting the same newly generated HMAC secret only in the Edge environment
    and existing Social host, followed by a rollback-safe Social deployment.

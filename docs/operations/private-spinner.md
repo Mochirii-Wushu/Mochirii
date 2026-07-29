@@ -68,7 +68,7 @@ Source, tests, migration, and function code may be reviewed in a PR. The followi
 
 - applying `20260727054717_enforce_three_minute_spinner_countdown.sql` after
   the released spinner and media migrations;
-- allowing the connected production integration to redeploy all 34 Edge Functions declared in `supabase/config.toml`, including `spinner-live-session`, `reaper-spinner-dispatch`, and the read-only `get-current-raffle` function;
+- allowing the connected production integration to redeploy all 40 Edge Functions declared in `supabase/config.toml`, including `spinner-live-session`, `reaper-spinner-dispatch`, and the raffle functions;
 - setting `DISCORD_RAFFLE_CHANNEL_ID`, `REAPER_SPINNER_DISPATCH_SECRET`, or changing any existing bot secret;
 - adding the matching Vault values used by scheduled dispatch;
 - exercising the target channel or promoting a production deployment.
@@ -79,11 +79,11 @@ Pause moderator draws before the three-minute timing migration or matching funct
 
 ## Production Integration Blast Radius
 
-The connected production integration does not deploy only the two spinner functions. On every push or merge to the configured production branch, it applies new migrations and deploys every Edge Function declared in `supabase/config.toml`. The current reviewed source declares 34 functions, including `spinner-live-session`, `reaper-spinner-dispatch`, and the read-only `get-current-raffle` function. This matches the [production integration contract](https://supabase.com/docs/guides/deployment/branching/github-integration): migrations and all functions declared in `config.toml` are production deployment inputs.
+The connected production integration does not deploy only the two spinner functions. On every push or merge to the configured production branch, it applies new migrations and deploys every Edge Function declared in `supabase/config.toml`. The current reviewed source declares 40 functions with 23 `verify_jwt=true` and 17 false, including `spinner-live-session`, `reaper-spinner-dispatch`, and the seven raffle functions. This matches the [production integration contract](https://supabase.com/docs/guides/deployment/branching/github-integration): migrations and all functions declared in `config.toml` are production deployment inputs.
 
-Before merge, record the prior production commit and no-secret version/status inventory for all 34 functions in ignored operations evidence. Require the exact-head Preview and protected checks to pass. After merge, serialize the release: do not merge another provider-affecting change until the production integration reports success for the migration and all 34 function deployments. Verify the two spinner functions from the merged commit and run the existing no-send authentication/boundary smokes for the other 32 functions. A manual two-function deployment is not an equivalent release and is not authorized by this runbook.
+Before merge, record the prior production commit and no-secret version/status inventory for all 40 functions in ignored operations evidence. Require the exact-head Preview and protected checks to pass. After merge, serialize the release: do not merge another provider-affecting change until the production integration reports success for the migration and all 40 function deployments. Verify the two spinner functions from the merged commit and run the existing no-send authentication/boundary smokes for the other 38 functions. A manual two-function deployment is not an equivalent release and is not authorized by this runbook.
 
-The 34 configured functions are:
+The 40 configured functions are:
 
 1. `verify-discord-member`
 2. `verify-member-access`
@@ -102,23 +102,29 @@ The 34 configured functions are:
 15. `publish-member-spotlight-winner`
 16. `get-current-spotlight-winner`
 17. `get-current-raffle`
-18. `list-instagram-publish-queue`
-19. `publish-instagram-gallery-submission`
-20. `mark-instagram-gallery-submission-shared`
-21. `check-instagram-api-status`
-22. `list-member-profiles`
-23. `list-visible-profile-cards`
-24. `get-member-profile`
-25. `submit-member-profile-media`
-26. `list-member-profile-media-queue`
-27. `moderate-member-profile-media`
-28. `mochi-pets-alpha-session`
-29. `mochi-pets-unity-auth`
-30. `mochi-pets-alpha-action`
-31. `mochi-pets-alpha-progress`
-32. `mochi-pets-alpha-admin`
-33. `submit-mochi-pets-feedback`
-34. `sync-pixelfed-social-account`
+18. `manage-raffle-entry`
+19. `moderate-raffle`
+20. `run-raffle-schedule`
+21. `manage-raffle-claim`
+22. `run-raffle-fulfillment`
+23. `reward-provider-webhook`
+24. `list-instagram-publish-queue`
+25. `publish-instagram-gallery-submission`
+26. `mark-instagram-gallery-submission-shared`
+27. `check-instagram-api-status`
+28. `list-member-profiles`
+29. `list-visible-profile-cards`
+30. `get-member-profile`
+31. `submit-member-profile-media`
+32. `list-member-profile-media-queue`
+33. `moderate-member-profile-media`
+34. `mochi-pets-alpha-session`
+35. `mochi-pets-unity-auth`
+36. `mochi-pets-alpha-action`
+37. `mochi-pets-alpha-progress`
+38. `mochi-pets-alpha-admin`
+39. `submit-mochi-pets-feedback`
+40. `sync-pixelfed-social-account`
 
 ## Authenticated Preview Boundary
 
@@ -176,7 +182,7 @@ If outbound delivery is unsafe, use the approved provider controls in this order
 
 The migration is forward-only. Promoting an older Website deployment or reverting function source does not undo tables, receipts, scheduled jobs, triggers, grants, or RLS. Do not hand-delete spinner tables, receipts, jobs, functions, or migration history. Correct a released schema defect with a reviewed forward-fix migration. Use a database restore only for an owner-approved integrity incident after the recovery point and data-loss window are explicitly accepted.
 
-A protected revert or forward-fix merge invokes the same 34-function production integration; review and approve that full redeployment blast radius again. Re-enable delivery only after the fix is green and a new high-entropy dispatcher value is stored identically in the Edge environment and Vault. Never reuse or disclose the disabled value.
+A protected revert or forward-fix merge invokes the same 40-function production integration; review and approve that full redeployment blast radius again. Re-enable delivery only after the fix is green and a new high-entropy dispatcher value is stored identically in the Edge environment and Vault. Never reuse or disclose the disabled value.
 
 ## Duplicate Start-Message Reconciliation
 
