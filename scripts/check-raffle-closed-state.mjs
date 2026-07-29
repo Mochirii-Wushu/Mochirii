@@ -281,7 +281,11 @@ assert(!nextConfig.includes('["/raffle/rules/:path*",'), "Next redirects: retire
 assertIncludes("navigation", read(files.navigation), 'href: "/raffle", label: "Raffle", nav: "raffle"');
 assertIncludes("footer", read(files.footer), '{ href: "/raffle", label: "Raffle" }');
 assertIncludes("home bulletin", read(files.home), '"href": "/raffle"');
-assertIncludes("Tome raffle guidance", read(files.tome), "the current raffle status stays public & clearly labeled");
+assertIncludes(
+  "Tome raffle guidance",
+  read(files.tome),
+  "Monthly raffles follow public eligibility, entry, prize, status & result rules.",
+);
 assertIncludes("website event cards", read(files.scheduleHelper), '.filter((item) => item.id !== "monthly-raffle")');
 assertIncludes("metadata", metadataSource, 'path: "/raffle"');
 assertIncludes("sitemap", read(files.sitemap), `${SITE_ORIGIN}/raffle</loc>`);

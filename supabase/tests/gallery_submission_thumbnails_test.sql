@@ -116,23 +116,24 @@ set member_status = 'active',
 where id = '11111111-1111-4111-8111-111111111111';
 
 insert into storage.objects (id, bucket_id, name, owner, metadata) values
-  ('10000000-0000-4000-8000-000000000001', 'member-gallery', '11111111-1111-4111-8111-111111111111/original-one.webp', '11111111-1111-4111-8111-111111111111', '{"size":1000,"mimetype":"image/webp"}'),
+  ('10000000-0000-4000-8000-000000000001', 'member-gallery', '11111111-1111-4111-8111-111111111111/original-one.jpg', '11111111-1111-4111-8111-111111111111', '{"size":1000,"mimetype":"image/jpeg"}'),
   ('10000000-0000-4000-8000-000000000002', 'member-gallery', '11111111-1111-4111-8111-111111111111/pending.webp', '11111111-1111-4111-8111-111111111111', '{"size":1100,"mimetype":"image/webp"}'),
   ('10000000-0000-4000-8000-000000000003', 'member-gallery', '11111111-1111-4111-8111-111111111111/unclassified.webp', '11111111-1111-4111-8111-111111111111', '{"size":1200,"mimetype":"image/webp"}'),
   ('20000000-0000-4000-8000-000000000001', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000001/display.webp', null, '{"size":900000,"mimetype":"image/webp"}'),
   ('20000000-0000-4000-8000-000000000002', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000001/revisions/31000000-0000-4000-8000-000000000001/thumbnail.webp', null, '{"size":70000,"mimetype":"image/webp"}'),
   ('20000000-0000-4000-8000-000000000004', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000001/revisions/31000000-0000-4000-8000-000000000002/thumbnail.webp', null, '{"size":71000,"mimetype":"image/webp"}'),
   ('20000000-0000-4000-8000-000000000005', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000003/display.webp', null, '{"size":800000,"mimetype":"image/webp"}'),
-  ('20000000-0000-4000-8000-000000000006', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000003/revisions/31000000-0000-4000-8000-000000000003/thumbnail.webp', null, '{"size":72000,"mimetype":"image/webp"}');
+  ('20000000-0000-4000-8000-000000000006', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000003/revisions/31000000-0000-4000-8000-000000000003/thumbnail.webp', null, '{"size":72000,"mimetype":"image/webp"}'),
+  ('20000000-0000-4000-8000-000000000008', 'member-gallery', '_social/submissions/22222222-2222-4222-8222-222222222221/32000000-0000-4000-8000-000000000001.jpg', null, '{"size":800,"mimetype":"image/jpeg"}');
 
 insert into public.gallery_submissions (
   id, user_id, storage_path, mime_type, size_bytes, title, category,
   instagram_opt_in, instagram_opt_in_at, instagram_opt_in_source,
-  instagram_opt_in_copy_version
+  instagram_opt_in_copy_version, instagram_opt_in_contract_version
 ) values
-  ('22222222-2222-4222-8222-222222222221', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/original-one.webp', 'image/webp', 1000, 'Approval fixture', 'scenery', true, now(), 'website_upload', 'gallery-instagram-opt-in-v1'),
-  ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/pending.webp', 'image/webp', 1100, 'Pending fixture', 'action', false, null, null, null),
-  ('22222222-2222-4222-8222-222222222223', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/unclassified.webp', 'image/webp', 1200, 'Unclassified fixture', null, false, null, null, null);
+  ('22222222-2222-4222-8222-222222222221', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/original-one.jpg', 'image/jpeg', 1000, 'Approval fixture', 'scenery', true, now(), 'website_upload', '2026-07-website-public-instagram-publish-v2', '2026-07-website-public-instagram-publish-v2'),
+  ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/pending.webp', 'image/webp', 1100, 'Pending fixture', 'action', false, null, null, null, null),
+  ('22222222-2222-4222-8222-222222222223', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/unclassified.webp', 'image/webp', 1200, 'Unclassified fixture', null, false, null, null, null, null);
 
 set local "request.jwt.claim.role" = 'service_role';
 
@@ -195,12 +196,32 @@ select is(
     '10000000-0000-4000-8000-000000000001',
     (select version from storage.objects where id = '10000000-0000-4000-8000-000000000001'),
     (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000001'),
-    'image/webp', 1000, 1920, 1080,
+    'image/jpeg', 1000, 1920, 1080,
     repeat('a', 64)
   ) ->> 'committed')::boolean,
   true,
   'trusted source dimensions and object identity commit once'
 );
+
+insert into private.gallery_social_derivatives (
+  submission_id, storage_object_id, storage_bucket, storage_path,
+  storage_object_version, storage_object_updated_at, mime_type, size_bytes,
+  width, height, sha256, sanitizer_version, metadata_policy, created_by,
+  source_storage_object_id, source_storage_object_version,
+  source_storage_object_updated_at, source_sha256, derivation_method
+) select
+  '22222222-2222-4222-8222-222222222221',
+  social.id, social.bucket_id, social.name, social.version, social.updated_at,
+  'image/jpeg', 800, 1000, 1000, repeat('e', 64),
+  'gallery-social-jpeg-v1', 'jfif-only-no-app-metadata-v1',
+  '11111111-1111-4111-8111-111111111111',
+  source.id, source.version, source.updated_at, repeat('a', 64),
+  'jpeg-metadata-strip-v1'
+from storage.objects as social
+cross join storage.objects as source
+where social.id = '20000000-0000-4000-8000-000000000008'
+  and source.id = '10000000-0000-4000-8000-000000000001';
+
 select is(
   (public.gallery_commit_source_validation(
     '22222222-2222-4222-8222-222222222221',
@@ -208,7 +229,7 @@ select is(
     '10000000-0000-4000-8000-000000000001',
     (select version from storage.objects where id = '10000000-0000-4000-8000-000000000001'),
     (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000001'),
-    'image/webp', 1000, 1920, 1080,
+    'image/jpeg', 1000, 1920, 1080,
     repeat('a', 64)
   ) ->> 'validated_at')::timestamptz,
   (
@@ -225,7 +246,7 @@ select is(
     '10000000-0000-4000-8000-000000000001',
     (select version from storage.objects where id = '10000000-0000-4000-8000-000000000001'),
     (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000001'),
-    'image/webp', 1000, 1920, 1080,
+    'image/jpeg', 1000, 1920, 1080,
     repeat('b', 64)
   ) ->> 'reason'),
   'source_validation_conflict',
@@ -317,8 +338,8 @@ select is(
 );
 select is(
   (select status from public.gallery_instagram_publish_jobs where submission_id = '22222222-2222-4222-8222-222222222221'),
-  'ineligible',
-  'unsupported source media is recorded as ineligible without an external publish attempt'
+  'queued',
+  'a JPEG source with the exact consent handshake is queued without an external publish attempt'
 );
 select is(
   (
@@ -326,10 +347,10 @@ select is(
     from public.gallery_instagram_publish_events as event
     join public.gallery_instagram_publish_jobs as job on job.id = event.job_id
     where job.submission_id = '22222222-2222-4222-8222-222222222221'
-      and event.action = 'ineligible'
+      and event.action = 'queued'
   ),
   1::bigint,
-  'outbox job and its audit event commit with the approval transaction'
+  'outbox job and its queued audit event commit with the approval transaction'
 );
 
 select throws_ok(
