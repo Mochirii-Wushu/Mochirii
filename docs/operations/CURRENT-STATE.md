@@ -69,6 +69,10 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   protected `main` with Root Directory `apps/web`.
 - Supabase project `deyvmtncimmcinldjyqe` remains the hosted Auth, Postgres, RLS,
   and Edge Function backend.
+- The last verified hosted baseline contains 34 applied migrations and exactly
+  33 ACTIVE Edge Functions with 20 `verify_jwt=true` and 13 false. The larger
+  local integration candidate described below has not been deployed, so its
+  49-migration and 45-function source inventories are not hosted-state claims.
 - `shop.mochirii.com` remains password-protected. Payments and checkout remain
   disabled. Theme `141514408011` remains unpublished.
 - `social.mochirii.com` remains on the single Singapore DigitalOcean Droplet
@@ -128,15 +132,48 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The current readback finds one open canonical pull request:
-Social replacement PR #535. Conflicting draft PR #532 was closed unmerged and
-its remote `agent/social-reliability` branch was deleted only after replacement
-traceability, exact-head checks, Vercel Preview, and a non-skipped Supabase
-Preview passed. PR #535 remains unreleased and must be rechecked at its current
-exact head after every update; the pull request is the authoritative source for
-that mutable head. Security and dependency alert counts are mutable provider
-state and must be read back at release time rather than inferred from the
-earlier closeout.
+`Supabase Preview`. The 2026-07-29 GitHub readback finds three open Website pull
+requests: #536, #538, and draft #539. Mochi Pets PR #4 is also open; Social
+Mobile has no open pull request. The authoritative local union has not been
+pushed and has no pull request, so none of the open Website pull requests may
+be closed as superseded until exact replacement parity, review, and checks are
+proved. Security and dependency alert counts are mutable provider state and
+must be read back at release time rather than inferred from an earlier
+closeout.
+
+## Local Full-Stack Integration Candidate
+
+- The clean source union at integration baseline
+  `dedc0a15926588b148906d685a87d61ce1a1e607` contains exactly 49 migrations
+  and 45 functions declared in `supabase/config.toml`, with a source-expected
+  JWT split of 28 `verify_jwt=true` / 17 false. These figures describe local
+  source only; hosted production remains at the 34-migration, 33-function,
+  20/13 baseline until a separately reviewed and authorized release succeeds.
+- A uniquely named, non-shared local Supabase project reset all 49 migrations
+  and passed 480 of 480 top-level pgTAP assertions. Warning-level database lint
+  was empty; security advisors at INFO and performance advisors at WARN were
+  empty. The remaining 54 performance INFO findings were `unused_index`
+  observations from a freshly reset empty database and are not evidence for
+  deletion. The union adds an explicit deny policy for the private raffle nonce
+  table and an index for the reviewed Gallery derivative foreign key.
+- The same isolated run did not use the quarantined shared local Supabase port
+  range and did not contact the hosted project. Cleanup proved no isolated
+  containers, volumes, networks, listeners, or registered worktree remained.
+- Server-side Supabase requests now use a bounded five-second transport that
+  composes caller and request cancellation, cleans up timers and listeners, and
+  fails closed with generic outage responses at protected authorization
+  boundaries. Local unit, repository, Web build, and browser checks exercise
+  that boundary; they are not a live-provider availability claim.
+- The union retains the source-only Meta publishing packet as a validated
+  subset: its isolated 46-migration reset, 109 focused pgTAP assertions, and
+  recorded manifest digest remain immutable evidence. Both publishing flags
+  remain false and no post was created. The broader 49/480 union result
+  supplements rather than rewrites that subset record.
+- The union has no remote branch or pull request and has caused no Vercel,
+  Supabase, DigitalOcean, Meta, Discord, Shopify, Apple, Unity, or other
+  provider change. Exact provider previews, accountable review, protected-main
+  release authority, source-to-provider readback, and rollback evidence remain
+  future gates.
 
 ## Website Reliability Release
 
@@ -181,15 +218,12 @@ earlier closeout.
   `ghcr.io/mochirii-wushu/mochirii-pixelfed-ops`.
 - The deployed canonical image digest is
   `sha256:1fd27c8f76595595912e6f12f1677c7f108aa50f64b38a85089006b47ad395f1`.
-- Social hardening replacement PR #535 is based on the current protected-main
-  baseline. It contains no database migration or `supabase/config.toml` change,
-  but it changes reviewed source consumed by existing declared functions. Its
-  Supabase Preview must therefore remain non-skipped. A protected-main merge
-  requires separate exact authorization to redeploy the integrated 45-function
-  source inventory while preserving 28/17 JWT parity; any inventory or parity drift is a stop
-  condition. It also refreshes expired Discord role evidence on demand so an
-  otherwise valid member cannot become stranded at Social consent when the
-  bounded verification window expires.
+- Social hardening replacement PR #535 was squash-merged through protected
+  `main` as `075937a30a9509faa189e9b1917a2ad9b847c7b0`. It refreshes expired
+  Discord role evidence on demand so an otherwise valid member is not stranded
+  at Social consent when the bounded verification window expires. This merged
+  historical release does not authorize deployment of the newer 45-function
+  local union or any DigitalOcean runtime change.
 - The approved Packet E write set only the server-side
   `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding as Sensitive for Vercel Preview and
   Production. The exact registered first-party identifier, callback, and S256
@@ -197,12 +231,11 @@ earlier closeout.
   No public variable, client secret, OAuth registration, callback, or other
   provider setting changed, and the existing Production deployment remained
   bound to protected `main` without a deployment solely for this setting.
-- PR #535 has been pushed and reviewed through exact-head GitHub, Vercel, and
-  non-skipped Supabase Preview gates. Protected Preview checks reached the
+- PR #535 passed its reviewed exact-head GitHub, Vercel, and non-skipped
+  Supabase Preview gates before merge. Protected Preview checks reached the
   application authorization boundary, preserved private/no-store rejection,
-  and found no identifier in rendered HTML or client assets. The replacement
-  has not been merged, published to GHCR, or deployed to DigitalOcean; those
-  effects remain separately exact-gated. The private-media runtime remains
+  and found no identifier in rendered HTML or client assets. DigitalOcean
+  deployment remains a separate exact gate. The private-media runtime remains
   blocked until anonymous object/CDN denial and one authorized
   application-media read are proven in the separately approved cutover packet.
 - Image workflow run `29664477462`, protected deployment run `29664673632`,
