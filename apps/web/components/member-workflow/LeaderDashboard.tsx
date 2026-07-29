@@ -71,9 +71,11 @@ type GalleryPreviewSelection = {
   blob: Blob | null;
 };
 
-export function LeaderDashboard() {
+export function LeaderDashboard({ initialAuthorized = false }: { initialAuthorized?: boolean }) {
   const [busy, setBusy] = useState(true);
-  const [panel, setPanel] = useState<"signed-out" | "denied" | "review">("signed-out");
+  const [panel, setPanel] = useState<"signed-out" | "denied" | "review">(
+    initialAuthorized ? "review" : "signed-out",
+  );
   const [activeStatus, setActiveStatus] = useState<ModerationStatus>("pending");
   const [queuePage, setQueuePage] = useState(1);
   const [queueThumbnailState, setQueueThumbnailState] = useState<GalleryThumbnailState>("all");

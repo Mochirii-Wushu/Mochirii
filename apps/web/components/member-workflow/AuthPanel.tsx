@@ -25,13 +25,15 @@ export function AuthPanel() {
   const placeholderProviders = useMemo(() => placeholderOAuthProviders(), []);
   const phoneProvider = providers.find((provider) => provider.id === "phone");
   const requiresFreshSignIn = searchParams.get("reauth") === "1";
+  const callbackError = searchParams.get("error");
+  const callbackFailed = callbackError === "session" || callbackError === "sign_in_failed";
   const redirectTo = useMemo(() => {
     return resolveAuthReturnPath(searchParams.get("redirect"), PRIVATE_RAFFLE_AUTH_RETURN_PATHS);
   }, [searchParams]);
 
   const load = useCallback(async () => {
     setBusy(true);
-    setError("");
+    setError(callbackFailed ? "Sign-in could not be completed. Try again." : "");
     const result = await getCurrentUser();
     const currentUser = result.ok ? result.data?.user || null : null;
     setUser(currentUser);
@@ -43,7 +45,7 @@ export function AuthPanel() {
           : "Choose a sign-in method. Gallery upload access is verified separately.",
     );
     setBusy(false);
-  }, [requiresFreshSignIn]);
+  }, [callbackFailed, requiresFreshSignIn]);
 
   useEffect(() => {
     void Promise.resolve().then(() => load());
@@ -168,7 +170,9 @@ export function AuthPanel() {
         ) : null}
         {signedIn ? (
           <>
-            <Link className="hero-cta" href="/account">Open Account</Link>
+            <Link className="hero-cta" href={redirectTo}>
+              {redirectTo === "/account" ? "Open Account" : "Continue"}
+            </Link>
             <button className="hero-cta" type="button" onClick={endSession} disabled={busy}>Sign out</button>
           </>
         ) : null}

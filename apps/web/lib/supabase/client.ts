@@ -60,6 +60,7 @@ export function getBrowserSupabaseClient() {
       flowType: "pkce",
       detectSessionInUrl: false,
     },
+    isSingleton: true,
   });
   startAuthCutover(browserClient);
 
