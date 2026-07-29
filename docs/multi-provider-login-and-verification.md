@@ -39,6 +39,36 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
 - OAuth client secrets stay only in Supabase Auth provider settings.
 - Phone stays disabled unless SMS provider, CAPTCHA, Auth rate limits, country/cost expectations, and abuse handling are configured in a separate lane.
 
+## Server-Side Reliability Boundary
+
+All Supabase requests made by the Next.js server client, request middleware,
+and Social OAuth decision route use the shared server fetch wrapper. Each
+request has a five-second deadline. The wrapper composes that deadline with
+caller cancellation from an explicit `RequestInit.signal` or, when no explicit
+signal is supplied, the input `Request.signal`; this preserves standard fetch
+precedence while ensuring a hung upstream cannot hold a server render or OAuth
+decision open indefinitely.
+
+The wrapper aborts the upstream request at the deadline and uses a raced stop
+promise so the boundary still rejects if an underlying fetch implementation
+ignores abort. It clears its timer and removes the caller abort listener after
+every settled request. An already-aborted caller is rejected without starting
+network work, while ordinary upstream errors retain their original failure.
+
+Protected routes fail closed when Supabase is unavailable. They do not turn an
+upstream outage into a signed-out redirect, reveal protected page content, or
+render provider diagnostics. OAuth decision failures return a generic,
+no-store error and never expose an upstream URL, token, cookie, or raw response.
+
+The 2026-07-29 local candidate verification covered the bounded transport with
+unit cases for success, timeout, ignored abort, caller cancellation, input
+`Request` cancellation, signal precedence, cleanup, upstream rejection,
+already-aborted callers, and invalid deadlines. A separate 36-case Web runtime
+suite and the production-mode server-auth boundary smoke passed with a
+deliberately unreachable test origin. This proves deterministic local timeout
+and fail-closed behavior; it does not claim that any live OAuth provider flow
+or hosted Supabase request succeeded.
+
 ## Phone OTP Activation Gate
 
 Phone remains absent from the public provider allowlist and disabled in
