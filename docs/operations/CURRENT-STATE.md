@@ -1,6 +1,6 @@
 # Current Mochirii State
 
-Updated: 2026-07-27 PDT
+Updated: 2026-07-29 PDT
 
 This no-secret file records the current hosted and repository state. Update it
 after a completed release or ownership change; do not place credentials,
@@ -124,7 +124,7 @@ earlier closeout.
   protection remains a separately approval-gated Auth setting.
 - Detailed scope, advisor rationale, worktree disposition, and release gates are
   in [`WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md`](./WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md).
-- The complete public-safe organization, branch, issue, and 28-worktree
+- The complete public-safe organization, branch, issue, and current-worktree
   classification is recorded in
   [`ORGANIZATION-RECONCILIATION-2026-07-27.md`](./ORGANIZATION-RECONCILIATION-2026-07-27.md).
 
