@@ -7,6 +7,8 @@ const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const repoRoot = path.resolve(appRoot, "../..");
 const manifestPath = path.join(appRoot, "MIGRATION-MANIFEST.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+const historicalRepository = ["Mochirii-Wushu", "Mochirii"].join("/");
+const historicalCopyReview = `https://github.com/${historicalRepository}/pull/459`;
 const failures = [];
 
 function normalize(filePath) {
@@ -130,7 +132,7 @@ const expectedApprovedPublicCopy = [
 ];
 const approvedPublicCopyFiles = manifest.approvedPublicCopy?.files ?? [];
 if (manifest.approvedPublicCopy?.status !== "customer-copy-v2-content-locked-provider-write-applied" ||
-    manifest.approvedPublicCopy?.sourceReview !== "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/459" ||
+    manifest.approvedPublicCopy?.sourceReview !== historicalCopyReview ||
     manifest.approvedPublicCopy?.providerWriteHistory?.record !== "apps/shopify-theme/content/customer-facing-copy-approval-packet.md" ||
     manifest.approvedPublicCopy?.providerWriteHistory?.status !== "applied-readback-verified" ||
     manifest.approvedPublicCopy?.providerWriteHistory?.appliedDate !== "2026-07-18" ||

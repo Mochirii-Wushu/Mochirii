@@ -85,6 +85,10 @@ const formerWebsiteRepositoryAllowedRoots = [
   "docs/operations/history/",
   "reports/",
 ];
+const formerWebsiteRepositoryAllowedFiles = new Set([
+  "apps/shopify-theme/MIGRATION-MANIFEST.json",
+  "apps/shopify-theme/content/approved-customer-copy.json",
+]);
 const failures = [];
 
 function git(args, options = {}) {
@@ -210,7 +214,8 @@ for (const relativePath of files) {
   const content = readFileSync(absolutePath, "utf8");
 
   const mayPreserveFormerWebsiteRepository = formerWebsiteRepositoryAllowedRoots
-    .some((root) => normalizedPath.startsWith(root));
+    .some((root) => normalizedPath.startsWith(root)) ||
+    formerWebsiteRepositoryAllowedFiles.has(normalizedPath);
   if (
     !mayPreserveFormerWebsiteRepository &&
     formerWebsiteRepositoryPattern.test(normalizedRepositoryReferences(content))

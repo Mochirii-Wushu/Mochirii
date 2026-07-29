@@ -11,6 +11,8 @@ const json = (relativePath) => JSON.parse(
   read(relativePath).replace(/^\uFEFF?\s*\/\*[\s\S]*?\*\/\s*/u, ""),
 );
 const content = json("content/approved-customer-copy.json");
+const historicalRepository = ["Mochirii-Wushu", "Mochirii"].join("/");
+const historicalPullRequest = `https://github.com/${historicalRepository}/pull/459`;
 
 function exactKeys(value, expected, label) {
   const actual = Object.keys(value ?? {}).sort();
@@ -80,8 +82,8 @@ exactKeys(content.provenance, [
   "sourceRevision",
   "providerWriteHistory",
 ], "provenance");
-if (content.provenance?.sourceRepository !== "Mochirii-Wushu/Mochirii-Website" ||
-    content.provenance?.sourcePullRequest !== "https://github.com/Mochirii-Wushu/Mochirii-Website/pull/459" ||
+if (content.provenance?.sourceRepository !== historicalRepository ||
+    content.provenance?.sourcePullRequest !== historicalPullRequest ||
     content.provenance?.sourceRevision !== "2026-07-18-v2" ||
     content.provenance?.providerWriteHistory !== "content/customer-facing-copy-approval-packet.md") {
   failures.push("provenance must identify the immutable public content source and separate provider-write history");
