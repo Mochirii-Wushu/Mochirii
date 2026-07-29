@@ -31,7 +31,7 @@ Run the smallest gate that matches the change, then broaden when provider or use
 - Baseline: `npm run toolchain:check`, `npm run check`, `git diff --check`, `npm audit --audit-level=moderate`.
 - Next app: `cd apps/web && npm run toolchain:check && npm run lint && npm run build && npm audit --audit-level=moderate`.
 - Production-sensitive work: `npm run check:production` and `npm run smoke:dns-cutover-post -- --base-url=https://mochirii.com --www-mode=redirect`.
-- Provider evidence: `npm run check:full-stack-release-evidence -- --providers --strict-provider`; add `--write` only after strict mode passes.
+- Provider evidence: `npm run check:full-stack-release-evidence -- --providers`; provider reads fail closed by default. Add `--write` only after the read passes. Use `--allow-partial-provider-evidence` only for an explicitly labeled diagnostic capture that cannot be treated as release verification.
 - Supabase work: `npm run check:supabase-security-performance`, `npm run check:supabase-edge-types`, relevant Deno tests, migration list, linked advisors, and Supabase Preview evidence for PRs with `supabase/` changes.
 - Browser/accessibility/performance work: route matrix, accessibility route matrix, Lighthouse Home/Recruitment/Gallery, and focused Playwright smokes for authenticated or media flows.
 - CSP work: `npm run check:csp-inline-hardening -- --live --write`; do not remove inline allowances until Preview browser evidence covers Supabase, Spotify, and Vercel telemetry.
