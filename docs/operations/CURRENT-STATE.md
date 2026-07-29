@@ -79,6 +79,53 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   Gateway worker's hosted supervisor and a current Social backup/restore drill
   are read back; see [`HOST-INDEPENDENCE.md`](./HOST-INDEPENDENCE.md).
 
+## Meta Publishing Source Packet
+
+- The moderator-reviewed Facebook Page and Instagram publishing packet is
+  source-only and has not been deployed to the hosted Website or Supabase
+  project. It makes no automatic Facebook Group mutation; a published Page post
+  can only be handed off to the official private guild Group manually.
+- `FACEBOOK_PAGE_PUBLISH_ENABLED=false` and
+  `INSTAGRAM_PUBLISH_ENABLED=false`, and no live Meta post was created. The
+  current Employee System User has Content access only to the Page and linked
+  Instagram asset plus partial Develop-app access; it has no full app
+  management, ad account, or ad scope. The Marketing API use case exists only
+  because Meta's System User installation flow requires Ads Management API
+  Standard Access.
+- A 60-day token with exactly `pages_manage_posts`,
+  `pages_read_engagement`, and `pages_show_list` was revoked after every Graph
+  request returned OAuthException 200 `API access blocked` behind the unresolved
+  `Account confirmation needed` checkpoint. No Page-task, Instagram
+  identity/account-type, or Instagram Graph-ID verification is current
+  evidence. The former Admin System User has no assets, installed apps, or
+  tokens and is retained as `Mochirii Gallery Publisher Legacy`.
+- Hosted secret values are not documented or assumed. Activation requires fresh
+  name-only secret-inventory evidence and a successful read-only provider
+  identity check. Instagram Graph-ID discovery, verification, and independent
+  pinning remain pending.
+- Public profile readback shows Instagram `mochirii_guild` beside the existing
+  TikTok and Twitch links. The Facebook Page and Instagram Website fields must
+  remain empty, and Meta/Instagram profile or publication copy must not include
+  or link `mochirii.com`.
+- Instagram and TikTok use the preferred `mochirii_guild` handle. Facebook
+  does not permit underscores and the preferred non-underscore variants were
+  unavailable, so the Page is `mochiriiguildpage` and the existing Group stays
+  `mochiriiguild`. Twitch remains `mochiriiguild` until its rename cooldown
+  ends and the preferred handle can be checked in account settings.
+- Facebook, Instagram, TikTok, and Twitch use the same canonical lotus emblem.
+  The Facebook Page, Facebook Group, and Twitch use the matching banner family;
+  Instagram and TikTok do not expose an equivalent profile-banner surface.
+- The final source-only 46-migration packet was validated on 2026-07-29 in a
+  uniquely named isolated local Supabase project: all 46 migrations reset,
+  all 109 focused Meta pgTAP assertions passed, and strict warning-level
+  database lint returned no findings. The migration manifest SHA-256 is
+  `8E9062A5452D40C7859F74FD47552322B030CCFF4724A6A9EC090961DC7C0A46`.
+  This is local source evidence only; the hosted project and quarantined shared
+  local stack were not contacted.
+- Any hosted migration, Edge Function deployment, Meta secret change,
+  activation, or first genuine post remains separately approval-gated and
+  requires current provider readback.
+
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
 `Supabase Preview`. The current readback finds one open canonical pull request:
@@ -138,8 +185,8 @@ earlier closeout.
   baseline. It contains no database migration or `supabase/config.toml` change,
   but it changes reviewed source consumed by existing declared functions. Its
   Supabase Preview must therefore remain non-skipped. A protected-main merge
-  requires separate exact authorization to redeploy the same 40 functions while
-  preserving 23/17 JWT parity; any inventory or parity drift is a stop
+  requires separate exact authorization to redeploy the integrated 45-function
+  source inventory while preserving 28/17 JWT parity; any inventory or parity drift is a stop
   condition. It also refreshes expired Discord role evidence on demand so an
   otherwise valid member cannot become stranded at Social consent when the
   bounded verification window expires.

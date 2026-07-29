@@ -79,8 +79,8 @@ const atomicMediaReservation = atomicMediaReservationMatch?.[0] || "";
 const functionBlocks = [...supabaseConfig.matchAll(/\[functions\.([^\]]+)\]([\s\S]*?)(?=\n\[functions\.|\s*$)/g)];
 const verifyJwtFalse = functionBlocks.filter(([, , body]) => /verify_jwt\s*=\s*false/.test(body));
 const verifyJwtTrue = functionBlocks.filter(([, , body]) => /verify_jwt\s*=\s*true/.test(body));
-assert(functionBlocks.length === 40, `Supabase function inventory: expected 40, found ${functionBlocks.length}.`);
-assert(verifyJwtTrue.length === 23, `Supabase function inventory: expected 23 verify_jwt=true, found ${verifyJwtTrue.length}.`);
+assert(functionBlocks.length === 45, `Supabase function inventory: expected 45, found ${functionBlocks.length}.`);
+assert(verifyJwtTrue.length === 28, `Supabase function inventory: expected 28 verify_jwt=true, found ${verifyJwtTrue.length}.`);
 assert(verifyJwtFalse.length === 17, `Supabase function inventory: expected 17 verify_jwt=false, found ${verifyJwtFalse.length}.`);
 const approvedFeedConfig = functionBlocks.find(([, name]) => name === "list-approved-gallery-submissions");
 assert(Boolean(approvedFeedConfig), "Supabase function inventory: list-approved-gallery-submissions is not configured.");
@@ -115,12 +115,17 @@ assert(
 [
   '"get-current-raffle"',
   '"list-approved-gallery-submissions"',
+  '"check-facebook-page-api-status"',
+  '"list-facebook-page-publish-queue"',
   '"list-gallery-review-queue"',
   '"manage-raffle-claim"',
   '"manage-raffle-entry"',
   '"moderate-gallery-submission"',
   '"moderate-raffle"',
+  '"publish-facebook-page-gallery-submission"',
   '"reaper-spinner-dispatch"',
+  '"resolve-facebook-page-publish-reconciliation"',
+  '"resolve-instagram-publish-reconciliation"',
   '"reward-provider-webhook"',
   '"run-raffle-fulfillment"',
   '"run-raffle-schedule"',
@@ -136,14 +141,19 @@ const committedLockFunctions = committedLockMatch
   ? [...committedLockMatch[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]).sort()
   : [];
 const expectedCommittedLockFunctions = [
+  "check-facebook-page-api-status",
   "get-current-raffle",
   "list-approved-gallery-submissions",
+  "list-facebook-page-publish-queue",
   "list-gallery-review-queue",
   "manage-raffle-claim",
   "manage-raffle-entry",
   "moderate-gallery-submission",
   "moderate-raffle",
+  "publish-facebook-page-gallery-submission",
   "reaper-spinner-dispatch",
+  "resolve-facebook-page-publish-reconciliation",
+  "resolve-instagram-publish-reconciliation",
   "reward-provider-webhook",
   "run-raffle-fulfillment",
   "run-raffle-schedule",
@@ -667,18 +677,18 @@ assertNotIncludes("Leader Dashboard selected-source boundary", leaderDashboard, 
   "p_thumbnail_sha256: thumbnailSha256",
   "p_expected_updated_at: expectedUpdatedAt",
   'error: "stale_submission_revision"',
-  '"gallery_commit_moderation"',
-  "const provisionalPaths = [thumbnailPath, publicOriginalPath]",
+  '"gallery_commit_moderation_with_social_derivative"',
+  "const provisionalPaths = [socialPath, thumbnailPath, publicOriginalPath]",
 ].forEach((snippet) => assertIncludes("atomic gallery moderation", moderation, snippet));
 
 if (/\.from\(["']gallery_submissions["']\)\s*\n?\s*\.update\(/.test(moderation)) {
-  failures.push("Atomic Gallery moderation: row updates must stay inside gallery_commit_moderation.");
+  failures.push("Atomic Gallery moderation: row updates must stay inside gallery_commit_moderation_with_social_derivative.");
 }
 if (/\.from\(["']gallery_moderation_events["']\)\s*\n?\s*\.insert\(/.test(moderation)) {
-  failures.push("Atomic Gallery moderation: audit inserts must stay inside gallery_commit_moderation.");
+  failures.push("Atomic Gallery moderation: audit inserts must stay inside gallery_commit_moderation_with_social_derivative.");
 }
-if (/\.from\(["']gallery_instagram_publish_(?:jobs|events)["']\)\s*\n?\s*\.(?:insert|upsert)\(/.test(moderation)) {
-  failures.push("Atomic Gallery moderation: Instagram outbox writes must stay inside gallery_commit_moderation.");
+if (/\.from\(["']gallery_(?:instagram|facebook_page)_publish_(?:jobs|events)["']\)\s*\n?\s*\.(?:insert|upsert)\(/.test(moderation)) {
+  failures.push("Atomic Gallery moderation: social outbox writes must stay inside gallery_commit_moderation_with_social_derivative.");
 }
 
 [
@@ -923,8 +933,8 @@ assertIncludes(
   "all six facets",
   "keyset",
   "snapshot",
-  "40",
-  "23/17",
+  "45",
+  "28/17",
   "not a global rate limit",
   "CORS is also",
   "not authorization or abuse prevention",
