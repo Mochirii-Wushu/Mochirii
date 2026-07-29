@@ -113,6 +113,7 @@ try {
       const result = await inspectRoute(context, route, viewport);
       matrix.push(result);
     }
+    await context.unrouteAll({ behavior: "wait" });
     await context.close();
   }
 } finally {
