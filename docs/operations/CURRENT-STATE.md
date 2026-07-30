@@ -75,8 +75,14 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   49-migration and 45-function source inventories are not hosted-state claims.
 - `shop.mochirii.com` remains password-protected. Payments and checkout remain
   disabled. Theme `141514408011` remains unpublished.
-- `social.mochirii.com` remains on the single Singapore DigitalOcean Droplet
-  with Spaces-backed media. Registration is closed and ActivityPub is disabled.
+- `social.mochirii.com` is assigned to the existing single DigitalOcean
+  Droplet with Spaces-backed media. Registration is closed and ActivityPub is
+  disabled. Public read-only probes at 2026-07-30T02:25Z returned Cloudflare
+  `522` for `/`, `/login`, `/.well-known/security.txt`, `/installer`, and an
+  installer child path after about 20 seconds each. The current origin cause
+  is not verified; historical healthy checks are not current availability
+  evidence, and no host, Cloudflare, DNS, image, database, or secret mutation
+  was made during this source review.
 - Core customer serving, authentication, media, releases, Social queues, and
   the two active Supabase spotlight schedules do not depend on the local
   workstation. Complete auxiliary continuity remains Pending until the Reaper
@@ -132,19 +138,24 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The 2026-07-29 GitHub readback finds three open Website pull
-requests: #536, #538, and draft #539. Mochi Pets PR #4 is also open; Social
-Mobile has no open pull request. The authoritative local union has not been
-pushed and has no pull request, so none of the open Website pull requests may
-be closed as superseded until exact replacement parity, review, and checks are
-proved. Security and dependency alert counts are mutable provider state and
-must be read back at release time rather than inferred from an earlier
-closeout.
+`Supabase Preview`. The 2026-07-29 GitHub readback finds five open Website pull
+requests: #536, #538, and the stacked draft Meta PRs #539, #540, and #541.
+Mochi Pets PR #4 is also open; Social Mobile has no open pull request. The
+authoritative local union has not been pushed and has no pull request, so none
+of the open Website pull requests may be closed as superseded until exact
+replacement parity, review, and checks are proved. Website currently reports
+zero open Dependabot, code-scanning, and secret-scanning alerts. Social Mobile
+has one open high-severity `brace-expansion` development-tool advisory tracked
+by issue #9. Alert APIs are unavailable for the other private repositories on
+the current plan; unavailable is not recorded as zero. GitHub private
+vulnerability reporting is currently disabled for Website, so both Website and
+Social source declare `mailto:support@mochirii.com` as the operational
+`security.txt` contact while retaining the GitHub security policy URL.
 
 ## Local Full-Stack Integration Candidate
 
-- The clean source union at integration baseline
-  `efc216d9e1e90cfd89f1896a1eaddbd5dceeb8a8` contains exactly 49 migrations
+- The clean source union at validated local head
+  `a51c3ea572d018364dfe36a550d0467eec0d6a79` contains exactly 49 migrations
   and 45 functions declared in `supabase/config.toml`, with a source-expected
   JWT split of 28 `verify_jwt=true` / 17 false. These figures describe local
   source only; hosted production remains at the 34-migration, 33-function,
@@ -174,6 +185,11 @@ closeout.
   provider change. Exact provider previews, accountable review, protected-main
   release authority, source-to-provider readback, and rollback evidence remain
   future gates.
+- Exact local verification at that head passed the complete repository suite,
+  Node 22.23.1/npm 10.9.8/Deno 2.9.4 toolchain contract, all 266 public PNG,
+  JPEG, GIF, and WebP decodes, Web lint, and the Next 16.2.11 production build.
+  Asset/CSP validators now fail closed on malformed media, unexpected external
+  origin/file pairs, and unreviewed multiline runtime-load sites.
 
 ## Website Reliability Release
 
@@ -218,6 +234,10 @@ closeout.
   `ghcr.io/mochirii-wushu/mochirii-pixelfed-ops`.
 - The deployed canonical image digest is
   `sha256:1fd27c8f76595595912e6f12f1677c7f108aa50f64b38a85089006b47ad395f1`.
+- The historical hosted checks below do not supersede the current Cloudflare
+  `522` observation recorded in Hosted Services. Social should be treated as
+  publicly unavailable until a read-only origin/provider diagnosis and a
+  separately approved rollback-safe recovery packet prove otherwise.
 - Social hardening replacement PR #535 was squash-merged through protected
   `main` as `075937a30a9509faa189e9b1917a2ad9b847c7b0`. It refreshes expired
   Discord role evidence on demand so an otherwise valid member is not stranded
