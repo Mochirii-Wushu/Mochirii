@@ -1,6 +1,6 @@
 # Mochirii Full-Stack Release Evidence
 
-Generated: 2026-07-29T22:41:41.959Z
+Generated: 2026-07-30T06:03:56.200Z
 
 This file is intentionally no-secret. It records release-readiness evidence only and omits raw tokens, service-role keys, webhook URLs, secret digests, private message content, cookies, and raw headers.
 
@@ -10,7 +10,7 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - Production URL: https://mochirii.com
 - Provider reads: disabled
 - Git branch: agent/full-stack-integration-rehearsal-20260729
-- Git head: 9b5e17afda55
+- Git head: dcaa33750e81
 - Git dirty entries: 0
 
 ## Local Release Surface
@@ -31,11 +31,11 @@ This file is intentionally no-secret. It records release-readiness evidence only
 
 - Status: local-only
 - CLI version: 2.109.1
-- Local migrations: 49
+- Local migrations: 50
 - Remote migrations: not checked
 - Migration local-only: none/not checked
 - Migration remote-only: none/not checked
-- Local function config count: 45
+- Local function config count: 46
 - Remote function count: not checked
 - Inactive remote functions: none/not checked
 - Secrets: not read by this no-secret evidence command

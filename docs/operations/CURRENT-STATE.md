@@ -72,7 +72,7 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 - The last verified hosted baseline contains 34 applied migrations and exactly
   33 ACTIVE Edge Functions with 20 `verify_jwt=true` and 13 false. The larger
   local integration candidate described below has not been deployed, so its
-  49-migration and 45-function source inventories are not hosted-state claims.
+  50-migration and 46-function source inventories are not hosted-state claims.
 - `shop.mochirii.com` remains password-protected. Payments and checkout remain
   disabled. Theme `141514408011` remains unpublished.
 - `social.mochirii.com` is assigned to the existing single DigitalOcean
@@ -154,19 +154,18 @@ Social source declare `mailto:support@mochirii.com` as the operational
 
 ## Local Full-Stack Integration Candidate
 
-- The clean source union at validated local head
-  `a51c3ea572d018364dfe36a550d0467eec0d6a79` contains exactly 49 migrations
-  and 45 functions declared in `supabase/config.toml`, with a source-expected
-  JWT split of 28 `verify_jwt=true` / 17 false. These figures describe local
+- The clean source union through validated local content head
+  `dcaa33750e8161ff83531655faa68e0a54f9799a` contains exactly 50 migrations
+  and 46 functions declared in `supabase/config.toml`, with a source-expected
+  JWT split of 29 `verify_jwt=true` / 17 false. These figures describe local
   source only; hosted production remains at the 34-migration, 33-function,
   20/13 baseline until a separately reviewed and authorized release succeeds.
-- A uniquely named, non-shared local Supabase project reset all 49 migrations
-  and passed 480 of 480 top-level pgTAP assertions. Warning-level database lint
-  was empty; security advisors at INFO and performance advisors at WARN were
-  empty. The remaining 54 performance INFO findings were `unused_index`
-  observations from a freshly reset empty database and are not evidence for
-  deletion. The union adds an explicit deny policy for the private raffle nonce
-  table and an index for the reviewed Gallery derivative foreign key.
+- A uniquely named, non-shared local Supabase project reset all 50 migrations
+  and passed 521 of 521 top-level pgTAP assertions. Warning-level database lint
+  and strict security/performance advisor results were empty. Fresh empty-
+  database `unused_index` observations are not deletion evidence. The union
+  adds an explicit deny policy for the private raffle nonce table and an index
+  for the reviewed Gallery derivative foreign key.
 - The same isolated run did not use the quarantined shared local Supabase port
   range and did not contact the hosted project. Cleanup proved no isolated
   containers, volumes, networks, listeners, or registered worktree remained.
@@ -178,7 +177,7 @@ Social source declare `mailto:support@mochirii.com` as the operational
 - The union retains the source-only Meta publishing packet as a validated
   subset: its isolated 46-migration reset, 109 focused pgTAP assertions, and
   recorded manifest digest remain immutable evidence. Both publishing flags
-  remain false and no post was created. The broader 49/480 union result
+  remain false and no post was created. The broader 50/521 union result
   supplements rather than rewrites that subset record.
 - The union has no remote branch or pull request and has caused no Vercel,
   Supabase, DigitalOcean, Meta, Discord, Shopify, Apple, Unity, or other
@@ -267,7 +266,7 @@ Social source declare `mailto:support@mochirii.com` as the operational
   `main` as `075937a30a9509faa189e9b1917a2ad9b847c7b0`. It refreshes expired
   Discord role evidence on demand so an otherwise valid member is not stranded
   at Social consent when the bounded verification window expires. This merged
-  historical release does not authorize deployment of the newer 45-function
+  historical release does not authorize deployment of the newer 46-function
   local union or any DigitalOcean runtime change.
 - The approved Packet E write set only the server-side
   `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding as Sensitive for Vercel Preview and

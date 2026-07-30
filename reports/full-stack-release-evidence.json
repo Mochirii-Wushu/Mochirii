@@ -1,13 +1,13 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-29T22:41:41.959Z",
+  "checkedAt": "2026-07-30T06:03:56.200Z",
   "scope": "Mochirii full-stack release evidence. This report is read-only and intentionally redacted; it records provider status, script coverage, and release gates without secret values.",
   "productionUrl": "https://mochirii.com",
   "providerReadsEnabled": false,
   "strictProviders": false,
   "git": {
     "branch": "agent/full-stack-integration-rehearsal-20260729",
-    "head": "9b5e17afda55",
+    "head": "dcaa33750e81",
     "upstream": "",
     "upstreamStatus": "none",
     "ahead": 0,
@@ -44,7 +44,7 @@
       "version": "2.109.1"
     },
     "localMigrations": {
-      "total": 49,
+      "total": 50,
       "versions": [
         "20260513081523",
         "20260513193110",
@@ -94,7 +94,8 @@
         "20260729071146",
         "20260729072000",
         "20260729130654",
-        "20260729183000"
+        "20260729183000",
+        "20260729224212"
       ],
       "files": [
         "20260513081523_create_discord_role_gated_gallery_uploads.sql",
@@ -145,11 +146,12 @@
         "20260729071146_enforce_facebook_consent_contract_and_permalink_integrity.sql",
         "20260729072000_randomize_social_derivative_paths_and_reduce_facebook_privileges.sql",
         "20260729130654_add_discord_gallery_ingest_hmac_replay_guard.sql",
-        "20260729183000_harden_disabled_monthly_raffle_foundation.sql"
+        "20260729183000_harden_disabled_monthly_raffle_foundation.sql",
+        "20260729224212_add_gallery_social_consent_withdrawal.sql"
       ]
     },
     "localFunctions": {
-      "total": 45,
+      "total": 46,
       "names": [
         "check-facebook-page-api-status",
         "check-instagram-api-status",
@@ -195,7 +197,8 @@
         "submit-mochi-pets-feedback",
         "sync-pixelfed-social-account",
         "verify-discord-member",
-        "verify-member-access"
+        "verify-member-access",
+        "withdraw-gallery-publication-consent"
       ],
       "verifyJwt": {
         "verify-discord-member": true,
@@ -205,6 +208,7 @@
         "spinner-live-session": true,
         "moderate-gallery-submission": true,
         "delete-rejected-gallery-submission": true,
+        "withdraw-gallery-publication-consent": true,
         "list-approved-gallery-submissions": false,
         "submit-discord-gallery-image": false,
         "reaper-discord-interactions": false,

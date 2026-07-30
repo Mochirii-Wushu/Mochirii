@@ -16,7 +16,7 @@ canonical names below.
 
 | Repository | Visibility/state | Default branch and verified SHA | Current classification | Production ownership |
 | --- | --- | --- | --- | --- |
-| `Mochirii-Wushu/Mochirii-Website` | Public, active | `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b` | PRs #536, #538, and stacked draft Meta PRs #539, #540, and #541 are open. A clean 49-migration/45-function local union preserves their relevant source intent but has no remote branch or PR; the open PRs remain until replacement parity, review, and checks are proved. Issues #443 and #475 are classified trackers. | Owns the Vercel Website, Shopify theme source, Social source, and Supabase source. A protected-`main` merge invokes the connected Vercel and Supabase integrations; Social-source merges can also publish a GHCR image. Provider effects remain release-gated. |
+| `Mochirii-Wushu/Mochirii-Website` | Public, active | `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b` | PRs #536, #538, and stacked draft Meta PRs #539, #540, and #541 are open. A clean 50-migration/46-function local union preserves their relevant source intent but has no remote branch or PR; the open PRs remain until replacement parity, review, and checks are proved. Issues #443 and #475 are classified trackers. | Owns the Vercel Website, Shopify theme source, Social source, and Supabase source. A protected-`main` merge invokes the connected Vercel and Supabase integrations; Social-source merges can also publish a GHCR image. Provider effects remain release-gated. |
 | `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, dormant | `main` at `57deb668620da6312d571090dee55e8fb58547d2` | PR #19 merged with exact reviewed-tree parity; its feature branch was deleted and merge-SHA CI passed. No open PRs. Issue #9 remains a classified dependency/toolchain tracker. | Source validation only; no Apple build, submission, or provider mutation occurred. |
 | `Mochirii-Wushu/Mochirii-Pets` | Private, dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | PR #4 is open at naming-only head `aadaaedc19aaf6e85d7bd742102c616c35b3c77f`. Its repository contract passes, but the Unity editor job fails before testing because neither approved Unity license secret is configured. The separate local manual-only CI-policy commit is not part of the naming candidate. Issue #3 is classified future Unity work. | Fresh Unity source only; no hosted runtime, deployment, Apple submission, or recurring provider cost. |
 | `Mochirii-Wushu/Reaper-Discord-Bot` | Private, active source | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 is merged; no open PRs or issues; only `main` remains remotely. A clean additive six-function ownership candidate is prepared locally at `30cfacd494681ca988147b5b0a94a0da1d0bfefa` (tree `d1fc4764eafbc4962a13a0e0c1c44a8ebf64068e`) and remains unpushed. | Source and rollback reference only. The merge ran repository CI and did not deploy Reaper or send Discord messages. The additive candidate grants no deployment authority. |
@@ -97,7 +97,7 @@ separately approved removal.
 | Worktree | Exact head | Classification |
 | --- | --- | --- |
 | `Website` | `2eec9e467b4679fd77648ef61e77cf246ec9589b` | HEAD equals `origin/main` while the checked-out branch is `mochi/vendor-mcp-setup`; preserve its two user-owned `.codex/` paths. |
-| `Website-full-stack-integration-rehearsal-20260729` | Validated local source head `a51c3ea572d018364dfe36a550d0467eec0d6a79` before this mutable ledger update. | Authoritative clean local union: 49 migrations, 45 functions, 28/17 source JWT expectation, bounded server-auth transport, hardened asset/CSP contracts, and preserved #536/#538/#539 plus Meta backend/UI source intent. Exact replacement parity remains a release gate. It is unpushed and has no PR or provider effect. |
+| `Website-full-stack-integration-rehearsal-20260729` | Validated local content head `dcaa33750e8161ff83531655faa68e0a54f9799a` before this mutable state update. | Authoritative clean local union: 50 migrations, 46 functions, 29/17 source JWT expectation, bounded server-auth transport, hardened asset/CSP contracts, and preserved #536/#538/#539 plus Meta backend/UI source intent. Exact replacement parity remains a release gate. It is unpushed and has no PR or provider effect. |
 | `Website-repository-name-reconciliation-20260728` | `661afd9299221f521e2f1bf805728442ff6be4c1` | Canonical-name reconciliation source for PR #538; retain until replacement parity is proved. |
 | `Website-repository-separation-adrs-20260729` | `331ed1e91e8cee65b4b1478b30fc545f41b57dd0` | Architecture/governance candidate; no provider or source-ownership transfer. |
 | `Website-shopify-prepayment-safety-20260729` | `5b3834ca2558df9bc5063119f673662b04e5bb62` | Storefront prepayment-safety candidate; preserves sealed copy evidence and authorizes no Shopify mutation or publication. |
@@ -166,14 +166,13 @@ removal is separately approval-gated.
   integration was visibly connected to
   `Mochirii-Wushu/Mochirii-Website`, working directory `.`, production branch
   `main`, and production deployment enabled.
-- The local union contains 49 migrations and 45 declared functions with 28/17
+- The local union contains 50 migrations and 46 declared functions with 29/17
   source parity. It has not been pushed, previewed, or deployed and therefore
-  does not alter the hosted readback. Its isolated 49/49 migration reset and
-  480/480 pgTAP result are local evidence only. Warning-level lint, INFO
-  security advisors, and WARN performance advisors were empty. The 54
-  remaining INFO performance observations were fresh-empty-database
-  `unused_index` notices and are not deletion evidence. The shared local stack
-  and all hosted providers were untouched.
+  does not alter the hosted readback. Its isolated 50/50 migration reset and
+  521/521 pgTAP result are local evidence only. Warning-level lint and strict
+  security/performance advisor results were empty. Fresh-empty-database
+  `unused_index` observations are not deletion evidence. The shared local
+  stack and all hosted providers were untouched.
 - The source-only Meta lanes retain
   `FACEBOOK_PAGE_PUBLISH_ENABLED=false` and
   `INSTAGRAM_PUBLISH_ENABLED=false`; no post was created. No provider identity,
