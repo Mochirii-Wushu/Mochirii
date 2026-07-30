@@ -48,7 +48,6 @@ const approvedPublicJsonFiles = [
 const sharedSocialCaptionSources = [
   "apps/web/components/member-workflow/FacebookPagePublishQueue.tsx",
   "apps/web/components/member-workflow/LeaderDashboard.tsx",
-  "supabase/functions/_shared/instagram-publishing.ts",
 ];
 const canonicalPublicCopy = [];
 let exactGameNameCount = 0;

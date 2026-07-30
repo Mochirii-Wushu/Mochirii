@@ -16,6 +16,7 @@ import {
   parseFacebookPageQueueStatus,
 } from "../_shared/facebook-page-queue-pagination.ts";
 import { normalizeFacebookPermalink } from "../_shared/facebook-page-publishing.ts";
+import { logSafeMetaEvent } from "../_shared/safe-telemetry.ts";
 
 const EVENT_LIMIT = 250;
 const UUID_RE =
@@ -37,7 +38,6 @@ function profileSummary(
     displayName: displayName(profile),
     discordUsername: safeString(profile.discord_username, 80),
     discordGlobalName: safeString(profile.discord_global_name, 100),
-    discordUserId: safeString(profile.discord_user_id, 40),
   };
 }
 
@@ -110,9 +110,10 @@ async function handleRequest(req: Request): Promise<Response> {
     ? quarantineData as JsonRecord
     : null;
   if (quarantineError || quarantine?.committed !== true) {
-    console.error("list-facebook-page-publish-queue quarantine failed", {
-      code: quarantineError?.code || "invalid_quarantine_response",
-      message: quarantineError?.message || "Invalid quarantine response",
+    logSafeMetaEvent("error", "facebook_queue_quarantine_failed", {
+      provider: "facebook_page",
+      stage: "stale_lease_quarantine",
+      errorCategory: "database_operation_failed",
     });
     return jsonResponse(
       {
@@ -147,10 +148,10 @@ async function handleRequest(req: Request): Promise<Response> {
 
   for (const { status, result } of countResults) {
     if (result.error) {
-      console.error("list-facebook-page-publish-queue count failed", {
-        status,
-        code: result.error.code,
-        message: result.error.message,
+      logSafeMetaEvent("error", "facebook_queue_count_failed", {
+        provider: "facebook_page",
+        stage: "queue_count",
+        errorCategory: "database_operation_failed",
       });
       return jsonResponse(
         {
@@ -169,7 +170,7 @@ async function handleRequest(req: Request): Promise<Response> {
   let jobQuery = access.adminClient
     .from("gallery_facebook_page_publish_jobs")
     .select(
-      "id,submission_id,status,eligibility_reason,message,source_mime_type,source_size_bytes,facebook_photo_id,facebook_post_id,facebook_permalink,last_error,attempt_count,published_by,published_at,created_at,updated_at",
+      "id,submission_id,status,eligibility_reason,message,facebook_photo_id,facebook_post_id,facebook_permalink,attempt_count,published_by,published_at,created_at,updated_at",
     );
   if (requestedStatus !== "all") {
     jobQuery = jobQuery.eq("status", requestedStatus);
@@ -185,9 +186,10 @@ async function handleRequest(req: Request): Promise<Response> {
     .order("id", { ascending: false })
     .limit(pageSize + 1);
   if (jobError) {
-    console.error("list-facebook-page-publish-queue job lookup failed", {
-      code: jobError.code,
-      message: jobError.message,
+    logSafeMetaEvent("error", "facebook_queue_lookup_failed", {
+      provider: "facebook_page",
+      stage: "queue_lookup",
+      errorCategory: "database_operation_failed",
     });
     return jsonResponse(
       {
@@ -211,7 +213,11 @@ async function handleRequest(req: Request): Promise<Response> {
         id: String(lastJob.id || ""),
       });
     } catch {
-      console.error("list-facebook-page-publish-queue cursor encoding failed");
+      logSafeMetaEvent("error", "facebook_queue_cursor_failed", {
+        provider: "facebook_page",
+        stage: "cursor_encoding",
+        errorCategory: "cursor_encoding_failed",
+      });
       return jsonResponse(
         {
           ok: false,
@@ -242,13 +248,14 @@ async function handleRequest(req: Request): Promise<Response> {
     const { data, error } = await access.adminClient
       .from("gallery_submissions")
       .select(
-        "id,user_id,gallery_publication_id,original_filename,mime_type,size_bytes,title,caption,category,status,reviewed_at,created_at,submission_source,discord_guild_id,discord_channel_id,discord_message_id,discord_attachment_id,discord_user_id,facebook_page_opt_in,facebook_page_opt_in_at,facebook_page_opt_in_source,facebook_page_opt_in_copy_version,facebook_page_opt_in_contract_version",
+        "id,user_id,gallery_publication_id,mime_type,size_bytes,title,caption,category,status,reviewed_at,created_at,submission_source,facebook_page_opt_in,facebook_page_opt_in_at,facebook_page_opt_in_source,facebook_page_opt_in_copy_version,facebook_page_opt_in_contract_version",
       )
       .in("id", submissionIds);
     if (error) {
-      console.error("list-facebook-page-publish-queue submissions failed", {
-        code: error.code,
-        message: error.message,
+      logSafeMetaEvent("error", "facebook_queue_submission_lookup_failed", {
+        provider: "facebook_page",
+        stage: "submission_lookup",
+        errorCategory: "database_operation_failed",
       });
       return jsonResponse(
         {
@@ -275,9 +282,10 @@ async function handleRequest(req: Request): Promise<Response> {
       .order("created_at", { ascending: false })
       .limit(EVENT_LIMIT);
     if (error) {
-      console.error("list-facebook-page-publish-queue events failed", {
-        code: error.code,
-        message: error.message,
+      logSafeMetaEvent("error", "facebook_queue_event_lookup_failed", {
+        provider: "facebook_page",
+        stage: "event_lookup",
+        errorCategory: "database_operation_failed",
       });
       return jsonResponse(
         {
@@ -312,13 +320,14 @@ async function handleRequest(req: Request): Promise<Response> {
     const { data, error } = await access.adminClient
       .from("member_profiles")
       .select(
-        "id,display_name,discord_username,discord_global_name,discord_user_id",
+        "id,display_name,discord_username,discord_global_name",
       )
       .in("id", userIds);
     if (error) {
-      console.error("list-facebook-page-publish-queue profiles failed", {
-        code: error.code,
-        message: error.message,
+      logSafeMetaEvent("error", "facebook_queue_profile_lookup_failed", {
+        provider: "facebook_page",
+        stage: "profile_lookup",
+        errorCategory: "database_operation_failed",
       });
       return jsonResponse(
         {
@@ -368,12 +377,9 @@ async function handleRequest(req: Request): Promise<Response> {
       status: safeString(job.status, 40),
       eligibilityReason: safeString(job.eligibility_reason, 500),
       message: safeString(job.message, 5000),
-      sourceMimeType: safeString(job.source_mime_type, 80),
-      sourceSizeBytes: Number(job.source_size_bytes || 0),
       facebookPhotoId: safeString(job.facebook_photo_id, 255),
       facebookPostId: safeString(job.facebook_post_id, 255),
       facebookPermalink: normalizeFacebookPermalink(job.facebook_permalink),
-      lastError: safeString(job.last_error, 1000),
       attemptCount: Number(job.attempt_count || 0),
       publishedAt: safeString(job.published_at, 80),
       createdAt: safeString(job.created_at, 80),
@@ -385,23 +391,14 @@ async function handleRequest(req: Request): Promise<Response> {
         id: submissionId,
         status: safeString(submission.status, 20),
         source: safeString(submission.submission_source, 40) || "website",
-        discord: {
-          guildId: safeString(submission.discord_guild_id, 40),
-          channelId: safeString(submission.discord_channel_id, 40),
-          messageId: safeString(submission.discord_message_id, 40),
-          attachmentId: safeString(submission.discord_attachment_id, 40),
-          userId: safeString(submission.discord_user_id, 40),
-        },
         uploader: {
           displayName: displayName(profile),
           discordUsername: safeString(profile.discord_username, 80),
           discordGlobalName: safeString(profile.discord_global_name, 100),
-          discordUserId: safeString(profile.discord_user_id, 40),
         },
         title: safeString(submission.title, 80),
         caption: safeString(submission.caption, 300),
         category: safeString(submission.category, 40),
-        originalFilename: safeString(submission.original_filename, 255),
         mimeType: safeString(submission.mime_type, 80),
         sizeBytes: Number(submission.size_bytes || 0),
         createdAt: safeString(submission.created_at, 80),

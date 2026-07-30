@@ -143,55 +143,80 @@ select ok(
     select 1 from pg_constraint
     where conrelid = 'public.gallery_facebook_page_publish_jobs'::regclass
       and conname = 'gallery_facebook_page_publish_jobs_destination_check'
-      and pg_get_constraintdef(oid) like '%1222888660907862%'
+      and pg_get_constraintdef(oid) like '%facebook_page%'
+      and pg_get_constraintdef(oid) !~ '[0-9]{8,}'
   ),
-  'every Facebook job is constrained to the official Page id'
-);
-
-select matches(
-  pg_get_functiondef('private.attest_gallery_facebook_page_consent()'::regprocedure),
-  'claimed_contract_version',
-  'new Facebook consent requires the exact client/server contract handshake'
+  'every Facebook job stores only the destination class while the provider identity stays server-pinned'
 );
 
 select ok(
   pg_get_functiondef(
-    'public.gallery_facebook_page_begin_publish(uuid,uuid,text)'::regprocedure
-  ) like '%2026-07-website-public-facebook-page-group-v2%'
+    'private.attest_gallery_facebook_page_consent()'::regprocedure
+  ) like '%upload_rights_confirmed is true%'
   and pg_get_functiondef(
-    'public.gallery_facebook_page_begin_publish(uuid,uuid,text)'::regprocedure
-  ) like '%facebook_page_opt_in_contract_version%'
-  and pg_get_functiondef(
-    'public.gallery_facebook_page_begin_publish(uuid,uuid,text)'::regprocedure
-  ) like '%1222888660907862%',
-  'Facebook claim rechecks current consent and the pinned destination'
-);
-
-select matches(
-  pg_get_functiondef(
-    'public.gallery_instagram_begin_publish(uuid,uuid,text,text)'::regprocedure
-  ),
-  '2026-07-website-public-instagram-publish-v2',
-  'Instagram claim rechecks current explicit public-account consent'
+    'private.attest_gallery_facebook_page_consent()'::regprocedure
+  ) like '%2026-07-website-public-facebook-page-group-v3%',
+  'new Facebook consent requires server-attested upload rights and the current v3 contract'
 );
 
 select ok(
   pg_get_functiondef(
-    'public.gallery_facebook_page_publish_source(uuid)'::regprocedure
+    'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)'::regprocedure
+  ) like '%private.gallery_social_consent_records%'
+  and pg_get_functiondef(
+    'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)'::regprocedure
+  ) like '%confirmation_fingerprint%'
+  and pg_get_functiondef(
+    'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)'::regprocedure
+  ) like '%facebook_page%'
+  and pg_get_functiondef(
+    'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)'::regprocedure
+  ) !~ '[0-9]{8,}',
+  'Facebook claim rechecks current consent and cryptographically bound confirmation without exposing a provider identifier'
+);
+
+select ok(
+  pg_get_functiondef(
+    'public.gallery_instagram_begin_publish(uuid,uuid,text,text,timestamptz,text,text)'::regprocedure
+  ) like '%private.gallery_social_consent_records%'
+  and pg_get_functiondef(
+    'public.gallery_instagram_begin_publish(uuid,uuid,text,text,timestamptz,text,text)'::regprocedure
+  ) like '%confirmation_fingerprint%'
+  and pg_get_functiondef(
+    'public.gallery_instagram_begin_publish(uuid,uuid,text,text,timestamptz,text,text)'::regprocedure
+  ) like '%instagram%',
+  'Instagram claim rechecks current consent and the cryptographically bound moderator confirmation'
+);
+
+select ok(
+  pg_get_functiondef(
+    'public.gallery_facebook_page_publish_source_without_confirmation(uuid)'::regprocedure
   ) like '%private.gallery_social_derivatives%'
   and pg_get_functiondef(
-    'public.gallery_facebook_page_publish_source(uuid)'::regprocedure
+    'public.gallery_facebook_page_publish_source_without_confirmation(uuid)'::regprocedure
   ) like '%[0-9a-f]{8}%'
   and pg_get_functiondef(
-    'public.gallery_instagram_publish_source(uuid)'::regprocedure
+    'public.gallery_instagram_publish_source_without_confirmation(uuid)'::regprocedure
   ) like '%private.gallery_social_derivatives%'
   and pg_get_functiondef(
-    'public.gallery_facebook_page_publish_source(uuid)'::regprocedure
+    'public.gallery_facebook_page_publish_source_without_confirmation(uuid)'::regprocedure
   ) not like '%private.gallery_source_validations%'
   and pg_get_functiondef(
+    'public.gallery_instagram_publish_source_without_confirmation(uuid)'::regprocedure
+  ) not like '%private.gallery_source_validations%'
+  and pg_get_functiondef(
+    'public.gallery_facebook_page_publish_source(uuid)'::regprocedure
+  ) like '%private.gallery_social_publication_attestations%'
+  and pg_get_functiondef(
+    'public.gallery_facebook_page_publish_source(uuid)'::regprocedure
+  ) like '%private.gallery_social_consent_records%'
+  and pg_get_functiondef(
     'public.gallery_instagram_publish_source(uuid)'::regprocedure
-  ) not like '%private.gallery_source_validations%',
-  'both publishers resolve only the frozen sanitized derivative'
+  ) like '%private.gallery_social_publication_attestations%'
+  and pg_get_functiondef(
+    'public.gallery_instagram_publish_source(uuid)'::regprocedure
+  ) like '%private.gallery_social_consent_records%',
+  'both publishers recheck confirmation and consent before resolving only the frozen sanitized derivative'
 );
 
 select ok(

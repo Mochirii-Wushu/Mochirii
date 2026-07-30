@@ -489,6 +489,14 @@ as $$
 declare
   delivery_reservation jsonb;
 begin
+  if coalesce(
+    nullif(current_setting('request.jwt.claim.role', true), ''),
+    auth.jwt() ->> 'role',
+    ''
+  ) <> 'service_role' then
+    raise exception 'Service role required.' using errcode = '42501';
+  end if;
+
   perform p_limit, p_offset;
   delivery_reservation := public.gallery_reserve_public_delivery('list', 65536);
   if coalesce((delivery_reservation ->> 'allowed')::boolean, false) is not true then

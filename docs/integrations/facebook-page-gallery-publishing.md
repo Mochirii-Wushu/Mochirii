@@ -1,249 +1,231 @@
 # Facebook Page Gallery Publishing
 
-## Status
+## Current provider status
 
-This is the no-secret provider and source contract for publishing a
-moderator-approved member Gallery image to the official Mōchirīī Facebook
-Page. It does not authorize a deployment, a Supabase secret change, a live
-post, or a Facebook Group mutation.
+This is the no-secret source and provider contract for the official Mōchirīī
+Facebook Page. It does not authorize a hosted migration, Edge Function or
+Website deployment, secret change, feature-flag change, public post, or Group
+mutation.
 
-Provider state observed on 2026-07-29:
+Evidence reviewed on 2026-07-29 shows:
 
-- Page: `Mōchirīī`
-- Page ID: `1222888660907862`
-- current Page URL: `https://www.facebook.com/mochiriiguildpage`
-- official private Group: `https://www.facebook.com/groups/mochiriiguild`
-- Business portfolio: `Mochirii`
-- Meta app: `Mochirii Gallery Publishing` (`4210347289109364`)
-- Page use case: `Manage everything on your Page`
-- Target Page permissions: `pages_show_list`, `pages_read_engagement`, and
-  `pages_manage_posts`
-- app mode: unpublished
-- Page-to-portfolio attachment: confirmed; Business Settings shows Page
-  `1222888660907862` owned by `Mochirii`
-- current owner access: Twills Lui has full Page access
-- current Employee System User: Content access only to the Page and linked
-  Instagram asset, plus partial Develop-app access; no full app management, ad
-  account, or ad scope
-- Marketing API use case: retained only because Meta's System User installation
-  flow requires Ads Management API Standard Access
-- authorization checkpoint: unresolved `Account confirmation needed`
-- most recent 60-day token: exactly `pages_manage_posts`,
-  `pages_read_engagement`, and `pages_show_list`; every Graph request returned
-  OAuthException 200 `API access blocked`, then the unusable token was revoked
-- current Graph proof: no successful Page-task, linked Instagram identity, or
-  Instagram Graph-ID verification
-- former Admin System User: no assets, installed apps, or tokens; retained as
-  `Mochirii Gallery Publisher Legacy`
-- hosted secret values are not documented or assumed; a future release requires
-  fresh name-only inventory evidence and a successful read-only identity check
-- hosted activation: `FACEBOOK_PAGE_PUBLISH_ENABLED=false`; the source packet,
-  migrations, Edge Functions, and Website have not been deployed, and no live
-  Page post was created
-- public Page profile: Instagram `mochirii_guild` is listed alongside the
-  existing TikTok and Twitch links
+- the Page and linked Instagram professional account are assigned to the
+  dedicated employee system user with Content-only asset access and partial
+  Develop-app access;
+- the employee identity has no full app management, ad account, or ad scope;
+- the Marketing API use case exists only because Meta's documented system-user
+  installation flow requires Ads Management API Standard Access;
+- the most recent 60-day token had exactly `pages_manage_posts`,
+  `pages_read_engagement`, and `pages_show_list`, but every Graph request was
+  blocked by the unresolved `Account confirmation needed` checkpoint, so the
+  unusable token was revoked;
+- no successful current Page-task, app binding, token type, scope, expiry,
+  data-access-expiry, or Page identity proof exists;
+- the former administrator publisher has no assets, installed app, or token
+  and remains clearly labeled as legacy;
+- `FACEBOOK_PAGE_PUBLISH_ENABLED=false`, the source packet is not evidence of a
+  hosted deployment, and no live Page post was created; and
+- hosted secret values are not documented or assumed. Only fresh name-only
+  secret inventory and a successful read-only identity diagnostic may satisfy
+  a later release gate.
 
-The app is intentionally not published yet. Meta requires a real privacy-policy
-URL, user-data-deletion instructions, and the remaining release requirements;
-do not substitute a placeholder URL or publish the app until those owner/legal
-and release gates are satisfied.
+The Page website field stays empty. Profile and publication copy must not place
+or link `mochirii.com`; required technical OAuth, callback, privacy, and data
+deletion URLs are separate provider configuration.
 
-Keep the Page website field empty and do not place or link `mochirii.com` in
-Meta profile or publication copy. This does not change full technical OAuth,
-callback, API, privacy-policy, or data-deletion URLs where Meta requires them.
+## Release boundary
 
-## Supported destination
+This integration publishes a moderator-approved private JPEG derivative to the
+Mochirii Facebook Page. It never publishes to a Facebook Group. Meta removed
+Groups API publishing in Graph API v19; a moderator may share a verified Page
+post to the Guild group manually.
 
-Meta removed the Facebook Groups API, including `publish_to_groups`, in Graph
-API v19.0 and removed all versions on 2024-04-22. The website therefore cannot
-publish directly to `https://www.facebook.com/groups/mochiriiguild` through an
-official API.
+Gallery approval and Page publication are separate audited actions. Publication
+requires `job_id`, final `message`, exact `expected_updated_at`, a confirmation
+fingerprint, and `confirm_facebook_publish: true`. The fingerprint binds the
+destination, current job state and attempt, final copy, and authenticated
+moderator. Edge recomputes it and the begin RPC locks and rechecks the same
+revision. Edited, stale, reused, or mismatched confirmation fails before Meta.
 
-The supported flow publishes to the Mōchirīī Facebook Page through the Page
-Photos endpoint. After a successful Page post, the Leader Dashboard may offer
-the official guild Group as a manual handoff. It must never label that handoff
-as automatic Group publishing.
+## Consent, approval, and withdrawal
+
+Member consent is destination-specific, unchecked by default, and exact:
+
+```text
+I authorize Mōchirīī moderators to publish this image and its moderator-approved caption on the public official Mōchirīī Facebook Page after gallery approval, and optionally share that Page post manually to the private official Mōchirīī Guild group.
+```
+
+The current server-attested handshake is
+`2026-07-website-public-facebook-page-group-v3`. The browser submits the
+unchecked boolean, exact handshake, and upload-rights attestation as untrusted
+claims. The database verifies the Website source and exact current version,
+then stamps time, source, and copy provenance itself. Missing, stale, Discord,
+or arbitrary client evidence remains historical and API-ineligible; no earlier
+version is silently upgraded or reused.
+
+Gallery approval may create an exact-once Page outbox job but never calls Meta.
+The separate Page queue requires the moderator to review the private derivative
+preview and exact final message, then arm and confirm a fingerprint bound to
+`job_id`, destination, current state, attempt, `expected_updated_at`, final
+message, and authenticated moderator. Editing any bound field disarms the
+confirmation.
+
+Members use `withdraw-gallery-publication-consent` for their own submission and
+destination. Pending, failed, or ineligible jobs cancel atomically. Publishing
+or ambiguous jobs quarantine for inspection. A published job creates a removal
+request without claiming the external copy was removed. Consent, confirmation,
+withdrawal, and removal evidence remains immutable.
+
+## Runtime configuration
+
+All values are Supabase Edge Function secrets. Values and private identifiers
+must not enter Git, Vercel, browser variables, logs, screenshots, artifacts, or
+PR text.
+
+```text
+META_APP_ID
+META_EXPECTED_APP_ID
+META_APP_SECRET
+FACEBOOK_PAGE_ID
+FACEBOOK_EXPECTED_PAGE_ID
+FACEBOOK_PAGE_ACCESS_TOKEN
+FACEBOOK_API_VERSION=v26.0
+FACEBOOK_PAGE_PUBLISH_ENABLED=false
+```
+
+Configured and independently expected identifiers must be numeric and match
+exactly. Publishing also requires the exact
+`FACEBOOK_PAGE_PUBLISH_ENABLED=true` value. The flag remains false through
+Preview, credential installation, and read-only diagnostics.
+
+The public Facebook Page website/link field stays empty. Public contact may use
+`support@mochirii.com`, while Mochirii's own legal pages remain available on
+`mochirii.com`. Moderator-approved Page messages may not contain or share any
+URL.
+
+## Provider request contract
+
+- Origin is fixed to `https://graph.facebook.com`.
+- Every path is pinned to `/v26.0/`; floating and older versions fail closed.
+- Access tokens travel only in the `Authorization: Bearer` header.
+- Every normal request receives a fresh `appsecret_time` and
+  `appsecret_proof`, HMAC-SHA256 over
+  `access_token + "|" + appsecret_time`.
+- Proofs are never reused and expire after five minutes.
+- Redirects are rejected, requests have bounded timeouts, and no provider
+  request is automatically retried.
+- Responses are bounded. Only allowlisted status/type/code fields may enter
+  audit details.
+- Messages reject schemes, `www`, bare domains, link shorteners, and other
+  URL-like text before database or provider access.
+
+The publisher verifies the randomized metadata-stripped JPEG against its
+database-attested size and SHA-256 before one
+`POST /{page-id}/photos` request. Success is not final until a fresh Graph read
+verifies the returned object id, `from.id`, and canonical permalink against the
+independently pinned Page. Network loss, timeout, 5xx, missing id, or missing
+ownership evidence enters `reconcile_required`.
+
+## Media and evidence integrity
+
+Social opt-ins accept only a source JPEG already 320–1440 pixels wide, no more
+than 1800 pixels high, within the 4:5 through 1.91:1 feed ratio, and within the
+8 MiB provider limit. PNG and WebP remain valid for Gallery-only submissions.
+The moderation browser never supplies publication bytes.
+
+During approval, Edge downloads the frozen consented source, verifies its
+object identity, version, timestamp, byte count, dimensions, and SHA-256, and
+derives a private JPEG without changing frame or entropy-coded image data. It
+retains at most one strict first-segment minimal JFIF APP0 marker, removes JPEG
+comments, and rejects every other APP0/JFXX or APP1–APP15 segment, conversion,
+resize, padding, or crop. Each attempt uses an unpredictable immutable revision
+path; deterministic or overwritable derivative paths fail closed.
+
+The database binds the source and derivative objects, versions, timestamps,
+digests, derivation method, destination, and current consent version in the same
+transaction as Gallery approval and outbox creation. Browser roles cannot read
+the reserved derivative boundary. Immediately before upload, Edge rechecks the
+exact bound bytes. A missing, replaced, overwritten, or legacy-unbound
+derivative is quarantined rather than published.
+
+Direct service-role table access is read-only. All state changes use reviewed
+RPCs after Edge revalidates the moderator. Queue DTOs expose only a
+credential-free approved Gallery thumbnail. Tokens, raw provider bodies,
+provider messages, member object paths, hashes, private derivatives, and signed
+URLs never enter browser responses, logs, or audit text.
+
+## Endpoints and diagnostics
+
+Authenticated moderator `POST` endpoints, all with `verify_jwt=true`:
+
+- `check-facebook-page-api-status`
+- `list-facebook-page-publish-queue`
+- `publish-facebook-page-gallery-submission`
+- `resolve-facebook-page-publish-reconciliation`
+
+Authenticated members use the separate `verify_jwt=true`
+`withdraw-gallery-publication-consent` endpoint. It revalidates ownership and
+does not expose moderator queue data.
+
+Status returns safe booleans, version, timestamp, and stable error categories
+only. Meta's token debugger requires the inspected token in the `input_token`
+query parameter. No query-token exception is approved, so the diagnostic makes
+zero debugger requests and fails closed with
+`meta_token_debug_query_transport_not_approved`. App binding, token type,
+scopes, expiry, and data-access expiry remain activation blockers.
+
+A `confirmed_published` reconciliation uses an object id only as a lookup key;
+Edge independently requires the official pinned owner and canonical permalink.
+`confirmed_not_published` is a separate recorded manual inspection. No retry is
+automatic.
+
+After success, the UI may offer a moderator-only manual Page-to-Group handoff.
+Source and docs must never claim automatic Group publishing.
+
+## Activation gates
+
+Keep Facebook publication disabled until every gate is current:
+
+1. Resolve the `Account confirmation needed` checkpoint through Meta's human
+   owner flow; do not automate or bypass it.
+2. Confirm the employee identity still has only the reviewed Content and
+   partial Develop-app access.
+3. Generate a fresh least-privilege credential through a separately approved
+   provider action and derive the runtime Page token without exposing either.
+4. Install only the required server secrets, with the expected app and Page
+   pins stored independently, `FACEBOOK_API_VERSION=v26.0`, and the flag false.
+5. Prove current app binding, token type, scopes, expiry, data-access expiry,
+   Page identity, and required content-creation authority through an approved
+   read-only diagnostic. Asset inventory alone is not proof.
+6. Complete the privacy, data-deletion, icon, category, contact, app-mode, and
+   any provider-specific review requirements shown by the current dashboard.
+7. Validate the exact final union source, migration history, functions, JWT
+   settings, Website source binding, queue, confirmation, withdrawal, and
+   fail-closed tests while the flag remains false.
+8. Obtain separate action-time approval to set
+   `FACEBOOK_PAGE_PUBLISH_ENABLED=true` and use the first genuine, newly
+   consented member image as the canary. Never create a synthetic public post.
+
+If any request has an ambiguous outcome, disable the flag and inspect the
+official Page before reconciliation. Never automatically retry. Confirming a
+published result uses the provider object only as a lookup key and re-verifies
+the pinned owner and canonical permalink. Confirming no post exists rejects
+contradictory IDs or URLs and returns the job to a separately approved retry
+state.
+
+## Linked Instagram dependency
+
+Facebook readiness does not enable Instagram. The linked asset assignment is
+not current Graph identity, scope, subtype, quota, or expiry proof. Instagram
+remains independently disabled until every gate in the
+[Instagram publishing contract](instagram-gallery-publishing.md) passes.
 
 Official references:
 
-- [Graph API v19.0 changelog](https://developers.facebook.com/docs/graph-api/changelog/version19.0)
-- [Create a Pages API app](https://developers.facebook.com/documentation/pages-api/create-an-app)
+- [Graph API v26 changelog](https://developers.facebook.com/docs/graph-api/changelog/version26.0/)
+- [Graph API v19 changelog](https://developers.facebook.com/docs/graph-api/changelog/version19.0/)
+- [Facebook Login security](https://developers.facebook.com/documentation/facebook-login/security)
 - [Page Photos endpoint](https://developers.facebook.com/docs/graph-api/reference/page/photos/)
 - [Page access tokens](https://developers.facebook.com/documentation/facebook-login/guides/access-tokens)
 - [App modes](https://developers.facebook.com/documentation/development/build-and-test/app-modes)
-- [Instagram API with Facebook Login](https://developers.facebook.com/documentation/instagram-platform/instagram-api-with-facebook-login/get-started)
-
-## Consent and approval contract
-
-Member upload consent is destination-specific and unchecked by default:
-
-```text
-I authorize Mōchirīī moderators to publish this image and its moderator-approved
-caption on the public official Mōchirīī Facebook Page after gallery approval,
-and optionally share that Page post manually to the private official Mōchirīī
-Guild group.
-```
-
-Instagram and Facebook Page consent remain independent. The website submits
-the unchecked-by-default boolean together with the exact non-secret contract
-version shown to the member. The database treats both values as an untrusted
-claim, verifies the website source and exact current version, then
-server-attests the time, source, and visible-copy version. A missing, stale, or
-arbitrary contract claim is recorded as unverified and is never silently
-upgraded into publishable consent. Members cannot add or alter consent after
-submission.
-
-The current server-attested Facebook consent copy version is
-`2026-07-website-public-facebook-page-group-v2`. Existing consent under another
-version must never be silently upgraded or reused.
-
-Gallery moderation and public Page publishing are separate decisions. The
-moderator first reviews the safely decoded consented source, then may
-choose `Approve for Gallery only`. That action commits the Gallery approval
-and exact-once Facebook Page outbox record, but never sends a public post. In
-the separate Page queue, a moderator edits the exact Page caption, arms the
-unchanged caption, reviews the rendered image and caption, and confirms the
-public action a second time. Editing the caption disarms confirmation.
-
-The Page queue uses a bounded, status-bound opaque keyset cursor ordered by
-`updated_at` and job ID. Previous/next navigation keeps every job reachable
-without unstable offset pages, including queues larger than 50 records. Only
-one external publish or reconciliation action can be active in the browser at
-a time.
-
-The moderation commit is fail-closed across Storage and Postgres. If the
-moderation RPC returns a definite non-commit, the provisional derivative is
-removed. If the RPC transport fails and commit outcome is unknown, the Edge
-boundary returns `moderation_commit_outcome_unknown`, does not guess whether
-the transaction committed, and does not delete the provisional object. The
-moderator must reload/reconcile current database state; unbound objects remain
-eligible for a separate evidence-driven cleanup rather than request-time
-deletion.
-
-Meta does not document an idempotency key for Page photo publishing. A timeout
-or unknown provider outcome therefore enters `reconcile_required`; it is never
-automatically retried because the post may already exist.
-An attempt still marked `publishing` after its 15-minute server lease is also
-quarantined to `reconcile_required` when a moderator loads the queue. The
-automatic quarantine event is attributed to the system, not the viewing
-moderator. The moderator must inspect the Page before any recovery. An explicit
-two-step reconciliation form requires the moderator to choose the inspected
-outcome and record a note before arming and confirming it. Confirming publication
-uses retained provider evidence or requires a Facebook photo or post id; confirming
-that no post exists moves the job to retryable `failed`, where publishing still
-requires a separate approval. Neither outcome is automatic.
-
-## Media integrity
-
-New website social opt-ins accept only a JPEG already 320–1440 pixels wide,
-no more than 1800 pixels high, and within the 4:5 through 1.91:1 feed ratio.
-PNG and WebP remain valid for Gallery-only submissions. This is also enforced
-by a database constraint for new opted-in rows; historical or unsupported
-sources may still be approved for the Gallery but receive an explicit
-`ineligible` social job.
-
-The moderation browser never supplies social publication bytes. During
-approval, the Edge boundary downloads the exact validated consented source,
-checks its size and SHA-256, retains at most one strict first-segment minimal
-JFIF APP0 marker, and derives a private JPEG by removing comment segments
-without changing the JPEG frame or entropy-coded image data. Every APP1–APP15
-segment is rejected, including EXIF (even orientation 1), ICC, SPIFF,
-JUMBF/HDR, Photoshop, Adobe transforms, and vendor semantics. Arbitrary APP0
-or JFXX, conversion, resizing, padding, and cropping also fail closed as
-socially ineligible. This is exact JPEG
-codestream/frame binding, not a claim that every decoder renders identical
-pixels.
-
-The private derivative evidence binds both immutable Storage objects, their
-versions and timestamps, the consented-source digest, the derivative digest,
-derivation method, destination, and current consent version in the same
-transaction as Gallery approval and outbox creation. Each approval attempt
-uses an unpredictable immutable revision path of the form
-`_social/submissions/{submission-uuid}/{revision-uuid}.jpg`; a deterministic
-`v1.jpg` path is invalid. That prevents retries or concurrent attempts from
-overwriting evidence belonging to another attempt. Browser roles cannot read
-the reserved derivative prefix. Immediately before posting, the Edge boundary
-rechecks the frozen derivative object and exact bytes and uploads them as
-multipart `source` to:
-
-```text
-POST https://graph.facebook.com/{version}/{page-id}/photos
-```
-
-The request includes the confirmed caption in Graph's `message` field and
-`published=true`. The durable
-result records the returned photo/post IDs, provider state, moderator actor,
-timestamps, and a safe error classification. Before a result can become
-`published`, the publisher re-reads the returned Graph object and requires its
-`from.id` to equal the pinned Page ID. The stored link must normalize to an
-HTTPS Facebook post/photo permalink; profile, homepage, credential-bearing,
-fragmented, alternate-port, encoded-path, and arbitrary-query URLs fail
-closed. Confirmed-published reconciliation performs the same read-only Graph
-ownership check for every supplied photo/post ID and therefore requires the
-configured Page credentials. Confirming not-published rejects any supplied
-provider ID or permalink instead of accepting contradictory evidence.
-
-Direct `service_role` access to the Page jobs and events tables is read-only.
-All state changes go through the reviewed security-definer RPCs after the Edge
-boundary verifies the moderator. Tokens, raw provider payloads, provider error
-messages, member Storage paths, and signed URLs must never enter logs or
-browser DTOs; provider failures use fixed operator-safe messages plus a small
-allowlist of non-secret code/type/status fields.
-
-## Runtime credentials
-
-Retain the least-privilege Employee System User with Content-only access to the
-Mōchirīī Page and linked Instagram asset plus partial Develop-app access. Do
-not grant full app management, an ad account, or ad scopes. Generate and store
-a new Page token only after account confirmation is resolved and a separately
-approved provider action succeeds. Runtime credentials belong only in Supabase
-Edge Function secrets:
-
-- `META_APP_ID` pinned to the Mochirii Meta app (`4210347289109364`)
-- `META_APP_SECRET`
-- `FACEBOOK_PAGE_ID` pinned to the official Mōchirīī Page
-  (`1222888660907862`)
-- `FACEBOOK_PAGE_ACCESS_TOKEN`
-- `FACEBOOK_API_VERSION`
-- `FACEBOOK_PAGE_PUBLISH_ENABLED` (strictly `true` to activate; absent or any
-  other value keeps publishing disabled)
-
-The app and Page IDs are identifiers, not credentials. The app secret and Page
-access token are secrets. Every authenticated Graph request includes a derived
-`appsecret_proof`; neither underlying secret may enter a browser response or
-log. Read-only diagnostics must reject a Page identity unless both the pinned
-ID and exact `Mōchirīī` Page name match.
-The activation flag is a server-only kill switch and must start as `false`.
-Never place it in Git, local reports, screenshots, browser variables,
-`NEXT_PUBLIC_*`, Vercel public variables, PR text, or this document.
-
-Before production enablement, a separately approved provider packet must:
-
-1. reconfirm the Employee System User retains only the reviewed Content and
-   partial Develop-app access;
-2. resolve the `Account confirmation needed` checkpoint, then generate a fresh
-   least-privilege Page token without exposing it in logs or chat;
-3. run a successful read-only Graph check for the pinned Page identity and
-   required publishing authority;
-4. set the provider values in Supabase secrets, keep
-   `FACEBOOK_PAGE_PUBLISH_ENABLED=false`, and deploy the reviewed
-   migration/functions;
-5. satisfy the app's privacy, data-deletion, icon/category, and Live-mode gates;
-6. run the read-only Page identity diagnostic again, approve activation, and set
-   `FACEBOOK_PAGE_PUBLISH_ENABLED=true`; a non-blocking task probe may report
-   `CREATE_CONTENT` or `PROFILE_PLUS_CREATE_CONTENT`, but Meta documents Page
-   tasks on `/me/accounts` with a User token rather than on the Page-token
-   identity request; and
-7. use the first genuine moderator-approved member image as the publishing
-   canary instead of creating a synthetic or throwaway public post.
-
-## Linked Instagram account
-
-The linked Instagram asset assignment exists, but Graph identity, Instagram
-scopes, account type, and Graph ID are not yet verified because the provider
-checkpoint blocks API access. Instagram activation remains a separate
-fail-closed release: the linked Graph identity, permissions, app-secret proof,
-provider restriction, human review, runtime secrets, and explicit activation
-approval must all pass the
-[Instagram publishing contract](instagram-gallery-publishing.md). Facebook Page
-readiness does not enable Instagram publishing.
+- [Supabase Edge Function secrets](https://supabase.com/docs/guides/functions/secrets)

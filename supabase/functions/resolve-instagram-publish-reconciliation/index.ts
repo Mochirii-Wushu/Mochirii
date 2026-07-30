@@ -8,7 +8,16 @@ import {
   requireModeratorAccess,
   safeString,
 } from "../_shared/gallery-moderation.ts";
-import { normalizeInstagramPostPermalink } from "../_shared/instagram-publishing.ts";
+import {
+  instagramConfig,
+  instagramMediaObjectEvidence,
+  normalizeInstagramPostPermalink,
+} from "../_shared/instagram-publishing.ts";
+import {
+  fetchMetaGraphOnce,
+  readBoundedMetaGraphJson,
+} from "../_shared/meta-graph-security.ts";
+import { logSafeMetaEvent } from "../_shared/safe-telemetry.ts";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -113,6 +122,61 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
+  let verifiedPermalink = permalink;
+  if (resolution === "confirmed_published") {
+    const config = instagramConfig();
+    if (!config.configured || !config.accountIdPinned || !mediaId) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: "instagram_reconciliation_verification_unavailable",
+          message:
+            "Official Instagram ownership cannot be verified until the pinned server credentials are configured.",
+        },
+        409,
+      );
+    }
+    try {
+      const response = await fetchMetaGraphOnce({
+        accessToken: config.accessToken,
+        appSecret: config.appSecret,
+        path: encodeURIComponent(mediaId),
+        query: { fields: "id,owner,username,permalink,media_type" },
+        timeoutMs: 30_000,
+      });
+      const evidence = instagramMediaObjectEvidence(
+        response.ok ? await readBoundedMetaGraphJson(response) : null,
+        mediaId,
+        config.expectedAccountId,
+      );
+      if (
+        !response.ok || !evidence.verified || !evidence.permalink ||
+        (permalink && permalink !== evidence.permalink)
+      ) {
+        return jsonResponse(
+          {
+            ok: false,
+            error: "instagram_reconciliation_verification_failed",
+            message:
+              "The inspected media was not verified as an image from @mochirii_guild.",
+          },
+          409,
+        );
+      }
+      verifiedPermalink = evidence.permalink;
+    } catch {
+      return jsonResponse(
+        {
+          ok: false,
+          error: "instagram_reconciliation_verification_unavailable",
+          message:
+            "The inspected Instagram media could not be verified against the official account.",
+        },
+        503,
+      );
+    }
+  }
+
   const { data, error } = await access.adminClient.rpc(
     "gallery_instagram_resolve_reconciliation",
     {
@@ -120,7 +184,7 @@ async function handleRequest(req: Request): Promise<Response> {
       p_actor_id: access.userId,
       p_resolution: resolution,
       p_instagram_media_id: mediaId,
-      p_instagram_permalink: permalink,
+      p_instagram_permalink: verifiedPermalink,
       p_note: note,
     },
   );
@@ -135,10 +199,10 @@ async function handleRequest(req: Request): Promise<Response> {
   if (error || payload.committed !== true || !job) {
     const reason = safeString(payload.reason, 80) ||
       "instagram_reconciliation_failed";
-    console.warn("resolve-instagram-publish-reconciliation failed", {
-      code: error?.code || reason,
-      message: error?.message || reason,
-      jobId,
+    logSafeMetaEvent("warn", "instagram_reconciliation_commit_failed", {
+      provider: "instagram",
+      stage: "reconciliation_commit",
+      errorCategory: reason,
     });
     const status = reason === "job_not_found"
       ? 404
@@ -168,11 +232,11 @@ async function handleRequest(req: Request): Promise<Response> {
     ok: true,
     data: {
       jobId: safeString(job.id, 80),
-      submissionId: safeString(job.submission_id, 80),
       status: safeString(job.status, 40),
       instagramMediaId: safeString(job.instagram_media_id, 255),
-      instagramPermalink: safeString(job.instagram_permalink, 1000),
-      lastError: safeString(job.last_error, 1000),
+      instagramPermalink: normalizeInstagramPostPermalink(
+        job.instagram_permalink,
+      ),
       publishedAt: safeString(job.published_at, 80),
       updatedAt: safeString(job.updated_at, 80),
     },

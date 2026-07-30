@@ -142,6 +142,17 @@ const reviewedLoopbacks = new Map([
     ],
   ],
   [
+    "supabase/functions/_shared/social-publication-copy.ts",
+    [{ value: "localhost", count: 1 }],
+  ],
+  [
+    "supabase/functions/_shared/social-publication-copy_test.ts",
+    [
+      { value: "localhost", count: 1 },
+      { value: "127.0.0.1", count: 1 },
+    ],
+  ],
+  [
     "apps/web/lib/member-social-links/profile-links-core.ts",
     [{ value: "localhost", count: 2 }],
   ],

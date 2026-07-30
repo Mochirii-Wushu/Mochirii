@@ -18,14 +18,19 @@ import {
 } from "../_shared/gallery-thumbnail.ts";
 import { gallerySocialDerivativeStoragePath } from "../_shared/gallery-social-path.ts";
 import { isDecodableGalleryWebp } from "../_shared/gallery-webp-decoder.ts";
+import {
+  safeGalleryModerationConflict,
+  safeGalleryModerationSubmission,
+  safeGalleryPublishJob,
+} from "../_shared/gallery-response-safety.ts";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const VALID_ACTIONS = new Set(["approved", "rejected", "thumbnail"]);
 const MEMBER_GALLERY_BUCKET = "member-gallery";
 const FACEBOOK_CONSENT_VERSION =
-  "2026-07-website-public-facebook-page-group-v2";
-const INSTAGRAM_CONSENT_VERSION = "2026-07-website-public-instagram-publish-v2";
+  "2026-07-website-public-facebook-page-group-v3";
+const INSTAGRAM_CONSENT_VERSION = "2026-07-website-public-instagram-publish-v3";
 const PUBLIC_GALLERY_CATEGORIES = new Set([
   "portraits",
   "gatherings",
@@ -39,19 +44,6 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
   return [...new Uint8Array(digest)]
     .map((value) => value.toString(16).padStart(2, "0"))
     .join("");
-}
-
-function browserSafePublishJob(value: unknown): JsonRecord | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const job = value as JsonRecord;
-  return {
-    id: safeString(job.id, 80),
-    submission_id: safeString(job.submission_id, 80),
-    status: safeString(job.status, 40),
-    eligibility_reason: safeString(job.eligibility_reason, 500),
-    created_at: safeString(job.created_at, 80),
-    updated_at: safeString(job.updated_at, 80),
-  };
 }
 
 Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
@@ -77,6 +69,8 @@ async function handleRequest(req: Request): Promise<Response> {
   const expectedUpdatedAt = safeString(bodyResult.body.expected_updated_at, 80);
   const confirmFacebookPublish =
     bodyResult.body.confirm_facebook_publish === true;
+  const confirmInstagramPublish =
+    bodyResult.body.confirm_instagram_publish === true;
 
   if (!submissionId || !UUID_RE.test(submissionId)) {
     return jsonResponse(
@@ -112,6 +106,18 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
+  if (confirmInstagramPublish) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "instagram_publish_requires_separate_review",
+        message:
+          "Approve the Gallery submission first, then use the separate Instagram queue to review the exact caption and alt text before confirming the public post.",
+      },
+      400,
+    );
+  }
+
   if (
     !expectedUpdatedAt ||
     !Number.isFinite(Date.parse(expectedUpdatedAt))
@@ -141,8 +147,6 @@ async function handleRequest(req: Request): Promise<Response> {
   if (lookupError) {
     console.error("moderate-gallery-submission lookup failed", {
       code: lookupError.code,
-      message: lookupError.message,
-      submissionId,
     });
     return jsonResponse(
       {
@@ -325,8 +329,7 @@ async function handleRequest(req: Request): Promise<Response> {
         sourceBlob.size !== sourceSizeBytes
       ) {
         console.warn("moderate-gallery-submission social source unavailable", {
-          submissionId,
-          reason: sourceDownloadError ? "download_failed" : "size_mismatch",
+          category: sourceDownloadError ? "download_failed" : "size_mismatch",
         });
         warnings.push(
           "Social publishing was left ineligible because the consented original could not be read safely.",
@@ -342,8 +345,7 @@ async function handleRequest(req: Request): Promise<Response> {
           socialSourceSha256 = await sha256Hex(sourceBytes);
         } else {
           console.info("moderate-gallery-submission social source ineligible", {
-            submissionId,
-            reason: derived.error,
+            category: "source_derivative_ineligible",
           });
           warnings.push(
             "Social publishing was left ineligible because the consented original is not a metadata-strippable JPEG already within the 4:5 to 1.91:1 feed bounds. Gallery approval was preserved.",
@@ -397,8 +399,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
       if (displayUploadError) {
         console.error("moderate-gallery-submission display upload failed", {
-          message: displayUploadError.message,
-          submissionId,
+          category: "storage_upload_rejected",
         });
         return jsonResponse(
           {
@@ -426,8 +427,7 @@ async function handleRequest(req: Request): Promise<Response> {
         ]);
       }
       console.error("moderate-gallery-submission thumbnail upload failed", {
-        message: thumbnailUploadError.message,
-        submissionId,
+        category: "storage_upload_rejected",
       });
       return jsonResponse(
         {
@@ -461,8 +461,7 @@ async function handleRequest(req: Request): Promise<Response> {
           );
         }
         console.error("moderate-gallery-submission social upload failed", {
-          message: socialUploadError.message,
-          submissionId,
+          category: "storage_upload_rejected",
         });
         return jsonResponse(
           {
@@ -556,8 +555,7 @@ async function handleRequest(req: Request): Promise<Response> {
     // objects are handled by a separate lifecycle cleanup.
     console.error("moderate-gallery-submission commit outcome unknown", {
       code: commitError.code,
-      message: commitError.message,
-      submissionId,
+      category: "database_commit_outcome_unknown",
     });
     return jsonResponse(
       {
@@ -579,14 +577,14 @@ async function handleRequest(req: Request): Promise<Response> {
         provisionalPaths,
       );
     }
+    const safeConflict = safeGalleryModerationConflict(commit.reason);
     console.error("moderate-gallery-submission atomic commit failed", {
-      message: safeString(commit.reason, 80) || "Atomic moderation conflict",
-      submissionId,
+      category: safeConflict,
     });
     return jsonResponse(
       {
         ok: false,
-        error: safeString(commit.reason, 80),
+        error: safeConflict,
         message: action === "thumbnail"
           ? "This gallery thumbnail changed before the update completed. Refresh and try again."
           : "This gallery submission changed before moderation completed. Refresh and try again.",
@@ -601,6 +599,7 @@ async function handleRequest(req: Request): Promise<Response> {
       ? commit.submission as JsonRecord
       : {};
   const reviewedAt = safeString(updatedSubmission.reviewed_at, 80);
+  const safeSubmission = safeGalleryModerationSubmission(updatedSubmission);
 
   const instagramJobInternal = commit.instagramJob &&
       typeof commit.instagramJob === "object" &&
@@ -613,13 +612,13 @@ async function handleRequest(req: Request): Promise<Response> {
       !Array.isArray(commit.facebookPageJob)
     ? commit.facebookPageJob as JsonRecord
     : null;
-  const instagramJob = browserSafePublishJob(instagramJobInternal);
-  const facebookPageJob = browserSafePublishJob(facebookPageJobInternal);
+  const instagramJob = safeGalleryPublishJob(instagramJobInternal);
+  const facebookPageJob = safeGalleryPublishJob(facebookPageJobInternal);
 
   return jsonResponse({
     ok: true,
     data: {
-      submission: updatedSubmission,
+      submission: safeSubmission,
       action,
       reviewedAt,
       instagramJob,

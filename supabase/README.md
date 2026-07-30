@@ -390,13 +390,23 @@ VOTE_REMINDER_TIME_ZONE=America/Los_Angeles
 VOTE_REMINDER_CRON_SECRET=<set manually, never commit>
 # DISCORD_VOTE_LINKS_JSON=<optional JSON links secret, never commit real private targets if sensitive>
 GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
+GALLERY_PREVIEW_VERCEL_OWNER=<independent server-side owner slug pin, never commit a real value>
+GALLERY_PREVIEW_VERCEL_OWNER_ID=<independent server-side owner id pin, never commit a real value>
+GALLERY_PREVIEW_VERCEL_PROJECT=<independent server-side project name pin, never commit a real value>
+GALLERY_PREVIEW_VERCEL_PROJECT_ID=<independent server-side project id pin, never commit a real value>
 INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
 INSTAGRAM_EXPECTED_ACCOUNT_ID=<set independently to the same verified Graph user ID, never commit>
 INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
-INSTAGRAM_API_VERSION=v25.0
+INSTAGRAM_API_VERSION=v26.0
 INSTAGRAM_PUBLISH_ENABLED=false
-META_APP_ID=4210347289109364
+META_APP_ID=<set manually, never commit>
+META_EXPECTED_APP_ID=<set independently to the same verified app ID, never commit>
 META_APP_SECRET=<set manually, never commit>
+FACEBOOK_PAGE_ID=<set manually, never commit>
+FACEBOOK_EXPECTED_PAGE_ID=<set independently to the same verified Page ID, never commit>
+FACEBOOK_PAGE_ACCESS_TOKEN=<set manually, never commit>
+FACEBOOK_API_VERSION=v26.0
+FACEBOOK_PAGE_PUBLISH_ENABLED=false
 DISCORD_WEBHOOK_GALLERY_APPROVED=<set manually, never commit>
 DISCORD_WEBHOOK_MOD_LOG=<set manually, never commit>
 DISCORD_EVENTS_CHANNEL_ID=<set per environment>
@@ -422,6 +432,11 @@ supabase functions serve mark-instagram-gallery-submission-shared --env-file sup
 supabase functions serve check-instagram-api-status --env-file supabase/functions/.env.local
 supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
 supabase functions serve resolve-instagram-publish-reconciliation --env-file supabase/functions/.env.local
+supabase functions serve list-facebook-page-publish-queue --env-file supabase/functions/.env.local
+supabase functions serve check-facebook-page-api-status --env-file supabase/functions/.env.local
+supabase functions serve publish-facebook-page-gallery-submission --env-file supabase/functions/.env.local
+supabase functions serve resolve-facebook-page-publish-reconciliation --env-file supabase/functions/.env.local
+supabase functions serve withdraw-gallery-publication-consent --env-file supabase/functions/.env.local
 ```
 
 Production secret examples:
@@ -442,18 +457,28 @@ supabase secrets set DISCORD_VOTE_CHANNEL_ID=1082802012095266866
 supabase secrets set VOTE_REMINDER_TIME_ZONE=America/Los_Angeles
 supabase secrets set VOTE_REMINDER_CRON_SECRET=<set manually, never commit>
 supabase secrets set GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
+supabase secrets set GALLERY_PREVIEW_VERCEL_OWNER=<set manually, never commit>
+supabase secrets set GALLERY_PREVIEW_VERCEL_OWNER_ID=<set manually, never commit>
+supabase secrets set GALLERY_PREVIEW_VERCEL_PROJECT=<set manually, never commit>
+supabase secrets set GALLERY_PREVIEW_VERCEL_PROJECT_ID=<set manually, never commit>
 supabase secrets set INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
 supabase secrets set INSTAGRAM_EXPECTED_ACCOUNT_ID=<set independently to the same verified Graph user ID, never commit>
 supabase secrets set INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
-supabase secrets set INSTAGRAM_API_VERSION=v25.0
+supabase secrets set INSTAGRAM_API_VERSION=v26.0
 supabase secrets set INSTAGRAM_PUBLISH_ENABLED=false
-supabase secrets set META_APP_ID=4210347289109364
+supabase secrets set META_APP_ID=<set manually, never commit>
+supabase secrets set META_EXPECTED_APP_ID=<set independently to the same verified app ID, never commit>
 supabase secrets set META_APP_SECRET=<set manually, never commit>
+supabase secrets set FACEBOOK_PAGE_ID=<set manually, never commit>
+supabase secrets set FACEBOOK_EXPECTED_PAGE_ID=<set independently to the same verified Page ID, never commit>
+supabase secrets set FACEBOOK_PAGE_ACCESS_TOKEN=<set manually, never commit>
+supabase secrets set FACEBOOK_API_VERSION=v26.0
+supabase secrets set FACEBOOK_PAGE_PUBLISH_ENABLED=false
 ```
 
-`supabase secrets set ...` writes remote project secrets. Run it only from a trusted shell and never paste tokens into tracked files.
+`supabase secrets set ...` writes remote project secrets. Run it only from a trusted shell and never paste tokens or private identity pins into tracked files. All four `GALLERY_PREVIEW_VERCEL_*` values are required; the preview endpoint fails closed when any pin is missing or malformed and derives its issuer, JWKS URL, audience, and subject only from those validated pins.
 
-Instagram credentials live only in Supabase secrets. Do not place Instagram access tokens, Graph account IDs, or environment values in Vercel, browser code, GitHub Actions logs, issue comments, PR text, or public docs with real values. Provider inventory identifiers may appear only in the no-secret integration contract and must not be treated as runtime credentials.
+Meta credentials and private identity pins live only in Supabase secrets and the approved private recovery boundary. Do not place access tokens, Graph identifiers, app secrets, proofs, or environment values in Vercel, browser code, GitHub Actions logs, issue comments, PR text, or public docs with real values.
 
 Verify remote secrets without printing secret values:
 
@@ -930,7 +955,7 @@ Instagram publishing uses five moderator-only Edge Functions:
 - `resolve-instagram-publish-reconciliation`
 - `mark-instagram-gallery-submission-shared`
 
-All five require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. The Meta API status function is diagnostic-only and must not create media containers or publish posts. The API publisher uses the fixed `https://graph.facebook.com` origin for the Page-linked Facebook Login model, pins `META_APP_ID=4210347289109364`, requires `META_APP_SECRET`, attaches server-computed HMAC-SHA256 `appsecret_proof` to every token-bearing request, requires the exact `INSTAGRAM_PUBLISH_ENABLED=true` server flag, and verifies the configured Graph id resolves to the `@mochirii_guild` Business account before reading or locking a job. It creates a short-lived signed URL only for Meta after verifying the frozen metadata-stripped social JPEG's exact object evidence, bytes, dimensions, MIME, and SHA-256. Tokens, secrets, proofs, object paths, hashes, and signed URLs are never returned to the browser.
+All five require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. The Meta API status function is diagnostic-only and must not create media containers or publish posts. The API publisher uses only the fixed `https://graph.facebook.com` origin and Graph `v26.0`, requires independently matching runtime and expected app/account pins, and requires the exact `INSTAGRAM_PUBLISH_ENABLED=true` server flag. Every normal token-bearing request uses bearer authorization plus a fresh five-minute-bounded HMAC-SHA256 `appsecret_time`/`appsecret_proof`; redirects, retries, unbounded responses, and raw provider diagnostics fail closed. The publisher verifies the configured Graph id and username before reading or locking a job. It creates a short-lived signed URL only for Meta after verifying the frozen metadata-stripped social JPEG's exact object evidence, bytes, dimensions, MIME, and SHA-256. Tokens, secrets, proofs, object paths, transient container identifiers, hashes, signed URLs, and raw provider responses are never returned to the browser.
 
 Approval behavior:
 
@@ -943,6 +968,8 @@ The Leader Dashboard shows the Instagram Queue with a credential-free approved t
 
 V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Keep the activation flag false while the provider link restriction and human review gate remain incomplete. Any live Meta setup, Supabase secret change, Edge Function redeployment, slash-command registration, activation-flag change, or real Instagram post requires explicit owner approval. See [`../docs/integrations/instagram-gallery-publishing.md`](../docs/integrations/instagram-gallery-publishing.md).
 
+Members use `withdraw-gallery-publication-consent` to record a destination-specific withdrawal. Queued, failed, or ineligible work is canceled atomically; ambiguous in-flight work is quarantined for moderator inspection; already-published work creates a removal request without claiming that an external copy was deleted. Original consent and withdrawal evidence remain immutable.
+
 ## Facebook Page Publishing Queue
 
 Facebook Page publishing uses four moderator-only Edge Functions:
@@ -954,7 +981,7 @@ Facebook Page publishing uses four moderator-only Edge Functions:
 
 All four require a signed-in Supabase user JWT plus current Discord Moderator verification. The website sends the unchecked-by-default Facebook consent boolean and exact non-secret `2026-07-website-public-facebook-page-group-v2` contract claim. An insert trigger accepts only that exact website handshake for current publishable consent, authors its timestamp/source/copy provenance, and marks missing or stale claims unverified instead of silently upgrading them; a second trigger makes the contract immutable. Explicit member consent and gallery approval create exactly one service-only Page job in the same database transaction as the moderation and Instagram outbox records. New opt-ins require an already feed-compatible JPEG. Gallery-only JPEG, PNG, and WebP uploads remain accepted; unsupported or legacy opted-in sources create an ineligible audited job instead of falling back to browser media. Existing submissions remain opted out.
 
-The publisher requires the exact server-only `FACEBOOK_PAGE_PUBLISH_ENABLED=true` activation flag before it locks a job. It locks only `queued` or `failed` jobs, resolves the immutable source-bound social derivative at its unpredictable `_social/submissions/{submission UUID}/{revision UUID}.jpg` path, downloads that private derivative server-side, verifies its exact object identity, version, timestamp, size, MIME, dimensions, and SHA-256, and uploads multipart bytes to the configured Facebook Page. Page id, Page access token, Graph API version, and the activation flag stay in Supabase Edge configuration; the flag starts false. Network failures, Meta server errors, responses without an external id, and attempts left `publishing` beyond their 15-minute lease enter `reconcile_required`; they must be inspected on the Page before any retry because the Graph photo endpoint has no client idempotency key. The automatic lease event has no moderator actor. Any returned provider ids remain on the reconciliation audit record as lookup evidence without marking the job published. A moderator can explicitly resolve the inspected result as published only after a read-only Graph lookup proves every supplied photo/post ID belongs to the pinned Page and yields a canonical HTTPS Facebook post/photo permalink. A not-published resolution rejects provider IDs and permalinks and returns the job to retryable `failed`. Both outcomes require a note and durable actor audit. The status function performs a read-only Page identity check; Page task evidence is optional and never substitutes for the server activation gate. Raw Meta error messages and payloads are not returned; only fixed operator-safe messages and allowlisted non-secret classifications cross the Edge boundary.
+The publisher requires the exact server-only `FACEBOOK_PAGE_PUBLISH_ENABLED=true` activation flag before it locks a job. It also requires independently matching runtime and expected app/Page pins and Graph `v26.0`. It locks only `queued` or `failed` jobs, resolves the immutable source-bound social derivative at its unpredictable `_social/submissions/{submission UUID}/{revision UUID}.jpg` path, downloads that private derivative server-side, verifies its exact object identity, version, timestamp, size, MIME, dimensions, and SHA-256, and uploads multipart bytes to the configured Facebook Page. Page id, Page access token, Graph API version, and the activation flag stay in Supabase Edge configuration; the flag starts false. Network failures, Meta server errors, responses without an external id, and attempts left `publishing` beyond their 15-minute lease enter `reconcile_required`; they must be inspected on the Page before any retry because the Graph photo endpoint has no client idempotency key. The automatic lease event has no moderator actor. Any returned provider ids remain on the reconciliation audit record as lookup evidence without marking the job published. A moderator can explicitly resolve the inspected result as published only after a read-only Graph lookup proves every supplied photo/post ID belongs to the pinned Page and yields a canonical HTTPS Facebook post/photo permalink. A not-published resolution rejects provider IDs and permalinks and returns the job to retryable `failed`. Both outcomes require a note and durable actor audit. The status function performs a read-only Page identity check; Page task evidence is optional and never substitutes for the server activation gate. Raw Meta error messages and payloads are not returned; only fixed operator-safe messages and allowlisted non-secret classifications cross the Edge boundary.
 
 If the moderation RPC has a definite non-commit, the provisional social derivative is removed. A transport failure with an unknown commit outcome returns `moderation_commit_outcome_unknown`, preserves the provisional object, and requires a state reload/reconciliation before cleanup so a committed derivative is never deleted speculatively.
 
@@ -986,7 +1013,7 @@ If an older approved `gallery_submissions` row has blank `title` and `caption` v
 
 Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; published member items use their frozen reviewed and created timestamps with the stable publication ID as the final key. The default Gallery order is computed before first paint and runtime cards append without moving rendered static cards. Visitors may choose `Newest first` or `Oldest first`; cross-source results are exposed only through the proven keyset boundary. Runtime thumbnails and display derivatives use stable credential-free Edge URLs backed by private, immutable media evidence; source originals and unpublished submissions remain private.
 
-The integrated source contract contains exactly 45 configured Edge Functions with 28 `verify_jwt=true` and 17 false. The Gallery delivery contract itself introduces no Edge Function; the total also includes the separately disabled monthly-raffle and social-publishing foundations. Recalculate that parity from the final exact release head before provider approval.
+The integrated source contract contains exactly 46 configured Edge Functions with 29 `verify_jwt=true` and 17 false. The additional authenticated function is the fail-closed social-publication consent-withdrawal boundary; the total also includes the separately disabled monthly-raffle and social-publishing foundations. Recalculate that parity from the final exact release head before provider approval.
 
 Before release, run `operations/reconcile_gallery_public_feed_v2.sql` from a
 trusted read-only session. It reports only public-safe counts and verifies that

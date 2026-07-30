@@ -25,11 +25,17 @@ const files = {
   resolve: "supabase/functions/resolve-instagram-publish-reconciliation/index.ts",
   sharedPublishing: "supabase/functions/_shared/instagram-publishing.ts",
   sharedPublishingTest: "supabase/functions/_shared/instagram-publishing_test.ts",
+  graphSecurity: "supabase/functions/_shared/meta-graph-security.ts",
+  providerDiagnostic: "supabase/functions/_shared/meta-provider-diagnostic.ts",
+  responseSafety: "supabase/functions/_shared/gallery-response-safety.ts",
+  responseSafetyTest: "supabase/functions/_shared/gallery-response-safety_test.ts",
+  publicationConfirmation: "supabase/functions/_shared/social-publication-confirmation.ts",
   publicationCopyGuard: "supabase/functions/_shared/social-publication-copy.ts",
   publicationCopyWeb: "apps/web/lib/gallery/social-publication-copy.ts",
   publicationCopyTest: "apps/web/lib/gallery/social-publication-copy.test.mts",
   databaseTest: "supabase/tests/instagram_gallery_publishing_hardening_test.sql",
   markShared: "supabase/functions/mark-instagram-gallery-submission-shared/index.ts",
+  withdrawal: "supabase/functions/withdraw-gallery-publication-consent/index.ts",
   envExample: "supabase/functions/.env.example",
   supabaseReadme: "supabase/README.md",
   moderationRunbook: "docs/member-gallery-moderation-runbook.md",
@@ -105,11 +111,17 @@ const publish = read(files.publish);
 const resolve = read(files.resolve);
 const sharedPublishing = read(files.sharedPublishing);
 const sharedPublishingTest = read(files.sharedPublishingTest);
+const graphSecurity = read(files.graphSecurity);
+const providerDiagnostic = read(files.providerDiagnostic);
+const responseSafety = read(files.responseSafety);
+const responseSafetyTest = read(files.responseSafetyTest);
+const publicationConfirmation = read(files.publicationConfirmation);
 const publicationCopyGuard = read(files.publicationCopyGuard);
 const publicationCopyWeb = read(files.publicationCopyWeb);
 const publicationCopyTest = read(files.publicationCopyTest);
 const databaseTest = read(files.databaseTest);
 const markShared = read(files.markShared);
+const withdrawal = read(files.withdrawal);
 const envExample = read(files.envExample);
 const supabaseReadme = read(files.supabaseReadme);
 const moderationRunbook = read(files.moderationRunbook);
@@ -317,14 +329,12 @@ assertNotMatches(
   "INSTAGRAM_API_VERSION",
   "INSTAGRAM_PUBLISH_ENABLED",
   "META_APP_ID",
+  "META_EXPECTED_APP_ID",
   "META_APP_SECRET",
-  "4210347289109364",
-  "https://graph.facebook.com",
   'const INSTAGRAM_EXPECTED_USERNAME = "mochirii_guild"',
   "instagramPublishFlagEnabled",
   "instagramIdentityMatches",
-  "instagramAppSecretProof",
-  "appsecret_proof",
+  "fetchMetaGraphOnce",
   "gallery-social-jpeg-v1",
   "jfif-only-no-app-metadata-v1",
   "instagramFeedImageIsCompatible",
@@ -335,10 +345,29 @@ assertNotMatches(
   "createSignedUrl",
   "/media_publish",
   "reconcile_required",
-  'redirect: "error"',
   "instagramGraphFailure",
   "provider_error_subcode",
 ].forEach((snippet) => assertIncludes("Instagram publishing boundary", sharedPublishing, snippet));
+
+[
+  'META_GRAPH_API_VERSION = "v26.0"',
+  "accessToken}|${appsecretTime}",
+  'headers.set("Authorization"',
+  'redirect: "error"',
+  "AbortSignal.any",
+  "fetchMetaGraphOnce",
+  "meta_token_debug_query_transport_not_approved",
+].forEach((snippet) => assertIncludes("Meta Graph security boundary", graphSecurity, snippet));
+assertIncludes(
+  "Meta provider diagnostic",
+  providerDiagnostic,
+  'businessAccountSubtypeVerification: values.provider === "instagram"',
+);
+assertIncludes(
+  "publication confirmation binding",
+  publicationConfirmation,
+  "socialPublicationConfirmationFingerprint",
+);
 
 assertNotMatches(
   "Instagram publishing boundary",
@@ -351,7 +380,11 @@ assertNotMatches(
   "requireModeratorAccess(req)",
   "publishInstagramJob",
   "confirm_instagram_publish",
+  "expected_updated_at",
+  "confirmation_fingerprint",
+  "socialPublicationConfirmationFingerprint",
   "validateSocialPublicationCopy([caption, altText])",
+  "safeInstagramPublishResponse(jobId, published)",
 ].forEach((snippet) => assertIncludes("publish-instagram-gallery-submission", publish, snippet));
 
 const edgeCopyGuardIndex = publish.indexOf("const copyValidation = validateSocialPublicationCopy");
@@ -361,7 +394,7 @@ if (edgeCopyGuardIndex < 0 || edgeAuthIndex < 0 || edgeAuthIndex > edgeCopyGuard
 }
 
 const helperCopyGuardIndex = sharedPublishing.indexOf("const copyValidation = validateSocialPublicationCopy");
-const helperConfigIndex = sharedPublishing.indexOf("const config = instagramConfig()");
+const helperConfigIndex = sharedPublishing.indexOf("const config = dependencies.config || instagramConfig()");
 if (helperCopyGuardIndex < 0 || helperConfigIndex < 0 || helperCopyGuardIndex > helperConfigIndex) {
   failures.push("Instagram publisher must reject disallowed publication copy before configuration or provider access.");
 }
@@ -369,8 +402,8 @@ if (helperCopyGuardIndex < 0 || helperConfigIndex < 0 || helperCopyGuardIndex > 
 [
   'normalize("NFKC")',
   "FORMAT_OR_ZERO_WIDTH_RE",
-  "SITE_DOMAIN_RE",
-  "social_publication_site_reference_forbidden",
+  "BARE_DOMAIN_RE",
+  "social_publication_url_reference_forbidden",
 ].forEach((snippet) => assertIncludes("shared publication copy guard", publicationCopyGuard, snippet));
 assertIncludes("browser publication copy guard", publicationCopyWeb, "social-publication-copy");
 [
@@ -383,9 +416,35 @@ assertIncludes("browser publication copy guard", publicationCopyWeb, "social-pub
   "copyValidation.message",
 ].forEach((snippet) => assertIncludes("Next leader dashboard publication copy guard", nextDashboard, snippet));
 [
-  "publication copy is rejected before database or provider access",
-  'result.error === "social_publication_site_reference_forbidden"',
+  "Instagram copy and missing alt text stop before database or Graph",
+  "invalid request reached database",
 ].forEach((snippet) => assertIncludes("Instagram publisher tests", sharedPublishingTest, snippet));
+
+[
+  "safeInstagramPublishQueueItem({",
+].forEach((snippet) => assertIncludes("Instagram queue response allowlist", listQueue, snippet));
+[
+  "safeInstagramPublishQueueItem",
+  "safeInstagramPublishResponse",
+].forEach((snippet) => assertIncludes("Gallery response safety", responseSafety, snippet));
+[
+  "Instagram queue response uses an exact browser-safe top-level shape",
+  "private transient provider state reached the Instagram queue DTO",
+  "Instagram publish responses use exact caller-safe success and failure shapes",
+  "private transient provider state reached an Instagram publish response",
+].forEach((snippet) => assertIncludes("Gallery response safety tests", responseSafetyTest, snippet));
+assertNotMatches(
+  "Instagram queue response",
+  listQueue,
+  /instagram_container_id|instagramContainerId/,
+  "private transient container ids must never enter queue browser DTOs.",
+);
+assertNotMatches(
+  "Instagram publish response",
+  publish,
+  /instagramContainerId/,
+  "private transient container ids must never enter publish responses.",
+);
 
 const publishFlagIndex = sharedPublishing.indexOf("if (!config.publishEnabled)");
 const identityCheckIndex = sharedPublishing.indexOf("instagramIdentityMatches(identityBody");
@@ -417,9 +476,9 @@ if (
   "instagramConfig",
   "instagramIdentityMatches",
   "publishEnabled",
-  "accountReachable",
-  "@mochirii_guild",
-  "Meta API publishing is not configured",
+  "readInstagramPageLinkageOnce",
+  "pageConfig.expectedPageId",
+  "providerErrorCategory",
 ].forEach((snippet) => assertIncludes("check-instagram-api-status", checkMeta, snippet));
 
 assertNotMatches(
@@ -430,13 +489,6 @@ assertNotMatches(
 );
 
 assertNotMatches(
-  "check-instagram-api-status",
-  checkMeta,
-  /expectedAccountId|INSTAGRAM_EXPECTED_ACCOUNT_ID/,
-  "Meta API diagnostic must not expose or name the private expected account-id secret.",
-);
-
-assertNotMatches(
   "Instagram Graph boundary",
   `${sharedPublishing}\n${checkMeta}\n${publish}`,
   /graph\.instagram\.com|INSTAGRAM_API_BASE_URL/,
@@ -444,23 +496,18 @@ assertNotMatches(
 );
 
 [
-  "Instagram Graph account activation requires an exact expected-id secret",
-  "a missing expected-id secret was treated as pinned",
-  "an invalid expected-id secret was treated as pinned",
-  "a mismatched expected-id secret was treated as pinned",
-  "a valid Instagram job UUID was rejected",
-  "a malformed Instagram job UUID was accepted",
-  "old Instagram username matched",
-  "non-Business account type matched",
-  "Business Settings asset id substituted for the Graph account id",
-  "missing flag was enabled",
-  "redirects were not rejected",
-  "app secret proof",
-  "server outcomes require reconciliation",
-  "feed derivative compatibility",
-  "reflected Meta errors never expose signed media evidence",
-  "fake-secret-token",
-  "safe provider error identifiers were not retained",
+  "Instagram identifiers and Graph URL are v26-only",
+  "Instagram runtime account pin must match independently",
+  "Instagram identity verifies id and username without an undocumented subtype field",
+  "Instagram quota is provider-derived and fail closed",
+  "Instagram container states use a closed allowlist",
+  "unknown and oversized Instagram container states reconcile without raw provider text",
+  "Instagram media evidence binds id, owner, username, type, and permalink",
+  "Instagram temporary media URL is HTTPS, origin-bound, and bearer-free",
+  "Instagram copy and missing alt text stop before database or Graph",
+  "Instagram disabled flag prevents database and Graph requests",
+  "Instagram JPEG compatibility and activation are fail closed",
+  "ambiguous outcomes reconcile and reflected provider evidence is redacted",
 ].forEach((snippet) => assertIncludes("Instagram publishing unit tests", sharedPublishingTest, snippet));
 
 [
@@ -480,7 +527,7 @@ assertNotMatches(
 
 [
   "accountIdPinned",
-  "expected account id secret does not match",
+  "readInstagramPageLinkageOnce",
   "withProtectedCors(req, handleRequest(req))",
   'req.method === "OPTIONS"',
   "protectedOptionsResponse(req)",
@@ -541,6 +588,18 @@ assertNotMatches(
   "publishing function must not log Instagram tokens or signed URLs.",
 );
 
+assertIncludes(
+  "social publication consent withdrawal",
+  withdrawal,
+  "gallery_withdraw_social_publication_consent",
+);
+assertNotMatches(
+  "Meta production sources",
+  `${sharedPublishing}\n${graphSecurity}\n${providerDiagnostic}\n${checkMeta}\n${publish}\n${resolve}\n${withdrawal}`,
+  /console\.(?:error|warn)/,
+  "raw provider or database errors must use the bounded safe telemetry contract.",
+);
+
 [
   "DISCORD_GALLERY_CHANNEL_ID=1508077313965817856",
   "DISCORD_GALLERY_INGEST_HMAC_KEYS_JSON=",
@@ -548,9 +607,10 @@ assertNotMatches(
   "INSTAGRAM_ACCOUNT_ID=",
   "INSTAGRAM_EXPECTED_ACCOUNT_ID=",
   "INSTAGRAM_ACCESS_TOKEN=",
-  "INSTAGRAM_API_VERSION=v25.0",
+  "INSTAGRAM_API_VERSION=v26.0",
   "INSTAGRAM_PUBLISH_ENABLED=false",
   "META_APP_ID=",
+  "META_EXPECTED_APP_ID=",
   "META_APP_SECRET=",
 ].forEach((snippet) => assertIncludes("supabase functions .env.example", envExample, snippet));
 
@@ -560,7 +620,7 @@ assertNotMatches(
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
   "mark-instagram-gallery-submission-shared",
-  "Instagram credentials live only in Supabase secrets",
+  "Meta credentials and private identity pins live only in Supabase secrets",
   "INSTAGRAM_PUBLISH_ENABLED=true",
   "https://graph.facebook.com",
   "no automatic Instagram publishing",
@@ -576,41 +636,21 @@ assertNotMatches(
 ].forEach((snippet) => assertIncludes("moderation runbook", moderationRunbook, snippet));
 
 [
-  "Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/198>",
-  "/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]",
-  "2026-06-discord-submit-v1",
-  "API-ineligible",
-  "No real Instagram post may be created without explicit action-time owner approval.",
-  "DISCORD_GALLERY_CHANNEL_ID",
-  "INSTAGRAM_ACCOUNT_ID",
-  "INSTAGRAM_EXPECTED_ACCOUNT_ID",
-  "INSTAGRAM_ACCESS_TOKEN",
-  "INSTAGRAM_PUBLISH_ENABLED",
-  "@mochirii_guild",
-  "2026-08-28",
-  "human reCAPTCHA",
-  "instagram_business_account.id",
-  "supabase functions deploy list-instagram-publish-queue",
-  "supabase functions deploy publish-instagram-gallery-submission",
-  "supabase functions deploy mark-instagram-gallery-submission-shared",
-  "\"instagramOptIn\": true",
-  "shared_manually",
-  "wrong channel fail-closed",
-  "duplicate Discord message/attachment does not change stored consent",
-  "Rollback options",
+  "website consent v3",
+  "pinned to `v26.0`",
+  "Both publishing flags remain `false`",
+  "authenticated `409` compatibility stub",
+  "public profile link fields remain empty",
 ].forEach((snippet) => assertIncludes("Instagram deployment runbook", deploymentRunbook, snippet));
 
 [
   "@mochirii_guild",
-  "https://www.facebook.com/mochiriiguildpage",
-  "4210347289109364",
-  "instagram_business_account.id",
   "INSTAGRAM_EXPECTED_ACCOUNT_ID",
   "INSTAGRAM_PUBLISH_ENABLED",
-  "2026-08-28",
-  "human reCAPTCHA",
+  "v26.0",
   "https://graph.facebook.com",
-  "Do not place or link `mochirii.com` in the Instagram profile",
+  "website/link field stays empty",
+  "support@mochirii.com",
 ].forEach((snippet) => assertIncludes("Instagram integration contract", integrationContract, snippet));
 
 assertNotMatches(

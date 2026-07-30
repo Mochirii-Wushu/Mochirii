@@ -42,6 +42,12 @@ const protectedFunctions = [
     body: {},
   },
   {
+    name: "withdraw-gallery-publication-consent",
+    body: {
+      submission_id: "00000000-0000-4000-8000-000000000000",
+    },
+  },
+  {
     name: "list-instagram-publish-queue",
     body: { status: "queued" },
   },

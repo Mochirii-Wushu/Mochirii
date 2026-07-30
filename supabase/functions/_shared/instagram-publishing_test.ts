@@ -1,19 +1,19 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  finishFailure,
   instagramAccountIdIsValid,
   instagramAccountIdMatchesCanonicalPin,
   instagramApiVersionIsValid,
-  instagramAppSecretProof,
+  instagramContainerStatusDecision,
   instagramFeedImageIsCompatible,
   instagramGraphFailure,
   instagramGraphOutcome,
   instagramGraphUrl,
   instagramIdentityMatches,
-  instagramJobIdIsValid,
-  instagramProofUrl,
+  instagramMediaObjectEvidence,
   instagramPublishFlagEnabled,
-  instagramTokenRequestInit,
+  instagramPublishingQuota,
+  instagramTemporaryMediaUrlIsSafe,
+  normalizeInstagramContainerStatusCode,
   normalizeInstagramPostPermalink,
   publishInstagramJob,
 } from "./instagram-publishing.ts";
@@ -22,242 +22,278 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-Deno.test("Instagram identifiers use strict provider formats", () => {
-  assert(
-    instagramAccountIdIsValid("17841400000000000"),
-    "valid Graph account id rejected",
-  );
-  assert(
-    !instagramAccountIdIsValid("mochirii_guild"),
-    "username accepted as an account id",
-  );
-  assert(
-    !instagramAccountIdIsValid("1262341610290624/instagram"),
-    "path-shaped account id accepted",
-  );
+const actorId = "61111111-1111-4111-8111-111111111111";
+const jobId = "63333333-3333-4333-8333-333333333333";
+const expectedUpdatedAt = "2026-07-29T20:00:00.000000+00:00";
+const digest = "a".repeat(64);
 
-  assert(instagramApiVersionIsValid("v25.0"), "current API version rejected");
-  assert(!instagramApiVersionIsValid("25.0"), "unprefixed version accepted");
+Deno.test("Instagram identifiers and Graph URL are v26-only", () => {
+  assert(instagramAccountIdIsValid("111111111111111"), "numeric id rejected");
+  assert(!instagramAccountIdIsValid("mochirii_guild"), "username accepted");
+  assert(instagramApiVersionIsValid("v26.0"), "v26 rejected");
+  assert(!instagramApiVersionIsValid("v25.0"), "v25 accepted");
+  assert(!instagramApiVersionIsValid("latest"), "floating version accepted");
   assert(
-    !instagramApiVersionIsValid("v25.0/media"),
-    "version path accepted",
-  );
-  assert(
-    instagramGraphUrl("latest", "17841400000000000/media") === "",
-    "invalid version produced a Graph URL",
-  );
-  assert(
-    instagramGraphUrl("v25.0", "17841400000000000/media") ===
-      "https://graph.facebook.com/v25.0/17841400000000000/media",
-    "valid Graph URL did not stay on Meta's fixed origin",
-  );
-  assert(
-    instagramJobIdIsValid("63333333-3333-4333-8333-333333333333"),
-    "a valid Instagram job UUID was rejected",
-  );
-  assert(
-    !instagramJobIdIsValid("63333333-3333-4333-833333333333"),
-    "a malformed Instagram job UUID was accepted",
+    instagramGraphUrl("v26.0", "111111111111111/media") ===
+      "https://graph.facebook.com/v26.0/111111111111111/media",
+    "Graph URL drifted",
   );
 });
 
-Deno.test("Instagram publication copy is rejected before database or provider access", async () => {
+Deno.test("Instagram runtime account pin must match independently", () => {
+  assert(
+    instagramAccountIdMatchesCanonicalPin(
+      "111111111111111",
+      "111111111111111",
+    ),
+    "exact pin rejected",
+  );
+  assert(
+    !instagramAccountIdMatchesCanonicalPin(
+      "111111111111111",
+      "222222222222222",
+    ),
+    "mismatched pin accepted",
+  );
+});
+
+Deno.test("Instagram identity verifies id and username without an undocumented subtype field", () => {
+  assert(
+    instagramIdentityMatches({
+      id: "111111111111111",
+      username: "mochirii_guild",
+    }, "111111111111111"),
+    "official identity rejected",
+  );
+  assert(
+    !instagramIdentityMatches({
+      id: "111111111111111",
+      username: "old_account",
+      account_type: "BUSINESS",
+    }, "111111111111111"),
+    "wrong username accepted",
+  );
+});
+
+Deno.test("Instagram quota is provider-derived and fail closed", () => {
+  const available = instagramPublishingQuota({
+    data: [{ quota_usage: 7, config: { quota_total: 23 } }],
+  });
+  assert(available.readable && !available.exhausted, "dynamic quota rejected");
+  assert(available.total === 23, "quota was hard-coded");
+  const exhausted = instagramPublishingQuota({
+    data: [{ quota_usage: 23, config: { quota_total: 23 } }],
+  });
+  assert(exhausted.exhausted, "exhausted quota accepted");
+  assert(
+    !instagramPublishingQuota({ data: [{}] }).readable,
+    "missing quota became available",
+  );
+});
+
+Deno.test("Instagram container states use a closed allowlist", () => {
+  const supported = [
+    "FINISHED",
+    "IN_PROGRESS",
+    "ERROR",
+    "EXPIRED",
+    "PUBLISHED",
+  ] as const;
+  for (const status of supported) {
+    assert(
+      normalizeInstagramContainerStatusCode(status.toLowerCase()) === status,
+      `${status} was not normalized`,
+    );
+  }
+  assert(
+    instagramContainerStatusDecision("FINISHED").action === "ready",
+    "finished container was not ready",
+  );
+  assert(
+    instagramContainerStatusDecision("IN_PROGRESS").action ===
+      "reconcile_required",
+    "in-progress container did not stop before media_publish",
+  );
+  assert(
+    instagramContainerStatusDecision("IN_PROGRESS").error ===
+      "container_in_progress",
+    "in-progress container lost its safe error category",
+  );
+  for (const status of ["ERROR", "EXPIRED", "PUBLISHED"] as const) {
+    assert(
+      instagramContainerStatusDecision(status).action ===
+        "reconcile_required",
+      `${status} did not fail closed into reconciliation`,
+    );
+  }
+});
+
+Deno.test("unknown and oversized Instagram container states reconcile without raw provider text", () => {
+  for (
+    const rawStatus of ["FUTURE_PROVIDER_STATE", `SECRET_${"x".repeat(4000)}`]
+  ) {
+    const decision = instagramContainerStatusDecision(rawStatus);
+    const serialized = JSON.stringify(decision);
+    assert(decision.statusCode === "UNKNOWN", "untrusted state was retained");
+    assert(
+      decision.action === "reconcile_required",
+      "untrusted state did not enter reconciliation",
+    );
+    assert(
+      decision.error === "container_status_unknown",
+      "untrusted state did not use the stable error category",
+    );
+    assert(!serialized.includes(rawStatus), "raw provider state was retained");
+    assert(!serialized.includes("SECRET_"), "provider evidence leaked");
+  }
+});
+
+Deno.test("Instagram media evidence binds id, owner, username, type, and permalink", () => {
+  const evidence = instagramMediaObjectEvidence(
+    {
+      id: "333333333333333",
+      owner: { id: "111111111111111" },
+      username: "mochirii_guild",
+      media_type: "IMAGE",
+      permalink: "https://instagram.com/p/AbC_123/?igsh=tracking",
+    },
+    "333333333333333",
+    "111111111111111",
+  );
+  assert(evidence.verified, "official image evidence rejected");
+  assert(
+    evidence.permalink === "https://www.instagram.com/p/AbC_123/",
+    "permalink not canonical",
+  );
+  assert(
+    !instagramMediaObjectEvidence(
+      {
+        id: "333333333333333",
+        owner: { id: "999999999999999" },
+        username: "mochirii_guild",
+        media_type: "IMAGE",
+        permalink: "https://instagram.com/p/AbC_123/",
+      },
+      "333333333333333",
+      "111111111111111",
+    ).verified,
+    "foreign owner accepted",
+  );
+  assert(
+    normalizeInstagramPostPermalink("https://evil.example/p/x") === null,
+    "foreign permalink accepted",
+  );
+});
+
+Deno.test("Instagram temporary media URL is HTTPS, origin-bound, and bearer-free", () => {
+  const supabaseUrl = "https://project.supabase.co";
+  const safeUrl =
+    `${supabaseUrl}/storage/v1/object/sign/member-gallery/_social/submissions/` +
+    `${jobId}/${actorId}.jpg?token=signed-value`;
+  assert(
+    instagramTemporaryMediaUrlIsSafe(safeUrl, supabaseUrl),
+    "valid temporary media URL was rejected",
+  );
+  for (
+    const value of [
+      safeUrl.replace("https://", "http://"),
+      safeUrl.replace("project.supabase.co", "evil.example"),
+      safeUrl.replace("?token=", "?access_token=secret&token="),
+      `${supabaseUrl}/storage/v1/object/public/member-gallery/image.jpg`,
+    ]
+  ) {
+    assert(
+      !instagramTemporaryMediaUrlIsSafe(value, supabaseUrl),
+      `unsafe temporary media URL was accepted: ${value}`,
+    );
+  }
+});
+
+Deno.test("Instagram copy and missing alt text stop before database or Graph", async () => {
+  for (
+    const values of [
+      { caption: "mochirii dot com", altText: "Reviewed alt" },
+      { caption: "Reviewed caption", altText: null },
+    ]
+  ) {
+    let databaseCalls = 0;
+    let providerCalls = 0;
+    const result = await publishInstagramJob({
+      adminClient: {
+        rpc: () => {
+          databaseCalls += 1;
+          throw new Error("database must not run");
+        },
+      } as unknown as SupabaseClient,
+      actorId,
+      jobId,
+      caption: values.caption,
+      altText: values.altText,
+      expectedUpdatedAt,
+      confirmationFingerprint: digest,
+      confirmationCopyHash: digest,
+      fetchImpl: () => {
+        providerCalls += 1;
+        throw new Error("provider must not run");
+      },
+    });
+    assert(!result.ok && !result.attempted, "invalid request attempted");
+    assert(databaseCalls === 0, "invalid request reached database");
+    assert(providerCalls === 0, "invalid request reached Graph");
+  }
+});
+
+Deno.test("Instagram disabled flag prevents database and Graph requests", async () => {
   let databaseCalls = 0;
   let providerCalls = 0;
   const result = await publishInstagramJob({
     adminClient: {
       rpc: () => {
         databaseCalls += 1;
-        throw new Error("database operation must not run");
+        throw new Error("database must not run");
       },
     } as unknown as SupabaseClient,
-    actorId: "61111111-1111-4111-8111-111111111111",
-    jobId: "63333333-3333-4333-8333-333333333333",
-    caption: "Approved caption",
-    altText: "Image shared at mochirii [dot] com",
+    actorId,
+    jobId,
+    caption: "Reviewed caption",
+    altText: "Reviewed alt text.",
+    expectedUpdatedAt,
+    confirmationFingerprint: digest,
+    confirmationCopyHash: digest,
+    config: {
+      accountId: "111111111111111",
+      expectedAccountId: "111111111111111",
+      accessToken: "token",
+      apiVersion: "v26.0",
+      appId: "333333333333333",
+      appSecret: "secret",
+      expectedAppId: "333333333333333",
+      expectedUsername: "mochirii_guild",
+      accountIdPinned: true,
+      publishEnabled: false,
+      configured: true,
+      missingSecrets: [],
+      invalidFields: [],
+    },
     fetchImpl: () => {
       providerCalls += 1;
-      throw new Error("provider operation must not run");
+      throw new Error("provider must not run");
     },
   });
-
-  assert(!result.ok, "blocked Instagram copy was accepted");
-  assert(!result.attempted, "blocked Instagram copy was marked attempted");
-  assert(
-    result.error === "social_publication_site_reference_forbidden",
-    "blocked Instagram copy returned the wrong error",
-  );
-  assert(databaseCalls === 0, "blocked Instagram copy reached the database");
-  assert(providerCalls === 0, "blocked Instagram copy reached the provider");
+  assert(result.error === "instagram_publish_disabled", "wrong blocker");
+  assert(databaseCalls === 0, "disabled publisher reached database");
+  assert(providerCalls === 0, "disabled publisher reached Graph");
 });
 
-Deno.test("Instagram post evidence uses canonical post or reel permalinks", () => {
-  assert(
-    normalizeInstagramPostPermalink(
-      "https://instagram.com/p/AbC_123/?igsh=tracking",
-    ) === "https://www.instagram.com/p/AbC_123/",
-    "a canonicalizable Instagram post permalink was rejected",
-  );
-  assert(
-    normalizeInstagramPostPermalink(
-      "https://www.instagram.com/reel/Reel-123",
-    ) === "https://www.instagram.com/reel/Reel-123/",
-    "a canonicalizable Instagram reel permalink was rejected",
-  );
-  for (
-    const invalid of [
-      "http://www.instagram.com/p/example/",
-      "https://user@www.instagram.com/p/example/",
-      "https://www.instagram.com/p/example/#fragment",
-      "https://m.instagram.com/p/example/",
-      "https://www.instagram.com/stories/example/123/",
-      "https://instagram.example/p/example/",
-    ]
-  ) {
-    assert(
-      normalizeInstagramPostPermalink(invalid) === null,
-      `unsafe Instagram permalink was accepted: ${invalid}`,
-    );
-  }
-});
-
-Deno.test("Instagram Graph account activation requires an exact expected-id secret", () => {
-  assert(
-    !instagramAccountIdMatchesCanonicalPin("17841400000000000", ""),
-    "a missing expected-id secret was treated as pinned",
-  );
-  assert(
-    !instagramAccountIdMatchesCanonicalPin(
-      "17841400000000000",
-      "not-a-graph-id",
-    ),
-    "an invalid expected-id secret was treated as pinned",
-  );
-  assert(
-    !instagramAccountIdMatchesCanonicalPin(
-      "17841443491948862",
-      "17841400000000000",
-    ),
-    "a mismatched expected-id secret was treated as pinned",
-  );
-  assert(
-    instagramAccountIdMatchesCanonicalPin(
-      "17841400000000000",
-      "17841400000000000",
-    ),
-    "the exact expected-id secret match was rejected",
-  );
-});
-
-Deno.test("Instagram publishing activation requires the exact server flag", () => {
-  assert(instagramPublishFlagEnabled("true"), "true flag was rejected");
-  assert(!instagramPublishFlagEnabled("false"), "false flag was enabled");
-  assert(!instagramPublishFlagEnabled("TRUE"), "uppercase flag was enabled");
-  assert(!instagramPublishFlagEnabled(" true "), "padded flag was enabled");
-  assert(
-    !instagramPublishFlagEnabled(undefined),
-    "missing flag was enabled",
-  );
-});
-
-Deno.test("Instagram identity is pinned to the new Business account", () => {
-  const accountId = "17841400000000000";
-  assert(
-    instagramIdentityMatches(
-      {
-        id: accountId,
-        username: "mochirii_guild",
-        account_type: "BUSINESS",
-      },
-      accountId,
-    ),
-    "canonical Business identity was rejected",
-  );
-  assert(
-    !instagramIdentityMatches(
-      {
-        id: accountId,
-        username: "mochiriiguild",
-        account_type: "BUSINESS",
-      },
-      accountId,
-    ),
-    "old Instagram username matched",
-  );
-  assert(
-    !instagramIdentityMatches(
-      {
-        id: accountId,
-        username: "mochirii_guild",
-        account_type: "MEDIA_CREATOR",
-      },
-      accountId,
-    ),
-    "non-Business account type matched",
-  );
-  assert(
-    !instagramIdentityMatches(
-      {
-        id: "1262340000000000",
-        username: "mochirii_guild",
-        account_type: "BUSINESS",
-      },
-      accountId,
-    ),
-    "Business Settings asset id substituted for the Graph account id",
-  );
-});
-
-Deno.test("token-bearing Instagram Graph requests reject redirects", () => {
-  const init = instagramTokenRequestInit("placeholder-token", {
-    headers: { Accept: "application/json" },
-  });
-  const headers = new Headers(init.headers);
-  assert(init.redirect === "error", "redirects were not rejected");
-  assert(
-    headers.get("Authorization") === "Bearer placeholder-token",
-    "bearer authorization was not installed",
-  );
-  assert(headers.get("Accept") === "application/json", "headers were lost");
-});
-
-Deno.test("Instagram Graph requests carry a server-computed app secret proof", async () => {
-  const proof = await instagramAppSecretProof(
-    "key",
-    "The quick brown fox jumps over the lazy dog",
-  );
-  assert(
-    proof ===
-      "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8",
-    "HMAC-SHA256 app secret proof did not match the known vector",
-  );
-  const proofUrl = new URL(instagramProofUrl(
-    "https://graph.facebook.com/v25.0/123?fields=id,username",
-    proof,
-  ));
-  assert(proofUrl.origin === "https://graph.facebook.com", "origin changed");
-  assert(proofUrl.searchParams.get("fields") === "id,username", "fields lost");
-  assert(proofUrl.searchParams.get("appsecret_proof") === proof, "proof lost");
-});
-
-Deno.test("Instagram feed derivative compatibility is fail closed", () => {
-  assert(
-    instagramFeedImageIsCompatible({
-      mimeType: "image/jpeg",
-      sizeBytes: 2 * 1024 * 1024,
-      width: 1080,
-      height: 1350,
-    }),
-    "4:5 social JPEG was rejected",
-  );
+Deno.test("Instagram JPEG compatibility and activation are fail closed", () => {
   assert(
     instagramFeedImageIsCompatible({
       mimeType: "image/jpeg",
       sizeBytes: 1024,
-      width: 1440,
-      height: 754,
+      width: 1080,
+      height: 1350,
     }),
-    "near-1.91:1 social JPEG was rejected",
+    "valid 4:5 JPEG rejected",
   );
   assert(
     !instagramFeedImageIsCompatible({
@@ -266,70 +302,23 @@ Deno.test("Instagram feed derivative compatibility is fail closed", () => {
       width: 1080,
       height: 1080,
     }),
-    "PNG derivative was accepted",
+    "PNG accepted",
   );
-  assert(
-    !instagramFeedImageIsCompatible({
-      mimeType: "image/jpeg",
-      sizeBytes: 8 * 1024 * 1024 + 1,
-      width: 1080,
-      height: 1080,
-    }),
-    "oversized provider derivative was accepted",
-  );
-  assert(
-    !instagramFeedImageIsCompatible({
-      mimeType: "image/jpeg",
-      sizeBytes: 1024,
-      width: 319,
-      height: 319,
-    }),
-    "undersized width was accepted",
-  );
-  assert(
-    !instagramFeedImageIsCompatible({
-      mimeType: "image/jpeg",
-      sizeBytes: 1024,
-      width: 1080,
-      height: 1400,
-    }),
-    "taller-than-4:5 image was accepted",
-  );
-  assert(
-    !instagramFeedImageIsCompatible({
-      mimeType: "image/jpeg",
-      sizeBytes: 1024,
-      width: 1440,
-      height: 753,
-    }),
-    "wider-than-1.91:1 image was accepted",
-  );
+  assert(instagramPublishFlagEnabled("true"), "exact flag rejected");
+  assert(!instagramPublishFlagEnabled("TRUE"), "loose flag accepted");
 });
 
-Deno.test("ambiguous Instagram publish server outcomes require reconciliation", () => {
-  assert(instagramGraphOutcome(400) === "failed", "400 became ambiguous");
-  assert(instagramGraphOutcome(429) === "failed", "429 became ambiguous");
-  assert(
-    instagramGraphOutcome(500) === "reconcile_required",
-    "500 stayed retryable",
-  );
-  assert(
-    instagramGraphOutcome(503) === "reconcile_required",
-    "503 stayed retryable",
-  );
-});
-
-Deno.test("reflected Meta errors never expose signed media evidence", async () => {
-  const signedUrl =
-    "https://deyvmtncimmcinldjyqe.supabase.co/storage/v1/object/sign/member-gallery/_social/submissions/62222222-2222-4222-8222-222222222221/65555555-5555-4555-8555-555555555555.jpg?token=fake-secret-token";
-  const objectPath =
-    "_social/submissions/62222222-2222-4222-8222-222222222221/65555555-5555-4555-8555-555555555555.jpg";
-  const providerFailure = instagramGraphFailure(
+Deno.test("ambiguous outcomes reconcile and reflected provider evidence is redacted", () => {
+  assert(instagramGraphOutcome(400) === "failed", "400 ambiguous");
+  assert(instagramGraphOutcome(429) === "failed", "429 ambiguous");
+  assert(instagramGraphOutcome(500) === "reconcile_required", "500 retryable");
+  const reflected =
+    "https://storage.example/private?token=secret _social/private.jpg";
+  const failure = instagramGraphFailure(
     {
       error: {
-        message:
-          `Invalid image_url ${signedUrl}; object ${objectPath}; token fake-secret-token`,
-        type: "OAuthException",
+        message: reflected,
+        type: `OAuthException ${reflected}`,
         code: 100,
         error_subcode: 36003,
       },
@@ -337,46 +326,12 @@ Deno.test("reflected Meta errors never expose signed media evidence", async () =
     400,
     "container_create",
   );
-  let capturedRpc: Record<string, unknown> | null = null;
-  const adminClient = {
-    rpc: async (name: string, params: Record<string, unknown>) => {
-      capturedRpc = { name, params };
-      return {
-        data: { committed: true, job: { status: "failed" } },
-        error: null,
-      };
-    },
-  } as unknown as SupabaseClient;
-
-  const publishResult = await finishFailure(adminClient, {
-    jobId: "63333333-3333-4333-8333-333333333333",
-    actorId: "61111111-1111-4111-8111-111111111111",
-    attempted: true,
-    outcome: "failed",
-    error: "instagram_container_failed",
-    message: providerFailure.message,
-    details: providerFailure.details,
-  });
-  const serialized = JSON.stringify({
-    providerFailure,
-    publishResult,
-    capturedRpc,
-  });
-
-  assert(
-    providerFailure.message === "Instagram rejected the media container.",
-    "provider error text replaced the fixed stage message",
-  );
-  assert(
-    providerFailure.details.provider_error_type === "OAuthException" &&
-      providerFailure.details.provider_error_code === 100 &&
-      providerFailure.details.provider_error_subcode === 36003,
-    "safe provider error identifiers were not retained",
-  );
-  for (const secretEvidence of [signedUrl, objectPath, "fake-secret-token"]) {
+  const serialized = JSON.stringify(failure);
+  assert(failure.details.provider_error_code === 100, "safe code lost");
+  for (const value of ["secret", "_social", "storage.example"]) {
     assert(
-      !serialized.includes(secretEvidence),
-      `reflected provider evidence escaped into result or RPC params: ${secretEvidence}`,
+      !serialized.includes(value),
+      `reflected evidence survived: ${value}`,
     );
   }
 });

@@ -68,9 +68,9 @@ select ok(
   'Facebook Page outbox tables have explicit restrictive client policies'
 );
 select ok(
-  not has_function_privilege('anon', 'public.gallery_facebook_page_begin_publish(uuid,uuid,text)', 'execute')
-  and not has_function_privilege('authenticated', 'public.gallery_facebook_page_begin_publish(uuid,uuid,text)', 'execute')
-  and has_function_privilege('service_role', 'public.gallery_facebook_page_begin_publish(uuid,uuid,text)', 'execute')
+  not has_function_privilege('anon', 'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)', 'execute')
+  and not has_function_privilege('authenticated', 'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)', 'execute')
+  and has_function_privilege('service_role', 'public.gallery_facebook_page_begin_publish(uuid,uuid,text,timestamptz,text,text)', 'execute')
   and not has_function_privilege('authenticated', 'public.gallery_facebook_page_publish_source(uuid)', 'execute')
   and has_function_privilege('service_role', 'public.gallery_facebook_page_publish_source(uuid)', 'execute')
   and not has_function_privilege('authenticated', 'public.gallery_facebook_page_quarantine_stale_publish_jobs()', 'execute')
@@ -129,6 +129,7 @@ insert into public.gallery_submissions (
   title,
   caption,
   category,
+  upload_rights_confirmed,
   facebook_page_opt_in,
   facebook_page_opt_in_contract_version
 ) values (
@@ -141,6 +142,7 @@ insert into public.gallery_submissions (
   'Approved member image.',
   'scenery',
   true,
+  true,
   '2026-07-website-public-facebook-page-group-v2'
 );
 
@@ -149,6 +151,8 @@ select ok(
       and facebook_page_opt_in_source = 'website_upload'
       and facebook_page_opt_in_copy_version = '2026-07-website-public-facebook-page-group-v2'
       and facebook_page_opt_in_contract_version = '2026-07-website-public-facebook-page-group-v2'
+      and facebook_page_consent_version = '2026-07-website-public-facebook-page-group-v3'
+      and upload_rights_contract_version = '2026-07-gallery-upload-rights-v1'
     from public.gallery_submissions
     where id = '52222222-2222-4222-8222-222222222221'),
   'database attests Facebook Page consent timestamp, source, copy, and exact client handshake'
@@ -192,13 +196,53 @@ insert into public.gallery_facebook_page_publish_jobs (
 
 select ok(
   (select status = 'ineligible'
-      and eligibility_reason like '%exact current website consent contract handshake%'
+      and eligibility_reason like '%rights and destination consent%'
     from public.gallery_facebook_page_publish_jobs
     where submission_id = '52222222-2222-4222-8222-222222222220'),
   'unverified cached consent cannot create a queued Facebook Page job'
 );
 
 set local "request.jwt.claim.role" = 'service_role';
+
+create function pg_temp.begin_facebook_publish(
+  p_job_id uuid,
+  p_actor_id uuid,
+  p_message text
+)
+returns jsonb
+language plpgsql
+as $$
+declare
+  job public.gallery_facebook_page_publish_jobs%rowtype;
+  final_message text;
+  copy_hash text;
+  fingerprint text;
+begin
+  select * into job
+  from public.gallery_facebook_page_publish_jobs
+  where id = p_job_id;
+  final_message := coalesce(nullif(p_message, ''), job.message, '');
+
+  if job.status not in ('queued', 'failed') then
+    return public.gallery_facebook_page_begin_publish(
+      job.id, p_actor_id, final_message, job.updated_at,
+      repeat('0', 64), repeat('0', 64)
+    );
+  end if;
+
+  copy_hash := public.gallery_social_copy_hash(
+    'facebook_page', final_message, ''
+  );
+  fingerprint := public.gallery_social_confirmation_fingerprint(
+    'facebook_page', job.id, job.status, job.attempt_count,
+    job.updated_at, p_actor_id, copy_hash
+  );
+  return public.gallery_facebook_page_begin_publish(
+    job.id, p_actor_id, final_message, job.updated_at,
+    fingerprint, copy_hash
+  );
+end;
+$$;
 
 select is(
   private.normalize_gallery_facebook_permalink(
@@ -211,22 +255,22 @@ select is(
 select ok(
   private.normalize_gallery_facebook_permalink('javascript:alert(1)') is null
   and private.normalize_gallery_facebook_permalink(
-    'https://evil.facebook.com/1222888660907862/posts/987654321'
+    'https://evil.facebook.com/facebook_page/posts/987654321'
   ) is null
   and private.normalize_gallery_facebook_permalink(
-    'https://facebook.com.example.test/1222888660907862/posts/987654321'
+    'https://facebook.com.example.test/facebook_page/posts/987654321'
   ) is null
   and private.normalize_gallery_facebook_permalink(
-    'https://user:pass@www.facebook.com/1222888660907862/posts/987654321'
+    'https://user:pass@www.facebook.com/facebook_page/posts/987654321'
   ) is null
   and private.normalize_gallery_facebook_permalink(
-    'https://www.facebook.com/1222888660907862/posts/987654321#fragment'
+    'https://www.facebook.com/facebook_page/posts/987654321#fragment'
   ) is null
   and private.normalize_gallery_facebook_permalink(
     'https://www.facebook.com/'
   ) is null
   and private.normalize_gallery_facebook_permalink(
-    'https://www.facebook.com/profile.php?id=61592841711452'
+    'https://www.facebook.com/profile.php?id=999999999999999'
   ) is null
   and private.normalize_gallery_facebook_permalink(
     'https://www.facebook.com/?story_fbid=12345&id=67890'
@@ -358,7 +402,7 @@ select is(
   'source evidence is unavailable before the publish lock'
 );
 select is(
-  (public.gallery_facebook_page_begin_publish(
+  (pg_temp.begin_facebook_publish(
     (select id from public.gallery_facebook_page_publish_jobs where submission_id = '52222222-2222-4222-8222-222222222221'),
     '59999999-9999-4999-8999-999999999999',
     'Moderator-adjusted Page message.'
@@ -420,7 +464,7 @@ select is(
   'known failure records one audit event'
 );
 select is(
-  (public.gallery_facebook_page_begin_publish(
+  (pg_temp.begin_facebook_publish(
     (select id from public.gallery_facebook_page_publish_jobs where submission_id = '52222222-2222-4222-8222-222222222221'),
     '59999999-9999-4999-8999-999999999999', null
   ) ->> 'committed')::boolean,
@@ -463,7 +507,7 @@ select ok(
   'stale-lease reconciliation requirement is durably audited'
 );
 select is(
-  (public.gallery_facebook_page_begin_publish(
+  (pg_temp.begin_facebook_publish(
     (select id from public.gallery_facebook_page_publish_jobs where submission_id = '52222222-2222-4222-8222-222222222221'),
     '59999999-9999-4999-8999-999999999999', null
   ) ->> 'reason'),
@@ -502,7 +546,7 @@ select is(
   'confirmed missing post returns the job to a retryable failed state'
 );
 select is(
-  (public.gallery_facebook_page_begin_publish(
+  (pg_temp.begin_facebook_publish(
     (select id from public.gallery_facebook_page_publish_jobs where submission_id = '52222222-2222-4222-8222-222222222221'),
     '59999999-9999-4999-8999-999999999999', null
   ) ->> 'committed')::boolean,
@@ -546,6 +590,7 @@ insert into public.gallery_submissions (
   status,
   reviewed_by,
   reviewed_at,
+  upload_rights_confirmed,
   facebook_page_opt_in,
   facebook_page_opt_in_contract_version
 ) values (
@@ -559,6 +604,7 @@ insert into public.gallery_submissions (
   'approved',
   '59999999-9999-4999-8999-999999999999',
   clock_timestamp(),
+  true,
   true,
   '2026-07-website-public-facebook-page-group-v2'
 );
@@ -610,7 +656,7 @@ insert into public.gallery_facebook_page_publish_jobs (
 
 do $begin_reconciliation_fixture$
 begin
-  perform public.gallery_facebook_page_begin_publish(
+  perform pg_temp.begin_facebook_publish(
     '54444444-4444-4444-8444-444444444444',
     '59999999-9999-4999-8999-999999999999',
     null
@@ -657,7 +703,7 @@ select is(
     'confirmed_published',
     'facebook-photo-lookup-id',
     'facebook-post-lookup-id',
-    'https://www.facebook.com/1222888660907862/posts/facebook-post-lookup-id',
+    'https://www.facebook.com/facebook_page/posts/facebook-post-lookup-id',
     'Inspected the Page post but did not provide a server ownership proof.',
     false
   ) ->> 'reason'),
@@ -671,7 +717,7 @@ select is(
     'confirmed_published',
     'facebook-photo-lookup-id',
     'facebook-post-lookup-id',
-    'https://www.facebook.com/1222888660907862/posts/facebook-post-lookup-id',
+    'https://www.facebook.com/facebook_page/posts/facebook-post-lookup-id',
     'Inspected the Page post and verified both ids against the pinned Page.',
     true
   ) ->> 'committed')::boolean,
@@ -713,6 +759,7 @@ insert into storage.objects (id, bucket_id, name, owner, metadata) values
 
 insert into public.gallery_submissions (
   id, user_id, storage_path, mime_type, size_bytes, title, category,
+  upload_rights_confirmed,
   instagram_opt_in, instagram_opt_in_at, instagram_opt_in_source,
   instagram_opt_in_copy_version, instagram_opt_in_contract_version,
   facebook_page_opt_in, facebook_page_opt_in_contract_version
@@ -722,6 +769,7 @@ insert into public.gallery_submissions (
     '51111111-1111-4111-8111-111111111111',
     '51111111-1111-4111-8111-111111111111/instagram-only.jpg',
     'image/jpeg', 1000, 'Instagram only fixture', 'scenery',
+    true,
     true, now(), 'website_upload', 'gallery-instagram-opt-in-v1',
     '2026-07-website-public-instagram-publish-v2', false, null
   ),
@@ -730,6 +778,7 @@ insert into public.gallery_submissions (
     '51111111-1111-4111-8111-111111111111',
     '51111111-1111-4111-8111-111111111111/both-destinations.jpg',
     'image/jpeg', 1000, 'Both destinations fixture', 'scenery',
+    true,
     true, now(), 'website_upload', 'gallery-instagram-opt-in-v1',
     '2026-07-website-public-instagram-publish-v2', true,
     '2026-07-website-public-facebook-page-group-v2'
@@ -739,6 +788,7 @@ insert into public.gallery_submissions (
     '51111111-1111-4111-8111-111111111111',
     '51111111-1111-4111-8111-111111111111/no-destinations.jpg',
     'image/jpeg', 1000, 'No destinations fixture', 'scenery',
+    true,
     false, null, null, null, null, false, null
   );
 

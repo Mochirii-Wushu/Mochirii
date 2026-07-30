@@ -137,13 +137,13 @@ alter table public.gallery_facebook_page_publish_jobs
   add column social_metadata_policy text;
 
 update public.gallery_facebook_page_publish_jobs
-set destination_page_id = '1222888660907862'
+set destination_page_id = 'facebook_page'
 where destination_page_id is null;
 
 alter table public.gallery_facebook_page_publish_jobs
   alter column destination_page_id set not null,
   add constraint gallery_facebook_page_publish_jobs_destination_check
-    check (destination_page_id = '1222888660907862'),
+    check (destination_page_id = 'facebook_page'),
   add constraint gallery_facebook_page_publish_jobs_social_evidence_check
     check (
       (
@@ -267,7 +267,7 @@ declare
   submission public.gallery_submissions%rowtype;
   derivative private.gallery_social_derivatives%rowtype;
 begin
-  new.destination_page_id := '1222888660907862';
+  new.destination_page_id := 'facebook_page';
   new.message := coalesce(
     nullif(btrim(new.message), ''),
     'A pretty gameplay showcase from Mōchirīī.'
@@ -421,7 +421,7 @@ begin
     raise exception 'Facebook destination and derivative binding are immutable.' using errcode = '23514';
   end if;
 
-  if new.destination_page_id <> '1222888660907862' then
+  if new.destination_page_id <> 'facebook_page' then
     raise exception 'Facebook destination is outside the Mochirii Page scope.' using errcode = '23514';
   end if;
   if new.status in ('queued', 'publishing', 'published', 'failed')
@@ -726,7 +726,7 @@ begin
       'committed', false, 'reason', 'submission_not_publishable', 'status', current_job.status
     );
   end if;
-  if current_job.destination_page_id <> '1222888660907862'
+  if current_job.destination_page_id <> 'facebook_page'
     or current_job.social_storage_object_id is null
     or current_job.social_mime_type <> 'image/jpeg'
     or current_job.social_size_bytes not between 1 and 8388608
@@ -904,7 +904,7 @@ begin
   if current_job.status <> 'publishing' then
     return jsonb_build_object('ok', false, 'reason', 'job_not_publishing');
   end if;
-  if current_job.destination_page_id <> '1222888660907862' then
+  if current_job.destination_page_id <> 'facebook_page' then
     return jsonb_build_object('ok', false, 'reason', 'destination_mismatch');
   end if;
 

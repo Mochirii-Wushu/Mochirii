@@ -128,12 +128,13 @@ insert into storage.objects (id, bucket_id, name, owner, metadata) values
 
 insert into public.gallery_submissions (
   id, user_id, storage_path, mime_type, size_bytes, title, category,
+  upload_rights_confirmed,
   instagram_opt_in, instagram_opt_in_at, instagram_opt_in_source,
   instagram_opt_in_copy_version, instagram_opt_in_contract_version
 ) values
-  ('22222222-2222-4222-8222-222222222221', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/original-one.jpg', 'image/jpeg', 1000, 'Approval fixture', 'scenery', true, now(), 'website_upload', '2026-07-website-public-instagram-publish-v2', '2026-07-website-public-instagram-publish-v2'),
-  ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/pending.webp', 'image/webp', 1100, 'Pending fixture', 'action', false, null, null, null, null),
-  ('22222222-2222-4222-8222-222222222223', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/unclassified.webp', 'image/webp', 1200, 'Unclassified fixture', null, false, null, null, null, null);
+  ('22222222-2222-4222-8222-222222222221', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/original-one.jpg', 'image/jpeg', 1000, 'Approval fixture', 'scenery', true, true, now(), 'website_upload', '2026-07-website-public-instagram-publish-v2', '2026-07-website-public-instagram-publish-v2'),
+  ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/pending.webp', 'image/webp', 1100, 'Pending fixture', 'action', false, false, null, null, null, null),
+  ('22222222-2222-4222-8222-222222222223', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/unclassified.webp', 'image/webp', 1200, 'Unclassified fixture', null, false, false, null, null, null, null);
 
 set local "request.jwt.claim.role" = 'service_role';
 

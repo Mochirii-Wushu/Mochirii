@@ -1,23 +1,30 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isGallerySocialDerivativeStoragePath } from "./gallery-social-path.ts";
 import { validateSocialPublicationCopy } from "./social-publication-copy.ts";
+import {
+  fetchMetaGraphOnce,
+  META_GRAPH_API_VERSION,
+  metaGraphApiVersionIsPinned,
+  metaGraphUrl,
+  metaMutatingResponseOutcome,
+  readBoundedMetaGraphJson,
+} from "./meta-graph-security.ts";
+import { logSafeMetaEvent } from "./safe-telemetry.ts";
 
 export type JsonRecord = Record<string, unknown>;
 
-const INSTAGRAM_GRAPH_BASE_URL = "https://graph.facebook.com";
 const INSTAGRAM_ACCOUNT_ID_RE = /^\d{5,30}$/;
-const INSTAGRAM_API_VERSION_RE = /^v\d{1,3}\.\d{1,2}$/;
 const INSTAGRAM_EXPECTED_USERNAME = "mochirii_guild";
-const META_EXPECTED_APP_ID = "4210347289109364";
 const GRAPH_REQUEST_TIMEOUT_MS = 60_000;
 const CONTAINER_STATUS_TIMEOUT_MS = 30_000;
-const CONTAINER_POLL_ATTEMPTS = 10;
-const CONTAINER_POLL_INTERVAL_MS = 1_000;
 const INSTAGRAM_MAX_SOURCE_BYTES = 8 * 1024 * 1024;
 const INSTAGRAM_MIN_WIDTH = 320;
 const INSTAGRAM_MAX_WIDTH = 1440;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const TIMESTAMPTZ_RE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
+const SHA256_RE = /^[0-9a-f]{64}$/;
 
 export type InstagramPublishResult = {
   attempted: boolean;
@@ -38,8 +45,11 @@ type PublishDependencies = {
   jobId: string;
   caption?: string | null;
   altText?: string | null;
+  expectedUpdatedAt: string;
+  confirmationFingerprint: string;
+  confirmationCopyHash: string;
   fetchImpl?: typeof fetch;
-  sleepImpl?: (milliseconds: number) => Promise<void>;
+  config?: ReturnType<typeof instagramConfig>;
 };
 
 function safeString(value: unknown, maxLength: number): string | null {
@@ -76,18 +86,40 @@ export function normalizeInstagramPostPermalink(value: unknown): string | null {
   }
 }
 
+export function instagramTemporaryMediaUrlIsSafe(
+  value: unknown,
+  supabaseUrl: unknown,
+): boolean {
+  const raw = safeString(value, 4096);
+  const rawSupabaseUrl = safeString(supabaseUrl, 2048);
+  if (!raw || !rawSupabaseUrl) return false;
+  try {
+    const url = new URL(raw);
+    const expected = new URL(rawSupabaseUrl);
+    const decodedPath = decodeURIComponent(url.pathname);
+    return expected.protocol === "https:" && url.protocol === "https:" &&
+      url.origin === expected.origin && !url.username && !url.password &&
+      !url.hash && !url.searchParams.has("access_token") &&
+      decodedPath.startsWith(
+        "/storage/v1/object/sign/member-gallery/_social/submissions/",
+      ) && url.searchParams.has("token");
+  } catch {
+    return false;
+  }
+}
+
 export function instagramJobIdIsValid(value: unknown): boolean {
   return UUID_RE.test(String(value ?? "").trim());
 }
 
 export function instagramConfig() {
   const accountId = Deno.env.get("INSTAGRAM_ACCOUNT_ID") || "";
-  const expectedAccountId =
-    Deno.env.get("INSTAGRAM_EXPECTED_ACCOUNT_ID") || "";
+  const expectedAccountId = Deno.env.get("INSTAGRAM_EXPECTED_ACCOUNT_ID") || "";
   const accessToken = Deno.env.get("INSTAGRAM_ACCESS_TOKEN") || "";
   const apiVersion = Deno.env.get("INSTAGRAM_API_VERSION") || "";
   const publishFlag = Deno.env.get("INSTAGRAM_PUBLISH_ENABLED") || "";
   const appId = Deno.env.get("META_APP_ID") || "";
+  const expectedAppId = Deno.env.get("META_EXPECTED_APP_ID") || "";
   const appSecret = Deno.env.get("META_APP_SECRET") || "";
   const missingSecrets = [
     ["INSTAGRAM_ACCOUNT_ID", accountId],
@@ -95,6 +127,7 @@ export function instagramConfig() {
     ["INSTAGRAM_ACCESS_TOKEN", accessToken],
     ["INSTAGRAM_API_VERSION", apiVersion],
     ["META_APP_ID", appId],
+    ["META_EXPECTED_APP_ID", expectedAppId],
     ["META_APP_SECRET", appSecret],
   ].filter(([, value]) => !value).map(([name]) => name);
   const invalidFields = [
@@ -107,7 +140,16 @@ export function instagramConfig() {
     ...(apiVersion && !instagramApiVersionIsValid(apiVersion)
       ? ["INSTAGRAM_API_VERSION"]
       : []),
-    ...(appId && appId !== META_EXPECTED_APP_ID ? ["META_APP_ID"] : []),
+    ...(appId && !instagramAccountIdIsValid(appId) ? ["META_APP_ID"] : []),
+    ...(expectedAppId && !instagramAccountIdIsValid(expectedAppId)
+      ? ["META_EXPECTED_APP_ID"]
+      : []),
+    ...(appId && expectedAppId && appId !== expectedAppId
+      ? ["META_APP_ID_PIN"]
+      : []),
+    ...(accountId && expectedAccountId && accountId !== expectedAccountId
+      ? ["INSTAGRAM_ACCOUNT_ID_PIN"]
+      : []),
   ];
   const accountIdPinned = instagramAccountIdMatchesCanonicalPin(
     accountId,
@@ -116,11 +158,12 @@ export function instagramConfig() {
 
   return {
     accountId,
+    expectedAccountId,
     accessToken,
     apiVersion,
     appId,
     appSecret,
-    expectedAppId: META_EXPECTED_APP_ID,
+    expectedAppId,
     expectedUsername: INSTAGRAM_EXPECTED_USERNAME,
     accountIdPinned,
     publishEnabled: instagramPublishFlagEnabled(publishFlag),
@@ -128,37 +171,6 @@ export function instagramConfig() {
     missingSecrets,
     invalidFields,
   };
-}
-
-export async function instagramAppSecretProof(
-  appSecret: string,
-  accessToken: string,
-): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(appSecret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    new TextEncoder().encode(accessToken),
-  );
-  return Array.from(
-    new Uint8Array(signature),
-    (byte) => byte.toString(16).padStart(2, "0"),
-  ).join("");
-}
-
-export function instagramProofUrl(
-  rawUrl: string,
-  appSecretProof: string,
-): string {
-  const url = new URL(rawUrl);
-  url.searchParams.set("appsecret_proof", appSecretProof);
-  return url.toString();
 }
 
 export function instagramAccountIdIsValid(value: string): boolean {
@@ -177,7 +189,7 @@ export function instagramAccountIdMatchesCanonicalPin(
 }
 
 export function instagramApiVersionIsValid(value: string): boolean {
-  return INSTAGRAM_API_VERSION_RE.test(value);
+  return metaGraphApiVersionIsPinned(value);
 }
 
 export function instagramPublishFlagEnabled(value: unknown): boolean {
@@ -203,21 +215,7 @@ export function instagramFeedImageIsCompatible(values: {
 
 export function instagramGraphUrl(version: string, path: string): string {
   if (!instagramApiVersionIsValid(version)) return "";
-  const cleanPath = path.replace(/^\/+/, "");
-  return `${INSTAGRAM_GRAPH_BASE_URL}/${version}/${cleanPath}`;
-}
-
-export function instagramTokenRequestInit(
-  accessToken: string,
-  init: RequestInit = {},
-): RequestInit {
-  const headers = new Headers(init.headers);
-  headers.set("Authorization", `Bearer ${accessToken}`);
-  return {
-    ...init,
-    headers,
-    redirect: "error",
-  };
+  return metaGraphUrl(path);
 }
 
 export function instagramIdentityMatches(
@@ -229,10 +227,8 @@ export function instagramIdentityMatches(
     : {};
   const id = safeString(identity.id, 80);
   const username = safeString(identity.username, 80)?.toLowerCase();
-  const accountType = safeString(identity.account_type, 80)?.toUpperCase();
   return id === configuredAccountId &&
-    username === INSTAGRAM_EXPECTED_USERNAME &&
-    accountType === "BUSINESS";
+    username === INSTAGRAM_EXPECTED_USERNAME;
 }
 
 export function instagramIdentitySummary(value: unknown): JsonRecord | null {
@@ -242,9 +238,61 @@ export function instagramIdentitySummary(value: unknown): JsonRecord | null {
   const id = safeString(identity.id, 80);
   if (!id) return null;
   return {
-    id,
-    username: safeString(identity.username, 80),
-    accountType: safeString(identity.account_type, 80),
+    identityPresent: true,
+    usernameMatches: safeString(identity.username, 80)?.toLowerCase() ===
+      INSTAGRAM_EXPECTED_USERNAME,
+    businessAccountSubtypeVerification: "manual_required",
+  };
+}
+
+export function instagramPublishingQuota(value: unknown): {
+  readable: boolean;
+  exhausted: boolean;
+  usage: number | null;
+  total: number | null;
+} {
+  const body = asRecord(value);
+  const first = Array.isArray(body.data) ? asRecord(body.data[0]) : body;
+  const config = asRecord(first.config);
+  const usage = Number(first.quota_usage);
+  const total = Number(config.quota_total);
+  const readable = Number.isSafeInteger(usage) && usage >= 0 &&
+    Number.isSafeInteger(total) && total > 0;
+  return {
+    readable,
+    exhausted: readable && usage >= total,
+    usage: readable ? usage : null,
+    total: readable ? total : null,
+  };
+}
+
+export function instagramMediaObjectEvidence(
+  value: unknown,
+  expectedMediaId: string,
+  expectedAccountId: string,
+): {
+  verified: boolean;
+  mediaId: string | null;
+  permalink: string | null;
+} {
+  const body = asRecord(value);
+  const owner = asRecord(body.owner);
+  const mediaId = safeString(body.id, 255);
+  const ownerId = safeString(owner.id || body.owner, 80);
+  const username = safeString(body.username, 80)?.toLowerCase();
+  const mediaType = safeString(body.media_type, 40)?.toUpperCase();
+  const permalink = normalizeInstagramPostPermalink(body.permalink);
+  return {
+    verified: Boolean(
+      mediaId === expectedMediaId &&
+        instagramAccountIdIsValid(expectedAccountId) &&
+        ownerId === expectedAccountId &&
+        username === INSTAGRAM_EXPECTED_USERNAME &&
+        mediaType === "IMAGE" &&
+        permalink,
+    ),
+    mediaId,
+    permalink,
   };
 }
 
@@ -265,15 +313,65 @@ function result(values: InstagramPublishResult): InstagramPublishResult {
 export function instagramGraphOutcome(
   status: number,
 ): "failed" | "reconcile_required" {
-  return status >= 500 ? "reconcile_required" : "failed";
+  return metaMutatingResponseOutcome(status);
 }
 
-async function readGraphJson(response: Response): Promise<JsonRecord> {
-  try {
-    return asRecord(await response.json());
-  } catch {
-    return {};
+export type InstagramContainerStatusCode =
+  | "FINISHED"
+  | "IN_PROGRESS"
+  | "ERROR"
+  | "EXPIRED"
+  | "PUBLISHED"
+  | "UNKNOWN";
+
+export type InstagramContainerStatusDecision = {
+  statusCode: InstagramContainerStatusCode;
+  action: "ready" | "reconcile_required";
+  error:
+    | "container_failed"
+    | "container_in_progress"
+    | "container_status_unknown"
+    | null;
+};
+
+export function normalizeInstagramContainerStatusCode(
+  value: unknown,
+): InstagramContainerStatusCode {
+  if (typeof value !== "string" || value.length > 32) return "UNKNOWN";
+  const normalized = value.trim().toUpperCase();
+  switch (normalized) {
+    case "FINISHED":
+    case "IN_PROGRESS":
+    case "ERROR":
+    case "EXPIRED":
+    case "PUBLISHED":
+      return normalized;
+    default:
+      return "UNKNOWN";
   }
+}
+
+export function instagramContainerStatusDecision(
+  value: unknown,
+): InstagramContainerStatusDecision {
+  const statusCode = normalizeInstagramContainerStatusCode(value);
+  if (statusCode === "FINISHED") {
+    return { statusCode, action: "ready", error: null };
+  }
+  if (statusCode === "IN_PROGRESS") {
+    return {
+      statusCode,
+      action: "reconcile_required",
+      error: "container_in_progress",
+    };
+  }
+  return {
+    statusCode,
+    action: "reconcile_required",
+    error: statusCode === "UNKNOWN"
+      ? "container_status_unknown"
+      : "container_failed",
+  };
 }
 
 type InstagramGraphFailureStage = "container_create" | "publish";
@@ -355,11 +453,10 @@ async function finishPublish(
     },
   );
   if (error) {
-    console.error("Instagram publish outcome commit failed", {
-      code: error.code,
-      message: error.message,
-      jobId: values.jobId,
+    logSafeMetaEvent("error", "instagram_publish_outcome_commit_failed", {
+      provider: "instagram",
       outcome: values.outcome,
+      errorCategory: "database_commit_failed",
     });
     return { committed: false, job: null, reason: "outcome_commit_failed" };
   }
@@ -513,61 +610,50 @@ async function reconcileAfterAuditFailure(
   });
 }
 
-async function defaultSleep(milliseconds: number): Promise<void> {
-  await new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
-}
-
-async function waitForContainer(
+async function readContainerStatusOnce(
   fetchImpl: typeof fetch,
-  sleepImpl: (milliseconds: number) => Promise<void>,
   config: ReturnType<typeof instagramConfig>,
-  appSecretProof: string,
   containerId: string,
 ): Promise<
-  { ready: boolean; statusCode: string | null; error: string | null }
+  {
+    ready: boolean;
+    statusCode: InstagramContainerStatusCode;
+    error: string | null;
+  }
 > {
-  const statusUrl = instagramGraphUrl(
-    config.apiVersion,
-    `${encodeURIComponent(containerId)}?fields=status_code,status`,
-  );
-  if (!statusUrl) {
-    return { ready: false, statusCode: null, error: "invalid_status_url" };
+  let response: Response;
+  try {
+    response = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: encodeURIComponent(containerId),
+      query: { fields: "status_code,status" },
+      timeoutMs: CONTAINER_STATUS_TIMEOUT_MS,
+      fetchImpl,
+    });
+  } catch {
+    return {
+      ready: false,
+      statusCode: "UNKNOWN",
+      error: "status_request_failed",
+    };
   }
-
-  for (let attempt = 1; attempt <= CONTAINER_POLL_ATTEMPTS; attempt += 1) {
-    let response: Response;
-    try {
-      response = await fetchImpl(
-        instagramProofUrl(statusUrl, appSecretProof),
-        instagramTokenRequestInit(config.accessToken, {
-          headers: { Accept: "application/json" },
-          signal: AbortSignal.timeout(CONTAINER_STATUS_TIMEOUT_MS),
-        }),
-      );
-    } catch {
-      return { ready: false, statusCode: null, error: "status_request_failed" };
-    }
-    const body = await readGraphJson(response);
-    const statusCode = safeString(body.status_code, 80)?.toUpperCase() || null;
-    if (!response.ok) {
-      return { ready: false, statusCode, error: "status_request_failed" };
-    }
-    if (statusCode === "FINISHED") {
-      return { ready: true, statusCode, error: null };
-    }
-    if (statusCode && statusCode !== "IN_PROGRESS") {
-      return { ready: false, statusCode, error: "container_failed" };
-    }
-    if (attempt < CONTAINER_POLL_ATTEMPTS) {
-      await sleepImpl(CONTAINER_POLL_INTERVAL_MS);
-    }
+  const body = await readBoundedMetaGraphJson(response);
+  const decision = instagramContainerStatusDecision(body.status_code);
+  if (!response.ok) {
+    return {
+      ready: false,
+      statusCode: decision.statusCode,
+      error: "status_request_failed",
+    };
   }
-
-  return {
-    ready: false,
-    statusCode: "IN_PROGRESS",
-    error: "container_timeout",
-  };
+  return decision.action === "ready"
+    ? { ready: true, statusCode: decision.statusCode, error: null }
+    : {
+      ready: false,
+      statusCode: decision.statusCode,
+      error: decision.error,
+    };
 }
 
 export async function publishInstagramJob(
@@ -575,9 +661,7 @@ export async function publishInstagramJob(
 ): Promise<InstagramPublishResult> {
   const { adminClient, actorId, jobId } = dependencies;
   const fetchImpl = dependencies.fetchImpl || fetch;
-  const sleepImpl = dependencies.sleepImpl || defaultSleep;
-  const caption = safeString(dependencies.caption, 2200) ||
-    "A pretty gameplay showcase from Mōchirīī.";
+  const caption = safeString(dependencies.caption, 2200);
   const altText = safeString(dependencies.altText, 1000);
   const copyValidation = validateSocialPublicationCopy([caption, altText]);
 
@@ -596,7 +680,12 @@ export async function publishInstagramJob(
     });
   }
 
-  if (!UUID_RE.test(jobId) || !UUID_RE.test(actorId)) {
+  if (
+    !UUID_RE.test(jobId) || !UUID_RE.test(actorId) || !altText ||
+    !TIMESTAMPTZ_RE.test(dependencies.expectedUpdatedAt) ||
+    !SHA256_RE.test(dependencies.confirmationFingerprint) ||
+    !SHA256_RE.test(dependencies.confirmationCopyHash)
+  ) {
     return result({
       attempted: false,
       ok: false,
@@ -611,7 +700,7 @@ export async function publishInstagramJob(
     });
   }
 
-  const config = instagramConfig();
+  const config = dependencies.config || instagramConfig();
   if (!config.configured) {
     return result({
       attempted: false,
@@ -657,39 +746,16 @@ export async function publishInstagramJob(
     });
   }
 
-  const appSecretProof = await instagramAppSecretProof(
-    config.appSecret,
-    config.accessToken,
-  );
-
-  const identityUrl = instagramGraphUrl(
-    config.apiVersion,
-    `${encodeURIComponent(config.accountId)}?fields=id,username,account_type`,
-  );
-  if (!identityUrl) {
-    return result({
-      attempted: false,
-      ok: false,
-      status: null,
-      job: null,
-      instagramContainerId: null,
-      instagramMediaId: null,
-      instagramPermalink: null,
-      publishedAt: null,
-      error: "instagram_invalid_configuration",
-      message: "Instagram publishing configuration is invalid.",
-    });
-  }
-
   try {
-    const identityResponse = await fetchImpl(
-      instagramProofUrl(identityUrl, appSecretProof),
-      instagramTokenRequestInit(config.accessToken, {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(CONTAINER_STATUS_TIMEOUT_MS),
-      }),
-    );
-    const identityBody = await readGraphJson(identityResponse);
+    const identityResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: encodeURIComponent(config.accountId),
+      query: { fields: "id,username" },
+      timeoutMs: CONTAINER_STATUS_TIMEOUT_MS,
+      fetchImpl,
+    });
+    const identityBody = await readBoundedMetaGraphJson(identityResponse);
     if (
       !identityResponse.ok ||
       !instagramIdentityMatches(identityBody, config.accountId)
@@ -724,6 +790,51 @@ export async function publishInstagramJob(
     });
   }
 
+  try {
+    const quotaResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: `${encodeURIComponent(config.accountId)}/content_publishing_limit`,
+      query: { fields: "quota_usage,config" },
+      timeoutMs: CONTAINER_STATUS_TIMEOUT_MS,
+      fetchImpl,
+    });
+    const quota = instagramPublishingQuota(
+      await readBoundedMetaGraphJson(quotaResponse),
+    );
+    if (!quotaResponse.ok || !quota.readable || quota.exhausted) {
+      return result({
+        attempted: false,
+        ok: false,
+        status: null,
+        job: null,
+        instagramContainerId: null,
+        instagramMediaId: null,
+        instagramPermalink: null,
+        publishedAt: null,
+        error: quota.exhausted
+          ? "instagram_publishing_quota_exhausted"
+          : "instagram_publishing_quota_unavailable",
+        message: quota.exhausted
+          ? "Instagram publishing is at the provider-reported publishing limit."
+          : "Instagram publishing quota could not be verified.",
+      });
+    }
+  } catch {
+    return result({
+      attempted: false,
+      ok: false,
+      status: null,
+      job: null,
+      instagramContainerId: null,
+      instagramMediaId: null,
+      instagramPermalink: null,
+      publishedAt: null,
+      error: "instagram_publishing_quota_unavailable",
+      message: "Instagram publishing quota could not be verified.",
+    });
+  }
+
   const { data: beginData, error: beginError } = await adminClient.rpc(
     "gallery_instagram_begin_publish",
     {
@@ -731,6 +842,9 @@ export async function publishInstagramJob(
       p_actor_id: actorId,
       p_caption: caption,
       p_alt_text: altText,
+      p_expected_updated_at: dependencies.expectedUpdatedAt,
+      p_confirmation_fingerprint: dependencies.confirmationFingerprint,
+      p_confirmation_copy_hash: dependencies.confirmationCopyHash,
     },
   );
   const begin = rpcRecord(beginData);
@@ -770,7 +884,6 @@ export async function publishInstagramJob(
       outcome: "failed",
       error: "instagram_source_unavailable",
       message: "The approved Instagram image source is unavailable.",
-      details: { reason: safeString(source.reason, 80) },
     });
   }
 
@@ -857,7 +970,14 @@ export async function publishInstagramJob(
   const { data: signedData, error: signedError } = await adminClient.storage
     .from(bucket)
     .createSignedUrl(storagePath, 60 * 60);
-  if (signedError || !signedData?.signedUrl) {
+  const signedUrl = safeString(signedData?.signedUrl, 4096);
+  if (
+    signedError || !signedUrl ||
+    !instagramTemporaryMediaUrlIsSafe(
+      signedUrl,
+      Deno.env.get("SUPABASE_URL"),
+    )
+  ) {
     return finishFailure(adminClient, {
       jobId,
       actorId,
@@ -868,57 +988,41 @@ export async function publishInstagramJob(
     });
   }
 
-  const mediaUrl = instagramGraphUrl(
-    config.apiVersion,
-    `${encodeURIComponent(config.accountId)}/media`,
-  );
-  const publishUrl = instagramGraphUrl(
-    config.apiVersion,
-    `${encodeURIComponent(config.accountId)}/media_publish`,
-  );
-  if (!mediaUrl || !publishUrl) {
-    return finishFailure(adminClient, {
-      jobId,
-      actorId,
-      attempted: false,
-      outcome: "failed",
-      error: "instagram_api_version_invalid",
-      message: "The Instagram Graph API version is invalid.",
-    });
-  }
-
   const mediaParams = new URLSearchParams({
-    image_url: signedData.signedUrl,
-    caption,
+    image_url: signedUrl,
+    alt_text: altText,
   });
-  if (altText) mediaParams.set("alt_text", altText);
+  if (caption) mediaParams.set("caption", caption);
 
   let mediaResponse: Response;
   try {
-    mediaResponse = await fetchImpl(
-      instagramProofUrl(mediaUrl, appSecretProof),
-      instagramTokenRequestInit(config.accessToken, {
+    mediaResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: `${encodeURIComponent(config.accountId)}/media`,
+      init: {
         method: "POST",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: mediaParams,
-        signal: AbortSignal.timeout(GRAPH_REQUEST_TIMEOUT_MS),
-      }),
-    );
+      },
+      timeoutMs: GRAPH_REQUEST_TIMEOUT_MS,
+      fetchImpl,
+    });
   } catch {
     return finishFailure(adminClient, {
       jobId,
       actorId,
       attempted: true,
-      outcome: "failed",
-      error: "instagram_container_request_failed",
-      message: "The Instagram media container request did not complete.",
+      outcome: "reconcile_required",
+      error: "instagram_publish_reconcile_required",
+      message:
+        "The Instagram container request ended without a confirmed result. Inspect the account before any retry.",
       details: { failure_stage: "container_request" },
     });
   }
-  const mediaBody = await readGraphJson(mediaResponse);
+  const mediaBody = await readBoundedMetaGraphJson(mediaResponse);
   const containerId = safeString(mediaBody.id, 255);
   if (!mediaResponse.ok || !containerId) {
     const providerFailure = instagramGraphFailure(
@@ -930,18 +1034,24 @@ export async function publishInstagramJob(
       jobId,
       actorId,
       attempted: true,
-      outcome: "failed",
-      error: "instagram_container_failed",
-      message: providerFailure.message,
+      outcome: !mediaResponse.ok
+        ? instagramGraphOutcome(mediaResponse.status)
+        : "reconcile_required",
+      error: !mediaResponse.ok &&
+          instagramGraphOutcome(mediaResponse.status) === "failed"
+        ? "instagram_container_failed"
+        : "instagram_publish_reconcile_required",
+      message: !mediaResponse.ok &&
+          instagramGraphOutcome(mediaResponse.status) === "failed"
+        ? providerFailure.message
+        : "The Instagram container result is ambiguous. Inspect the account before any retry.",
       details: providerFailure.details,
     });
   }
 
-  const container = await waitForContainer(
+  const container = await readContainerStatusOnce(
     fetchImpl,
-    sleepImpl,
     config,
-    appSecretProof,
     containerId,
   );
   if (!container.ready) {
@@ -949,13 +1059,11 @@ export async function publishInstagramJob(
       jobId,
       actorId,
       attempted: true,
-      outcome: "failed",
-      error: container.error === "container_timeout"
-        ? "instagram_container_in_progress"
-        : "instagram_container_failed",
-      message: container.error === "container_timeout"
-        ? "The Instagram media container remained in progress. No publish request was sent."
-        : "The Instagram media container did not become publishable.",
+      outcome: "reconcile_required",
+      error: "instagram_publish_reconcile_required",
+      message: container.error === "container_in_progress"
+        ? "The Instagram media container is still processing. Publication stopped before media_publish; inspect and resolve the job before any new attempt."
+        : "The Instagram media container state is ambiguous. Inspect it before any retry.",
       instagramContainerId: containerId,
       details: {
         failure_stage: "container_status",
@@ -967,18 +1075,20 @@ export async function publishInstagramJob(
   const publishParams = new URLSearchParams({ creation_id: containerId });
   let publishResponse: Response;
   try {
-    publishResponse = await fetchImpl(
-      instagramProofUrl(publishUrl, appSecretProof),
-      instagramTokenRequestInit(config.accessToken, {
+    publishResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: `${encodeURIComponent(config.accountId)}/media_publish`,
+      init: {
         method: "POST",
         headers: {
-          Accept: "application/json",
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: publishParams,
-        signal: AbortSignal.timeout(GRAPH_REQUEST_TIMEOUT_MS),
-      }),
-    );
+      },
+      timeoutMs: GRAPH_REQUEST_TIMEOUT_MS,
+      fetchImpl,
+    });
   } catch {
     return finishFailure(adminClient, {
       jobId,
@@ -993,7 +1103,7 @@ export async function publishInstagramJob(
     });
   }
 
-  const publishBody = await readGraphJson(publishResponse);
+  const publishBody = await readBoundedMetaGraphJson(publishResponse);
   if (!publishResponse.ok) {
     const outcome = instagramGraphOutcome(publishResponse.status);
     const providerFailure = instagramGraphFailure(
@@ -1035,25 +1145,57 @@ export async function publishInstagramJob(
     });
   }
 
-  let permalink: string | null = null;
-  const permalinkUrl = instagramGraphUrl(
-    config.apiVersion,
-    `${encodeURIComponent(mediaId)}?fields=permalink`,
-  );
+  let mediaEvidence: ReturnType<typeof instagramMediaObjectEvidence> | null =
+    null;
   try {
-    const permalinkResponse = await fetchImpl(
-      instagramProofUrl(permalinkUrl, appSecretProof),
-      instagramTokenRequestInit(config.accessToken, {
-        headers: { Accept: "application/json" },
-        signal: AbortSignal.timeout(CONTAINER_STATUS_TIMEOUT_MS),
-      }),
-    );
-    if (permalinkResponse.ok) {
-      const permalinkBody = await readGraphJson(permalinkResponse);
-      permalink = normalizeInstagramPostPermalink(permalinkBody.permalink);
+    const evidenceResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: encodeURIComponent(mediaId),
+      query: { fields: "id,owner,username,permalink,media_type" },
+      timeoutMs: CONTAINER_STATUS_TIMEOUT_MS,
+      fetchImpl,
+    });
+    if (evidenceResponse.ok) {
+      mediaEvidence = instagramMediaObjectEvidence(
+        await readBoundedMetaGraphJson(evidenceResponse),
+        mediaId,
+        config.expectedAccountId,
+      );
     }
   } catch {
-    // Publishing already succeeded. Missing permalink is non-fatal.
+    // Publishing already succeeded; this read must never trigger a retry.
+  }
+  const permalink = mediaEvidence?.permalink || null;
+  if (!mediaEvidence?.verified || !permalink) {
+    const reconciled = await finishPublish(adminClient, {
+      jobId,
+      actorId,
+      outcome: "reconcile_required",
+      instagramContainerId: containerId,
+      instagramMediaId: mediaId,
+      instagramPermalink: permalink,
+      error:
+        "Meta accepted the publish request, but official account ownership evidence could not be verified.",
+      details: {
+        failure_stage: "account_ownership_verification",
+        provider_returned_media_id: true,
+        provider_returned_permalink: Boolean(permalink),
+      },
+    });
+    return result({
+      attempted: true,
+      ok: false,
+      status: "reconcile_required",
+      job: reconciled.job,
+      instagramContainerId: containerId,
+      instagramMediaId: mediaId,
+      instagramPermalink: permalink,
+      publishedAt: null,
+      error: "instagram_ownership_reconcile_required",
+      message:
+        "Meta may have published the image, but the result could not be bound to @mochirii_guild. Inspect the official account before any retry.",
+    });
   }
 
   const finished = await finishPublish(adminClient, {
@@ -1066,6 +1208,7 @@ export async function publishInstagramJob(
     details: {
       status_code: publishResponse.status,
       has_permalink: Boolean(permalink),
+      account_ownership_verified: true,
     },
   });
   if (!finished.committed || !finished.job) {

@@ -11,6 +11,10 @@ const files = {
   env: "supabase/functions/.env.example",
   helper: "supabase/functions/_shared/facebook-page-publishing.ts",
   helperTest: "supabase/functions/_shared/facebook-page-publishing_test.ts",
+  graphSecurity: "supabase/functions/_shared/meta-graph-security.ts",
+  providerDiagnostic: "supabase/functions/_shared/meta-provider-diagnostic.ts",
+  safeTelemetry: "supabase/functions/_shared/safe-telemetry.ts",
+  publicationConfirmation: "supabase/functions/_shared/social-publication-confirmation.ts",
   publicationCopyGuard: "supabase/functions/_shared/social-publication-copy.ts",
   publicationCopyWeb: "apps/web/lib/gallery/social-publication-copy.ts",
   publicationCopyTest: "apps/web/lib/gallery/social-publication-copy.test.mts",
@@ -82,6 +86,10 @@ const config = read(files.config);
 const env = read(files.env);
 const helper = read(files.helper);
 const helperTest = read(files.helperTest);
+const graphSecurity = read(files.graphSecurity);
+const providerDiagnostic = read(files.providerDiagnostic);
+const safeTelemetry = read(files.safeTelemetry);
+const publicationConfirmation = read(files.publicationConfirmation);
 const publicationCopyGuard = read(files.publicationCopyGuard);
 const publicationCopyWeb = read(files.publicationCopyWeb);
 const publicationCopyTest = read(files.publicationCopyTest);
@@ -217,42 +225,63 @@ matches(
 
 [
   "META_APP_ID=",
+  "META_EXPECTED_APP_ID=",
   "META_APP_SECRET=",
   "FACEBOOK_PAGE_ID=",
+  "FACEBOOK_EXPECTED_PAGE_ID=",
   "FACEBOOK_PAGE_ACCESS_TOKEN=",
-  "FACEBOOK_API_VERSION=v25.0",
+  "FACEBOOK_API_VERSION=v26.0",
   "FACEBOOK_PAGE_PUBLISH_ENABLED=false",
 ].forEach((snippet) => includes("environment template", env, snippet));
 
 [
   'Deno.env.get("FACEBOOK_PAGE_ID")',
+  'Deno.env.get("FACEBOOK_EXPECTED_PAGE_ID")',
   'Deno.env.get("FACEBOOK_PAGE_ACCESS_TOKEN")',
   'Deno.env.get("FACEBOOK_API_VERSION")',
   'Deno.env.get("FACEBOOK_PAGE_PUBLISH_ENABLED")',
   'Deno.env.get("META_APP_ID")',
+  'Deno.env.get("META_EXPECTED_APP_ID")',
   'Deno.env.get("META_APP_SECRET")',
-  'FACEBOOK_CANONICAL_PAGE_ID = "1222888660907862"',
-  'FACEBOOK_CANONICAL_PAGE_NAME = "Mōchirīī"',
-  'url.searchParams.set("appsecret_proof", proof)',
   "facebookPagePublishFlagEnabled",
   "facebook_page_publish_disabled",
   "facebookPageIdIsValid",
   "facebookApiVersionIsValid",
-  'const FACEBOOK_GRAPH_BASE_URL = "https://graph.facebook.com"',
-  'redirect: "error"',
+  "fetchMetaGraphOnce",
   'form.set(\n    "source"',
   'form.set("message", finalMessage)',
   '.download(storagePath)',
   "sha256Hex(bytes)",
-  '`${FACEBOOK_CANONICAL_PAGE_ID}/photos`',
+  '`${config.expectedPageId}/photos`',
   'outcome: "reconcile_required"',
   "normalizeFacebookPermalink",
   "facebookPageObjectEvidence",
-  'fields=id,from{id},permalink_url,link',
+  'fields: "id,from{id},permalink_url,link"',
   "pageOwnershipVerified: true",
   "facebookGraphErrorDetails",
   '"Meta rejected the Facebook Page image."',
 ].forEach((snippet) => includes("shared publisher", helper, snippet));
+
+[
+  'META_GRAPH_API_VERSION = "v26.0"',
+  "accessToken}|${appsecretTime}",
+  'headers.set("Authorization"',
+  'redirect: "error"',
+  "AbortSignal.any",
+  "fetchMetaGraphOnce",
+  "meta_token_debug_query_transport_not_approved",
+].forEach((snippet) => includes("Meta Graph security boundary", graphSecurity, snippet));
+includes(
+  "Meta provider diagnostic",
+  providerDiagnostic,
+  "tokenDebuggerCalled: false",
+);
+includes("safe Meta telemetry", safeTelemetry, "logSafeMetaEvent");
+includes(
+  "publication confirmation binding",
+  publicationConfirmation,
+  "socialPublicationConfirmationFingerprint",
+);
 
 notMatches(
   "shared publisher",
@@ -421,17 +450,14 @@ matches(
 ].forEach((snippet) => includes("Facebook browser permalink tests", webPermalinkTest, snippet));
 
 [
-  "facebookPageIdIsValid",
-  "facebookApiVersionIsValid",
-  "facebookTasksCanPublish",
-  "facebookPagePublishFlagEnabled",
-  'init.redirect === "error"',
-  'facebookGraphOutcome(500) === "reconcile_required"',
-  "unsafe permalink was accepted",
-  "unrelated Page ownership was accepted",
-  "reflected Graph messages cannot enter stored audit details",
-  'serialized.includes("appsecret_proof")',
-  'serialized.includes("_social/")',
+  "Facebook identifiers and Graph URL are v26-only",
+  "Facebook runtime identity uses an independent expected id",
+  "Facebook copy is rejected before database and provider access",
+  "Facebook disabled flag prevents every database and Graph request",
+  "Facebook success accepts the DB destination class without a numeric Page id in DB payloads",
+  "Facebook Page task evidence is least privilege",
+  "Facebook permalink and ownership evidence are canonical",
+  "ambiguous server outcomes reconcile and Graph errors are redacted",
 ].forEach((snippet) => includes("publisher helper tests", helperTest, snippet));
 
 [
@@ -460,10 +486,7 @@ notMatches(
 [
   "facebook_page_opt_in",
   "facebookPageOptIn",
-  "facebookPageOptInAt",
-  "facebookPageOptInSource",
-  "facebookPageOptInCopyVersion",
-  "facebookPageOptInContractVersion",
+  "safeGalleryModeratorProfile(profile)",
 ].forEach((snippet) => includes("review queue", reviewQueue, snippet));
 
 [
@@ -509,14 +532,12 @@ notMatches(
 [
   "requireModeratorAccess(req)",
   "facebookPageConfig",
-  "facebookTokenRequestInit",
-  "pageReachable",
+  "facebookPageIdentityMatches",
+  "fetchMetaGraphOnce",
   "publishEnabled",
-  "publishAuthorityConfirmed",
   "facebookTasksCanPublish",
-  "?fields=id,name,link",
-  "?fields=tasks",
-  "config.publishEnabled",
+  'query: { fields: "id" }',
+  'query: { fields: "tasks" }',
 ].forEach((snippet) => includes("Facebook status", status, snippet));
 notMatches(
   "Facebook status",
@@ -534,6 +555,9 @@ notMatches(
 [
   "requireModeratorAccess(req)",
   "confirm_facebook_publish",
+  "expected_updated_at",
+  "confirmation_fingerprint",
+  "socialPublicationConfirmationFingerprint",
   "publishFacebookPageJob",
   "validateSocialPublicationCopy([message])",
   "facebookPhotoId",
@@ -541,6 +565,13 @@ notMatches(
   "facebookPermalink",
   'published.error === "facebook_page_publish_disabled"',
 ].forEach((snippet) => includes("Facebook publish function", publish, snippet));
+
+notMatches(
+  "Meta production sources",
+  `${helper}\n${graphSecurity}\n${providerDiagnostic}\n${status}\n${publish}\n${resolve}`,
+  /console\.(?:error|warn)/,
+  "raw provider or database errors must use the bounded safe telemetry contract.",
+);
 
 const edgeCopyGuardIndex = publish.indexOf("const copyValidation = validateSocialPublicationCopy");
 const edgeAuthIndex = publish.indexOf("const access = await requireModeratorAccess(req)");
@@ -568,8 +599,8 @@ if (
 [
   'normalize("NFKC")',
   "FORMAT_OR_ZERO_WIDTH_RE",
-  "SITE_DOMAIN_RE",
-  "social_publication_site_reference_forbidden",
+  "BARE_DOMAIN_RE",
+  "social_publication_url_reference_forbidden",
 ].forEach((snippet) => includes("shared publication copy guard", publicationCopyGuard, snippet));
 includes("browser publication copy guard", publicationCopyWeb, "social-publication-copy");
 [
@@ -582,8 +613,8 @@ includes("browser publication copy guard", publicationCopyWeb, "social-publicati
   "copyValidation.message",
 ].forEach((snippet) => includes("Facebook Page queue publication copy guard", webQueue, snippet));
 [
-  "publication copy is rejected before database or provider access",
-  'result.error === "social_publication_site_reference_forbidden"',
+  "Facebook copy is rejected before database and provider access",
+  "blocked copy was attempted",
 ].forEach((snippet) => includes("Facebook publisher tests", helperTest, snippet));
 
 notMatches(

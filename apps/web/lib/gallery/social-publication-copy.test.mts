@@ -7,7 +7,7 @@ import {
   validateSocialPublicationCopy,
 } from "./social-publication-copy.ts";
 
-test("publication copy rejects canonical, subdomain, credential-confusion, and obfuscated site references", () => {
+test("publication copy rejects URLs plus canonical, credential-confusion, and obfuscated site references", () => {
   const blocked = [
     "mochirii.com",
     "Visit mochirii.com.",
@@ -17,6 +17,8 @@ test("publication copy rejects canonical, subdomain, credential-confusion, and o
     "https://person@mochirii.com/path",
     "https://mochirii.com.example.test/path",
     "https://www.mochirii.com.example.test/path",
+    "https://notmochirii.com/path",
+    "https://mochirii.company/path",
     "hello@mochirii.com.example.test",
     "MＯＣＨＩＲＩＩ．ＣＯＭ",
     "mo\u200bchirii.com",
@@ -39,11 +41,9 @@ test("publication copy rejects canonical, subdomain, credential-confusion, and o
   }
 });
 
-test("publication copy allows unrelated domains and ordinary copy", () => {
+test("publication copy allows ordinary non-URL copy", () => {
   const allowed = [
     "A pretty gameplay showcase from Mōchirīī.",
-    "https://notmochirii.com/path",
-    "https://mochirii.company/path",
     "The mochirii community gathered for an event.",
   ];
 

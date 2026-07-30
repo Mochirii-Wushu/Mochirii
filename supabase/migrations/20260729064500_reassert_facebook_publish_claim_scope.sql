@@ -50,7 +50,7 @@ begin
     );
   end if;
 
-  if current_job.destination_page_id <> '1222888660907862'
+  if current_job.destination_page_id <> 'facebook_page'
     or current_job.social_storage_object_id is null
     or current_job.social_mime_type <> 'image/jpeg'
     or current_job.social_size_bytes not between 1 and 8388608

@@ -13,7 +13,11 @@ import {
   gallerySourcePreviewResponse,
 } from "../_shared/gallery-source-decode.ts";
 import { validateGallerySourceBytes } from "../_shared/gallery-source-image.ts";
-import { galleryPreviewSanitizerIsAttested } from "../_shared/gallery-preview-attestation.ts";
+import {
+  galleryPreviewSanitizerIsAttested,
+  galleryPreviewVercelIdentityFromEnv,
+} from "../_shared/gallery-preview-attestation.ts";
+import { safeGalleryModeratorProfile } from "../_shared/gallery-response-safety.ts";
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 50;
@@ -75,14 +79,7 @@ function displayName(profile: JsonRecord | null | undefined): string {
 function profileSummary(
   profile: JsonRecord | null | undefined,
 ): JsonRecord | null {
-  if (!profile) return null;
-
-  return {
-    displayName: displayName(profile),
-    discordUsername: safeString(profile.discord_username, 80),
-    discordGlobalName: safeString(profile.discord_global_name, 100),
-    discordUserId: safeString(profile.discord_user_id, 40),
-  };
+  return safeGalleryModeratorProfile(profile);
 }
 
 Deno.serve((req: Request) => withProtectedCors(req, handleRequest(req)));
@@ -108,7 +105,6 @@ async function handleRequest(req: Request): Promise<Response> {
       hasAccess: true,
       data: {
         hasAccess: true,
-        moderatorId: access.userId,
       },
       message: "Moderator access verified.",
     });
@@ -118,6 +114,7 @@ async function handleRequest(req: Request): Promise<Response> {
     if (
       !(await galleryPreviewSanitizerIsAttested(req, {
         supabaseUrl: Deno.env.get("SUPABASE_URL") || "",
+        vercelIdentity: galleryPreviewVercelIdentityFromEnv(),
       }))
     ) {
       return new Response(null, {
@@ -189,7 +186,7 @@ async function handleRequest(req: Request): Promise<Response> {
           ok: false,
           error: candidateError
             ? "source_validation_lookup_failed"
-            : safeString(candidate.reason, 80) || "stale_submission_revision",
+            : "stale_submission_revision",
           message:
             "The private Gallery source changed or cannot be validated. Refresh the queue and review it again.",
         },
@@ -207,8 +204,7 @@ async function handleRequest(req: Request): Promise<Response> {
     const reservation = asRecord(reservationData);
     if (reservationError) {
       console.error("list-gallery-review-queue source preview budget failed", {
-        submissionId,
-        reason: "reservation_unavailable",
+        category: "reservation_unavailable",
       });
       return jsonResponse(
         {
@@ -254,8 +250,7 @@ async function handleRequest(req: Request): Promise<Response> {
     );
     if (!validation.ok) {
       console.warn("list-gallery-review-queue source validation rejected", {
-        submissionId,
-        reason: validation.error,
+        category: "source_validation_rejected",
       });
       return jsonResponse(
         {
@@ -276,8 +271,7 @@ async function handleRequest(req: Request): Promise<Response> {
     );
     if (!decode.ok) {
       console.warn("list-gallery-review-queue source decode rejected", {
-        submissionId,
-        reason: decode.error,
+        category: "source_decode_rejected",
       });
       return jsonResponse(
         {
@@ -313,7 +307,7 @@ async function handleRequest(req: Request): Promise<Response> {
           ok: false,
           error: commitError
             ? "source_validation_commit_failed"
-            : safeString(commit.reason, 80) || "source_validation_conflict",
+            : "source_validation_conflict",
           message:
             "The private Gallery source changed during validation. Refresh the queue and review it again.",
         },
@@ -368,7 +362,6 @@ async function handleRequest(req: Request): Promise<Response> {
       console.error("list-gallery-review-queue count lookup failed", {
         status,
         code: result.error.code,
-        message: result.error.message,
       });
 
       return jsonResponse(
@@ -396,7 +389,6 @@ async function handleRequest(req: Request): Promise<Response> {
   if (missingThumbnailCountError) {
     console.error("list-gallery-review-queue thumbnail count failed", {
       code: missingThumbnailCountError.code,
-      message: missingThumbnailCountError.message,
     });
     return jsonResponse(
       {
@@ -412,7 +404,7 @@ async function handleRequest(req: Request): Promise<Response> {
   let submissionQuery = access.adminClient
     .from("gallery_submissions")
     .select(
-      "id,user_id,storage_bucket,storage_path,gallery_publication_id,thumbnail_revision_id,thumbnail_storage_path,thumbnail_mime_type,thumbnail_size_bytes,thumbnail_width,thumbnail_height,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at,submission_source,discord_guild_id,discord_channel_id,discord_message_id,discord_attachment_id,discord_user_id,instagram_opt_in,instagram_opt_in_at,instagram_opt_in_source,instagram_opt_in_copy_version,instagram_opt_in_contract_version,facebook_page_opt_in,facebook_page_opt_in_at,facebook_page_opt_in_source,facebook_page_opt_in_copy_version,facebook_page_opt_in_contract_version",
+      "id,user_id,storage_bucket,storage_path,gallery_publication_id,thumbnail_mime_type,thumbnail_size_bytes,thumbnail_width,thumbnail_height,original_filename,mime_type,size_bytes,title,caption,category,status,rejection_reason,reviewed_by,reviewed_at,created_at,updated_at,submission_source,instagram_opt_in,facebook_page_opt_in",
       { count: "exact" },
     )
     .eq("status", requestedStatus);
@@ -443,7 +435,6 @@ async function handleRequest(req: Request): Promise<Response> {
   if (submissionError) {
     console.error("list-gallery-review-queue submission lookup failed", {
       code: submissionError.code,
-      message: submissionError.message,
     });
 
     return jsonResponse(
@@ -478,8 +469,9 @@ async function handleRequest(req: Request): Promise<Response> {
         "list-gallery-review-queue source validation lookup failed",
         {
           code: validationError?.code,
-          message: validationError?.message ||
-            "Invalid source validation response",
+          category: validationError
+            ? "database_lookup_rejected"
+            : "invalid_validation_response",
         },
       );
       return jsonResponse(
@@ -513,7 +505,6 @@ async function handleRequest(req: Request): Promise<Response> {
     if (eventError) {
       console.error("list-gallery-review-queue event lookup failed", {
         code: eventError.code,
-        message: eventError.message,
       });
 
       return jsonResponse(
@@ -556,14 +547,13 @@ async function handleRequest(req: Request): Promise<Response> {
     const { data: profileData, error: profileError } = await access.adminClient
       .from("member_profiles")
       .select(
-        "id,display_name,discord_username,discord_global_name,discord_user_id",
+        "id,display_name,discord_username,discord_global_name",
       )
       .in("id", userIds);
 
     if (profileError) {
       console.error("list-gallery-review-queue profile lookup failed", {
         code: profileError.code,
-        message: profileError.message,
       });
 
       return jsonResponse(
@@ -600,8 +590,8 @@ async function handleRequest(req: Request): Promise<Response> {
       console.warn(
         "list-gallery-review-queue skipped invalid storage reference",
         {
-          submissionId,
-          bucket,
+          category: "invalid_storage_reference",
+          bucketMatches: bucket === MEMBER_GALLERY_BUCKET,
           hasStoragePath: Boolean(storagePath),
         },
       );
@@ -633,18 +623,10 @@ async function handleRequest(req: Request): Promise<Response> {
       id: submissionId,
       status: safeString(submission.status, 20) || requestedStatus,
       source: safeString(submission.submission_source, 40) || "website",
-      discord: {
-        guildId: safeString(submission.discord_guild_id, 40),
-        channelId: safeString(submission.discord_channel_id, 40),
-        messageId: safeString(submission.discord_message_id, 40),
-        attachmentId: safeString(submission.discord_attachment_id, 40),
-        userId: safeString(submission.discord_user_id, 40),
-      },
       uploader: {
         displayName: displayName(profile),
         discordUsername: safeString(profile.discord_username, 80),
         discordGlobalName: safeString(profile.discord_global_name, 100),
-        discordUserId: safeString(profile.discord_user_id, 40),
       },
       reviewer: profileSummary(reviewer),
       title: safeString(submission.title, 80),
@@ -657,10 +639,6 @@ async function handleRequest(req: Request): Promise<Response> {
       reviewedAt: safeString(submission.reviewed_at, 80),
       updatedAt: safeString(submission.updated_at, 80),
       rejectionReason: safeString(submission.rejection_reason, 500),
-      storageBucket: bucket,
-      storagePath,
-      thumbnailRevisionId: safeString(submission.thumbnail_revision_id, 80),
-      thumbnailStoragePath: safeString(submission.thumbnail_storage_path, 1000),
       thumbnailMimeType: safeString(submission.thumbnail_mime_type, 80),
       thumbnailSizeBytes: Number(submission.thumbnail_size_bytes || 0) || null,
       thumbnailWidth: Number(submission.thumbnail_width || 0) || null,
@@ -669,34 +647,9 @@ async function handleRequest(req: Request): Promise<Response> {
         safeString(submission.gallery_publication_id, 80),
       ),
       sourceValidationState: sourceValidation ? "validated" : "required",
-      sourceWidth: Number(sourceValidation?.width || 0) || null,
-      sourceHeight: Number(sourceValidation?.height || 0) || null,
-      sourceValidatedAt: safeString(sourceValidation?.validated_at, 80),
       previewError,
       instagramOptIn: submission.instagram_opt_in === true,
-      instagramOptInAt: safeString(submission.instagram_opt_in_at, 80),
-      instagramOptInSource: safeString(submission.instagram_opt_in_source, 80),
-      instagramOptInCopyVersion: safeString(
-        submission.instagram_opt_in_copy_version,
-        80,
-      ),
       facebookPageOptIn: submission.facebook_page_opt_in === true,
-      facebookPageOptInAt: safeString(
-        submission.facebook_page_opt_in_at,
-        80,
-      ),
-      facebookPageOptInSource: safeString(
-        submission.facebook_page_opt_in_source,
-        80,
-      ),
-      facebookPageOptInCopyVersion: safeString(
-        submission.facebook_page_opt_in_copy_version,
-        80,
-      ),
-      facebookPageOptInContractVersion: safeString(
-        submission.facebook_page_opt_in_contract_version,
-        80,
-      ),
       moderationEvents: events,
     });
   }

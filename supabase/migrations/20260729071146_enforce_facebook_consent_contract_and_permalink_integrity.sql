@@ -227,7 +227,7 @@ declare
   submission public.gallery_submissions%rowtype;
   derivative private.gallery_social_derivatives%rowtype;
 begin
-  new.destination_page_id := '1222888660907862';
+  new.destination_page_id := 'facebook_page';
   new.message := coalesce(
     nullif(btrim(new.message), ''),
     'A pretty gameplay showcase from Mōchirīī.'
@@ -390,7 +390,7 @@ begin
     );
   end if;
 
-  if current_job.destination_page_id <> '1222888660907862'
+  if current_job.destination_page_id <> 'facebook_page'
     or current_job.social_storage_object_id is null
     or current_job.social_mime_type <> 'image/jpeg'
     or current_job.social_size_bytes not between 1 and 8388608
@@ -487,7 +487,7 @@ begin
   if current_job.status <> 'publishing' then
     return jsonb_build_object('ok', false, 'reason', 'job_not_publishing');
   end if;
-  if current_job.destination_page_id <> '1222888660907862' then
+  if current_job.destination_page_id <> 'facebook_page' then
     return jsonb_build_object('ok', false, 'reason', 'destination_mismatch');
   end if;
 
@@ -783,7 +783,7 @@ begin
     from public.gallery_submissions as submission
     where submission.id = current_job.submission_id;
     if coalesce(current_consent, false) is not true
-      or current_job.destination_page_id <> '1222888660907862'
+      or current_job.destination_page_id <> 'facebook_page'
     then
       return jsonb_build_object(
         'committed', false,

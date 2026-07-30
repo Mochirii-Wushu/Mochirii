@@ -15,6 +15,7 @@ const functions = [
   "spinner-live-session",
   "moderate-gallery-submission",
   "delete-rejected-gallery-submission",
+  "withdraw-gallery-publication-consent",
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",

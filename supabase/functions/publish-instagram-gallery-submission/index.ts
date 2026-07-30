@@ -3,12 +3,18 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { publishInstagramJob } from "../_shared/instagram-publishing.ts";
 import { validateSocialPublicationCopy } from "../_shared/social-publication-copy.ts";
 import {
+  constantTimeHexEqual,
+  socialPublicationConfirmationFingerprint,
+  socialPublicationFingerprintLooksValid,
+} from "../_shared/social-publication-confirmation.ts";
+import {
   CORS_HEADERS,
   jsonResponse,
   readRequiredJsonBody,
   requireModeratorAccess,
   safeString,
 } from "../_shared/gallery-moderation.ts";
+import { safeInstagramPublishResponse } from "../_shared/gallery-response-safety.ts";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -34,6 +40,14 @@ async function handleRequest(req: Request): Promise<Response> {
   const caption = safeString(bodyResult.body.caption, 2200);
   const altText = safeString(bodyResult.body.alt_text, 1000);
   const confirmed = bodyResult.body.confirm_instagram_publish === true;
+  const expectedUpdatedAt = safeString(
+    bodyResult.body.expected_updated_at,
+    80,
+  );
+  const suppliedFingerprint = safeString(
+    bodyResult.body.confirmation_fingerprint,
+    64,
+  );
 
   const copyValidation = validateSocialPublicationCopy([caption, altText]);
   if (!copyValidation.ok) {
@@ -69,27 +83,95 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
+  if (
+    !altText || !expectedUpdatedAt ||
+    !socialPublicationFingerprintLooksValid(suppliedFingerprint)
+  ) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: !altText
+          ? "instagram_alt_text_required"
+          : "instagram_publish_confirmation_invalid",
+        message: !altText
+          ? "Moderator-reviewed Instagram alt text is required."
+          : "Refresh the Instagram queue and confirm this exact revision.",
+      },
+      !altText ? 400 : 409,
+    );
+  }
+
+  const { data: currentData, error: currentError } = await access.adminClient
+    .from("gallery_instagram_publish_jobs")
+    .select("id,status,attempt_count,updated_at,caption,alt_text")
+    .eq("id", jobId)
+    .maybeSingle();
+  const current = currentData && typeof currentData === "object" &&
+      !Array.isArray(currentData)
+    ? currentData as Record<string, unknown>
+    : null;
+  const currentUpdatedAt = safeString(current?.updated_at, 80);
+  const currentStatus = safeString(current?.status, 40);
+  const currentAttemptCount = Number(current?.attempt_count);
+  const finalCaption = caption || safeString(current?.caption, 2200);
+  const finalAltText = altText || safeString(current?.alt_text, 1000);
+  if (
+    currentError || !current || !currentUpdatedAt || !currentStatus ||
+    !Number.isSafeInteger(currentAttemptCount) ||
+    currentAttemptCount < 0 ||
+    currentUpdatedAt !== expectedUpdatedAt
+  ) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: currentError
+          ? "instagram_confirmation_state_unavailable"
+          : "instagram_publish_confirmation_stale",
+        message: "Refresh the Instagram queue and confirm this exact revision.",
+      },
+      currentError ? 500 : 409,
+    );
+  }
+  const confirmation = await socialPublicationConfirmationFingerprint({
+    destination: "instagram",
+    jobId: jobId.toLowerCase(),
+    status: currentStatus,
+    attemptCount: currentAttemptCount,
+    updatedAt: currentUpdatedAt,
+    moderatorUserId: access.userId.toLowerCase(),
+    primaryCopy: finalCaption,
+    altText: finalAltText,
+  });
+  if (
+    !constantTimeHexEqual(
+      suppliedFingerprint,
+      confirmation.fingerprint,
+    )
+  ) {
+    return jsonResponse(
+      {
+        ok: false,
+        error: "instagram_publish_confirmation_mismatch",
+        message:
+          "The destination, revision, caption, alt text, or moderator changed. Confirm again.",
+      },
+      409,
+    );
+  }
+
   const published = await publishInstagramJob({
     adminClient: access.adminClient,
     actorId: access.userId,
     jobId,
-    caption,
-    altText,
+    caption: finalCaption,
+    altText: finalAltText,
+    expectedUpdatedAt: currentUpdatedAt,
+    confirmationFingerprint: confirmation.fingerprint,
+    confirmationCopyHash: confirmation.copyHash,
   });
 
   if (published.ok) {
-    return jsonResponse({
-      ok: true,
-      data: {
-        jobId,
-        status: published.status,
-        instagramContainerId: published.instagramContainerId,
-        instagramMediaId: published.instagramMediaId,
-        instagramPermalink: published.instagramPermalink,
-        publishedAt: published.publishedAt,
-      },
-      message: published.message,
-    });
+    return jsonResponse(safeInstagramPublishResponse(jobId, published));
   }
 
   const statusCode = published.error === "job_not_found"
@@ -104,19 +186,7 @@ async function handleRequest(req: Request): Promise<Response> {
     : 409;
 
   return jsonResponse(
-    {
-      ok: false,
-      error: published.error || "instagram_publish_failed",
-      data: {
-        jobId,
-        status: published.status,
-        attempted: published.attempted,
-        instagramContainerId: published.instagramContainerId,
-        instagramMediaId: published.instagramMediaId,
-        instagramPermalink: published.instagramPermalink,
-      },
-      message: published.message,
-    },
+    safeInstagramPublishResponse(jobId, published),
     statusCode,
   );
 }

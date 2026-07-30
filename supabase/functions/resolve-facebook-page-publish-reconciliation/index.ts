@@ -9,12 +9,15 @@ import {
   safeString,
 } from "../_shared/gallery-moderation.ts";
 import {
-  facebookAuthenticatedGraphUrl,
   facebookPageConfig,
   facebookPageObjectEvidence,
-  facebookTokenRequestInit,
   normalizeFacebookPermalink,
 } from "../_shared/facebook-page-publishing.ts";
+import {
+  fetchMetaGraphOnce,
+  readBoundedMetaGraphJson,
+} from "../_shared/meta-graph-security.ts";
+import { logSafeMetaEvent } from "../_shared/safe-telemetry.ts";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -147,34 +150,22 @@ async function handleRequest(req: Request): Promise<Response> {
     ];
     const providerPermalinks: string[] = [];
     for (const objectId of objectIds) {
-      const evidenceUrl = await facebookAuthenticatedGraphUrl(
-        config.apiVersion,
-        `${encodeURIComponent(objectId)}?fields=id,from{id},permalink_url,link`,
-        config.accessToken,
-        config.appSecret,
-      );
-      if (!evidenceUrl) {
-        return jsonResponse(
-          {
-            ok: false,
-            error: "facebook_page_reconciliation_verification_failed",
-            message:
-              "The inspected Facebook object could not be checked against the pinned Page.",
-          },
-          409,
-        );
-      }
-
       try {
-        const response = await fetch(
-          evidenceUrl,
-          facebookTokenRequestInit(config.accessToken, {
-            headers: { Accept: "application/json" },
-            signal: AbortSignal.timeout(30_000),
-          }),
+        const response = await fetchMetaGraphOnce({
+          accessToken: config.accessToken,
+          appSecret: config.appSecret,
+          path: encodeURIComponent(objectId),
+          query: { fields: "id,from{id},permalink_url,link" },
+          timeoutMs: 30_000,
+        });
+        const body = response.ok
+          ? await readBoundedMetaGraphJson(response)
+          : null;
+        const evidence = facebookPageObjectEvidence(
+          body,
+          objectId,
+          config.expectedPageId,
         );
-        const body = response.ok ? await response.json() : null;
-        const evidence = facebookPageObjectEvidence(body, objectId);
         if (!response.ok || !evidence.verified || !evidence.permalink) {
           return jsonResponse(
             {
@@ -252,10 +243,10 @@ async function handleRequest(req: Request): Promise<Response> {
   if (error || payload.committed !== true || !job) {
     const reason = safeString(payload.reason, 80) ||
       "facebook_page_reconciliation_failed";
-    console.warn("resolve-facebook-page-publish-reconciliation failed", {
-      code: error?.code || reason,
-      message: error?.message || reason,
-      jobId,
+    logSafeMetaEvent("warn", "facebook_reconciliation_commit_failed", {
+      provider: "facebook_page",
+      stage: "reconciliation_commit",
+      errorCategory: reason,
     });
     const status = reason === "job_not_found"
       ? 404
@@ -284,12 +275,10 @@ async function handleRequest(req: Request): Promise<Response> {
     ok: true,
     data: {
       jobId: safeString(job.id, 80),
-      submissionId: safeString(job.submission_id, 80),
       status: safeString(job.status, 40),
       facebookPhotoId: safeString(job.facebook_photo_id, 255),
       facebookPostId: safeString(job.facebook_post_id, 255),
       facebookPermalink: normalizeFacebookPermalink(job.facebook_permalink),
-      lastError: safeString(job.last_error, 1000),
       publishedAt: safeString(job.published_at, 80),
       updatedAt: safeString(job.updated_at, 80),
     },

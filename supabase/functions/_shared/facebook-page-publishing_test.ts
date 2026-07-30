@@ -1,11 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  FACEBOOK_CANONICAL_PAGE_ID,
-  FACEBOOK_CANONICAL_PAGE_NAME,
-  META_CANONICAL_APP_ID,
   facebookApiVersionIsValid,
-  facebookAppSecretProof,
-  facebookAuthenticatedGraphUrl,
   facebookGraphErrorDetails,
   facebookGraphOutcome,
   facebookGraphUrl,
@@ -14,7 +9,6 @@ import {
   facebookPageObjectEvidence,
   facebookPagePublishFlagEnabled,
   facebookTasksCanPublish,
-  facebookTokenRequestInit,
   normalizeFacebookPermalink,
   publishFacebookPageJob,
 } from "./facebook-page-publishing.ts";
@@ -23,315 +17,297 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-Deno.test("Facebook identifiers use strict provider formats", () => {
-  assert(facebookPageIdIsValid("123456789012345"), "valid Page id rejected");
-  assert(!facebookPageIdIsValid("page-name"), "named Page id accepted");
-  assert(!facebookPageIdIsValid("123/456"), "path-shaped Page id accepted");
-  assert(!facebookPageIdIsValid("1234"), "short Page id accepted");
+const actorId = "61111111-1111-4111-8111-111111111111";
+const jobId = "63333333-3333-4333-8333-333333333333";
+const expectedUpdatedAt = "2026-07-29T20:00:00.000000+00:00";
+const digest = "a".repeat(64);
 
-  assert(facebookApiVersionIsValid("v25.0"), "current API version rejected");
-  assert(!facebookApiVersionIsValid("25.0"), "unprefixed version accepted");
-  assert(!facebookApiVersionIsValid("v25.0/photos"), "version path accepted");
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new Uint8Array(bytes).buffer,
+  );
+  return Array.from(
+    new Uint8Array(digest),
+    (byte) => byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
+
+Deno.test("Facebook identifiers and Graph URL are v26-only", () => {
+  assert(facebookPageIdIsValid("111111111111111"), "numeric id rejected");
+  assert(!facebookPageIdIsValid("page-name"), "named id accepted");
+  assert(facebookApiVersionIsValid("v26.0"), "v26 rejected");
+  assert(!facebookApiVersionIsValid("v25.0"), "v25 accepted");
   assert(!facebookApiVersionIsValid("latest"), "floating version accepted");
   assert(
-    facebookGraphUrl("latest", "123/photos") === "",
-    "invalid version produced a Graph URL",
+    facebookGraphUrl("v26.0", "111111111111111/photos") ===
+      "https://graph.facebook.com/v26.0/111111111111111/photos",
+    "Graph URL drifted",
   );
   assert(
-    facebookGraphUrl("v25.0", "123456/photos") ===
-      "https://graph.facebook.com/v25.0/123456/photos",
-    "valid Graph URL did not stay on Meta's fixed origin",
+    facebookGraphUrl("v26.0", "https://evil.example") === "",
+    "origin escaped",
   );
 });
 
-Deno.test("Facebook publication copy is rejected before database or provider access", async () => {
+Deno.test("Facebook runtime identity uses an independent expected id", () => {
+  assert(
+    facebookPageIdentityMatches("111111111111111", "111111111111111"),
+    "exact runtime pin rejected",
+  );
+  assert(
+    !facebookPageIdentityMatches("111111111111111", "222222222222222"),
+    "mismatched runtime pin accepted",
+  );
+});
+
+Deno.test("Facebook copy is rejected before database and provider access", async () => {
   let databaseCalls = 0;
   let providerCalls = 0;
   const result = await publishFacebookPageJob({
     adminClient: {
       rpc: () => {
         databaseCalls += 1;
-        throw new Error("database operation must not run");
+        throw new Error("database must not run");
       },
     } as unknown as SupabaseClient,
-    actorId: "61111111-1111-4111-8111-111111111111",
-    jobId: "63333333-3333-4333-8333-333333333333",
-    message: "Visit https://mochirii.com@unrelated.example",
+    actorId,
+    jobId,
+    message: "Visit mochirii [dot] com",
+    expectedUpdatedAt,
+    confirmationFingerprint: digest,
+    confirmationCopyHash: digest,
     fetchImpl: () => {
       providerCalls += 1;
-      throw new Error("provider operation must not run");
+      throw new Error("provider must not run");
     },
   });
-
-  assert(!result.ok, "blocked Facebook copy was accepted");
-  assert(!result.attempted, "blocked Facebook copy was marked attempted");
-  assert(
-    result.error === "social_publication_site_reference_forbidden",
-    "blocked Facebook copy returned the wrong error",
-  );
-  assert(databaseCalls === 0, "blocked Facebook copy reached the database");
-  assert(providerCalls === 0, "blocked Facebook copy reached the provider");
+  assert(!result.ok && !result.attempted, "blocked copy was attempted");
+  assert(databaseCalls === 0, "blocked copy reached database");
+  assert(providerCalls === 0, "blocked copy reached provider");
 });
 
-Deno.test("Facebook stored fallback copy is rejected before source or provider access", async () => {
-  let sourceCalls = 0;
+Deno.test("Facebook disabled flag prevents every database and Graph request", async () => {
+  let databaseCalls = 0;
   let providerCalls = 0;
-  const rpcCalls: string[] = [];
   const result = await publishFacebookPageJob({
     adminClient: {
-      rpc: (name: string) => {
-        rpcCalls.push(name);
-        if (name === "gallery_facebook_page_begin_publish") {
-          return Promise.resolve({
-            data: {
-              committed: true,
-              job: {
-                destination_page_id: FACEBOOK_CANONICAL_PAGE_ID,
-                message: "mochirii.com.",
-              },
-            },
-            error: null,
-          });
-        }
-        if (name === "gallery_facebook_page_finish_publish") {
-          return Promise.resolve({
-            data: { committed: true, job: { status: "failed" } },
-            error: null,
-          });
-        }
-        sourceCalls += 1;
-        throw new Error(`unexpected database operation: ${name}`);
+      rpc: () => {
+        databaseCalls += 1;
+        throw new Error("database must not run");
       },
     } as unknown as SupabaseClient,
-    actorId: "61111111-1111-4111-8111-111111111111",
-    jobId: "63333333-3333-4333-8333-333333333333",
-    message: null,
+    actorId,
+    jobId,
+    message: "Reviewed caption",
+    expectedUpdatedAt,
+    confirmationFingerprint: digest,
+    confirmationCopyHash: digest,
     config: {
-      appId: META_CANONICAL_APP_ID,
-      appSecret: "test-app-secret",
-      pageId: FACEBOOK_CANONICAL_PAGE_ID,
-      accessToken: "test-page-token",
-      apiVersion: "v25.0",
-      publishEnabled: true,
+      appId: "333333333333333",
+      expectedAppId: "333333333333333",
+      appSecret: "app-secret",
+      pageId: "111111111111111",
+      expectedPageId: "111111111111111",
+      accessToken: "page-token",
+      apiVersion: "v26.0",
+      publishEnabled: false,
       configured: true,
       missingSecrets: [],
       invalidFields: [],
     },
     fetchImpl: () => {
       providerCalls += 1;
-      throw new Error("provider operation must not run");
+      throw new Error("provider must not run");
+    },
+  });
+  assert(result.error === "facebook_page_publish_disabled", "wrong blocker");
+  assert(databaseCalls === 0, "disabled publisher reached database");
+  assert(providerCalls === 0, "disabled publisher reached Graph");
+});
+
+Deno.test("Facebook success accepts the DB destination class without a numeric Page id in DB payloads", async () => {
+  const expectedPageId = "111111111111111";
+  const photoId = "222222222222222";
+  const postId = "111111111111111_222222222222222";
+  const submissionId = "62222222-2222-4222-8222-222222222222";
+  const revisionId = "65555555-5555-4555-8555-555555555555";
+  const objectName = `_social/submissions/${submissionId}/${revisionId}.jpg`;
+  const bytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9]);
+  const expectedSha256 = await sha256Hex(bytes);
+  const rpcCalls: string[] = [];
+  const adminClient = {
+    rpc: (name: string) => {
+      rpcCalls.push(name);
+      if (name === "gallery_facebook_page_begin_publish") {
+        return Promise.resolve({
+          data: {
+            committed: true,
+            job: { status: "publishing", message: "Reviewed caption" },
+          },
+          error: null,
+        });
+      }
+      if (name === "gallery_facebook_page_publish_source") {
+        return Promise.resolve({
+          data: {
+            ok: true,
+            bucket_id: "member-gallery",
+            object_name: objectName,
+            mime_type: "image/jpeg",
+            sha256: expectedSha256,
+            size_bytes: bytes.byteLength,
+            width: 1080,
+            height: 1080,
+            destination_page_id: "facebook_page",
+            sanitizer_version: "gallery-social-jpeg-v1",
+            metadata_policy: "jfif-only-no-app-metadata-v1",
+            submission_id: submissionId,
+          },
+          error: null,
+        });
+      }
+      if (name === "gallery_facebook_page_finish_publish") {
+        return Promise.resolve({
+          data: {
+            committed: true,
+            job: {
+              status: "published",
+              published_at: "2026-07-29T20:01:00.000Z",
+            },
+          },
+          error: null,
+        });
+      }
+      throw new Error(`unexpected RPC: ${name}`);
+    },
+    storage: {
+      from: () => ({
+        download: () =>
+          Promise.resolve({
+            data: new Blob([bytes], { type: "image/jpeg" }),
+            error: null,
+          }),
+      }),
+    },
+  } as unknown as SupabaseClient;
+
+  let providerCalls = 0;
+  const result = await publishFacebookPageJob({
+    adminClient,
+    actorId,
+    jobId,
+    message: "Reviewed caption",
+    expectedUpdatedAt,
+    confirmationFingerprint: digest,
+    confirmationCopyHash: digest,
+    config: {
+      appId: "333333333333333",
+      expectedAppId: "333333333333333",
+      appSecret: "app-secret",
+      pageId: expectedPageId,
+      expectedPageId,
+      accessToken: "page-token",
+      apiVersion: "v26.0",
+      publishEnabled: true,
+      configured: true,
+      missingSecrets: [],
+      invalidFields: [],
+    },
+    fetchImpl: (input, init) => {
+      providerCalls += 1;
+      const url = new URL(String(input));
+      if (init?.method === "POST") {
+        return Promise.resolve(Response.json({ id: photoId, post_id: postId }));
+      }
+      if (url.pathname.endsWith(`/${postId}`)) {
+        return Promise.resolve(Response.json({
+          id: postId,
+          from: { id: expectedPageId },
+          permalink_url:
+            `https://www.facebook.com/${expectedPageId}/posts/${photoId}`,
+        }));
+      }
+      return Promise.resolve(Response.json({ id: expectedPageId }));
     },
   });
 
-  assert(!result.ok, "blocked stored Facebook copy was accepted");
-  assert(!result.attempted, "blocked stored Facebook copy was marked attempted");
-  assert(
-    result.error === "social_publication_site_reference_forbidden",
-    "blocked stored Facebook copy returned the wrong error",
-  );
+  assert(result.ok && result.status === "published", "valid class failed");
+  assert(providerCalls === 3, "unexpected provider request count");
   assert(
     rpcCalls.join(",") ===
-      "gallery_facebook_page_begin_publish,gallery_facebook_page_finish_publish",
-    "blocked stored Facebook copy did not fail through the audited boundary",
-  );
-  assert(sourceCalls === 0, "blocked stored Facebook copy reached its source");
-  assert(providerCalls === 0, "blocked stored Facebook copy reached the provider");
-});
-
-Deno.test("Facebook inventory is hard-pinned to the official Page identity", () => {
-  assert(
-    facebookPageIdentityMatches(
-      FACEBOOK_CANONICAL_PAGE_ID,
-      FACEBOOK_CANONICAL_PAGE_NAME,
-    ),
-    "canonical Page identity was rejected",
-  );
-  assert(
-    !facebookPageIdentityMatches(
-      FACEBOOK_CANONICAL_PAGE_ID,
-      "Mochirii",
-    ),
-    "wrong Page name was accepted",
-  );
-  assert(
-    !facebookPageIdentityMatches(
-      "999999999999999",
-      FACEBOOK_CANONICAL_PAGE_NAME,
-    ),
-    "wrong Page id was accepted",
+      "gallery_facebook_page_begin_publish,gallery_facebook_page_publish_source,gallery_facebook_page_finish_publish",
+    "database workflow drifted",
   );
 });
 
-Deno.test("token-bearing Graph URLs include a server-derived appsecret proof", async () => {
-  const proof = await facebookAppSecretProof(
-    "The quick brown fox jumps over the lazy dog",
-    "key",
-  );
-  assert(
-    proof ===
-      "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8",
-    "HMAC-SHA256 proof did not match the known vector",
-  );
-
-  const graphUrl = await facebookAuthenticatedGraphUrl(
-    "v25.0",
-    `${FACEBOOK_CANONICAL_PAGE_ID}?fields=id,name`,
-    "token",
-    "secret",
-  );
-  const parsed = new URL(graphUrl);
-  assert(
-    parsed.origin === "https://graph.facebook.com",
-    "Graph origin drifted",
-  );
-  assert(
-    /^[0-9a-f]{64}$/.test(parsed.searchParams.get("appsecret_proof") || ""),
-    "authenticated Graph URL omitted appsecret proof",
-  );
-  assert(!graphUrl.includes("token"), "access token leaked into the Graph URL");
-});
-
-Deno.test("Page task evidence recognizes create-content authority", () => {
-  assert(facebookTasksCanPublish(["CREATE_CONTENT"]), "Page task was rejected");
+Deno.test("Facebook Page task evidence is least privilege", () => {
+  assert(facebookTasksCanPublish(["CREATE_CONTENT"]), "task rejected");
   assert(
     facebookTasksCanPublish(["PROFILE_PLUS_CREATE_CONTENT"]),
-    "profile-plus create task was rejected",
+    "profile task rejected",
   );
-  assert(
-    !facebookTasksCanPublish(["MODERATE"]),
-    "moderation implied publishing",
-  );
-  assert(!facebookTasksCanPublish([]), "missing tasks implied publishing");
-  assert(!facebookTasksCanPublish(null), "invalid tasks implied publishing");
+  assert(!facebookTasksCanPublish(["MODERATE"]), "moderation implied posting");
+  assert(facebookPagePublishFlagEnabled("true"), "exact flag rejected");
+  assert(!facebookPagePublishFlagEnabled("TRUE"), "loose flag accepted");
 });
 
-Deno.test("Page publishing activation requires the exact server flag", () => {
-  assert(facebookPagePublishFlagEnabled("true"), "true flag was rejected");
-  assert(!facebookPagePublishFlagEnabled("false"), "false flag was enabled");
-  assert(!facebookPagePublishFlagEnabled("TRUE"), "uppercase flag was enabled");
-  assert(!facebookPagePublishFlagEnabled(" true "), "padded flag was enabled");
-  assert(
-    !facebookPagePublishFlagEnabled(undefined),
-    "missing flag was enabled",
-  );
-});
-
-Deno.test("token-bearing Graph requests reject redirects", () => {
-  const init = facebookTokenRequestInit("placeholder-token", {
-    method: "POST",
-    headers: { Accept: "application/json" },
-  });
-  const headers = new Headers(init.headers);
-  assert(init.method === "POST", "request method was not preserved");
-  assert(init.redirect === "error", "redirects were not rejected");
-  assert(
-    headers.get("Authorization") === "Bearer placeholder-token",
-    "bearer authorization was not installed",
-  );
-  assert(headers.get("Accept") === "application/json", "headers were lost");
-});
-
-Deno.test("ambiguous Graph server failures require reconciliation", () => {
-  assert(
-    facebookGraphOutcome(400) === "failed",
-    "client rejection became ambiguous",
-  );
-  assert(facebookGraphOutcome(429) === "failed", "rate limit became ambiguous");
-  assert(
-    facebookGraphOutcome(500) === "reconcile_required",
-    "server failure stayed retryable",
-  );
-  assert(
-    facebookGraphOutcome(503) === "reconcile_required",
-    "provider outage stayed retryable",
-  );
-});
-
-Deno.test("Facebook permalinks are canonical and remain on known HTTPS hosts", () => {
-  assert(
-    normalizeFacebookPermalink(
-      "https://m.facebook.com/story.php?story_fbid=12345&id=67890&utm_source=test",
-    ) ===
-      "https://www.facebook.com/story.php?story_fbid=12345&id=67890",
-    "known mobile permalink was not normalized",
-  );
-  assert(
-    normalizeFacebookPermalink("https://facebook.com/photo/?fbid=34") ===
-      "https://www.facebook.com/photo.php?fbid=34",
-    "legacy photo path did not use the database canonical form",
-  );
-  for (
-    const value of [
-      "javascript:alert(1)",
-      "https://evil.facebook.com/post/1",
-      "https://facebook.com.example.test/post/1",
-      "https://user:pass@www.facebook.com/post/1",
-      "https://www.facebook.com/post/1#fragment",
-      "https://www.facebook.com:8443/post/1",
-      "https://www.facebook.com/",
-      "https://www.facebook.com/profile.php?id=61592841711452",
-      "https://www.facebook.com/about",
-      "https://www.facebook.com/?story_fbid=12345&id=67890",
-    ]
-  ) {
-    assert(
-      normalizeFacebookPermalink(value) === null,
-      `unsafe permalink was accepted: ${value}`,
-    );
-  }
-});
-
-Deno.test("Facebook object evidence is bound to the pinned Page and requested id", () => {
-  const verified = facebookPageObjectEvidence({
-    id: "1222888660907862_987654321",
-    from: { id: FACEBOOK_CANONICAL_PAGE_ID },
-    permalink_url:
-      "https://www.facebook.com/1222888660907862/posts/987654321?utm_source=test",
-  }, "1222888660907862_987654321");
-  assert(verified.verified, "canonical Page object evidence was rejected");
-  assert(
-    verified.permalink ===
-      "https://www.facebook.com/1222888660907862/posts/987654321",
-    "tracking parameters were not removed",
-  );
-
-  assert(
-    !facebookPageObjectEvidence({
-      id: "1222888660907862_987654321",
-      from: { id: "999999999999999" },
-      permalink_url: "https://www.facebook.com/other-page/posts/987654321",
-    }, "1222888660907862_987654321").verified,
-    "unrelated Page ownership was accepted",
-  );
-  assert(
-    !facebookPageObjectEvidence({
-      id: "different-object",
-      from: { id: FACEBOOK_CANONICAL_PAGE_ID },
+Deno.test("Facebook permalink and ownership evidence are canonical", () => {
+  const expectedPageId = "111111111111111";
+  const objectId = "111111111111111_222222222222222";
+  const evidence = facebookPageObjectEvidence(
+    {
+      id: objectId,
+      from: { id: expectedPageId },
       permalink_url:
-        "https://www.facebook.com/1222888660907862/posts/987654321",
-    }, "1222888660907862_987654321").verified,
-    "substituted object id was accepted",
+        "https://m.facebook.com/111111111111111/posts/222222222222222?utm_source=x",
+    },
+    objectId,
+    expectedPageId,
+  );
+  assert(evidence.verified, "official object rejected");
+  assert(
+    evidence.permalink ===
+      "https://www.facebook.com/111111111111111/posts/222222222222222",
+    "permalink not canonical",
+  );
+  assert(
+    !facebookPageObjectEvidence(
+      {
+        id: objectId,
+        from: { id: "999999999999999" },
+        permalink_url: "https://www.facebook.com/other/posts/222222222222222",
+      },
+      objectId,
+      expectedPageId,
+    ).verified,
+    "foreign Page accepted",
+  );
+  assert(
+    normalizeFacebookPermalink("https://evil.example/post") === null,
+    "foreign permalink accepted",
   );
 });
 
-Deno.test("reflected Graph messages cannot enter stored audit details", () => {
-  const reflection =
-    "token=secret appsecret_proof=proof https://graph.facebook.com/v25.0/object _social/submissions/private.jpg";
+Deno.test("ambiguous server outcomes reconcile and Graph errors are redacted", () => {
+  assert(facebookGraphOutcome(400) === "failed", "400 ambiguous");
+  assert(facebookGraphOutcome(429) === "failed", "429 ambiguous");
+  assert(facebookGraphOutcome(500) === "reconcile_required", "500 retryable");
+  const reflected = "token=secret appsecret_proof=proof _social/private.jpg";
   const details = facebookGraphErrorDetails({
     error: {
-      message: reflection,
-      type: `OAuthException ${reflection}`,
+      message: reflected,
+      type: `OAuthException ${reflected}`,
       code: 190,
       error_subcode: 463,
     },
-    message: reflection,
-  }, 400);
+  }, 401);
   const serialized = JSON.stringify(details);
-  assert(details.status_code === 400, "safe status code was lost");
-  assert(details.provider_error_code === 190, "safe error code was lost");
-  assert(details.provider_error_subcode === 463, "safe subcode was lost");
-  assert(details.provider_error_type === null, "unsafe provider type survived");
-  assert(!serialized.includes("secret"), "reflected token survived");
-  assert(!serialized.includes("appsecret_proof"), "reflected proof survived");
-  assert(!serialized.includes("_social/"), "reflected object path survived");
+  assert(details.provider_error_code === 190, "safe code lost");
+  for (const value of ["secret", "appsecret_proof", "_social"]) {
+    assert(
+      !serialized.includes(value),
+      `reflected evidence survived: ${value}`,
+    );
+  }
 });

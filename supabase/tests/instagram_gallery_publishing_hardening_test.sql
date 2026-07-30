@@ -31,8 +31,8 @@ select ok(
   'browser clients can send the contract handshake but cannot update stored Instagram consent evidence'
 );
 select ok(
-  not has_function_privilege('authenticated', 'public.gallery_instagram_begin_publish(uuid,uuid,text,text)', 'execute')
-  and has_function_privilege('service_role', 'public.gallery_instagram_begin_publish(uuid,uuid,text,text)', 'execute'),
+  not has_function_privilege('authenticated', 'public.gallery_instagram_begin_publish(uuid,uuid,text,text,timestamptz,text,text)', 'execute')
+  and has_function_privilege('service_role', 'public.gallery_instagram_begin_publish(uuid,uuid,text,text,timestamptz,text,text)', 'execute'),
   'Instagram claim RPC is service-role only'
 );
 select ok(
@@ -82,14 +82,14 @@ select matches(
   'Instagram events include durable reconciliation actions'
 );
 select matches(
-  pg_get_functiondef('public.gallery_instagram_begin_publish(uuid,uuid,text,text)'::regprocedure),
-  'instagram_opt_in_contract_version',
-  'claim requires the exact current public Instagram consent contract handshake'
+  pg_get_functiondef('public.gallery_instagram_begin_publish(uuid,uuid,text,text,timestamptz,text,text)'::regprocedure),
+  'confirmation_fingerprint',
+  'claim requires the exact current moderator confirmation fingerprint'
 );
 select matches(
   pg_get_functiondef('public.gallery_instagram_publish_source(uuid)'::regprocedure),
-  'instagram_opt_in_contract_version',
-  'publisher source resolution rechecks the exact consent contract handshake'
+  'gallery_social_publication_attestations',
+  'publisher source resolution rechecks the current confirmation attestation'
 );
 select ok(
   exists (
@@ -126,6 +126,7 @@ insert into auth.users (
 
 insert into public.gallery_submissions (
   id, user_id, storage_path, mime_type, size_bytes, title, caption, category,
+  upload_rights_confirmed,
   instagram_opt_in, instagram_opt_in_at, instagram_opt_in_source,
   instagram_opt_in_copy_version, instagram_opt_in_contract_version
 ) values (
@@ -133,6 +134,7 @@ insert into public.gallery_submissions (
   '61111111-1111-4111-8111-111111111111',
   '61111111-1111-4111-8111-111111111111/instagram-consent.jpg',
   'image/jpeg', 1000, 'Instagram fixture', 'Approved member image.', 'scenery',
+  true,
   true, '2000-01-01 00:00:00+00', 'discord_slash_command', 'forged-client-version',
   '2026-07-website-public-instagram-publish-v2'
 );
@@ -142,6 +144,8 @@ select ok(
       and instagram_opt_in_source = 'website_upload'
       and instagram_opt_in_copy_version = '2026-07-website-public-instagram-publish-v2'
       and instagram_opt_in_contract_version = '2026-07-website-public-instagram-publish-v2'
+      and instagram_consent_version = '2026-07-website-public-instagram-publish-v3'
+      and upload_rights_contract_version = '2026-07-gallery-upload-rights-v1'
     from public.gallery_submissions
     where id = '62222222-2222-4222-8222-222222222221'),
   'database overwrites forged Instagram consent provenance with current website attestation'
@@ -162,7 +166,7 @@ insert into public.gallery_submissions (
 select ok(
   (select instagram_opt_in is true
       and instagram_opt_in_source = 'website_upload'
-      and instagram_opt_in_copy_version = '2026-06-website-upload-v1'
+      and instagram_opt_in_copy_version = 'gallery-instagram-opt-in-unverified-v1'
       and instagram_opt_in_contract_version is null
     from public.gallery_submissions
     where id = '62222222-2222-4222-8222-222222222223'),
@@ -280,9 +284,13 @@ select is(
     '63333333-3333-4333-8333-333333333333',
     '61111111-1111-4111-8111-111111111111',
     'Must not publish.',
-    'Must not publish.'
+    'Must not publish.',
+    (select updated_at from public.gallery_instagram_publish_jobs
+      where id = '63333333-3333-4333-8333-333333333333'),
+    repeat('0', 64),
+    repeat('0', 64)
   ) ->> 'reason',
-  'submission_not_publishable',
+  'consent_or_derivative_invalid',
   'an earlier-draft v2 row with a null contract cannot acquire a publish lease'
 );
 
@@ -296,7 +304,7 @@ select is(
   public.gallery_instagram_publish_source(
     '63333333-3333-4333-8333-333333333333'
   ) ->> 'reason',
-  'submission_not_publishable',
+  'current_confirmation_or_consent_required',
   'an earlier-draft v2 row with a null contract cannot resolve publishable media'
 );
 
@@ -312,7 +320,7 @@ select throws_ok(
     '{}'::jsonb
   )$$,
   '23514',
-  'Instagram active publication state requires the exact current website consent contract handshake.',
+  'Current Instagram rights and consent are required.',
   'the final published-state transition rejects an earlier-draft v2 row with a null contract'
 );
 
@@ -344,7 +352,7 @@ select throws_ok(
       instagram_permalink = 'https://www.instagram.com/p/direct-update-blocked/'
     where id = '63333333-3333-4333-8333-333333333333'$$,
   '23514',
-  'Instagram active publication state requires the exact current website consent contract handshake.',
+  'Current Instagram rights and consent are required.',
   'a direct update cannot use the legacy reconciliation exception'
 );
 

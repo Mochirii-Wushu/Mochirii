@@ -234,12 +234,12 @@ if (nextConfig.includes("'unsafe-eval'")) {
 const verifyJwtFalseFunctions = extractVerifyJwtFalseFunctions(supabaseConfig);
 const configuredFunctions = extractConfiguredFunctions(supabaseConfig);
 const verifyJwtDeclarations = [...supabaseConfig.matchAll(/^verify_jwt\s*=\s*(?:true|false)\s*$/gm)];
-if (configuredFunctions.length !== 45) {
-  failures.push(`supabase/config.toml: expected 45 configured functions, found ${configuredFunctions.length}.`);
+if (configuredFunctions.length !== 46) {
+  failures.push(`supabase/config.toml: expected 46 configured functions, found ${configuredFunctions.length}.`);
 }
-if (configuredFunctions.length - verifyJwtFalseFunctions.length !== 28) {
+if (configuredFunctions.length - verifyJwtFalseFunctions.length !== 29) {
   failures.push(
-    `supabase/config.toml: expected 28 verify_jwt=true functions, found ${configuredFunctions.length - verifyJwtFalseFunctions.length}.`,
+    `supabase/config.toml: expected 29 verify_jwt=true functions, found ${configuredFunctions.length - verifyJwtFalseFunctions.length}.`,
   );
 }
 if (verifyJwtDeclarations.length !== configuredFunctions.length) {

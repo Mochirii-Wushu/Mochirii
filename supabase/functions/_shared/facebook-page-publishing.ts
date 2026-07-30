@@ -1,6 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isGallerySocialDerivativeStoragePath } from "./gallery-social-path.ts";
 import { validateSocialPublicationCopy } from "./social-publication-copy.ts";
+import {
+  fetchMetaGraphOnce,
+  META_GRAPH_API_VERSION,
+  metaGraphApiVersionIsPinned,
+  metaMutatingResponseOutcome,
+  readBoundedMetaGraphJson,
+} from "./meta-graph-security.ts";
+import { logSafeMetaEvent } from "./safe-telemetry.ts";
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -22,6 +30,9 @@ type PublishDependencies = {
   actorId: string;
   jobId: string;
   message?: string | null;
+  expectedUpdatedAt: string;
+  confirmationFingerprint: string;
+  confirmationCopyHash: string;
   fetchImpl?: typeof fetch;
   config?: ReturnType<typeof facebookPageConfig>;
 };
@@ -30,20 +41,16 @@ const GRAPH_REQUEST_TIMEOUT_MS = 90_000;
 const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const TIMESTAMPTZ_RE =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/;
+const SHA256_RE = /^[0-9a-f]{64}$/;
 const FACEBOOK_PAGE_ID_RE = /^\d{5,30}$/;
-const FACEBOOK_API_VERSION_RE = /^v\d{1,3}\.\d{1,2}$/;
 const FACEBOOK_PROVIDER_ID_RE = /^[A-Za-z0-9_.:-]{1,255}$/;
-const FACEBOOK_GRAPH_BASE_URL = "https://graph.facebook.com";
 const FACEBOOK_PERMALINK_HOSTS = new Set([
   "facebook.com",
   "www.facebook.com",
   "m.facebook.com",
 ]);
-export const META_CANONICAL_APP_ID = "4210347289109364";
-export const FACEBOOK_CANONICAL_PAGE_ID = "1222888660907862";
-export const FACEBOOK_CANONICAL_PAGE_NAME = "Mōchirīī";
-export const FACEBOOK_CANONICAL_PAGE_URL =
-  "https://www.facebook.com/profile.php?id=61592841711452";
 const FACEBOOK_PAGE_PUBLISH_TASKS = new Set([
   "CREATE_CONTENT",
   "PROFILE_PLUS_CREATE_CONTENT",
@@ -96,18 +103,32 @@ export function facebookPageConfig() {
   const apiVersion = Deno.env.get("FACEBOOK_API_VERSION") || "";
   const publishFlag = Deno.env.get("FACEBOOK_PAGE_PUBLISH_ENABLED") || "";
   const appId = Deno.env.get("META_APP_ID") || "";
+  const expectedAppId = Deno.env.get("META_EXPECTED_APP_ID") || "";
   const appSecret = Deno.env.get("META_APP_SECRET") || "";
+  const expectedPageId = Deno.env.get("FACEBOOK_EXPECTED_PAGE_ID") || "";
   const missingSecrets = [
     ["META_APP_ID", appId],
+    ["META_EXPECTED_APP_ID", expectedAppId],
     ["META_APP_SECRET", appSecret],
     ["FACEBOOK_PAGE_ID", pageId],
+    ["FACEBOOK_EXPECTED_PAGE_ID", expectedPageId],
     ["FACEBOOK_PAGE_ACCESS_TOKEN", accessToken],
     ["FACEBOOK_API_VERSION", apiVersion],
   ].filter(([, value]) => !value).map(([name]) => name);
   const invalidFields = [
-    ...(appId && appId !== META_CANONICAL_APP_ID ? ["META_APP_ID"] : []),
-    ...(pageId && pageId !== FACEBOOK_CANONICAL_PAGE_ID
-      ? ["FACEBOOK_PAGE_ID"]
+    ...(appId && !facebookPageIdIsValid(appId) ? ["META_APP_ID"] : []),
+    ...(expectedAppId && !facebookPageIdIsValid(expectedAppId)
+      ? ["META_EXPECTED_APP_ID"]
+      : []),
+    ...(appId && expectedAppId && appId !== expectedAppId
+      ? ["META_APP_ID_PIN"]
+      : []),
+    ...(pageId && !facebookPageIdIsValid(pageId) ? ["FACEBOOK_PAGE_ID"] : []),
+    ...(expectedPageId && !facebookPageIdIsValid(expectedPageId)
+      ? ["FACEBOOK_EXPECTED_PAGE_ID"]
+      : []),
+    ...(pageId && expectedPageId && pageId !== expectedPageId
+      ? ["FACEBOOK_PAGE_ID_PIN"]
       : []),
     ...(apiVersion && !facebookApiVersionIsValid(apiVersion)
       ? ["FACEBOOK_API_VERSION"]
@@ -116,8 +137,10 @@ export function facebookPageConfig() {
 
   return {
     appId,
+    expectedAppId,
     appSecret,
     pageId,
+    expectedPageId,
     accessToken,
     apiVersion,
     publishEnabled: facebookPagePublishFlagEnabled(publishFlag),
@@ -127,24 +150,19 @@ export function facebookPageConfig() {
   };
 }
 
-export function facebookGraphBaseUrl(): string {
-  return FACEBOOK_GRAPH_BASE_URL;
-}
-
 export function facebookPageIdIsValid(value: string): boolean {
   return FACEBOOK_PAGE_ID_RE.test(value);
 }
 
 export function facebookPageIdentityMatches(
   id: unknown,
-  name: unknown,
+  expectedPageId: string,
 ): boolean {
-  return id === FACEBOOK_CANONICAL_PAGE_ID &&
-    name === FACEBOOK_CANONICAL_PAGE_NAME;
+  return facebookPageIdIsValid(expectedPageId) && id === expectedPageId;
 }
 
 export function facebookApiVersionIsValid(value: string): boolean {
-  return FACEBOOK_API_VERSION_RE.test(value);
+  return metaGraphApiVersionIsPinned(value);
 }
 
 export function facebookPagePublishFlagEnabled(value: unknown): boolean {
@@ -158,69 +176,18 @@ export function facebookTasksCanPublish(value: unknown): boolean {
     );
 }
 
-export function facebookTokenRequestInit(
-  accessToken: string,
-  init: RequestInit = {},
-): RequestInit {
-  const headers = new Headers(init.headers);
-  headers.set("Authorization", `Bearer ${accessToken}`);
-  return {
-    ...init,
-    headers,
-    redirect: "error",
-  };
-}
-
-export async function facebookAppSecretProof(
-  accessToken: string,
-  appSecret: string,
-): Promise<string> {
-  if (!accessToken || !appSecret) return "";
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(appSecret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    encoder.encode(accessToken),
-  );
-  return Array.from(
-    new Uint8Array(signature),
-    (byte) => byte.toString(16).padStart(2, "0"),
-  ).join("");
-}
-
 export function facebookGraphUrl(apiVersion: string, path: string): string {
-  const version = apiVersion.replace(/^\/+|\/+$/g, "");
   const cleanPath = path.replace(/^\/+/, "");
-  return facebookApiVersionIsValid(version) && cleanPath
-    ? `${facebookGraphBaseUrl()}/${version}/${cleanPath}`
+  return facebookApiVersionIsValid(apiVersion) &&
+      /^[A-Za-z0-9_.:-]+(?:\/[A-Za-z0-9_.:-]+)*$/.test(cleanPath)
+    ? `https://graph.facebook.com/${META_GRAPH_API_VERSION}/${cleanPath}`
     : "";
-}
-
-export async function facebookAuthenticatedGraphUrl(
-  apiVersion: string,
-  path: string,
-  accessToken: string,
-  appSecret: string,
-): Promise<string> {
-  const baseUrl = facebookGraphUrl(apiVersion, path);
-  const proof = await facebookAppSecretProof(accessToken, appSecret);
-  if (!baseUrl || !proof) return "";
-  const url = new URL(baseUrl);
-  url.searchParams.set("appsecret_proof", proof);
-  return url.toString();
 }
 
 export function facebookGraphOutcome(
   status: number,
 ): "failed" | "reconcile_required" {
-  return status >= 500 ? "reconcile_required" : "failed";
+  return metaMutatingResponseOutcome(status);
 }
 
 export function normalizeFacebookPermalink(value: unknown): string | null {
@@ -317,6 +284,7 @@ export function normalizeFacebookPermalink(value: unknown): string | null {
 export function facebookPageObjectEvidence(
   value: unknown,
   requestedObjectId: unknown,
+  expectedPageId: string,
 ): {
   verified: boolean;
   objectId: string | null;
@@ -335,20 +303,13 @@ export function facebookPageObjectEvidence(
     verified: Boolean(
       requestedId && FACEBOOK_PROVIDER_ID_RE.test(requestedId) &&
         objectId === requestedId &&
-        ownerPageId === FACEBOOK_CANONICAL_PAGE_ID && permalink,
+        facebookPageIdIsValid(expectedPageId) &&
+        ownerPageId === expectedPageId && permalink,
     ),
     objectId,
     ownerPageId,
     permalink,
   };
-}
-
-async function readGraphJson(response: Response): Promise<JsonRecord> {
-  try {
-    return asRecord(await response.json());
-  } catch {
-    return {};
-  }
 }
 
 export function facebookGraphErrorDetails(
@@ -417,11 +378,10 @@ async function finishPublish(
   );
 
   if (error) {
-    console.error("facebook page publish outcome commit failed", {
-      code: error.code,
-      message: error.message,
-      jobId: values.jobId,
+    logSafeMetaEvent("error", "facebook_publish_outcome_commit_failed", {
+      provider: "facebook_page",
       outcome: values.outcome,
+      errorCategory: "database_commit_failed",
     });
     return { committed: false, job: null, reason: "outcome_commit_failed" };
   }
@@ -594,7 +554,12 @@ export async function publishFacebookPageJob(
     });
   }
 
-  if (!UUID_RE.test(jobId) || !UUID_RE.test(actorId)) {
+  if (
+    !UUID_RE.test(jobId) || !UUID_RE.test(actorId) ||
+    !TIMESTAMPTZ_RE.test(dependencies.expectedUpdatedAt) ||
+    !SHA256_RE.test(dependencies.confirmationFingerprint) ||
+    !SHA256_RE.test(dependencies.confirmationCopyHash)
+  ) {
     return result({
       attempted: false,
       ok: false,
@@ -641,12 +606,59 @@ export async function publishFacebookPageJob(
     });
   }
 
+  try {
+    const identityResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: config.expectedPageId,
+      query: { fields: "id" },
+      timeoutMs: 30_000,
+      fetchImpl,
+    });
+    const identity = await readBoundedMetaGraphJson(identityResponse);
+    if (
+      !identityResponse.ok ||
+      !facebookPageIdentityMatches(identity.id, config.expectedPageId)
+    ) {
+      return result({
+        attempted: false,
+        ok: false,
+        status: null,
+        job: null,
+        facebookPhotoId: null,
+        facebookPostId: null,
+        facebookPermalink: null,
+        publishedAt: null,
+        error: "facebook_page_identity_mismatch",
+        message:
+          "The configured Facebook Page identity could not be verified before publishing.",
+      });
+    }
+  } catch {
+    return result({
+      attempted: false,
+      ok: false,
+      status: null,
+      job: null,
+      facebookPhotoId: null,
+      facebookPostId: null,
+      facebookPermalink: null,
+      publishedAt: null,
+      error: "facebook_page_identity_unavailable",
+      message:
+        "The configured Facebook Page identity could not be verified before publishing.",
+    });
+  }
+
   const { data: beginData, error: beginError } = await adminClient.rpc(
     "gallery_facebook_page_begin_publish",
     {
       p_job_id: jobId,
       p_actor_id: actorId,
       p_message: requestedMessage,
+      p_expected_updated_at: dependencies.expectedUpdatedAt,
+      p_confirmation_fingerprint: dependencies.confirmationFingerprint,
+      p_confirmation_copy_hash: dependencies.confirmationCopyHash,
     },
   );
   const begin = rpcRecord(beginData);
@@ -656,10 +668,11 @@ export async function publishFacebookPageJob(
     : null;
 
   if (beginError || begin.committed !== true || !begunJob) {
-    console.warn("facebook page publish job was not acquired", {
-      code: beginError?.code,
-      message: beginError?.message || safeString(begin.reason, 80),
-      jobId,
+    logSafeMetaEvent("warn", "facebook_publish_job_not_acquired", {
+      provider: "facebook_page",
+      errorCategory: beginError
+        ? "database_lock_failed"
+        : safeString(begin.reason, 80) || "job_not_publishable",
     });
     return result({
       attempted: false,
@@ -692,31 +705,15 @@ export async function publishFacebookPageJob(
     });
   }
 
-  if (
-    safeString(begunJob.destination_page_id, 80) !==
-      FACEBOOK_CANONICAL_PAGE_ID
-  ) {
-    return finishFailure(adminClient, {
-      jobId,
-      actorId,
-      attempted: false,
-      outcome: "failed",
-      error: "facebook_page_destination_mismatch",
-      message:
-        "The Facebook Page job is outside the pinned Mōchirīī Page scope.",
-    });
-  }
-
   const { data: sourceData, error: sourceError } = await adminClient.rpc(
     "gallery_facebook_page_publish_source",
     { p_job_id: jobId },
   );
   const source = rpcRecord(sourceData);
   if (sourceError || source.ok !== true) {
-    console.error("facebook page publish source lookup failed", {
-      code: sourceError?.code,
-      message: sourceError?.message || safeString(source.reason, 80),
-      jobId,
+    logSafeMetaEvent("error", "facebook_publish_source_lookup_failed", {
+      provider: "facebook_page",
+      errorCategory: "source_lookup_failed",
     });
     return finishFailure(adminClient, {
       jobId,
@@ -725,7 +722,6 @@ export async function publishFacebookPageJob(
       outcome: "failed",
       error: "facebook_page_source_unavailable",
       message: "The approved Facebook Page image source is unavailable.",
-      details: { reason: safeString(source.reason, 80) },
     });
   }
 
@@ -736,7 +732,7 @@ export async function publishFacebookPageJob(
   const expectedSize = Number(source.size_bytes || 0);
   const expectedWidth = Number(source.width || 0);
   const expectedHeight = Number(source.height || 0);
-  const destinationPageId = safeString(source.destination_page_id, 80);
+  const destinationClass = safeString(source.destination_page_id, 80);
   const sanitizerVersion = safeString(source.sanitizer_version, 80);
   const metadataPolicy = safeString(source.metadata_policy, 80);
   const sourceSubmissionId = safeString(source.submission_id, 80);
@@ -754,7 +750,7 @@ export async function publishFacebookPageJob(
     !Number.isSafeInteger(expectedHeight) || expectedHeight < 1 ||
     expectedHeight > 1800 || expectedWidth * 5 < expectedHeight * 4 ||
     expectedWidth * 100 > expectedHeight * 191 ||
-    destinationPageId !== FACEBOOK_CANONICAL_PAGE_ID ||
+    destinationClass !== "facebook_page" ||
     sanitizerVersion !== "gallery-social-jpeg-v1" ||
     metadataPolicy !== "jfif-only-no-app-metadata-v1"
   ) {
@@ -772,9 +768,9 @@ export async function publishFacebookPageJob(
     .from(bucket)
     .download(storagePath);
   if (downloadError || !blob) {
-    console.error("facebook page publish source download failed", {
-      message: downloadError?.message || "Missing source blob",
-      jobId,
+    logSafeMetaEvent("error", "facebook_publish_source_download_failed", {
+      provider: "facebook_page",
+      errorCategory: "source_download_failed",
     });
     return finishFailure(adminClient, {
       jobId,
@@ -808,29 +804,12 @@ export async function publishFacebookPageJob(
     });
   }
 
-  const graphUrl = await facebookAuthenticatedGraphUrl(
-    config.apiVersion,
-    `${FACEBOOK_CANONICAL_PAGE_ID}/photos`,
-    config.accessToken,
-    config.appSecret,
-  );
-  if (!graphUrl) {
-    return finishFailure(adminClient, {
-      jobId,
-      actorId,
-      attempted: false,
-      outcome: "failed",
-      error: "facebook_page_api_version_invalid",
-      message: "The Facebook Graph API version is invalid.",
-    });
-  }
-
   const mediaBuffer = new Uint8Array(bytes).buffer;
   const form = new FormData();
   form.set(
     "source",
     new Blob([mediaBuffer], { type: mimeType || "application/octet-stream" }),
-    `mochirii-gallery-${jobId}.jpg`,
+    "mochirii-gallery.jpg",
   );
   // Meta's Page Photos endpoint names the photo caption field `message`.
   if (finalMessage) form.set("message", finalMessage);
@@ -838,24 +817,23 @@ export async function publishFacebookPageJob(
 
   let graphResponse: Response;
   try {
-    graphResponse = await fetchImpl(
-      graphUrl,
-      facebookTokenRequestInit(
-        config.accessToken,
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-          },
-          body: form,
-          signal: AbortSignal.timeout(GRAPH_REQUEST_TIMEOUT_MS),
-        },
-      ),
-    );
+    graphResponse = await fetchMetaGraphOnce({
+      accessToken: config.accessToken,
+      appSecret: config.appSecret,
+      path: `${config.expectedPageId}/photos`,
+      init: { method: "POST", body: form },
+      timeoutMs: GRAPH_REQUEST_TIMEOUT_MS,
+      fetchImpl,
+    });
   } catch (error) {
-    console.warn("facebook page publish request outcome is unknown", {
-      errorName: error instanceof Error ? error.name : "UnknownFetchError",
-      jobId,
+    logSafeMetaEvent("warn", "facebook_publish_request_ambiguous", {
+      provider: "facebook_page",
+      stage: "publish_request",
+      outcome: "reconcile_required",
+      errorCategory:
+        error instanceof DOMException && error.name === "TimeoutError"
+          ? "provider_timeout"
+          : "provider_network_error",
     });
     return finishFailure(adminClient, {
       jobId,
@@ -869,7 +847,7 @@ export async function publishFacebookPageJob(
     });
   }
 
-  const graphBody = await readGraphJson(graphResponse);
+  const graphBody = await readBoundedMetaGraphJson(graphResponse);
   if (!graphResponse.ok) {
     const outcome = facebookGraphOutcome(graphResponse.status);
     return finishFailure(adminClient, {
@@ -909,32 +887,23 @@ export async function publishFacebookPageJob(
   let pageOwnershipVerified = false;
   const permalinkObjectId = facebookPostId || facebookPhotoId;
   if (permalinkObjectId) {
-    const permalinkUrl = await facebookAuthenticatedGraphUrl(
-      config.apiVersion,
-      `${
-        encodeURIComponent(permalinkObjectId)
-      }?fields=id,from{id},permalink_url,link`,
-      config.accessToken,
-      config.appSecret,
-    );
     try {
-      const permalinkResponse = await fetchImpl(
-        permalinkUrl,
-        facebookTokenRequestInit(
-          config.accessToken,
-          {
-            headers: {
-              Accept: "application/json",
-            },
-            signal: AbortSignal.timeout(GRAPH_REQUEST_TIMEOUT_MS),
-          },
-        ),
-      );
+      const permalinkResponse = await fetchMetaGraphOnce({
+        accessToken: config.accessToken,
+        appSecret: config.appSecret,
+        path: encodeURIComponent(permalinkObjectId),
+        query: { fields: "id,from{id},permalink_url,link" },
+        timeoutMs: GRAPH_REQUEST_TIMEOUT_MS,
+        fetchImpl,
+      });
       if (permalinkResponse.ok) {
-        const permalinkBody = await readGraphJson(permalinkResponse);
+        const permalinkBody = await readBoundedMetaGraphJson(
+          permalinkResponse,
+        );
         const evidence = facebookPageObjectEvidence(
           permalinkBody,
           permalinkObjectId,
+          config.expectedPageId,
         );
         facebookPermalink = evidence.permalink;
         pageOwnershipVerified = evidence.verified;
