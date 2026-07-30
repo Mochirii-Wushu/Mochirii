@@ -298,6 +298,7 @@ assertIncludes("local smoke harness", read(paths.localSmokeHarness), [
   "startHttpsProxy({",
   "startMockMemberVerifier({",
   "NODE_EXTRA_CA_CERTS",
+  '"--supabase-auth-cookie-name"',
   '"sb-localhost-auth-token"',
   '"--allow-self-signed-localhost"',
   'readArg("--browser", "all")',
@@ -308,6 +309,8 @@ assertIncludes("browser smoke", read(paths.browserSmoke), [
   'page.goto(`${baseUrl}/games/mochi-pets`',
   "assertResponsiveLayout",
   "assertSessionCookie",
+  "page.context().addCookies",
+  "base64-",
   "verifyMalformedSuccessFailsClosed",
 ]);
 assertIncludes("root check runner", read(paths.checkAll), [

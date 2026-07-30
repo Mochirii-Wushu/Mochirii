@@ -18,6 +18,8 @@ const required = [
   "supabase/functions/resolve-instagram-publish-reconciliation/index.ts",
   "supabase/functions/mark-instagram-gallery-submission-shared/index.ts",
   "supabase/functions/withdraw-gallery-publication-consent/index.ts",
+  "supabase/functions/withdraw-gallery-publication-consent/failure.ts",
+  "supabase/functions/withdraw-gallery-publication-consent/failure_test.ts",
 ];
 for (const file of required) {
   if (!existsSync(file)) failures.push(`Missing ${file}`);
@@ -52,6 +54,12 @@ const stub = read(
 );
 const withdrawal = read(
   "supabase/functions/withdraw-gallery-publication-consent/index.ts",
+);
+const withdrawalFailure = read(
+  "supabase/functions/withdraw-gallery-publication-consent/failure.ts",
+);
+const withdrawalFailureTests = read(
+  "supabase/functions/withdraw-gallery-publication-consent/failure_test.ts",
 );
 const docs = read("docs/integrations/instagram-gallery-publishing.md");
 const runbook = read(
@@ -214,6 +222,26 @@ requireText(
   withdrawal,
   "gallery_withdraw_social_publication_consent",
   "withdrawal RPC",
+);
+requireText(
+  withdrawal,
+  "classifyGalleryWithdrawalFailure(payload.reason, error)",
+  "withdrawal failure classifier",
+);
+requireText(
+  withdrawalFailure,
+  'reason === "destination_not_selected"',
+  "withdrawal destination conflict",
+);
+requireText(
+  withdrawalFailure,
+  'error.message === "Submission owner required."',
+  "exact withdrawal owner exception",
+);
+requireText(
+  withdrawalFailureTests,
+  'message: "Service role required."',
+  "privileged withdrawal failure redaction regression",
 );
 requireText(docs, "v26.0", "documented API version");
 requireText(docs, "website field empty", "Instagram website policy");

@@ -1,5 +1,5 @@
 begin;
-select plan(41);
+select plan(43);
 
 select has_table(
   'private', 'gallery_upload_rights_attestations',
@@ -419,6 +419,24 @@ select throws_ok(
   '42501',
   'Submission owner required.',
   'a different member cannot withdraw the owner consent'
+);
+
+select is(
+  public.gallery_withdraw_social_publication_consent(
+    '74444444-4444-4444-8444-444444444442',
+    'instagram',
+    '71111111-1111-4111-8111-111111111111'
+  ) ->> 'reason',
+  'destination_not_selected',
+  'an unselected destination returns the reviewed conflict reason'
+);
+select is(
+  (select count(*)::bigint
+   from private.gallery_social_withdrawal_events
+   where submission_id = '74444444-4444-4444-8444-444444444442'
+     and destination = 'instagram'),
+  0::bigint,
+  'an unselected destination does not create withdrawal evidence'
 );
 
 select is(

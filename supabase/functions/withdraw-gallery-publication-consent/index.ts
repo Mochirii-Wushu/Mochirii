@@ -11,6 +11,7 @@ import {
 } from "../_shared/gallery-moderation.ts";
 import { createAdminClient } from "../_shared/member-profiles.ts";
 import { logSafeMetaEvent } from "../_shared/safe-telemetry.ts";
+import { classifyGalleryWithdrawalFailure } from "./failure.ts";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -94,33 +95,19 @@ async function handleRequest(req: Request): Promise<Response> {
   );
   const payload = asRecord(data);
   if (error || payload.committed !== true) {
-    const reason = safeString(payload.reason, 80) ||
-      "gallery_withdrawal_failed";
+    const failure = classifyGalleryWithdrawalFailure(payload.reason, error);
     logSafeMetaEvent("warn", "gallery_withdrawal_commit_failed", {
       destination,
       stage: "withdrawal_commit",
-      errorCategory: reason,
+      errorCategory: failure.reason,
     });
-    const status = reason === "submission_not_found"
-      ? 404
-      : reason === "submission_not_owned"
-      ? 403
-      : reason === "destination_not_consented"
-      ? 409
-      : 500;
     return jsonResponse(
       {
         ok: false,
-        error: reason,
-        message: status === 403
-          ? "Only the submitting member may withdraw this consent."
-          : status === 409
-          ? "That destination does not have active publication consent."
-          : status === 404
-          ? "The Gallery submission was not found."
-          : "Publication consent could not be withdrawn.",
+        error: failure.reason,
+        message: failure.message,
       },
-      status,
+      failure.status,
     );
   }
 

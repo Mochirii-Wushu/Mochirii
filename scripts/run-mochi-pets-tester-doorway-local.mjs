@@ -137,7 +137,7 @@ async function runScenario({
         smokeScript,
         "--base-url",
         browserBaseUrl,
-        "--supabase-storage-key",
+        "--supabase-auth-cookie-name",
         "sb-localhost-auth-token",
         "--allow-self-signed-localhost",
         "--browser",
