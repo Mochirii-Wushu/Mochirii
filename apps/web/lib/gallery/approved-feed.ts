@@ -228,11 +228,6 @@ function validDateOrNull(value: unknown) {
   return typeof clean === "string" && Number.isFinite(Date.parse(clean)) ? clean : undefined;
 }
 
-function isLoopbackHttp(url: URL) {
-  return url.protocol === "http:" &&
-    (url.hostname === "localhost" || url.hostname === "127.0.0.1");
-}
-
 function configuredSupabaseUrl() {
   const projectRef = String(publicUrls.supabaseProjectRef || "").trim().toLowerCase();
   const fallback = new URL(`https://${projectRef}.supabase.co`);
@@ -245,8 +240,7 @@ function configuredSupabaseUrl() {
       !url.username && !url.password;
     const hostedProject = url.protocol === "https:" && !url.port &&
       url.hostname === `${projectRef}.supabase.co`;
-    const localProject = process.env.NODE_ENV !== "production" && isLoopbackHttp(url);
-    if (!exactRoot || (!hostedProject && !localProject)) return fallback;
+    if (!exactRoot || !hostedProject) return fallback;
     return new URL(url.origin);
   } catch {
     return fallback;
@@ -265,7 +259,7 @@ function validGalleryMediaUrl(
     const configured = configuredSupabaseUrl();
     if (
       url.origin !== configured.origin ||
-      (url.protocol !== "https:" && !isLoopbackHttp(url)) ||
+      url.protocol !== "https:" ||
       url.username || url.password ||
       url.hash || url.pathname !== galleryMediaPath ||
       [...url.searchParams.keys()].sort().join(",") !== "asset,id" ||

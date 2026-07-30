@@ -22,7 +22,7 @@ Deno.test("provider diagnostic is safe and blocked without token debugger approv
   assert(payload.ready === false, "blocked diagnostic became ready");
   assert(
     payload.errorCategory ===
-      "meta_token_debug_query_transport_not_approved",
+      "meta_debugger_transport_blocked",
     "stable blocker changed",
   );
   const serialized = JSON.stringify(payload);

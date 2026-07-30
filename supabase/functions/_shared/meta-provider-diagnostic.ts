@@ -1,7 +1,7 @@
 import {
   fetchMetaGraphOnce,
   META_GRAPH_API_VERSION,
-  META_TOKEN_DEBUG_QUERY_TRANSPORT_NOT_APPROVED,
+  META_DEBUGGER_TRANSPORT_BLOCKED_CATEGORY,
   metaTokenDebuggerTransportApproved,
   readBoundedMetaGraphJson,
 } from "./meta-graph-security.ts";
@@ -177,7 +177,7 @@ export function metaProviderDiagnosticPayload(
       ? "manual_required"
       : null,
     ready: false,
-    errorCategory: META_TOKEN_DEBUG_QUERY_TRANSPORT_NOT_APPROVED,
+    errorCategory: META_DEBUGGER_TRANSPORT_BLOCKED_CATEGORY,
     providerErrorCategory,
     checkedAt: (values.checkedAt || new Date()).toISOString(),
   };

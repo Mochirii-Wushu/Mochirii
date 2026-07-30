@@ -171,7 +171,7 @@ Status returns safe booleans, version, timestamp, and stable error categories
 only. Meta's token debugger requires the inspected token in the `input_token`
 query parameter. No query-token exception is approved, so the diagnostic makes
 zero debugger requests and fails closed with
-`meta_token_debug_query_transport_not_approved`. App binding, token type,
+`meta_debugger_transport_blocked`. App binding, token type,
 scopes, expiry, and data-access expiry remain activation blockers.
 
 A `confirmed_published` reconciliation uses an object id only as a lookup key;

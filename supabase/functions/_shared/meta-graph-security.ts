@@ -2,8 +2,8 @@ export const META_GRAPH_ORIGIN = "https://graph.facebook.com";
 export const META_GRAPH_API_VERSION = "v26.0";
 export const META_GRAPH_REQUEST_TIMEOUT_MS = 30_000;
 export const META_APP_SECRET_PROOF_MAX_AGE_SECONDS = 300;
-export const META_TOKEN_DEBUG_QUERY_TRANSPORT_NOT_APPROVED =
-  "meta_token_debug_query_transport_not_approved";
+export const META_DEBUGGER_TRANSPORT_BLOCKED_CATEGORY =
+  "meta_debugger_transport_blocked";
 
 const GRAPH_PATH_RE = /^[A-Za-z0-9_.:-]+(?:\/[A-Za-z0-9_.:-]+)*$/;
 const MAX_GRAPH_RESPONSE_BYTES = 64 * 1024;

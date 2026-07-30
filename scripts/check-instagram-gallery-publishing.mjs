@@ -84,7 +84,7 @@ requireText(security, 'headers.set("Authorization"', "bearer transport");
 requireText(security, "AbortSignal.any", "non-bypassable timeout");
 requireText(
   security,
-  "meta_token_debug_query_transport_not_approved",
+  "meta_debugger_transport_blocked",
   "debugger blocker",
 );
 requireText(

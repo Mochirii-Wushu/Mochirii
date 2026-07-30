@@ -67,7 +67,7 @@ requireText(security, "AbortSignal.any", "non-bypassable timeout");
 requireText(security, "fetchMetaGraphOnce", "single-attempt wrapper");
 requireText(
   security,
-  "meta_token_debug_query_transport_not_approved",
+  "meta_debugger_transport_blocked",
   "debugger blocker",
 );
 requireText(publisher, 'Deno.env.get("META_EXPECTED_APP_ID")', "app id pin");

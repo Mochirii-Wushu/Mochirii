@@ -199,7 +199,7 @@ only. The Page linkage uses the Facebook Page access token, bearer
 authorization, a fresh timed app-secret proof, one network attempt, and a
 bounded response. The token debugger requires `input_token` in the URL; no
 exception is approved. The route makes zero debugger calls and reports
-`meta_token_debug_query_transport_not_approved`. Token binding, type, scopes,
+`meta_debugger_transport_blocked`. Token binding, type, scopes,
 expiry, and data-access expiry remain activation blockers. Business subtype is
 also a manual owner prerequisite.
 

@@ -4,7 +4,7 @@ import {
   fetchMetaGraphOnce,
   META_GRAPH_API_VERSION,
   META_GRAPH_ORIGIN,
-  META_TOKEN_DEBUG_QUERY_TRANSPORT_NOT_APPROVED,
+  META_DEBUGGER_TRANSPORT_BLOCKED_CATEGORY,
   metaBearerRequestInit,
   metaGraphApiVersionIsPinned,
   metaGraphUrl,
@@ -149,8 +149,8 @@ Deno.test("Meta Graph JSON reads enforce a byte bound before parsing", async () 
 Deno.test("token debugger is a stable blocked prerequisite", () => {
   assert(!metaTokenDebuggerTransportApproved(), "debugger enabled");
   assert(
-    META_TOKEN_DEBUG_QUERY_TRANSPORT_NOT_APPROVED ===
-      "meta_token_debug_query_transport_not_approved",
+    META_DEBUGGER_TRANSPORT_BLOCKED_CATEGORY ===
+      "meta_debugger_transport_blocked",
     "blocker changed",
   );
 });
