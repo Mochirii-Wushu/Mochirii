@@ -200,7 +200,7 @@
     },
     {
       "path": "apps/shopify-theme/templates/gift_card.liquid",
-      "sha256": "9eb1d411b08300e8d3e371c4bf5741b01205092b91adb2fb8628013b688b1dc9"
+      "sha256": "c2f76592c9cc523fcc13e8d290f098e29876ee10ca45f4217b5becc970c2cee0"
     },
     {
       "path": "apps/shopify-theme/templates/index.json",

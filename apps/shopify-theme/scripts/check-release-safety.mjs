@@ -408,6 +408,7 @@ if (/(?:apple_wallet|add_to_wallet|wallet_pass)/iu.test(giftCard)) {
   failures.push("templates/gift_card.liquid: wallet-provider surfaces must remain absent");
 }
 requireText("templates/gift_card.liquid", giftCard, "assign storefront_name = 'Mochirii Cosmetics'");
+requireText("templates/gift_card.liquid", giftCard, '<meta name="robots" content="noindex, nofollow">');
 
 for (const relativePath of ["sections/main-index.liquid", "sections/main-collection.liquid"]) {
   const source = read(relativePath);

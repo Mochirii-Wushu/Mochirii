@@ -14,6 +14,7 @@ import { deflateSync } from "node:zlib";
 import { calculateRetailPriceUsd, redactedPriceVerification, verifyPrivatePriceLedger } from "./lib/private-price-rule.mjs";
 import {
   EXPECTED_PRODUCT_HANDLES,
+  PREPAYMENT_RESPONSIVE_VIEWPORTS,
   PREPAYMENT_GATE_POLICY,
   REQUIRED_EVIDENCE_KINDS,
   REQUIRED_SEARCH_QUERIES,
@@ -1399,7 +1400,7 @@ function buildFixture(directory) {
       voiceover_safari_pass: true,
       automated_accessibility_critical: 0,
       automated_accessibility_serious: 0,
-      responsive_viewports: ["360x800", "390x844", "768x1024", "1440x900"],
+      responsive_viewports: [...PREPAYMENT_RESPONSIVE_VIEWPORTS],
       lighthouse: ["home", "collection", "product", "cart"].map((routeType) => ({
         route_type: routeType,
         accessibility: 95,

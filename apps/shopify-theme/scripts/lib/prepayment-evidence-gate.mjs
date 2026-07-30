@@ -106,6 +106,23 @@ export const REQUIRED_SEARCH_QUERIES = Object.freeze([
   "cleanser",
 ]);
 
+export const PREPAYMENT_RESPONSIVE_VIEWPORTS = Object.freeze([
+  "320x568",
+  "360x800",
+  "375x812",
+  "390x844",
+  "393x852",
+  "412x915",
+  "430x932",
+  "640x360",
+  "844x390",
+  "768x1024",
+  "1024x768",
+  "1440x900",
+  "2560x1080",
+  "2560x1440",
+]);
+
 const EXPECTED_COLLECTION_HANDLES = Object.freeze([
   "mochirii-cosmetics",
   "cleanse-tone",
@@ -4793,7 +4810,7 @@ function validateQualityAssurance(quality, evidence, referencedIds, issues, now)
   }
   exactValue(quality.automated_accessibility_critical, 0, issues, gate, "automated-critical");
   exactValue(quality.automated_accessibility_serious, 0, issues, gate, "automated-serious");
-  if (!sameSet(quality.responsive_viewports, ["360x800", "390x844", "768x1024", "1440x900"])) {
+  if (!sameSet(quality.responsive_viewports, PREPAYMENT_RESPONSIVE_VIEWPORTS)) {
     add(issues, gate, "responsive-viewport-set");
   }
   if (!Array.isArray(quality.lighthouse) || quality.lighthouse.length !== 4) {
@@ -4886,7 +4903,7 @@ function validateQualityAssurance(quality, evidence, referencedIds, issues, now)
     add(issues, gate, "evidence.automated-route-set");
   }
 
-  if (!Array.isArray(claim.responsive_viewports) || claim.responsive_viewports.length !== 4) {
+  if (!Array.isArray(claim.responsive_viewports) || claim.responsive_viewports.length !== PREPAYMENT_RESPONSIVE_VIEWPORTS.length) {
     add(issues, gate, "evidence.viewports.exact-count");
   }
   const viewportIds = [];
