@@ -161,17 +161,11 @@ else {
   assertEqual("monthly raffle first Saturday recurrence day", monthlyRaffle.discordRecurrenceRule?.by_n_weekday?.[0]?.day, 5);
   assertEqual("monthly raffle UTC start", localToUtcIso("2026-07-04", monthlyRaffle.startTime), "2026-07-04T13:30:00.000Z");
   assertEqual("monthly raffle UTC end", localToUtcIso("2026-07-04", monthlyRaffle.endTime), "2026-07-04T14:00:00.000Z");
-  [
-    "Once a month we host a guild raffle where members can win pretty in-game goodies.",
-    "- All guild event times are UTC+8.",
-    "- Raffles are 9:30 PM at guild base. (Guild Party Time)",
-    "- Sign up through Discord or the in-game event to join.",
-    "- Log in at least once on raffle day, even if you can't be there for the drawing.",
-    "- Any giftable item in the shop that day can be chosen as a prize.",
-    "- If there's something you want that isn't in the shop, just DM Twills & ask. If it's possible, we'll try to make it happen.",
-  ].forEach((snippet) => {
-    if (!String(monthlyRaffle.description || "").includes(snippet)) fail(`monthly raffle description missing: ${snippet}`);
-  });
+  assertEqual(
+    "monthly raffle description",
+    monthlyRaffle.description,
+    "The monthly guild drawing. Review the current status, eligibility, entry details, rewards, results, and complete rules on the raffle page.",
+  );
 }
 
 const heroRealm = schedule.weekly.find((item) => item.id === "guild-heros-realm");
