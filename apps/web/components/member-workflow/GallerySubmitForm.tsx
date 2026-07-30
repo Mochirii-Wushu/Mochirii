@@ -199,7 +199,10 @@ export function GallerySubmitForm() {
 
   useEffect(() => {
     void Promise.resolve().then(() => checkAccess());
-    const subscription = onAuthStateChange(() => {
+    const subscription = onAuthStateChange((event) => {
+      // The explicit initial read above already resolves INITIAL_SESSION.
+      // Repeating it can briefly disable the form and discard keyboard focus.
+      if (event === "INITIAL_SESSION") return;
       void checkAccess();
     });
     return () => {
