@@ -1,5 +1,5 @@
 /* =========================================================
-   HOME â€” Doors (grid spacing)
+   HOME — Doors (grid spacing)
    ========================================================= */
 .home-doors{
   display:grid;
@@ -14,7 +14,7 @@
 }
 
 /* =========================================================
-   HOME â€” Doors (plate rhythm and typography)
+   HOME — Doors (plate rhythm and typography)
    ========================================================= */
 .home-door__plate{
   display:flex;
@@ -44,7 +44,7 @@
 }
 
 /* =========================================================
-   HOME â€” Doors (label pill; visual only)
+   HOME — Doors (label pill; visual only)
    ========================================================= */
 .home-door__label{
   display:inline-flex;

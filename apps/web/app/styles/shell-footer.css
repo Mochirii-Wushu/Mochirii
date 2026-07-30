@@ -1,5 +1,5 @@
 /* =========================================================
-   FOOTER â€” Footer layout, links, and responsive columns
+   FOOTER — Footer layout, links, and responsive columns
    ========================================================= */
 .site-footer{
   position:relative;
@@ -232,7 +232,7 @@
 }
 
 /* =========================================================
-   MOTION â€” Glint animation used on CTA buttons
+   MOTION — Glint animation used on CTA buttons
    ========================================================= */
 @keyframes glint{
   0%{transform:translateX(-70%) rotate(15deg);}

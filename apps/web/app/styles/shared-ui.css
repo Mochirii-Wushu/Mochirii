@@ -1,5 +1,5 @@
 /* =========================================================
-   GLASS â€” Card surfaces, blur, borders, padding
+   GLASS — Card surfaces, blur, borders, padding
    ========================================================= */
 .glass-card{
   position:relative;
@@ -36,7 +36,7 @@
 }
 
 /* =========================================================
-   MOTION â€” Animated border accent on body cards
+   MOTION — Animated border accent on body cards
    ========================================================= */
 .page-main .glass-card{
   border:2px solid var(--card-line, var(--line));
@@ -44,7 +44,7 @@
 }
 
 /* =========================================================
-   CENTER â€” Centered hero layout utility
+   CENTER — Centered hero layout utility
    ========================================================= */
 .center-stack{
   display:flex;
@@ -55,7 +55,7 @@
 .center-stack .badge-row{justify-content:center;}
 
 /* =========================================================
-   TYPE â€” Global typography for hero + sections
+   TYPE — Global typography for hero + sections
    ========================================================= */
 .kicker{
   margin:0 0 10px;
@@ -104,7 +104,7 @@
 .muted{color:var(--ink-2);}
 
 /* =========================================================
-   BADGES â€” Pill row (hero/meta badges; general purpose)
+   BADGES — Pill row (hero/meta badges; general purpose)
    ========================================================= */
 .badge-row{
   display:flex;
@@ -164,7 +164,7 @@
 }
 
 /* =========================================================
-   PROSE â€” Paragraph stacking and readable rhythm
+   PROSE — Paragraph stacking and readable rhythm
    ========================================================= */
 .prose-stack{
   display:flex;
