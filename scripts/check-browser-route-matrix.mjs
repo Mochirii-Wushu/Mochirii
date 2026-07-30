@@ -33,6 +33,8 @@ const browserRouteOverrides = new Map([
   ["/account", { label: "Account", expectLiveRegion: true, expectAlert: true }],
   ["/social", { label: "Social", expectLiveRegion: true, expectAlert: true }],
   ["/leader-dashboard", { label: "Leader Dashboard", expectLiveRegion: true, expectAlert: true }],
+  ["/leader-dashboard/raffle", { label: "Raffle Administration", expectedRedirectPath: "/auth", expectedRedirectReturn: "/leader-dashboard/raffle" }],
+  ["/raffle/claim", { label: "Raffle Reward", expectedRedirectPath: "/auth", expectedRedirectReturn: "/raffle/claim" }],
   ["/games/mochi-pets", { label: "Mochi Pets", expectNoForm: true, expectNoIframe: true }],
 ]);
 const browserPageRoutes = routeMatrix.routes.filter(
@@ -75,7 +77,7 @@ const routeFilter = getArg("--route", "");
 const routes = routeFilter ? allRoutes.filter((entry) => entry.route === routeFilter) : allRoutes;
 if (!routes.length) throw new Error(`Unknown route filter ${routeFilter}.`);
 
-const viewports = [
+const allViewports = [
   { name: "mobile-360x800", width: 360, height: 800 },
   { name: "mobile-375x812", width: 375, height: 812 },
   { name: "mobile-390x844", width: 390, height: 844 },
@@ -90,6 +92,11 @@ const viewports = [
   { name: "desktop-1536x864", width: 1536, height: 864 },
   { name: "desktop-1920x1080", width: 1920, height: 1080 },
 ];
+const viewportFilter = getArg("--viewport", "");
+const viewports = viewportFilter
+  ? allViewports.filter((entry) => entry.name === viewportFilter)
+  : allViewports;
+if (!viewports.length) throw new Error(`Unknown viewport filter ${viewportFilter}.`);
 
 const playwright = await import("playwright");
 const browserType = playwright[browserName];
@@ -108,7 +115,7 @@ try {
       ignoreHTTPSErrors: false,
     });
     await bridgeWebKitLocalHttps(context, navigationBaseUrl);
-    await stubLocalAnalytics(context);
+    await installDeterministicRouteFixtures(context);
     for (const route of routes) {
       const result = await inspectRoute(context, route, viewport);
       matrix.push(result);
@@ -192,6 +199,7 @@ async function inspectRoute(context, route, viewport) {
   const canceledNextPrefetches = [];
   const httpErrors = [];
   const discordPreviewRequests = [];
+  const spotifyFixtureResponses = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(safeText(message.text()));
   });
@@ -215,12 +223,21 @@ async function inspectRoute(context, route, viewport) {
   });
   page.on("response", (response) => {
     if (response.status() >= 400) httpErrors.push(safeText(`${response.status()} ${response.url()}`));
+    const responseUrl = new URL(response.url());
+    if (responseUrl.origin === "https://open.spotify.com" && responseUrl.pathname.startsWith("/embed/") && response.status() === 200) {
+      spotifyFixtureResponses.push(response.url());
+    }
   });
   page.on("request", (request) => {
     if (/^https:\/\/discord\.com\/widget\?/i.test(request.url())) discordPreviewRequests.push(request.url());
   });
 
-  const url = `${navigationBaseUrl}${route.route}`;
+  const requestedUrl = `${navigationBaseUrl}${route.route}`;
+  const url = await resolveExpectedLocalWebKitRedirect(
+    requestedUrl,
+    route.expectedRedirectPath,
+    route.expectedRedirectReturn,
+  );
   let response = null;
   let gotoError = "";
   try {
@@ -237,6 +254,12 @@ async function inspectRoute(context, route, viewport) {
     }, viewport.textScale);
     await page.waitForTimeout(50);
   }
+
+  const spotifyEmbed = route.route === "/spotify"
+    ? await inspectSpotifyEmbed(page, spotifyFixtureResponses).catch((error) => ({
+      error: safeText(error?.message || String(error)),
+    }))
+    : null;
 
   const status = response?.status() || 0;
   const expectedStatus = route.expectedStatus ?? 200;
@@ -312,6 +335,7 @@ async function inspectRoute(context, route, viewport) {
       robots: document.querySelector('meta[name="robots"]')?.getAttribute("content") || "",
       brandEmblem: Boolean(document.querySelector(".not-found-emblem")),
       main: Boolean(document.querySelector("#main")),
+      protectedAccessUnavailable: Boolean(document.querySelector("[data-protected-access-unavailable]")),
       liveRegions: document.querySelectorAll("[aria-live]").length,
       alerts: document.querySelectorAll('[role="alert"]').length,
       forms: document.querySelectorAll("form").length,
@@ -341,9 +365,15 @@ async function inspectRoute(context, route, viewport) {
   const focus = await inspectFocus(page);
   const trap = await inspectKeyboardTrap(page);
   const discordPreview = route.route === "/join"
-    ? await inspectDiscordPreview(page, discordPreviewRequests)
+    ? await inspectDiscordPreview(page, discordPreviewRequests).catch((error) => ({
+      error: safeText(error?.message || String(error)),
+    }))
     : null;
 
+  const finalUrl = page.url();
+  const redirectEvidence = route.expectedRedirectPath
+    ? inspectRedirectEvidence(finalUrl, navigationBaseUrl, route.expectedRedirectPath, route.expectedRedirectReturn)
+    : null;
   await page.close();
 
   const result = {
@@ -352,6 +382,9 @@ async function inspectRoute(context, route, viewport) {
     viewport: viewport.name,
     size: `${viewport.width}x${viewport.height}`,
     url,
+    requestedUrl,
+    finalUrl: safeText(finalUrl),
+    redirectEvidence,
     status,
     statusOk,
     title: safeText(browserState.title || ""),
@@ -359,6 +392,7 @@ async function inspectRoute(context, route, viewport) {
     robots: safeText(browserState.robots || ""),
     brandEmblem: Boolean(browserState.brandEmblem),
     main: Boolean(browserState.main),
+    protectedAccessUnavailable: Boolean(browserState.protectedAccessUnavailable),
     liveRegions: browserState.liveRegions || 0,
     alerts: browserState.alerts || 0,
     forms: browserState.forms || 0,
@@ -373,6 +407,7 @@ async function inspectRoute(context, route, viewport) {
     focus,
     keyboardTrap: trap,
     discordPreview,
+    spotifyEmbed,
     consoleErrors: consoleErrors.slice(0, 8),
     pageErrors: pageErrors.slice(0, 8),
     failedRequests: failedRequests.slice(0, 8),
@@ -388,14 +423,27 @@ async function inspectRoute(context, route, viewport) {
 async function inspectDiscordPreview(page, requests) {
   const initialRequestCount = requests.length;
   const button = page.getByRole("button", { name: "Show server preview" });
+  const toggle = page.locator('[aria-controls="joinDiscordServerPreview"]');
+  await button.waitFor({ state: "visible", timeout: 10_000 });
   const initial = await page.evaluate(() => ({
     iframeCount: document.querySelectorAll("#joinDiscordServerPreview iframe").length,
     expanded: document.querySelector('[aria-controls="joinDiscordServerPreview"]')?.getAttribute("aria-expanded") || "",
   }));
+  initial.accessibleNameMatches = await page.getByRole("button", { name: "Show server preview", exact: true }).count() === 1;
 
-  await button.focus();
-  await button.press("Enter");
-  await page.waitForSelector("#joinDiscordServerPreview iframe", { state: "visible", timeout: 10_000 });
+  await toggle.focus();
+  let expanded = await toggle.getAttribute("aria-expanded");
+  for (let attempt = 0; attempt < 30 && expanded !== "true"; attempt += 1) {
+    await toggle.press("Enter");
+    await page.waitForTimeout(100);
+    expanded = await toggle.getAttribute("aria-expanded");
+  }
+  if (expanded !== "true") {
+    throw new Error("Discord preview toggle did not become interactive after hydration.");
+  }
+  const iframe = page.locator("#joinDiscordServerPreview iframe");
+  await iframe.waitFor({ state: "visible", timeout: 10_000 });
+  await iframe.scrollIntoViewIfNeeded();
   for (let attempt = 0; attempt < 20 && requests.length === initialRequestCount; attempt += 1) {
     await page.waitForTimeout(50);
   }
@@ -414,8 +462,9 @@ async function inspectDiscordPreview(page, requests) {
       toggleFocused: document.activeElement === toggle,
     };
   });
+  shown.accessibleNameMatches = await page.getByRole("button", { name: "Hide server preview", exact: true }).count() === 1;
 
-  await page.getByRole("button", { name: "Hide server preview" }).press("Enter");
+  await toggle.press("Enter");
   await page.waitForSelector("#joinDiscordServerPreview iframe", { state: "detached", timeout: 10_000 });
   const hidden = await page.evaluate(() => {
     const toggle = document.querySelector('[aria-controls="joinDiscordServerPreview"]');
@@ -425,6 +474,7 @@ async function inspectDiscordPreview(page, requests) {
       toggleFocused: document.activeElement === toggle,
     };
   });
+  hidden.accessibleNameMatches = await page.getByRole("button", { name: "Show server preview", exact: true }).count() === 1;
 
   return {
     initialRequestCount,
@@ -432,6 +482,36 @@ async function inspectDiscordPreview(page, requests) {
     initial,
     shown,
     hidden,
+  };
+}
+
+async function inspectSpotifyEmbed(page, responses) {
+  const firstShell = page.locator('[data-deferred-spotify-embed="true"]').first();
+  await firstShell.waitFor({ state: "visible", timeout: 10_000 });
+  await firstShell.scrollIntoViewIfNeeded();
+  const iframes = page.locator('iframe[src^="https://open.spotify.com/embed/"]');
+  const firstIframe = iframes.first();
+  await firstIframe.waitFor({ state: "attached", timeout: 10_000 });
+  await firstIframe.scrollIntoViewIfNeeded();
+  let stableMatches = 0;
+  for (let attempt = 0; attempt < 100 && stableMatches < 5; attempt += 1) {
+    const iframeCount = await iframes.count();
+    stableMatches = iframeCount > 0 && responses.length === iframeCount ? stableMatches + 1 : 0;
+    await page.waitForTimeout(100);
+  }
+  const titles = await iframes.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute("title")?.trim() || ""),
+  );
+  const sources = await iframes.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute("src")?.trim() || ""),
+  );
+  return {
+    iframeCount: titles.length,
+    titledIframeCount: titles.filter(Boolean).length,
+    sourcedIframeCount: sources.filter(Boolean).length,
+    uniqueSourceCount: new Set(sources.filter(Boolean)).size,
+    fixtureResponseCount: responses.length,
+    uniqueFixtureResponseCount: new Set(responses).size,
   };
 }
 
@@ -497,6 +577,12 @@ function validateResult(route, result) {
       : result.httpErrors;
   if (!result.statusOk) failures.push(`${label}: expected HTTP ${route.expectedStatus ?? 200}, got status ${result.status}${result.gotoError ? ` (${result.gotoError})` : ""}.`);
   if (route.expectedH1 && result.h1 !== route.expectedH1) failures.push(`${label}: expected h1 ${JSON.stringify(route.expectedH1)}, got ${JSON.stringify(result.h1)}.`);
+  if (route.expectedRedirectPath) {
+    const redirect = result.redirectEvidence;
+    if (!redirect?.sameOrigin || !redirect.pathMatches || !redirect.returnMatches || !redirect.queryIsExact) {
+      failures.push(`${label}: expected same-origin redirect to ${route.expectedRedirectPath} with exact return ${route.expectedRedirectReturn}, got ${result.finalUrl}.`);
+    }
+  }
   if (route.expectNoindex && !/(?:^|,)\s*noindex\s*(?:,|$)/i.test(result.robots)) failures.push(`${label}: expected an automatic noindex robots directive.`);
   if (route.expectBrandEmblem && !result.brandEmblem) failures.push(`${label}: branded page emblem is missing.`);
   if (route.expectMain && !result.main) failures.push(`${label}: missing #main skip-link target.`);
@@ -512,19 +598,42 @@ function validateResult(route, result) {
   if (route.expectNoIframe && result.iframes.total !== 0) failures.push(`${label}: route must not contain an iframe.`);
   if (route.route === "/join") {
     const preview = result.discordPreview;
-    if (!preview || preview.initialRequestCount !== 0 || preview.initial.iframeCount !== 0 || preview.initial.expanded !== "false") {
-      failures.push(`${label}: Discord preview must be collapsed and make no provider request before activation.`);
+    if (!preview || preview.error) {
+      failures.push(`${label}: Discord preview interaction failed: ${preview?.error || "missing result"}.`);
+    } else {
+      if (preview.initialRequestCount !== 0 || preview.initial.iframeCount !== 0 || preview.initial.expanded !== "false") {
+        failures.push(`${label}: Discord preview must be collapsed and make no provider request before activation.`);
+      }
+      if (!preview.initial.accessibleNameMatches || !preview.shown.accessibleNameMatches || !preview.hidden.accessibleNameMatches) {
+        failures.push(`${label}: Discord preview toggle accessible name did not match its collapsed and expanded states.`);
+      }
+      if (preview.requestCountAfterActivation <= preview.initialRequestCount) {
+        failures.push(`${label}: Discord preview activation did not request the iframe source.`);
+      }
+      if (preview.shown.expanded !== "true" || preview.shown.iframeCount !== 1 || !preview.shown.iframeTitle || !preview.shown.iframeSource || !preview.shown.visible) {
+        failures.push(`${label}: activated Discord preview is missing its visible, titled iframe or expanded state.`);
+      }
+      if (preview.shown.horizontalOverflow) failures.push(`${label}: activated Discord preview causes horizontal overflow.`);
+      if (!preview.shown.toggleFocused) failures.push(`${label}: preview toggle lost keyboard focus after opening.`);
+      if (preview.hidden.expanded !== "false" || preview.hidden.iframeCount !== 0 || !preview.hidden.toggleFocused) {
+        failures.push(`${label}: hidden Discord preview did not remove the iframe, collapse state, and retain toggle focus.`);
+      }
     }
-    if (!preview || preview.requestCountAfterActivation <= preview.initialRequestCount) {
-      failures.push(`${label}: Discord preview activation did not request the iframe source.`);
-    }
-    if (!preview || preview.shown.expanded !== "true" || preview.shown.iframeCount !== 1 || !preview.shown.iframeTitle || !preview.shown.iframeSource || !preview.shown.visible) {
-      failures.push(`${label}: activated Discord preview is missing its visible, titled iframe or expanded state.`);
-    }
-    if (preview?.shown.horizontalOverflow) failures.push(`${label}: activated Discord preview causes horizontal overflow.`);
-    if (!preview?.shown.toggleFocused) failures.push(`${label}: preview toggle lost keyboard focus after opening.`);
-    if (!preview || preview.hidden.expanded !== "false" || preview.hidden.iframeCount !== 0 || !preview.hidden.toggleFocused) {
-      failures.push(`${label}: hidden Discord preview did not remove the iframe, collapse state, and retain toggle focus.`);
+  }
+  if (route.route === "/spotify") {
+    const embed = result.spotifyEmbed;
+    if (!embed || embed.error) {
+      failures.push(`${label}: Spotify fixture interaction failed: ${embed?.error || "missing result"}.`);
+    } else if (
+      embed.iframeCount < 1
+      || embed.titledIframeCount !== embed.iframeCount
+      || embed.sourcedIframeCount !== embed.iframeCount
+      || embed.uniqueSourceCount !== embed.iframeCount
+      || embed.fixtureResponseCount < 1
+      || embed.fixtureResponseCount > embed.iframeCount
+      || embed.uniqueFixtureResponseCount !== embed.fixtureResponseCount
+    ) {
+      failures.push(`${label}: every Spotify iframe must be titled and uniquely sourced, and each fetched lazy frame must complete one unique deterministic fixture response (${JSON.stringify(embed)}).`);
     }
   }
   if (route.expectForm && result.forms === 0) failures.push(`${label}: expected a form.`);
@@ -536,7 +645,10 @@ function validateResult(route, result) {
     }
   }
   if (result.inputs.total > 0 && result.inputs.labeled < result.inputs.total) failures.push(`${label}: form input label coverage ${result.inputs.labeled}/${result.inputs.total}.`);
-  if (route.expectLiveRegion && result.liveRegions === 0) failures.push(`${label}: expected at least one live region.`);
+  if (result.protectedAccessUnavailable && (result.forms !== 0 || result.iframes.total !== 0 || !result.main || !result.h1)) {
+    failures.push(`${label}: fail-closed protected-access state must have a main heading and must not render forms or iframes.`);
+  }
+  if (route.expectLiveRegion && !result.protectedAccessUnavailable && result.liveRegions === 0) failures.push(`${label}: expected at least one live region.`);
   if (route.expectAlert && result.alerts === 0) warnings.push(`${label}: no alert region observed in signed-out/default browser state; confirm error state remains covered statically.`);
   if (!result.reducedMotion.matches) failures.push(`${label}: reduced-motion media query did not match in Playwright context.`);
   if (result.reducedMotion.animated.length) warnings.push(`${label}: reduced-motion context still reported ${result.reducedMotion.animated.length} animated or transitioning sampled elements.`);
@@ -547,7 +659,7 @@ function validateResult(route, result) {
   for (const error of httpErrors) failures.push(`${label}: HTTP error: ${error}`);
 }
 
-async function stubLocalAnalytics(context) {
+async function installDeterministicRouteFixtures(context) {
   await context.route("**/_vercel/insights/script.js", (route) => route.fulfill({
     status: 200,
     contentType: "application/javascript; charset=utf-8",
@@ -562,6 +674,11 @@ async function stubLocalAnalytics(context) {
     status: 200,
     contentType: "text/html; charset=utf-8",
     body: "<!doctype html><html lang=\"en\"><title>Server preview fixture</title><body></body></html>",
+  }));
+  await context.route("https://open.spotify.com/embed/**", (route) => route.fulfill({
+    status: 200,
+    contentType: "text/html; charset=utf-8",
+    body: "<!doctype html><html lang=\"en\"><title>Spotify embed fixture</title><body></body></html>",
   }));
   await context.route("**/functions/v1/list-approved-gallery-submissions", (route) => route.fulfill({
     status: 200,
@@ -595,6 +712,39 @@ async function bridgeWebKitLocalHttps(context, secureBaseUrl) {
     const response = await route.fetch({ url: localUrl.href });
     await route.fulfill({ response });
   });
+}
+
+async function resolveExpectedLocalWebKitRedirect(urlValue, expectedPath, expectedReturnPath) {
+  if (!expectedPath || navigationBaseUrl === baseUrl) return urlValue;
+
+  const localUrl = new URL(urlValue);
+  localUrl.protocol = "http:";
+  const response = await fetch(localUrl, { redirect: "manual" });
+  const location = response.headers.get("location") || "";
+  await response.body?.cancel();
+  if (response.status < 300 || response.status >= 400 || !location) {
+    throw new Error(`Expected ${localUrl.pathname} to redirect to ${expectedPath}, received HTTP ${response.status}.`);
+  }
+
+  const redirectUrl = new URL(location, localUrl);
+  const redirect = inspectRedirectEvidence(redirectUrl, baseUrl, expectedPath, expectedReturnPath);
+  if (!redirect.sameOrigin || !redirect.pathMatches || !redirect.returnMatches || !redirect.queryIsExact) {
+    throw new Error(`Expected same-origin redirect to ${expectedPath} with exact return ${expectedReturnPath}, received ${redirectUrl.href}.`);
+  }
+  redirectUrl.protocol = "https:";
+  return redirectUrl.href;
+}
+
+function inspectRedirectEvidence(urlValue, expectedBaseUrl, expectedPath, expectedReturnPath) {
+  const url = new URL(urlValue);
+  const redirectValues = url.searchParams.getAll("redirect");
+  const queryKeys = [...url.searchParams.keys()];
+  return {
+    sameOrigin: url.origin === new URL(expectedBaseUrl).origin,
+    pathMatches: url.pathname === expectedPath,
+    returnMatches: redirectValues.length === 1 && redirectValues[0] === expectedReturnPath,
+    queryIsExact: queryKeys.length === 1 && queryKeys[0] === "redirect",
+  };
 }
 
 function renderMarkdown(report) {

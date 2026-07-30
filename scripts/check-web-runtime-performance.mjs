@@ -107,7 +107,8 @@ assertNotIncludes("Join route", joinPage, "<iframe");
   'initialRequestCount !== 0',
   'requestCountAfterActivation <= preview.initialRequestCount',
   'preview.hidden.expanded !== "false"',
-  'preview?.shown.horizontalOverflow',
+  'preview.shown.horizontalOverflow',
+  'preview.initial.accessibleNameMatches',
 ].forEach((snippet) => assertIncludes("Discord preview browser regression", browserRouteMatrix, snippet));
 
 const timing = read("apps/web/lib/observability/authenticated-route-timing.ts");
