@@ -6,6 +6,7 @@ import {
   type GalleryPreviewLease,
 } from "@/lib/gallery/safe-preview";
 import { normalizeInstagramPostPermalink } from "@/lib/gallery/instagram-action-confirmation";
+import { validateSocialPublicationCopy } from "@/lib/gallery/social-publication-copy";
 import { SUPABASE_URL } from "@/lib/supabase/config";
 import {
   text,
@@ -31,6 +32,7 @@ export const instagramStatuses: Array<{ id: string; label: string; empty: string
   { id: "failed", label: "Failed", empty: "No failed Instagram jobs." },
   { id: "reconcile_required", label: "Needs reconciliation", empty: "No Instagram jobs need reconciliation." },
   { id: "published", label: "Published", empty: "No published Instagram posts." },
+  { id: "canceled", label: "Canceled", empty: "No canceled Instagram jobs." },
   { id: "shared_manually", label: "Shared manually", empty: "No manually shared Instagram jobs." },
   { id: "all", label: "All", empty: "No Instagram publishing jobs." },
 ];
@@ -523,8 +525,10 @@ export function InstagramJobCard({
   const status = text(job.status, "queued").toLowerCase();
   const thumbnailUrl = approvedInstagramThumbnailUrl(job);
   const canEditPublishText = status === "queued" || status === "failed";
-  const canPublish = canEditPublishText && metaPublishAvailable;
-  const permalink = text(job.instagramPermalink);
+  const copyValidation = validateSocialPublicationCopy([caption, altText]);
+  const canPublish = canEditPublishText && metaPublishAvailable &&
+    Boolean(caption.trim()) && Boolean(altText.trim()) && copyValidation.ok;
+  const permalink = normalizeInstagramPostPermalink(job.instagramPermalink);
   const publishArmed = confirmation === "publish";
   const reconcilable = status === "reconcile_required";
   const reconcilePublishedArmed = confirmation === "reconcile-published";
@@ -589,6 +593,9 @@ export function InstagramJobCard({
             onChange={(event) => onCaptionChange(event.target.value.slice(0, 2200))}
           />
         </label>
+        {!caption.trim() ? (
+          <p className="review-action-note" role="alert">A final Instagram caption is required.</p>
+        ) : null}
         <label className="form-field">
           <span>Instagram alt text</span>
           <textarea
@@ -599,6 +606,12 @@ export function InstagramJobCard({
             onChange={(event) => onAltTextChange(event.target.value.slice(0, 1000))}
           />
         </label>
+        {!altText.trim() ? (
+          <p className="review-action-note" role="alert">Moderator-reviewed Instagram alt text is required.</p>
+        ) : null}
+        {!copyValidation.ok ? (
+          <p className="review-action-note" role="alert">{copyValidation.message}</p>
+        ) : null}
         {reconcilable ? (
           <label className="form-field">
             <span>Instagram media ID when publication is confirmed</span>
@@ -751,11 +764,9 @@ export function InstagramApiStatusCard({
   onRefresh: () => void;
 }) {
   const configured = Boolean(status?.configured);
-  const accountReachable = Boolean(status?.accountReachable);
   const publishEnabled = Boolean(status?.publishEnabled);
-  const accountIdPinned = Boolean(status?.accountIdPinned);
-  const ready = configured && accountReachable && accountIdPinned && publishEnabled;
-  const label = ready ? "Configured" : configured ? "Needs review" : "Not configured";
+  const ready = Boolean(status?.ready && configured && publishEnabled);
+  const label = ready ? "Ready" : configured ? "Blocked" : "Not configured";
   const message = text(status?.message, "Meta API status has not been checked yet.");
 
   return (
@@ -766,16 +777,16 @@ export function InstagramApiStatusCard({
       </div>
       <dl className="review-meta instagram-api-status__meta" aria-label="Meta API diagnostic details">
         <div>
-          <dt>Account</dt>
-          <dd>{status?.account?.username ? `@${status.account.username}` : "Not verified"}</dd>
+          <dt>Pinned identity</dt>
+          <dd>{status?.identityMatches && status?.pageToInstagramLinkageVerified ? "Passed" : "Not passed"}</dd>
         </div>
         <div>
-          <dt>Account check</dt>
-          <dd>{accountReachable ? "Passed" : "Not passed"}</dd>
+          <dt>Token and scopes</dt>
+          <dd>{status?.tokenBindingVerified && status?.scopesVerified && status?.expiryVerified ? "Passed" : "Not passed"}</dd>
         </div>
         <div>
-          <dt>Graph user ID pin</dt>
-          <dd>{accountIdPinned ? "Pinned" : "Required"}</dd>
+          <dt>Quota</dt>
+          <dd>{status?.quotaReadable && !status?.quotaExhausted ? "Passed" : "Not passed"}</dd>
         </div>
         <div>
           <dt>Server activation</dt>

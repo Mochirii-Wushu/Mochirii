@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getCurrentSession } from "@/lib/supabase/auth";
 import {
   checkFacebookPageApiStatus,
   listFacebookPagePublishQueue,
@@ -12,16 +13,16 @@ import {
   type FacebookPageApiStatus,
   type FacebookPagePublishJob,
   type FacebookPagePublishQueue as FacebookPagePublishQueueData,
-  type FacebookPageReconciliationResolution,
 } from "@/lib/supabase/types";
 import { SUPABASE_URL } from "@/lib/supabase/config";
 import {
-  facebookPagePublishFingerprint,
+  facebookPagePublishConfirmation,
   facebookPageReconciliationFingerprint,
+  type FacebookReconciliationDraft,
 } from "@/lib/gallery/facebook-action-confirmation";
+import type { FacebookPagePublicationRequest } from "@/lib/gallery/social-publication-request";
 import { validateSocialPublicationCopy } from "@/lib/gallery/social-publication-copy";
 import {
-  FACEBOOK_CANONICAL_PAGE_ID,
   FACEBOOK_CANONICAL_PAGE_URL,
   normalizeFacebookPermalink,
 } from "@/lib/gallery/facebook-permalink";
@@ -40,6 +41,7 @@ const facebookPageStatuses = [
   { id: "reconcile_required", label: "Needs reconciliation", empty: "No Facebook Page jobs need reconciliation." },
   { id: "published", label: "Published", empty: "No published Facebook Page posts." },
   { id: "ineligible", label: "Ineligible", empty: "No ineligible Facebook Page jobs." },
+  { id: "canceled", label: "Canceled", empty: "No canceled Facebook Page jobs." },
   { id: "all", label: "All", empty: "No Facebook Page publishing jobs." },
 ] as const;
 
@@ -48,13 +50,7 @@ type JobMessage = {
   kind: "status" | "error" | "success";
   message: string;
 };
-type ReconciliationDraft = {
-  resolution: FacebookPageReconciliationResolution | "";
-  note: string;
-  facebookPhotoId: string;
-  facebookPostId: string;
-  facebookPermalink: string;
-};
+type ReconciliationDraft = FacebookReconciliationDraft;
 
 function facebookPageStatusConfig(value: unknown) {
   const status = text(value, "queued").toLowerCase();
@@ -137,12 +133,12 @@ function FacebookPageApiStatusCard({
   const pageReachable = Boolean(status?.pageReachable);
   const publishEnabled = Boolean(status?.publishEnabled);
   const publishAuthorityConfirmed = Boolean(status?.publishAuthorityConfirmed);
-  const ready = configured && pageReachable && publishEnabled;
+  const ready = Boolean(status?.ready && configured && publishEnabled);
   const label = ready
     ? publishAuthorityConfirmed ? "Configured" : "Armed"
     : configured ? "Needs review" : "Not configured";
   const message = text(status?.message, "Facebook Page API status has not been checked yet.");
-  const pageLink = text(status?.page?.id) === FACEBOOK_CANONICAL_PAGE_ID
+  const pageLink = ready && status?.identityMatches
     ? FACEBOOK_CANONICAL_PAGE_URL
     : "";
 
@@ -152,13 +148,25 @@ function FacebookPageApiStatusCard({
         <strong>Facebook Page API: {label}</strong>
         <p>{message}</p>
         {pageLink ? (
-          <p><a href={pageLink} target="_blank" rel="noopener noreferrer">Open {status?.page?.name || "Facebook Page"}</a></p>
+          <p><a href={pageLink} target="_blank" rel="noopener noreferrer">Open official Facebook Page</a></p>
         ) : null}
       </div>
       <dl className="review-meta" aria-label="Facebook Page API diagnostic details">
         <div>
           <dt>Page check</dt>
           <dd>{pageReachable ? "Passed" : "Not passed"}</dd>
+        </div>
+        <div>
+          <dt>Pinned identity</dt>
+          <dd>{status?.identityMatches ? "Passed" : "Not passed"}</dd>
+        </div>
+        <div>
+          <dt>Publish task</dt>
+          <dd>{status?.createContentTaskVerified ? "Passed" : "Not passed"}</dd>
+        </div>
+        <div>
+          <dt>Token and scopes</dt>
+          <dd>{status?.tokenBindingVerified && status?.scopesVerified && status?.expiryVerified ? "Passed" : "Not passed"}</dd>
         </div>
         <div>
           <dt>Server activation</dt>
@@ -225,7 +233,7 @@ function FacebookPageJobCard({
   const reconcilable = status === "reconcile_required";
   const canPublish = retryable && pagePublishAvailable && Boolean(message.trim());
   const permalink = normalizeFacebookPermalink(job.facebookPermalink) || "";
-  const published = status === "published";
+  const verifiedPublished = status === "published" && Boolean(permalink);
   const thumbnailUrl = approvedGalleryThumbnailUrl(job);
   const reconciliationError = reconciliationValidation(reconciliation);
 
@@ -268,10 +276,10 @@ function FacebookPageJobCard({
         {permalink ? (
           <p><a href={permalink} target="_blank" rel="noopener noreferrer">Open Facebook Page post</a></p>
         ) : null}
-        {published ? (
-          <div className="review-decision">
-            <strong>Manual guild-group handoff</strong>
-            <p>Facebook does not provide API publishing to Groups. Open the private guild group and share this completed Page post manually.</p>
+        {verifiedPublished ? (
+          <div className="review-decision" data-facebook-group-handoff>
+            <strong>Manual Page-to-Group handoff</strong>
+            <p>After inspecting the verified Page post above, open the official Guild group and share that Page post manually. No Groups API is used.</p>
             <a href={FACEBOOK_GROUP_URL} target="_blank" rel="noopener noreferrer">Open Mōchirīī Guild Facebook group</a>
           </div>
         ) : null}
@@ -464,12 +472,15 @@ export function FacebookPagePublishQueue() {
   const [apiError, setApiError] = useState("");
   const [publicationError, setPublicationError] = useState("");
   const [messages, setMessages] = useState<Record<string, string>>({});
-  const [confirmations, setConfirmations] = useState<Record<string, string | undefined>>({});
+  const [confirmations, setConfirmations] = useState<Record<string, FacebookPagePublicationRequest | undefined>>({});
   const [reconciliationDrafts, setReconciliationDrafts] = useState<Record<string, ReconciliationDraft | undefined>>({});
   const [reconciliationConfirmations, setReconciliationConfirmations] = useState<Record<string, string | undefined>>({});
   const [jobMessages, setJobMessages] = useState<Record<string, JobMessage | undefined>>({});
   const mountedRef = useRef(true);
   const externalActionRef = useRef("");
+  const outcomeRef = useRef<HTMLDivElement>(null);
+
+  const focusOutcome = () => requestAnimationFrame(() => outcomeRef.current?.focus());
 
   const loadQueue = useCallback(async (
     requestedStatus: FacebookPageStatusId,
@@ -565,7 +576,16 @@ export function FacebookPagePublishQueue() {
     if (mountedRef.current) setBusyJobId("");
   }
 
-  function armPublish(job: FacebookPagePublishJob) {
+  async function moderatorUserId() {
+    const session = await getCurrentSession();
+    const userId = text(session.data?.session?.user?.id).toLowerCase();
+    if (!session.ok || !userId) {
+      throw new Error("Sign in again before confirming publication.");
+    }
+    return userId;
+  }
+
+  async function armPublish(job: FacebookPagePublishJob) {
     const jobId = text(job.id);
     if (!jobId) {
       setPublicationError("Choose a Facebook Page publishing job before continuing.");
@@ -589,16 +609,27 @@ export function FacebookPagePublishQueue() {
       });
       return;
     }
-    setPublicationError("");
-    setMessages((current) => ({ ...current, [jobId]: message }));
-    setConfirmations((current) => ({
-      ...current,
-      [jobId]: facebookPagePublishFingerprint(job, message),
-    }));
-    setJobMessage(jobId, {
-      kind: "status",
-      message: "Ready for final confirmation. This action creates a public Facebook Page post.",
-    });
+    try {
+      const request = await facebookPagePublishConfirmation(
+        job,
+        await moderatorUserId(),
+        message,
+      );
+      setPublicationError("");
+      setMessages((current) => ({ ...current, [jobId]: message }));
+      setConfirmations((current) => ({ ...current, [jobId]: request }));
+      setJobMessage(jobId, {
+        kind: "status",
+        message: "Ready for final confirmation. This exact caption and job revision will create one public Facebook Page post.",
+      });
+      focusOutcome();
+    } catch (caught) {
+      const message = caught instanceof Error
+        ? caught.message
+        : "Publication confirmation could not be prepared.";
+      setPublicationError(message);
+      setJobMessage(jobId, { kind: "error", message });
+    }
   }
 
   function cancelPublish(job: FacebookPagePublishJob) {
@@ -617,7 +648,7 @@ export function FacebookPagePublishQueue() {
     setPublicationError("");
   }
 
-  function armReconciliation(job: FacebookPagePublishJob) {
+  async function armReconciliation(job: FacebookPagePublishJob) {
     const jobId = text(job.id);
     if (!jobId) {
       setPublicationError("Choose a Facebook Page reconciliation job before continuing.");
@@ -631,17 +662,23 @@ export function FacebookPagePublishQueue() {
       return;
     }
 
-    setPublicationError("");
-    setReconciliationConfirmations((current) => ({
-      ...current,
-      [jobId]: facebookPageReconciliationFingerprint(job, draft),
-    }));
-    setJobMessage(jobId, {
-      kind: "status",
-      message: draft.resolution === "confirmed_published"
-        ? "Reconciliation is armed. Confirm only if the inspected Page post and provider id match this job."
-        : "Reconciliation is armed. Confirm only after checking that no matching Page post exists.",
-    });
+    try {
+      const fingerprint = await facebookPageReconciliationFingerprint(job, draft);
+      setPublicationError("");
+      setReconciliationConfirmations((current) => ({
+        ...current,
+        [jobId]: fingerprint,
+      }));
+      setJobMessage(jobId, {
+        kind: "status",
+        message: draft.resolution === "confirmed_published"
+          ? "Reconciliation is armed. Confirm only if the inspected Page post and provider id match this exact job revision."
+          : "Reconciliation is armed. Confirm only after checking that no matching Page post exists for this exact job revision.",
+      });
+    } catch {
+      setPublicationError("The reconciliation confirmation could not be prepared.");
+      setJobMessage(jobId, { kind: "error", message: "The reconciliation confirmation could not be prepared." });
+    }
   }
 
   function cancelReconciliation(job: FacebookPagePublishJob) {
@@ -671,16 +708,35 @@ export function FacebookPagePublishQueue() {
       });
       return;
     }
-    if (
-      confirmations[jobId] !== facebookPagePublishFingerprint(job, message)
-    ) {
-      armPublish(job);
+    const armedRequest = confirmations[jobId];
+    if (!armedRequest) {
+      await armPublish(job);
+      return;
+    }
+
+    let currentRequest: FacebookPagePublicationRequest;
+    try {
+      currentRequest = await facebookPagePublishConfirmation(
+        job,
+        await moderatorUserId(),
+        message,
+      );
+    } catch (caught) {
+      const message = caught instanceof Error
+        ? caught.message
+        : "Publication confirmation could not be verified.";
+      setPublicationError(message);
+      setJobMessage(jobId, { kind: "error", message });
+      return;
+    }
+    if (JSON.stringify(currentRequest) !== JSON.stringify(armedRequest)) {
+      await armPublish(job);
       return;
     }
 
     const pageApiReady = Boolean(
-      apiStatus?.configured &&
-      apiStatus.pageReachable &&
+      apiStatus?.ready &&
+      apiStatus.configured &&
       apiStatus.publishEnabled,
     );
     if (!pageApiReady) {
@@ -700,7 +756,7 @@ export function FacebookPagePublishQueue() {
 
     let result;
     try {
-      result = await publishFacebookPageGallerySubmission({ jobId, message, confirmPublish: true });
+      result = await publishFacebookPageGallerySubmission(currentRequest);
     } catch {
       releaseExternalAction(jobId);
       if (mountedRef.current) {
@@ -743,9 +799,9 @@ export function FacebookPagePublishQueue() {
     if (
       !draft.resolution ||
       reconciliationConfirmations[jobId] !==
-        facebookPageReconciliationFingerprint(job, draft)
+        await facebookPageReconciliationFingerprint(job, draft)
     ) {
-      armReconciliation(job);
+      await armReconciliation(job);
       return;
     }
     if (!acquireExternalAction(jobId)) {
@@ -798,8 +854,8 @@ export function FacebookPagePublishQueue() {
   const jobs = Array.isArray(queue?.jobs) ? queue.jobs : [];
   const config = facebookPageStatusConfig(activeStatus);
   const pagePublishAvailable = Boolean(
-    apiStatus?.configured &&
-    apiStatus.pageReachable &&
+    apiStatus?.ready &&
+    apiStatus.configured &&
     apiStatus.publishEnabled,
   );
   const error = [queueError, apiError, publicationError].filter(Boolean).join(" ");
@@ -832,8 +888,10 @@ export function FacebookPagePublishQueue() {
         ))}
       </div>
 
-      <WorkflowNotice hidden={!statusMessage}>{statusMessage}</WorkflowNotice>
-      <WorkflowNotice tone="danger" role="alert" hidden={!error}>{error}</WorkflowNotice>
+      <div ref={outcomeRef} tabIndex={-1} aria-label="Facebook Page queue outcome">
+        <WorkflowNotice hidden={!statusMessage}>{statusMessage}</WorkflowNotice>
+        <WorkflowNotice tone="danger" role="alert" hidden={!error}>{error}</WorkflowNotice>
+      </div>
 
       <FacebookPageApiStatusCard
         status={apiStatus}
@@ -850,20 +908,18 @@ export function FacebookPagePublishQueue() {
               DEFAULT_FACEBOOK_PAGE_MESSAGE,
             );
             const reconciliation = reconciliationDraft(job, reconciliationDrafts[id]);
-            const reconciliationArmed = reconciliationConfirmations[id] ===
-              facebookPageReconciliationFingerprint(job, reconciliation);
+            const reconciliationArmed = Boolean(reconciliationConfirmations[id]);
             return (
               <FacebookPageJobCard
                 job={job}
                 busy={queueBusy || Boolean(busyJobId)}
                 message={message}
-                confirmationArmed={confirmations[id] ===
-                  facebookPagePublishFingerprint(job, message)}
+                confirmationArmed={Boolean(confirmations[id])}
                 reconciliation={reconciliation}
                 reconciliationArmed={reconciliationArmed}
                 jobMessage={jobMessages[id]}
                 pagePublishAvailable={pagePublishAvailable}
-                pageLink={text(apiStatus?.page?.id) === FACEBOOK_CANONICAL_PAGE_ID
+                pageLink={apiStatus?.ready && apiStatus.identityMatches
                   ? FACEBOOK_CANONICAL_PAGE_URL
                   : ""}
                 key={id}

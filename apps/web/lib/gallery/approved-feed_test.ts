@@ -125,6 +125,88 @@ test("asset resolvers derive only the exact credential-free media URL", async ()
   );
 });
 
+test("public media stays pinned to the configured Supabase project", async () => {
+  const original = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  try {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://outside.invalid";
+    assert.equal(await resolveApprovedGalleryOriginal(submissionId), mediaUrl("full"));
+
+    process.env.NEXT_PUBLIC_SUPABASE_URL = `${mediaOrigin}/unexpected/path`;
+    assert.equal(
+      await refreshApprovedGalleryThumbnail(submissionId),
+      mediaUrl("thumbnail"),
+    );
+  } finally {
+    if (original === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    else process.env.NEXT_PUBLIC_SUPABASE_URL = original;
+  }
+});
+
+test("public JSON reads reject oversized, encoded, and invalid UTF-8 bodies", async () => {
+  const originalFetch = globalThis.fetch;
+  const cases: Array<() => Response> = [
+    () => new Response("{}", {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": String(64 * 1024 + 1),
+      },
+    }),
+    () => new Response("{}", {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Encoding": "gzip",
+      },
+    }),
+    () => new Response(new Uint8Array([0xc3, 0x28]), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    }),
+  ];
+
+  try {
+    let index = 0;
+    globalThis.fetch = async () => cases[index++]();
+    for (const query of ["oversized-json", "encoded-json", "invalid-utf8"]) {
+      const result = await listApprovedGallerySubmissions({ query });
+      assert.equal(result.ok, false, query);
+      assert.equal(result.data, null, query);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("oversized full images are canceled before body download", async () => {
+  const originalFetch = globalThis.fetch;
+  let canceled = false;
+  globalThis.fetch = async () => new Response(new ReadableStream({
+    pull(controller) {
+      controller.enqueue(new Uint8Array([0x52, 0x49, 0x46, 0x46]));
+    },
+    cancel() {
+      canceled = true;
+    },
+  }), {
+    status: 200,
+    headers: {
+      "Content-Type": "image/webp",
+      "Content-Length": String(2 * 1024 * 1024 + 1),
+    },
+  });
+
+  try {
+    await assert.rejects(
+      loadApprovedGalleryOriginal(submissionId),
+      /full image is unavailable/i,
+    );
+    assert.equal(canceled, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("only list requests use POST while media uses deterministic GET URLs", async () => {
   const originalFetch = globalThis.fetch;
   const requests: Array<{

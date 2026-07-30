@@ -6,6 +6,7 @@ import {
   type GalleryFilterSlug,
   galleryItemCategories,
   isGalleryCategory,
+  isGalleryFilter,
   normalizeGalleryQuery,
 } from "./categories.ts";
 
@@ -73,6 +74,7 @@ const fullImageUnavailableMessage = "The full image is unavailable.";
 const thumbnailUnavailableMessage = "The image preview is unavailable.";
 const APPROVED_GALLERY_REQUEST_TIMEOUT_MS = 8_000;
 const APPROVED_GALLERY_MEDIA_TIMEOUT_MS = 15_000;
+const APPROVED_GALLERY_JSON_MAX_BYTES = 64 * 1024;
 const APPROVED_GALLERY_DISPLAY_MAX_BYTES = 2 * 1024 * 1024;
 const APPROVED_GALLERY_CACHE_MAX_ENTRIES = 40;
 const APPROVED_GALLERY_CACHE_MAX_TTL_MS = 60_000;
@@ -138,20 +140,113 @@ function safeInteger(value: unknown, minimum: number, maximum: number): number |
     : null;
 }
 
+function responseContentLength(response: Response, maximum: number) {
+  const header = response.headers.get("content-length");
+  if (header === null) return null;
+  if (!/^\d+$/u.test(header)) return -1;
+  const value = Number(header);
+  return Number.isSafeInteger(value) && value >= 0 && value <= maximum ? value : -1;
+}
+
+async function cancelResponseBody(response: Response) {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // The body may already be closed or aborted.
+  }
+}
+
+async function readBoundedResponseBytes(response: Response, maximum: number) {
+  if (!response.body) return null;
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      if (!chunk.value?.byteLength) continue;
+      received += chunk.value.byteLength;
+      if (received > maximum) {
+        await reader.cancel("gallery_response_too_large");
+        return null;
+      }
+      chunks.push(chunk.value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
+}
+
+async function readBoundedJson(response: Response) {
+  const contentType = (response.headers.get("content-type") || "")
+    .split(";", 1)[0]
+    .trim()
+    .toLowerCase();
+  const contentEncoding = (response.headers.get("content-encoding") || "identity")
+    .trim()
+    .toLowerCase();
+  const contentLength = responseContentLength(
+    response,
+    APPROVED_GALLERY_JSON_MAX_BYTES,
+  );
+  if (
+    contentType !== "application/json" ||
+    contentEncoding !== "identity" ||
+    contentLength === -1
+  ) {
+    await cancelResponseBody(response);
+    return null;
+  }
+  const bytes = await readBoundedResponseBytes(
+    response,
+    APPROVED_GALLERY_JSON_MAX_BYTES,
+  );
+  if (!bytes || (contentLength !== null && bytes.byteLength !== contentLength)) {
+    return null;
+  }
+  try {
+    return JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(bytes),
+    ) as unknown;
+  } catch {
+    return null;
+  }
+}
+
 function validDateOrNull(value: unknown) {
   const clean = stringOrNull(value, 80);
   if (clean === null) return null;
   return typeof clean === "string" && Number.isFinite(Date.parse(clean)) ? clean : undefined;
 }
 
+function isLoopbackHttp(url: URL) {
+  return url.protocol === "http:" &&
+    (url.hostname === "localhost" || url.hostname === "127.0.0.1");
+}
+
 function configuredSupabaseUrl() {
-  const fallback = new URL(`https://${publicUrls.supabaseProjectRef}.supabase.co`);
+  const projectRef = String(publicUrls.supabaseProjectRef || "").trim().toLowerCase();
+  const fallback = new URL(`https://${projectRef}.supabase.co`);
   const configured = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
   if (!configured) return fallback;
 
   try {
     const url = new URL(configured);
-    if (url.protocol !== "https:" || url.username || url.password) return fallback;
+    const exactRoot = url.pathname === "/" && !url.search && !url.hash &&
+      !url.username && !url.password;
+    const hostedProject = url.protocol === "https:" && !url.port &&
+      url.hostname === `${projectRef}.supabase.co`;
+    const localProject = process.env.NODE_ENV !== "production" && isLoopbackHttp(url);
+    if (!exactRoot || (!hostedProject && !localProject)) return fallback;
     return new URL(url.origin);
   } catch {
     return fallback;
@@ -169,7 +264,9 @@ function validGalleryMediaUrl(
     const url = new URL(clean);
     const configured = configuredSupabaseUrl();
     if (
-      url.origin !== configured.origin || url.protocol !== "https:" || url.username || url.password ||
+      url.origin !== configured.origin ||
+      (url.protocol !== "https:" && !isLoopbackHttp(url)) ||
+      url.username || url.password ||
       url.hash || url.pathname !== galleryMediaPath ||
       [...url.searchParams.keys()].sort().join(",") !== "asset,id" ||
       url.searchParams.get("asset") !== (mediaKind === "display" ? "full" : "thumbnail") ||
@@ -460,7 +557,7 @@ async function performApprovedGalleryRequest<T>({
       cache: "no-store",
       credentials: "omit",
     }, signal);
-    const payload = record(await response.json().catch(() => null));
+    const payload = record(await readBoundedJson(response));
     const data = payload?.ok === true ? parse(payload.data) : null;
     if (!response.ok || !data) {
       return { ok: false, status: response.status, statusText: response.statusText, data: null, message: unavailable };
@@ -534,13 +631,20 @@ export async function listApprovedGallerySubmissions(
     ? Math.min(APPROVED_GALLERY_PAGE_SIZE, Math.max(1, Number(request.pageSize)))
     : APPROVED_GALLERY_PAGE_SIZE;
   const query = normalizeGalleryQuery(request.query);
+  const cursor = typeof request.cursor === "string" && cursorPattern.test(request.cursor)
+    ? request.cursor
+    : null;
+  const category = request.category && isGalleryFilter(request.category) &&
+      request.category !== GALLERY_ALL_CATEGORY
+    ? request.category
+    : null;
   return requestApprovedGallery({
     body: {
       action: "list",
       pageSize,
-      cursor: request.cursor || null,
+      cursor,
       sort: request.sort === "oldest" ? "oldest" : "newest",
-      category: request.category && request.category !== "all" ? request.category : null,
+      category,
       query: query || null,
     },
     signal,
@@ -579,17 +683,30 @@ export async function loadApprovedGalleryOriginal(id: string, signal?: AbortSign
       .split(";", 1)[0]
       .trim()
       .toLowerCase();
-    const contentLengthText = response.headers.get("content-length");
-    const contentLength = contentLengthText === null ? null : Number(contentLengthText);
+    const contentLength = responseContentLength(
+      response,
+      APPROVED_GALLERY_DISPLAY_MAX_BYTES,
+    );
+    const contentEncoding = (response.headers.get("content-encoding") || "identity")
+      .trim()
+      .toLowerCase();
     if (
-      !response.ok || contentType !== "image/webp" ||
-      (contentLength !== null && (
-        !Number.isSafeInteger(contentLength) || contentLength < 1 ||
-        contentLength > APPROVED_GALLERY_DISPLAY_MAX_BYTES
-      ))
-    ) throw new Error(fullImageUnavailableMessage);
+      !response.ok ||
+      contentType !== "image/webp" ||
+      contentEncoding !== "identity" ||
+      contentLength === -1 ||
+      contentLength === 0
+    ) {
+      await cancelResponseBody(response);
+      throw new Error(fullImageUnavailableMessage);
+    }
 
-    const blob = await response.blob();
+    const bytes = await readBoundedResponseBytes(
+      response,
+      APPROVED_GALLERY_DISPLAY_MAX_BYTES,
+    );
+    if (!bytes) throw new Error(fullImageUnavailableMessage);
+    const blob = new Blob([bytes], { type: "image/webp" });
     if (
       blob.type.toLowerCase() !== "image/webp" || blob.size < 1 ||
       blob.size > APPROVED_GALLERY_DISPLAY_MAX_BYTES ||

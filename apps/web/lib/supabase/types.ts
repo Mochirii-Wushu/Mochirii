@@ -125,11 +125,15 @@ export type GallerySubmission = {
   instagram_opt_in_source?: string | null;
   instagram_opt_in_copy_version?: string | null;
   instagram_opt_in_contract_version?: string | null;
+  instagram_consent_version?: string | null;
   facebook_page_opt_in?: boolean | null;
   facebook_page_opt_in_at?: string | null;
   facebook_page_opt_in_source?: string | null;
   facebook_page_opt_in_copy_version?: string | null;
   facebook_page_opt_in_contract_version?: string | null;
+  facebook_page_consent_version?: string | null;
+  upload_rights_confirmed?: boolean | null;
+  social_withdrawals?: GallerySocialWithdrawalStatus[];
   thumbnail_width?: number | null;
   thumbnail_height?: number | null;
 };
@@ -140,6 +144,31 @@ export type GallerySubmissionMetadata = {
   category?: string | null;
   instagramOptIn?: boolean | null;
   facebookPageOptIn?: boolean | null;
+  uploadRightsConfirmed?: boolean | null;
+};
+
+export type GallerySocialDestination = "instagram" | "facebook_page";
+
+export type GallerySocialWithdrawalStatus = {
+  submission_id: string;
+  destination: GallerySocialDestination;
+  state:
+    | "withdrawn_before_queue"
+    | "canceled"
+    | "quarantined"
+    | "removal_requested"
+    | string;
+  external_removal_required: boolean;
+  requested_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type GallerySocialWithdrawalResponse = {
+  destination?: GallerySocialDestination | string | null;
+  action?: string | null;
+  status?: string | null;
+  requiresModeratorInspection?: boolean | null;
+  removalRequestCreated?: boolean | null;
 };
 
 export type VerificationResponse = {
@@ -371,6 +400,28 @@ export type InstagramApiStatus = {
   message?: string | null;
   missingSecrets?: string[];
   invalidFields?: string[];
+  tokenDebuggerCalled?: boolean | null;
+  tokenDebuggerTransportApproved?: boolean | null;
+  tokenBindingVerified?: boolean | null;
+  tokenTypeVerified?: boolean | null;
+  scopesVerified?: boolean | null;
+  expiryVerified?: boolean | null;
+  dataAccessExpiryVerified?: boolean | null;
+  tokenExpiryWindow?: string | null;
+  dataAccessExpiryWindow?: string | null;
+  identityReachable?: boolean | null;
+  identityMatches?: boolean | null;
+  ready?: boolean | null;
+  errorCategory?: string | null;
+  providerErrorCategory?: string | null;
+  facebookPageReachable?: boolean | null;
+  facebookPageIdentityMatches?: boolean | null;
+  instagramBusinessAccountPresent?: boolean | null;
+  instagramBusinessAccountMatches?: boolean | null;
+  pageToInstagramLinkageVerified?: boolean | null;
+  quotaReadable?: boolean | null;
+  quotaExhausted?: boolean | null;
+  businessAccountSubtypeVerification?: string | null;
 };
 
 export type FacebookPagePublishJobStatus =
@@ -492,6 +543,21 @@ export type FacebookPageApiStatus = {
   checkedAt?: string | null;
   message?: string | null;
   missingSecrets?: string[];
+  tokenDebuggerCalled?: boolean | null;
+  tokenDebuggerTransportApproved?: boolean | null;
+  tokenBindingVerified?: boolean | null;
+  tokenTypeVerified?: boolean | null;
+  scopesVerified?: boolean | null;
+  expiryVerified?: boolean | null;
+  dataAccessExpiryVerified?: boolean | null;
+  tokenExpiryWindow?: string | null;
+  dataAccessExpiryWindow?: string | null;
+  identityReachable?: boolean | null;
+  identityMatches?: boolean | null;
+  ready?: boolean | null;
+  errorCategory?: string | null;
+  providerErrorCategory?: string | null;
+  createContentTaskVerified?: boolean | null;
 };
 
 export type ModerateGallerySubmissionResponse = {

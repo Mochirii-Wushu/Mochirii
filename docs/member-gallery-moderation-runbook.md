@@ -6,7 +6,7 @@ It does not contain secrets, tokens, private URLs, or deployment credentials.
 
 Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/123>
 
-Instagram deployment and Reaper rollout steps are separate from routine moderation and are tracked in [`instagram-gallery-publishing-deployment-runbook.md`](./instagram-gallery-publishing-deployment-runbook.md).
+Meta deployment and Reaper rollout steps are separate from routine moderation and are tracked in [`instagram-gallery-publishing-deployment-runbook.md`](./instagram-gallery-publishing-deployment-runbook.md).
 
 ## 1. What Moderation Controls
 
@@ -16,7 +16,7 @@ Moderation does not:
 
 - edit `apps/web/public/data/gallery.json`
 - publish static Gallery images
-- automatically publish images to Instagram
+- automatically publish images to Instagram or the official Facebook Page
 - make the `member-gallery` Storage bucket public
 - assign Discord roles
 - bypass Supabase RLS or Storage policies
@@ -25,7 +25,7 @@ Moderation does not:
 
 Published submissions are served to the public Gallery by the approved-feed Edge Function. Its list returns only short-lived bounded thumbnails; the viewer resolves one bounded display derivative on demand from a stable opaque publication ID. The member-owned source original remains private. Pending, rejected, archived, and historical approved rows without a complete immutable publication revision stay out of the public Gallery.
 
-If a member opted in to Instagram sharing, approving the website Gallery submission creates an Instagram Queue job. It does not publish to Instagram. A moderator must review that separate queue and use a final confirmation before any external public post is sent.
+If a member selected Instagram or the official Facebook Page, approving the website Gallery submission may create one destination-specific queue job. It does not publish externally. A moderator must review the separate destination queue and use a second confirmation before any public provider request is sent.
 
 ## 2. Access Requirements
 
@@ -69,7 +69,8 @@ Each submission may show:
 - prepared Gallery thumbnail decoded width and height
 - submitted date
 - reviewed date
-- Instagram opt-in state
+- upload-rights confirmation
+- independent Instagram and Facebook Page opt-in states
 - Storage reference
 - moderation history
 
@@ -87,7 +88,8 @@ Before approving a submission, check:
 - the category is reasonable for Gallery browsing
 - the category is one canonical Gallery category: Portraits, Gatherings, Action, Scenery, or Companions
 - the image does not reveal sensitive account, server, or personal information
-- any Instagram opt-in is intentional and shown on the submission
+- upload rights and permission involving identifiable people were explicitly confirmed
+- any Instagram or Facebook Page opt-in is intentional and shown independently on the submission
 
 Preparing a preview reserves the exact source bytes, validates and fully decodes the exact current Storage object, and binds its MIME type, encoded byte size, dimensions, SHA-256, object identity, and durable validation timestamp to the submission revision. Accepted sources are static JPEG, PNG, or WebP no larger than 8 MiB, 4096 pixels on either edge, or 12.6 megapixels. The same-origin website route independently decodes and re-renders a metadata-free WebP no larger than 2560 pixels per edge or 2 MiB. Only that derivative reaches the browser; no source URL or signed Storage capability does. Validation evidence is service-only and becomes stale if the object identity or row revision changes. The ordinary queue does not bulk-download or bulk-validate private originals.
 
@@ -116,9 +118,9 @@ After approval:
 - the row status, moderation event, prior-revision retirement, and new publication revision commit atomically
 - a stale queue snapshot cannot commit; the moderator must refresh and review the current text and image again
 - the approved public Gallery feed may include the item
-- an opted-in image may create an Instagram Queue job for later review
+- an opted-in image may create one Instagram and/or Facebook Page job for later review
 - no static Gallery JSON is edited
-- no automatic Instagram publishing happens
+- no automatic external publishing happens
 
 If an older approved item says `Not prepared`, use the Approved queue's `Needs thumbnail` filter and paginated controls. Treat that label as an explicit publication-media review, not a mechanical thumbnail backfill. Republish only after confirming the prepared private preview still matches the reviewed unit and selecting one canonical category. The workflow creates both bounded assets and an immutable publication revision. The legacy row remains private until that transaction succeeds and records its moderation audit event; approval status or old thumbnail fields alone are never publication evidence.
 
@@ -131,7 +133,15 @@ Retired revision records remain immutable, and their service-owned objects must
 be retained for at least one hour so in-flight snapshot delivery can finish.
 Do not delete or rewrite them during routine moderation.
 
-## 6. Instagram Queue
+## 6. Destination Publishing Queues
+
+Instagram and Facebook Page queues are moderator-only second steps. Gallery approval and each destination publication are separate audited decisions. Both server-side publication flags default to false, and a diagnostic is read-only: it must not create media or posts.
+
+Every publish action has a prepare step followed by a separate confirmation. The confirmation fingerprint binds the destination, current job ID/state/revision, attempt count, final caption, Instagram alt text when applicable, and current moderator. Editing copy, refreshing the queue, changing the job, or receiving a stale revision disarms it. Never retry an ambiguous provider request; inspect and reconcile it first.
+
+Automated destination copy rejects URL-like text. Do not place `mochirii.com` or any external link in Instagram publication copy or profile fields.
+
+### Instagram
 
 The Instagram Queue is a moderator-only second step for approved images where the member explicitly opted in. It is separate from website Gallery approval.
 
@@ -165,6 +175,16 @@ database RPC can mark a job `shared_manually`. That status is historical only.
 Meta API publishing should remain disabled until Meta developer registration is complete, `INSTAGRAM_*` Supabase secrets are set, and the moderator-only `Check Meta API` diagnostic passes. The diagnostic does not create media containers or publish posts.
 
 Do not publish test images, live images, or retry failed jobs unless the owner has approved the live Instagram action. Do not paste signed preview URLs into Discord, GitHub, public docs, screenshots, or Meta setup notes.
+
+### Facebook Page
+
+The Facebook Page queue follows the same two-step confirmation and stale-revision controls. It sends only the private sanitized social derivative to the server-pinned official Page. The browser must not compare, display, or persist raw provider IDs, secret names, or credential details.
+
+After a verified Page post exists, the dashboard may expose a moderator-only link for a manual Page-to-Guild-group handoff. No Facebook Groups API is used, and group sharing must never be described as automatic.
+
+### Consent withdrawal
+
+Members withdraw one destination at a time from Account. Queued, failed, or ineligible work is canceled atomically; publishing or uncertain work is quarantined for inspection; published work creates a removal request. Preserve the original consent and immutable withdrawal event, and never claim an external copy was removed until that outcome is separately verified.
 
 ## 7. Declining A Submission
 

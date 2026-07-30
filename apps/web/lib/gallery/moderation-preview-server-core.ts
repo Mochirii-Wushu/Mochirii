@@ -101,13 +101,23 @@ async function cancelResponseBody(response: Response) {
   }
 }
 
-async function readExactBoundedBody(response: Response, expectedBytes: number) {
+function failIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) fail("preview_request_aborted");
+}
+
+async function readExactBoundedBody(
+  response: Response,
+  expectedBytes: number,
+  signal?: AbortSignal,
+) {
+  failIfAborted(signal);
   if (!response.body) fail("preview_source_empty");
   const reader = response.body.getReader();
   const bytes = new Uint8Array(expectedBytes);
   let received = 0;
   try {
     while (true) {
+      failIfAborted(signal);
       const chunk = await reader.read();
       if (chunk.done) break;
       if (!chunk.value?.byteLength) continue;
@@ -195,11 +205,16 @@ function stripGeneratedWebpMetadata(bytes: Uint8Array) {
   return output;
 }
 
-async function encodeBoundedPreview(sourceBytes: Uint8Array, source: {
-  mimeType: string;
-  width: number;
-  height: number;
-}) {
+async function encodeBoundedPreview(
+  sourceBytes: Uint8Array,
+  source: {
+    mimeType: string;
+    width: number;
+    height: number;
+  },
+  signal?: AbortSignal,
+) {
+  failIfAborted(signal);
   let decoded;
   try {
     decoded = await loadImage(Buffer.from(
@@ -210,6 +225,7 @@ async function encodeBoundedPreview(sourceBytes: Uint8Array, source: {
   } catch {
     fail("preview_source_decode_failed");
   }
+  failIfAborted(signal);
 
   const decodedWidth = Number(decoded.width || 0);
   const decodedHeight = Number(decoded.height || 0);
@@ -229,6 +245,7 @@ async function encodeBoundedPreview(sourceBytes: Uint8Array, source: {
   const attempted = new Set<string>();
   try {
     for (const maximumEdge of EDGE_STEPS) {
+      failIfAborted(signal);
       const dimensions = boundedDimensions(decodedWidth, decodedHeight, maximumEdge);
       const key = `${dimensions.width}x${dimensions.height}`;
       if (attempted.has(key)) continue;
@@ -239,9 +256,11 @@ async function encodeBoundedPreview(sourceBytes: Uint8Array, source: {
       context.drawImage(decoded, 0, 0, dimensions.width, dimensions.height);
 
       for (const quality of QUALITY_STEPS) {
+        failIfAborted(signal);
         const encoded = stripGeneratedWebpMetadata(
           await canvas.encode("webp", quality),
         );
+        failIfAborted(signal);
         if (encoded.byteLength < 1 || encoded.byteLength > GALLERY_MODERATOR_PREVIEW_MAX_BYTES) {
           continue;
         }
@@ -278,6 +297,7 @@ export async function prepareGalleryModerationPreview({
   supabaseUrl,
   fetchImpl = fetch,
   timeoutMs = DEFAULT_UPSTREAM_TIMEOUT_MS,
+  signal,
 }: {
   accessToken: string;
   expectedUpdatedAt: string;
@@ -288,50 +308,61 @@ export async function prepareGalleryModerationPreview({
   supabaseUrl: string;
   fetchImpl?: FetchLike;
   timeoutMs?: number;
+  signal?: AbortSignal;
 }): Promise<GalleryModerationPreview> {
   if (
     !accessToken || !publishableKey || !sanitizerAttestation ||
     sanitizerAttestation.length > 8 * 1024
   ) fail("preview_upstream_unconfigured");
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30_000) {
+    fail("preview_upstream_unconfigured");
+  }
+  failIfAborted(signal);
   const endpoint = validatedEndpoint(supabaseUrl, supabaseProjectRef);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  let response: Response;
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  signal?.addEventListener("abort", abortFromCaller, { once: true });
+  const timeout = setTimeout(
+    () => controller.abort(new DOMException("timed out", "TimeoutError")),
+    timeoutMs,
+  );
+  const operationSignal = controller.signal;
   try {
-    response = await fetchImpl(endpoint, {
-      method: "POST",
-      cache: "no-store",
-      redirect: "error",
-      headers: {
-        Accept: "application/octet-stream",
-        apikey: publishableKey,
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        [GALLERY_SANITIZER_ATTESTATION_HEADER]: sanitizerAttestation,
-      },
-      body: JSON.stringify({
-        action: "prepare_preview",
-        submission_id: submissionId,
-        expected_updated_at: expectedUpdatedAt,
-      }),
-      signal: controller.signal,
-    });
-  } catch {
-    fail("preview_upstream_unavailable");
-  } finally {
-    clearTimeout(timeout);
-  }
+    let response: Response;
+    try {
+      response = await fetchImpl(endpoint, {
+        method: "POST",
+        cache: "no-store",
+        redirect: "error",
+        headers: {
+          Accept: "application/octet-stream",
+          apikey: publishableKey,
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          [GALLERY_SANITIZER_ATTESTATION_HEADER]: sanitizerAttestation,
+        },
+        body: JSON.stringify({
+          action: "prepare_preview",
+          submission_id: submissionId,
+          expected_updated_at: expectedUpdatedAt,
+        }),
+        signal: operationSignal,
+      });
+    } catch {
+      fail("preview_upstream_unavailable");
+    }
 
-  if (!response.ok) {
-    await cancelResponseBody(response);
-    fail("preview_upstream_denied");
-  }
-  let mimeType: string;
-  let sizeBytes: number;
-  let sourceWidth: number;
-  let sourceHeight: number;
-  let sourceValidatedAt: string;
-  try {
+    failIfAborted(operationSignal);
+    if (!response.ok) {
+      await cancelResponseBody(response);
+      fail("preview_upstream_denied");
+    }
+    let mimeType: string;
+    let sizeBytes: number;
+    let sourceWidth: number;
+    let sourceHeight: number;
+    let sourceValidatedAt: string;
+    try {
     const contentEncoding = String(response.headers.get("content-encoding") || "identity")
       .trim().toLowerCase();
     if (contentEncoding !== "identity") fail("preview_source_encoding_invalid");
@@ -375,26 +406,35 @@ export async function prepareGalleryModerationPreview({
     if (sourceDecodeVersion !== GALLERY_SOURCE_DECODE_VERSION) {
       fail("preview_source_decoder_invalid");
     }
-  } catch (error) {
-    await cancelResponseBody(response);
-    throw error;
-  }
+    } catch (error) {
+      await cancelResponseBody(response);
+      throw error;
+    }
 
-  const sourceBytes = await readExactBoundedBody(response, sizeBytes);
-  const encoded = await encodeBoundedPreview(sourceBytes, {
-    mimeType,
-    width: sourceWidth,
-    height: sourceHeight,
-  });
-  return {
-    bytes: encoded.bytes,
-    submissionId,
-    sourceWidth,
-    sourceHeight,
-    previewWidth: encoded.width,
-    previewHeight: encoded.height,
-    sourceValidatedAt,
-    sourceDecodeVersion: GALLERY_SOURCE_DECODE_VERSION,
-    previewVersion: GALLERY_MODERATOR_PREVIEW_VERSION,
-  };
+    const sourceBytes = await readExactBoundedBody(
+      response,
+      sizeBytes,
+      operationSignal,
+    );
+    failIfAborted(operationSignal);
+    const encoded = await encodeBoundedPreview(sourceBytes, {
+      mimeType,
+      width: sourceWidth,
+      height: sourceHeight,
+    }, operationSignal);
+    return {
+      bytes: encoded.bytes,
+      submissionId,
+      sourceWidth,
+      sourceHeight,
+      previewWidth: encoded.width,
+      previewHeight: encoded.height,
+      sourceValidatedAt,
+      sourceDecodeVersion: GALLERY_SOURCE_DECODE_VERSION,
+      previewVersion: GALLERY_MODERATOR_PREVIEW_VERSION,
+    };
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", abortFromCaller);
+  }
 }

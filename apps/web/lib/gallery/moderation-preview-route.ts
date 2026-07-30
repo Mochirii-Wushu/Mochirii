@@ -197,6 +197,7 @@ export async function handleGalleryModerationPreviewRequest(request: Request, {
       submissionId: body.submissionId,
       supabaseProjectRef,
       supabaseUrl,
+      signal: request.signal,
     });
     return previewResponse(preview);
   } catch {

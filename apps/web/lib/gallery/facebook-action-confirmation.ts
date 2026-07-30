@@ -1,3 +1,9 @@
+import { sha256Hex } from "./social-publication-confirmation.ts";
+import {
+  buildFacebookPagePublicationRequest,
+  type FacebookPagePublicationRequest,
+} from "./social-publication-request.ts";
+
 type FacebookActionJob = {
   id?: unknown;
   status?: unknown;
@@ -5,56 +11,57 @@ type FacebookActionJob = {
   updatedAt?: unknown;
 };
 
-type FacebookReconciliationDraft = {
-  resolution: unknown;
-  note: unknown;
-  facebookPhotoId: unknown;
-  facebookPostId: unknown;
-  facebookPermalink: unknown;
+export type FacebookReconciliationDraft = {
+  resolution: "confirmed_published" | "confirmed_not_published" | "";
+  note: string;
+  facebookPhotoId: string;
+  facebookPostId: string;
+  facebookPermalink: string;
 };
 
-function normalizedText(value: unknown): string {
-  return String(value ?? "").trim();
+function clean(value: unknown, maximumLength: number): string {
+  return String(value ?? "").normalize("NFC").trim().slice(0, maximumLength);
 }
 
-function normalizedAttemptCount(value: unknown): number {
-  const attemptCount = Number(value);
-  return Number.isSafeInteger(attemptCount) && attemptCount >= 0
-    ? attemptCount
-    : 0;
-}
-
-function jobState(job: FacebookActionJob): [string, string, number, string] {
+function jobState(job: FacebookActionJob) {
+  const attemptCount = Number(job.attemptCount);
   return [
-    normalizedText(job.id),
-    normalizedText(job.status).toLowerCase(),
-    normalizedAttemptCount(job.attemptCount),
-    normalizedText(job.updatedAt),
-  ];
+    clean(job.id, 80).toLowerCase(),
+    clean(job.status, 40).toLowerCase(),
+    Number.isSafeInteger(attemptCount) && attemptCount >= 0 ? attemptCount : -1,
+    clean(job.updatedAt, 80),
+  ] as const;
 }
 
-export function facebookPagePublishFingerprint(
+export async function facebookPagePublishConfirmation(
   job: FacebookActionJob,
-  message: unknown,
-): string {
-  return JSON.stringify([
-    "facebook-page-publish-v1",
-    ...jobState(job),
-    normalizedText(message),
-  ]);
+  moderatorUserId: string,
+  message: string,
+): Promise<FacebookPagePublicationRequest> {
+  return buildFacebookPagePublicationRequest({
+    job,
+    moderatorUserId,
+    primaryCopy: message,
+  });
 }
 
-export function facebookPageReconciliationFingerprint(
+export async function facebookPageReconciliationFingerprint(
   job: FacebookActionJob,
   draft: FacebookReconciliationDraft,
-): string {
-  return JSON.stringify([
-    "facebook-page-reconciliation-v1",
+): Promise<string> {
+  return sha256Hex(JSON.stringify([
+    "facebook-page-reconciliation-ui-v1",
     ...jobState(job),
-    normalizedText(draft.resolution),
-    normalizedText(draft.note),
-    normalizedText(draft.facebookPhotoId),
-    normalizedText(draft.facebookPostId),
-    normalizedText(draft.facebookPermalink),
-  ]);
+    draft.resolution,
+    clean(draft.note, 500),
+    draft.resolution === "confirmed_published"
+      ? clean(draft.facebookPhotoId, 255)
+      : "",
+    draft.resolution === "confirmed_published"
+      ? clean(draft.facebookPostId, 255)
+      : "",
+    draft.resolution === "confirmed_published"
+      ? clean(draft.facebookPermalink, 1000)
+      : "",
+  ]));
 }

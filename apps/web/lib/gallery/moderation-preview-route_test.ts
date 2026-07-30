@@ -131,7 +131,8 @@ test("the development marker is available only to an exact loopback pair", () =>
 
 test("the route returns only the bounded same-origin WebP and safe evidence headers", async () => {
   let received: Record<string, unknown> | null = null;
-  const response = await handleGalleryModerationPreviewRequest(request(), {
+  const previewRequest = request();
+  const response = await handleGalleryModerationPreviewRequest(previewRequest, {
     ...dependencies,
     preparePreview: async (options) => {
       received = options;
@@ -159,8 +160,9 @@ test("the route returns only the bounded same-origin WebP and safe evidence head
   assert.equal(received?.accessToken, accessToken);
   assert.equal(received?.sanitizerAttestation, sanitizerAttestation);
     assert.equal(received?.submissionId, submissionId);
-    assert.equal(received?.expectedUpdatedAt, expectedUpdatedAt);
-    assert.equal(received?.supabaseProjectRef, supabaseProjectRef);
+  assert.equal(received?.expectedUpdatedAt, expectedUpdatedAt);
+  assert.equal(received?.supabaseProjectRef, supabaseProjectRef);
+  assert.equal(received?.signal, previewRequest.signal);
 });
 
 test("route failures remain opaque and never serialize credentials", async () => {

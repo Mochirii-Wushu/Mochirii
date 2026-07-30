@@ -6,12 +6,10 @@ import {
   type FacebookPageApiStatus,
   type FacebookPageReconciliationResolution,
   type FacebookPageReconciliationResult,
-  type FacebookPagePublishJobStatus,
   type FacebookPagePublishQueue,
   type GalleryReviewQueue,
   type InstagramApiStatus,
   type InstagramPublishQueue,
-  type InstagramPublishJob,
   type InstagramReconciliationResolution,
   type InstagramReconciliationResult,
   type MemberVerificationReviewResponse,
@@ -23,6 +21,19 @@ import type { GalleryModerationMedia } from "@/lib/gallery-thumbnail";
 import { fetchGalleryModerationPreview } from "@/lib/gallery/moderation-preview-client";
 import { normalizeFacebookPermalink } from "@/lib/gallery/facebook-permalink";
 import { normalizeInstagramPostPermalink } from "@/lib/gallery/instagram-action-confirmation";
+import type {
+  FacebookPagePublicationRequest,
+  InstagramPublicationRequest,
+} from "@/lib/gallery/social-publication-request";
+import { socialPublicationFingerprintLooksValid } from "@/lib/gallery/social-publication-confirmation";
+
+const PUBLICATION_JOB_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+function publicationRevisionLooksValid(jobId: string, updatedAt: string) {
+  return PUBLICATION_JOB_ID_RE.test(jobId) &&
+    Number.isFinite(Date.parse(updatedAt));
+}
 
 export async function checkLeaderGalleryModerationAccess() {
   return invokeEdgeFunction<{ hasAccess?: boolean; moderatorId?: string }>("list-gallery-review-queue", {
@@ -48,6 +59,7 @@ export async function listGalleryReviewQueue(options: {
 export async function prepareGalleryReviewPreview(
   submissionId: string,
   expectedUpdatedAt: string,
+  options: { signal?: AbortSignal } = {},
 ) {
   const cleanSubmissionId = String(submissionId || "").trim();
   const cleanExpectedUpdatedAt = String(expectedUpdatedAt || "").trim();
@@ -64,6 +76,7 @@ export async function prepareGalleryReviewPreview(
   const preview = await fetchGalleryModerationPreview({
     accessToken,
     expectedUpdatedAt: cleanExpectedUpdatedAt,
+    signal: options.signal,
     submissionId: cleanSubmissionId,
   });
   return preview
@@ -171,30 +184,27 @@ export async function checkInstagramApiStatus() {
   return invokeEdgeFunction<InstagramApiStatus>("check-instagram-api-status", {});
 }
 
-export async function publishInstagramGallerySubmission({
-  jobId,
-  caption,
-  altText,
-  confirmPublish,
-}: {
-  jobId: string;
-  caption: string;
-  altText?: string;
-  confirmPublish: boolean;
-}) {
-  const cleanJobId = String(jobId || "").trim();
-  if (!cleanJobId) return failedResult("Choose an Instagram publishing job before publishing.");
-  if (!confirmPublish) return failedResult("Confirm Instagram publishing before posting.");
-
-  return invokeEdgeFunction<{ job?: InstagramPublishJob; instagramMediaId?: string; instagramPermalink?: string; publishedAt?: string }>(
-    "publish-instagram-gallery-submission",
-    {
-      job_id: cleanJobId,
-      caption: String(caption || "").trim().slice(0, 2200),
-      alt_text: String(altText || "").trim().slice(0, 1000),
-      confirmPublish,
-    },
-  );
+export async function publishInstagramGallerySubmission(
+  request: InstagramPublicationRequest,
+) {
+  if (
+    request.confirm_instagram_publish !== true ||
+    !publicationRevisionLooksValid(request.job_id, request.expected_updated_at) ||
+    !request.caption ||
+    !request.alt_text ||
+    !socialPublicationFingerprintLooksValid(request.confirmation_fingerprint)
+  ) {
+    return failedResult(
+      "Refresh the Instagram queue and confirm this exact revision.",
+    );
+  }
+  return invokeEdgeFunction<{
+    jobId?: string;
+    status?: string;
+    instagramMediaId?: string;
+    instagramPermalink?: string;
+    publishedAt?: string;
+  }>("publish-instagram-gallery-submission", request);
 }
 
 export async function resolveInstagramPublishReconciliation({
@@ -270,33 +280,27 @@ export async function checkFacebookPageApiStatus() {
   return invokeEdgeFunction<FacebookPageApiStatus>("check-facebook-page-api-status", {});
 }
 
-export async function publishFacebookPageGallerySubmission({
-  jobId,
-  message,
-  confirmPublish,
-}: {
-  jobId: string;
-  message: string;
-  confirmPublish: boolean;
-}) {
-  const cleanJobId = String(jobId || "").trim();
-  if (!cleanJobId) return failedResult("Choose a Facebook Page publishing job before publishing.");
-  if (!confirmPublish) return failedResult("Confirm Facebook Page publishing before posting.");
-
+export async function publishFacebookPageGallerySubmission(
+  request: FacebookPagePublicationRequest,
+) {
+  if (
+    request.confirm_facebook_publish !== true ||
+    !publicationRevisionLooksValid(request.job_id, request.expected_updated_at) ||
+    !request.message ||
+    !socialPublicationFingerprintLooksValid(request.confirmation_fingerprint)
+  ) {
+    return failedResult(
+      "Refresh the Facebook Page queue and confirm this exact revision.",
+    );
+  }
   return invokeEdgeFunction<{
     jobId?: string;
-    submissionId?: string;
-    status?: FacebookPagePublishJobStatus | string;
+    status?: string;
     facebookPhotoId?: string;
     facebookPostId?: string;
     facebookPermalink?: string;
     publishedAt?: string;
-    message?: string;
-  }>("publish-facebook-page-gallery-submission", {
-    job_id: cleanJobId,
-    message: String(message || "").trim().slice(0, 5000),
-    confirm_facebook_publish: confirmPublish,
-  });
+  }>("publish-facebook-page-gallery-submission", request);
 }
 
 export async function resolveFacebookPagePublishReconciliation({

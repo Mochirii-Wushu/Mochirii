@@ -270,3 +270,36 @@ test("the sanitizer bounds upstream time", async () => {
       error.code === "preview_upstream_unavailable",
   );
 });
+
+test("the sanitizer propagates caller cancellation through the upstream request", async () => {
+  const controller = new AbortController();
+  let receivedSignal: AbortSignal | undefined;
+  const pending = prepareGalleryModerationPreview({
+    accessToken,
+    expectedUpdatedAt,
+    publishableKey: "public-key",
+    sanitizerAttestation,
+    submissionId,
+    supabaseProjectRef,
+    supabaseUrl,
+    signal: controller.signal,
+    fetchImpl: async (_input, init) => {
+      receivedSignal = init?.signal;
+      return await new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener(
+          "abort",
+          () => reject(new DOMException("aborted", "AbortError")),
+          { once: true },
+        );
+      });
+    },
+  });
+  controller.abort();
+  await assert.rejects(
+    () => pending,
+    (error: unknown) =>
+      error instanceof GalleryModerationPreviewError &&
+      error.code === "preview_upstream_unavailable",
+  );
+  assert.equal(receivedSignal?.aborted, true);
+});

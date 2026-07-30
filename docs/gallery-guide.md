@@ -16,6 +16,14 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 - Captions and alt text should match visible image content.
 - Do not invent player identities, events, locations, or actions that are not visible or otherwise confirmed.
 
+### Member submission rights and destination consent
+
+- The upload-rights checkbox is required, unchecked by default, and recorded with the submission. It covers the member's right to submit the image and permission involving identifiable people.
+- Instagram and the official Facebook Page are independent, unchecked destination choices. Upload and Gallery approval never publish externally.
+- A member may withdraw one destination at a time from Account. Queued work is canceled, ambiguous in-flight work is quarantined, and an already-published copy creates a removal request; the interface must never claim an external copy was deleted automatically.
+- Final destination copy is moderator-reviewed. Each publish action requires a second confirmation cryptographically bound to the destination, current job revision, attempt count, exact caption, Instagram alt text when applicable, and current moderator. Editing or refreshing invalidates that confirmation.
+- URL-like text is rejected from automated social publication copy. Keep Instagram profile fields and automated publication copy free of `mochirii.com` or any other external link.
+
 ## 3. Image Paths
 
 - Thumbnail paths must use `apps/web/public/assets/img/gallery/thumbs/`.

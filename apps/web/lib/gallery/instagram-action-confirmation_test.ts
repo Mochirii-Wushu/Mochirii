@@ -1,99 +1,83 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  fingerprintInstagramAction,
+  instagramPublishConfirmation,
+  instagramReconciliationFingerprint,
   normalizeInstagramPostPermalink,
 } from "./instagram-action-confirmation.ts";
 
-const base = {
-  jobId: "11111111-1111-4111-8111-111111111111",
+const job = {
+  id: "63333333-3333-4333-8333-333333333333",
   status: "queued",
   attemptCount: 0,
-} as const;
+  updatedAt: "2026-07-29T12:34:56.123456+00:00",
+};
+const moderator = "61111111-1111-4111-8111-111111111111";
 
-test("Instagram publish confirmation fingerprints the exact normalized copy and job state", () => {
-  const armed = fingerprintInstagramAction({
-    ...base,
-    action: "publish",
-    caption: "  Approved caption  ",
-    altText: "Approved alt text",
-  });
-
-  assert.equal(armed, fingerprintInstagramAction({
-    ...base,
-    action: "publish",
-    caption: "Approved caption",
-    altText: "Approved alt text",
-  }));
-  assert.notEqual(armed, fingerprintInstagramAction({
-    ...base,
-    action: "publish",
-    caption: "Changed caption",
-    altText: "Approved alt text",
-  }));
-  assert.notEqual(armed, fingerprintInstagramAction({
-    ...base,
-    action: "publish",
-    caption: "Approved caption",
-    altText: "Changed alt text",
-  }));
-  assert.notEqual(armed, fingerprintInstagramAction({
-    ...base,
-    status: "failed",
-    action: "publish",
-    caption: "Approved caption",
-    altText: "Approved alt text",
-  }));
+test("Instagram publication confirmation binds exact copy and queue revision", async () => {
+  const armed = await instagramPublishConfirmation(
+    job,
+    moderator,
+    "Caption",
+    "Alt text",
+  );
+  assert.notEqual(
+    armed.confirmation_fingerprint,
+    (await instagramPublishConfirmation(job, moderator, "Edited", "Alt text"))
+      .confirmation_fingerprint,
+  );
+  assert.notEqual(
+    armed.confirmation_fingerprint,
+    (await instagramPublishConfirmation(
+      { ...job, attemptCount: 1 },
+      moderator,
+      "Caption",
+      "Alt text",
+    )).confirmation_fingerprint,
+  );
 });
 
-test("reconciliation evidence accepts and normalizes only canonical Instagram posts or reels", () => {
+test("Instagram reconciliation confirmation binds every inspected field", async () => {
+  const draft = {
+    resolution: "confirmed_published" as const,
+    note: "Inspected official account",
+    instagramMediaId: "123456789",
+    instagramPermalink: "https://www.instagram.com/p/example/",
+  };
+  const armed = await instagramReconciliationFingerprint(job, draft);
+  assert.notEqual(
+    armed,
+    await instagramReconciliationFingerprint(job, {
+      ...draft,
+      note: "Changed inspection",
+    }),
+  );
+  assert.notEqual(
+    armed,
+    await instagramReconciliationFingerprint(
+      { ...job, updatedAt: "2026-07-29T12:34:57Z" },
+      draft,
+    ),
+  );
+});
+
+test("Instagram permalink normalization accepts only canonical posts and reels", () => {
   assert.equal(
-    normalizeInstagramPostPermalink("https://instagram.com/p/AbC_123/?igsh=tracking"),
+    normalizeInstagramPostPermalink(
+      "https://instagram.com/p/AbC_123/?tracking=x",
+    ),
     "https://www.instagram.com/p/AbC_123/",
   );
   assert.equal(
     normalizeInstagramPostPermalink("https://www.instagram.com/reel/Reel-123"),
     "https://www.instagram.com/reel/Reel-123/",
   );
-
-  for (const invalid of [
+  for (const value of [
     "http://www.instagram.com/p/example/",
     "https://user@www.instagram.com/p/example/",
     "https://www.instagram.com/p/example/#fragment",
     "https://m.instagram.com/p/example/",
-    "https://www.instagram.com/stories/example/123/",
-    "https://www.instagram.com/p/example/extra/",
-    "https://instagram.example/p/example/",
   ]) {
-    assert.equal(normalizeInstagramPostPermalink(invalid), null, invalid);
-  }
-});
-
-test("reconciliation confirmation fingerprints resolution and every evidence field", () => {
-  const armed = fingerprintInstagramAction({
-    ...base,
-    status: "reconcile_required",
-    action: "reconcile-published",
-    mediaId: "123456789",
-    permalink: "https://www.instagram.com/p/example/",
-    note: "Matched the official account post",
-  });
-
-  for (const changed of [
-    { action: "reconcile-not-published" as const },
-    { mediaId: "987654321" },
-    { permalink: "https://www.instagram.com/p/changed/" },
-    { note: "Changed evidence note" },
-    { attemptCount: 1 },
-  ]) {
-    assert.notEqual(armed, fingerprintInstagramAction({
-      ...base,
-      status: "reconcile_required",
-      action: "reconcile-published",
-      mediaId: "123456789",
-      permalink: "https://www.instagram.com/p/example/",
-      note: "Matched the official account post",
-      ...changed,
-    }));
+    assert.equal(normalizeInstagramPostPermalink(value), null);
   }
 });

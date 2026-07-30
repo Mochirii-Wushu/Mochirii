@@ -90,3 +90,60 @@ test("the browser requests only the fixed same-origin sanitizer route", async ()
   assert.equal(String(init?.body).includes("supabase.co"), false);
   assert.deepEqual(JSON.parse(String(init?.body)), { submissionId, expectedUpdatedAt });
 });
+
+test("the caller can cancel the composed preview request before its timeout", async () => {
+  Object.assign(globalThis, { window: globalThis });
+  const caller = new AbortController();
+  let requestSignal: AbortSignal | null = null;
+  const resultPromise = fetchGalleryModerationPreview({
+    accessToken,
+    expectedUpdatedAt,
+    signal: caller.signal,
+    submissionId,
+    timeoutMs: 60_000,
+    fetchImpl: async (_candidate, init) => {
+      requestSignal = init?.signal || null;
+      return await new Promise<Response>((_resolve, reject) => {
+        requestSignal?.addEventListener(
+          "abort",
+          () => reject(requestSignal?.reason),
+          { once: true },
+        );
+      });
+    },
+  });
+
+  assert.ok(requestSignal);
+  assert.notEqual(requestSignal, caller.signal);
+  assert.equal(requestSignal.aborted, false);
+  caller.abort(new Error("preview replaced"));
+  assert.equal(await resultPromise, null);
+  assert.equal(requestSignal.aborted, true);
+});
+
+test("the preview timeout still cancels the composed request", async () => {
+  Object.assign(globalThis, { window: globalThis });
+  const caller = new AbortController();
+  let requestSignal: AbortSignal | null = null;
+  const result = await fetchGalleryModerationPreview({
+    accessToken,
+    expectedUpdatedAt,
+    signal: caller.signal,
+    submissionId,
+    timeoutMs: 1,
+    fetchImpl: async (_candidate, init) => {
+      requestSignal = init?.signal || null;
+      return await new Promise<Response>((_resolve, reject) => {
+        requestSignal?.addEventListener(
+          "abort",
+          () => reject(requestSignal?.reason),
+          { once: true },
+        );
+      });
+    },
+  });
+
+  assert.equal(result, null);
+  assert.ok(requestSignal?.aborted);
+  assert.equal(caller.signal.aborted, false);
+});

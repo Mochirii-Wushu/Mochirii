@@ -9,10 +9,12 @@ import {
 } from "@/lib/auth-load-generation";
 import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
 import {
-  fingerprintInstagramAction,
+  instagramPublishConfirmation,
+  instagramReconciliationFingerprint,
   normalizeInstagramPostPermalink,
 } from "@/lib/gallery/instagram-action-confirmation";
 import { validateSocialPublicationCopy } from "@/lib/gallery/social-publication-copy";
+import type { InstagramPublicationRequest } from "@/lib/gallery/social-publication-request";
 import {
   clearPrivateSpinnerSession,
   openPrivateSpinnerSession,
@@ -67,8 +69,8 @@ import { WorkflowEmptyState, WorkflowNotice } from "./WorkflowState";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 type GalleryThumbnailState = "all" | "missing" | "ready";
-type InstagramActionConfirmation = {
-  action: InstagramAction;
+type InstagramReconciliationConfirmation = {
+  resolution: InstagramReconciliationResolution;
   fingerprint: string;
 };
 type GalleryPreviewSelection = {
@@ -112,7 +114,8 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
   const [instagramMediaIds, setInstagramMediaIds] = useState<Record<string, string>>({});
   const [instagramPermalinks, setInstagramPermalinks] = useState<Record<string, string>>({});
   const [instagramNotes, setInstagramNotes] = useState<Record<string, string>>({});
-  const [instagramConfirmations, setInstagramConfirmations] = useState<Record<string, InstagramActionConfirmation | undefined>>({});
+  const [instagramConfirmations, setInstagramConfirmations] = useState<Record<string, InstagramPublicationRequest | undefined>>({});
+  const [instagramReconciliationConfirmations, setInstagramReconciliationConfirmations] = useState<Record<string, InstagramReconciliationConfirmation | undefined>>({});
   const [instagramJobMessages, setInstagramJobMessages] = useState<Record<string, InstagramJobMessage | undefined>>({});
   const [instagramCursor, setInstagramCursor] = useState("");
   const [instagramCursorHistory, setInstagramCursorHistory] = useState<string[]>([]);
@@ -130,6 +133,12 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
   const [spinnerLaunchBusy, setSpinnerLaunchBusy] = useState(false);
   const [spinnerLaunchMessage, setSpinnerLaunchMessage] = useState("");
   const leaderLoadGenerationRef = useRef(0);
+  const galleryPreviewRequestRef = useRef<AbortController | null>(null);
+
+  const cancelGalleryPreviewRequest = useCallback(() => {
+    galleryPreviewRequestRef.current?.abort();
+    galleryPreviewRequestRef.current = null;
+  }, []);
 
   const retainGalleryPreviewBlob = useCallback((
     submissionId: string,
@@ -160,6 +169,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
   }, []);
 
   const clearModeratorState = useCallback(() => {
+    cancelGalleryPreviewRequest();
     setQueue(null);
     setReviewStatus("");
     setReviewError("");
@@ -182,6 +192,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     setInstagramPermalinks({});
     setInstagramNotes({});
     setInstagramConfirmations({});
+    setInstagramReconciliationConfirmations({});
     setInstagramJobMessages({});
     setInstagramCursor("");
     setInstagramCursorHistory([]);
@@ -194,7 +205,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     setMemberVerificationLast(null);
     setSpinnerLaunchBusy(false);
     setSpinnerLaunchMessage("");
-  }, []);
+  }, [cancelGalleryPreviewRequest]);
 
   const loadQueue = useCallback(async ({
     status = "pending",
@@ -211,6 +222,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
   } = {}) => {
     const requestGeneration = loadGeneration ?? leaderLoadGenerationRef.current;
     if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
+    cancelGalleryPreviewRequest();
     const nextStatus = normalizeStatus(status);
     const nextPage = Math.max(1, Math.trunc(page));
     const nextThumbnailState = nextStatus === "approved" ? thumbnailState : "all";
@@ -247,7 +259,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
           : config.empty),
     );
     setBusy(false);
-  }, []);
+  }, [cancelGalleryPreviewRequest]);
 
   const loadInstagramQueue = useCallback(async ({
     status = instagramActiveStatus,
@@ -268,6 +280,8 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     setInstagramCursor(cursor);
     setInstagramBusy(true);
     setInstagramError("");
+    setInstagramConfirmations({});
+    setInstagramReconciliationConfirmations({});
     setInstagramStatus(`Loading ${config.label.toLowerCase()} Instagram jobs.`);
 
     const result = await listInstagramPublishQueue({ status: nextStatus, cursor, limit: 25 });
@@ -365,10 +379,11 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       void measureAuthenticatedRouteTask("leader-dashboard", checkAccess);
     });
     return () => {
+      cancelGalleryPreviewRequest();
       invalidateAuthLoadGeneration(leaderLoadGenerationRef);
       subscription.data?.subscription?.unsubscribe();
     };
-  }, [checkAccess]);
+  }, [cancelGalleryPreviewRequest, checkAccess]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -531,11 +546,20 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       return;
     }
 
+    cancelGalleryPreviewRequest();
+    const controller = new AbortController();
+    galleryPreviewRequestRef.current = controller;
     setBusy(true);
     setGalleryPreview(null);
     setReviewError("");
     setReviewStatus("Preparing one private Gallery preview.");
-    const result = await prepareGalleryReviewPreview(submissionId, expectedUpdatedAt);
+    const result = await prepareGalleryReviewPreview(submissionId, expectedUpdatedAt, {
+      signal: controller.signal,
+    });
+    if (galleryPreviewRequestRef.current === controller) {
+      galleryPreviewRequestRef.current = null;
+    }
+    if (controller.signal.aborted) return;
     if (!isCurrentAuthLoadGeneration(leaderLoadGenerationRef, requestGeneration)) return;
     if (!result.ok) {
       setReviewError(result.message || "The private Gallery preview could not be prepared.");
@@ -694,37 +718,39 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     }));
   }
 
-  function instagramActionFingerprint(job: InstagramPublishJob, action: InstagramAction) {
+  function instagramReconciliationDraft(
+    job: InstagramPublishJob,
+    resolution: InstagramReconciliationResolution,
+  ) {
     const jobId = text(job.id).trim();
-    const status = text(job.status).trim().toLowerCase();
-    const attemptCount = Math.max(0, Math.trunc(Number(job.attemptCount) || 0));
-    const caption = (instagramCaptions[jobId] ?? text(job.caption, "A pretty gameplay showcase from Mōchirīī."))
-      .trim()
-      .slice(0, 2200);
-    const altText = (instagramAltTexts[jobId] ?? text(job.altText)).trim().slice(0, 1000);
-    const mediaId = (instagramMediaIds[jobId] ?? text(job.instagramMediaId)).trim().slice(0, 255);
-    const permalink = (instagramPermalinks[jobId] ?? text(job.instagramPermalink)).trim();
-    const note = (instagramNotes[jobId] ?? "").trim().slice(0, 500);
-
-    return fingerprintInstagramAction({
-      jobId,
-      status,
-      attemptCount,
-      action,
-      caption,
-      altText,
-      mediaId,
-      permalink,
-      note,
-    });
+    return {
+      resolution,
+      note: (instagramNotes[jobId] ?? "").trim().slice(0, 500),
+      instagramMediaId: resolution === "confirmed_published"
+        ? (instagramMediaIds[jobId] ?? text(job.instagramMediaId)).trim().slice(0, 255)
+        : "",
+      instagramPermalink: resolution === "confirmed_published"
+        ? (instagramPermalinks[jobId] ?? text(job.instagramPermalink)).trim().slice(0, 1000)
+        : "",
+    };
   }
 
   function disarmInstagramAction(jobId: string) {
     setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    setInstagramReconciliationConfirmations((current) => ({ ...current, [jobId]: undefined }));
     setInstagramJobMessage(jobId, undefined);
   }
 
-  function armInstagramAction(job: InstagramPublishJob, action: InstagramAction) {
+  async function instagramModeratorId() {
+    const auth = await requireAuth();
+    const userId = text(auth.data?.user?.id).toLowerCase();
+    if (!auth.ok || !userId) {
+      throw new Error("Sign in again before confirming Instagram publication.");
+    }
+    return userId;
+  }
+
+  async function armInstagramAction(job: InstagramPublishJob, action: InstagramAction) {
     const jobId = text(job.id);
     if (!jobId) {
       setInstagramError("Choose an Instagram publishing job before continuing.");
@@ -738,65 +764,96 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       );
       const altText = instagramAltTexts[jobId] ?? text(job.altText);
       const copyValidation = validateSocialPublicationCopy([caption, altText]);
-      if (!copyValidation.ok) {
-        setInstagramError(copyValidation.message);
+      if (!caption.trim() || !altText.trim() || !copyValidation.ok) {
+        const message = !caption.trim()
+          ? "A final Instagram caption is required."
+          : !altText.trim()
+            ? "Moderator-reviewed Instagram alt text is required."
+            : copyValidation.message ?? "Instagram publication copy is invalid.";
+        setInstagramError(message);
         setInstagramJobMessage(jobId, {
           kind: "error",
-          message: copyValidation.message,
+          message,
         });
         return;
       }
-    }
-
-    if (action === "reconcile-published") {
-      const mediaId = (instagramMediaIds[jobId] ?? text(job.instagramMediaId)).trim();
-      const permalink = normalizeInstagramPostPermalink(
-        instagramPermalinks[jobId] ?? text(job.instagramPermalink),
-      );
-      const note = (instagramNotes[jobId] ?? "").trim();
-      if (!/^\d{5,255}$/.test(mediaId) || !permalink || !note) {
-        const message = !/^\d{5,255}$/.test(mediaId)
-          ? "Enter the numeric Instagram media ID before recording a publication."
-          : !permalink
-          ? "Paste the canonical official Instagram post or reel permalink before recording a publication."
-          : "Record what you inspected on the official Instagram account before reconciliation.";
+      try {
+        const request = await instagramPublishConfirmation(
+          job,
+          await instagramModeratorId(),
+          caption,
+          altText,
+        );
+        setInstagramConfirmations((current) => ({ ...current, [jobId]: request }));
+        setInstagramReconciliationConfirmations((current) => ({ ...current, [jobId]: undefined }));
+        setInstagramError("");
+        setInstagramJobMessage(jobId, {
+          kind: "status",
+          message: "Ready to confirm Meta API publishing for this exact caption, alt text, and job revision.",
+        });
+      } catch (caught) {
+        const message = caught instanceof Error
+          ? caught.message
+          : "Instagram confirmation could not be prepared.";
         setInstagramError(message);
         setInstagramJobMessage(jobId, { kind: "error", message });
-        return;
       }
+      return;
     }
 
-    setInstagramError("");
-    setInstagramConfirmations((current) => ({
-      ...current,
-      [jobId]: {
-        action,
-        fingerprint: instagramActionFingerprint(job, action),
-      },
-    }));
-    setInstagramJobMessage(
-      jobId,
-      action === "publish"
+    const resolution: InstagramReconciliationResolution = action === "reconcile-published"
+      ? "confirmed_published"
+      : "confirmed_not_published";
+    const draft = instagramReconciliationDraft(job, resolution);
+    const normalizedPermalink = normalizeInstagramPostPermalink(draft.instagramPermalink);
+    if (
+      !draft.note ||
+      (resolution === "confirmed_published" &&
+        (!/^\d{5,255}$/.test(draft.instagramMediaId) || !normalizedPermalink))
+    ) {
+      const message = !draft.note
+        ? "Record what you inspected on the official Instagram account before reconciliation."
+        : !/^\d{5,255}$/.test(draft.instagramMediaId)
+          ? "Enter the numeric Instagram media ID before recording a publication."
+          : !normalizedPermalink
+          ? "Paste the canonical official Instagram post or reel permalink before recording a publication."
+          : "The inspected result could not be confirmed.";
+      setInstagramError(message);
+      setInstagramJobMessage(jobId, { kind: "error", message });
+      return;
+    }
+
+    try {
+      const fingerprint = await instagramReconciliationFingerprint(job, draft);
+      setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+      setInstagramReconciliationConfirmations((current) => ({
+        ...current,
+        [jobId]: { resolution, fingerprint },
+      }));
+      setInstagramError("");
+      setInstagramJobMessage(
+        jobId,
+        action === "reconcile-published"
         ? {
           kind: "status",
-          message: "Ready to confirm Meta API publishing. Use only with action-time approval.",
-        }
-        : action === "reconcile-published"
-        ? {
-          kind: "status",
-          message: "Ready to record the existing Instagram publication after inspecting the official account.",
+          message: "Ready to record the existing Instagram publication for this exact inspected job revision.",
         }
         : {
           kind: "status",
-          message: "Ready to record that no Instagram post exists after inspecting the official account.",
+          message: "Ready to record that no Instagram post exists for this exact inspected job revision.",
         },
-    );
+      );
+    } catch {
+      setInstagramError("The Instagram reconciliation confirmation could not be prepared.");
+      setInstagramJobMessage(jobId, { kind: "error", message: "The Instagram reconciliation confirmation could not be prepared." });
+    }
   }
 
   function cancelInstagramAction(job: InstagramPublishJob) {
     const jobId = text(job.id);
     if (!jobId) return;
     setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    setInstagramReconciliationConfirmations((current) => ({ ...current, [jobId]: undefined }));
     setInstagramJobMessage(jobId, undefined);
   }
 
@@ -805,13 +862,18 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     const caption = instagramCaptions[jobId] ?? text(job.caption, "A pretty gameplay showcase from Mōchirīī.");
     const altText = instagramAltTexts[jobId] ?? text(job.altText);
     const copyValidation = validateSocialPublicationCopy([caption, altText]);
-    const metaApiReady = Boolean(instagramApiStatus?.configured && instagramApiStatus.accountReachable && instagramApiStatus.accountIdPinned && instagramApiStatus.publishEnabled);
+    const metaApiReady = Boolean(
+      instagramApiStatus?.ready &&
+      instagramApiStatus.configured &&
+      instagramApiStatus.publishEnabled,
+    );
 
     if (!copyValidation.ok) {
-      setInstagramError(copyValidation.message);
+      const message = copyValidation.message ?? "Instagram publication copy is invalid.";
+      setInstagramError(message);
       setInstagramJobMessage(jobId, {
         kind: "error",
-        message: copyValidation.message,
+        message,
       });
       return;
     }
@@ -824,11 +886,30 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       return;
     }
 
-    if (
-      instagramConfirmations[jobId]?.action !== "publish" ||
-      instagramConfirmations[jobId]?.fingerprint !== instagramActionFingerprint(job, "publish")
-    ) {
-      armInstagramAction(job, "publish");
+    const armedRequest = instagramConfirmations[jobId];
+    if (!armedRequest) {
+      await armInstagramAction(job, "publish");
+      return;
+    }
+
+    let request: InstagramPublicationRequest;
+    try {
+      request = await instagramPublishConfirmation(
+        job,
+        await instagramModeratorId(),
+        caption,
+        altText,
+      );
+    } catch (caught) {
+      const message = caught instanceof Error
+        ? caught.message
+        : "Instagram confirmation could not be verified.";
+      setInstagramError(message);
+      setInstagramJobMessage(jobId, { kind: "error", message });
+      return;
+    }
+    if (JSON.stringify(request) !== JSON.stringify(armedRequest)) {
+      await armInstagramAction(job, "publish");
       return;
     }
 
@@ -837,12 +918,8 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     setInstagramStatus("Publishing image to Instagram.");
     setInstagramJobMessage(jobId, { kind: "status", message: "Publishing image to Instagram through the Meta API." });
 
-    const result = await publishInstagramGallerySubmission({
-      jobId,
-      caption,
-      altText,
-      confirmPublish: true,
-    });
+    setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    const result = await publishInstagramGallerySubmission(request);
 
     if (!result.ok) {
       setInstagramJobMessage(jobId, {
@@ -897,19 +974,19 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     const action: InstagramAction = resolution === "confirmed_published"
       ? "reconcile-published"
       : "reconcile-not-published";
-    const note = (instagramNotes[jobId] ?? "").trim();
-    const instagramMediaId = (instagramMediaIds[jobId] ?? text(job.instagramMediaId)).trim();
-    const rawInstagramPermalink = (instagramPermalinks[jobId] ?? text(job.instagramPermalink)).trim();
-    const instagramPermalink = normalizeInstagramPostPermalink(rawInstagramPermalink);
+    const draft = instagramReconciliationDraft(job, resolution);
+    const instagramPermalink = normalizeInstagramPostPermalink(draft.instagramPermalink);
+    const fingerprint = await instagramReconciliationFingerprint(job, draft);
+    const armedConfirmation = instagramReconciliationConfirmations[jobId];
 
     if (
-      instagramConfirmations[jobId]?.action !== action ||
-      instagramConfirmations[jobId]?.fingerprint !== instagramActionFingerprint(job, action)
+      armedConfirmation?.resolution !== resolution ||
+      armedConfirmation.fingerprint !== fingerprint
     ) {
-      armInstagramAction(job, action);
+      await armInstagramAction(job, action);
       return;
     }
-    if (!note) {
+    if (!draft.note) {
       setInstagramJobMessage(jobId, {
         kind: "error",
         message: "Record what was inspected on the official Instagram account.",
@@ -918,7 +995,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
     }
     if (
       resolution === "confirmed_published" &&
-      (!/^\d{5,255}$/.test(instagramMediaId) || !instagramPermalink)
+      (!/^\d{5,255}$/.test(draft.instagramMediaId) || !instagramPermalink)
     ) {
       setInstagramJobMessage(jobId, {
         kind: "error",
@@ -935,12 +1012,13 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       message: "Recording the moderator-inspected Instagram account result without creating a post.",
     });
 
+    setInstagramReconciliationConfirmations((current) => ({ ...current, [jobId]: undefined }));
     const result = await resolveInstagramPublishReconciliation({
       jobId,
       resolution,
-      instagramMediaId: resolution === "confirmed_published" ? instagramMediaId : "",
+      instagramMediaId: resolution === "confirmed_published" ? draft.instagramMediaId : "",
       instagramPermalink: resolution === "confirmed_published" ? instagramPermalink || "" : "",
-      note,
+      note: draft.note,
       confirmReconciliation: true,
     });
 
@@ -955,7 +1033,7 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       return;
     }
 
-    setInstagramConfirmations((current) => ({ ...current, [jobId]: undefined }));
+    setInstagramReconciliationConfirmations((current) => ({ ...current, [jobId]: undefined }));
     setInstagramJobMessage(jobId, {
       kind: "success",
       message: result.message || "Instagram reconciliation result recorded.",
@@ -1258,12 +1336,19 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
         {instagramJobs.length ? (
           instagramJobs.map((job) => {
             const id = text(job.id, "unknown");
-            const metaPublishAvailable = Boolean(instagramApiStatus?.configured && instagramApiStatus.accountReachable && instagramApiStatus.accountIdPinned && instagramApiStatus.publishEnabled);
-            const storedConfirmation = instagramConfirmations[id];
-            const confirmation = storedConfirmation && storedConfirmation.fingerprint ===
-                instagramActionFingerprint(job, storedConfirmation.action)
-              ? storedConfirmation.action
-              : undefined;
+            const metaPublishAvailable = Boolean(
+              instagramApiStatus?.ready &&
+              instagramApiStatus.configured &&
+              instagramApiStatus.publishEnabled,
+            );
+            const storedReconciliation = instagramReconciliationConfirmations[id];
+            const confirmation: InstagramAction | undefined = instagramConfirmations[id]
+              ? "publish"
+              : storedReconciliation?.resolution === "confirmed_published"
+                ? "reconcile-published"
+                : storedReconciliation?.resolution === "confirmed_not_published"
+                  ? "reconcile-not-published"
+                  : undefined;
             return (
               <InstagramJobCard
                 job={job}
@@ -1299,9 +1384,9 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
                 }}
                 onCopyCaption={() => copyInstagramText(instagramCaptions[id] ?? text(job.caption, "A pretty gameplay showcase from Mōchirīī."), "Instagram caption")}
                 onCopyAltText={() => copyInstagramText(instagramAltTexts[id] ?? text(job.altText), "Instagram alt text")}
-                onArmPublish={(item) => armInstagramAction(item, "publish")}
+                onArmPublish={(item) => void armInstagramAction(item, "publish")}
                 onConfirmPublish={publishInstagram}
-                onArmReconciliation={(item, resolution) => armInstagramAction(
+                onArmReconciliation={(item, resolution) => void armInstagramAction(
                   item,
                   resolution === "confirmed_published" ? "reconcile-published" : "reconcile-not-published",
                 )}

@@ -4,6 +4,7 @@ import {
   SOCIAL_PUBLICATION_COPY_ERROR,
   SOCIAL_PUBLICATION_COPY_ERROR_CODE,
   socialPublicationCopyContainsSiteReference,
+  socialPublicationCopyContainsUrlLikeReference,
   validateSocialPublicationCopy,
 } from "./social-publication-copy.ts";
 
@@ -53,6 +54,35 @@ test("publication copy allows ordinary non-URL copy", () => {
       false,
       value,
     );
+  }
+});
+
+test("both Meta destinations reject every URL-like publication reference", () => {
+  for (const value of [
+    "https://example.com/path",
+    "www.example.com",
+    "example.com",
+    "support@example.com",
+    "mochirii [dot] com",
+    "h t t p s : / / example.com",
+    "www\u200b.example.com",
+  ]) {
+    assert.equal(
+      socialPublicationCopyContainsUrlLikeReference(value),
+      true,
+      value,
+    );
+    assert.equal(validateSocialPublicationCopy([value]).ok, false, value);
+  }
+});
+
+test("ordinary sparse guild copy remains allowed", () => {
+  for (const value of [
+    "A member portrait from Wushu land.",
+    "Pretty armor beneath the pavilion lanterns.",
+    "Cupcake won the duel 3 to 0.",
+  ]) {
+    assert.equal(validateSocialPublicationCopy([value]).ok, true, value);
   }
 });
 

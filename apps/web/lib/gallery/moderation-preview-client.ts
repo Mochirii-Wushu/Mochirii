@@ -114,17 +114,22 @@ export async function parseGalleryModerationPreviewResponse(
 export async function fetchGalleryModerationPreview({
   accessToken,
   expectedUpdatedAt,
+  signal,
   submissionId,
   fetchImpl = fetch,
   timeoutMs = DEFAULT_TIMEOUT_MS,
 }: {
   accessToken: string;
   expectedUpdatedAt: string;
+  signal?: AbortSignal;
   submissionId: string;
   fetchImpl?: typeof fetch;
   timeoutMs?: number;
 }) {
   const controller = new AbortController();
+  const abortFromCaller = () => controller.abort(signal?.reason);
+  if (signal?.aborted) abortFromCaller();
+  else signal?.addEventListener("abort", abortFromCaller, { once: true });
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetchImpl(PREVIEW_ROUTE, {
@@ -145,5 +150,6 @@ export async function fetchGalleryModerationPreview({
     return null;
   } finally {
     window.clearTimeout(timeout);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
 }
