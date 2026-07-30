@@ -33,6 +33,9 @@ Web or iOS artifact is connected.
 - `GALLERY-THUMBNAIL-ROLLOUT.md`: immutable Gallery publication revisions,
   bounded display/thumbnail media, schema-v2 feed, explicit historical
   republication, retention, release, and rollback gates.
+- `STOREFRONT-SURFACE-LIFECYCLE-2026-07-29.md`: evidence-based active,
+  replaced, retired, privacy, cache, test, and terminal decisions for every
+  storefront journey before provider acceptance.
 - `repository-ownership.md`: source and hosted ownership matrix.
 - `REPOSITORY-SEPARATION-ADR-2026-07-29.md`: proposed, non-activating repository
   boundary decision for review.

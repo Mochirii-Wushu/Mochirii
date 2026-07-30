@@ -2,27 +2,40 @@
 
 Date: 2026-07-29
 
-Status: Proposed governance direction only. This ADR does not authorize a
-history rewrite, source move, deployment, secret transfer, provider change,
-production cutover, or deletion.
+Status: Current-state single-writer safety decision; terminal ownership
+direction partially superseded. This ADR does not authorize a history rewrite,
+source move, deployment, secret transfer, provider change, production cutover,
+or deletion.
 
-## Decision
+The higher-authority execution specification now requires the terminal Social
+service source boundary to move to `Mochirii-Wushu/Mochirii-Social` and the
+terminal Reaper-specific handler, test, deployment, and operations boundary to
+move to `Mochirii-Wushu/Reaper-Discord-Bot`. Those target decisions do not prove
+that either cutover has occurred. The current Website-owned implementation and
+single deployment writer remain authoritative until a focused successor
+decision, exact parity evidence, approved cutover, provider readback, and
+rollback window pass.
+
+## Current-state decision and terminal direction
 
 Keep one production authority for each active runtime.
 
 1. Website remains the sole source, configuration, schema, schedule, secret-
    destination, and deployment owner for the shared Supabase project and every
    Edge Function declared in `supabase/config.toml`.
-2. Reaper remains a consumer of versioned Website contracts. It may own its
-   Discord Gateway worker, command registration, and repository-local bot
-   behavior, but it does not own, copy, publish, or deploy Website Edge
+2. Reaper currently remains a consumer of versioned Website contracts. It may
+   own its Discord Gateway worker, command registration, and repository-local
+   bot behavior, but it does not own, copy, publish, or deploy Website Edge
    Functions or their shared helpers.
-3. Social may be evaluated for a future source-history extraction into the
-   private `Mochirii-Wushu/Mochirii-Social` repository because it has a
+3. Social extraction into the private `Mochirii-Wushu/Mochirii-Social`
+   repository is the required terminal source direction because it has a
    separate application runtime and data lifecycle. Source preparation and
-   production ownership transfer are different, separately approved phases.
-4. Forums initialization is outside this ADR. An empty target repository is
-   not production infrastructure.
+   production ownership transfer remain different, separately approved phases.
+4. Reaper-specific handlers may reach their required terminal owner only
+   through one supported single-writer design that keeps shared schema and
+   identity governance in Website and prevents a second live deployment path.
+5. Forums initialization remains outside this ADR. An empty target repository
+   is not production infrastructure.
 
 Current repository instructions remain authoritative. No target repository
 becomes a production owner merely because a proposal, compatibility fixture, or
@@ -59,7 +72,7 @@ are preserved only with their existing application-layer signature, scoped
 capability, or constant-time secret checks. Moving files to another repository
 would not create an independent security or deployment boundary.
 
-## Reaper contract-consumer model
+## Current Reaper contract-consumer model
 
 Reaper may consume reviewed, versioned contracts for:
 
@@ -77,11 +90,12 @@ second canonical tree. A Reaper pull request must not contain a deployable
 Supabase manifest, project identifier, deployment workflow, shared-project
 credential, or claim of function ownership.
 
-Any future proposal to move bot execution out of Website requires a new ADR and
-must first prove one supported single-writer design. Examples that require
-separate evaluation are a single release orchestrator consuming immutable
-artifacts or a fully isolated runtime with narrow Website APIs. Neither design
-is selected or authorized here.
+The required terminal move of Reaper-specific handler ownership still requires
+a focused successor ADR or implementation packet that proves one supported
+single-writer design. Examples that require separate evaluation are a single
+release orchestrator consuming immutable artifacts or a fully isolated runtime
+with narrow Website APIs. Neither design is selected, deployed, or authorized
+by this current-state ADR.
 
 ## Future Social source extraction
 
