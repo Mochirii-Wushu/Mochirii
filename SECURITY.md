@@ -4,7 +4,7 @@ Please do not report security issues in public issues or pull requests.
 
 ## Reporting
 
-Use GitHub private vulnerability reporting if available for this repository. If it is not available, contact a repository administrator privately and include:
+Use GitHub private vulnerability reporting when it is enabled for this repository. Otherwise, email `support@mochirii.com` with the subject `Security report` and include:
 
 - A concise description of the issue
 - Affected URL, route, function, or workflow

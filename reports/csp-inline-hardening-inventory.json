@@ -1,9 +1,10 @@
 {
   "ok": true,
-  "checkedAt": "2026-07-25T11:37:21.731Z",
+  "checkedAt": "2026-07-30T02:26:13.878Z",
   "scope": "CSP inline hardening inventory for the Vercel/Next production app. This is a no-secret, read-only pass that prepares the later browser-verified unsafe-inline reduction.",
   "baseUrl": "https://mochirii.com",
   "policy": {
+    "source": "apps/web/next.config.ts#contentSecurityPolicy",
     "headerEnforced": true,
     "reportOnlyMentioned": false,
     "entries": [
@@ -89,63 +90,366 @@
       "style-src"
     ],
     "unsafeEvalDirectives": [],
-    "inlineReductionReady": false,
-    "externalOrigins": [
-      {
-        "origin": "https://*.scdn.co",
-        "allowedBy": [
-          "img-src"
-        ]
+    "inlineReductionReady": false
+  },
+  "policyContexts": {
+    "default": {
+      "source": "apps/web/next.config.ts#contentSecurityPolicy",
+      "headerEnforced": true,
+      "reportOnlyMentioned": false,
+      "entries": [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'none'",
+        "form-action 'self'",
+        "script-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co",
+        "font-src 'self' data:",
+        "media-src 'self' data: blob:",
+        "frame-src 'self' https://discord.com https://open.spotify.com",
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
+        "worker-src 'self' blob:",
+        "upgrade-insecure-requests"
+      ],
+      "directiveMap": {
+        "default-src": [
+          "'self'"
+        ],
+        "base-uri": [
+          "'self'"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "frame-ancestors": [
+          "'none'"
+        ],
+        "form-action": [
+          "'self'"
+        ],
+        "script-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:",
+          "blob:",
+          "https://*.supabase.co",
+          "https://cdn.discordapp.com",
+          "https://media.discordapp.net",
+          "https://i.scdn.co",
+          "https://*.scdn.co"
+        ],
+        "font-src": [
+          "'self'",
+          "data:"
+        ],
+        "media-src": [
+          "'self'",
+          "data:",
+          "blob:"
+        ],
+        "frame-src": [
+          "'self'",
+          "https://discord.com",
+          "https://open.spotify.com"
+        ],
+        "connect-src": [
+          "'self'",
+          "https://*.supabase.co",
+          "wss://*.supabase.co",
+          "https://discord.com",
+          "https://cdn.discordapp.com",
+          "https://vitals.vercel-insights.com"
+        ],
+        "worker-src": [
+          "'self'",
+          "blob:"
+        ],
+        "upgrade-insecure-requests": []
       },
-      {
-        "origin": "https://*.supabase.co",
-        "allowedBy": [
-          "img-src",
-          "connect-src"
-        ]
+      "unsafeInlineDirectives": [
+        "script-src",
+        "style-src"
+      ],
+      "unsafeEvalDirectives": [],
+      "inlineReductionReady": false
+    },
+    "auth": {
+      "source": "apps/web/next.config.ts#authContentSecurityPolicy",
+      "headerEnforced": true,
+      "reportOnlyMentioned": false,
+      "entries": [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'none'",
+        "form-action 'self'",
+        "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://*.scdn.co",
+        "font-src 'self' data:",
+        "media-src 'self' data: blob:",
+        "frame-src 'self' https://discord.com https://open.spotify.com https://challenges.cloudflare.com",
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
+        "worker-src 'self' blob:",
+        "upgrade-insecure-requests"
+      ],
+      "directiveMap": {
+        "default-src": [
+          "'self'"
+        ],
+        "base-uri": [
+          "'self'"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "frame-ancestors": [
+          "'none'"
+        ],
+        "form-action": [
+          "'self'"
+        ],
+        "script-src": [
+          "'self'",
+          "'unsafe-inline'",
+          "https://challenges.cloudflare.com"
+        ],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:",
+          "blob:",
+          "https://*.supabase.co",
+          "https://cdn.discordapp.com",
+          "https://media.discordapp.net",
+          "https://i.scdn.co",
+          "https://*.scdn.co"
+        ],
+        "font-src": [
+          "'self'",
+          "data:"
+        ],
+        "media-src": [
+          "'self'",
+          "data:",
+          "blob:"
+        ],
+        "frame-src": [
+          "'self'",
+          "https://discord.com",
+          "https://open.spotify.com",
+          "https://challenges.cloudflare.com"
+        ],
+        "connect-src": [
+          "'self'",
+          "https://*.supabase.co",
+          "wss://*.supabase.co",
+          "https://discord.com",
+          "https://cdn.discordapp.com",
+          "https://vitals.vercel-insights.com"
+        ],
+        "worker-src": [
+          "'self'",
+          "blob:"
+        ],
+        "upgrade-insecure-requests": []
       },
-      {
-        "origin": "https://cdn.discordapp.com",
-        "allowedBy": [
-          "img-src",
-          "connect-src"
-        ]
+      "unsafeInlineDirectives": [
+        "script-src",
+        "style-src"
+      ],
+      "unsafeEvalDirectives": [],
+      "inlineReductionReady": false
+    },
+    "spinner": {
+      "source": "apps/web/next.config.ts#spinnerContentSecurityPolicy",
+      "headerEnforced": true,
+      "reportOnlyMentioned": false,
+      "entries": [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'none'",
+        "form-action 'self'",
+        "script-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob:",
+        "font-src 'self' data:",
+        "media-src 'self' data: blob:",
+        "connect-src 'self'",
+        "worker-src 'self' blob:",
+        "upgrade-insecure-requests"
+      ],
+      "directiveMap": {
+        "default-src": [
+          "'self'"
+        ],
+        "base-uri": [
+          "'self'"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "frame-ancestors": [
+          "'none'"
+        ],
+        "form-action": [
+          "'self'"
+        ],
+        "script-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:",
+          "blob:"
+        ],
+        "font-src": [
+          "'self'",
+          "data:"
+        ],
+        "media-src": [
+          "'self'",
+          "data:",
+          "blob:"
+        ],
+        "connect-src": [
+          "'self'"
+        ],
+        "worker-src": [
+          "'self'",
+          "blob:"
+        ],
+        "upgrade-insecure-requests": []
       },
-      {
-        "origin": "https://discord.com",
-        "allowedBy": [
-          "frame-src",
-          "connect-src"
-        ]
+      "unsafeInlineDirectives": [
+        "script-src",
+        "style-src"
+      ],
+      "unsafeEvalDirectives": [],
+      "inlineReductionReady": false
+    },
+    "protected": {
+      "source": "apps/web/lib/security/protected-csp.ts#protectedPageContentSecurityPolicy",
+      "headerEnforced": true,
+      "reportOnlyMentioned": false,
+      "entries": [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "object-src 'none'",
+        "frame-ancestors 'none'",
+        "form-action 'self'",
+        "script-src 'self' 'nonce-${nonce}' 'strict-dynamic'",
+        "style-src 'self' 'nonce-${nonce}'",
+        "style-src-attr 'unsafe-inline'",
+        "img-src 'self' data: blob: https://*.supabase.co https://cdn.discordapp.com https://media.discordapp.net",
+        "font-src 'self' data:",
+        "media-src 'self' data: blob:",
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://discord.com https://cdn.discordapp.com https://vitals.vercel-insights.com",
+        "worker-src 'self' blob:",
+        "upgrade-insecure-requests"
+      ],
+      "directiveMap": {
+        "default-src": [
+          "'self'"
+        ],
+        "base-uri": [
+          "'self'"
+        ],
+        "object-src": [
+          "'none'"
+        ],
+        "frame-ancestors": [
+          "'none'"
+        ],
+        "form-action": [
+          "'self'"
+        ],
+        "script-src": [
+          "'self'",
+          "'nonce-${nonce}'",
+          "'strict-dynamic'"
+        ],
+        "style-src": [
+          "'self'",
+          "'nonce-${nonce}'"
+        ],
+        "style-src-attr": [
+          "'unsafe-inline'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:",
+          "blob:",
+          "https://*.supabase.co",
+          "https://cdn.discordapp.com",
+          "https://media.discordapp.net"
+        ],
+        "font-src": [
+          "'self'",
+          "data:"
+        ],
+        "media-src": [
+          "'self'",
+          "data:",
+          "blob:"
+        ],
+        "connect-src": [
+          "'self'",
+          "https://*.supabase.co",
+          "wss://*.supabase.co",
+          "https://discord.com",
+          "https://cdn.discordapp.com",
+          "https://vitals.vercel-insights.com"
+        ],
+        "worker-src": [
+          "'self'",
+          "blob:"
+        ],
+        "upgrade-insecure-requests": []
       },
-      {
-        "origin": "https://i.scdn.co",
-        "allowedBy": [
-          "img-src"
-        ]
-      },
-      {
-        "origin": "https://media.discordapp.net",
-        "allowedBy": [
-          "img-src"
-        ]
-      },
-      {
-        "origin": "https://open.spotify.com",
-        "allowedBy": [
-          "frame-src"
-        ]
-      },
-      {
-        "origin": "https://vitals.vercel-insights.com",
-        "allowedBy": [
-          "connect-src"
-        ]
-      }
-    ]
+      "unsafeInlineDirectives": [
+        "style-src-attr"
+      ],
+      "unsafeEvalDirectives": [],
+      "inlineReductionReady": false
+    }
+  },
+  "protectedRouteHardening": {
+    "routes": [
+      "/leader-dashboard",
+      "/oauth/consent",
+      "/raffle/claim",
+      "/leader-dashboard/raffle"
+    ],
+    "nonceBound": true,
+    "strictDynamic": true,
+    "scriptUnsafeInline": false,
+    "rootProxyDelegates": true,
+    "helperAppliesNonceCsp": true,
+    "helperAppliesFullPrivateHeaders": true,
+    "secureCookiePolicy": true,
+    "claimsFailureContained": true
   },
   "sourceInventory": {
-    "scannedFiles": 112,
+    "scannedFiles": 285,
     "scannedRoots": [
       "apps/web/app",
       "apps/web/components",
@@ -154,18 +458,86 @@
     "patterns": {
       "inlineStyleProp": {
         "label": "React inline style prop",
-        "severity": "inventory",
-        "count": 0,
-        "files": [],
-        "hits": []
+        "severity": "block-unless-reviewed",
+        "count": 8,
+        "reviewedCount": 8,
+        "files": [
+          {
+            "file": "apps/web/components/spinner/RaffleSpinner.tsx",
+            "count": 2
+          },
+          {
+            "file": "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
+            "count": 2
+          },
+          {
+            "file": "apps/web/app/spinner/not-found.tsx",
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/public-pages/common.tsx",
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/public-pages/RecruitmentAudioPlayer.tsx",
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/ResponsiveGalleryMedia.tsx",
+            "count": 1
+          }
+        ],
+        "hits": [
+          {
+            "file": "apps/web/app/spinner/not-found.tsx",
+            "line": 5,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/public-pages/common.tsx",
+            "line": 311,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/public-pages/RecruitmentAudioPlayer.tsx",
+            "line": 158,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/ResponsiveGalleryMedia.tsx",
+            "line": 154,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/spinner/RaffleSpinner.tsx",
+            "line": 1022,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/spinner/RaffleSpinner.tsx",
+            "line": 1101,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
+            "line": 412,
+            "count": 1
+          },
+          {
+            "file": "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
+            "line": 454,
+            "count": 1
+          }
+        ]
       },
       "iframeElement": {
         "label": "iframe element",
-        "severity": "inventory",
+        "severity": "block-unless-reviewed",
         "count": 2,
+        "reviewedCount": 2,
         "files": [
           {
-            "file": "apps/web/components/public-pages/route-pages/JoinPage.tsx",
+            "file": "apps/web/components/public-pages/DiscordServerPreview.tsx",
             "count": 1
           },
           {
@@ -175,8 +547,8 @@
         ],
         "hits": [
           {
-            "file": "apps/web/components/public-pages/route-pages/JoinPage.tsx",
-            "line": 72,
+            "file": "apps/web/components/public-pages/DiscordServerPreview.tsx",
+            "line": 33,
             "count": 1
           },
           {
@@ -188,8 +560,9 @@
       },
       "scriptElement": {
         "label": "script element",
-        "severity": "review",
+        "severity": "block-unless-reviewed",
         "count": 1,
+        "reviewedCount": 1,
         "files": [
           {
             "file": "apps/web/app/page.tsx",
@@ -199,22 +572,70 @@
         "hits": [
           {
             "file": "apps/web/app/page.tsx",
-            "line": 321,
+            "line": 343,
             "count": 1
           }
         ]
       },
+      "dynamicScriptElement": {
+        "label": "dynamic script element",
+        "severity": "block-unless-reviewed",
+        "count": 1,
+        "reviewedCount": 1,
+        "files": [
+          {
+            "file": "apps/web/components/member-workflow/AuthCaptcha.tsx",
+            "count": 1
+          }
+        ],
+        "hits": [
+          {
+            "file": "apps/web/components/member-workflow/AuthCaptcha.tsx",
+            "line": 69,
+            "count": 1
+          }
+        ]
+      },
+      "styleElement": {
+        "label": "style element",
+        "severity": "block-unless-reviewed",
+        "count": 1,
+        "reviewedCount": 1,
+        "files": [
+          {
+            "file": "apps/web/components/public-pages/GalleryBrowser.tsx",
+            "count": 1
+          }
+        ],
+        "hits": [
+          {
+            "file": "apps/web/components/public-pages/GalleryBrowser.tsx",
+            "line": 678,
+            "count": 1
+          }
+        ]
+      },
+      "dynamicStyleElement": {
+        "label": "dynamic style element",
+        "severity": "block-unless-reviewed",
+        "count": 0,
+        "reviewedCount": 0,
+        "files": [],
+        "hits": []
+      },
       "nextScriptImport": {
         "label": "next/script import",
-        "severity": "review",
+        "severity": "block-unless-reviewed",
         "count": 0,
+        "reviewedCount": 0,
         "files": [],
         "hits": []
       },
       "dangerouslySetInnerHTML": {
         "label": "dangerouslySetInnerHTML",
-        "severity": "block",
+        "severity": "block-unless-reviewed",
         "count": 1,
+        "reviewedCount": 1,
         "files": [
           {
             "file": "apps/web/app/page.tsx",
@@ -224,7 +645,7 @@
         "hits": [
           {
             "file": "apps/web/app/page.tsx",
-            "line": 324,
+            "line": 346,
             "count": 1
           }
         ]
@@ -233,6 +654,7 @@
         "label": "iframe srcDoc",
         "severity": "block",
         "count": 0,
+        "reviewedCount": 0,
         "files": [],
         "hits": []
       },
@@ -240,6 +662,7 @@
         "label": "eval call",
         "severity": "block",
         "count": 0,
+        "reviewedCount": 0,
         "files": [],
         "hits": []
       },
@@ -247,6 +670,7 @@
         "label": "new Function",
         "severity": "block",
         "count": 0,
+        "reviewedCount": 0,
         "files": [],
         "hits": []
       }
@@ -254,44 +678,721 @@
     "blockingHits": [],
     "reviewedBlockingHits": [
       {
+        "file": "apps/web/app/spinner/not-found.tsx",
+        "line": 5,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/public-pages/common.tsx",
+        "line": 311,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/public-pages/RecruitmentAudioPlayer.tsx",
+        "line": 158,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/ResponsiveGalleryMedia.tsx",
+        "line": 154,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/spinner/RaffleSpinner.tsx",
+        "line": 1022,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/spinner/RaffleSpinner.tsx",
+        "line": 1101,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
+        "line": 412,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
+        "line": 454,
+        "count": 1,
+        "patternId": "inlineStyleProp",
+        "label": "React inline style prop"
+      },
+      {
+        "file": "apps/web/components/public-pages/DiscordServerPreview.tsx",
+        "line": 33,
+        "count": 1,
+        "patternId": "iframeElement",
+        "label": "iframe element"
+      },
+      {
+        "file": "apps/web/components/public-pages/SpotifyBrowser.tsx",
+        "line": 99,
+        "count": 1,
+        "patternId": "iframeElement",
+        "label": "iframe element"
+      },
+      {
         "file": "apps/web/app/page.tsx",
-        "line": 324,
+        "line": 343,
+        "count": 1,
+        "patternId": "scriptElement",
+        "label": "script element"
+      },
+      {
+        "file": "apps/web/components/member-workflow/AuthCaptcha.tsx",
+        "line": 69,
+        "count": 1,
+        "patternId": "dynamicScriptElement",
+        "label": "dynamic script element"
+      },
+      {
+        "file": "apps/web/components/public-pages/GalleryBrowser.tsx",
+        "line": 678,
+        "count": 1,
+        "patternId": "styleElement",
+        "label": "style element"
+      },
+      {
+        "file": "apps/web/app/page.tsx",
+        "line": 346,
         "count": 1,
         "patternId": "dangerouslySetInnerHTML",
         "label": "dangerouslySetInnerHTML"
       }
     ],
-    "externalOrigins": [
-      {
-        "origin": "https://discord.com",
-        "allowedBy": [
-          "frame-src",
-          "connect-src"
-        ],
-        "files": [
-          "apps/web/components/public-pages/route-pages/JoinPage.tsx"
-        ]
-      },
-      {
-        "origin": "https://schema.org",
-        "allowedBy": [],
-        "files": [
-          "apps/web/app/page.tsx"
-        ]
-      },
-      {
-        "origin": "https://www.instagram.com",
-        "allowedBy": [],
-        "files": [
-          "apps/web/components/member-workflow/LeaderDashboardParts.tsx"
-        ]
-      }
-    ]
+    "externalReferences": {
+      "runtimeResources": [
+        {
+          "origin": "https://challenges.cloudflare.com",
+          "policyContext": "auth",
+          "routes": [
+            "/auth"
+          ],
+          "requiredDirectives": [
+            "script-src",
+            "frame-src"
+          ],
+          "files": [
+            "apps/web/components/member-workflow/AuthCaptcha.tsx"
+          ],
+          "use": "Turnstile API script and its provider-injected challenge frame",
+          "evidence": [
+            "TURNSTILE_SCRIPT_URL",
+            "document.createElement(\"script\")",
+            "turnstile.render"
+          ],
+          "sourceEvidencePresent": true,
+          "allowedDirectives": [
+            "script-src",
+            "frame-src"
+          ],
+          "missingDirectives": []
+        },
+        {
+          "origin": "https://discord.com",
+          "policyContext": "default",
+          "routes": [
+            "/join"
+          ],
+          "requiredDirectives": [
+            "frame-src"
+          ],
+          "files": [
+            "apps/web/components/public-pages/DiscordServerPreview.tsx"
+          ],
+          "use": "user-activated server-preview iframe",
+          "evidence": [
+            "src=\"https://discord.com/widget",
+            "loading=\"lazy\""
+          ],
+          "sourceEvidencePresent": true,
+          "allowedDirectives": [
+            "frame-src"
+          ],
+          "missingDirectives": []
+        },
+        {
+          "origin": "https://open.spotify.com",
+          "policyContext": "default",
+          "routes": [
+            "/spotify"
+          ],
+          "requiredDirectives": [
+            "frame-src"
+          ],
+          "files": [
+            "apps/web/components/public-pages/SpotifyBrowser.tsx"
+          ],
+          "use": "deferred playlist and media iframe",
+          "evidence": [
+            "https://open.spotify.com/embed/",
+            "<iframe",
+            "loading=\"lazy\""
+          ],
+          "sourceEvidencePresent": true,
+          "allowedDirectives": [
+            "frame-src"
+          ],
+          "missingDirectives": []
+        }
+      ],
+      "navigationAndData": [
+        {
+          "origin": "https://auth.mochirii.invalid",
+          "files": [
+            "apps/web/lib/supabase/auth-redirect.ts"
+          ]
+        },
+        {
+          "origin": "https://bsky.app",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://example.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://example.social",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://facebook.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://instagram.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://linkedin.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://mochirii.invalid",
+          "files": [
+            "apps/web/lib/auth-redirect.ts"
+          ]
+        },
+        {
+          "origin": "https://open.spotify.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://schema.org",
+          "files": [
+            "apps/web/app/page.tsx"
+          ]
+        },
+        {
+          "origin": "https://social.mochirii.com",
+          "files": [
+            "apps/web/lib/oauth/approved-social-redirect.ts"
+          ]
+        },
+        {
+          "origin": "https://tiktok.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://twitch.tv",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://www.facebook.com",
+          "files": [
+            "apps/web/components/member-workflow/FacebookPagePublishQueue.tsx",
+            "apps/web/lib/gallery/facebook-permalink.ts"
+          ]
+        },
+        {
+          "origin": "https://www.instagram.com",
+          "files": [
+            "apps/web/components/member-workflow/LeaderDashboardParts.tsx"
+          ]
+        },
+        {
+          "origin": "https://x.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        },
+        {
+          "origin": "https://youtube.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.ts"
+          ]
+        }
+      ],
+      "testFixtures": [
+        {
+          "origin": "http://127.0.0.1:54321",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-route_test.ts",
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "http://127.0.0.1.example.com",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "http://example.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "http://localhost:3000",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-route_test.ts"
+          ]
+        },
+        {
+          "origin": "http://localhost:54321",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "http://localhost.example.com:3000",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-route_test.ts"
+          ]
+        },
+        {
+          "origin": "http://project.invalid",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "http://social.mochirii.com",
+          "files": [
+            "apps/web/lib/oauth/approved-social-redirect.test.mts"
+          ]
+        },
+        {
+          "origin": "http://www.instagram.com",
+          "files": [
+            "apps/web/lib/gallery/instagram-action-confirmation_test.ts"
+          ]
+        },
+        {
+          "origin": "https://[::1]",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://127.0.0.1",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://attacker.example",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "https://bsky.app",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://deyvmtncimmcinldjyqe.supabase.co",
+          "files": [
+            "apps/web/lib/gallery/approved-feed_test.ts"
+          ]
+        },
+        {
+          "origin": "https://evil.example",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts",
+            "apps/web/lib/oauth/approved-social-redirect.test.mts"
+          ]
+        },
+        {
+          "origin": "https://evil.facebook.com",
+          "files": [
+            "apps/web/lib/gallery/facebook-permalink_test.ts"
+          ]
+        },
+        {
+          "origin": "https://example.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts",
+            "apps/web/lib/oauth/approved-social-redirect.test.mts",
+            "apps/web/lib/oauth/authorization-decision-core.test.mts",
+            "apps/web/lib/supabase/auth-redirect-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://example.com:8443",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://example.invalid",
+          "files": [
+            "apps/web/lib/auth-redirect.test.mts",
+            "apps/web/lib/oauth/consent-login-url.test.mts"
+          ]
+        },
+        {
+          "origin": "https://example.test",
+          "files": [
+            "apps/web/lib/gallery/approved-feed_test.ts",
+            "apps/web/lib/supabase/server-fetch.test.mts"
+          ]
+        },
+        {
+          "origin": "https://facebook.com",
+          "files": [
+            "apps/web/lib/gallery/facebook-permalink_test.ts",
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://facebook.com.example.test",
+          "files": [
+            "apps/web/lib/gallery/facebook-permalink_test.ts"
+          ]
+        },
+        {
+          "origin": "https://foreign.example.com",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "https://guild.social",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://instagram.com",
+          "files": [
+            "apps/web/lib/gallery/instagram-action-confirmation_test.ts",
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://instagram.com.evil.example",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://instagram.example",
+          "files": [
+            "apps/web/lib/gallery/instagram-action-confirmation_test.ts"
+          ]
+        },
+        {
+          "origin": "https://linkedin.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://localhost",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://m.facebook.com",
+          "files": [
+            "apps/web/lib/gallery/facebook-permalink_test.ts"
+          ]
+        },
+        {
+          "origin": "https://m.instagram.com",
+          "files": [
+            "apps/web/lib/gallery/instagram-action-confirmation_test.ts"
+          ]
+        },
+        {
+          "origin": "https://mochirii.com",
+          "files": [
+            "apps/web/lib/auth-redirect.test.mts",
+            "apps/web/lib/events/reference-time_test.ts",
+            "apps/web/lib/gallery/browser-state_test.ts",
+            "apps/web/lib/gallery/moderation-preview-route_test.ts",
+            "apps/web/lib/gallery/social-publication-copy.test.mts",
+            "apps/web/lib/member-social-links/profile-links-core.test.mts",
+            "apps/web/lib/oauth/consent-login-url.test.mts",
+            "apps/web/lib/supabase/legacy-auth-cutover-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://mochirii.com.example.test",
+          "files": [
+            "apps/web/lib/gallery/social-publication-copy.test.mts"
+          ]
+        },
+        {
+          "origin": "https://mochirii.company",
+          "files": [
+            "apps/web/lib/gallery/social-publication-copy.test.mts"
+          ]
+        },
+        {
+          "origin": "https://notmochirii.com",
+          "files": [
+            "apps/web/lib/gallery/social-publication-copy.test.mts"
+          ]
+        },
+        {
+          "origin": "https://open.spotify.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://outside.invalid",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-route_test.ts"
+          ]
+        },
+        {
+          "origin": "https://preview.example",
+          "files": [
+            "apps/web/lib/supabase/auth-redirect-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://project-ref.supabase.co",
+          "files": [
+            "apps/web/lib/supabase/server-access-policy.test.mts"
+          ]
+        },
+        {
+          "origin": "https://project.example",
+          "files": [
+            "apps/web/lib/mochi-pets/member-verification-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://project.supabase.co",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-route_test.ts"
+          ]
+        },
+        {
+          "origin": "https://router.local",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://social.mochirii.com",
+          "files": [
+            "apps/web/lib/gallery/social-publication-copy.test.mts",
+            "apps/web/lib/oauth/approved-social-redirect.test.mts",
+            "apps/web/lib/oauth/authorization-decision-core.test.mts",
+            "apps/web/lib/oauth/prior-consent-redirect.test.mts"
+          ]
+        },
+        {
+          "origin": "https://social.mochirii.com.evil.example",
+          "files": [
+            "apps/web/lib/oauth/approved-social-redirect.test.mts"
+          ]
+        },
+        {
+          "origin": "https://tiktok.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://twitch.tv",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://twitter.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://unrelated.example",
+          "files": [
+            "apps/web/lib/gallery/social-publication-copy.test.mts"
+          ]
+        },
+        {
+          "origin": "https://uvwxyzabcdefghijklmn.supabase.co",
+          "files": [
+            "apps/web/lib/gallery/moderation-preview-server_test.ts"
+          ]
+        },
+        {
+          "origin": "https://www.facebook.com",
+          "files": [
+            "apps/web/lib/gallery/facebook-action-confirmation_test.ts",
+            "apps/web/lib/gallery/facebook-permalink_test.ts"
+          ]
+        },
+        {
+          "origin": "https://www.facebook.com:8443",
+          "files": [
+            "apps/web/lib/gallery/facebook-permalink_test.ts"
+          ]
+        },
+        {
+          "origin": "https://www.instagram.com",
+          "files": [
+            "apps/web/lib/gallery/instagram-action-confirmation_test.ts",
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://www.linkedin.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://www.mochirii.com.example.test",
+          "files": [
+            "apps/web/lib/gallery/social-publication-copy.test.mts"
+          ]
+        },
+        {
+          "origin": "https://www.tiktok.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://x.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://youtu.be",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        },
+        {
+          "origin": "https://youtube.com",
+          "files": [
+            "apps/web/lib/member-social-links/profile-links-core.test.mts"
+          ]
+        }
+      ],
+      "policyDeclarations": [
+        {
+          "origin": "https://*.supabase.co",
+          "files": [
+            "apps/web/lib/security/protected-csp.ts"
+          ]
+        },
+        {
+          "origin": "https://cdn.discordapp.com",
+          "files": [
+            "apps/web/lib/security/protected-csp.ts"
+          ]
+        },
+        {
+          "origin": "https://discord.com",
+          "files": [
+            "apps/web/lib/security/protected-csp.ts"
+          ]
+        },
+        {
+          "origin": "https://media.discordapp.net",
+          "files": [
+            "apps/web/lib/security/protected-csp.ts"
+          ]
+        },
+        {
+          "origin": "https://vitals.vercel-insights.com",
+          "files": [
+            "apps/web/lib/security/protected-csp.ts"
+          ]
+        }
+      ],
+      "unreviewedReferences": []
+    },
+    "nonLiteralRuntimeLoads": {
+      "reviewed": [
+        {
+          "patternId": "srcAssignment",
+          "file": "apps/web/components/member-workflow/AuthCaptcha.tsx",
+          "line": 71
+        },
+        {
+          "patternId": "fetchCall",
+          "file": "apps/web/lib/gallery/approved-feed.ts",
+          "line": 362
+        },
+        {
+          "patternId": "srcAssignment",
+          "file": "apps/web/lib/gallery-thumbnail.ts",
+          "line": 61
+        },
+        {
+          "patternId": "fetchCall",
+          "file": "apps/web/lib/member-profiles/visible-profile-cards.ts",
+          "line": 49
+        }
+      ],
+      "unreviewed": []
+    }
   },
   "routeMatrix": [
     {
       "route": "/",
       "surface": "home shell",
+      "policyContext": "default",
       "features": [
         "Vercel analytics",
         "Speed Insights",
@@ -301,14 +1402,16 @@
     {
       "route": "/join",
       "surface": "Discord funnel",
+      "policyContext": "default",
       "features": [
-        "Discord links",
-        "rules and verification copy"
+        "Discord link",
+        "optional Discord iframe"
       ]
     },
     {
       "route": "/events",
       "surface": "events",
+      "policyContext": "default",
       "features": [
         "event cover images",
         "filter state"
@@ -317,6 +1420,7 @@
     {
       "route": "/gallery",
       "surface": "gallery",
+      "policyContext": "default",
       "features": [
         "Supabase signed media",
         "lightbox",
@@ -326,14 +1430,16 @@
     {
       "route": "/auth",
       "surface": "auth",
+      "policyContext": "auth",
       "features": [
         "Supabase auth client",
-        "status message"
+        "Cloudflare Turnstile script and frame"
       ]
     },
     {
       "route": "/account",
       "surface": "member account",
+      "policyContext": "default",
       "features": [
         "Supabase auth",
         "gallery submissions",
@@ -344,6 +1450,7 @@
     {
       "route": "/gallery-submit",
       "surface": "gallery submit",
+      "policyContext": "default",
       "features": [
         "Supabase storage upload",
         "status message"
@@ -352,14 +1459,49 @@
     {
       "route": "/leader-dashboard",
       "surface": "moderation",
+      "policyContext": "protected",
       "features": [
         "Supabase moderation queues",
         "status messages"
       ]
     },
     {
+      "route": "/oauth/consent",
+      "surface": "OAuth consent",
+      "policyContext": "protected",
+      "features": [
+        "server-verified authorization",
+        "status messages"
+      ]
+    },
+    {
+      "route": "/raffle/claim",
+      "surface": "raffle claim",
+      "policyContext": "protected",
+      "features": [
+        "server-verified winner claim"
+      ]
+    },
+    {
+      "route": "/leader-dashboard/raffle",
+      "surface": "raffle administration",
+      "policyContext": "protected",
+      "features": [
+        "server-verified moderator controls"
+      ]
+    },
+    {
+      "route": "/spinner",
+      "surface": "private spinner",
+      "policyContext": "spinner",
+      "features": [
+        "same-origin live spinner resources"
+      ]
+    },
+    {
       "route": "/spotify",
       "surface": "Spotify",
+      "policyContext": "default",
       "features": [
         "Spotify iframe embeds"
       ]
@@ -367,6 +1509,7 @@
     {
       "route": "/spotlight",
       "surface": "spotlight",
+      "policyContext": "default",
       "features": [
         "Supabase public spotlight endpoint"
       ]
@@ -374,13 +1517,16 @@
     {
       "route": "/games/mochi-pets",
       "surface": "Mochi Pets",
+      "policyContext": "default",
       "features": [
-        "static project-status content"
+        "same-origin tester form",
+        "disconnected waiting room"
       ]
     },
     {
       "route": "/tome",
       "surface": "Tome",
+      "policyContext": "default",
       "features": [
         "static conduct content"
       ]
@@ -391,16 +1537,13 @@
     "reason": "run with --live to check production headers"
   },
   "nextSteps": [
-    "Keep React inline style props at zero before any style-src unsafe-inline removal.",
+    "Keep the reviewed inline-style allowlist exact; remove or redesign each controlled runtime style before tightening style-src or style-src-attr.",
     "Run a Vercel Preview browser pass before removing style-src unsafe-inline because framework-managed image/route helpers can still emit runtime style attributes.",
-    "Keep Spotify iframe routes in the browser route sweep.",
-    "Verify Supabase auth/storage, Discord handoff links, Vercel Analytics, and Speed Insights before tightening CSP.",
-    "Treat Next.js nonce-based CSP as a separate compatibility PR because nonce middleware makes pages dynamically rendered instead of static/prerendered.",
-    "Remove script-src unsafe-inline only after choosing a Next-compatible nonce or SRI path and proving no analytics, auth, or embed regressions."
+    "Keep auth Turnstile, Discord preview, and Spotify iframe routes in the browser route sweep.",
+    "Verify Supabase auth/storage, Vercel Analytics, and Speed Insights before tightening CSP.",
+    "Keep nonce-based strict script CSP on the already-dynamic auth routes and include them in every browser release sweep.",
+    "Keep public routes static while Turbopack lacks stable hash-based SRI; reconsider global script-src unsafe-inline only when a cache-compatible stable path exists."
   ],
-  "warnings": [
-    "https://schema.org appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening.",
-    "https://www.instagram.com appears in app source but is not currently allowed by CSP; confirm it is not runtime-loaded before tightening."
-  ],
+  "warnings": [],
   "failures": []
 }

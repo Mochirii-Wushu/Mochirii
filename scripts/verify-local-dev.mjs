@@ -5,6 +5,7 @@ const steps = [
   ["root checks", "npm", ["run", "check"]],
   ["root whitespace", "git", ["diff", "--check"]],
   ["Next toolchain", "npm", ["--prefix", "apps/web", "run", "toolchain:check"]],
+  ["public image decode", "npm", ["--prefix", "apps/web", "run", "check:public-image-decode"]],
   ["Next lint", "npm", ["--prefix", "apps/web", "run", "lint"]],
   ["Next build", "npm", ["--prefix", "apps/web", "run", "build"]],
 ];

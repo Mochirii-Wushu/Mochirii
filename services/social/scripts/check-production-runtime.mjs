@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { securityTxtContractFailures } from "./security-txt-contract.mjs";
 
 const root = process.cwd();
 const repositoryRoot = path.resolve(root, "../..");
@@ -322,6 +323,7 @@ requireIncludes(caddyPath, caddy, [
   'header @dependencyReadiness Cache-Control "private, no-store"',
   "respond @dependencyReadiness 404",
   "reverse_proxy 127.0.0.1:8080",
+  "header -Server",
   "trusted_proxies static 103.21.244.0/22",
   "198.41.128.0/17",
   "2c0f:f248::/32",
@@ -329,6 +331,7 @@ requireIncludes(caddyPath, caddy, [
   "trusted_proxies_strict",
   "header_up X-Forwarded-For {client_ip}",
   "header_up X-Request-ID {http.request.uuid}",
+  "header_down -Server",
   "header_down X-Request-ID {http.request.uuid}",
 ]);
 if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
@@ -336,6 +339,27 @@ if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_p
 }
 if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
   failures.push(`${caddyPath} must never trust a caller-supplied request ID`);
+}
+
+const securityTxtPath = "public/.well-known/security.txt";
+const securityTxt = read(securityTxtPath);
+for (const failure of securityTxtContractFailures(securityTxt)) {
+  failures.push(`${securityTxtPath} ${failure}`);
+}
+if (
+  securityTxtContractFailures(`${securityTxt}Hiring: https://example.com/jobs\n`)
+    .every((failure) => !failure.includes("unexpected field"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2020-01-01T00:00:00Z"))
+    .every((failure) => !failure.includes("remain in the future"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2027-02-29T00:00:00Z"))
+    .every((failure) => !failure.includes("exact UTC RFC 3339"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2027-04-31T00:00:00Z"))
+    .every((failure) => !failure.includes("exact UTC RFC 3339"))
+) {
+  failures.push(`${securityTxtPath} parser canaries must reject appended fields, expired metadata, and normalized calendar dates`);
+}
+if (/pixelfed|shopify/iu.test(securityTxt)) {
+  failures.push(`${securityTxtPath} must remain Mochirii-only public security metadata`);
 }
 
 const caddyInstallerPath = "scripts/install-production-caddy.sh";

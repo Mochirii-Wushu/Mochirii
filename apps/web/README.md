@@ -328,7 +328,7 @@ restorable historical artifact, not a live hosting or authentication fallback.
 
 ## Accepted or Deferred Warnings
 
-- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. It is preserved exactly as-is because audio quality is preferred over file-size optimization. This is not a Vercel blocker. Do not compress, re-encode, replace, delete, externalize, or otherwise optimize this audio without explicit user approval.
+- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. Its audio packets are preserved because audio quality is preferred over file-size optimization; public user tags are stripped and validated. This is not a Vercel blocker. Do not compress, re-encode, replace, delete, externalize, or otherwise optimize this audio without explicit user approval.
 - A local `vercel build --prod` can warn if `.next` exists. Run `npm run vercel:build:local` to clean local generated output first.
 - The previous local `outputFileTracingRoot` / `turbopack.root` mismatch is fixed by matching `turbopack.root` to the `apps/web` project root used by `vercel build --prod --cwd apps/web`.
 - Vercel Development env is intentionally skipped for now. Production and Preview envs are what matter for current deployed and PR-preview builds.

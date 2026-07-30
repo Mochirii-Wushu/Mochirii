@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { securityTxtContractFailures } from "./security-txt-contract.mjs";
 
 const root = process.cwd();
 const repositoryRoot = path.resolve(root, "../..");
@@ -567,6 +568,7 @@ requireIncludes("caddy/Caddyfile", caddy, [
   "@retiredCreationAndTokenManagement path /installer /installer/*",
   "respond @retiredCreationAndTokenManagement 404",
   "reverse_proxy 127.0.0.1:8080",
+  "header -Server",
   "trusted_proxies static 103.21.244.0/22",
   "198.41.128.0/17",
   "2c0f:f248::/32",
@@ -574,6 +576,7 @@ requireIncludes("caddy/Caddyfile", caddy, [
   "trusted_proxies_strict",
   "header_up X-Forwarded-For {client_ip}",
   "header_up X-Request-ID {http.request.uuid}",
+  "header_down -Server",
   "header_down X-Request-ID {http.request.uuid}",
 ]);
 if (caddy.split(/\s+/u).includes("/installer*")) {
@@ -584,6 +587,14 @@ if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_p
 }
 if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
   failures.push("caddy/Caddyfile must overwrite rather than trust a caller-supplied request ID");
+}
+
+const securityTxt = read("public/.well-known/security.txt");
+for (const failure of securityTxtContractFailures(securityTxt)) {
+  failures.push(`public/.well-known/security.txt ${failure}`);
+}
+if (/pixelfed|shopify/iu.test(securityTxt)) {
+  failures.push("public/.well-known/security.txt must remain Mochirii-only public security metadata");
 }
 
 const requestIdMiddleware = read("app/Http/Middleware/MochiriiRequestId.php");

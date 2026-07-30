@@ -1,4 +1,4 @@
-Contact: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy
+Contact: mailto:support@mochirii.com
 Policy: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy
 Preferred-Languages: en
 Canonical: https://mochirii.com/.well-known/security.txt

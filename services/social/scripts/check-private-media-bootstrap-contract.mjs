@@ -384,12 +384,14 @@ requireIncludes(caddyPath, caddy, [
   'Cache-Control "private, no-store"',
   'X-Content-Type-Options "nosniff"',
   'Referrer-Policy "no-referrer"',
+  "header -Server",
   "trusted_proxies static 103.21.244.0/22",
   "198.41.128.0/17",
   "2c0f:f248::/32",
   "client_ip_headers CF-Connecting-IP X-Forwarded-For",
   "trusted_proxies_strict",
   "header_up X-Forwarded-For {client_ip}",
+  "header_down -Server",
 ]);
 
 const harnessPath = "scripts/test-private-media-bootstrap-runtime.sh";

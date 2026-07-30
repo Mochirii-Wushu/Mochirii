@@ -8,6 +8,7 @@
 
 social.mochirii.com {
 	encode zstd gzip
+	header -Server
 	request_body {
 		max_size 100MB
 	}
@@ -30,6 +31,7 @@ social.mochirii.com {
 	reverse_proxy 127.0.0.1:8080 {
 		header_up X-Forwarded-For {client_ip}
 		header_up X-Request-ID {http.request.uuid}
+		header_down -Server
 		header_down X-Request-ID {http.request.uuid}
 	}
 }
