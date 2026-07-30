@@ -306,8 +306,6 @@ export type GalleryReviewQueue = {
 
 export type RejectedGalleryCleanupResponse = {
   submissionId?: string | null;
-  storageBucket?: string | null;
-  storagePath?: string | null;
   removedObjectCount?: number | null;
   deletedAt?: string | null;
 };

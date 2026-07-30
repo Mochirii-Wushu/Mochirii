@@ -23,6 +23,7 @@ const files = {
   spinnerDiscordOutbox: "supabase/functions/_shared/spinner-discord-outbox.ts",
   approvedFeed: "supabase/functions/list-approved-gallery-submissions/index.ts",
   approvedFeedHelper: "supabase/functions/_shared/gallery-public-feed.ts",
+  rejectedGalleryCleanup: "supabase/functions/delete-rejected-gallery-submission/index.ts",
   visibleProfileCards: "supabase/functions/list-visible-profile-cards/index.ts",
   mochiPetsAlphaShared: "supabase/functions/_shared/mochi-pets-alpha.ts",
   mochiPetsAlphaAction: "supabase/functions/mochi-pets-alpha-action/index.ts",
@@ -104,6 +105,13 @@ const reaperSpinnerSecuritySource = `${reaperSpinnerDispatch}\n${spinnerDiscordO
 const approvedFeed = read(files.approvedFeed);
 const approvedFeedHelper = read(files.approvedFeedHelper);
 const approvedFeedSecuritySource = `${approvedFeed}\n${approvedFeedHelper}`;
+const rejectedGalleryCleanup = read(files.rejectedGalleryCleanup);
+const rejectedGalleryCleanupSuccessStart = rejectedGalleryCleanup.lastIndexOf(
+  "return jsonResponse({\n    ok: true,",
+);
+const rejectedGalleryCleanupSuccessResponse = rejectedGalleryCleanupSuccessStart >= 0
+  ? rejectedGalleryCleanup.slice(rejectedGalleryCleanupSuccessStart)
+  : "";
 const approvedFeedListResponseStart = approvedFeed.lastIndexOf("return jsonResponse({\n    ok: true,");
 const approvedFeedListResponse = approvedFeedListResponseStart >= 0
   ? approvedFeed.slice(approvedFeedListResponseStart)
@@ -664,6 +672,49 @@ assertNotMatches(
   pattern,
   "public Gallery delivery must not mint or expose bearer URLs.",
 ));
+
+assertMatches(
+  "delete-rejected-gallery-submission success response",
+  rejectedGalleryCleanupSuccessResponse,
+  /data:\s*\{[\s\S]*?submissionId:[\s\S]*?removedObjectCount:[\s\S]*?deletedAt[\s\S]*?\}/,
+  "cleanup response must expose only the reviewed deletion receipt fields.",
+);
+
+assertNotMatches(
+  "delete-rejected-gallery-submission success response",
+  rejectedGalleryCleanupSuccessResponse,
+  /storageBucket|storagePath|storage_bucket|storage_path/,
+  "cleanup response must not expose private Storage coordinates.",
+);
+
+[
+  "lookupError.message",
+  "storageError.message",
+  "deleteError.message",
+].forEach((snippet) => {
+  if (rejectedGalleryCleanup.includes(snippet)) {
+    failures.push(`delete-rejected-gallery-submission: provider error detail must not be logged: ${snippet}.`);
+  }
+});
+
+[
+  'category: "unsafe_storage_reference"',
+  'category: "storage_delete_rejected"',
+  'category: "rejected_submission_removed"',
+].forEach((snippet) => assertIncludes(
+  "delete-rejected-gallery-submission safe telemetry",
+  rejectedGalleryCleanup,
+  snippet,
+));
+
+const cleanupSubmissionIdOccurrences = [
+  ...rejectedGalleryCleanup.matchAll(/submissionId:\s*request\.submissionId/g),
+].length;
+if (cleanupSubmissionIdOccurrences !== 1) {
+  failures.push(
+    "delete-rejected-gallery-submission: submission ID may appear only in the authenticated success response.",
+  );
+}
 
 [
   "CORS_HEADERS",

@@ -60,8 +60,10 @@ checks, accountable review, and no owner bypass.
   pre-union source. Website draft PR #541, `feat(meta): complete Gallery
   publishing UI`, is stacked on #540 at remote head
   `35fe1a8d081367cfcfaa4490ebf9f2789e9b33b8`; its Vercel and Next checks pass,
-  Supabase Preview correctly skips because it has no Supabase diff, and its
-  repository `validate` context also fails. Both remain sibling-lane evidence
+  while Supabase Preview skipped because the project had reached its concurrent
+  Preview limit, and its repository `validate` context also fails. The UI PR's
+  relative diff contains no additional Supabase changes, but that is not the
+  provider-recorded skip reason. Both remain sibling-lane evidence
   and must stay open until exact union parity and replacement checks are
   proved; neither is production authority.
 - Mochirii Pets PR #4 remains at naming-only head
