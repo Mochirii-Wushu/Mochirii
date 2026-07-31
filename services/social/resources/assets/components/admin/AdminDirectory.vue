@@ -747,7 +747,7 @@
                                                     <hr class="my-1">
                                                     <p class="small font-weight-bold text-muted mb-0 text-center">Testimonial</p>
                                                     <div class="border rounded px-3">
-                                                        <p v-html="testimonial.body" class="my-2 small" style="white-space: pre-wrap;"></p>
+                                                        <p v-text="testimonial.body" class="my-2 small" style="white-space: pre-wrap;"></p>
                                                     </div>
                                                 </div>
                                             </div>

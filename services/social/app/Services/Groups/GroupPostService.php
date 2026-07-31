@@ -4,6 +4,7 @@ namespace App\Services\Groups;
 
 use App\Models\Group;
 use App\Models\GroupPost;
+use App\Services\SanitizeService;
 use App\Transformer\Api\GroupPostTransformer;
 use Cache;
 use Illuminate\Http\Request;
@@ -21,7 +22,7 @@ class GroupPostService
 
     public static function get($gid, $pid)
     {
-        return Cache::remember(self::key($gid, $pid), 604800, function () use ($gid, $pid) {
+        $res = Cache::remember(self::key($gid, $pid), 604800, function () use ($gid, $pid) {
             $gp = GroupPost::whereGroupId($gid)->find($pid);
 
             if (! $gp) {
@@ -42,6 +43,12 @@ class GroupPostService
             // $status['account']['url'] = url("/groups/{$gp['group_id']}/user/{$status['account']['id']}");
             return $res;
         });
+
+        if ($res && array_key_exists('content', $res)) {
+            $res['content'] = app(SanitizeService::class)->richText($res['content']);
+        }
+
+        return $res;
     }
 
     public static function del($gid, $pid)

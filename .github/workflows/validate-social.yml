@@ -138,6 +138,8 @@ jobs:
         working-directory: services/social
         run: >-
           php artisan test
+          tests/Unit/SanitizeServiceTest.php
+          tests/Unit/OutputBoundaryTest.php
           tests/Unit/AvatarUploadPolicyTest.php
           tests/Feature/RemoteOidcTest.php
           tests/Feature/LoginTest.php

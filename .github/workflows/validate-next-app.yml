@@ -39,7 +39,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Decode public PNG, JPEG, GIF, and WebP images
+      - name: Validate public SVG and Lottie semantics
+        run: npm run check:public-artifact-semantics
+
+      - name: Decode public images, icons, and audio
         run: npm run check:public-image-decode
 
       - name: Test private spinner media

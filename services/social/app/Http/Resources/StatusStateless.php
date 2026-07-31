@@ -9,6 +9,7 @@ use App\Services\LikeService;
 use App\Services\MediaService;
 use App\Services\MediaTagService;
 use App\Services\PollService;
+use App\Services\SanitizeService;
 use App\Services\StatusHashtagService;
 use App\Services\StatusMentionService;
 use App\Util\Lexer\Autolink;
@@ -27,7 +28,7 @@ class StatusStateless extends JsonResource
         $status = $this;
         $taggedPeople = MediaTagService::get($status->id);
         $poll = $status->type === 'poll' ? PollService::get($status->id) : null;
-        $autoLink = $status->caption ? Autolink::create()->autolink($status->caption) : null;
+        $autoLink = $status->caption ? app(SanitizeService::class)->richText(Autolink::create()->autolink($status->caption)) : null;
 
         return [
             '_v' => 1,

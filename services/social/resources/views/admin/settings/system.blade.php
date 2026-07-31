@@ -71,7 +71,7 @@
           <div class="text-left px-3">
             <p class="mb-0 latest-name h2 font-weight-bold"></p>
             <p class="mb-0 latest-branch badge badge-primary"></p>
-            <p class="mb-0 latest-body"></p>
+            <pre class="mb-0 latest-body"></pre>
           </div>
         </div>
       </div>
@@ -91,6 +91,11 @@
 
   .latest-body h3 {
     font-size: 1.0rem;
+  }
+
+  .latest-body {
+    font-family: inherit;
+    white-space: pre-wrap;
   }
 
   .latest-branch {
@@ -117,7 +122,7 @@ $(document).ready(function() {
         $('.latest-version').text(latest.tag_name);
         $('.latest-name').text(latest.name);
         $('.latest-branch').text(latest.target_commitish);
-        $('.latest-body').html(marked(latest.body));
+        $('.latest-body').text(typeof latest.body === 'string' ? latest.body : '');
         $('.card-loading').hide();
         $('.card-release').removeClass('d-none');
       });

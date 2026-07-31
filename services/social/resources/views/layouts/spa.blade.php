@@ -23,13 +23,13 @@
 	<link href="{{ mix('css/app.css') }}" rel="stylesheet" data-stylesheet="light">
 	<link href="{{ mix('css/spa.css') }}" rel="stylesheet" data-stylesheet="light">
 	@if(config_cache('uikit.show_custom.css'))
-	<style type="text/css">{!!config_cache('uikit.custom.css')!!}</style>
+	<style type="text/css">{!! app(\App\Services\SanitizeService::class)->cssText(config_cache('uikit.custom.css')) !!}</style>
 	@endif
 	@auth
 	<script type="text/javascript">
 		window._sharedData = {
 			curUser: {},
-			user: {!! json_encode(\App\Services\ProfileService::get(request()->user()->profile_id)) !!},
+			user: {{ \Illuminate\Support\Js::from(\App\Services\ProfileService::get(request()->user()->profile_id)) }},
 			version: 0
 		};
 		window.App = {

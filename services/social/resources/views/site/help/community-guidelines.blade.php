@@ -8,7 +8,7 @@
   <hr>
   @if($page)
   <div>
-    {!!$page->content!!}
+    {!! app(\App\Services\SanitizeService::class)->richText($page->content ?? '') !!}
     <hr>
     <p class="">This document was last updated {{$page->created_at->format('M d, Y')}}.</p>
   </div>

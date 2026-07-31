@@ -22,7 +22,7 @@
       {{-- <span class="pl-1"><a href="#" class="font-weight-bold">Edit</a></span> --}}
     </p>
     <div id="editor" class="d-none" style="height: 400px">
-      {!!$page->content!!}
+      {!! app(\App\Services\SanitizeService::class)->richText($page->content ?? '') !!}
     </div>
     <div id="rawEditor" style="height: 400px">
       <label class="font-weight-bold">Raw HTML</label>

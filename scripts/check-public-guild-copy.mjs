@@ -1,22 +1,22 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import {
+  APPROVED_FOOTER_DESCRIPTION,
+  APPROVED_HOME_SUBTITLE,
+  EXPECTED_EXACT_GAME_NAME_COUNT,
+  EXPECTED_PUBLIC_JSON_FILES,
+  TARGETED_PUBLIC_PAGE_SHELL_FILES,
+  discoverPublicJsonFiles,
+  formatPolicyIssue,
+  scanEditorialText,
+  scanExactGameName,
+  scanJsonExactGameName,
+  stripStylingTokens,
+  walkJsonStrings,
+} from "./lib/public-guild-copy-policy.mjs";
 
 const root = process.cwd();
 const failures = [];
-const rules = [
-  {
-    label: "mood-filler wording",
-    pattern: /\b(?:warm|warmth|calm|quiet|cozy|soft|softly|gentle|gently|whimsical|peaceful|serene|soothing|dreamy|tranquil|unhurried|lovely)\b/iu,
-  },
-  {
-    label: "generic non-game wording",
-    pattern: /\b(?:shared\s+runs?|little\s+guild|tiny\s+guild|baddie\s+smashing|off-session\s+planning|operating\s+cadence|winding\s+down|long\s+listening|wandering\s+through\s+ambient\s+sounds|late\s+hours|slower\s+tempo|feel\s+at\s+home|cheerful\s+presence|brightens\s+the\s+guild|having\s+fun\s+together)\b/iu,
-  },
-  {
-    label: "vague mood wording",
-    pattern: /\b(?:enthusiasm|presence)\s*(?:&|and)\s*spirit\b/iu,
-  },
-];
 const brandAccents = [
   { label: "Wushu land", pattern: /\bWushu land\b/giu, minimum: 1, maximum: 3 },
   { label: "pretty", pattern: /\bpretty\b/giu, minimum: 1, maximum: 6 },
@@ -30,15 +30,8 @@ const focusChecks = [
   { label: "progression", pattern: /\bprogression\b/giu },
   { label: "member activity or support", pattern: /\b(?:member\s+(?:activity|support|progression|showcases?)|event\s+participation)\b/giu },
 ];
-const exactGameName = {
-  pattern: /\bWhere Winds Meet\b/giu,
-  minimum: 3,
-  maximum: 16,
-};
-const approvedHomeSubtitle = "Asia Pacific • Where Winds Meet Guild";
-const approvedFooterDescription = "An Asia Pacific Where Winds Meet guild, with events scheduled in UTC+8.";
 const sharedSocialCaption = "A pretty gameplay showcase from Mōchirīī.";
-const approvedPublicJsonFiles = [
+const canonicalPublicJsonFiles = [
   "apps/web/public/data/recruitment.json",
   "apps/web/public/data/spotify.json",
   "apps/web/public/data/spotlight.json",
@@ -61,53 +54,36 @@ function filesUnder(relativeDirectory, extensions) {
   });
 }
 
-function exactGameNameIsApproved(relative, location, value) {
-  if (relative === "apps/web/public/data/home.json") {
-    return location === "$.hero.subtitle" && value === approvedHomeSubtitle;
-  }
-  if (relative === "apps/web/components/public-pages/metadata.ts") return true;
-  if (relative === "apps/web/lib/site-metadata.ts") return true;
-  if (relative === "apps/web/components/SiteHeader.tsx" || relative.startsWith("apps/web/components/site-header/")) return true;
-  if (relative === "apps/web/components/SiteFooter.tsx") {
-    return value.includes(approvedFooterDescription);
-  }
-  return false;
-}
-
 function checkText(relative, location, value, { canonical = false } = {}) {
   if (canonical) canonicalPublicCopy.push(value);
-  for (const { label, pattern } of rules) {
-    const match = value.match(pattern);
-    if (match) failures.push(`${relative}:${location}: ${label}: ${JSON.stringify(match[0])}`);
-  }
+  failures.push(...scanEditorialText(relative, location, value).map(formatPolicyIssue));
+}
 
-  const gameNameMatches = value.match(exactGameName.pattern);
-  if (gameNameMatches) {
-    exactGameNameCount += gameNameMatches.length;
-    if (!exactGameNameIsApproved(relative, location, value)) {
-      failures.push(`${relative}:${location}: exact game name is outside an approved title, metadata, Home subtitle, header, or primary footer lane.`);
-    }
-  }
+function checkExactGameName(relative, location, value) {
+  const result = scanExactGameName(relative, location, value);
+  exactGameNameCount += result.count;
+  failures.push(...result.issues.map(formatPolicyIssue));
 }
 
 function checkJsonValue(relative, value, pointer = "$") {
-  if (typeof value === "string") {
-    checkText(relative, pointer, value, { canonical: true });
-    return;
-  }
-  if (Array.isArray(value)) {
-    value.forEach((entry, index) => checkJsonValue(relative, entry, `${pointer}[${index}]`));
-    return;
-  }
-  if (value && typeof value === "object") {
-    Object.entries(value).forEach(([key, entry]) => checkJsonValue(relative, entry, `${pointer}.${key}`));
-  }
+  walkJsonStrings(value, (text, location) => checkText(relative, location, text, { canonical: true }), pointer);
 }
 
-for (const relativePath of approvedPublicJsonFiles) {
+const publicJsonFiles = discoverPublicJsonFiles(root);
+if (JSON.stringify(publicJsonFiles) !== JSON.stringify(EXPECTED_PUBLIC_JSON_FILES)) {
+  failures.push(`public JSON inventory changed; review and update the exact contract: ${JSON.stringify(publicJsonFiles)}.`);
+}
+
+for (const relativePath of canonicalPublicJsonFiles) {
   const absolute = path.join(root, relativePath);
   const relative = path.relative(root, absolute).replaceAll("\\", "/");
   checkJsonValue(relative, JSON.parse(readFileSync(absolute, "utf8")));
+}
+
+for (const relative of publicJsonFiles) {
+  const result = scanJsonExactGameName(relative, JSON.parse(readFileSync(path.join(root, relative), "utf8")));
+  exactGameNameCount += result.count;
+  failures.push(...result.issues.map(formatPolicyIssue));
 }
 
 const directSourceFiles = [
@@ -115,6 +91,7 @@ const directSourceFiles = [
   "apps/web/components/member-workflow/FacebookPagePublishQueue.tsx",
   "apps/web/components/member-workflow/GallerySubmitForm.tsx",
   "apps/web/components/member-workflow/LeaderDashboard.tsx",
+  ...TARGETED_PUBLIC_PAGE_SHELL_FILES,
   "apps/web/components/public-pages/metadata.ts",
   "supabase/functions/_shared/facebook-page-publishing.ts",
   "supabase/functions/_shared/instagram-publishing.ts",
@@ -145,12 +122,24 @@ for (const absolute of sourceFiles) {
   const source = readFileSync(absolute, "utf8");
   sourceText.set(relative, source);
   source.split(/\r?\n/u).forEach((line, index) => {
-    const withoutStylingTokens = line
-      .replace(/className\s*=\s*"[^"]*"/gu, "")
-      .replace(/className\s*=\s*'[^']*'/gu, "")
-      .replace(/className\s*=\s*\{[^}]*\}/gu, "");
+    const withoutStylingTokens = stripStylingTokens(line);
     checkText(relative, index + 1, withoutStylingTokens);
   });
+}
+
+const exactGameNameSourceFiles = [
+  "apps/web/components/SiteFooter.tsx",
+  "apps/web/components/SiteHeader.tsx",
+  "apps/web/components/public-pages/metadata.ts",
+  "apps/web/lib/site-metadata.ts",
+  ...filesUnder("apps/web/components/site-header", new Set([".tsx"]))
+    .map((absolute) => path.relative(root, absolute).replaceAll("\\", "/"))
+    .sort(),
+];
+for (const relative of exactGameNameSourceFiles) {
+  readFileSync(path.join(root, relative), "utf8")
+    .split(/\r?\n/u)
+    .forEach((line, index) => checkExactGameName(relative, index + 1, line));
 }
 
 for (const relative of sharedSocialCaptionSources) {
@@ -225,8 +214,8 @@ for (const { label, pattern } of focusChecks) {
   if (count < 1) failures.push(`canonical public copy must include concrete ${label} language.`);
 }
 
-if (exactGameNameCount < exactGameName.minimum || exactGameNameCount > exactGameName.maximum) {
-  failures.push(`exact game name must appear ${exactGameName.minimum}-${exactGameName.maximum} times across approved lanes; found ${exactGameNameCount}.`);
+if (exactGameNameCount !== EXPECTED_EXACT_GAME_NAME_COUNT) {
+  failures.push(`exact game name must appear exactly ${EXPECTED_EXACT_GAME_NAME_COUNT} times across approved lanes; found ${exactGameNameCount}.`);
 }
 
 if (failures.length) {
@@ -236,10 +225,10 @@ if (failures.length) {
 }
 
 console.log("Public guild copy contract OK.");
-console.log("- Public copy avoids mood filler and generic non-game phrasing.");
+console.log("- Reviewed guild-copy surfaces avoid mood filler and generic non-game phrasing.");
 console.log(`- Wushu land (${accentCounts.get("Wushu land")}), pretty (${accentCounts.get("pretty")}) and cupcake (${accentCounts.get("cupcake")}) remain sparse protected brand accents.`);
 console.log("- Canonical public copy includes recruitment, events, builds, guides, progression and member activity or support.");
-console.log(`- Where Winds Meet remains limited to ${exactGameNameCount} approved title, metadata, Home subtitle and primary footer occurrences.`);
+console.log(`- All ${publicJsonFiles.length} public JSON files and the approved source lanes were scanned; Where Winds Meet remains limited to exactly ${exactGameNameCount} approved metadata, Home subtitle and primary footer occurrences.`);
 console.log("- Facebook and Instagram publication surfaces retain the reviewed shared social caption.");
 console.log("- Public website display is exactly mochirii.com; Instagram and Facebook publication copy contain no site link.");
 console.log("- Discord account guidance displays mochirii.com and reviewed member-facing fallbacks use Mōchirīī/Mōchī branding.");

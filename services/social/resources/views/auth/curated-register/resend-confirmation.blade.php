@@ -14,7 +14,7 @@
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
                 <div class="alert alert-danger bg-danger border-danger text-white">
-                    <p class="lead font-weight-bold mb-0"><i class="far fa-exclamation-triangle mr-2"></i> {!! $error !!}</p>
+                    <p class="lead font-weight-bold mb-0"><i class="far fa-exclamation-triangle mr-2"></i> {{ $error }}</p>
                 </div>
                 @endforeach
                 <div class="mb-5"></div>

@@ -166,6 +166,46 @@ Deno.test("Discord role success stores fresh eligible evidence", async () => {
   });
 });
 
+Deno.test("Discord refresh rejects malformed member role payloads without writes", async () => {
+  await withDiscordConfig(async () => {
+    for (
+      const payload of [
+        { roles: EXPECTED_ROLE_IDS[0] },
+        { roles: [1234567890123456], pending: false },
+        { roles: EXPECTED_ROLE_IDS, pending: "false" },
+        {
+          roles: EXPECTED_ROLE_IDS,
+          pending: false,
+          user: { id: "other-discord-id" },
+        },
+      ]
+    ) {
+      const { client, writes } = fakeAdminClient();
+      const result = await updateDiscordProfile(
+        client,
+        "member-id",
+        { id: "member-id" },
+        activeProfile(),
+        "discord-id",
+        NOW,
+        {
+          fetchImpl: (() =>
+            Promise.resolve(Response.json(payload))) as typeof fetch,
+        },
+      );
+
+      assert(
+        result.ok === false && result.status === 502,
+        "malformed Discord role state must fail closed",
+      );
+      assert(
+        writes.length === 0,
+        "malformed Discord role state must not overwrite verified evidence",
+      );
+    }
+  });
+});
+
 function activeProfile() {
   return {
     member_status: "active",

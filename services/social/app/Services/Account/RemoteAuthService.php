@@ -17,12 +17,12 @@ class RemoteAuthService
         return (bool) config('instance.discover.beagle_api');
     }
 
-    public static function getConfig()
+    public static function getConfig(): string
     {
         return json_encode([
             'default_only' => config('remote-auth.mastodon.domains.only_default'),
             'custom_only' => config('remote-auth.mastodon.domains.only_custom'),
-        ]);
+        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
     }
 
     public static function getMastodonClient($domain)

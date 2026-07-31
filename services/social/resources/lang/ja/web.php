@@ -305,7 +305,7 @@ return [
             'no_filters' => 'まだフィルターはありません',
             'no_filters_message' => 'フィルター機能を使えば、特定の言葉を含む投稿をタイムラインから取り除いてくれます。',
             'create_first_filter' => '最初のフィルターを作ってみる',
-            'no_matching_filters' => '<strong> :searchQuery </strong>に一致するフィルターは見つかりませんでした。',
+            'no_matching_filters' => ' :searchQuery に一致するフィルターは見つかりませんでした。',
             'no_matching_filters_message' => 'フィルター機能を使えば、特定の言葉を含む投稿をタイムラインから取り除いてくれます。',
             'create_new_filter' => '新規フィルターを作成',
             'filter_title' => 'フィルター名',

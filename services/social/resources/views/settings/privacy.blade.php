@@ -31,7 +31,12 @@
       <label class="form-check-label font-weight-bold" for="crawlable">
         {{__('settings.privacy.disable_search_engine_indexing')}}
       </label>
-      <p class="text-muted small help-text">{{__('settings.privacy.when_your_account_is_visible_to_search_engines_etc')}} {!! $settings->is_private ? '<strong>'.__('settings.privacy.not_available_when_your_account_is_private').'</strong>' : ''!!}</p>
+      <p class="text-muted small help-text">
+        {{ __('settings.privacy.when_your_account_is_visible_to_search_engines_etc') }}
+        @if($settings->is_private)
+          <strong>{{ __('settings.privacy.not_available_when_your_account_is_private') }}</strong>
+        @endif
+      </p>
     </div>
 
     <div class="form-check pb-3">
@@ -39,7 +44,12 @@
       <label class="form-check-label font-weight-bold" for="indexable">
         {{__('settings.privacy.include_public_posts_in_search_results')}}
       </label>
-        <p class="text-muted small help-text">{{__('settings.privacy.your_public_posts_may_appear_in_search_results_etc')}} {!! $settings->is_private ? '<strong>'.__('settings.privacy.not_available_when_your_account_is_private').'</strong>' : ''!!}</p>
+        <p class="text-muted small help-text">
+          {{ __('settings.privacy.your_public_posts_may_appear_in_search_results_etc') }}
+          @if($settings->is_private)
+            <strong>{{ __('settings.privacy.not_available_when_your_account_is_private') }}</strong>
+          @endif
+        </p>
     </div>
 
 
@@ -48,7 +58,12 @@
       <label class="form-check-label font-weight-bold" for="is_suggestable">
         {{__('settings.privacy.show_on_directory')}}
       </label>
-      <p class="text-muted small help-text">{{__('settings.privacy.when_this_option_is_enabled_your_profile_is_etc')}} {!! $settings->is_private ? '<strong>'.__('settings.privacy.not_available_when_your_account_is_private').'</strong>' : ''!!}</p>
+      <p class="text-muted small help-text">
+        {{ __('settings.privacy.when_this_option_is_enabled_your_profile_is_etc') }}
+        @if($settings->is_private)
+          <strong>{{ __('settings.privacy.not_available_when_your_account_is_private') }}</strong>
+        @endif
+      </p>
     </div>
 
     <div class="form-check pb-3">

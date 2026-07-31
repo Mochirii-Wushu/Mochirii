@@ -7,6 +7,7 @@ use App\Jobs\StatusPipeline\StatusLocalUpdateActivityPubDeliverPipeline;
 use App\Models\StatusEdit;
 use App\Services\Status\UpdateStatusService;
 use App\Services\StatusService;
+use App\Services\SanitizeService;
 use App\Status;
 use App\Util\Lexer\Autolink;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class StatusEditController extends Controller
             $caption = nl2br(strip_tags(str_replace('</p>', "\n", $edit->caption)));
 
             return [
-                'content' => Autolink::create()->autolink($caption),
+                'content' => app(SanitizeService::class)->richText(Autolink::create()->autolink($caption)),
                 'spoiler_text' => $edit->spoiler_text,
                 'sensitive' => (bool) $edit->is_nsfw,
                 'created_at' => str_replace('+00:00', 'Z', $edit->created_at->format(DATE_RFC3339_EXTENDED)),

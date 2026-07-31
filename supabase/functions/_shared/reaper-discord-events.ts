@@ -1,5 +1,14 @@
 import { asArray, asRecord, normalizedMime, safeString, snowflake, type JsonRecord } from "./discord-interaction-helpers.ts";
-import { siteUrl } from "./public-origins.ts";
+import {
+  GALLERY_SOURCE_IMAGE_MAX_BYTES,
+  validateGallerySourceBytes,
+} from "./gallery-source-image.ts";
+import {
+  exactHttpsUrl,
+  fetchWithTimeout,
+  readBoundedResponseBytes,
+} from "./outbound-http.ts";
+import { SITE_ORIGIN, siteUrl } from "./public-origins.ts";
 
 export const DISCORD_EVENT_PRIVACY_GUILD_ONLY = 2;
 export const DISCORD_EVENT_ENTITY_EXTERNAL = 3;
@@ -19,6 +28,9 @@ export type ScheduleEvent = {
 };
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const EVENT_COVER_FETCH_TIMEOUT_MS = 10_000;
+const WEBSITE_ORIGINS = new Set([SITE_ORIGIN]);
+const EVENT_COVER_SEARCH_PARAMS = new Set(["v"]);
 const eventCoverImageCache = new Map<string, string>();
 const MONTHLY_RULE_WEEKDAYS: Readonly<Record<string, number>> = {
   "next-first-saturday": 6,
@@ -85,7 +97,7 @@ function localToUtcIso(localDate: string, time: string, offset: number): string 
 
 export function scheduleAssetUrl(value: unknown, versionValue?: unknown): string | null {
   const raw = safeString(value, 300);
-  if (!raw) return null;
+  if (!raw || raw.split(/[\\/]/).includes("..")) return null;
   const version = safeString(versionValue, 80);
   const withVersion = (url: string) => {
     if (!version) return url;
@@ -93,10 +105,18 @@ export function scheduleAssetUrl(value: unknown, versionValue?: unknown): string
     parsed.searchParams.set("v", version);
     return parsed.toString();
   };
-  if (/^https:\/\/[^\s]+$/i.test(raw)) return withVersion(raw);
-  const normalized = raw.replace(/^\.?\//, "");
-  if (!normalized.startsWith("assets/")) return null;
-  return withVersion(siteUrl(normalized));
+  try {
+    const candidate = /^https:\/\/[^\s]+$/i.test(raw)
+      ? raw
+      : siteUrl(raw.replace(/^\.?\//, ""));
+    return exactHttpsUrl(withVersion(candidate), {
+      allowedOrigins: WEBSITE_ORIGINS,
+      pathPrefix: "/assets/",
+      allowedSearchParams: EVENT_COVER_SEARCH_PARAMS,
+    });
+  } catch {
+    return null;
+  }
 }
 
 export function recurrenceRule(value: unknown, startIso: string): JsonRecord | null {
@@ -254,27 +274,45 @@ function bytesToBase64(bytes: Uint8Array): string {
 }
 
 export async function eventCoverImageData(url: string, userAgent = "Mochirii-Reaper-RankSync/1.0"): Promise<string> {
-  const cached = eventCoverImageCache.get(url);
+  const trustedUrl = exactHttpsUrl(url, {
+    allowedOrigins: WEBSITE_ORIGINS,
+    pathPrefix: "/assets/",
+    allowedSearchParams: EVENT_COVER_SEARCH_PARAMS,
+  });
+  if (!trustedUrl) throw new Error("Event cover image URL is not allowed.");
+
+  const cached = eventCoverImageCache.get(trustedUrl);
   if (cached) return cached;
 
-  const response = await fetch(url, {
-    headers: {
-      Accept: "image/png,image/jpeg,image/webp",
-      "User-Agent": userAgent,
+  const response = await fetchWithTimeout(
+    trustedUrl,
+    {
+      headers: {
+        Accept: "image/png,image/jpeg,image/webp",
+        "User-Agent": userAgent,
+      },
     },
-  });
+    { timeoutMs: EVENT_COVER_FETCH_TIMEOUT_MS },
+  );
   const contentType = normalizedMime(response.headers.get("Content-Type"));
   if (!response.ok || !contentType) {
     throw new Error(`Event cover image fetch failed with HTTP ${response.status}.`);
   }
 
-  const bytes = new Uint8Array(await response.arrayBuffer());
+  const bytes = await readBoundedResponseBytes(
+    response,
+    GALLERY_SOURCE_IMAGE_MAX_BYTES,
+  );
   if (!bytes.length) {
     throw new Error("Event cover image fetch returned an empty file.");
   }
+  const validation = await validateGallerySourceBytes(bytes, contentType);
+  if (!validation.ok) {
+    throw new Error("Event cover image validation failed.");
+  }
 
   const data = `data:${contentType};base64,${bytesToBase64(bytes)}`;
-  eventCoverImageCache.set(url, data);
+  eventCoverImageCache.set(trustedUrl, data);
   return data;
 }
 

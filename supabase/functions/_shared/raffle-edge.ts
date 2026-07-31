@@ -20,12 +20,16 @@ import {
 } from "./raffle-draw.ts";
 import { selectCurrentCycleCandidate } from "./raffle-schedule.ts";
 import { verifyAuthenticatedUser } from "./verified-auth.ts";
+import {
+  discordFetch,
+  discordMemberRoleState,
+  type DiscordFetchResult,
+} from "./discord-api.ts";
 
 export type JsonRecord = Record<string, unknown>;
 
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_MODERATOR_ROLE_IDS = ["1078630751165222984"];
-const DISCORD_API_BASE = "https://discord.com/api/v10";
 
 export const PUBLIC_CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -342,14 +346,25 @@ export async function requireRaffleModerator(
     };
   }
 
-  const response = await (dependencies.fetcher || fetch)(
-    `${DISCORD_API_BASE}/guilds/${EXPECTED_DISCORD_GUILD_ID}/members/${
-      encodeURIComponent(discordUserId)
-    }`,
-    {
-      headers: { Authorization: `Bot ${botToken}`, Accept: "application/json" },
-    },
-  );
+  let response: DiscordFetchResult;
+  try {
+    response = await discordFetch(
+      `/guilds/${EXPECTED_DISCORD_GUILD_ID}/members/${encodeURIComponent(discordUserId)}`,
+      {
+        token: botToken,
+        fetcher: dependencies.fetcher,
+      },
+    );
+  } catch {
+    return {
+      ok: false,
+      response: jsonResponse({
+        ok: false,
+        error: "leader_access_unavailable",
+        message: "Raffle leader access could not be verified.",
+      }, 503),
+    };
+  }
   if (!response.ok) {
     const status = response.status === 429
       ? 429
@@ -366,10 +381,20 @@ export async function requireRaffleModerator(
     };
   }
 
-  const guildMember = asRecord(await response.json());
-  const roles = new Set(stringArray(guildMember.roles));
+  const guildMember = discordMemberRoleState(response.data);
+  if (!guildMember) {
+    return {
+      ok: false,
+      response: jsonResponse({
+        ok: false,
+        error: "leader_access_unavailable",
+        message: "Raffle leader access could not be verified.",
+      }, 502),
+    };
+  }
+  const roles = new Set(guildMember.roles);
   if (
-    guildMember.pending === true ||
+    guildMember.pending ||
     !EXPECTED_MODERATOR_ROLE_IDS.every((roleId) => roles.has(roleId))
   ) {
     return {

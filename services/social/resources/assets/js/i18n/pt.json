@@ -261,7 +261,7 @@
             "no_filters": "Voc\u00ea ainda n\u00e3o tem nenhum filtro de conte\u00fado",
             "no_filters_message": "Os filtros ajudam voc\u00ea a ocultar conte\u00fado que cont\u00e9m palavras ou frases espec\u00edficas das suas linhas do tempo.",
             "create_first_filter": "Crie Seu Primeiro Filtro",
-            "no_matching_filters": "Voc\u00ea n\u00e3o tem nenhum filtro de conte\u00fado que corresponda a <strong>:searchQuery</strong>.",
+            "no_matching_filters": "Voc\u00ea n\u00e3o tem nenhum filtro de conte\u00fado que corresponda a {searchQuery}.",
             "no_matching_filters_message": "Os filtros ajudam voc\u00ea a ocultar conte\u00fado que cont\u00e9m palavras ou frases espec\u00edficas das suas linhas do tempo.",
             "create_new_filter": "Criar Novo Filtro",
             "filter_title": "T\u00edtulo do Filtro",

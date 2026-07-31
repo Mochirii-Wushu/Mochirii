@@ -158,10 +158,14 @@
 
                     hls.on(Hls.Events.LEVEL_SWITCHED, function(event, data) {
                         var span = document.querySelector(".plyr__menu__container [data-plyr='quality'][value='0'] span")
+						if (!span) {
+							return;
+						}
                         if (hls.autoLevelEnabled) {
-                            span.innerHTML = `Auto (${hls.levels[data.level].height}p)`
+							const height = Number(hls.levels[data.level]?.height);
+							span.textContent = Number.isFinite(height) ? `Auto (${height}p)` : 'Auto'
                         } else {
-                            span.innerHTML = `Auto`
+							span.textContent = 'Auto'
                         }
                     })
 

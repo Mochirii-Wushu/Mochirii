@@ -9,7 +9,7 @@
 
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{!! $title ?? config('mochirii-branding.display_name') !!}</title>
+	<title>{{ $title ?? config('mochirii-branding.display_name') }}</title>
 
 	<meta property="og:site_name" content="{{ config('mochirii-branding.display_name') }}">
 	<meta property="og:title" content="{{ $title ?? config('mochirii-branding.display_name') }}">

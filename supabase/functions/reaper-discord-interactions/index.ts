@@ -44,6 +44,7 @@ import {
   successMessage,
 } from "../_shared/discord-interaction-helpers.ts";
 import { readBoundedUtf8RequestBody } from "../_shared/bounded-request-body.ts";
+import { discordFetch as boundedDiscordFetch } from "../_shared/discord-api.ts";
 import { verifyDiscordSignature } from "../_shared/discord-signature.ts";
 import {
   createDiscordGalleryIngestHeaders,
@@ -54,6 +55,11 @@ import {
 } from "../_shared/discord-gallery-ingest-auth.ts";
 import { SITE_ORIGIN, siteUrl } from "../_shared/public-origins.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
+import {
+  exactHttpsUrl,
+  fetchWithTimeout,
+  readBoundedResponseJson,
+} from "../_shared/outbound-http.ts";
 import { processEventSync } from "../_shared/reaper-event-sync-workflow.ts";
 import {
   handlePhotoDayPollCommand,
@@ -79,7 +85,6 @@ declare const EdgeRuntime: {
   waitUntil(promise: Promise<unknown>): void;
 };
 
-const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
 const DISCORD_API_USER_AGENT = `Mochirii-Reaper-RankSync/1.0 (${SITE_ORIGIN})`;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_DISCORD_GALLERY_CHANNEL_ID = "1508077313965817856";
@@ -90,6 +95,9 @@ const EXPECTED_MODMAIL_LOG_CHANNEL_ID = MODMAIL_LOG_CHANNEL_ID;
 const EXPECTED_MODMAIL_MODERATOR_ROLE_ID = MODMAIL_MODERATOR_ROLE_ID;
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
 const GUILD_SCHEDULE_URL = siteUrl("data/guild-schedule.json");
+const EXPECTED_SUPABASE_ORIGIN = "https://deyvmtncimmcinldjyqe.supabase.co";
+const SUBMISSION_FUNCTION_TIMEOUT_MS = 10_000;
+const SUBMISSION_FUNCTION_MAX_RESPONSE_BYTES = 64 * 1024;
 const MAX_DISCORD_INTERACTION_BODY_BYTES = 64 * 1024;
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const MANAGE_EVENTS_PERMISSION = 1n << 33n;
@@ -154,8 +162,8 @@ function discordApiHeaders(contentType = false): Headers {
   return headers;
 }
 
-function retryAfterMs(response: Response, data: unknown): number {
-  const headerSeconds = Number(response.headers.get("Retry-After") || "");
+function retryAfterMs(headers: Headers, data: unknown): number {
+  const headerSeconds = Number(headers.get("Retry-After") || "");
   const bodySeconds = Number(asRecord(data).retry_after || "");
   const seconds = Number.isFinite(headerSeconds) && headerSeconds > 0 ? headerSeconds : bodySeconds;
   if (!Number.isFinite(seconds) || seconds <= 0) return 0;
@@ -168,19 +176,14 @@ function wait(ms: number): Promise<void> {
 
 async function discordApi(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; data: unknown }> {
   for (let attempt = 0; attempt <= DISCORD_API_MAX_RETRIES; attempt += 1) {
-    const response = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
-    const text = await response.text();
-    let data: unknown = null;
-    if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = text;
-      }
-    }
+    const response = await boundedDiscordFetch(path, {
+      ...init,
+      token: Deno.env.get("DISCORD_BOT_TOKEN") || "",
+    });
+    const data = response.ok ? response.data : response.error;
 
     if (response.status === 429 && attempt < DISCORD_API_MAX_RETRIES) {
-      const delay = retryAfterMs(response, data);
+      const delay = retryAfterMs(response.headers, data);
       if (delay > 0 && delay <= DISCORD_FUNCTION_RETRY_BUDGET_MS) {
         await wait(delay);
         continue;
@@ -210,14 +213,16 @@ async function fetchGuildMembers(): Promise<JsonRecord[]> {
 
     const batch = asArray(response.data).map(asRecord);
     members.push(...batch);
-    if (batch.length < 1000) break;
+    if (batch.length < 1000) return members;
 
     const lastUserId = memberUserId(batch[batch.length - 1]);
-    if (!lastUserId || lastUserId === after) break;
+    if (!lastUserId || lastUserId === after) {
+      throw new Error("Discord guild member pagination did not advance.");
+    }
     after = lastUserId;
   }
 
-  return members;
+  throw new Error("Discord guild member pagination exceeded the configured page limit.");
 }
 
 async function fetchGuildRoles(): Promise<JsonRecord[]> {
@@ -240,7 +245,7 @@ async function fetchGuildMember(userId: string): Promise<JsonRecord | null> {
   if (response.status === 404) return null;
 
   if (!response.ok) {
-    throw new Error(`Guild member ${userId} fetch failed with Discord API ${response.status}.`);
+    throw new Error(`Guild member fetch failed with Discord API ${response.status}.`);
   }
 
   return asRecord(response.data);
@@ -423,8 +428,14 @@ async function processModmailAudit(interactionToken: string, applicationId: stri
   }
 }
 
-function sourceEndpoint(supabaseUrl: string): string {
-  return `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/submit-discord-gallery-image`;
+function sourceEndpoint(supabaseUrl: string): string | null {
+  return exactHttpsUrl(
+    `${supabaseUrl.replace(/\/+$/, "")}/functions/v1/submit-discord-gallery-image`,
+    {
+      allowedOrigins: new Set([EXPECTED_SUPABASE_ORIGIN]),
+      exactPathname: "/functions/v1/submit-discord-gallery-image",
+    },
+  );
 }
 
 async function processSubmission(payload: JsonRecord, interactionToken: string, applicationId: string): Promise<void> {
@@ -436,8 +447,9 @@ async function processSubmission(payload: JsonRecord, interactionToken: string, 
   const activeKey = ingestKeys
     ? discordGalleryIngestActiveKey(ingestKeys, activeKeyId)
     : null;
+  const submissionEndpoint = sourceEndpoint(supabaseUrl);
 
-  if (!supabaseUrl || !ingestKeys || !activeKey) {
+  if (!submissionEndpoint || !ingestKeys || !activeKey) {
     console.error("reaper-discord-interactions missing submit-discord-gallery-image configuration", {
       hasSupabaseUrl: Boolean(supabaseUrl),
       hasIngestHmacKeys: Boolean(ingestKeys),
@@ -458,15 +470,31 @@ async function processSubmission(payload: JsonRecord, interactionToken: string, 
       activeKeyId: activeKey.keyId,
       rawBody,
     });
-    const response = await fetch(sourceEndpoint(supabaseUrl), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders,
+    const response = await fetchWithTimeout(
+      submissionEndpoint,
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: rawBody,
       },
-      body: rawBody,
-    });
-    const body = asRecord(await response.json().catch(() => ({})));
+      { timeoutMs: SUBMISSION_FUNCTION_TIMEOUT_MS },
+    );
+    const contentType = response.headers.get("content-type")?.split(";", 1)[0]
+      ?.trim().toLowerCase();
+    if (contentType !== "application/json") {
+      throw new Error("Gallery submission response type was invalid.");
+    }
+    const body = asRecord(
+      await readBoundedResponseJson(
+        response,
+        SUBMISSION_FUNCTION_MAX_RESPONSE_BYTES,
+      ),
+    );
 
     if (!response.ok || body.ok !== true) {
       await editOriginalInteractionResponse(

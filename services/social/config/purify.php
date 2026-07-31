@@ -2,6 +2,52 @@
 
 use Stevebauman\Purify\Definitions\Html5Definition;
 
+$mochiriiRichText = [
+    'Core.Encoding' => 'utf-8',
+    'HTML.Doctype' => 'HTML 4.01 Transitional',
+    'HTML.Allowed' => 'a[href|title|rel|class],p[class],span[class],strong,em,del,b,i,s,strike,blockquote,code,pre,h1,h2,h3,h4,h5,h6,ul,ol,li,br',
+    'HTML.ForbiddenElements' => '',
+    'CSS.AllowedProperties' => '',
+    'AutoFormat.AutoParagraph' => false,
+    'AutoFormat.RemoveEmpty' => false,
+    'Attr.AllowedClasses' => [
+        'h-feed',
+        'h-entry',
+        'h-cite',
+        'h-card',
+        'p-author',
+        'p-name',
+        'p-in-reply-to',
+        'p-repost-of',
+        'p-comment',
+        'u-photo',
+        'u-uid',
+        'u-url',
+        'dt-published',
+        'e-content',
+        'mention',
+        'hashtag',
+        'list-slug',
+        'ellipsis',
+        'invisible',
+    ],
+    'Attr.AllowedRel' => [
+        'noreferrer',
+        'noopener',
+        'nofollow',
+    ],
+    'HTML.TargetBlank' => true,
+    'HTML.Nofollow' => true,
+    'URI.DefaultScheme' => 'https',
+    'URI.DisableExternalResources' => true,
+    'URI.DisableResources' => true,
+    'URI.AllowedSchemes' => [
+        'http' => true,
+        'https' => true,
+    ],
+    'URI.HostBlacklist' => config('costar.enabled') ? config('costar.domain.block') : [],
+];
+
 return [
 
     /*
@@ -38,6 +84,8 @@ return [
     */
 
     'configs' => [
+
+        'mochirii_rich_text' => $mochiriiRichText,
 
         'default' => [
             'Core.Encoding' => 'utf-8',

@@ -66,7 +66,13 @@
             <div v-if="searchQuery && filteredFilters.length === 0" class="bg-light p-4 rounded text-center border">
                 <div class="py-3">
                     <i class="fas fa-filter text-secondary fa-3x mb-3"></i>
-                    <p class="lead text-secondary" v-html="$t('settings.filters.no_matching_filters', { searchQuery })"></p>
+                    <i18n
+                        path="settings.filters.no_matching_filters"
+                        tag="p"
+                        class="lead text-secondary"
+                    >
+                        <strong place="searchQuery">{{ searchQuery }}</strong>
+                    </i18n>
                     <p class="text-muted small mt-2">
                         {{ $t('settings.filters.no_matching_filters_message') }}
                     </p>

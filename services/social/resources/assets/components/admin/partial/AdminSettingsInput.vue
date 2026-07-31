@@ -12,7 +12,7 @@
                 @input="$emit('change', $event.target.value)"
                 :disabled="isDisabled" />
         </div>
-        <p v-if="description && description.length" class="help-text small text-muted mb-0" v-html="description">
+        <p v-if="description && description.length" class="help-text small text-muted mb-0" v-text="description">
         </p>
     </div>
 </template>

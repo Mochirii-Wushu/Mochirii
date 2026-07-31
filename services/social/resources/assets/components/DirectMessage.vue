@@ -224,7 +224,7 @@
 								<div class="media-body">
 									<p
 										class="display-name"
-										v-html="conversationProfile.display_name"
+										v-text="conversationProfile.display_name"
 										@click="gotoProfile(conversationProfile)"
 										>
 									</p>

@@ -1,7 +1,7 @@
 <x-mail::message>
 # {{ $title }}
 
-## {!! $message !!}
+## {{ $message }}
 
 <x-mail::button :url="$url">
 View Report

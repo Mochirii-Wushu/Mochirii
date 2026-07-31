@@ -35,7 +35,7 @@
                             <img class="media-item" src="{{ $media['url'] }}" alt="{{ $media['description'] ?? '' }}">
                         @endforeach
                     </div>
-                    <p style="padding:10px;">{!! $item['content'] !!}</p>
+                    <div style="padding:10px;">{!! str_replace(']]>', ']]]]><![CDATA[>', app(\App\Services\SanitizeService::class)->richText($item['content'] ?? '')) !!}</div>
                     ]]>
                 </content>
                 <link rel="alternate" href="{{ $item['url'] }}" />

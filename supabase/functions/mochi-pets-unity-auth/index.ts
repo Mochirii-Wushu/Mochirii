@@ -13,6 +13,10 @@ import {
   unityCustomId,
   upsertUnityPlayerLink,
 } from "../_shared/mochi-pets-alpha.ts";
+import {
+  fetchWithTimeout,
+  readBoundedResponseJson,
+} from "../_shared/outbound-http.ts";
 
 type UnityTokenCache = {
   accessToken: string;
@@ -20,6 +24,8 @@ type UnityTokenCache = {
 };
 
 let cachedStatelessToken: UnityTokenCache | null = null;
+const UNITY_REQUEST_TIMEOUT_MS = 10_000;
+const UNITY_MAX_RESPONSE_BYTES = 64 * 1024;
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS_HEADERS });
@@ -157,17 +163,33 @@ async function signInUnityCustomId(
   const statelessToken = await unityStatelessToken(config);
   if (!statelessToken.ok) return statelessToken;
 
-  const response = await fetch(`https://player-auth.services.api.unity.com/v1/projects/${encodeURIComponent(config.projectId)}/authentication/server/custom-id`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${statelessToken.accessToken}`,
-      "Content-Type": "application/json",
-      "UnityEnvironment": config.environmentName,
-    },
-    body: JSON.stringify({ externalId: customId, signInOnly: false }),
-  });
-
-  const body = await safeJson(response);
+  let response: Response;
+  let body: Record<string, unknown>;
+  try {
+    response = await fetchWithTimeout(
+      `https://player-auth.services.api.unity.com/v1/projects/${encodeURIComponent(config.projectId)}/authentication/server/custom-id`,
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Authorization": `Bearer ${statelessToken.accessToken}`,
+          "Content-Type": "application/json",
+          "UnityEnvironment": config.environmentName,
+        },
+        body: JSON.stringify({ externalId: customId, signInOnly: false }),
+      },
+      { timeoutMs: UNITY_REQUEST_TIMEOUT_MS },
+    );
+    body = await safeJson(response);
+  } catch {
+    return {
+      ok: false,
+      response: jsonResponse(
+        { ok: false, error: "unity_custom_id_failed", message: "Unity player authentication could not be completed." },
+        503,
+      ),
+    };
+  }
   if (!response.ok) {
     return {
       ok: false,
@@ -199,19 +221,29 @@ async function unityStatelessToken(config: {
   }
 
   const authorization = btoa(`${config.serviceAccountKeyId}:${config.serviceAccountSecret}`);
-  const response = await fetch(
-    `https://services.api.unity.com/auth/v1/token-exchange?projectId=${encodeURIComponent(config.projectId)}&environmentId=${encodeURIComponent(config.environmentId)}`,
-    {
-      method: "POST",
-      headers: {
-        "Authorization": `Basic ${authorization}`,
-        "Content-Type": "application/json",
+  let response: Response;
+  let body: Record<string, unknown>;
+  try {
+    response = await fetchWithTimeout(
+      `https://services.api.unity.com/auth/v1/token-exchange?projectId=${encodeURIComponent(config.projectId)}&environmentId=${encodeURIComponent(config.environmentId)}`,
+      {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Authorization": `Basic ${authorization}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ scopes: [] }),
       },
-      body: JSON.stringify({ scopes: [] }),
-    },
-  );
-
-  const body = await safeJson(response);
+      { timeoutMs: UNITY_REQUEST_TIMEOUT_MS },
+    );
+    body = await safeJson(response);
+  } catch {
+    return {
+      ok: false,
+      response: jsonResponse({ ok: false, error: "unity_token_exchange_failed", message: "Unity service token exchange failed." }, 503),
+    };
+  }
   const accessToken = safeString(body.accessToken, 8192);
   if (!response.ok || !accessToken) {
     return {
@@ -230,9 +262,10 @@ async function unityStatelessToken(config: {
 }
 
 async function safeJson(response: Response): Promise<Record<string, unknown>> {
-  try {
-    return asRecord(await response.json());
-  } catch {
-    return {};
-  }
+  const contentType = response.headers.get("content-type")?.split(";", 1)[0]
+    ?.trim().toLowerCase();
+  if (contentType !== "application/json") throw new Error("invalid_response_type");
+  return asRecord(
+    await readBoundedResponseJson(response, UNITY_MAX_RESPONSE_BYTES),
+  );
 }

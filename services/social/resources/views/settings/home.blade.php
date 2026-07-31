@@ -152,14 +152,22 @@ $(document).ready(function() {
 			el.attr('rows', '4');
 		}
 
-		let val = len + ' / ' + limit;
-
-		if(len > limit) {
-			let diff = len - limit;
-			val = '<span class="text-danger">-' + diff + '</span> / ' + limit;
+		function updateBioCounter(length, maxLength) {
+			document.querySelectorAll('.bio-counter').forEach(counter => {
+				counter.replaceChildren();
+				if(length > maxLength) {
+					let overflow = document.createElement('span');
+					overflow.classList.add('text-danger');
+					overflow.textContent = '-' + (length - maxLength);
+					counter.appendChild(overflow);
+					counter.appendChild(document.createTextNode(' / ' + maxLength));
+					return;
+				}
+				counter.textContent = length + ' / ' + maxLength;
+			});
 		}
 
-		$('.bio-counter').html(val);
+		updateBioCounter(len, limit);
 
 		$('#bio').on('change keyup paste', function(e) {
 			let el = $(this);
@@ -170,14 +178,7 @@ $(document).ready(function() {
 				el.attr('rows', '4');
 			}
 
-			let val = len + ' / ' + limit;
-
-			if(len > limit) {
-				let diff = len - limit;
-				val = '<span class="text-danger">-' + diff + '</span> / ' + limit;
-			}
-
-			$('.bio-counter').html(val);
+			updateBioCounter(len, limit);
 		});
 
 		$(document).on('click', '.modal-close', function(e) {
@@ -191,7 +192,16 @@ $(document).ready(function() {
 				var reader = new FileReader();
 
 				reader.addEventListener("load", function() {
-						$('#previewAvatar').html('<img src="' + reader.result + '" class="rounded-circle box-shadow mb-3" width="100%" height="100%"/>');
+						let preview = document.getElementById('previewAvatar');
+						let image = document.createElement('img');
+						image.src = String(reader.result || '');
+						image.classList.add('rounded-circle', 'box-shadow', 'mb-3');
+						image.width = 320;
+						image.height = 320;
+						image.style.width = '100%';
+						image.style.height = '100%';
+						image.alt = 'Profile photo preview';
+						preview.replaceChildren(image);
 				}, false);
 
 				if (file) {

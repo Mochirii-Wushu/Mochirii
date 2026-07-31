@@ -39,6 +39,8 @@ const oauthDecisionRoute = read("apps/web/app/api/oauth/decision/route.ts");
   "await supabaseServerFetch(endpoint",
 ].forEach((snippet) => assertIncludes("OAuth decision bounded transport", oauthDecisionRoute, snippet));
 const verifyDiscordMember = read("supabase/functions/verify-discord-member/index.ts");
+const discordApi = read("supabase/functions/_shared/discord-api.ts");
+const outboundHttp = read("supabase/functions/_shared/outbound-http.ts");
 const memberVerificationIdentity = read("supabase/functions/_shared/member-verification-identity.ts");
 const memberVerificationIdentityTest = read("supabase/functions/_shared/member-verification-identity_test.ts");
 const memberAccessPolicy = read("supabase/functions/_shared/member-access-policy.ts");
@@ -248,19 +250,36 @@ assertIncludes("check-all", checkAll, '["test:member-access-refresh", ["deno", "
   assertIncludes(label, source, "resolveDiscordIdentity(");
 });
 
-assertIncludes(
-  "verify-discord-member bounded Discord lookup",
-  verifyDiscordMember,
-  "AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT_MS)",
+[
+  "../_shared/discord-api.ts",
+  "discordFetch(",
+  "timeoutMs: DISCORD_REQUEST_TIMEOUT_MS",
+  "discordMemberRoleState(",
+].forEach((snippet) =>
+  assertIncludes("verify-discord-member bounded Discord lookup", verifyDiscordMember, snippet)
 );
 
 [
   '../_shared/member-access-policy.ts',
   'currentMemberAccess({',
   "discordVerificationNeedsRefresh(profile, discordUserId)",
-  "AbortSignal.timeout(",
+  "discordFetch(",
+  "timeoutMs: options.requestTimeoutMs || DISCORD_REQUEST_TIMEOUT_MS",
+  "discordMemberRoleState(",
   "discordResult.status === 429 ? 429 : 503",
 ].forEach((snippet) => assertIncludes("verify-member-access shared access policy", verifyMemberAccess, snippet));
+
+[
+  'export const DISCORD_API_BASE = "https://discord.com/api/v10"',
+  "fetchWithTimeout(",
+  "readBoundedResponseText(",
+  "discordMemberRoleState(",
+].forEach((snippet) => assertIncludes("shared bounded Discord API", discordApi, snippet));
+[
+  'redirect: "error"',
+  "AbortSignal.timeout(options.timeoutMs)",
+  "readBoundedResponseBytes(",
+].forEach((snippet) => assertIncludes("shared bounded outbound transport", outboundHttp, snippet));
 
 assertIncludes(
   "Social authorization decision membership refresh",

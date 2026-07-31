@@ -36,7 +36,7 @@
                     class="form-control"
                     id="css"
                     name="css"
-                    rows="5">{!!config_cache('uikit.custom.css')!!}</textarea>
+                    rows="5">{{ config_cache('uikit.custom.css') }}</textarea>
             </div>
             <button class="btn btn-primary">Save</button>
         </form>

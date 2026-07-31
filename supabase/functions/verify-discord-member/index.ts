@@ -3,7 +3,6 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   asRecord,
-  asStringArray,
   defaultDisplayName,
   discordAvatarUrl,
   resolveDiscordIdentity,
@@ -12,6 +11,13 @@ import {
   type SyncedProviderIdentity,
 } from "../_shared/member-verification-identity.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
+import {
+  discordFetch,
+  discordMemberRoleState,
+  discordRetryAfterSeconds,
+  type DiscordFetchResult,
+} from "../_shared/discord-api.ts";
+import { OutboundHttpError } from "../_shared/outbound-http.ts";
 
 type VerificationResponse = {
   verified: boolean;
@@ -29,7 +35,6 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_REQUEST_TIMEOUT_MS = 5_000;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
@@ -265,21 +270,19 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
-  let discordResponse: Response;
+  let discordResponse: DiscordFetchResult;
   try {
-    discordResponse = await fetch(
-      `${DISCORD_API_BASE}/guilds/${encodeURIComponent(guildId)}/members/${encodeURIComponent(discordUserId)}`,
+    discordResponse = await discordFetch(
+      `/guilds/${encodeURIComponent(guildId)}/members/${encodeURIComponent(discordUserId)}`,
       {
-        headers: {
-          Authorization: `Bot ${botToken}`,
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(DISCORD_REQUEST_TIMEOUT_MS),
+        token: botToken,
+        timeoutMs: DISCORD_REQUEST_TIMEOUT_MS,
       },
     );
   } catch (error) {
     console.warn("verify-discord-member Discord lookup unavailable", {
-      cause: error instanceof DOMException && error.name === "TimeoutError"
+      cause: error instanceof DOMException && error.name === "TimeoutError" ||
+          error instanceof OutboundHttpError && error.code === "request_timeout"
         ? "timeout"
         : "network",
     });
@@ -298,7 +301,7 @@ async function handleRequest(req: Request): Promise<Response> {
   }
 
   if (discordResponse.status === 429) {
-    const retryAfter = discordResponse.headers.get("retry-after");
+    const retryAfter = discordRetryAfterSeconds(discordResponse.headers);
     console.warn("verify-discord-member Discord rate limited", {
       retryAfter,
     });
@@ -311,7 +314,7 @@ async function handleRequest(req: Request): Promise<Response> {
         pending: false,
         missingRoleIds: requiredRoleIds,
         memberStatus: currentStatus,
-        message: retryAfter
+        message: retryAfter !== null
           ? `Discord verification is rate limited. Try again in ${retryAfter} seconds.`
           : "Discord verification is rate limited. Please try again soon.",
       }),
@@ -377,7 +380,6 @@ async function handleRequest(req: Request): Promise<Response> {
   if (!discordResponse.ok) {
     console.error("verify-discord-member Discord lookup failed", {
       status: discordResponse.status,
-      statusText: discordResponse.statusText,
     });
 
     return jsonResponse(
@@ -394,12 +396,33 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
-  const member = await discordResponse.json() as JsonRecord;
+  const roleState = discordMemberRoleState(
+    discordResponse.data,
+    discordUserId,
+  );
+  if (!roleState) {
+    console.error("verify-discord-member Discord response invalid", {
+      status: discordResponse.status,
+    });
+    return jsonResponse(
+      verificationBody({
+        verified: false,
+        hasGuildMembership: false,
+        hasRequiredRoles: false,
+        pending: false,
+        missingRoleIds: requiredRoleIds,
+        memberStatus: currentStatus,
+        message: "Discord verification could not be completed. Please try again later.",
+      }),
+      502,
+    );
+  }
+  const member = asRecord(discordResponse.data) as JsonRecord;
   const discordUser = asRecord(member.user);
-  const roles = asStringArray(member.roles);
+  const roles = roleState.roles;
   const roleSet = new Set(roles);
   const missingRoleIds = requiredRoleIds.filter((roleId) => !roleSet.has(roleId));
-  const pending = member.pending === true;
+  const pending = roleState.pending;
   const hasGuildMembership = true;
   const hasRequiredRoles = missingRoleIds.length === 0;
   const eligibleStatus = hasGuildMembership && hasRequiredRoles && !pending;

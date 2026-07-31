@@ -95,7 +95,7 @@
         <span class="username font-weight-bold">
           <bdi><a class="text-dark" href="{{$item->profile->url()}}" v-pre>{{$item->profile->username}}</a></bdi>
         </span>
-        <span v-pre>{!! $item->rendered ?? e($item->caption) !!}</span>
+        <span v-pre>{!! app(\App\Services\SanitizeService::class)->richText($item->rendered ?? $item->caption ?? '') !!}</span>
       </p>
     </div>
     <div class="comments">

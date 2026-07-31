@@ -40,10 +40,33 @@ JWT, destination, or runbook change:
 npm run check:integration-exposure-catalog
 ```
 
-The check fails unless the catalog matches all 45 configured functions and the
-reviewed `28 verify_jwt=true / 17 false` split. A false gateway setting is not
+The check fails unless the catalog matches all 46 configured functions and the
+reviewed `29 verify_jwt=true / 17 false` split. A false gateway setting is not
 synonymous with anonymous access: the catalog must resolve it to either a
 bounded public projection or an explicit in-handler caller boundary.
+
+## Edge response contracts
+
+[`edge-response-contracts.v1.json`](edge-response-contracts.v1.json) is the
+machine-readable field and sensitivity allowlist for every configured Edge
+Function response state. It records explicit nested paths and narrowly bounded
+classified containers for intentionally record-shaped protocol or data
+payloads. Text and binary responses have an explicit bounded whole-body
+classification. No wildcard path or secret value is allowed.
+
+The check recursively fingerprints each configured entrypoint, all of its
+repository-local imports, and the applicable Deno manifests and locks. Source
+drift fails until the response-shape states and fields are updated; descriptive
+metadata alone cannot acknowledge the drift. Validate the contract and its
+fail-closed self-tests after any Edge response or shared DTO change:
+
+```powershell
+npm run check:edge-response-contracts
+npm run test:edge-response-contracts
+```
+
+This is repository evidence only. Preview and production response parity still
+require separately authorized runtime verification.
 
 See [Hosted runtime ownership](hosted-runtime.json) and
 [the host-independence runbook](../operations/HOST-INDEPENDENCE.md) for the

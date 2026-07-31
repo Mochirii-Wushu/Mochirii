@@ -5,7 +5,7 @@
                 <input type="checkbox" :name="elementId" class="custom-control-input" :id="elementId" :checked="value" @change="$emit('change', !value)">
                 <label class="custom-control-label font-weight-bold" :for="elementId">{{ name }}</label>
             </div>
-            <p class="mt-1 mb-0 small text-muted" v-html="description"></p>
+            <p class="mt-1 mb-0 small text-muted" v-text="description"></p>
         </div>
     </div>
 </template>

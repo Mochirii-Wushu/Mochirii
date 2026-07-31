@@ -282,7 +282,7 @@
 									</div>
 								</div>
 							</div>
-							<p class="text-center mb-3 lead" v-html="status.caption"></p>
+							<p class="text-center mb-3 lead" v-text="status.caption"></p>
 							<!-- <p class="text-center text-muted small text-uppercase mb-4">2 likes</p> -->
 							<!-- <div class="d-flex justify-content-center">
 								<a class="btn btn-primary btn-sm py-1 px-4 text-uppercase font-weight-bold" :href="status.url" style="font-weight: 500">View Post</a>

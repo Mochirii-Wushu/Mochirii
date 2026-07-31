@@ -44,7 +44,7 @@ export function GalleryPage({ initialState }: { initialState: GalleryRouteState 
         title={text(meta.title, "Guild Album")}
         intro={
           <p className="lede" id="galleryDesc">
-            {text(meta.description, "Shared runs, quiet roads, and little guild moments worth keeping.")}
+            {text(meta.description, "Portraits, gatherings, and road scenes from the guild album.")}
           </p>
         }
         badges={<BadgeRow items={["Tip: click any image to view it full size."]} label="Gallery tips" />}
@@ -54,7 +54,7 @@ export function GalleryPage({ initialState }: { initialState: GalleryRouteState 
           <section className="glass-card glass-card--primary glass-pad center-stack">
             <h2 className="section-title">Gallery</h2>
             <p className="muted" id="galleryIntro">
-              Send screenshots to the Discord gallery channel when a run, view, or tiny guild moment feels worth saving.
+              Send screenshots to the Discord gallery channel when a run, view, or guild moment feels worth saving.
             </p>
             <GalleryItems initialState={initialState} />
             <p id="galleryError" className="sr-only" role="status" aria-live="polite" />

@@ -39,6 +39,11 @@ class AccountService
             return $softFail ? null : abort(404);
         }
 
+        $sanitizer = app(SanitizeService::class);
+        $res['display_name'] = $sanitizer->plainText($res['display_name'] ?? '');
+        $res['note'] = $sanitizer->richText($res['note'] ?? '');
+        $res['note_text'] = $sanitizer->plainText($res['note']);
+
         return $res;
     }
 

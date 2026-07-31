@@ -175,7 +175,7 @@
 						<img class="rounded-circle box-shadow" :src="status.account.avatar" width="32px" height="32px" onerror="this.onerror=null;this.src='/storage/avatars/default.png?v=2'" alt="avatar">
 					</div>
 					<div class="pl-2">
-						<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)" v-html="statusCardUsernameFormat(status)">
+						<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)" v-text="statusCardUsernameFormat(status)">
 							Loading...
 						</a>
 						<span v-if="status.account.is_admin" class="fa-stack" title="Admin Account" data-toggle="tooltip" style="height:1em; line-height:1em; max-width:19px;">
@@ -296,7 +296,7 @@
 							<div class="pl-2 d-flex align-items-top">
 								<div>
 									<p class="mb-0">
-										<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)" v-html="statusCardUsernameFormat(status)">
+									<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)" v-text="statusCardUsernameFormat(status)">
 											Loading...
 										</a>
 									</p>
@@ -687,19 +687,19 @@
 
 				switch(fmt) {
 					case '@':
-					return usr + '<span class="text-lighter font-weight-bold">@' + dom + '</span>';
+					return usr + '@' + dom;
 					break;
 
 					case 'from':
-					return usr + '<span class="text-lighter font-weight-bold"> <span class="font-weight-normal">from</span> ' + dom + '</span>';
+					return usr + ' from ' + dom;
 					break;
 
 					case 'custom':
-					return usr + '<span class="text-lighter font-weight-bold"> ' + txt + ' ' + dom + '</span>';
+					return usr + ' ' + txt + ' ' + dom;
 					break;
 
 					default:
-					return usr + '<span class="text-lighter font-weight-bold">@' + dom + '</span>';
+					return usr + '@' + dom;
 					break;
 				}
 			},

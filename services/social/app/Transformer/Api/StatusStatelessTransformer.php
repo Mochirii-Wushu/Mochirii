@@ -9,6 +9,7 @@ use App\Services\LikeService;
 use App\Services\MediaService;
 use App\Services\MediaTagService;
 use App\Services\PollService;
+use App\Services\SanitizeService;
 use App\Services\StatusHashtagService;
 use App\Services\StatusLabelService;
 use App\Services\StatusMentionService;
@@ -23,7 +24,7 @@ class StatusStatelessTransformer extends Fractal\TransformerAbstract
     {
         $taggedPeople = MediaTagService::get($status->id);
         $poll = $status->type === 'poll' ? PollService::get($status->id) : null;
-        $rendered = $status->caption ? nl2br(Autolink::create()->autolink($status->caption)) : '';
+        $rendered = $status->caption ? app(SanitizeService::class)->richText(nl2br(Autolink::create()->autolink($status->caption))) : '';
 
         return [
             '_v' => 1,
