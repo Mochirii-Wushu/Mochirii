@@ -1,6 +1,7 @@
 import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { discordFetch } from "../_shared/discord-api.ts";
+import { constantTimeSecretEqual } from "../_shared/secret-auth.ts";
 import {
   addHours,
   bearerOrHeaderSecret,
@@ -126,7 +127,7 @@ async function handleRequest(req: Request): Promise<Response> {
   if (!config.secret) {
     return jsonResponse({ ok: false, message: "Spotlight poll cron secret is not configured." }, 500);
   }
-  if (bearerOrHeaderSecret(req) !== config.secret) {
+  if (!await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)) {
     return jsonResponse({ ok: false, message: "Unauthorized." }, 401);
   }
   if (!config.ready) {

@@ -43,6 +43,7 @@ import {
   stringOption,
   successMessage,
 } from "../_shared/discord-interaction-helpers.ts";
+import { readBoundedUtf8RequestBody } from "../_shared/bounded-request-body.ts";
 import { verifyDiscordSignature } from "../_shared/discord-signature.ts";
 import {
   createDiscordGalleryIngestHeaders,
@@ -89,6 +90,7 @@ const EXPECTED_MODMAIL_LOG_CHANNEL_ID = MODMAIL_LOG_CHANNEL_ID;
 const EXPECTED_MODMAIL_MODERATOR_ROLE_ID = MODMAIL_MODERATOR_ROLE_ID;
 const BASE_GUILD_ROLE_ID = "1468659807736299520";
 const GUILD_SCHEDULE_URL = siteUrl("data/guild-schedule.json");
+const MAX_DISCORD_INTERACTION_BODY_BYTES = 64 * 1024;
 const MANAGE_ROLES_PERMISSION = 1n << 28n;
 const MANAGE_EVENTS_PERMISSION = 1n << 33n;
 const CREATE_EVENTS_PERMISSION = 1n << 44n;
@@ -510,16 +512,25 @@ Deno.serve(async (req: Request) => {
     return new Response("Method not allowed.", { status: 405 });
   }
 
-  const rawBody = await req.text();
+  const bodyResult = await readBoundedUtf8RequestBody(
+    req,
+    MAX_DISCORD_INTERACTION_BODY_BYTES,
+  );
+  if (!bodyResult.ok) {
+    return new Response(null, {
+      headers: { "Cache-Control": "no-store" },
+      status: bodyResult.status,
+    });
+  }
   const publicKey = Deno.env.get("DISCORD_PUBLIC_KEY") || "";
 
-  if (!publicKey || !verifyDiscordSignature(req, rawBody, publicKey)) {
+  if (!publicKey || !verifyDiscordSignature(req, bodyResult.bytes, publicKey)) {
     return new Response("invalid request signature", { status: 401 });
   }
 
   let interaction: JsonRecord;
   try {
-    interaction = asRecord(JSON.parse(rawBody));
+    interaction = asRecord(JSON.parse(bodyResult.text));
   } catch {
     return interactionMessage("Discord request could not be read.");
   }

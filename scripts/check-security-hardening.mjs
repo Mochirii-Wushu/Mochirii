@@ -367,7 +367,11 @@ const unauthenticatedFunctionGuardSpecs = {
   "reaper-discord-interactions": {
     source: reaperSecuritySource,
     kind: "Discord signature verified",
-    snippets: ["x-signature-ed25519", "x-signature-timestamp", "verifyDiscordSignature(req, rawBody, publicKey)"],
+    snippets: [
+      "x-signature-ed25519",
+      "x-signature-timestamp",
+      "verifyDiscordSignature(req, bodyResult.bytes, publicKey)",
+    ],
   },
   "reaper-spinner-dispatch": {
     source: reaperSpinnerSecuritySource,
@@ -387,17 +391,17 @@ const unauthenticatedFunctionGuardSpecs = {
   "send-vote-reminder": {
     source: voteReminder,
     kind: "shared-secret scheduled vote reminder",
-    snippets: ["VOTE_REMINDER_CRON_SECRET", "x-mochirii-vote-reminder-secret", "bearerOrHeaderSecret(req) !== cronSecret"],
+    snippets: ["VOTE_REMINDER_CRON_SECRET", "x-mochirii-vote-reminder-secret", "await constantTimeSecretEqual(bearerOrHeaderSecret(req), cronSecret)"],
   },
   "send-member-spotlight-poll": {
     source: `${spotlightPollShared}\n${spotlightPollSender}`,
     kind: "shared-secret spotlight sender",
-    snippets: ["bearerOrHeaderSecret(req) !== config.secret", "SPOTLIGHT_POLL_CRON_SECRET", "buildDiscordPollPayload"],
+    snippets: ["await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)", "SPOTLIGHT_POLL_CRON_SECRET", "buildDiscordPollPayload"],
   },
   "publish-member-spotlight-winner": {
     source: `${spotlightPollShared}\n${spotlightPollPublisher}`,
     kind: "shared-secret spotlight publisher",
-    snippets: ["bearerOrHeaderSecret(req) !== config.secret", "SPOTLIGHT_POLL_CRON_SECRET", "results.finalized"],
+    snippets: ["await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)", "SPOTLIGHT_POLL_CRON_SECRET", "results.finalized"],
   },
   "get-current-spotlight-winner": {
     source: spotlightPollPublicWinner,
@@ -534,7 +538,7 @@ for (const name of expectedUnauthenticatedFunctions) {
   "x-signature-ed25519",
   "x-signature-timestamp",
   "DISCORD_PUBLIC_KEY",
-  "verifyDiscordSignature(req, rawBody, publicKey)",
+  "verifyDiscordSignature(req, bodyResult.bytes, publicKey)",
   "SIGNATURE_WINDOW_MS",
   "Retry-After",
   "retry_after",
@@ -554,8 +558,8 @@ for (const name of expectedUnauthenticatedFunctions) {
 assertMatches(
   "reaper-discord-interactions",
   reaper,
-  /const rawBody = await req\.text\(\);[\s\S]*verifyDiscordSignature\(req, rawBody, publicKey\)[\s\S]*JSON\.parse\(rawBody\)/,
-  "Discord signatures must be validated against the raw body before parsing JSON.",
+  /const bodyResult = await readBoundedUtf8RequestBody\([\s\S]*verifyDiscordSignature\(req, bodyResult\.bytes, publicKey\)[\s\S]*JSON\.parse\(bodyResult\.text\)/,
+  "Discord signatures must be validated against the bounded exact body bytes before parsing JSON.",
 );
 
 [
@@ -576,7 +580,7 @@ assertNotMatches(
 [
   "VOTE_REMINDER_CRON_SECRET",
   "x-mochirii-vote-reminder-secret",
-  "bearerOrHeaderSecret(req) !== cronSecret",
+  "await constantTimeSecretEqual(bearerOrHeaderSecret(req), cronSecret)",
   "DISCORD_VOTE_CHANNEL_ID",
 ].forEach((snippet) => assertIncludes("send-vote-reminder", voteReminder, snippet));
 
@@ -586,13 +590,13 @@ assertNotMatches(
 ].forEach((snippet) => assertIncludes("spotlight-polls shared helper", spotlightPollShared, snippet));
 
 [
-  "bearerOrHeaderSecret(req) !== config.secret",
+  "await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)",
   "buildDiscordPollPayload",
   "duplicate: true",
 ].forEach((snippet) => assertIncludes("send-member-spotlight-poll", spotlightPollSender, snippet));
 
 [
-  "bearerOrHeaderSecret(req) !== config.secret",
+  "await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)",
   "results.finalized",
   "winner_display_name",
 ].forEach((snippet) => assertIncludes("publish-member-spotlight-winner", spotlightPollPublisher, snippet));

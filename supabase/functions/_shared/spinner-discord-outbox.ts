@@ -3,6 +3,7 @@ import {
   SPINNER_DISCORD_CHANNEL_ID,
   SPINNER_DISCORD_CHANNEL_KEY,
 } from "./spinner-live.ts";
+export { constantTimeSecretEqual } from "./secret-auth.ts";
 
 export type SpinnerOutboxRow = {
   id: string;
@@ -33,7 +34,6 @@ export type SpinnerOutboxDependencies = {
 
 const SNOWFLAKE_PATTERN = /^\d{16,22}$/;
 export const SPINNER_DISPATCH_MAX_BODY_BYTES = 1_024;
-const SPINNER_DISPATCH_MAX_CREDENTIAL_BYTES = 1_024;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -183,35 +183,6 @@ export function spinnerDispatcherSecret(req: Request): string {
   if (direct) return direct;
   return (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "")
     .trim();
-}
-
-export async function constantTimeSecretEqual(
-  provided: string,
-  expected: string,
-): Promise<boolean> {
-  const encoder = new TextEncoder();
-  const providedBytes = encoder.encode(provided);
-  const expectedBytes = encoder.encode(expected);
-  if (
-    providedBytes.length === 0 ||
-    expectedBytes.length === 0 ||
-    providedBytes.length > SPINNER_DISPATCH_MAX_CREDENTIAL_BYTES ||
-    expectedBytes.length > SPINNER_DISPATCH_MAX_CREDENTIAL_BYTES
-  ) {
-    return false;
-  }
-
-  const [providedHash, expectedHash] = await Promise.all([
-    crypto.subtle.digest("SHA-256", providedBytes),
-    crypto.subtle.digest("SHA-256", expectedBytes),
-  ]);
-  const providedDigest = new Uint8Array(providedHash);
-  const expectedDigest = new Uint8Array(expectedHash);
-  let mismatch = providedBytes.length ^ expectedBytes.length;
-  for (let index = 0; index < providedDigest.length; index += 1) {
-    mismatch |= providedDigest[index] ^ expectedDigest[index];
-  }
-  return mismatch === 0;
 }
 
 export async function readBoundedJsonObject(

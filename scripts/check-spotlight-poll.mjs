@@ -49,6 +49,8 @@ const config = read("supabase/config.toml");
 const migration = read("supabase/migrations/20260610120000_add_member_spotlight_polls.sql");
 const shared = read("supabase/functions/_shared/spotlight-polls.ts");
 const serviceRole = read("supabase/functions/_shared/supabase-service-role.ts");
+const secretAuth = read("supabase/functions/_shared/secret-auth.ts");
+const secretAuthTest = read("supabase/functions/_shared/secret-auth_test.ts");
 const sender = read("supabase/functions/send-member-spotlight-poll/index.ts");
 const publisher = read("supabase/functions/publish-member-spotlight-winner/index.ts");
 const publicWinner = read("supabase/functions/get-current-spotlight-winner/index.ts");
@@ -132,6 +134,8 @@ assertNotMatches(
   "buildDiscordPollPayload",
   "duplicate: true",
   "pollAnswerIds",
+  "constantTimeSecretEqual",
+  "await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)",
 ].forEach((snippet) => assertIncludes("send-member-spotlight-poll", sender, snippet));
 
 [
@@ -141,7 +145,19 @@ assertNotMatches(
   "winner_display_name",
   "candidateOrder",
   "noVotes: true",
+  "constantTimeSecretEqual",
+  "await constantTimeSecretEqual(bearerOrHeaderSecret(req), config.secret)",
 ].forEach((snippet) => assertIncludes("publish-member-spotlight-winner", publisher, snippet));
+
+[
+  'crypto.subtle.digest("SHA-256"',
+  "MAX_SHARED_SECRET_BYTES",
+  "mismatch |= providedDigest[index] ^ expectedDigest[index]",
+].forEach((snippet) => assertIncludes("shared secret authentication", secretAuth, snippet));
+[
+  "constant-time secret comparison accepts only an exact match",
+  "Different or empty secrets must fail closed.",
+].forEach((snippet) => assertIncludes("shared secret authentication tests", secretAuthTest, snippet));
 
 [
   "winner_display_name",

@@ -11,7 +11,38 @@ Deno.test("Discord signature helper accepts a valid raw-body signature", () => {
   const signature = nacl.sign.detached(message, keyPair.secretKey);
   const req = signedRequest(timestamp, bytesToHex(signature));
 
-  assert(verifyDiscordSignature(req, rawBody, bytesToHex(keyPair.publicKey), Number(timestamp) * 1000), "valid signature should pass");
+  assert(
+    verifyDiscordSignature(
+      req,
+      rawBody,
+      bytesToHex(keyPair.publicKey),
+      Number(timestamp) * 1000,
+    ),
+    "valid signature should pass",
+  );
+});
+
+Deno.test("Discord signature helper preserves exact bounded body bytes", () => {
+  const keyPair = nacl.sign.keyPair();
+  const timestamp = "1780000000";
+  const rawBody = encoder.encode(JSON.stringify({ type: 1, name: "Mōchirīī" }));
+  const timestampBytes = encoder.encode(timestamp);
+  const message = new Uint8Array(
+    timestampBytes.byteLength + rawBody.byteLength,
+  );
+  message.set(timestampBytes);
+  message.set(rawBody, timestampBytes.byteLength);
+  const signature = nacl.sign.detached(message, keyPair.secretKey);
+
+  assert(
+    verifyDiscordSignature(
+      signedRequest(timestamp, bytesToHex(signature)),
+      rawBody,
+      bytesToHex(keyPair.publicKey),
+      Number(timestamp) * 1000,
+    ),
+    "valid exact-byte signature should pass",
+  );
 });
 
 Deno.test("Discord signature helper rejects stale timestamps and malformed signatures", () => {
@@ -22,11 +53,21 @@ Deno.test("Discord signature helper rejects stale timestamps and malformed signa
   const signature = nacl.sign.detached(message, keyPair.secretKey);
 
   assert(
-    verifyDiscordSignature(signedRequest(timestamp, bytesToHex(signature)), rawBody, bytesToHex(keyPair.publicKey), Number(timestamp) * 1000 + 1_000_000) === false,
+    verifyDiscordSignature(
+      signedRequest(timestamp, bytesToHex(signature)),
+      rawBody,
+      bytesToHex(keyPair.publicKey),
+      Number(timestamp) * 1000 + 1_000_000,
+    ) === false,
     "stale timestamp should fail",
   );
   assert(
-    verifyDiscordSignature(signedRequest(timestamp, "not-hex"), rawBody, bytesToHex(keyPair.publicKey), Number(timestamp) * 1000) === false,
+    verifyDiscordSignature(
+      signedRequest(timestamp, "not-hex"),
+      rawBody,
+      bytesToHex(keyPair.publicKey),
+      Number(timestamp) * 1000,
+    ) === false,
     "malformed signature should fail",
   );
 });
@@ -49,7 +90,9 @@ function signedRequest(timestamp: string, signature: string): Request {
 }
 
 function bytesToHex(bytes: Uint8Array): string {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+    "",
+  );
 }
 
 function assert(condition: unknown, message: string): asserts condition {

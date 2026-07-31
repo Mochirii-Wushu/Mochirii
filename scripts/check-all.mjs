@@ -46,6 +46,7 @@ const checks = [
   ["check:reaper-discord-interactions", ["node", "scripts/check-reaper-discord-interactions.mjs"]],
   ["test:photo-day-poll", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/photo-day-polls_test.ts"]],
   ["test:discord-signature", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/discord-signature_test.ts"]],
+  ["test:edge-request-security", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/bounded-request-body_test.ts", "supabase/functions/_shared/secret-auth_test.ts"]],
   ["test:reaper-discord-events", ["deno", "test", "--allow-env", "--node-modules-dir=auto", "--import-map=supabase/functions/reaper-discord-interactions/deno.json", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/reaper-discord-events_test.ts"]],
   ["check:reaper-modmail-audit", ["node", "scripts/check-reaper-modmail-audit.mjs"]],
   ["test:reaper-pending-verification", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/pending-verification-containment_test.ts"]],

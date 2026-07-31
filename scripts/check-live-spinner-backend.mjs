@@ -29,6 +29,7 @@ const files = {
   cors: "supabase/functions/_shared/cors.ts",
   dispatcher: "supabase/functions/reaper-spinner-dispatch/index.ts",
   dispatcherShared: "supabase/functions/_shared/spinner-discord-outbox.ts",
+  secretAuth: "supabase/functions/_shared/secret-auth.ts",
   media: "supabase/functions/_shared/spinner-media.ts",
   mediaDispatch: "supabase/functions/_shared/spinner-media-dispatch.ts",
   mediaTest: "supabase/functions/_shared/spinner-media_test.ts",
@@ -82,6 +83,7 @@ const authority = read(files.authority);
 const cors = read(files.cors);
 const dispatcher = read(files.dispatcher);
 const dispatcherShared = read(files.dispatcherShared);
+const secretAuth = read(files.secretAuth);
 const media = read(files.media);
 const mediaDispatch = read(files.mediaDispatch);
 const mediaTest = read(files.mediaTest);
@@ -660,9 +662,12 @@ for (const snippet of [
   "discord_network_error",
   "safeAllowedMentions",
   "SPINNER_DISPATCH_MAX_BODY_BYTES",
-  'crypto.subtle.digest("SHA-256"',
 ].forEach((snippet) =>
   includes("idempotent Reaper delivery", dispatcherShared, snippet)
+);
+
+["constantTimeSecretEqual", 'crypto.subtle.digest("SHA-256"'].forEach(
+  (snippet) => includes("constant-time Reaper authentication", secretAuth, snippet),
 );
 
 [

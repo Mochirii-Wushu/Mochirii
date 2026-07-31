@@ -9,6 +9,8 @@ const files = {
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
   function: "supabase/functions/reaper-discord-interactions/index.ts",
+  boundedBody: "supabase/functions/_shared/bounded-request-body.ts",
+  boundedBodyTest: "supabase/functions/_shared/bounded-request-body_test.ts",
   discordSignature: "supabase/functions/_shared/discord-signature.ts",
   reaperEvents: "supabase/functions/_shared/reaper-discord-events.ts",
   reaperEventSyncWorkflow: "supabase/functions/_shared/reaper-event-sync-workflow.ts",
@@ -66,6 +68,8 @@ const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
 const functionSource = read(files.function);
+const boundedBody = read(files.boundedBody);
+const boundedBodyTest = read(files.boundedBodyTest);
 const discordSignature = read(files.discordSignature);
 const reaperEvents = read(files.reaperEvents);
 const reaperEventSyncWorkflow = read(files.reaperEventSyncWorkflow);
@@ -123,6 +127,7 @@ assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.
   '"check:reaper-discord-interactions"',
   '"check:reaper-pending-verification"',
   '"test:photo-day-poll"',
+  '"test:edge-request-security"',
   '"register:reaper-gallery-submit-command"',
   '"register:reaper-photo-day-poll-command"',
   '"register:reaper-pending-verification-command"',
@@ -130,6 +135,7 @@ assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.
 ].forEach((snippet) => assertIncludes("package.json", packageJson, snippet));
 assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
 assertIncludes("check-all", checkAll, "test:photo-day-poll");
+assertIncludes("check-all", checkAll, "test:edge-request-security");
 assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
 
 [
@@ -518,9 +524,22 @@ assertNotMatches(
 assertMatches(
   "reaper-discord-interactions",
   functionSource,
-  /const rawBody = await req\.text\(\);[\s\S]*verifyDiscordSignature\(req, rawBody, publicKey\)[\s\S]*JSON\.parse\(rawBody\)/,
-  "Discord signature must be verified against the raw body before JSON parsing.",
+  /readBoundedUtf8RequestBody\([\s\S]*MAX_DISCORD_INTERACTION_BODY_BYTES[\s\S]*verifyDiscordSignature\(req, bodyResult\.bytes, publicKey\)[\s\S]*JSON\.parse\(bodyResult\.text\)/,
+  "Discord interactions must bound the exact signed body before signature verification and JSON parsing.",
 );
+assertNotIncludes("reaper-discord-interactions", functionSource, "await req.text()");
+[
+  "readBoundedUtf8RequestBody",
+  "content-length",
+  'reason: "too-large"',
+  "reader.cancel()",
+  'new TextDecoder("utf-8", { fatal: true })',
+].forEach((snippet) => assertIncludes("bounded interaction body", boundedBody, snippet));
+[
+  "declared oversized interaction body fails before stream reads",
+  "streamed oversized interaction body is cancelled",
+  "bounded request body rejects invalid UTF-8",
+].forEach((snippet) => assertIncludes("bounded interaction body tests", boundedBodyTest, snippet));
 
 assertMatches(
   "reaper-discord-interactions",
