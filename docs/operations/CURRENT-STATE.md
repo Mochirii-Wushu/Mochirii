@@ -1,6 +1,6 @@
 # Current Mochirii State
 
-Updated: 2026-07-29 PDT
+Updated: 2026-07-30 PDT
 
 This no-secret file records the current hosted and repository state. Update it
 after a completed release or ownership change; do not place credentials,
@@ -67,6 +67,11 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 - `mochirii.com` remains hosted by the existing Vercel project and deploys from
   protected `main` with Root Directory `apps/web`.
+- An authenticated read-only Vercel Settings -> Git readback on 2026-07-30
+  confirms that project `mochirii` is connected to the canonical
+  `Mochirii-Wushu/Mochirii-Website` repository. The project overview identifies
+  `main/apps/web` as the current production source. This readback changed no
+  setting and does not deploy the local candidate.
 - Supabase project `deyvmtncimmcinldjyqe` remains the hosted Auth, Postgres, RLS,
   and Edge Function backend.
 - The last verified hosted baseline contains 34 applied migrations and exactly
@@ -138,7 +143,7 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 GitHub protects `main` with strict required checks for `validate`,
 `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The 2026-07-29 GitHub readback finds five open Website pull
+`Supabase Preview`. The 2026-07-30 GitHub readback finds five open Website pull
 requests: #536, #538, and the stacked draft Meta PRs #539, #540, and #541.
 Mochi Pets PR #4 is also open; Social Mobile has no open pull request. The
 authoritative local union has not been pushed and has no pull request, so none
@@ -154,8 +159,9 @@ Social source declare `mailto:support@mochirii.com` as the operational
 
 ## Local Full-Stack Integration Candidate
 
-- The clean source union through validated local content head
-  `dcaa33750e8161ff83531655faa68e0a54f9799a` contains exactly 50 migrations
+- The clean source union through validated implementation head
+  `54962b6aee8ee1a602fbee376f62c098b949e1df` (tree
+  `ec31270c4300ff989fff5621510cd8e97ab73645`) contains exactly 50 migrations
   and 46 functions declared in `supabase/config.toml`, with a source-expected
   JWT split of 29 `verify_jwt=true` / 17 false. These figures describe local
   source only; hosted production remains at the 34-migration, 33-function,
@@ -174,6 +180,23 @@ Social source declare `mailto:support@mochirii.com` as the operational
   fails closed with generic outage responses at protected authorization
   boundaries. Local unit, repository, Web build, and browser checks exercise
   that boundary; they are not a live-provider availability claim.
+- Discord request bodies are rejected above a streaming 64 KiB ceiling before
+  parsing or signature verification. Discord signatures are verified against
+  the exact received bytes after strict UTF-8 validation, and scheduled-task
+  secrets use the shared bounded SHA-256 constant-time comparator. The shared
+  outbound HTTP client bounds redirects, protocols, destinations, time, and
+  response size. These changes do not alter migrations, function inventory, or
+  JWT parity; the reviewed Web lockfile change only adds the test tooling used
+  by the new public-artifact checks.
+- Social output boundaries now use escaped text or typed DOM nodes by default.
+  Fixed application markup and fixed-allowlist rich text are separately
+  classified. Stored Page and Newsroom HTML is normalized on write and legacy
+  rows are re-sanitized when rendered; style-element content is protected only
+  against breakout and remains a trusted-administrator boundary. Script JSON
+  uses Laravel `Js::from` or all four JSON hexadecimal encoding flags. The
+  executable contract covers 50 active Vue `v-html` sinks, 14 imperative DOM
+  boundaries, and 45 exact raw-Blade outputs; all 27 formerly open boundaries
+  are closed.
 - The union retains the source-only Meta publishing packet as a validated
   subset: its isolated 46-migration reset, 109 focused pgTAP assertions, and
   recorded manifest digest remain immutable evidence. Both publishing flags
@@ -185,10 +208,27 @@ Social source declare `mailto:support@mochirii.com` as the operational
   release authority, source-to-provider readback, and rollback evidence remain
   future gates.
 - Exact local verification at that head passed the complete repository suite,
-  Node 22.23.1/npm 10.9.8/Deno 2.9.4 toolchain contract, all 266 public PNG,
-  JPEG, GIF, and WebP decodes, Web lint, and the Next 16.2.11 production build.
-  Asset/CSP validators now fail closed on malformed media, unexpected external
+  Node 22.23.1/npm 10.9.8/Deno 2.9.4 toolchain contract, Docker 29.6.1 daemon
+  readback, all 266 public PNG, JPEG, GIF, and WebP decodes, Web lint, and the
+  Next 16.2.11 production build. Social passed 219 PHP tests with 1,488
+  assertions, the 32-test focused security lane, Composer audit with no known
+  advisories, the production dependency audit with no high or critical
+  finding, 62 generated JavaScript syntax checks, and CSS semantics across 7
+  files, 39,896 declarations, and 200 bounded URLs. Two production asset builds
+  produced the same aggregate SHA-256
+  `14D427D0EDB59FACA42B0209A85F999940343A2ECBB3E2D1A403B1D24876A46E`.
+  Asset/CSP validators fail closed on malformed media, unexpected external
   origin/file pairs, and unreviewed multiline runtime-load sites.
+- Local browser acceptance passed the Home/Gallery lightbox across 19 Chromium
+  viewports plus representative Firefox, WebKit, touch, safe-area, 200%, and
+  400% reflow cases; the approved-feed fixture passed 90 publications; and the
+  complete route matrix passed 312/312 checks in each of Chromium, Firefox, and
+  WebKit with no horizontal overflow, footer clipping, focus failure, or
+  reduced-motion failure.
+- The clean Mobile successor is
+  `b417daaf546395ded535b3beebde5d74b459c7dd` (tree
+  `e29fe53a69107df702525bfb5d8bdc7417c12872`). It remains local and unpushed;
+  no Apple, EAS, or provider action occurred.
 
 ## Legal and Privacy Readiness
 

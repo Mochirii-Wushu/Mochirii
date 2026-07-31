@@ -4,7 +4,7 @@ This public-safe mutable ledger records the canonical GitHub organization,
 repository, pull-request, issue, branch, worktree, and production-ownership
 baseline. It contains no secrets, host addresses, private provider exports,
 member data, or credential values. Mutable values were read back on
-2026-07-29 and must be rechecked at every release gate.
+2026-07-30 and must be rechecked at every release gate.
 
 Sealed evidence, merged pull requests, historical check output, and provider
 audit metadata are immutable records. Old repository URLs that occur only in
@@ -16,13 +16,13 @@ canonical names below.
 
 | Repository | Visibility/state | Default branch and verified SHA | Current classification | Production ownership |
 | --- | --- | --- | --- | --- |
-| `Mochirii-Wushu/Mochirii-Website` | Public, active | `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b` | PRs #536, #538, and stacked draft Meta PRs #539, #540, and #541 are open. A clean 50-migration/46-function local union preserves their relevant source intent but has no remote branch or PR; the open PRs remain until replacement parity, review, and checks are proved. Issues #443 and #475 are classified trackers. | Owns the Vercel Website, Shopify theme source, Social source, and Supabase source. A protected-`main` merge invokes the connected Vercel and Supabase integrations; Social-source merges can also publish a GHCR image. Provider effects remain release-gated. |
-| `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, dormant | `main` at `57deb668620da6312d571090dee55e8fb58547d2` | PR #19 merged with exact reviewed-tree parity; its feature branch was deleted and merge-SHA CI passed. No open PRs. Issue #9 remains a classified dependency/toolchain tracker. | Source validation only; no Apple build, submission, or provider mutation occurred. |
-| `Mochirii-Wushu/Mochirii-Pets` | Private, dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | PR #4 is open at naming-only head `aadaaedc19aaf6e85d7bd742102c616c35b3c77f`. Its repository contract passes, but the Unity editor job fails before testing because neither approved Unity license secret is configured. The separate local manual-only CI-policy commit is not part of the naming candidate. Issue #3 is classified future Unity work. | Fresh Unity source only; no hosted runtime, deployment, Apple submission, or recurring provider cost. |
-| `Mochirii-Wushu/Reaper-Discord-Bot` | Private, active source | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 is merged; no open PRs or issues; only `main` remains remotely. A clean additive six-function ownership candidate is prepared locally at `30cfacd494681ca988147b5b0a94a0da1d0bfefa` (tree `d1fc4764eafbc4962a13a0e0c1c44a8ebf64068e`) and remains unpushed. | Source and rollback reference only. The merge ran repository CI and did not deploy Reaper or send Discord messages. The additive candidate grants no deployment authority. |
+| `Mochirii-Wushu/Mochirii-Website` | Public, active | `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b` | PRs #536, #538, and stacked draft Meta PRs #539, #540, and #541 are open. The clean implementation union is `54962b6aee8ee1a602fbee376f62c098b949e1df` (tree `ec31270c4300ff989fff5621510cd8e97ab73645`) and preserves their relevant source intent, but it has no remote branch or PR; the open PRs remain until replacement parity, review, and checks are proved. Issues #443 and #475 are classified trackers. | Owns the Vercel Website, Shopify theme source, Social source, and Supabase source. A protected-`main` merge invokes the connected Vercel and Supabase integrations; Social-source merges can also publish a GHCR image. Provider effects remain release-gated. |
+| `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, dormant | `main` at `57deb668620da6312d571090dee55e8fb58547d2` | PR #19 merged with exact reviewed-tree parity; its feature branch was deleted and merge-SHA CI passed. No open PRs. Issue #9 remains a classified dependency/toolchain tracker. The clean local security and documentation successor is `b417daaf546395ded535b3beebde5d74b459c7dd` (tree `e29fe53a69107df702525bfb5d8bdc7417c12872`); it records that Website remains the current Social source owner until a separately approved extraction and cutover. | Source validation only; no Apple build, submission, or provider mutation occurred. |
+| `Mochirii-Wushu/Mochirii-Pets` | Private, dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | PR #4 is open at naming-only head `aadaaedc19aaf6e85d7bd742102c616c35b3c77f`. Its repository contract passes, but the Unity editor job fails before testing because neither approved Unity license secret is configured. A clean local activation-gated/manual-policy successor is `f088bbab9a4786fa13ce6c8e92d0ef5f7ca0d902` (tree `6fa35bc0c938e6167a9ffed1f302ae4ed772f214`); adopting that policy remains an owner decision and is not part of PR #4. Issue #3 is classified future Unity work. | Fresh Unity source only; no hosted runtime, deployment, Apple submission, or recurring provider cost. |
+| `Mochirii-Wushu/Reaper-Discord-Bot` | Private, active source | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 is merged; no open PRs or issues; only `main` remains remotely. The clean local contract-consumer candidate is `88d06147159ba3b9ea8d62fee08e50187c394a5b` (tree `c0b2b3268104f81c818e49bbfaff0ee1231074f3`); it tracks zero `supabase/` files and passes 39/39 tests against the Website producer contract. | Source and rollback reference only. Website remains the shared-schema and Edge-Function owner. No Reaper deployment or Discord send is authorized. |
 | `Mochirii-Wushu/Mochirii-Raffle-Spinner` | Private, archived | `main` at `95e917357517faeb43be9e2da6551baec213aed8` | No open PRs or issues. Two historical Dependabot branches are intentionally retained. | Historical source only; no current deployment or schedule depends on it. |
-| `Mochirii-Wushu/Mochirii-Forums` | Private, empty; governance seed prepared | No branch refs; `main` is reserved for an approval-gated bootstrap. | No PRs, issues, or runtime source. The clean local governance-only seed at `9a3291dd4f0adba903dcfe2ecc73b7bd99dd8760` remains unpushed pending separate authorization. | No production dependency, provider effect, runtime, or recurring cost. Application source and provider connection require separate future approval. |
-| `Mochirii-Wushu/Mochirii-Social` | Private, empty placeholder | No branch refs | No PRs, issues, or active source. The hosted Social source remains under `Mochirii-Website/services/social`. | No production dependency or provider effect. |
+| `Mochirii-Wushu/Mochirii-Forums` | Private, empty; governance and source packets prepared | No branch refs; `main` is reserved for an approval-gated bootstrap. | No PRs, issues, or remote source. The clean local governance seed is `ed98cf8d8b6fe624468cca8b8e4fef6954ec276b`; its source-introduction successor is `564f52292aca11d40c7aeaf78a42acfa03b39c55` (tree `1ac991b49f5fd63909ec6bea7c0e05cf64577d94`). Both remain unpushed and create no runtime or provider state. | No production dependency, provider effect, runtime, or recurring cost. Provider connection requires separate future approval. |
+| `Mochirii-Wushu/Mochirii-Social` | Private, empty placeholder | No branch refs | No PRs, issues, or remote source. The hosted Social source remains under `Mochirii-Website/services/social`. Clean local extraction and modernization candidates exist at `98c006c425c96b86239c60e19252d03e15ef93f2` and `afcdccfe415f5bc9bc790690ead464198cc04fa2`; neither establishes ownership or production without a separately approved cutover. | Intended successor only. It has no production dependency or provider effect while empty. |
 
 GitHub reports exactly these seven repositories. The configured default branch
 for either empty repository does not create a branch ref. Private-repository plan
@@ -89,7 +89,7 @@ checks, accountable review, and no owner bypass.
 
 ## Local Website Worktrees
 
-The latest 2026-07-29 readback finds 49 registered Website worktrees. The canonical
+The latest 2026-07-30 readback finds 51 registered Website worktrees. The canonical
 `Website` checkout remains at the exact upstream SHA with two known user-owned
 `.codex/` paths; those paths and every intentional dirty lane must be
 preserved. The worktree count is not a cleanup allowlist: every path requires a
@@ -99,7 +99,7 @@ separately approved removal.
 | Worktree | Exact head | Classification |
 | --- | --- | --- |
 | `Website` | `2eec9e467b4679fd77648ef61e77cf246ec9589b` | HEAD equals `origin/main` while the checked-out branch is `mochi/vendor-mcp-setup`; preserve its two user-owned `.codex/` paths. |
-| `Website-full-stack-integration-rehearsal-20260729` | Validated local content head `dcaa33750e8161ff83531655faa68e0a54f9799a` before this mutable state update. | Authoritative clean local union: 50 migrations, 46 functions, 29/17 source JWT expectation, bounded server-auth transport, hardened asset/CSP contracts, and preserved #536/#538/#539 plus Meta backend/UI source intent. Exact replacement parity remains a release gate. It is unpushed and has no PR or provider effect. |
+| `Website-full-stack-integration-rehearsal-20260729` | Validated implementation head `54962b6aee8ee1a602fbee376f62c098b949e1df` (tree `ec31270c4300ff989fff5621510cd8e97ab73645`) before this mutable ledger refresh. | Authoritative clean local union: 50 migrations, 46 functions, 29/17 source JWT expectation, bounded server-auth and outbound HTTP transports, exact-byte Discord verification, constant-time secret comparison, hardened public asset/CSP and Social rendering contracts, and preserved #536/#538/#539 plus Meta backend/UI source intent. Exact replacement parity remains a release gate. It is unpushed and has no PR or provider effect. |
 | `Website-repository-name-reconciliation-20260728` | `661afd9299221f521e2f1bf805728442ff6be4c1` | Canonical-name reconciliation source for PR #538; retain until replacement parity is proved. |
 | `Website-repository-separation-adrs-20260729` | `331ed1e91e8cee65b4b1478b30fc545f41b57dd0` | Architecture/governance candidate; no provider or source-ownership transfer. |
 | `Website-shopify-prepayment-safety-20260729` | `5b3834ca2558df9bc5063119f673662b04e5bb62` | Storefront prepayment-safety candidate; preserves sealed copy evidence and authorizes no Shopify mutation or publication. |
@@ -152,17 +152,19 @@ source, or rehearsal lanes, even where their intent is present in the union:
 `Website-stacked-raffle-consolidation-20260729`, and
 `Website-stacked-shopify-prepayment-safety-20260729`.
 
-Final cleanup requires the complete 49-worktree inventory, exact patch/tree
+Final cleanup requires the complete 51-worktree inventory, exact patch/tree
 comparison, clean status, recorded head, and proof that no unique source,
 asset, test, or documentation would be lost. Destructive worktree or branch
 removal is separately approval-gated.
 
 ## Provider Connection Readback
 
-- The last verified Vercel production project readback was labeled as connected to
-  `Mochirii-Wushu/Mochirii-Website`. A provider-generated hyperlink still uses
-  the former GitHub path and follows GitHub's redirect; no source or provider
-  mutation is required for repository naming.
+- An authenticated read-only Vercel Settings -> Git readback on 2026-07-30
+  confirms that project `mochirii` is connected to
+  `Mochirii-Wushu/Mochirii-Website`, with the canonical GitHub repository URL.
+  The project overview identifies `main/apps/web` as the production source.
+  Historical deployment metadata may retain contemporary legacy text; no
+  provider mutation was made or is required for the active binding.
 - The last verified hosted Supabase baseline contains 34 applied migrations
   and 33 ACTIVE functions with 20 `verify_jwt=true` / 13 false. Its GitHub
   integration was visibly connected to
