@@ -222,7 +222,7 @@ export function AuthPanel() {
               >
                 <ProviderLogo provider={provider.id} />
                 <span className="provider-button__copy">
-                  <span>{provider.label}</span>
+                  <span>{provider.signInLabel}</span>
                   <small>{provider.automaticVerification ? "Automatic Discord role check" : "Moderator review required"}</small>
                 </span>
               </button>
@@ -238,7 +238,7 @@ export function AuthPanel() {
               >
                 <ProviderLogo provider={provider.id} />
                 <span className="provider-button__copy">
-                  <span>{provider.label}</span>
+                  <span>{provider.signInLabel}</span>
                   <small>Setup pending</small>
                 </span>
               </button>

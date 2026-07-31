@@ -12,7 +12,7 @@ import {
 import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
 import { consumeLiveDrawHandoffIntent } from "@/lib/spinner/viewer-handoff";
 import { measureAuthenticatedRouteTask } from "@/lib/observability/authenticated-route-timing";
-import { enabledOAuthProviders, placeholderOAuthProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
+import { enabledIdentityLinkProviders, type OAuthProviderId } from "@/lib/supabase/auth-providers";
 import { getLinkedIdentities, linkProviderIdentity, openPrivateSpinnerSession, openPrivateSpinnerViewerHandoff } from "@/lib/supabase/auth";
 import { getCurrentProfile, profileHasVerifiedRoles, signedInName, updateCurrentProfile, verifyMemberAccess } from "@/lib/supabase/profile";
 import { listMyGallerySubmissions } from "@/lib/supabase/gallery-submissions";
@@ -395,13 +395,9 @@ export function AccountPanel() {
   const completion = profileCompletion(profile);
   const hasRoles = profile?.has_required_discord_roles === true;
   const recentRoles = profileHasVerifiedRoles(profile);
-  const enabledProviders = enabledOAuthProviders();
+  const enabledLinkProviders = enabledIdentityLinkProviders();
   const linkedProviderIds = new Set(linkedIdentities.map((identity) => text(identity.provider).toLowerCase()).filter(Boolean));
-  const availableLinkProviders = enabledProviders.filter((provider) => !linkedProviderIds.has(provider.id));
-  const placeholderLinkProviders = placeholderOAuthProviders().filter((provider) =>
-    !linkedProviderIds.has(provider.id) && !availableLinkProviders.some((availableProvider) => availableProvider.id === provider.id),
-  );
-  const linkProviderCount = availableLinkProviders.length + placeholderLinkProviders.length;
+  const availableLinkProviders = enabledLinkProviders.filter((provider) => !linkedProviderIds.has(provider.id));
   const counts = countSubmissions(submissions);
   const discordHandle = text(profile?.discord_handle || profile?.discord_username || profile?.discord_global_name, signedInName(user, profile));
   const bioLength = formState.bio.length;
@@ -590,7 +586,7 @@ export function AccountPanel() {
             )}
           </div>
 
-          {linkProviderCount ? (
+          {availableLinkProviders.length ? (
             <div className="provider-grid provider-grid--compact" aria-label="Link another sign-in method">
               {availableLinkProviders.map((provider) => (
                 <button className="provider-button" type="button" onClick={() => linkProvider(provider.id)} disabled={busy} key={provider.id}>
@@ -598,22 +594,6 @@ export function AccountPanel() {
                   <span className="provider-button__copy">
                     <span>Link {provider.shortLabel}</span>
                     <small>{provider.automaticVerification ? "Automatic Discord role check" : "Review required"}</small>
-                  </span>
-                </button>
-              ))}
-              {placeholderLinkProviders.map((provider) => (
-                <button
-                  className="provider-button provider-button--placeholder"
-                  type="button"
-                  disabled
-                  aria-label={`${provider.label} account linking setup pending`}
-                  title={provider.setupNote}
-                  key={`placeholder-${provider.id}`}
-                >
-                  <ProviderLogo provider={provider.id} />
-                  <span className="provider-button__copy">
-                    <span>Link {provider.shortLabel}</span>
-                    <small>Setup pending</small>
                   </span>
                 </button>
               ))}

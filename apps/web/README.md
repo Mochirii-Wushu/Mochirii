@@ -143,9 +143,34 @@ Phase 3 member workflows use only browser-safe public Supabase values in the Nex
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch
+NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple
 ```
 
 Do not print or commit secret values. Do not add service-role keys, Discord bot tokens, Instagram access tokens, OAuth client secrets, or other privileged credentials to browser code. Privileged verification, moderation, Instagram publishing, signed preview URLs, and audit behavior stay inside Supabase Edge Functions.
+
+Supabase Auth remains the sole OAuth broker. The six-provider source registry,
+runtime sign-in allowlist, and Account
+identity-link list are intentionally independent: source can stage a reviewed
+sign-in option without automatically exposing one-click account linking.
+Discord, Google, Twitch, and Apple are the current production-enabled
+initiation lanes; initiation redirects alone do not prove full sign-in.
+Facebook and Spotify stay production-disabled until their provider
+configuration, full callback evidence, app review where required, and
+provider-specific brand approval are complete. Kakao and Phone remain outside
+the approved six-provider sign-in presentation.
+
+Only after Facebook and Spotify pass those gates should the runtime allowlist
+be extended to `apple,facebook,google,discord,twitch,spotify`; until then their
+buttons remain absent rather than failing after user activation.
+
+The six exact labels are `Continue with Apple`, `Continue with Facebook`,
+`Continue with Google`, `Sign in with Discord`, `Log in with Twitch`, and
+`Log in with Spotify`. Their official marks are served locally from
+`public/assets/auth-providers`; that directory's `README.md` records official
+sources and checksums and excludes the marks from the Mochirii project license.
+Do not fetch marks from provider CDNs at runtime or add a provider SDK that
+bypasses Supabase.
 
 ## App Router Contract
 

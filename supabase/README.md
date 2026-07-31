@@ -175,12 +175,19 @@ The Account page does not expose private Storage URLs. It shows submission text 
 
 ## Multi-Provider Auth Setup
 
-The current live sign-in set is Discord, Google, Twitch, and Apple. Apple is active identity evidence only and must keep its generated OAuth client secret on a six-month rotation cadence. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
+Supabase Auth remains the sole OAuth broker. Source now registers six reviewed
+sign-in options while the runtime allowlist exposes only the four configured
+providers and Account identity linking remains a separate, narrower policy. A public
+source or environment entry does not enable a Supabase provider and is not
+evidence that its consent/callback/session flow works.
 
 | State | Providers | Operational rule |
 | --- | --- | --- |
-| Active | Discord, Google, Twitch, Apple | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`. Apple is active identity evidence and still requires moderator review for member-only privileges. |
-| Deferred | Facebook, Kakao, Spotify, Phone | Keep disabled and hidden from public activation until a scoped provider lane is reopened. |
+| Approved source registry | Apple, Facebook, Google, Discord, Twitch, Spotify | All six have reviewed button definitions and checksum-verified local official marks. Registration does not render or enable a provider. |
+| Production-enabled initiation | Discord, Google, Twitch, Apple | Current read-only evidence proves Supabase initiation reaches each official provider, not that consent, hosted callback, cookie session, and return path complete. Re-prove that full flow for releases that change authentication. Apple is identity evidence only and must keep its generated OAuth client secret on a six-month rotation cadence. |
+| Production-disabled broker lanes | Facebook, Spotify | Keep disabled and absent from the runtime sign-in allowlist until provider configuration, end-to-end callback evidence, app review where required, and provider-specific brand approval are complete. Source presence does not authorize activation. |
+| Account identity linking | Discord, Google, Twitch, Apple | Keep `NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple`. Facebook and Spotify must not become one-click Account linking options automatically. |
+| Deferred outside the approved six | Kakao, Phone | Keep disabled and hidden until a separately approved readiness lane is complete. |
 
 Social or phone sign-in through Supabase Auth proves account control only. It
 does not automatically prove guild membership, role ownership, gallery access,
@@ -196,8 +203,9 @@ In Supabase Dashboard:
 2. Enable only the providers that are ready for live callbacks.
 3. Add each provider's Client ID / public app identifier.
 4. Add each provider's Client Secret in Supabase only.
-5. Enable Supabase Auth Manual Linking so signed-in users can link Discord,
-   Google, Twitch, and Apple identities from Account with `linkIdentity`.
+5. Enable Supabase Auth Manual Linking so signed-in users can link only the
+   separately reviewed Discord, Google, Twitch, and Apple identities exposed by
+   Account with `linkIdentity`.
 6. Set the production Site URL to the public site URL.
 7. Add production redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
 8. Add local development redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
@@ -210,13 +218,34 @@ https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
 The browser/provider allowlist is controlled separately with public-safe env only:
 
 ```text
-NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch
+NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple
 NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=
 NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
 NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER=
 NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY=
 ```
+
+These two provider lists are public presentation/client-policy controls. The
+website checks each list before calling the browser client, but Supabase Manual
+Linking is a global project setting rather than a per-provider server policy.
+Review the dashboard provider state and Manual Linking together in every
+activation packet. Never treat the Account UI as the sole security boundary.
+
+Exact source button labels are `Continue with Apple`, `Continue with Facebook`,
+`Continue with Google`, `Sign in with Discord`, `Log in with Twitch`, and
+`Log in with Spotify`. Official marks are served locally from
+`apps/web/public/assets/auth-providers`; the directory `README.md` records the
+official sources and hashes and excludes the files from the Mochirii project
+license. Do not introduce runtime logo downloads or a second provider SDK that
+bypasses Supabase. Facebook and Spotify stay production-disabled until their
+provider and brand-policy gates pass.
+
+After both disabled lanes pass their provider, callback, session, return-path,
+and brand-policy gates, the same approved activation packet may extend the
+runtime value to `apple,facebook,google,discord,twitch,spotify`. Do not expose a
+button before its Supabase provider can complete the flow.
 
 Phone is additionally fail-closed in source. A phone code can be requested
 only when every public readiness field is complete, the CAPTCHA provider is
@@ -262,7 +291,7 @@ from Account. The equivalent Management API field is
 `security_manual_linking_enabled`; never print the bearer token or raw auth
 config response while checking it.
 
-Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider lanes are intentionally reopened.
+Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider configuration, full callback, app-review, and provider-specific brand-approval gates are complete.
 
 Preview-only member verification smoke:
 

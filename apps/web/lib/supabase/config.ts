@@ -5,7 +5,12 @@ export { SUPABASE_PROJECT_REF };
 export const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
 export const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
 export const NEXT_PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");
-export const NEXT_PUBLIC_AUTH_PROVIDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_IDS || "discord,google,twitch,apple";
+export const NEXT_PUBLIC_AUTH_PROVIDER_IDS =
+  process.env.NEXT_PUBLIC_AUTH_PROVIDER_IDS
+  ?? "apple,google,discord,twitch";
+export const NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS =
+  process.env.NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS
+  ?? "discord,google,twitch,apple";
 export const NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS = process.env.NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS || "";
 export const NEXT_PUBLIC_PHONE_AUTH_READY = process.env.NEXT_PUBLIC_PHONE_AUTH_READY === "true";
 export const NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
@@ -58,6 +63,7 @@ export function getSupabasePublicConfig() {
     acceptedImageTypes: [...ACCEPTED_IMAGE_TYPES],
     recentVerificationMs: RECENT_VERIFICATION_MS,
     authProviderIds: NEXT_PUBLIC_AUTH_PROVIDER_IDS,
+    authIdentityLinkProviderIds: NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS,
     authProviderPlaceholderIds: NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS,
     phoneAuthReady: NEXT_PUBLIC_PHONE_AUTH_READY,
     authCaptchaEnabled: NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED,

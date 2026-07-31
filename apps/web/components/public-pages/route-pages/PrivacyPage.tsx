@@ -36,7 +36,7 @@ export function PrivacyPage() {
           <div className="grid-12 grid-gap">
             <section className="col-8 glass-card glass-card--primary glass-pad" aria-labelledby="privacyScopeTitle">
               <p className="kicker">
-                Last updated <time dateTime="2026-07-29">July 29, 2026</time>
+                Last updated <time dateTime="2026-07-31">July 31, 2026</time>
               </p>
               <h2 className="section-title" id="privacyScopeTitle">Scope and contact</h2>
               <div className="prose-stack">
@@ -73,9 +73,10 @@ export function PrivacyPage() {
                   <h3 className="section-title section-title--sm" id="privacyAccountTitle">Account and membership</h3>
                   <p>
                     Website account identifiers, editable profile information, session cookies used to keep you
-                    signed in, limited browser storage used for auth cutover or interface preferences, Discord identity
-                    and role information, onboarding or verification state, and the results of live moderator-role
-                    checks.
+                    signed in, limited browser storage used for auth cutover or interface preferences, and the basic
+                    identity details supplied by an enabled sign-in option, such as a provider subject identifier,
+                    display name, email address, and email-verification state. We also handle Discord identity and role
+                    information, onboarding or verification state, and the results of live moderator-role checks.
                   </p>
                 </section>
                 <section aria-labelledby="privacyUploadTitle">
@@ -108,6 +109,10 @@ export function PrivacyPage() {
               <h2 className="section-title" id="privacyUseTitle">How we use and disclose information</h2>
               <ul className="list-stack">
                 <li>Authenticate members, confirm current guild and moderator access, and protect restricted tools.</li>
+                <li>
+                  When you choose an enabled sign-in option, receive only the identity details needed to create or
+                  locate your Mōchirīī website account. A sign-in identity does not prove guild membership by itself.
+                </li>
                 <li>Receive, store, review, display, withdraw, and investigate Gallery submissions.</li>
                 <li>
                   If you choose a public destination and a moderator separately approves publication, prepare a
@@ -118,9 +123,10 @@ export function PrivacyPage() {
               </ul>
               <p className="u-mt-18">
                 Authorized moderators may access information needed for review. Supabase provides database, private
-                storage, and server-function processing; Vercel delivers and measures the website; Discord supplies
-                identity and role information; and Meta processes an approved public post for Facebook or Instagram.
-                Each provider may process data in countries where it operates under its own terms.
+                storage, server-function processing, and the website&apos;s enabled sign-in broker; Vercel delivers and
+                measures the website; Discord supplies identity and role information; and Meta processes a future
+                Facebook sign-in only if that option is separately activated or an approved public post for Facebook
+                or Instagram. Each provider may process data in countries where it operates under its own terms.
               </p>
             </section>
 
@@ -150,6 +156,12 @@ export function PrivacyPage() {
                   While automated destination publishing remains inactive, email support to request withdrawal or
                   removal. A moderator will verify the requester, inspect the submission and any existing external
                   copy, keep automated publishing disabled, and record the outcome manually.
+                </p>
+                <p>
+                  If Facebook sign-in is activated later, unlinking or deleting eligible Mōchirīī-held account data
+                  does not delete the member&apos;s Facebook account. Mōchirīī will verify the requester, remove eligible
+                  account-linked identity data it controls, and retain only records needed for security, disputes,
+                  legal duties, or an accurate deletion audit.
                 </p>
                 <p>
                   When destination publishing is enabled, withdrawing before publication will cancel an eligible

@@ -1,9 +1,11 @@
 import type { Provider } from "@supabase/supabase-js";
 import {
+  NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS,
   NEXT_PUBLIC_AUTH_PROVIDER_IDS,
   NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS,
   isSupabaseConfigured,
 } from "./config";
+import { resolveProviderPolicyIds } from "./auth-provider-policy-core";
 import { phoneAuthConfigurationReady } from "./phone-auth-policy";
 
 export const AUTH_PROVIDER_IDS = [
@@ -34,6 +36,7 @@ export type AuthProviderConfig = {
   id: AuthProviderId;
   label: string;
   shortLabel: string;
+  signInLabel: string;
   kind: "oauth" | "phone";
   scopes?: string;
   approvalRequired: boolean;
@@ -46,6 +49,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "discord",
     label: "Discord",
     shortLabel: "Discord",
+    signInLabel: "Sign in with Discord",
     kind: "oauth",
     scopes: "identify email",
     approvalRequired: false,
@@ -56,6 +60,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "phone",
     label: "Phone OTP",
     shortLabel: "Phone",
+    signInLabel: "Continue with Phone",
     kind: "phone",
     approvalRequired: true,
     automaticVerification: false,
@@ -65,6 +70,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "apple",
     label: "Apple",
     shortLabel: "Apple",
+    signInLabel: "Continue with Apple",
     kind: "oauth",
     approvalRequired: true,
     automaticVerification: false,
@@ -74,6 +80,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "facebook",
     label: "Facebook",
     shortLabel: "Facebook",
+    signInLabel: "Continue with Facebook",
     kind: "oauth",
     scopes: "email",
     approvalRequired: true,
@@ -84,6 +91,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "google",
     label: "Google",
     shortLabel: "Google",
+    signInLabel: "Continue with Google",
     kind: "oauth",
     scopes: "openid email profile",
     approvalRequired: true,
@@ -94,6 +102,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "kakao",
     label: "Kakao",
     shortLabel: "Kakao",
+    signInLabel: "Continue with Kakao",
     kind: "oauth",
     scopes: "profile_nickname profile_image",
     approvalRequired: true,
@@ -104,6 +113,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "twitch",
     label: "Twitch",
     shortLabel: "Twitch",
+    signInLabel: "Log in with Twitch",
     kind: "oauth",
     approvalRequired: true,
     automaticVerification: false,
@@ -113,6 +123,7 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
     id: "spotify",
     label: "Spotify",
     shortLabel: "Spotify",
+    signInLabel: "Log in with Spotify",
     kind: "oauth",
     approvalRequired: true,
     automaticVerification: false,
@@ -123,21 +134,16 @@ export const AUTH_PROVIDER_REGISTRY: Record<AuthProviderId, AuthProviderConfig> 
 const PROVIDER_ID_SET = new Set<string>(AUTH_PROVIDER_IDS);
 const OAUTH_PROVIDER_ID_SET = new Set<string>(OAUTH_PROVIDER_IDS);
 
-function splitProviderEnv(value: string | undefined) {
-  return String(value || "")
-    .split(",")
-    .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
+function requestedProviderIds() {
+  return resolveProviderPolicyIds(NEXT_PUBLIC_AUTH_PROVIDER_IDS, AUTH_PROVIDER_IDS);
 }
 
-function requestedProviderIds() {
-  const requested = splitProviderEnv(NEXT_PUBLIC_AUTH_PROVIDER_IDS);
-  return requested.length ? requested : ["discord"];
+function requestedIdentityLinkProviderIds() {
+  return resolveProviderPolicyIds(NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS, OAUTH_PROVIDER_IDS);
 }
 
 function requestedPlaceholderProviderIds() {
-  const requested = splitProviderEnv(NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS);
-  return requested;
+  return resolveProviderPolicyIds(NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS, AUTH_PROVIDER_IDS);
 }
 
 export function isAuthProviderId(value: unknown): value is AuthProviderId {
@@ -173,6 +179,24 @@ export function enabledOAuthProviders() {
   return enabledAuthProviders().filter((provider): provider is AuthProviderConfig & { id: OAuthProviderId; kind: "oauth" } =>
     provider.kind === "oauth" && isOAuthProviderId(provider.id),
   );
+}
+
+export function enabledIdentityLinkProviders() {
+  return requestedIdentityLinkProviderIds()
+    .map((providerId) => AUTH_PROVIDER_REGISTRY[providerId])
+    .filter((provider): provider is AuthProviderConfig & { id: OAuthProviderId; kind: "oauth" } =>
+      provider.kind === "oauth" && isOAuthProviderId(provider.id),
+    );
+}
+
+export function isSignInProviderEnabled(value: unknown): value is OAuthProviderId {
+  return isOAuthProviderId(value)
+    && enabledOAuthProviders().some(({ id }) => id === value);
+}
+
+export function isIdentityLinkProviderEnabled(value: unknown): value is OAuthProviderId {
+  return isOAuthProviderId(value)
+    && enabledIdentityLinkProviders().some(({ id }) => id === value);
 }
 
 export function placeholderAuthProviders() {

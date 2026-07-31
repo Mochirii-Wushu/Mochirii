@@ -1,7 +1,8 @@
 import type { SpinnerAccessMode } from "@/lib/spinner/session-policy";
 import {
   AUTH_PROVIDER_REGISTRY,
-  isOAuthProviderId,
+  isIdentityLinkProviderEnabled,
+  isSignInProviderEnabled,
   phoneAuthReady,
   providerToSupabaseProvider,
   type OAuthProviderId,
@@ -34,7 +35,7 @@ function resolveRedirectTo(value = "/account") {
 
 export async function signInWithProvider(provider: OAuthProviderId, options: { redirectTo?: string } = {}) {
   try {
-    if (!isOAuthProviderId(provider)) throw new Error("That sign-in provider is not supported.");
+    if (!isSignInProviderEnabled(provider)) throw new Error("That sign-in provider is not enabled.");
 
     const client = await requireReadyBrowserSupabaseClient();
     const config = AUTH_PROVIDER_REGISTRY[provider];
@@ -54,7 +55,7 @@ export async function signInWithProvider(provider: OAuthProviderId, options: { r
 
 export async function linkProviderIdentity(provider: OAuthProviderId, options: { redirectTo?: string } = {}) {
   try {
-    if (!isOAuthProviderId(provider)) throw new Error("That sign-in provider is not supported.");
+    if (!isIdentityLinkProviderEnabled(provider)) throw new Error("That identity-linking provider is not enabled.");
 
     const client = await requireReadyBrowserSupabaseClient();
     const config = AUTH_PROVIDER_REGISTRY[provider];

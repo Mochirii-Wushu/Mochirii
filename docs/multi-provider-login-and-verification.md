@@ -9,10 +9,18 @@ This feature separates four layers that must stay distinct:
 
 ## Current Provider State
 
+Supabase Auth remains the sole OAuth broker. The source contract deliberately
+separates buttons that may appear on the sign-in page from providers that may
+be linked from an already authenticated Account. Neither public environment
+variable enables a provider in Supabase or substitutes for callback testing.
+
 | State | Providers | Operational rule |
 | --- | --- | --- |
-| Active | Discord, Google, Twitch, Apple | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`. Apple is active identity evidence and still requires moderator review for member-only privileges. |
-| Deferred | Facebook, Kakao, Spotify, Phone | Keep disabled and hidden from public activation until a scoped provider lane is reopened. |
+| Approved source registry | Apple, Facebook, Google, Discord, Twitch, Spotify | All six have reviewed button definitions and local official marks. Registration does not render or enable a provider. |
+| Production-enabled initiation | Discord, Google, Twitch, Apple | Current read-only evidence proves Supabase initiation reaches each official provider. It does not prove consent, callback, cookie-session, or return-path completion; verify that full flow before describing one as working. Apple is identity evidence and still requires moderator review for member-only privileges. |
+| Production-disabled broker lanes | Facebook, Spotify | Keep disabled and absent from the runtime sign-in allowlist until provider configuration, end-to-end callback evidence, app review where required, and provider-specific brand approval are complete. Their source-staged buttons and marks do not authorize activation. |
+| Account identity linking | Discord, Google, Twitch, Apple | The separate Account allowlist is `NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple`. Facebook and Spotify do not become one-click linking methods merely because they are present in the sign-in source list. |
+| Deferred outside the approved six | Kakao, Phone | Keep disabled and hidden until a separately approved provider lane satisfies its readiness gates. |
 
 This is an operational activation list, not a destructive schema list. Existing code and database constraints may retain historical/future provider values so linked identity history and future Apple work do not need a migration churn pass.
 
@@ -30,7 +38,8 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
   `security_manual_linking_enabled`; do not print bearer tokens or raw auth
   config responses while checking it.
 - Browser/Vercel public env may contain only provider IDs and public readiness flags:
-  - `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`
+  - `NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch`
+  - `NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple`
   - `NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=`
   - `NEXT_PUBLIC_PHONE_AUTH_READY=false`
   - `NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false`
@@ -38,6 +47,70 @@ Deferred Phone readiness was captured in PR #300, <https://github.com/Mochirii-W
   - `NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY=`
 - OAuth client secrets stay only in Supabase Auth provider settings.
 - Phone stays disabled unless SMS provider, CAPTCHA, Auth rate limits, country/cost expectations, and abuse handling are configured in a separate lane.
+
+The website enforces both reviewed lists before calling the browser Supabase
+client. They are presentation and client-policy controls, not a server-side
+per-provider authorization boundary. Supabase's project-level Manual Linking
+setting remains global, so an activation packet must review that setting and
+the provider dashboard state together rather than relying on the Account UI.
+
+## Provider Buttons And Official Marks
+
+The six reviewed source labels are exact:
+
+- `Continue with Apple`
+- `Continue with Facebook`
+- `Continue with Google`
+- `Sign in with Discord`
+- `Log in with Twitch`
+- `Log in with Spotify`
+
+Official local marks live under
+`apps/web/public/assets/auth-providers`. Their retrieval source, review date,
+and SHA-256 are recorded in that directory's `README.md`. The files are used
+only to identify the matching authentication option, are excluded from the
+Mochirii project license, and must not be recolored, distorted, or reused as
+Mochirii branding. Loading the sign-in page must not fetch logo artwork from a
+provider at runtime.
+
+Facebook uses the unmodified login mark linked by Meta's Login Button
+documentation while Supabase continues to own the OAuth flow; do not add
+Meta's JavaScript SDK as a second broker. Spotify remains production-disabled
+because its current design guidance needs provider-specific confirmation for
+this multi-provider chooser. Facebook likewise remains disabled until its
+platform and brand-review gates are satisfied.
+
+## Facebook Source-Only Readiness
+
+The Website is ready to present Facebook without connecting it yet:
+
+- the exact visible label is `Continue with Facebook` and the checksum-locked
+  official mark is served locally;
+- the provider registry uses Supabase's `facebook` provider and requests only
+  `email`; Facebook's standard `public_profile` data is handled only as part of
+  the provider's basic identity response;
+- `NEXT_PUBLIC_AUTH_PROVIDER_IDS` excludes Facebook by default, the public
+  placeholder list is empty, and the browser client rejects a direct Facebook
+  call while it is outside that allowlist;
+- `NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS` independently excludes
+  Facebook, so later sign-in activation cannot silently expose one-click
+  identity linking;
+- no Meta JavaScript SDK, Graph API token, provider token persistence, or
+  second website session exists for sign-in;
+- `/privacy` and `/meta-data-deletion` distinguish future Facebook member
+  sign-in from the separate Page and Instagram publishing workflow.
+
+`npm run smoke:auth-provider-chooser` starts a local, disposable Next.js
+instance with a six-provider test allowlist. It checks the exact Facebook
+accessible label, official local mark, common mobile/desktop geometry, and a
+synthetic Supabase authorization URL in Chromium, Firefox, and WebKit. The
+test blocks every real Meta/Facebook request and never uses a client ID,
+secret, token, hosted callback, or provider account.
+
+Only after those gates pass, extend the runtime value to
+`apple,facebook,google,discord,twitch,spotify` in the same approved activation
+packet that enables both providers. Never publish a button before its broker
+lane can complete the corresponding flow.
 
 ## Server-Side Reliability Boundary
 
@@ -109,9 +182,9 @@ owner-approved provider mutation.
 - Apple: active identity evidence; member review is required for member-only privileges and the OAuth client secret must stay on a six-month rotation cadence.
 - Google: use minimal `openid email profile` scopes.
 - Twitch: identity evidence only, not membership proof.
-- Facebook: deferred; request `email` only if the Facebook lane is reopened.
+- Facebook: source-staged but production-disabled; request `email` only after provider configuration, callback, app-review, and brand-approval gates pass.
 - Kakao: deferred; keep disabled until the app is approved as a Kakao Biz App for `account_email` or leadership accepts a profile-only manual-review path.
-- Spotify: deferred; identity evidence only and no membership proof.
+- Spotify: source-staged but production-disabled; identity evidence only, no membership proof, and activation requires provider-specific brand approval.
 - Phone: deferred; SMS control only and still requires moderator review for gallery access.
 
 ## Apple Activation Gate
@@ -172,16 +245,18 @@ provider.
 
 ## Activation Checklist
 
-1. Confirm Supabase Auth production has Discord, Google, Twitch, and Apple enabled among the current active set.
-2. Confirm Supabase Auth Manual Linking is enabled for the production project.
-3. Confirm Facebook, Kakao, Spotify, and Phone remain disabled in Supabase Auth production.
-4. Set the public provider allowlist to `discord,google,twitch,apple`.
-5. Leave the public placeholder list empty.
-6. Deploy `verify-member-access` and `review-member-verification`.
-7. Smoke Discord, Google, Twitch, and Apple provider flows without recording tokens, cookies, raw headers, or OAuth payloads.
-8. Confirm Apple is clickable, redirects through Supabase Auth, and links to the existing admin account before signed-out Apple login is tested.
-9. Confirm a non-Discord account remains blocked until moderator approval.
-10. In Supabase Preview, confirm an approved active member can upload and an expired/revoked/suspended/archived member cannot.
+1. Confirm the source sign-in policy is exactly `apple,facebook,google,discord,twitch,spotify` and the Account linking policy is independently `discord,google,twitch,apple`.
+2. Confirm the six buttons use the exact reviewed labels and the checksum-verified local official marks.
+3. Confirm Supabase Auth production has Discord, Google, Twitch, and Apple enabled among the current active set.
+4. Confirm Supabase Auth Manual Linking is enabled for the production project and Account offers only Discord, Google, Twitch, and Apple.
+5. Confirm Facebook, Spotify, Kakao, and Phone remain disabled in Supabase Auth production; Facebook and Spotify require separate provider and brand approval before activation.
+6. Leave the public placeholder list empty.
+7. Deploy `verify-member-access` and `review-member-verification` only in an independently approved release.
+8. Smoke Discord, Google, Twitch, and Apple through consent, Supabase callback, cookie session, and reviewed return path without recording tokens, cookies, raw headers, or OAuth payloads.
+9. Confirm Apple links to the existing admin account before signed-out Apple login is tested.
+10. Confirm Facebook and Spotify fail closed while their Supabase provider lanes are disabled, without attempting a provider consent flow.
+11. Confirm a non-Discord account remains blocked until moderator approval.
+12. In Supabase Preview, confirm an approved active member can upload and an expired/revoked/suspended/archived member cannot.
 
 ## Out Of Scope
 

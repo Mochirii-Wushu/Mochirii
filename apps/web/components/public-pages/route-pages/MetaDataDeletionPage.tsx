@@ -39,7 +39,7 @@ export function MetaDataDeletionPage() {
           <div className="grid-12 grid-gap">
             <section className="col-8 glass-card glass-card--primary glass-pad" aria-labelledby="deletionRequestTitle">
               <p className="kicker">
-                Last updated <time dateTime="2026-07-29">July 29, 2026</time>
+                Last updated <time dateTime="2026-07-31">July 31, 2026</time>
               </p>
               <h2 className="section-title" id="deletionRequestTitle">How to make a request</h2>
               <ol className="list-stack legal-steps">
@@ -74,9 +74,16 @@ export function MetaDataDeletionPage() {
                 those services outside Mōchirīī&apos;s control.
               </p>
               <p>
-                Members will not authenticate this publishing integration through Facebook Login. If destination
+                The Page and Instagram publishing workflow is separate from member authentication. If destination
                 publishing is enabled, Mōchirīī intends to use a business-owned publisher for its own Facebook Page and
-                a connected professional Instagram account after the provider asset chain is verified.
+                a connected professional Instagram account after the provider asset chain is verified. A future
+                Facebook sign-in option would use a separate, minimum-data authentication client through the Website
+                sign-in broker.
+              </p>
+              <p>
+                If Facebook sign-in is activated later, this process also covers eligible Facebook identity data held
+                with a Mōchirīī website account. It does not delete the member&apos;s Facebook account or data Facebook
+                retains under its own terms.
               </p>
             </aside>
 

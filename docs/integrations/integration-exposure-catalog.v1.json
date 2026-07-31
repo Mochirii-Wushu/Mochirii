@@ -179,16 +179,16 @@
     },
     {
       "id": "auth-providers",
-      "declaredState": "source_declared_active",
+      "declaredState": "source_declared_activation_gated",
       "destinations": ["supabase-auth"],
       "dataClasses": ["authentication_identity", "auth_provider_configuration"],
-      "auth": "Source declares Discord, Google, Twitch, and Apple as the approved active sign-in set; provider enablement and client configuration require dashboard readback.",
+      "auth": "Supabase is the sole OAuth broker. The source registry defines Apple, Facebook, Google, Discord, Twitch, and Spotify, the runtime sign-in allowlist exposes only configured providers, and Account identity linking independently allows Discord, Google, Twitch, and Apple. Facebook and Spotify remain production-disabled and absent from the runtime allowlist pending provider, callback, app-review, and brand-policy gates; dashboard readback is authoritative for actual enablement.",
       "owner": "identity-operations",
       "disableControl": "auth-provider-disable",
       "runbook": "identity",
       "verification": "identity",
-      "sourceRefs": ["docs/multi-provider-login-and-verification.md", "apps/web/lib/supabase/auth-providers.ts"],
-      "runtimeReadback": { "required": true, "status": "runtime_readback_required", "facts": ["enabled providers", "redirect allowlist", "manual linking", "provider client state"] }
+      "sourceRefs": ["docs/multi-provider-login-and-verification.md", "apps/web/lib/supabase/config.ts", "apps/web/lib/supabase/auth-providers.ts", "apps/web/public/assets/auth-providers/README.md"],
+      "runtimeReadback": { "required": true, "status": "runtime_readback_required", "facts": ["enabled providers", "sign-in presentation allowlist", "identity-link allowlist", "redirect allowlist", "manual linking", "provider client state", "provider-specific brand approval"] }
     },
     {
       "id": "phone-auth",

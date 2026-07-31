@@ -244,11 +244,6 @@
     align-items:flex-start;
   }
 
-  .provider-grid,
-  .provider-grid--compact{
-    grid-template-columns:1fr;
-  }
-
   .status-grid,
   .account-overview-grid,
   .account-action-grid,

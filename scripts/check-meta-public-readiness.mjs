@@ -38,7 +38,7 @@ for (const [label, source] of [
   ["Meta data deletion page", deletion],
 ]) {
   requireText(label, source, 'id="main"');
-  requireText(label, source, 'dateTime="2026-07-29"');
+  requireText(label, source, 'dateTime="2026-07-31"');
   requireText(label, source, "support@mochirii.com");
   forbidText(label, source, /\b(?:warm|calm|quiet|shared runs?)\b/i, "mood filler or shared-runs wording");
   forbidText(label, source, /\b(?:ghp|gho|ghs|github_pat)_[A-Za-z0-9_]{20,}\b|\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}\b/, "credential-like value");
