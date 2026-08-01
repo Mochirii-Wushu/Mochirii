@@ -13,7 +13,7 @@ const MAX_IMAGE_PIXELS = 100_000_000;
 const CANONICAL_PNG_PIXELS_PER_METER = 2_835;
 const ALLOWED_PUBLIC_WEBP_CHUNKS = new Set(["VP8X", "ALPH", "VP8 ", "VP8L"]);
 const WEBP_PRIVACY_METADATA_CHUNKS = new Set(["ICCP", "EXIF", "XMP "]);
-const ALLOWED_PUBLIC_PNG_CHUNKS = new Set(["IHDR", "PLTE", "tRNS", "pHYs", "IDAT", "IEND"]);
+const ALLOWED_PUBLIC_PNG_CHUNKS = new Set(["IHDR", "PLTE", "tRNS", "pHYs", "sRGB", "IDAT", "IEND"]);
 const PNG_PRIVACY_METADATA_CHUNKS = new Set(["eXIf", "tEXt", "zTXt", "iTXt", "tIME", "iCCP"]);
 
 export function maximumAssetFormatBytes(extension) {
@@ -183,6 +183,7 @@ export function validatePng(buffer) {
   let sawPlte = false;
   let sawTransparency = false;
   let sawPhysicalDimensions = false;
+  let sawSrgb = false;
   let idatEnded = false;
   let width = 0;
   let height = 0;
@@ -225,6 +226,11 @@ export function validatePng(buffer) {
         invalid("PNG", "unsupported compression, filter, or interlace method");
       }
       sawIhdr = true;
+    } else if (type === "sRGB") {
+      if (sawSrgb || sawPlte || idatChunks > 0 || size !== 1 || buffer[payload] > 3) {
+        invalid("PNG", "sRGB is duplicate, malformed, or out of order");
+      }
+      sawSrgb = true;
     } else if (type === "PLTE") {
       if (
         sawPlte || sawTransparency || idatChunks > 0 ||
@@ -1181,6 +1187,20 @@ export function assertAssetValidatorCanaries() {
   physicalDimensions.writeUInt32BE(2835, 4);
   physicalDimensions[8] = 1;
   validatePng(insertPngChunkAfterIhdr(png, "pHYs", physicalDimensions));
+  const standardSrgb = Buffer.from([0]);
+  validatePng(insertPngChunkAfterIhdr(png, "sRGB", standardSrgb));
+  expectReject(
+    "duplicate PNG sRGB",
+    validatePng,
+    insertPngChunkAfterIhdr(insertPngChunkAfterIhdr(png, "sRGB", standardSrgb), "sRGB", standardSrgb),
+  );
+  expectReject("malformed PNG sRGB", validatePng, insertPngChunkAfterIhdr(png, "sRGB", Buffer.from([0, 0])));
+  expectReject("invalid PNG sRGB intent", validatePng, insertPngChunkAfterIhdr(png, "sRGB", Buffer.from([4])));
+  expectReject(
+    "out-of-order PNG sRGB",
+    validatePng,
+    Buffer.concat([png.subarray(0, png.length - 12), createPngChunk("sRGB", standardSrgb), png.subarray(png.length - 12)]),
+  );
   const noncanonicalPhysicalDimensions = Buffer.from(physicalDimensions);
   noncanonicalPhysicalDimensions.writeUInt32BE(0x50524956, 0);
   noncanonicalPhysicalDimensions.writeUInt32BE(0x41544521, 4);

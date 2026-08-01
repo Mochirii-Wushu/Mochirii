@@ -75,7 +75,7 @@ assertNotIncludes("AccountPanel Apple linking", accountPanel, "placeholderOAuthP
 assertNotIncludes("AccountPanel Apple linking", accountPanel, "Setup pending");
 
 [
-  "/assets/auth-providers/apple-logo.generated.svg",
+  "/assets/auth-providers/apple-logo.generated.png",
   "provider-logo--apple",
 ].forEach((snippet) => assertIncludes("Apple provider logo support", `${providerLogo}\n${readAppCss()}`, snippet));
 

@@ -11,7 +11,7 @@ const OFFICIAL_PROVIDER_ASSETS: Partial<Record<AuthProviderId, {
   height: number;
 }>> = {
   apple: {
-    src: "/assets/auth-providers/apple-logo.generated.svg",
+    src: "/assets/auth-providers/apple-logo.generated.png",
     width: 56,
     height: 56,
   },

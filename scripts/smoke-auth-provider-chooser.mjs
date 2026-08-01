@@ -10,7 +10,7 @@ const port = await reserveLoopbackPort();
 const baseUrl = `http://127.0.0.1:${port}`;
 const syntheticAuthOrigin = baseUrl;
 const expectedProviders = [
-  ["Continue with Apple", "apple-logo.generated.svg"],
+  ["Continue with Apple", "apple-logo.generated.png"],
   ["Continue with Facebook", "facebook-login-mark.svg"],
   ["Continue with Google", "google-g.generated.svg"],
   ["Sign in with Discord", "discord-symbol-white.svg"],

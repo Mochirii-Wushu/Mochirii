@@ -108,7 +108,7 @@ assertIncludes("check-all", checkAll, '["test:member-access-refresh", ["deno", "
 
 [
   "OFFICIAL_PROVIDER_ASSETS",
-  "/assets/auth-providers/apple-logo.generated.svg",
+  "/assets/auth-providers/apple-logo.generated.png",
   "/assets/auth-providers/facebook-login-mark.svg",
   "/assets/auth-providers/google-g.generated.svg",
   "/assets/auth-providers/discord-symbol-white.svg",
@@ -216,7 +216,7 @@ assertNotIncludes("AccountPanel link policy", accountPanel, "Setup pending");
 [
   "not part of Mochirii's project license",
   "production-disabled",
-  "apple-logo.generated.svg",
+  "apple-logo.generated.png",
   "facebook-login-mark.svg",
   "google-g.generated.svg",
   "discord-symbol-white.svg",

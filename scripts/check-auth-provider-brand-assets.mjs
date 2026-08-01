@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { canonicalizeCheckoutTextBytes } from "./lib/canonical-checkout-text.mjs";
 
 const assets = new Map([
-  ["apple-logo.generated.svg", "46DC761ACEC539EC3CD45779BD3D19846DBBB57E703A0E94BFB630AE865D350C"],
+  ["apple-logo.generated.png", "89F6F779656A18F20BB888F5A118C8D581E5EBC8670BC32CED52EA732D1D2B3F"],
   ["discord-symbol-white.svg", "2123B8A552A13349F8139EA81FA96FE10B84CC6C9B2A1545A62EC1F7B476AE76"],
   ["facebook-login-mark.svg", "316535B6DE46AB29760DD143FDF2A893D7971B166A5FF11D12B19B6ACB53E932"],
   ["google-g.generated.svg", "3A432ACC7C5D85F06F13930798135E955CCC728EFE541290A909B33498B61B43"],
@@ -12,6 +12,7 @@ const assets = new Map([
   ["twitch-glitch-white.svg", "7FF2942CE7B169CB9175DF2BC2BE8292DA9C6701B5C5039C38EBE61A667ABBE6"],
 ]);
 const failures = [];
+const binaryAssets = new Set(["apple-logo.generated.png"]);
 
 function read(path) {
   return readFileSync(new URL(`../${path}`, import.meta.url));
@@ -25,7 +26,8 @@ for (const [filename, expectedHash] of assets) {
   const path = `apps/web/public/assets/auth-providers/${filename}`;
   let canonicalBytes;
   try {
-    canonicalBytes = canonicalizeCheckoutTextBytes(read(path));
+    const bytes = read(path);
+    canonicalBytes = binaryAssets.has(filename) ? bytes : canonicalizeCheckoutTextBytes(bytes);
   } catch (error) {
     failures.push(`${filename}: ${error instanceof Error ? error.message : "invalid checkout bytes"}`);
     continue;
@@ -40,7 +42,7 @@ const providerLogo = text("apps/web/components/member-workflow/ProviderLogo.tsx"
 const providerRegistry = text("apps/web/lib/supabase/auth-providers.ts");
 const provenance = text("apps/web/public/assets/auth-providers/README.md");
 const memberWorkflowCss = text("apps/web/app/styles/member-workflow.css");
-const appleMark = text("apps/web/public/assets/auth-providers/apple-logo.generated.svg");
+const appleMark = read("apps/web/public/assets/auth-providers/apple-logo.generated.png");
 const googleMark = text("apps/web/public/assets/auth-providers/google-g.generated.svg");
 const labels = [
   "Continue with Apple",
@@ -86,11 +88,17 @@ for (const snippet of [
   if (!googleMark.includes(snippet)) failures.push(`Google mark: missing official configurator geometry ${snippet}`);
 }
 
-for (const snippet of [
-  'viewBox="0 0 112 112"',
-  'width="112" height="112"',
-]) {
-  if (!appleMark.includes(snippet)) failures.push(`Apple mark: missing official generated-button geometry ${snippet}`);
+const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+if (!appleMark.subarray(0, pngSignature.length).equals(pngSignature)) {
+  failures.push("Apple mark: missing PNG signature");
+}
+if (
+  appleMark.length < 24
+  || appleMark.toString("ascii", 12, 16) !== "IHDR"
+  || appleMark.readUInt32BE(16) !== 112
+  || appleMark.readUInt32BE(20) !== 112
+) {
+  failures.push("Apple mark: expected official 112x112 generated-button geometry");
 }
 
 for (const snippet of [
