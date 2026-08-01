@@ -68,7 +68,7 @@ Source, tests, migration, and function code may be reviewed in a PR. The followi
 
 - applying `20260727054717_enforce_three_minute_spinner_countdown.sql` after
   the released spinner and media migrations;
-- allowing the connected production integration to redeploy all 45 Edge Functions declared in `supabase/config.toml`, including `spinner-live-session`, `reaper-spinner-dispatch`, the raffle functions, and the disabled social-publishing functions;
+- allowing the connected production integration to redeploy all 49 Edge Functions declared in `supabase/config.toml`, including `spinner-live-session`, `reaper-spinner-dispatch`, the raffle functions, and the disabled social-publishing functions;
 - setting `DISCORD_RAFFLE_CHANNEL_ID`, `REAPER_SPINNER_DISPATCH_SECRET`, or changing any existing bot secret;
 - adding the matching Vault values used by scheduled dispatch;
 - exercising the target channel or promoting a production deployment.
@@ -79,11 +79,11 @@ Pause moderator draws before the three-minute timing migration or matching funct
 
 ## Production Integration Blast Radius
 
-The connected production integration does not deploy only the two spinner functions. On every push or merge to the configured production branch, it applies new migrations and deploys every Edge Function declared in `supabase/config.toml`. The integrated source declares 45 functions with 28 `verify_jwt=true` and 17 false, including `spinner-live-session`, `reaper-spinner-dispatch`, the seven raffle functions, and the disabled Instagram and Facebook publishing lanes enumerated below. This matches the [production integration contract](https://supabase.com/docs/guides/deployment/branching/github-integration): migrations and all functions declared in `config.toml` are production deployment inputs.
+The connected production integration does not deploy only the two spinner functions. On every push or merge to the configured production branch, it applies new migrations and deploys every Edge Function declared in `supabase/config.toml`. The integrated source declares 49 functions with 31 `verify_jwt=true` and 18 false, including `spinner-live-session`, `reaper-spinner-dispatch`, the seven raffle functions, the consent-withdrawal function, and the disabled Gallery and event social-publishing lanes enumerated below. This matches the [production integration contract](https://supabase.com/docs/guides/deployment/branching/github-integration): migrations and all functions declared in `config.toml` are production deployment inputs.
 
-Before merge, record the prior production commit and no-secret version/status inventory for all 45 functions in ignored operations evidence. Require the exact-head Preview and protected checks to pass. After merge, serialize the release: do not merge another provider-affecting change until the production integration reports success for the migration and all 45 function deployments. Verify the two spinner functions from the merged commit and run the existing no-send authentication/boundary smokes for the other 43 functions. A manual two-function deployment is not an equivalent release and is not authorized by this runbook.
+Before merge, record the prior production commit and no-secret version/status inventory for all 49 functions in ignored operations evidence. Require the exact-head Preview and protected checks to pass. After merge, serialize the release: do not merge another provider-affecting change until the production integration reports success for the migration and all 49 function deployments. Verify the two spinner functions from the merged commit and run the existing no-send authentication/boundary smokes for the other 47 functions. A manual two-function deployment is not an equivalent release and is not authorized by this runbook.
 
-The 45 configured functions are:
+The 49 configured functions are:
 
 1. `verify-discord-member`
 2. `verify-member-access`
@@ -130,6 +130,10 @@ The 45 configured functions are:
 43. `mochi-pets-alpha-admin`
 44. `submit-mochi-pets-feedback`
 45. `sync-pixelfed-social-account`
+46. `withdraw-gallery-publication-consent`
+47. `manage-event-social-publication`
+48. `run-event-social-publication`
+49. `resolve-event-social-publication-reconciliation`
 
 ## Authenticated Preview Boundary
 
@@ -187,7 +191,7 @@ If outbound delivery is unsafe, use the approved provider controls in this order
 
 The migration is forward-only. Promoting an older Website deployment or reverting function source does not undo tables, receipts, scheduled jobs, triggers, grants, or RLS. Do not hand-delete spinner tables, receipts, jobs, functions, or migration history. Correct a released schema defect with a reviewed forward-fix migration. Use a database restore only for an owner-approved integrity incident after the recovery point and data-loss window are explicitly accepted.
 
-A protected revert or forward-fix merge invokes the same 45-function production integration; review and approve that full redeployment blast radius again. Re-enable delivery only after the fix is green and a new high-entropy dispatcher value is stored identically in the Edge environment and Vault. Never reuse or disclose the disabled value.
+A protected revert or forward-fix merge invokes the same 49-function production integration; review and approve that full redeployment blast radius again. Re-enable delivery only after the fix is green and a new high-entropy dispatcher value is stored identically in the Edge environment and Vault. Never reuse or disclose the disabled value.
 
 ## Duplicate Start-Message Reconciliation
 

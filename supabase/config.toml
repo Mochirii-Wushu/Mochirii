@@ -203,6 +203,24 @@ verify_jwt = true
 import_map = "./functions/check-facebook-page-api-status/deno.json"
 entrypoint = "./functions/check-facebook-page-api-status/index.ts"
 
+[functions.manage-event-social-publication]
+enabled = true
+verify_jwt = true
+import_map = "./functions/manage-event-social-publication/deno.json"
+entrypoint = "./functions/manage-event-social-publication/index.ts"
+
+[functions.run-event-social-publication]
+enabled = true
+verify_jwt = false
+import_map = "./functions/run-event-social-publication/deno.json"
+entrypoint = "./functions/run-event-social-publication/index.ts"
+
+[functions.resolve-event-social-publication-reconciliation]
+enabled = true
+verify_jwt = true
+import_map = "./functions/resolve-event-social-publication-reconciliation/deno.json"
+entrypoint = "./functions/resolve-event-social-publication-reconciliation/index.ts"
+
 [functions.list-member-profiles]
 enabled = true
 verify_jwt = true

@@ -7,9 +7,9 @@
     "secretValuesAllowed": false
   },
   "jwtSummary": {
-    "total": 46,
-    "verifyJwtTrue": 29,
-    "verifyJwtFalse": 17,
+    "total": 49,
+    "verifyJwtTrue": 31,
+    "verifyJwtFalse": 18,
     "trueRationale": "Browser, member, moderator, and user-session callers require a Supabase Auth JWT at the Edge gateway and a narrower handler authorization check.",
     "falseRationale": "These endpoints must accept a public request or a non-Supabase caller at the gateway. Each non-public handler applies its own signature, shared-secret, capability, cron-secret, game-server, or Social-sync boundary. Public handlers return only reviewed public projections."
   },
@@ -21,6 +21,7 @@
     "commerce_configuration": { "classification": "internal", "description": "Storefront theme and non-secret commerce configuration." },
     "discord_interaction": { "classification": "confidential", "description": "Discord interaction payloads and command responses." },
     "discord_message_and_event": { "classification": "confidential", "description": "Guild messages, scheduled-event data, and delivery metadata." },
+    "event_social_publication": { "classification": "confidential", "description": "Schedule occurrences, reusable template approvals, destination jobs, moderation actions, public-delivery state, and reconciliation evidence." },
     "facebook_page_publish_job": { "classification": "confidential", "description": "Opt-in Facebook Page publishing jobs, captions, events, reconciliation evidence, and provider identifiers." },
     "guild_membership_and_roles": { "classification": "confidential", "description": "Discord guild membership, onboarding, and role evidence." },
     "instagram_publish_job": { "classification": "confidential", "description": "Opt-in publishing jobs, captions, events, and provider identifiers." },
@@ -77,6 +78,7 @@
     { "id": "alpha-user-jwt", "gatewayVerifyJwt": true, "boundary": "Supabase gateway JWT plus handler user lookup, alpha allowlist, and terms checks.", "sourceRefs": ["supabase/functions/_shared/mochi-pets-alpha.ts"] },
     { "id": "cron-secret", "gatewayVerifyJwt": false, "boundary": "Server-held cron secret is checked in the handler and missing configuration fails closed.", "sourceRefs": ["supabase/functions/_shared/spotlight-polls.ts", "supabase/functions/send-vote-reminder/index.ts"] },
     { "id": "discord-ed25519", "gatewayVerifyJwt": false, "boundary": "Discord request signature is verified against the raw body before commands are handled.", "sourceRefs": ["supabase/functions/_shared/discord-signature.ts"] },
+    { "id": "event-social-scheduler-secret", "gatewayVerifyJwt": false, "boundary": "A dedicated minimum-32-character scheduler secret is compared in constant time before an exact bounded JSON request may materialize occurrences, stage Instagram containers, or attempt an independently enabled publication at the atomic due-time gate; missing configuration returns an opaque denial.", "sourceRefs": ["supabase/functions/run-event-social-publication/index.ts", "supabase/functions/_shared/secret-auth.ts"] },
     { "id": "game-server-secret", "gatewayVerifyJwt": false, "boundary": "Server-held game runtime secret is checked before player authorization and data access.", "sourceRefs": ["supabase/functions/_shared/mochi-pets-alpha.ts"] },
     { "id": "member-sync-secret", "gatewayVerifyJwt": false, "boundary": "Dedicated Reaper member-sync secret is compared in constant time before processing guild events.", "sourceRefs": ["supabase/functions/reaper-discord-member-sync/index.ts"] },
     { "id": "moderator-jwt", "gatewayVerifyJwt": true, "boundary": "Supabase gateway JWT plus authoritative user, current membership, and moderator-role checks in the handler.", "sourceRefs": ["supabase/functions/_shared/gallery-moderation.ts"] },
@@ -96,6 +98,7 @@
   "disableControls": [
     { "id": "auth-provider-disable", "control": "Remove the provider from the public allowlist and disable it through a separately approved Supabase Auth change.", "sourceRefs": ["docs/multi-provider-login-and-verification.md"] },
     { "id": "discord-integration-disable", "control": "Disable the Discord caller or endpoint and then disable affected functions through an approved release; preserve audit data.", "sourceRefs": ["docs/reaper-runtime-health-checklist.md"] },
+    { "id": "event-social-publishing-disable", "control": "Set the affected destination switch false through the moderator emergency-disable path or owner/operator release path; preserve occurrence, job, approval, and reconciliation audit rows.", "sourceRefs": ["supabase/README.md", "supabase/functions/manage-event-social-publication/index.ts"] },
     { "id": "facebook-page-publishing-disable", "control": "Keep the server publishing flag false and stop opt-in Page job creation or direct publishing without deleting queue, reconciliation, or audit rows.", "sourceRefs": ["docs/integrations/facebook-page-gallery-publishing.md"] },
     { "id": "instagram-publishing-disable", "control": "Keep the server publishing flag false and stop opt-in job creation or direct publishing without deleting queue, reconciliation, or audit rows.", "sourceRefs": ["docs/instagram-gallery-publishing-deployment-runbook.md", "docs/integrations/instagram-gallery-publishing.md"] },
     { "id": "release-automation-disable", "control": "Pause the exact workflow or protected-main release path through a reviewed repository/provider change.", "sourceRefs": ["docs/operations/deployment.md"] },
@@ -109,6 +112,7 @@
   ],
   "runbookProfiles": [
     { "id": "facebook-page", "paths": ["docs/integrations/facebook-page-gallery-publishing.md"] },
+    { "id": "event-social", "paths": ["docs/operations/event-social-publication.md", "docs/integrations/event-social-content-contract.md", "supabase/README.md"] },
     { "id": "gallery", "paths": ["docs/member-gallery-moderation-runbook.md", "docs/gallery-guide.md"] },
     { "id": "hosted-runtime", "paths": ["docs/operations/integration-operations-runbook.md", "docs/operations/HOST-INDEPENDENCE.md"] },
     { "id": "identity", "paths": ["docs/multi-provider-login-and-verification.md", "docs/member-workflow-production-qa-runbook.md"] },
@@ -124,6 +128,7 @@
   ],
   "verificationProfiles": [
     { "id": "facebook-page", "commands": ["check:facebook-page-gallery-publishing", "test:facebook-page-publishing", "test:facebook-page-gallery-db", "check:supabase-edge-types"] },
+    { "id": "event-social", "commands": ["check:event-social-schedule-parity", "check:event-social-content", "check:event-social-assets", "test:event-social-schedule", "test:event-social-templates", "test:event-social-publishing", "test:event-social-reconciliation", "test:event-social-db-guard", "test:event-social-publication-db", "check:supabase-edge-types", "check:edge-response-contracts", "check:security-hardening"] },
     { "id": "gallery", "commands": ["check:gallery-approved-feed", "check:discord-gallery-ingest", "check:supabase-edge-types"] },
     { "id": "hosted-runtime", "commands": ["check:host-independence", "check:production"] },
     { "id": "identity", "commands": ["check:multi-provider-auth", "check:member-workflow-qa", "check:supabase-edge-types"] },
@@ -269,6 +274,19 @@
       "runtimeReadback": { "required": true, "status": "runtime_readback_required", "facts": ["secret-name presence", "Graph account identity", "permissions and account checkpoint", "publishing flag", "app mode"] }
     },
     {
+      "id": "event-social-publication",
+      "declaredState": "source_declared_activation_gated",
+      "destinations": ["facebook-api", "instagram-api", "discord-api", "mochirii-website", "supabase-auth", "supabase-edge", "supabase-postgres"],
+      "dataClasses": ["event_social_publication", "moderation_record", "discord_message_and_event"],
+      "auth": "Moderator queue actions require a Supabase JWT plus fresh moderator authorization. Scheduled runs require an independent server-held secret. Every destination remains disabled until a separately approved owner/operator activation, and ambiguous provider results require reconciliation without automatic retry.",
+      "owner": "content-operations",
+      "disableControl": "event-social-publishing-disable",
+      "runbook": "event-social",
+      "verification": "event-social",
+      "sourceRefs": ["docs/operations/event-social-publication.md", "docs/integrations/event-social-content-contract.md", "supabase/functions/manage-event-social-publication/index.ts", "supabase/functions/run-event-social-publication/index.ts", "supabase/functions/resolve-event-social-publication-reconciliation/index.ts", "supabase/migrations/20260731115926_add_event_social_publication_scheduler.sql"],
+      "runtimeReadback": { "required": true, "status": "runtime_readback_required", "facts": ["migration and function deployment", "JWT settings", "scheduler secret and cron state", "destination switches", "provider identity and permissions", "approved template revisions"] }
+    },
+    {
       "id": "raffle-foundation",
       "declaredState": "source_declared_activation_gated",
       "destinations": ["supabase-auth", "supabase-edge", "supabase-postgres", "mochirii-social", "reward-provider-webhook-ingress", "reward-relay", "reward-provider-api"],
@@ -342,6 +360,9 @@
     { "id": "publish-facebook-page-gallery-submission", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "supabase-postgres", "supabase-storage", "facebook-api"], "dataClasses": ["facebook_page_publish_job", "private_gallery_submission", "sanitized_social_derivative", "moderation_record"], "auth": "moderator-jwt", "owner": "content-operations", "disableControl": "facebook-page-publishing-disable", "runbook": "facebook-page", "verification": "facebook-page", "sourceRefs": ["supabase/functions/publish-facebook-page-gallery-submission/index.ts"], "runtimeReadback": "runtime_readback_required" },
     { "id": "resolve-facebook-page-publish-reconciliation", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "supabase-postgres", "facebook-api"], "dataClasses": ["facebook_page_publish_job", "moderation_record"], "auth": "moderator-jwt", "owner": "content-operations", "disableControl": "facebook-page-publishing-disable", "runbook": "facebook-page", "verification": "facebook-page", "sourceRefs": ["supabase/functions/resolve-facebook-page-publish-reconciliation/index.ts"], "runtimeReadback": "runtime_readback_required" },
     { "id": "check-facebook-page-api-status", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "facebook-api"], "dataClasses": ["facebook_page_publish_job"], "auth": "moderator-jwt", "owner": "content-operations", "disableControl": "facebook-page-publishing-disable", "runbook": "facebook-page", "verification": "facebook-page", "sourceRefs": ["supabase/functions/check-facebook-page-api-status/index.ts"], "runtimeReadback": "runtime_readback_required" },
+    { "id": "manage-event-social-publication", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "supabase-postgres", "mochirii-website"], "dataClasses": ["event_social_publication", "moderation_record"], "auth": "moderator-jwt", "owner": "content-operations", "disableControl": "event-social-publishing-disable", "runbook": "event-social", "verification": "event-social", "sourceRefs": ["supabase/functions/manage-event-social-publication/index.ts", "supabase/migrations/20260731115926_add_event_social_publication_scheduler.sql"], "runtimeReadback": "runtime_readback_required" },
+    { "id": "run-event-social-publication", "enabled": true, "verifyJwt": false, "destinations": ["supabase-postgres", "mochirii-website", "facebook-api", "instagram-api", "discord-api"], "dataClasses": ["event_social_publication", "moderation_record", "discord_message_and_event"], "auth": "event-social-scheduler-secret", "owner": "content-operations", "disableControl": "event-social-publishing-disable", "runbook": "event-social", "verification": "event-social", "sourceRefs": ["supabase/functions/run-event-social-publication/index.ts", "supabase/migrations/20260731115926_add_event_social_publication_scheduler.sql"], "runtimeReadback": "runtime_readback_required" },
+    { "id": "resolve-event-social-publication-reconciliation", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "supabase-postgres", "facebook-api", "instagram-api", "discord-api"], "dataClasses": ["event_social_publication", "moderation_record", "discord_message_and_event"], "auth": "moderator-jwt", "owner": "content-operations", "disableControl": "event-social-publishing-disable", "runbook": "event-social", "verification": "event-social", "sourceRefs": ["supabase/functions/resolve-event-social-publication-reconciliation/index.ts", "supabase/functions/_shared/event-social-reconciliation.ts", "supabase/migrations/20260731115926_add_event_social_publication_scheduler.sql"], "runtimeReadback": "runtime_readback_required" },
     { "id": "list-member-profiles", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "supabase-postgres", "supabase-storage"], "dataClasses": ["public_member_profile", "guild_membership_and_roles"], "auth": "active-member-jwt", "owner": "profile-operations", "disableControl": "supabase-function-disable", "runbook": "profiles", "verification": "profiles", "sourceRefs": ["supabase/functions/list-member-profiles/index.ts"], "runtimeReadback": "runtime_readback_required" },
     { "id": "list-visible-profile-cards", "enabled": true, "verifyJwt": false, "destinations": ["supabase-postgres", "supabase-storage"], "dataClasses": ["public_member_profile"], "auth": "public-approved-read", "owner": "profile-operations", "disableControl": "supabase-function-disable", "runbook": "profiles", "verification": "profiles", "sourceRefs": ["supabase/functions/list-visible-profile-cards/index.ts"], "runtimeReadback": "runtime_readback_required" },
     { "id": "get-member-profile", "enabled": true, "verifyJwt": true, "destinations": ["supabase-auth", "supabase-postgres", "supabase-storage"], "dataClasses": ["public_member_profile", "guild_membership_and_roles"], "auth": "active-member-jwt", "owner": "profile-operations", "disableControl": "supabase-function-disable", "runbook": "profiles", "verification": "profiles", "sourceRefs": ["supabase/functions/get-member-profile/index.ts"], "runtimeReadback": "runtime_readback_required" },

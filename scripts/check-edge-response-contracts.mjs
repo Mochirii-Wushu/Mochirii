@@ -140,7 +140,7 @@ function validateSourceContract(source, configured) {
   if (JSON.stringify(contractIds) !== JSON.stringify(configuredIds)) {
     fail("function IDs and order must exactly match supabase/config.toml");
   }
-  if (source.functions.length !== 46) fail(`expected 46 functions, found ${source.functions.length}`);
+  if (source.functions.length !== 49) fail(`expected 49 functions, found ${source.functions.length}`);
 
   for (const entry of source.functions) {
     const label = `function ${entry?.id}`;

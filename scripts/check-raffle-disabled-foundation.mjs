@@ -38,6 +38,9 @@ const reviewedFunctions = [
   ["publish-facebook-page-gallery-submission", true],
   ["resolve-facebook-page-publish-reconciliation", true],
   ["check-facebook-page-api-status", true],
+  ["manage-event-social-publication", true],
+  ["run-event-social-publication", false],
+  ["resolve-event-social-publication-reconciliation", true],
   ["list-member-profiles", true],
   ["list-visible-profile-cards", false],
   ["get-member-profile", true],
@@ -94,7 +97,7 @@ function checkBoundedRequestBodies() {
 }
 
 console.log("Disabled raffle foundation contract OK.");
-console.log("- The reviewed Supabase inventory is exactly 46 functions with 29 verify_jwt=true and 17 false.");
+console.log("- The reviewed Supabase inventory is exactly 49 functions with 31 verify_jwt=true and 18 false.");
 console.log("- Six raffle Edge Functions are pinned to Supabase 2.110.8 and every operational switch defaults closed.");
 console.log("- Reward-relay source is private, dependency-free, loopback-bound, and disabled by default.");
 if (!privateSsrBoundaryPresent()) {
@@ -106,10 +109,10 @@ function checkFunctionInventory() {
   const sections = parseFunctionSections(source);
   const actual = sections.map(({ name, body }) => [name, value(body, "verify_jwt")]);
   const expected = reviewedFunctions.map(([name, jwt]) => [name, String(jwt)]);
-  assertDeepEqual(actual, expected, "Supabase function names, order, and raw JWT literals must match the reviewed 46-function inventory");
-  assert(sections.length === 46, `Supabase function inventory must contain 46 functions; found ${sections.length}`);
-  assert(actual.filter(([, jwt]) => jwt === "true").length === 29, "Supabase function inventory must contain 29 verify_jwt=true functions");
-  assert(actual.filter(([, jwt]) => jwt === "false").length === 17, "Supabase function inventory must contain 17 verify_jwt=false functions");
+  assertDeepEqual(actual, expected, "Supabase function names, order, and raw JWT literals must match the reviewed 49-function inventory");
+  assert(sections.length === 49, `Supabase function inventory must contain 49 functions; found ${sections.length}`);
+  assert(actual.filter(([, jwt]) => jwt === "true").length === 31, "Supabase function inventory must contain 31 verify_jwt=true functions");
+  assert(actual.filter(([, jwt]) => jwt === "false").length === 18, "Supabase function inventory must contain 18 verify_jwt=false functions");
 
   for (const { name, body } of sections) {
     assert(value(body, "enabled") === "true", `${name}: enabled must remain true`);

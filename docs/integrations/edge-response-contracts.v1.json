@@ -14,9 +14,9 @@
     "credential": "Short-lived bearer credential returned only by an authenticated private capability endpoint."
   },
   "jwtSummary": {
-    "total": 46,
-    "verifyJwtTrue": 29,
-    "verifyJwtFalse": 17
+    "total": 49,
+    "verifyJwtTrue": 31,
+    "verifyJwtFalse": 18
   },
   "functions": [
     {
@@ -4796,6 +4796,648 @@
       "reviewedSourceSha256": "9743bf36ca4f7aa70de08651f318e90de7b7634c9110abc57a02bc9884274d38",
       "semanticContractSha256": "ac501ddc6531370dac6476cac53497f91b7b0c087d5e05769ed15586a73f3e1f",
       "responseShapeContractSha256": "ffeb337c09a3fce268db3ab31768e49256491f86c37e526213aec5e59e0cbe77"
+    },
+    {
+      "id": "manage-event-social-publication",
+      "enabled": true,
+      "verifyJwt": true,
+      "entrypoint": "supabase/functions/manage-event-social-publication/index.ts",
+      "states": [
+        {
+          "id": "cors-preflight",
+          "when": [
+            "OPTIONS"
+          ],
+          "bodyKind": "text",
+          "body": {
+            "classification": "operational",
+            "dataClass": "cors_preflight",
+            "maximumBytes": 256,
+            "rationale": "Protocol-only CORS acknowledgement with no member or provider data."
+          },
+          "fields": [],
+          "inheritedContainers": []
+        },
+        {
+          "id": "failure",
+          "when": [
+            "validation, authorization, dependency, or internal failure"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "reconcileRequired",
+              "classification": "operational"
+            },
+            {
+              "path": "revision",
+              "classification": "operational"
+            },
+            {
+              "path": "status",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "owner-activation-required",
+          "when": [
+            "POST attempts to enable a destination outside the owner/operator release path"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "moderator-event-publication-queue",
+          "when": [
+            "POST list bounded occurrences, jobs, destination switches, and reusable templates"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "destinations[]",
+              "classification": "confidential"
+            },
+            {
+              "path": "jobs[]",
+              "classification": "confidential"
+            },
+            {
+              "path": "occurrences[]",
+              "classification": "confidential"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            },
+            {
+              "path": "templates[]",
+              "classification": "confidential"
+            }
+          ],
+          "inheritedContainers": [
+            {
+              "path": "destinations[]",
+              "classification": "confidential",
+              "dataClass": "event_social_publication",
+              "maximumBytes": 16384,
+              "descendants": "inherit",
+              "rationale": "Destination activation state is owner-controlled operational configuration shown only to moderators."
+            },
+            {
+              "path": "jobs[]",
+              "classification": "confidential",
+              "dataClass": "event_social_publication",
+              "maximumBytes": 524288,
+              "descendants": "inherit",
+              "rationale": "Each job exposes only reviewed moderator workflow fields; descendants inherit confidential classification."
+            },
+            {
+              "path": "occurrences[]",
+              "classification": "confidential",
+              "dataClass": "event_social_publication",
+              "maximumBytes": 262144,
+              "descendants": "inherit",
+              "rationale": "Each occurrence is a bounded moderator-only schedule and workflow projection; descendants inherit confidential classification."
+            },
+            {
+              "path": "templates[]",
+              "classification": "confidential",
+              "dataClass": "event_social_publication",
+              "maximumBytes": 65536,
+              "descendants": "inherit",
+              "rationale": "Reusable template approval state is moderator-only and excludes hashes and provider identifiers."
+            }
+          ]
+        },
+        {
+          "id": "moderator-event-cancellation",
+          "when": [
+            "POST separately confirmed occurrence cancellation"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "canceled",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "moderator-event-approval-revocation",
+          "when": [
+            "POST separately confirmed destination approval revocation"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "destination",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "revoked",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "moderator-event-destination-emergency-disable",
+          "when": [
+            "POST separately confirmed destination emergency disable; activation is refused"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "destination",
+              "classification": "operational"
+            },
+            {
+              "path": "enabled",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        }
+      ],
+      "reviewedSourceRefs": [
+        "deno.lock",
+        "supabase/functions/_shared/cors.ts",
+        "supabase/functions/_shared/event-social-schedule.ts",
+        "supabase/functions/_shared/gallery-moderation.ts",
+        "supabase/functions/_shared/member-verification-identity.ts",
+        "supabase/functions/_shared/public-origins.ts",
+        "supabase/functions/_shared/supabase-service-role.ts",
+        "supabase/functions/manage-event-social-publication/deno.json",
+        "supabase/functions/manage-event-social-publication/deno.lock",
+        "supabase/functions/manage-event-social-publication/index.ts"
+      ],
+      "reviewedSourceSha256": "11a62cd78822f22436f866c0b0fff67113fad71ee6c9ec857950a4bfe8be38f0",
+      "semanticContractSha256": "94aecf9e43ffe26f201981f6db30fded515381ab222cd1adb5559df782747757",
+      "responseShapeContractSha256": "1997d96835f959edc1b220abe4b6eb5618f0335896c603ce6670e2a36b2009e7"
+    },
+    {
+      "id": "run-event-social-publication",
+      "enabled": true,
+      "verifyJwt": false,
+      "entrypoint": "supabase/functions/run-event-social-publication/index.ts",
+      "states": [
+        {
+          "id": "opaque-denied",
+          "when": [
+            "non-POST, invalid scheduler secret, invalid body, or missing server configuration"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "scheduler-failure",
+          "when": [
+            "template, materialization, or claim failure"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "all-destinations-disabled",
+          "when": [
+            "authorized exact-empty-body tick materializes the reviewed schedule projection but every destination remains disabled"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "claimed",
+              "classification": "operational"
+            },
+            {
+              "path": "enabledDestinations",
+              "classification": "operational"
+            },
+            {
+              "path": "failed",
+              "classification": "operational"
+            },
+            {
+              "path": "materialized",
+              "classification": "operational"
+            },
+            {
+              "path": "materializedSuppressed",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationClaimed",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationFailed",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationPending",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationPrepared",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationReconcileRequired",
+              "classification": "operational"
+            },
+            {
+              "path": "published",
+              "classification": "operational"
+            },
+            {
+              "path": "reconcileRequired",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            },
+            {
+              "path": "sweptExpired",
+              "classification": "operational"
+            },
+            {
+              "path": "sweptMissed",
+              "classification": "operational"
+            },
+            {
+              "path": "sweptPreparationFailed",
+              "classification": "operational"
+            },
+            {
+              "path": "verifiedPublished",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "scheduler-summary-with-provider-verified-publish-count",
+          "when": [
+            "authorized exact-empty-body materialization and bounded publication tick for the reviewed schedule projection"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "claimed",
+              "classification": "operational"
+            },
+            {
+              "path": "enabledDestinations",
+              "classification": "operational"
+            },
+            {
+              "path": "failed",
+              "classification": "operational"
+            },
+            {
+              "path": "materialized",
+              "classification": "operational"
+            },
+            {
+              "path": "materializedSuppressed",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationClaimed",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationFailed",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationPending",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationPrepared",
+              "classification": "operational"
+            },
+            {
+              "path": "preparationReconcileRequired",
+              "classification": "operational"
+            },
+            {
+              "path": "published",
+              "classification": "operational"
+            },
+            {
+              "path": "reconcileRequired",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            },
+            {
+              "path": "sweptExpired",
+              "classification": "operational"
+            },
+            {
+              "path": "sweptMissed",
+              "classification": "operational"
+            },
+            {
+              "path": "sweptPreparationFailed",
+              "classification": "operational"
+            },
+            {
+              "path": "verifiedPublished",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        }
+      ],
+      "reviewedSourceRefs": [
+        "deno.lock",
+        "supabase/functions/_shared/bounded-request-body.ts",
+        "supabase/functions/_shared/cors.ts",
+        "supabase/functions/_shared/discord-api.ts",
+        "supabase/functions/_shared/event-social-publishing.ts",
+        "supabase/functions/_shared/event-social-schedule.ts",
+        "supabase/functions/_shared/event-social-scheduler-request.ts",
+        "supabase/functions/_shared/event-social-templates.ts",
+        "supabase/functions/_shared/facebook-page-publishing.ts",
+        "supabase/functions/_shared/gallery-social-path.ts",
+        "supabase/functions/_shared/meta-graph-security.ts",
+        "supabase/functions/_shared/outbound-http.ts",
+        "supabase/functions/_shared/public-origins.ts",
+        "supabase/functions/_shared/safe-telemetry.ts",
+        "supabase/functions/_shared/secret-auth.ts",
+        "supabase/functions/_shared/social-publication-copy.ts",
+        "supabase/functions/_shared/supabase-service-role.ts",
+        "supabase/functions/run-event-social-publication/deno.json",
+        "supabase/functions/run-event-social-publication/deno.lock",
+        "supabase/functions/run-event-social-publication/index.ts"
+      ],
+      "reviewedSourceSha256": "a354f8dc88c863919494c2094aaa478474a9f4603baf0c7b394a53a32f04c293",
+      "semanticContractSha256": "0e906e28e81b1d1367dc1ec16269730da71f8cff11b825a5801d0d0eff4515f4",
+      "responseShapeContractSha256": "f8ab95cab0109a787da9e93d41e5ed18fcdb9fe628e67cf32187542e18589931"
+    },
+    {
+      "id": "resolve-event-social-publication-reconciliation",
+      "enabled": true,
+      "verifyJwt": true,
+      "entrypoint": "supabase/functions/resolve-event-social-publication-reconciliation/index.ts",
+      "states": [
+        {
+          "id": "cors-preflight",
+          "when": [
+            "OPTIONS"
+          ],
+          "bodyKind": "text",
+          "body": {
+            "classification": "operational",
+            "dataClass": "cors_preflight",
+            "maximumBytes": 256,
+            "rationale": "Protocol-only CORS acknowledgement with no member or provider data."
+          },
+          "fields": [],
+          "inheritedContainers": []
+        },
+        {
+          "id": "failure",
+          "when": [
+            "validation, authorization, dependency, or internal failure"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "reconcileRequired",
+              "classification": "operational"
+            },
+            {
+              "path": "revision",
+              "classification": "operational"
+            },
+            {
+              "path": "status",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "moderator-event-publication-confirmed-published-after-provider-readback",
+          "when": [
+            "POST provider-readback confirmation that exact quarantined Facebook jobs use the canonical Page post permalink after photo and post ownership verification"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "data.destination",
+              "classification": "operational"
+            },
+            {
+              "path": "data.destinationEnabled",
+              "classification": "operational"
+            },
+            {
+              "path": "data.jobId",
+              "classification": "internal"
+            },
+            {
+              "path": "data.status",
+              "classification": "operational"
+            },
+            {
+              "path": "data.updatedAt",
+              "classification": "operational"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "moderator-event-publication-confirmed-not-published",
+          "when": [
+            "POST bounded inspection confirmation that the exact quarantined job was not published"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "data.destination",
+              "classification": "operational"
+            },
+            {
+              "path": "data.destinationEnabled",
+              "classification": "operational"
+            },
+            {
+              "path": "data.jobId",
+              "classification": "internal"
+            },
+            {
+              "path": "data.status",
+              "classification": "operational"
+            },
+            {
+              "path": "data.updatedAt",
+              "classification": "operational"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            },
+            {
+              "path": "scheduleContractVersion",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        }
+      ],
+      "reviewedSourceRefs": [
+        "deno.lock",
+        "supabase/functions/_shared/cors.ts",
+        "supabase/functions/_shared/discord-api.ts",
+        "supabase/functions/_shared/event-social-reconciliation.ts",
+        "supabase/functions/_shared/event-social-schedule.ts",
+        "supabase/functions/_shared/facebook-page-publishing.ts",
+        "supabase/functions/_shared/gallery-moderation.ts",
+        "supabase/functions/_shared/gallery-social-path.ts",
+        "supabase/functions/_shared/instagram-publishing.ts",
+        "supabase/functions/_shared/member-verification-identity.ts",
+        "supabase/functions/_shared/meta-graph-security.ts",
+        "supabase/functions/_shared/outbound-http.ts",
+        "supabase/functions/_shared/public-origins.ts",
+        "supabase/functions/_shared/safe-telemetry.ts",
+        "supabase/functions/_shared/social-publication-copy.ts",
+        "supabase/functions/_shared/supabase-service-role.ts",
+        "supabase/functions/resolve-event-social-publication-reconciliation/deno.json",
+        "supabase/functions/resolve-event-social-publication-reconciliation/deno.lock",
+        "supabase/functions/resolve-event-social-publication-reconciliation/index.ts"
+      ],
+      "reviewedSourceSha256": "036621e9576c9a525e878fd89cfc4e4cd4133042966a19beff85b916ca45b7d4",
+      "semanticContractSha256": "b6d004772ec9988cf1fa126c2a9311188449e1ee2e890143cb3a0a850d37819d",
+      "responseShapeContractSha256": "8d72971a9ff7d5c269648c161ea5a11d5c6741432d0d503c10c9e9abdbf1f191"
     },
     {
       "id": "list-member-profiles",

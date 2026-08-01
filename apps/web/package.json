@@ -93,6 +93,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
     "saxes": "6.0.0",
+    "sharp": "0.35.3",
     "typescript": "^5",
     "vercel": "57.0.0"
   }

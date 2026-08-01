@@ -29,9 +29,9 @@ Every deployed function owns a local `deno.json` with exact direct dependency
 versions, following [Supabase's function dependency guidance](https://supabase.com/docs/guides/functions/dependencies).
 The Supabase CLI uses that file as Deno configuration when bundling a function;
 it does not use the repository root `deno.lock` as the deployment lock.
-Accordingly, `npm run check:supabase-edge-types` checks all 45 entrypoints with
+Accordingly, `npm run check:supabase-edge-types` checks all 49 entrypoints with
 their real function-local configuration. It requires the exact reviewed set of
-18 committed function-local locks:
+21 committed function-local locks:
 
 ```text
 check-facebook-page-api-status
@@ -39,6 +39,7 @@ get-current-raffle
 list-approved-gallery-submissions
 list-facebook-page-publish-queue
 list-gallery-review-queue
+manage-event-social-publication
 manage-raffle-claim
 manage-raffle-entry
 moderate-gallery-submission
@@ -46,8 +47,10 @@ moderate-raffle
 publish-facebook-page-gallery-submission
 reaper-spinner-dispatch
 resolve-facebook-page-publish-reconciliation
+resolve-event-social-publication-reconciliation
 resolve-instagram-publish-reconciliation
 reward-provider-webhook
+run-event-social-publication
 run-raffle-fulfillment
 run-raffle-schedule
 spinner-live-session
@@ -140,6 +143,63 @@ It also exposes Auth/profile/gallery helpers:
 - `listApprovedGallerySubmissions()`
 
 The hardened Facebook Page and Instagram publishing packet in this source tree has not been deployed to the hosted Website or Supabase project. Both publishing flags remain `false`, no Meta credential or private Instagram Graph account ID is stored in source, and no live Meta post was created. The current Employee System User has Content access only to the Page and linked Instagram asset plus partial Develop-app access; it has no full app management, ad account, or ad scope. The Marketing API use case exists only because Meta's System User installation flow requires Ads Management API Standard Access. A 60-day token with exactly `pages_manage_posts`, `pages_read_engagement`, and `pages_show_list` was revoked after every Graph request returned OAuthException 200 `API access blocked` behind the unresolved `Account confirmation needed` checkpoint. No Page-task, Instagram identity/account-type, or Instagram Graph-ID verification is current evidence. The former Admin System User has no assets, installed apps, or tokens and is retained as `Mochirii Gallery Publisher Legacy`. Hosted secret values are not documented or assumed; activation requires fresh name-only secret-inventory evidence and a successful read-only provider identity check. Release gates are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
+
+## Event Social Publication Scheduler
+
+The source-only event scheduler projects timing from the committed
+`apps/web/public/data/guild-schedule.json` into service-only occurrence and
+destination-job records. It permits a public mutation only from the exact
+one-hour reminder instant through a strict two-minute late-tolerance window.
+First-Wednesday Gathering and first-Saturday Raffle occurrences own their
+same-time Guild Party slot in one materialization transaction; canceling the
+monthly occurrence preserves that ownership and does not revive the Party job.
+
+Facebook Page, Instagram, and Discord each have an independent reusable
+event-template approval, template switch, database destination switch, and
+Edge secret flag; every switch defaults to false. A template uses the exact
+hash-attested bundled content packet, renders only the occurrence date/time
+tokens from the authoritative schedule, and pins one reviewed static asset per
+event and destination. Schedule, content, or asset drift revokes the reusable
+approval. Browser or per-occurrence copy overrides are not supported. Meta
+also requires the existing provider-wide flag, pinned
+identities, credentials, and exact Graph `v26.0`. The scheduler has no Facebook
+Groups API path and rejects URL-like text from publication copy. Discord sends
+the attested image as a multipart attachment, never as a public image embed.
+Instagram creates and validates its non-public media container 15 to 10 minutes
+before the reminder, then calls `media_publish` only after the same atomic
+one-hour gate used by Facebook and Discord. Provider mutations are
+single-attempt. An uncertain non-public container creation fails terminally
+without retrying or disabling Instagram; only a result that could already be
+public enters `reconcile_required` and is never leased again automatically.
+Credentials live only in Supabase Vault/Edge Function secrets; the repository
+stores names and false defaults only.
+
+The moderator endpoint exposes a bounded, redacted queue and permits a
+confirmed emergency disable. It deliberately refuses every enable request;
+destination and reusable-template activation remain owner/operator release
+actions outside that endpoint.
+The separate JWT-protected reconciliation endpoint loads the job destination
+server-side and verifies an exact supplied provider object against the pinned
+Facebook Page, Instagram account, or Discord bot/channel before recording a
+published resolution. A confirmed-not-published resolution requires an
+explicit bounded owner-inspection note, is terminal, cannot retry the missed
+reminder, and never re-enables a disabled destination. Raw provider responses,
+tokens, private identifiers, paths, hashes, and notes are excluded from public
+responses and logs.
+
+Active destination, template, job-approval, and reconciliation actors use
+restricting foreign keys so account deletion cannot erase or invalidate a live
+authorization or historical publication decision. Operator offboarding must
+first disable every destination and revoke every active template; any account
+deletion that still conflicts with retained publication evidence requires a
+separately reviewed retention/deletion decision rather than a cascading write.
+
+The migration creates the one-minute cron source, but it cannot invoke the Edge
+worker until `project_url` is exactly
+`https://deyvmtncimmcinldjyqe.supabase.co` and
+`event_social_scheduler_secret` exists in Vault.
+Deploying the migration/functions, installing secrets, enabling any switch, or
+publishing remains a separately approved provider/production action.
 
 Migration history note: keep `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` and `supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql` in place. The Instagram publishing schema now lives in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`, and the manual sharing status schema now lives in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`, but Supabase Preview compares remote migration versions to local files and needs the original timestamps represented locally.
 
@@ -1042,7 +1102,7 @@ If an older approved `gallery_submissions` row has blank `title` and `caption` v
 
 Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; published member items use their frozen reviewed and created timestamps with the stable publication ID as the final key. The default Gallery order is computed before first paint and runtime cards append without moving rendered static cards. Visitors may choose `Newest first` or `Oldest first`; cross-source results are exposed only through the proven keyset boundary. Runtime thumbnails and display derivatives use stable credential-free Edge URLs backed by private, immutable media evidence; source originals and unpublished submissions remain private.
 
-The integrated source contract contains exactly 46 configured Edge Functions with 29 `verify_jwt=true` and 17 false. The additional authenticated function is the fail-closed social-publication consent-withdrawal boundary; the total also includes the separately disabled monthly-raffle and social-publishing foundations. Recalculate that parity from the final exact release head before provider approval.
+The integrated source contract contains exactly 49 configured Edge Functions with 31 `verify_jwt=true` and 18 false. The current total includes the fail-closed social-publication consent-withdrawal boundary, the independently gated event-social manager, scheduler, and reconciliation resolver, and the separately disabled monthly-raffle and social-publishing foundations. Recalculate that parity from the final exact release head before provider approval.
 
 Before release, run `operations/reconcile_gallery_public_feed_v2.sql` from a
 trusted read-only session. It reports only public-safe counts and verifies that

@@ -451,7 +451,7 @@ for (const functionName of ["spinner-live-session", "reaper-spinner-dispatch"]) 
 }
 
 for (const snippet of [
-  "all 45 Edge Functions declared in `supabase/config.toml`",
+  "all 49 Edge Functions declared in `supabase/config.toml`",
   "The Preview database is data-less by design",
   "select count(*)::integer as total_rows",
   '"claimed": 0',
@@ -461,7 +461,7 @@ for (const snippet of [
   "reaper_spinner_dispatch_secret",
   "REAPER_SPINNER_DISPATCH_SECRET",
   "The migration is forward-only.",
-  "A protected revert or forward-fix merge invokes the same 45-function production integration",
+  "A protected revert or forward-fix merge invokes the same 49-function production integration",
   "Do not retry blindly.",
   "operator_reconciled_start",
   "and phase = 'start_pending'",
@@ -469,7 +469,7 @@ for (const snippet of [
 ]) includes("spinner operations runbook", source.runbook, snippet);
 
 for (const snippet of [
-  "redeploys all 45 functions declared in",
+  "redeploys all 49 functions declared in",
   "zero claimed, completed,",
   "Never retry blindly",
   "forward-fix migration",

@@ -79,9 +79,9 @@ const atomicMediaReservation = atomicMediaReservationMatch?.[0] || "";
 const functionBlocks = [...supabaseConfig.matchAll(/\[functions\.([^\]]+)\]([\s\S]*?)(?=\n\[functions\.|\s*$)/g)];
 const verifyJwtFalse = functionBlocks.filter(([, , body]) => /verify_jwt\s*=\s*false/.test(body));
 const verifyJwtTrue = functionBlocks.filter(([, , body]) => /verify_jwt\s*=\s*true/.test(body));
-assert(functionBlocks.length === 46, `Supabase function inventory: expected 46, found ${functionBlocks.length}.`);
-assert(verifyJwtTrue.length === 29, `Supabase function inventory: expected 29 verify_jwt=true, found ${verifyJwtTrue.length}.`);
-assert(verifyJwtFalse.length === 17, `Supabase function inventory: expected 17 verify_jwt=false, found ${verifyJwtFalse.length}.`);
+assert(functionBlocks.length === 49, `Supabase function inventory: expected 49, found ${functionBlocks.length}.`);
+assert(verifyJwtTrue.length === 31, `Supabase function inventory: expected 31 verify_jwt=true, found ${verifyJwtTrue.length}.`);
+assert(verifyJwtFalse.length === 18, `Supabase function inventory: expected 18 verify_jwt=false, found ${verifyJwtFalse.length}.`);
 const approvedFeedConfig = functionBlocks.find(([, name]) => name === "list-approved-gallery-submissions");
 assert(Boolean(approvedFeedConfig), "Supabase function inventory: list-approved-gallery-submissions is not configured.");
 assert(
@@ -121,6 +121,7 @@ assert(
   '"check-facebook-page-api-status"',
   '"list-facebook-page-publish-queue"',
   '"list-gallery-review-queue"',
+  '"manage-event-social-publication"',
   '"manage-raffle-claim"',
   '"manage-raffle-entry"',
   '"moderate-gallery-submission"',
@@ -129,8 +130,10 @@ assert(
   '"publish-facebook-page-gallery-submission"',
   '"reaper-spinner-dispatch"',
   '"resolve-facebook-page-publish-reconciliation"',
+  '"resolve-event-social-publication-reconciliation"',
   '"resolve-instagram-publish-reconciliation"',
   '"reward-provider-webhook"',
+  '"run-event-social-publication"',
   '"run-raffle-fulfillment"',
   '"run-raffle-schedule"',
   '"spinner-live-session"',
@@ -150,6 +153,7 @@ const expectedCommittedLockFunctions = [
   "list-approved-gallery-submissions",
   "list-facebook-page-publish-queue",
   "list-gallery-review-queue",
+  "manage-event-social-publication",
   "manage-raffle-claim",
   "manage-raffle-entry",
   "moderate-gallery-submission",
@@ -157,8 +161,10 @@ const expectedCommittedLockFunctions = [
   "publish-facebook-page-gallery-submission",
   "reaper-spinner-dispatch",
   "resolve-facebook-page-publish-reconciliation",
+  "resolve-event-social-publication-reconciliation",
   "resolve-instagram-publish-reconciliation",
   "reward-provider-webhook",
+  "run-event-social-publication",
   "run-raffle-fulfillment",
   "run-raffle-schedule",
   "spinner-live-session",

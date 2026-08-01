@@ -44,6 +44,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Website image-validation dependencies
+        working-directory: apps/web
+        run: npm ci
+
       - name: Install Social validation dependencies
         working-directory: services/social
         run: npm ci

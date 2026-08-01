@@ -131,6 +131,9 @@ else {
     "A monthly gathering where every member can discuss anything they'd like with the guild.",
   );
   assertEqual("monthly gathering rule", monthlyGathering.rule, "next-first-wednesday");
+  assertEqual("monthly gathering replacement", monthlyGathering.replacesEventId, "guild-party");
+  assertEqual("monthly gathering reward replacement", monthlyGathering.replacementRewardEventId, "guild-party");
+  assertEqual("monthly gathering cancellation restore", monthlyGathering.cancellationRestoresReplacement, false);
   assertEqual("monthly gathering time", monthlyGathering.time, "9:30 PM");
   assertEqual("monthly gathering start", monthlyGathering.startTime, "21:30");
   assertEqual("monthly gathering end", monthlyGathering.endTime, "22:00");
@@ -147,6 +150,9 @@ const monthlyRaffle = schedule.monthly?.raffle;
 if (!monthlyRaffle) fail("monthly raffle is missing.");
 else {
   assertEqual("monthly raffle title", monthlyRaffle.title, "Monthly Guild Raffle");
+  assertEqual("monthly raffle replacement", monthlyRaffle.replacesEventId, "guild-party");
+  assertEqual("monthly raffle reward replacement", monthlyRaffle.replacementRewardEventId, "guild-party");
+  assertEqual("monthly raffle cancellation restore", monthlyRaffle.cancellationRestoresReplacement, false);
   assertEqual("monthly raffle time", monthlyRaffle.time, "9:30 PM");
   assertEqual("monthly raffle start", monthlyRaffle.startTime, "21:30");
   assertEqual("monthly raffle end", monthlyRaffle.endTime, "22:00");

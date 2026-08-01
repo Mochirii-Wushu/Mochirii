@@ -108,6 +108,20 @@ const protectedFunctions = [
     body: {},
   },
   {
+    name: "manage-event-social-publication",
+    body: { action: "list" },
+  },
+  {
+    name: "resolve-event-social-publication-reconciliation",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      expected_updated_at: "2026-07-31T00:00:00.000Z",
+      resolution: "confirmed_not_published",
+      note: "Smoke test only.",
+      confirm_reconciliation: true,
+    },
+  },
+  {
     name: "list-member-profiles",
     body: {},
   },
@@ -189,6 +203,12 @@ const secretProtectedFunctions = [
     secretHeader: "x-mochirii-reaper-spinner-secret",
     cors: false,
     body: { limit: 1 },
+  },
+  {
+    name: "run-event-social-publication",
+    secretHeader: "x-mochirii-event-social-secret",
+    cors: false,
+    body: {},
   },
   {
     name: "send-vote-reminder",

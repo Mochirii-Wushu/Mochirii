@@ -340,6 +340,64 @@ export const edgeResponseContractSource = {
       states: [error(), json("moderator-diagnostic", ["POST source-safe diagnostic"], { [OPERATIONAL]: ["ok", "message"], [INTERNAL]: metaDiagnosticFields.map((field) => `data.${field}`) })],
     },
     {
+      id: "manage-event-social-publication",
+      states: [
+        text("cors-preflight", ["OPTIONS"], OPERATIONAL, "cors_preflight", 256, "Protocol-only CORS acknowledgement with no member or provider data."),
+        error(),
+        json("owner-activation-required", ["POST attempts to enable a destination outside the owner/operator release path"], {
+          [OPERATIONAL]: ["ok", "error", "message"],
+        }),
+        json("moderator-event-publication-queue", ["POST list bounded occurrences, jobs, destination switches, and reusable templates"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion"],
+          [CONFIDENTIAL]: ["occurrences[]", "jobs[]", "destinations[]", "templates[]"],
+        }, {
+          inheritedContainers: [
+            classifiedContainer("occurrences[]", CONFIDENTIAL, "event_social_publication", 262144, "Each occurrence is a bounded moderator-only schedule and workflow projection; descendants inherit confidential classification."),
+            classifiedContainer("jobs[]", CONFIDENTIAL, "event_social_publication", 524288, "Each job exposes only reviewed moderator workflow fields; descendants inherit confidential classification."),
+            classifiedContainer("destinations[]", CONFIDENTIAL, "event_social_publication", 16384, "Destination activation state is owner-controlled operational configuration shown only to moderators."),
+            classifiedContainer("templates[]", CONFIDENTIAL, "event_social_publication", 65536, "Reusable template approval state is moderator-only and excludes hashes and provider identifiers."),
+          ],
+        }),
+        json("moderator-event-cancellation", ["POST separately confirmed occurrence cancellation"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "canceled"],
+        }),
+        json("moderator-event-approval-revocation", ["POST separately confirmed destination approval revocation"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "revoked", "destination"],
+        }),
+        json("moderator-event-destination-emergency-disable", ["POST separately confirmed destination emergency disable; activation is refused"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "destination", "enabled"],
+        }),
+      ],
+    },
+    {
+      id: "run-event-social-publication",
+      states: [
+        json("opaque-denied", ["non-POST, invalid scheduler secret, invalid body, or missing server configuration"], { [OPERATIONAL]: ["ok"] }),
+        json("scheduler-failure", ["template, materialization, or claim failure"], { [OPERATIONAL]: ["ok", "error"] }),
+        json("all-destinations-disabled", ["authorized exact-empty-body tick materializes the reviewed schedule projection but every destination remains disabled"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "materialized", "materializedSuppressed", "enabledDestinations", "claimed", "published", "verifiedPublished", "failed", "reconcileRequired", "sweptExpired", "sweptPreparationFailed", "sweptMissed", "preparationClaimed", "preparationPrepared", "preparationPending", "preparationFailed", "preparationReconcileRequired"],
+        }),
+        json("scheduler-summary-with-provider-verified-publish-count", ["authorized exact-empty-body materialization and bounded publication tick for the reviewed schedule projection"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "materialized", "materializedSuppressed", "enabledDestinations", "claimed", "published", "verifiedPublished", "failed", "reconcileRequired", "sweptExpired", "sweptPreparationFailed", "sweptMissed", "preparationClaimed", "preparationPrepared", "preparationPending", "preparationFailed", "preparationReconcileRequired"],
+        }),
+      ],
+    },
+    {
+      id: "resolve-event-social-publication-reconciliation",
+      states: [
+        text("cors-preflight", ["OPTIONS"], OPERATIONAL, "cors_preflight", 256, "Protocol-only CORS acknowledgement with no member or provider data."),
+        error(),
+        json("moderator-event-publication-confirmed-published-after-provider-readback", ["POST provider-readback confirmation that exact quarantined Facebook jobs use the canonical Page post permalink after photo and post ownership verification"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "message", "data.destination", "data.status", "data.updatedAt", "data.destinationEnabled"],
+          [INTERNAL]: ["data.jobId"],
+        }),
+        json("moderator-event-publication-confirmed-not-published", ["POST bounded inspection confirmation that the exact quarantined job was not published"], {
+          [OPERATIONAL]: ["ok", "scheduleContractVersion", "message", "data.destination", "data.status", "data.updatedAt", "data.destinationEnabled"],
+          [INTERNAL]: ["data.jobId"],
+        }),
+      ],
+    },
+    {
       id: "list-member-profiles",
       states: [empty("cors-preflight", ["OPTIONS"]), error(), json("member-directory", ["POST active-member directory"], { [OPERATIONAL]: ["ok", "data.count", "data.signedUrlSeconds"], [CONFIDENTIAL]: ["data.profiles[]", ...profileFields.map((field) => `data.profiles[].${field}`)] })],
     },

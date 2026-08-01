@@ -9,6 +9,19 @@ const nextConfig = readFileSync(path.join(root, "apps", "web", "next.config.ts")
 const topLevelManifest = {
   "announcements.json": ["meta", "items"],
   "tome.json": ["hero", "intro", "tenets", "etiquette", "rhythm", "recognition"],
+  "event-social-assets.json": [
+    "schemaVersion",
+    "rendererVersion",
+    "renderVersion",
+    "contentAddressedPlatformAssets",
+    "reusableOccurrenceIndependentCreative",
+    "overlayContainsDateOrTime",
+    "publicationEnabled",
+    "providerMutationPerformed",
+    "brandAssets",
+    "outputs",
+  ],
+  "event-social-content.json": ["schemaVersion", "publication", "scheduleContract", "brand", "policy", "layouts", "events"],
   "events.json": ["meta", "featured", "upcoming", "recurring", "participation"],
   "gallery.json": ["meta", "categories", "albums"],
   "guild-schedule.json": ["timezone", "discordCoverVersion", "monthly", "spotlight", "weekly"],
@@ -193,7 +206,8 @@ function validateGenericValue(filePath, valuePath, key, value, parent) {
     const isAllowedGameNamePath =
       keyName === "title" ||
       valuePath.includes(".meta.") ||
-      fullPath === "apps/web/public/data/home.json.hero.subtitle";
+      fullPath === "apps/web/public/data/home.json.hero.subtitle" ||
+      fullPath === "apps/web/public/data/event-social-content.json.events.2.platforms.facebook.captionTemplate";
     if (/Where Winds Meet/i.test(value) && !isAllowedGameNamePath) {
       addFailure(`${fullPath}: visible body copy should not contain the exact game name outside allowed title/metadata contexts.`);
     }
@@ -374,6 +388,15 @@ function validateGuildSchedule(data) {
     }
     if (!isKebab(item.id)) addFailure(`${filePath}.monthly.${key}.id: expected kebab-case id.`);
     if (item.rule !== expectedRule) addFailure(`${filePath}.monthly.${key}.rule: expected ${expectedRule}.`);
+    if (item.replacesEventId !== "guild-party") {
+      addFailure(`${filePath}.monthly.${key}.replacesEventId: expected guild-party.`);
+    }
+    if (item.replacementRewardEventId !== "guild-party") {
+      addFailure(`${filePath}.monthly.${key}.replacementRewardEventId: expected guild-party.`);
+    }
+    if (item.cancellationRestoresReplacement !== false) {
+      addFailure(`${filePath}.monthly.${key}.cancellationRestoresReplacement: expected false.`);
+    }
     if (!isTime24(item.startTime)) addFailure(`${filePath}.monthly.${key}.startTime: expected HH:MM.`);
     if (!isTime24(item.endTime)) addFailure(`${filePath}.monthly.${key}.endTime: expected HH:MM.`);
   });

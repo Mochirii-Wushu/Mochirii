@@ -44,6 +44,13 @@ const files = {
   rewardCrypto: "supabase/functions/_shared/reward-crypto.ts",
   rewardWebhook: "supabase/functions/_shared/reward-webhook.ts",
   pixelfedSocialSync: "supabase/functions/sync-pixelfed-social-account/index.ts",
+  eventSocialManager: "supabase/functions/manage-event-social-publication/index.ts",
+  eventSocialRunner: "supabase/functions/run-event-social-publication/index.ts",
+  eventSocialPublishing: "supabase/functions/_shared/event-social-publishing.ts",
+  eventSocialSchedulerRequest: "supabase/functions/_shared/event-social-scheduler-request.ts",
+  eventSocialTemplates: "supabase/functions/_shared/event-social-templates.ts",
+  eventSocialReconciliation: "supabase/functions/_shared/event-social-reconciliation.ts",
+  eventSocialReconciliationResolver: "supabase/functions/resolve-event-social-publication-reconciliation/index.ts",
   report: "reports/free-security-hardening-2026-06-08.md",
   cspReport: "reports/csp-enforcement-verification-2026-06-08.md",
   deployment: "docs/operations/deployment.md",
@@ -137,6 +144,14 @@ const rewardProviderWebhook = read(files.rewardProviderWebhook);
 const rewardCrypto = read(files.rewardCrypto);
 const rewardWebhook = read(files.rewardWebhook);
 const pixelfedSocialSync = read(files.pixelfedSocialSync);
+const eventSocialManager = read(files.eventSocialManager);
+const eventSocialRunner = read(files.eventSocialRunner);
+const eventSocialPublishing = read(files.eventSocialPublishing);
+const eventSocialSchedulerRequest = read(files.eventSocialSchedulerRequest);
+const eventSocialTemplates = read(files.eventSocialTemplates);
+const eventSocialReconciliation = read(files.eventSocialReconciliation);
+const eventSocialReconciliationResolver = read(files.eventSocialReconciliationResolver);
+const eventSocialSecuritySource = `${eventSocialRunner}\n${eventSocialPublishing}\n${eventSocialTemplates}\n${eventSocialSchedulerRequest}`;
 const report = read(files.report);
 const cspReport = read(files.cspReport);
 const deployment = read(files.deployment);
@@ -242,12 +257,12 @@ if (nextConfig.includes("'unsafe-eval'")) {
 const verifyJwtFalseFunctions = extractVerifyJwtFalseFunctions(supabaseConfig);
 const configuredFunctions = extractConfiguredFunctions(supabaseConfig);
 const verifyJwtDeclarations = [...supabaseConfig.matchAll(/^verify_jwt\s*=\s*(?:true|false)\s*$/gm)];
-if (configuredFunctions.length !== 46) {
-  failures.push(`supabase/config.toml: expected 46 configured functions, found ${configuredFunctions.length}.`);
+if (configuredFunctions.length !== 49) {
+  failures.push(`supabase/config.toml: expected 49 configured functions, found ${configuredFunctions.length}.`);
 }
-if (configuredFunctions.length - verifyJwtFalseFunctions.length !== 29) {
+if (configuredFunctions.length - verifyJwtFalseFunctions.length !== 31) {
   failures.push(
-    `supabase/config.toml: expected 29 verify_jwt=true functions, found ${configuredFunctions.length - verifyJwtFalseFunctions.length}.`,
+    `supabase/config.toml: expected 31 verify_jwt=true functions, found ${configuredFunctions.length - verifyJwtFalseFunctions.length}.`,
   );
 }
 if (verifyJwtDeclarations.length !== configuredFunctions.length) {
@@ -270,6 +285,7 @@ const expectedUnauthenticatedFunctions = [
   "run-raffle-schedule",
   "run-raffle-fulfillment",
   "reward-provider-webhook",
+  "run-event-social-publication",
   "mochi-pets-alpha-action",
   "mochi-pets-alpha-progress",
   "sync-pixelfed-social-account",
@@ -458,6 +474,34 @@ const unauthenticatedFunctionGuardSpecs = {
       "cancelReader(reader)",
     ],
   },
+  "run-event-social-publication": {
+    source: eventSocialSecuritySource,
+    kind: "closed-by-default exact-time event publication worker",
+    snippets: [
+      "EVENT_SOCIAL_SCHEDULER_SECRET",
+      "x-mochirii-event-social-secret",
+      "constantTimeSecretEqual(providedSecret, expectedSecret)",
+      "readBoundedUtf8RequestBody",
+      "Object.keys(value).length === 0",
+      "enabledEventSocialDestinations(providerConfig)",
+      "EVENT_FACEBOOK_PAGE_PUBLISH_ENABLED",
+      "EVENT_INSTAGRAM_PUBLISH_ENABLED",
+      "EVENT_DISCORD_PUBLISH_ENABLED",
+      "META_GRAPH_API_VERSION",
+      'outcome: "reconcile_required"',
+      "EVENT_SOCIAL_TEMPLATE_PACKET",
+      "sweep_event_social_publication_leases",
+      "event_social_projection_is_current",
+      "await Promise.all(rows.map(async (rawJob) =>",
+      "EVENT_SOCIAL_CONTENT_SHA256",
+      "EVENT_SOCIAL_MEDIA_SHA256",
+      'form.append("payload_json"',
+      '"files[0]"',
+      "alt_text_custom: job.alt_text",
+      "attachment.description !== job.alt_text",
+      "template_media_attestation_mismatch",
+    ],
+  },
   "mochi-pets-alpha-action": {
     source: `${mochiPetsAlphaShared}\n${mochiPetsAlphaAction}`,
     kind: "game-server shared token",
@@ -491,6 +535,56 @@ for (const name of expectedUnauthenticatedFunctions) {
   for (const snippet of spec.snippets) {
     assertIncludes(`${name} ${spec.kind}`, spec.source, snippet);
   }
+}
+
+for (const snippet of [
+  "requireModeratorAccess(req)",
+  'action === "list"',
+  "safeListedOccurrence",
+  "safeListedJob",
+  'error: "owner_operator_activation_required"',
+  "set_event_social_destination_enabled",
+]) {
+  assertIncludes(
+    "manage-event-social-publication fail-closed moderator boundary",
+    eventSocialManager,
+    snippet,
+  );
+}
+assertNotMatches(
+  "manage-event-social-publication owner-only activation boundary",
+  eventSocialManager,
+  /p_enabled:\s*true/,
+  "The moderator endpoint must not contain a direct destination-activation RPC payload.",
+);
+
+for (const snippet of [
+  "requireModeratorAccess(req)",
+  'Object.hasOwn(body, "destination")',
+  "get_event_social_publication_reconciliation_snapshot",
+  "verifyEventSocialProviderPublication",
+  "resolve_event_social_publication_reconciliation",
+  "confirm_reconciliation",
+]) {
+  assertIncludes(
+    "event-social reconciliation moderator and server-derived destination boundary",
+    eventSocialReconciliationResolver,
+    snippet,
+  );
+}
+for (const snippet of [
+  "destinationEnabled: false",
+  "facebookPageObjectEvidence",
+  "instagramMediaObjectEvidence",
+  'discordFetch("/users/@me"',
+  "confirmedNotPublishedEvidenceIsSafe",
+  "eventSocialReconciliationPublicDto",
+]) {
+  assertIncludes(
+    "event-social provider ownership readback and redacted DTO boundary",
+    eventSocialReconciliation,
+    snippet,
+  );
 }
 
 [

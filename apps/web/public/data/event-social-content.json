@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 1,
+  "publication": {
+    "enabledByDefault": false,
+    "platforms": {
+      "facebook": false,
+      "instagram": false,
+      "discord": false
+    }
+  },
+  "scheduleContract": {
+    "source": "./guild-schedule.json",
+    "timezone": "UTC+8",
+    "reminderOffsetMinutes": 60,
+    "lateDispatchPolicy": "suppress",
+    "requiredTokens": [
+      "{{EVENT_DATE}}",
+      "{{EVENT_TIME_RANGE}}"
+    ]
+  },
+  "brand": {
+    "guildSealAsset": "./assets/img/brand/emblem.webp",
+    "cupcakeMarkAsset": "./assets/img/brand/cupcake-mark.svg",
+    "marksRequiredOnEveryCreative": true,
+    "lockupPlacement": "top-paired",
+    "equalVisualWeight": true,
+    "captionAccentBounds": {
+      "Mōchirīī": {
+        "minimum": 1,
+        "maximum": 5
+      },
+      "Mōchī": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "Wushu land": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "pretty": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "cupcake": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "wonderful": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "Where Winds Meet": {
+        "minimum": 1,
+        "maximum": 2
+      },
+      "wuxia": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "xianxia": {
+        "minimum": 1,
+        "maximum": 1
+      },
+      "Jianghu": {
+        "minimum": 1,
+        "maximum": 1
+      }
+    }
+  },
+  "policy": {
+    "forbiddenPublicWords": [
+      "warm",
+      "warmth",
+      "calm",
+      "quiet",
+      "cozy",
+      "serene",
+      "peaceful",
+      "gentle",
+      "gently",
+      "soft",
+      "softly",
+      "shared",
+      "soothing",
+      "dreamy",
+      "tranquil",
+      "unhurried",
+      "lovely",
+      "whimsical"
+    ],
+    "forbiddenPublicPhrases": [
+      "shared run",
+      "shared runs",
+      "shared-run",
+      "shared-runs",
+      "shared activity",
+      "shared activities",
+      "shared event",
+      "shared events",
+      "shared session",
+      "shared sessions",
+      "link in bio",
+      "link-in-bio",
+      "qr code"
+    ],
+    "rejectLinks": true,
+    "rejectDomains": true,
+    "rejectHashtags": true,
+    "exactGameNameInCaptions": true
+  },
+  "layouts": {
+    "facebook": {
+      "width": 1080,
+      "height": 1350,
+      "aspectRatio": "4:5",
+      "mimeType": "image/jpeg",
+      "colorSpace": "sRGB",
+      "safeInsetPercent": 8,
+      "minimumTextContrastRatio": 4.5,
+      "captionMaxCharacters": 500,
+      "altTextMaxCharacters": 500,
+      "maxOverlayTextLines": 8
+    },
+    "instagram": {
+      "width": 1080,
+      "height": 1350,
+      "aspectRatio": "4:5",
+      "mimeType": "image/jpeg",
+      "colorSpace": "sRGB",
+      "safeInsetPercent": 8,
+      "minimumTextContrastRatio": 4.5,
+      "captionMaxCharacters": 500,
+      "altTextMaxCharacters": 500,
+      "maxOverlayTextLines": 8
+    },
+    "discord": {
+      "width": 1600,
+      "height": 640,
+      "aspectRatio": "5:2",
+      "mimeType": "image/png",
+      "colorSpace": "sRGB",
+      "safeInsetPercent": 5,
+      "minimumTextContrastRatio": 4.5,
+      "captionMaxCharacters": 500,
+      "altTextMaxCharacters": 500,
+      "maxOverlayTextLines": 6
+    }
+  },
+  "events": [
+    {
+      "id": "monthly-gathering",
+      "scheduleId": "monthly-gathering",
+      "title": "Monthly Guild Gathering",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/monthly-gathering.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/monthly-gathering/facebook.3720a28e06bf434e63b877d97dfbf0af5ac72610d38e3fb030263946b1d2e787.jpg",
+          "instagram": "./assets/img/event-social/monthly-gathering/instagram.3720a28e06bf434e63b877d97dfbf0af5ac72610d38e3fb030263946b1d2e787.jpg",
+          "discord": "./assets/img/event-social/monthly-gathering/discord.b10e9b8de972aa33b4497dfc8900f2e63a4f437eeb16668134f8ecab9af35d76.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Monthly Guild Gathering",
+        "noticeText": "This gathering replaces that day's Guild Party. Attendance still qualifies for the in-game Guild Party attendance reward.",
+        "altText": "Mōchirīī Monthly Guild Gathering reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Monthly Guild Gathering.’ A notice says the gathering replaces that day's Guild Party and attendance still qualifies for the in-game Guild Party attendance reward."
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "Mōchirīī’s Monthly Guild Gathering begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Bring your questions, comments, concerns, and suggestions. This gathering replaces the Guild Party scheduled for {{EVENT_DATE}}. Attendance still qualifies for the in-game Guild Party attendance reward. What should we add to the agenda?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nMonthly Guild Gathering\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nBring one xianxia-themed guild idea with your questions, comments, concerns, and suggestions. This gathering replaces the Guild Party scheduled for {{EVENT_DATE}}. Attendance still qualifies for the in-game Guild Party attendance reward.\nWhat should we add to the agenda?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Monthly Guild Gathering starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nBring your questions, comments, concerns, and suggestions.\nThis gathering replaces the Guild Party scheduled for {{EVENT_DATE}}. Attendance still qualifies for the in-game Guild Party attendance reward.\nReply with an agenda item."
+        }
+      }
+    },
+    {
+      "id": "monthly-raffle",
+      "scheduleId": "monthly-raffle",
+      "title": "Monthly Guild Raffle",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/monthly-raffle.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/monthly-raffle/facebook.72dd15868270aa1a8568272d730fcbb5f3d507525780e39b533eeacd0439385f.jpg",
+          "instagram": "./assets/img/event-social/monthly-raffle/instagram.72dd15868270aa1a8568272d730fcbb5f3d507525780e39b533eeacd0439385f.jpg",
+          "discord": "./assets/img/event-social/monthly-raffle/discord.310dbb78add1cbe44a57c88d41fb6a69b5dde10606fe1f54b5029bc19fc753f9.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Monthly Guild Raffle",
+        "noticeText": "This raffle replaces that day's Guild Party. Attendance still qualifies for the in-game Guild Party attendance reward.",
+        "altText": "Mōchirīī Monthly Guild Raffle reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Monthly Guild Raffle.’ A notice says the raffle replaces that day's Guild Party and attendance still qualifies for the in-game Guild Party attendance reward."
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "The Monthly Guild Raffle begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Meet at Guild Base Pool for the drawing. This raffle replaces the Guild Party scheduled for {{EVENT_DATE}}. Attendance still qualifies for the in-game Guild Party attendance reward. Who’s joining the draw?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nMonthly Guild Raffle\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nMeet at Guild Base Pool for the drawing. This raffle replaces the Guild Party scheduled for {{EVENT_DATE}}. Attendance still qualifies for the in-game Guild Party attendance reward.\nCupcake luck—who’s joining?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Monthly Guild Raffle starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nMeet at Guild Base Pool for the drawing.\nThis raffle replaces the Guild Party scheduled for {{EVENT_DATE}}. Attendance still qualifies for the in-game Guild Party attendance reward.\nReply if you’re joining."
+        }
+      }
+    },
+    {
+      "id": "guild-party",
+      "scheduleId": "guild-party",
+      "title": "Guild Party",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/guild-party.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/guild-party/facebook.c0f07fb423af74d61e03511a311afb90449e41f8857bdbff5110a2387afc3c9e.jpg",
+          "instagram": "./assets/img/event-social/guild-party/instagram.c0f07fb423af74d61e03511a311afb90449e41f8857bdbff5110a2387afc3c9e.jpg",
+          "discord": "./assets/img/event-social/guild-party/discord.3c973ff0e04fafa629ce4872e192fddc7759bf48541cb5a6e7fa4a2e8d8eebf2.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Guild Party",
+        "noticeText": "Join the guild in game for today's Guild Party.",
+        "altText": "Mōchirīī Guild Party reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Guild Party.’"
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "Guild Party begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Join Mōchirīī in Where Winds Meet for today’s Guild Party. Who’s checking in?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nGuild Party\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nJoin the guild in game for today’s Guild Party.\nWushu land roll call: are you joining?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Guild Party starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nMōchī roll call: reply if you’re joining in game."
+        }
+      }
+    },
+    {
+      "id": "breaking-army",
+      "scheduleId": "breaking-army",
+      "title": "Breaking Army",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/breaking-army.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/breaking-army/facebook.9d822a38586fdd9954484341062dc8d2b8ae218875a226f3fd9bddaadef3f1a3.jpg",
+          "instagram": "./assets/img/event-social/breaking-army/instagram.9d822a38586fdd9954484341062dc8d2b8ae218875a226f3fd9bddaadef3f1a3.jpg",
+          "discord": "./assets/img/event-social/breaking-army/discord.343202530a793d311ec225b6bdec3ecae422b273478f075caa4b7af7e40b70d9.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Breaking Army",
+        "noticeText": "Check your build and confirm your role before the start.",
+        "altText": "Mōchirīī Breaking Army reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Breaking Army.’"
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "Breaking Army begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Check your build, confirm your role, and be ready to coordinate at the start. What role are you bringing?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nBreaking Army\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nCheck your build and confirm your role before the start.\nWhat role are you bringing?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Breaking Army starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nWuxia fighters, check your build and confirm your role. Reply with the role you’re bringing."
+        }
+      }
+    },
+    {
+      "id": "showdown",
+      "scheduleId": "showdown",
+      "title": "Showdown",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/showdown.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/showdown/facebook.0746d7848d3200ba91b8e10cc4b07a9baed034ff2c1351947beb0d1bff47b61b.jpg",
+          "instagram": "./assets/img/event-social/showdown/instagram.0746d7848d3200ba91b8e10cc4b07a9baed034ff2c1351947beb0d1bff47b61b.jpg",
+          "discord": "./assets/img/event-social/showdown/discord.89655c54f1c8550e3d08c992af3cba6f99d0345fee5b4c0eac4b9a456a0795b7.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Showdown",
+        "noticeText": "Review your build and party plan before the start.",
+        "altText": "Mōchirīī Showdown reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Showdown.’"
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "Showdown begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Review your build and party plan before the start. Which setup are you bringing?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nShowdown\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nReview your build and party plan before the start.\nWhich setup are you bringing?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Showdown starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nReview your build and party plan. Reply with the setup you’re bringing."
+        }
+      }
+    },
+    {
+      "id": "guild-wars",
+      "scheduleId": "guild-wars",
+      "title": "Guild Wars",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/guild-wars.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/guild-wars/facebook.d4dee4f1d0a16f54ebf850886f5625040a981400d0d09abb360b151a540de9e9.jpg",
+          "instagram": "./assets/img/event-social/guild-wars/instagram.d4dee4f1d0a16f54ebf850886f5625040a981400d0d09abb360b151a540de9e9.jpg",
+          "discord": "./assets/img/event-social/guild-wars/discord.ad5cc36b0b170ca21adf2cbc07159b2f0a5ee739a0c9037f6315a6a17b8d013c.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Guild Wars",
+        "noticeText": "Be online before the start so parties and roles can be set.",
+        "altText": "Mōchirīī Guild Wars reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Guild Wars.’"
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "Guild Wars begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Be online before the start so parties and roles can be set. Who’s joining?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nGuild Wars\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nBring a pretty look and a battle-ready build.\nWho’s joining?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Guild Wars starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nBe online before the start so parties and roles can be set. Reply if you’re joining."
+        }
+      }
+    },
+    {
+      "id": "guild-heros-realm",
+      "scheduleId": "guild-heros-realm",
+      "title": "Guild Hero's Realm: Weekly Coordination",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/guild-heros-realm.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/guild-heros-realm/facebook.50c34cc0a486981d895bcf7806457d2b2113209850bb1c28207b393075c90ed4.jpg",
+          "instagram": "./assets/img/event-social/guild-heros-realm/instagram.50c34cc0a486981d895bcf7806457d2b2113209850bb1c28207b393075c90ed4.jpg",
+          "discord": "./assets/img/event-social/guild-heros-realm/discord.b5636fb84a44b22fac19f735a0eac501faf7db52409c939e3ee60569be249b0e.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "Guild Hero's Realm",
+        "noticeText": "Bring your questions and preferred role; parties will be organized before entry.",
+        "altText": "Mōchirīī Guild Hero's Realm reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. Guild Hero's Realm.’"
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "Guild Hero’s Realm begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Bring your questions and preferred role; Mōchirīī will organize parties before entry. What help do you need?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nGuild Hero’s Realm\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nBring your questions and preferred role. Parties will be organized before entry.\nWhat help do you need?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**Guild Hero’s Realm starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nBring your questions and preferred role. Reply with the help you need before parties are organized."
+        }
+      }
+    },
+    {
+      "id": "united-resolve",
+      "scheduleId": "united-resolve",
+      "title": "United Resolve",
+      "creative": {
+        "artMasterAsset": "./assets/img/event-social/masters/united-resolve.webp",
+        "platformAssets": {
+          "facebook": "./assets/img/event-social/united-resolve/facebook.ced933fdb65f3667655f17827d4bc4452d1a9bafe8514d2dc42ded3e75ed7376.jpg",
+          "instagram": "./assets/img/event-social/united-resolve/instagram.ced933fdb65f3667655f17827d4bc4452d1a9bafe8514d2dc42ded3e75ed7376.jpg",
+          "discord": "./assets/img/event-social/united-resolve/discord.642fa333e1cabf3fda9f5b14d721b7b2d658eeb7547e14eef62c8bd14f8fcf56.png"
+        },
+        "badgeText": "Starts in one hour",
+        "titleText": "United Resolve",
+        "noticeText": "Continue after Hero's Realm and be ready at the start.",
+        "altText": "Mōchirīī United Resolve reminder artwork with the guild seal and cupcake mark. Text reads: ‘Starts in one hour. United Resolve.’"
+      },
+      "platforms": {
+        "facebook": {
+          "publicationEnabled": false,
+          "captionTemplate": "United Resolve begins in one hour. {{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8. Continue with Mōchirīī after Hero’s Realm and be ready at the start. Who still needs a party?"
+        },
+        "instagram": {
+          "publicationEnabled": false,
+          "captionTemplate": "Starts in one hour.\nUnited Resolve\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nContinue after Hero’s Realm and be ready at the start.\nJianghu roll call: who still needs a party?"
+        },
+        "discord": {
+          "publicationEnabled": false,
+          "captionTemplate": "**United Resolve starts in one hour.**\n{{EVENT_DATE}} · {{EVENT_TIME_RANGE}} UTC+8\nMake this a wonderful finish to the event window. Reply if you still need a party."
+        }
+      }
+    }
+  ]
+}

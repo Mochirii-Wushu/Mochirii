@@ -3,9 +3,11 @@ import path from "node:path";
 
 export const APPROVED_HOME_SUBTITLE = "Asia Pacific • Where Winds Meet Guild";
 export const APPROVED_FOOTER_DESCRIPTION = "An Asia Pacific Where Winds Meet guild, with events scheduled in UTC+8.";
-export const EXPECTED_EXACT_GAME_NAME_COUNT = 15;
+export const EXPECTED_EXACT_GAME_NAME_COUNT = 16;
 export const EXPECTED_PUBLIC_JSON_FILES = Object.freeze([
   "apps/web/public/data/announcements.json",
+  "apps/web/public/data/event-social-assets.json",
+  "apps/web/public/data/event-social-content.json",
   "apps/web/public/data/events.json",
   "apps/web/public/data/gallery.json",
   "apps/web/public/data/guild-schedule.json",
@@ -59,6 +61,9 @@ export function discoverPublicJsonFiles(root) {
 }
 
 export function exactGameNameIsApproved(relative, location, value) {
+  if (relative === "apps/web/public/data/event-social-content.json") {
+    return location === "$.events[2].platforms.facebook.captionTemplate";
+  }
   if (relative === "apps/web/public/data/home.json") {
     return location === "$.hero.subtitle" && value === APPROVED_HOME_SUBTITLE;
   }
