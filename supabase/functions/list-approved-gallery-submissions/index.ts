@@ -1,11 +1,14 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 import {
+  buildGalleryPublicListResponse,
   encodeGalleryCursor,
+  GALLERY_PUBLIC_LIST_RESERVED_BYTES,
   GALLERY_PUBLIC_SCHEMA_VERSION,
   GalleryIsolateCircuitBreaker,
   GalleryIsolateEvidenceCache,
   galleryPublicListCacheKey,
+  galleryPublicListOverflowEvent,
   isLegacyGalleryListRequest,
   parseGalleryDatabasePage,
   parseGalleryDeliveryReservation,
@@ -47,7 +50,15 @@ function jsonResponse(
   status = 200,
   extraHeaders: Record<string, string> = {},
 ): Response {
-  return new Response(JSON.stringify(body), {
+  return serializedJsonResponse(JSON.stringify(body), status, extraHeaders);
+}
+
+function serializedJsonResponse(
+  body: string,
+  status = 200,
+  extraHeaders: Record<string, string> = {},
+): Response {
+  return new Response(body, {
     status,
     headers: {
       ...CORS_HEADERS,
@@ -56,6 +67,21 @@ function jsonResponse(
       ...extraHeaders,
     },
   });
+}
+
+function boundedListResponse(
+  body: JsonRecord,
+  representation: "legacy" | "schema-v2",
+  itemCount: number,
+): Response {
+  const result = buildGalleryPublicListResponse(body, CORS_HEADERS);
+  if (!result.overflowed) return result.response;
+
+  console.error(
+    "list-approved-gallery-submissions page delivery failed",
+    galleryPublicListOverflowEvent(representation, itemCount),
+  );
+  return result.response;
 }
 
 function publicMediaUrl(
@@ -405,7 +431,7 @@ async function handleRequest(req: Request): Promise<Response> {
     () =>
       adminClient.rpc("gallery_reserve_public_delivery", {
         p_delivery_kind: "list",
-        p_reserved_bytes: 65536,
+        p_reserved_bytes: GALLERY_PUBLIC_LIST_RESERVED_BYTES,
       }),
     "list",
   );
@@ -533,16 +559,20 @@ async function handleRequest(req: Request): Promise<Response> {
       }, 503);
     }
 
-    return jsonResponse({
-      ok: true,
-      data: {
-        submissions,
-        count: submissions.length,
+    return boundedListResponse(
+      {
+        ok: true,
+        data: {
+          submissions,
+          count: submissions.length,
+        },
+        message: submissions.length
+          ? "Member-submitted images loaded."
+          : "No member-submitted images are available yet.",
       },
-      message: submissions.length
-        ? "Member-submitted images loaded."
-        : "No member-submitted images are available yet.",
-    });
+      "legacy",
+      submissions.length,
+    );
   }
 
   const nextCursor = encodeGalleryCursor({
@@ -562,26 +592,30 @@ async function handleRequest(req: Request): Promise<Response> {
     }, 503);
   }
 
-  return jsonResponse({
-    ok: true,
-    data: {
-      schemaVersion: GALLERY_PUBLIC_SCHEMA_VERSION,
-      items,
-      count: items.length,
-      totalEligible: safeInteger(page.totalEligible),
-      facets: safeFacets(page.facets),
-      hasMore: page.hasMore === true,
-      nextCursor,
-      partial: false,
-      complete: page.hasMore !== true,
-      deliveryFailures: 0,
-      delivery: "bounded-edge-media",
-      cacheSeconds: 15,
+  return boundedListResponse(
+    {
+      ok: true,
+      data: {
+        schemaVersion: GALLERY_PUBLIC_SCHEMA_VERSION,
+        items,
+        count: items.length,
+        totalEligible: safeInteger(page.totalEligible),
+        facets: safeFacets(page.facets),
+        hasMore: page.hasMore === true,
+        nextCursor,
+        partial: false,
+        complete: page.hasMore !== true,
+        deliveryFailures: 0,
+        delivery: "bounded-edge-media",
+        cacheSeconds: 15,
+      },
+      message: items.length
+        ? "Member-submitted images loaded."
+        : "No member-submitted images are available yet.",
     },
-    message: items.length
-      ? "Member-submitted images loaded."
-      : "No member-submitted images are available yet.",
-  });
+    "schema-v2",
+    items.length,
+  );
 }
 
 Deno.serve(async (req: Request) => {

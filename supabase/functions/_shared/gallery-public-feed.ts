@@ -1,5 +1,7 @@
 export const GALLERY_PUBLIC_SCHEMA_VERSION = 2;
 export const GALLERY_PUBLIC_PAGE_SIZE = 24;
+export const GALLERY_PUBLIC_LIST_RESERVED_BYTES = 64 * 1024;
+export const GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES = 512;
 export const GALLERY_PUBLIC_MAX_QUERY_LENGTH = 80;
 export const GALLERY_CURSOR_MAX_AGE_MS = 10 * 60 * 1000;
 export const GALLERY_PUBLIC_EVIDENCE_CACHE_TTL_MS = 15 * 1000;
@@ -509,6 +511,107 @@ export function safeGalleryText(
   return text.slice(0, maxLength);
 }
 
+function safeGalleryPublicText(
+  value: unknown,
+  maxLength: number,
+): string | null {
+  const text = safeGalleryText(value, maxLength);
+  if (!text) return null;
+  for (const character of text) {
+    const codePoint = character.codePointAt(0) ?? 0;
+    if (
+      (codePoint <= 0x1f && ![0x09, 0x0a, 0x0d].includes(codePoint)) ||
+      (codePoint >= 0x7f && codePoint <= 0x9f) ||
+      (codePoint >= 0xd800 && codePoint <= 0xdfff)
+    ) return null;
+  }
+  return text;
+}
+
+export function safeGalleryPublicMediaUrl(value: unknown): string | null {
+  const text = safeGalleryPublicText(
+    value,
+    GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES + 1,
+  );
+  if (
+    !text || /\s/u.test(text) ||
+    new TextEncoder().encode(text).byteLength >
+      GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES
+  ) return null;
+
+  try {
+    const url = new URL(text);
+    if (
+      url.protocol !== "https:" || !url.hostname || url.username ||
+      url.password || url.hash
+    ) return null;
+    const normalized = url.href;
+    return new TextEncoder().encode(normalized).byteLength <=
+        GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES
+      ? normalized
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export function serializeGalleryPublicListResponse(
+  value: unknown,
+): string | null {
+  try {
+    const serialized = JSON.stringify(value);
+    if (
+      typeof serialized !== "string" ||
+      new TextEncoder().encode(serialized).byteLength >
+        GALLERY_PUBLIC_LIST_RESERVED_BYTES
+    ) return null;
+    return serialized;
+  } catch {
+    return null;
+  }
+}
+
+const GALLERY_PUBLIC_LIST_OVERFLOW_BODY = JSON.stringify({
+  ok: false,
+  error: "approved_submission_page_unavailable",
+  message: "Member-submitted images are temporarily unavailable.",
+});
+
+export function galleryPublicListOverflowEvent(
+  representation: "legacy" | "schema-v2",
+  itemCount: number,
+): Record<string, string | number> {
+  return {
+    code: "list_response_budget_exceeded",
+    representation,
+    itemCount: Number.isSafeInteger(itemCount) && itemCount >= 0
+      ? itemCount
+      : 0,
+  };
+}
+
+export function buildGalleryPublicListResponse(
+  value: unknown,
+  extraHeaders: Record<string, string> = {},
+): { response: Response; overflowed: boolean } {
+  const serialized = serializeGalleryPublicListResponse(value);
+  const overflowed = serialized === null;
+  return {
+    overflowed,
+    response: new Response(
+      overflowed ? GALLERY_PUBLIC_LIST_OVERFLOW_BODY : serialized,
+      {
+        status: overflowed ? 503 : 200,
+        headers: {
+          ...extraHeaders,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
+      },
+    ),
+  };
+}
+
 function validDate(value: unknown): string | null {
   const text = safeGalleryText(value, 80);
   return text && Number.isFinite(Date.parse(text)) ? text : null;
@@ -740,7 +843,9 @@ export function parseGalleryDatabasePage(value: unknown): JsonRecord | null {
 
   const totalEligible = safeIntegerForEvidence(page.totalEligible);
   const sourceApprovedCount = safeIntegerForEvidence(page.sourceApprovedCount);
-  const publicationReadyCount = safeIntegerForEvidence(page.publicationReadyCount);
+  const publicationReadyCount = safeIntegerForEvidence(
+    page.publicationReadyCount,
+  );
   const unknownCategoryCount = safeIntegerForEvidence(
     page.unknownCategoryCount,
   );
@@ -797,6 +902,7 @@ export function toPublicGalleryItem(
 ): JsonRecord | null {
   const item = record(value);
   const id = safeGalleryText(item.id, 80);
+  const safeThumbnailUrl = safeGalleryPublicMediaUrl(thumbnailUrl);
   const thumbnailSizeBytes = Number(item.thumbnailSizeBytes || 0);
   const thumbnailWidth = Number(item.thumbnailWidth || 0);
   const thumbnailHeight = Number(item.thumbnailHeight || 0);
@@ -806,7 +912,7 @@ export function toPublicGalleryItem(
   const reviewedAt = validDate(item.reviewedAt);
   const category = safeGalleryText(item.category, 40)?.toLowerCase() || null;
   if (
-    !id || !UUID_RE.test(id) || !thumbnailUrl ||
+    !id || !UUID_RE.test(id) || !safeThumbnailUrl ||
     displayMimeType !== "image/webp" ||
     !Number.isSafeInteger(displaySizeBytes) || displaySizeBytes < 1 ||
     displaySizeBytes > 2 * 1024 * 1024 ||
@@ -822,15 +928,15 @@ export function toPublicGalleryItem(
 
   return {
     id,
-    title: safeGalleryText(item.title, 80),
-    caption: safeGalleryText(item.caption, 300),
+    title: safeGalleryPublicText(item.title, 80),
+    caption: safeGalleryPublicText(item.caption, 300),
     category,
     categories: safeCategories(item.categories),
     mime_type: displayMimeType,
     size_bytes: displaySizeBytes,
     created_at: createdAt,
     reviewed_at: reviewedAt,
-    thumbnail_url: thumbnailUrl,
+    thumbnail_url: safeThumbnailUrl,
     thumbnail_size_bytes: thumbnailSizeBytes,
     thumbnail_width: thumbnailWidth,
     thumbnail_height: thumbnailHeight,
@@ -843,8 +949,8 @@ export function toLegacyGalleryItem(
 ): JsonRecord | null {
   const item = record(value);
   const id = safeGalleryText(item.id, 80);
-  const thumbnailUrl = safeGalleryText(item.thumbnail_url, 4000);
-  const safeFullUrl = safeGalleryText(fullUrl, 4000);
+  const thumbnailUrl = safeGalleryPublicMediaUrl(item.thumbnail_url);
+  const safeFullUrl = safeGalleryPublicMediaUrl(fullUrl);
   const mimeType = safeGalleryText(item.mime_type, 80)?.toLowerCase();
   const sizeBytes = Number(item.size_bytes || 0);
   const thumbnailSizeBytes = Number(item.thumbnail_size_bytes || 0);
@@ -863,8 +969,8 @@ export function toLegacyGalleryItem(
 
   return {
     id,
-    title: safeGalleryText(item.title, 80),
-    caption: safeGalleryText(item.caption, 300),
+    title: safeGalleryPublicText(item.title, 80),
+    caption: safeGalleryPublicText(item.caption, 300),
     category,
     mime_type: mimeType,
     size_bytes: sizeBytes,

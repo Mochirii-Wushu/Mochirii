@@ -247,6 +247,8 @@ assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile
 [
   "GALLERY_PUBLIC_SCHEMA_VERSION = 2",
   "GALLERY_PUBLIC_PAGE_SIZE = 24",
+  "GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES = 512",
+  "export function safeGalleryPublicMediaUrl",
   'action: "list"',
   'action: "full"',
   "snapshotAt",
@@ -255,7 +257,25 @@ assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile
   "thumbnailHeight",
   "thumbnail_width: thumbnailWidth",
   "thumbnail_height: thumbnailHeight",
+  "const safeThumbnailUrl = safeGalleryPublicMediaUrl(thumbnailUrl);",
+  "thumbnail_url: safeThumbnailUrl",
+  "const thumbnailUrl = safeGalleryPublicMediaUrl(item.thumbnail_url);",
+  "const safeFullUrl = safeGalleryPublicMediaUrl(fullUrl);",
+  "full_signed_url: safeFullUrl",
 ].forEach((snippet) => assertIncludes("approved gallery public helper", publicFeedHelper, snippet));
+
+assertRegex(
+  "approved Gallery v2 public item",
+  publicFeedHelper,
+  /export function toPublicGalleryItem\([\s\S]*?return \{(?:(?!storagePath|storageBucket|userId|full_signed_url|thumbnail_signed_url)[\s\S])*thumbnail_url: safeThumbnailUrl,[\s\S]*?^\}/m,
+  "Gallery feed v2 must expose only the bounded Edge thumbnail URL without private storage or member fields.",
+);
+assertRegex(
+  "approved Gallery legacy public item",
+  publicFeedHelper,
+  /export function toLegacyGalleryItem\([\s\S]*?const thumbnailUrl = safeGalleryPublicMediaUrl\(item\.thumbnail_url\);[\s\S]*?const safeFullUrl = safeGalleryPublicMediaUrl\(fullUrl\);[\s\S]*?full_signed_url: safeFullUrl,[\s\S]*?thumbnail_signed_url: thumbnailUrl,/,
+  "legacy compatibility must apply the same bounded URL validator to thumbnail and full Edge URLs.",
+);
 
 [
   "gallery_submissions_thumbnail_dimensions_check",

@@ -1,6 +1,7 @@
 # Supabase Cost Usage Runbook
 
-Date checked: 2026-07-28
+Source contract checked: 2026-08-01
+Provider usage snapshot: 2026-07-28
 
 This runbook gives leaders a safe way to monitor Supabase usage for the member Gallery, Discord verification, approved Gallery feed, and moderation workflows. It is operational guidance, not a billing quote. Before making billing or quota decisions, check the current Supabase dashboard and the live Supabase pricing/docs pages.
 
@@ -20,7 +21,7 @@ Official Supabase references checked for this runbook:
 - Storage CDN behavior: <https://supabase.com/docs/guides/storage/cdn/fundamentals>
 - Supabase changelog index: <https://supabase.com/changelog.md>
 
-The 2026-07-28 changelog scan did not show a Storage egress breaking change
+The 2026-08-01 changelog scan did not show a Storage egress breaking change
 that alters this response. Cached and origin Storage egress remain separately
 metered, and the current repository already uses Node.js 22.
 
@@ -70,20 +71,34 @@ an original is requested:
 - the browser does not request an approved original until a visitor opens its
   viewer;
 - pending, rejected, and archived objects remain outside the public feed;
+- both modern and legacy list JSON pass through one serializer capped at the
+  same `65,536` bytes reserved for the request;
 - the private bucket remains unchanged, while public delivery uses stable Edge
   URLs with exact object-size/hash verification and no signed bearer URL;
 - the database-serialized global budget caps combined Gallery delivery at 64
   MiB per UTC day, with per-kind minute and daily request ceilings; and
-- local and Preview gallery/browser matrices intercept the approved feed with
+- broad local gallery/browser matrices intercept the approved feed with
   deterministic fixtures.
+
+The database-backed public-delivery window is a shared `64 MiB` source budget
+for list, thumbnail, and display reservations. Each list request conservatively
+reserves `64 KiB`, so list traffic alone has an effective ceiling of `1,024`
+requests per UTC day. Thumbnail and display reservations consume the same
+window and can make the actual list ceiling lower. This is a fail-closed
+application budget, not a promise that Supabase bills every reservation as
+exactly that many bytes; provider egress is measured from bytes actually sent
+by Supabase services.
 
 Broad gallery and browser matrices now refuse the canonical production Website
 origin by default. A deliberately approved bounded production canary requires
 the exact process-scoped variable
 `MOCHIRII_ALLOW_LIVE_GALLERY_MEDIA_SMOKE_ONCE=true`. Do not save that variable
 in a shell profile, `.env` file, CI configuration, or provider setting. Normal
-development and release verification should use a local origin or the exact
-reviewed Vercel Preview.
+development and broad browser verification should use the local fixture-backed
+origin. Manual Gallery Lighthouse defaults to that local production build. A
+Vercel Preview or Production Lighthouse run is live provider traffic and
+requires the same exact one-shot opt-in plus separate source-binding evidence
+for the reviewed deployment.
 
 ## Current Member Gallery Policy
 
@@ -176,7 +191,7 @@ Stop and escalate:
   reaches `500 MB`.
 
 At the stop threshold, stop nonessential live media matrices immediately and
-move validation to local/Preview fixtures. Do not make the bucket public,
+move validation to local fixtures. Do not make the bucket public,
 delete objects, rotate URLs, resize infrastructure, or change plans as an
 unreviewed containment shortcut.
 
@@ -192,7 +207,7 @@ delivery are linked.
 - Approved submissions may be visible in the public Gallery until their status or object state changes through the approved admin path.
 - Moderation events are accountability records and should not be rewritten as routine cleanup.
 
-If cleanup is needed, use `docs/member-gallery-cleanup-plan.md` once G14 exists. Until then, escalate cleanup as a scoped admin task and avoid ad hoc production deletion.
+If cleanup is needed, follow the reviewed `docs/member-gallery-cleanup-plan.md` as a separate scoped admin task. Never perform ad hoc production deletion.
 
 ## Normal Review Checklist
 
@@ -210,7 +225,7 @@ After a guild event or traffic spike:
 
 1. Check `list-approved-gallery-submissions` invocation volume.
 2. Check egress and public Gallery traffic timing.
-3. Check function error logs for repeated signed URL failures.
+3. Check function error logs for repeated bounded media-delivery failures.
 4. Check whether new uploads match known member activity.
 5. If growth is abnormal, stop and open a scoped QA/admin branch.
 
@@ -225,7 +240,7 @@ For unexpected usage:
 
 1. Capture the symptom: affected service, time window, rough magnitude, and dashboard page.
 2. Redact all private values before sharing.
-3. Stop broad production-origin media matrices and use local or reviewed Preview fixtures.
+3. Stop broad production-origin media matrices and use local fixtures.
 4. Confirm whether public site traffic, Discord event activity, moderation work, or a release verification window explains the change.
 5. Use the dashboard service breakdown and the Logs Explorer Storage Egress Requests template when retained data is available; aggregate by request count and bytes without copying paths.
 6. Inspect function logs without copying tokens or private identifiers into public channels.
@@ -275,7 +290,7 @@ The member Gallery cost posture is healthy when:
   backed by exact immutable media evidence and the global delivery budget
 - protected functions fail closed for anonymous users
 - usage growth matches member activity
-- broad gallery/browser matrices use local or reviewed Preview fixtures unless a bounded live canary has exact approval
+- broad gallery/browser matrices use local fixtures unless a bounded live canary has exact approval
 - projected egress remains below the internal watch and stop thresholds
 - dashboard checks show no quota, invoice, or error surprises
 - cleanup decisions are planned before Storage is deleted

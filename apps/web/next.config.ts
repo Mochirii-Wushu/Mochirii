@@ -5,6 +5,10 @@ import publicUrls from "./config/public-urls.json";
 
 const appRoot = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(appRoot, "../..");
+const localGalleryAuditFixture =
+  process.env.NEXT_PUBLIC_MOCHIRII_GALLERY_AUDIT_MODE === "local-fixture-v1" &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL === "http://127.0.0.1:8765";
+const localGalleryAuditFixtureOrigin = "http://127.0.0.1:8766";
 
 const legacyHtmlRedirects = [
   ["/index.html", "/"],
@@ -90,7 +94,8 @@ const securityHeaders = [
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+    value:
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
   },
   {
     key: "Cross-Origin-Opener-Policy",
@@ -183,6 +188,26 @@ const nextConfig: NextConfig = {
       destination,
       permanent: true,
     }));
+  },
+  async rewrites() {
+    return localGalleryAuditFixture
+      ? [
+        {
+          source: "/functions/v1/list-approved-gallery-submissions",
+          destination:
+            `${localGalleryAuditFixtureOrigin}/functions/v1/list-approved-gallery-submissions`,
+        },
+        {
+          source: "/_vercel/insights/script.js",
+          destination: `${localGalleryAuditFixtureOrigin}/_vercel/insights/script.js`,
+        },
+        {
+          source: "/_vercel/speed-insights/script.js",
+          destination:
+            `${localGalleryAuditFixtureOrigin}/_vercel/speed-insights/script.js`,
+        },
+      ]
+      : [];
   },
 };
 

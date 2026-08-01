@@ -119,7 +119,7 @@ const rejectedGalleryCleanupSuccessStart = rejectedGalleryCleanup.lastIndexOf(
 const rejectedGalleryCleanupSuccessResponse = rejectedGalleryCleanupSuccessStart >= 0
   ? rejectedGalleryCleanup.slice(rejectedGalleryCleanupSuccessStart)
   : "";
-const approvedFeedListResponseStart = approvedFeed.lastIndexOf("return jsonResponse({\n    ok: true,");
+const approvedFeedListResponseStart = approvedFeed.lastIndexOf("return boundedListResponse(");
 const approvedFeedListResponse = approvedFeedListResponseStart >= 0
   ? approvedFeed.slice(approvedFeedListResponseStart)
   : "";
@@ -361,6 +361,12 @@ const unauthenticatedFunctionGuardSpecs = {
       'request.action === "full" || request.action === "thumbnail"',
       'if (req.method !== "GET")',
       'keys === "asset,id"',
+      "GALLERY_PUBLIC_LIST_RESERVED_BYTES",
+      "serializeGalleryPublicListResponse",
+      "buildGalleryPublicListResponse",
+      "galleryPublicListOverflowEvent",
+      "safeGalleryPublicMediaUrl",
+      "boundedListResponse",
       ".download(storagePath)",
       "await sha256Hex(mediaBytes) !== mediaSha256",
     ],
@@ -724,6 +730,13 @@ assertNotMatches(
   'request.action === "full" || request.action === "thumbnail"',
   'if (req.method !== "GET")',
   'keys === "asset,id"',
+  "GALLERY_PUBLIC_LIST_RESERVED_BYTES",
+  "serializeGalleryPublicListResponse",
+  "buildGalleryPublicListResponse",
+  "galleryPublicListOverflowEvent",
+  "safeGalleryPublicMediaUrl",
+  "boundedListResponse",
+  '"Cache-Control": "no-store"',
   "parseGalleryMediaReservation(mediaData, request.id, request.action)",
   ".download(storagePath)",
   "mediaBlob.size !== mediaSize",
@@ -757,6 +770,25 @@ assertMatches(
   approvedFeedListResponse,
   /data:\s*\{[\s\S]*?items,[\s\S]*?nextCursor\s*,[\s\S]*?delivery:\s*"bounded-edge-media",[\s\S]*?cacheSeconds:\s*15[\s\S]*?\}/,
   "list action must return bounded Edge thumbnail-page metadata.",
+);
+
+assertMatches(
+  "list-approved-gallery-submissions bounded response helper",
+  approvedFeed,
+  /function boundedListResponse\([\s\S]*?buildGalleryPublicListResponse\(body, CORS_HEADERS\)[\s\S]*?if \(!result\.overflowed\) return result\.response;[\s\S]*?galleryPublicListOverflowEvent\(representation, itemCount\)[\s\S]*?return result\.response;/,
+  "list responses must share one fail-closed byte ceiling and log only safe representation metadata.",
+);
+assertMatches(
+  "list-approved-gallery-submissions legacy bounded response",
+  approvedFeed,
+  /if \(legacyListRequest\)[\s\S]*?return boundedListResponse\(\s*\{[\s\S]*?submissions[\s\S]*?\},\s*"legacy",\s*submissions\.length,\s*\);/,
+  "legacy list compatibility must use the shared response ceiling.",
+);
+assertMatches(
+  "list-approved-gallery-submissions schema-v2 bounded response",
+  approvedFeedListResponse,
+  /return boundedListResponse\(\s*\{[\s\S]*?items[\s\S]*?\},\s*"schema-v2",\s*items\.length,\s*\);/,
+  "schema-v2 list responses must use the shared response ceiling.",
 );
 
 assertNotMatches(

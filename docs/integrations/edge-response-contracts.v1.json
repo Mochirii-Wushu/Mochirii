@@ -1467,7 +1467,7 @@
         {
           "id": "legacy-approved-list",
           "when": [
-            "GET or POST legacy approved list"
+            "GET or POST legacy approved list within the shared 64 KiB serialized response ceiling"
           ],
           "bodyKind": "json",
           "body": null,
@@ -1494,16 +1494,16 @@
               "path": "data.submissions[]",
               "classification": "public",
               "dataClass": "public_gallery_media",
-              "maximumBytes": 524288,
+              "maximumBytes": 65536,
               "descendants": "inherit",
-              "rationale": "Each item is a reviewed public Gallery projection and all descendants are public."
+              "rationale": "The complete legacy response is capped at 64 KiB; each reviewed public Gallery projection and all descendants inherit public classification."
             }
           ]
         },
         {
           "id": "public-feed-list",
           "when": [
-            "GET or POST v2 list"
+            "GET or POST v2 list within the shared 64 KiB serialized response ceiling"
           ],
           "bodyKind": "json",
           "body": null,
@@ -1570,9 +1570,9 @@
               "path": "data.items[]",
               "classification": "public",
               "dataClass": "public_gallery_media",
-              "maximumBytes": 524288,
+              "maximumBytes": 65536,
               "descendants": "inherit",
-              "rationale": "Each item is a reviewed public Gallery projection and all descendants are public."
+              "rationale": "The complete schema-v2 response is capped at 64 KiB; each reviewed public Gallery projection and all descendants inherit public classification."
             }
           ]
         },
@@ -1600,9 +1600,9 @@
         "supabase/functions/list-approved-gallery-submissions/deno.lock",
         "supabase/functions/list-approved-gallery-submissions/index.ts"
       ],
-      "reviewedSourceSha256": "39a642f93aed93efccf365bc3cff81718f4a3a4839c871e77925e610d26c6d50",
-      "semanticContractSha256": "ad3807dc47003cb480bfa4c741f590b285d5357298d866d1b2ebd5a0eba9cd7c",
-      "responseShapeContractSha256": "8882898a2a4c3e2296f2561428b03c11991696e6ddc46f0730184e28e77821a8"
+      "reviewedSourceSha256": "c13c466a235a878aa23ad1b2694d78c1e42193382348503a75ade562b0d55dec",
+      "semanticContractSha256": "f1f4591eea9d7bbf5f66a898becc78a79850e9c7028b5d32c2cad76e253b1bbe",
+      "responseShapeContractSha256": "e2675cd2c8099be04a887af7749eca82f5030d64e9985cff7ba3d613c46b89b6"
     },
     {
       "id": "submit-discord-gallery-image",

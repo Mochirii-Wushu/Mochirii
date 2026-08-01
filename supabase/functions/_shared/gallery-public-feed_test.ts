@@ -1,10 +1,14 @@
 import {
+  buildGalleryPublicListResponse,
   encodeGalleryCursor,
+  GALLERY_PUBLIC_LIST_RESERVED_BYTES,
+  GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
   GALLERY_PUBLIC_PAGE_SIZE,
   GalleryEvidenceNotCacheableError,
   GalleryIsolateCircuitBreaker,
   GalleryIsolateEvidenceCache,
   galleryPublicListCacheKey,
+  galleryPublicListOverflowEvent,
   type GalleryPublicRequest,
   isLegacyGalleryListRequest,
   isUnsignedGalleryPageEvidence,
@@ -12,6 +16,8 @@ import {
   parseGalleryDeliveryReservation,
   parseGalleryMediaReservation,
   parseGalleryPublicRequest,
+  safeGalleryPublicMediaUrl,
+  serializeGalleryPublicListResponse,
   toLegacyGalleryItem,
   toPublicGalleryItem,
 } from "./gallery-public-feed.ts";
@@ -26,6 +32,48 @@ function assertNumberEquals(
   message: string,
 ): void {
   assert(actual === expected, message);
+}
+
+function utf8ByteLength(value: string): number {
+  return new TextEncoder().encode(value).byteLength;
+}
+
+function asciiGalleryUrlAtByteLength(
+  byteLength: number,
+  finalCharacter = "a",
+): string {
+  const prefix = "https://gallery.example.test/";
+  const remaining = byteLength - utf8ByteLength(prefix);
+  assert(remaining >= 1, "requested URL byte length was too small");
+  return `${prefix}${"a".repeat(remaining - 1)}${finalCharacter}`;
+}
+
+function responseAtByteLength(
+  representation: "legacy" | "schema-v2",
+  byteLength: number,
+): Record<string, unknown> {
+  const body = representation === "legacy"
+    ? {
+      ok: true,
+      data: { submissions: [], count: 0, padding: "" },
+      message: "No member-submitted images are available yet.",
+    }
+    : {
+      ok: true,
+      data: { schemaVersion: 2, items: [], count: 0, padding: "" },
+      message: "No member-submitted images are available yet.",
+    };
+  const baseLength = utf8ByteLength(JSON.stringify(body));
+  assert(
+    baseLength <= byteLength,
+    "requested response byte length was too small",
+  );
+  body.data.padding = "a".repeat(byteLength - baseLength);
+  assert(
+    utf8ByteLength(JSON.stringify(body)) === byteLength,
+    "response fixture did not reach its exact byte length",
+  );
+  return body;
 }
 
 async function assertRejects(
@@ -237,7 +285,10 @@ Deno.test("strict database page evidence rejects malformed empty and aggregate e
     "cursor and pagination mismatch was accepted",
   );
   assert(
-    parseGalleryDatabasePage({ ...databasePage(), publicationReadyCount: 1 }) === null,
+    parseGalleryDatabasePage({
+      ...databasePage(),
+      publicationReadyCount: 1,
+    }) === null,
     "an incomplete publication ledger was accepted as a complete public feed",
   );
 });
@@ -339,7 +390,7 @@ Deno.test("public Gallery items omit service-only references and originals", () 
   const item = toPublicGalleryItem({
     id: cursorValue.id,
     title: "Guild view",
-    caption: "A shared horizon",
+    caption: "A shared horizon\nSecond line\twith detail\rThird line",
     category: "scenery",
     categories: ["member-submissions", "scenery"],
     mimeType: "image/webp",
@@ -367,8 +418,277 @@ Deno.test("public Gallery items omit service-only references and originals", () 
     "bounded thumbnail was not preserved",
   );
   assert(
+    item.caption === "A shared horizon\nSecond line\twith detail\rThird line",
+    "ordinary multiline caption whitespace was not preserved",
+  );
+  assert(
     !serialized.includes("Mōchī Member") && !("uploader_display_name" in item),
     "member identity leaked into the anonymous Gallery item",
+  );
+});
+
+Deno.test("public Gallery text rejects unsafe controls without dropping ordinary multiline captions", () => {
+  const item = toPublicGalleryItem({
+    id: cursorValue.id,
+    title: "Unsafe\u0000title",
+    caption: "First line\nSecond line\twith detail\rThird line",
+    category: "scenery",
+    categories: ["member-submissions", "scenery"],
+    mimeType: "image/webp",
+    sizeBytes: 1000,
+    createdAt: cursorValue.createdAt,
+    reviewedAt: cursorValue.reviewedAt,
+    thumbnailSizeBytes: 100,
+    thumbnailWidth: 640,
+    thumbnailHeight: 400,
+  }, "https://example.invalid/bounded-thumbnail");
+
+  assert(item, "expected a valid public item");
+  assert(item.title === null, "unsafe title controls were retained");
+  assert(
+    item.caption === "First line\nSecond line\twith detail\rThird line",
+    "ordinary multiline caption whitespace was dropped",
+  );
+});
+
+Deno.test("legacy and schema-v2 response envelopes share the exact 64 KiB boundary", () => {
+  for (const representation of ["legacy", "schema-v2"] as const) {
+    const exact = responseAtByteLength(
+      representation,
+      GALLERY_PUBLIC_LIST_RESERVED_BYTES,
+    );
+    const oversized = responseAtByteLength(
+      representation,
+      GALLERY_PUBLIC_LIST_RESERVED_BYTES + 1,
+    );
+    assert(
+      serializeGalleryPublicListResponse(exact) !== null,
+      `${representation} response at the reservation boundary was rejected`,
+    );
+    assert(
+      serializeGalleryPublicListResponse(oversized) === null,
+      `${representation} response above the reservation boundary was accepted`,
+    );
+  }
+});
+
+Deno.test("bounded list responses fail closed without leaking page content or log fields", async () => {
+  const exact = responseAtByteLength(
+    "schema-v2",
+    GALLERY_PUBLIC_LIST_RESERVED_BYTES,
+  );
+  const accepted = buildGalleryPublicListResponse(exact, {
+    "Access-Control-Allow-Origin": "*",
+  });
+  assert(!accepted.overflowed, "exact-boundary response overflowed");
+  assertNumberEquals(
+    accepted.response.status,
+    200,
+    "exact response status drifted",
+  );
+  assert(
+    accepted.response.headers.get("cache-control") === "no-store",
+    "exact response lost no-store",
+  );
+
+  const sentinel = "private-caption-and-media-url-must-not-leak";
+  const oversized = responseAtByteLength(
+    "legacy",
+    GALLERY_PUBLIC_LIST_RESERVED_BYTES + 1,
+  );
+  (oversized.data as Record<string, unknown>).submissions = [{
+    caption: sentinel,
+    thumbnail_url: `https://gallery.example.test/${sentinel}`,
+  }];
+  const rejected = buildGalleryPublicListResponse(oversized, {
+    "Access-Control-Allow-Origin": "*",
+  });
+  assert(rejected.overflowed, "oversized response did not overflow");
+  assertNumberEquals(rejected.response.status, 503, "overflow status drifted");
+  assert(
+    rejected.response.headers.get("cache-control") === "no-store",
+    "overflow response lost no-store",
+  );
+  assert(
+    rejected.response.headers.get("content-type") === "application/json",
+    "overflow response content type drifted",
+  );
+  const overflowBody = await rejected.response.text();
+  assert(
+    !overflowBody.includes(sentinel),
+    "overflow response leaked page content",
+  );
+  assert(
+    overflowBody === JSON.stringify({
+      ok: false,
+      error: "approved_submission_page_unavailable",
+      message: "Member-submitted images are temporarily unavailable.",
+    }),
+    "overflow response body drifted",
+  );
+
+  const event = galleryPublicListOverflowEvent("legacy", 24);
+  assert(
+    JSON.stringify(Object.keys(event)) ===
+      JSON.stringify(["code", "representation", "itemCount"]),
+    "overflow log fields expanded",
+  );
+  assert(
+    !JSON.stringify(event).includes(sentinel),
+    "overflow log leaked page content",
+  );
+});
+
+Deno.test("public media URLs enforce one UTF-8-aware 512-byte HTTPS contract", () => {
+  const exact = asciiGalleryUrlAtByteLength(
+    GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
+  );
+  const oversized = asciiGalleryUrlAtByteLength(
+    GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES + 1,
+  );
+  assert(
+    safeGalleryPublicMediaUrl(exact) === exact,
+    "exact-boundary Gallery media URL was rejected",
+  );
+  assert(
+    safeGalleryPublicMediaUrl(oversized) === null,
+    "oversized ASCII Gallery media URL was accepted",
+  );
+
+  const prefix = "https://gallery.example.test/";
+  const multibyteOverflow = `${prefix}${
+    "é".repeat(
+      Math.floor(
+        (GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES - utf8ByteLength(prefix)) / 2,
+      ) +
+        1,
+    )
+  }`;
+  assert(
+    multibyteOverflow.length < GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES &&
+      utf8ByteLength(multibyteOverflow) > GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
+    "multibyte overflow fixture did not exercise byte-aware validation",
+  );
+  assert(
+    safeGalleryPublicMediaUrl(multibyteOverflow) === null,
+    "oversized multibyte Gallery media URL was accepted",
+  );
+
+  for (
+    const unsafe of [
+      "not-a-url",
+      "http://gallery.example.test/image.webp",
+      "https://user:password@gallery.example.test/image.webp",
+      "https://gallery.example.test/image.webp#private",
+      "https://gallery.example.test/unsafe\u0000control",
+      "https://gallery.example.test/unsafe\ud800surrogate",
+    ]
+  ) {
+    assert(
+      safeGalleryPublicMediaUrl(unsafe) === null,
+      `unsafe Gallery media URL was accepted: ${JSON.stringify(unsafe)}`,
+    );
+  }
+});
+
+Deno.test("maximum legal schema-v2 and legacy list responses fit the shared reservation", () => {
+  const maximumText = "\u0800";
+  const title = maximumText.repeat(80);
+  const caption = maximumText.repeat(300);
+  const maximumDate = `${new Date(Date.now() - 60_000).toUTCString()} (${
+    "a".repeat(48)
+  })`;
+  assert(
+    maximumDate.length === 80,
+    "maximum legal date did not reach its field bound",
+  );
+  const items = Array.from({ length: GALLERY_PUBLIC_PAGE_SIZE }, (_, index) => {
+    const id = `11111111-1111-4111-8111-${String(index + 1).padStart(12, "0")}`;
+    const thumbnailUrl = asciiGalleryUrlAtByteLength(
+      GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
+      String(index % 10),
+    );
+    const item = toPublicGalleryItem({
+      id,
+      title,
+      caption,
+      category: "gatherings",
+      categories: [
+        "member-submissions",
+        "portraits",
+        "gatherings",
+        "action",
+        "scenery",
+        "companions",
+      ],
+      mimeType: "image/webp",
+      sizeBytes: 2 * 1024 * 1024,
+      createdAt: maximumDate,
+      reviewedAt: maximumDate,
+      thumbnailSizeBytes: 80 * 1024,
+      thumbnailWidth: 720,
+      thumbnailHeight: 720,
+    }, thumbnailUrl);
+    assert(item, "maximum legal Gallery item was rejected");
+    return item;
+  });
+  const nextCursor = encodeGalleryCursor({
+    snapshotAt: maximumDate,
+    reviewedAt: maximumDate,
+    createdAt: maximumDate,
+    id: items.at(-1)?.id,
+    sort: "newest",
+    category: "gatherings",
+    query: maximumText.repeat(80),
+  });
+  assert(nextCursor, "maximum legal Gallery cursor was rejected");
+
+  const schemaV2Body = {
+    ok: true,
+    data: {
+      schemaVersion: 2,
+      items,
+      count: GALLERY_PUBLIC_PAGE_SIZE,
+      totalEligible: Number.MAX_SAFE_INTEGER,
+      facets: {
+        "member-submissions": Number.MAX_SAFE_INTEGER,
+        portraits: Number.MAX_SAFE_INTEGER,
+        gatherings: Number.MAX_SAFE_INTEGER,
+        action: Number.MAX_SAFE_INTEGER,
+        scenery: Number.MAX_SAFE_INTEGER,
+        companions: Number.MAX_SAFE_INTEGER,
+      },
+      hasMore: true,
+      nextCursor,
+      partial: false,
+      complete: false,
+      deliveryFailures: 0,
+      delivery: "bounded-edge-media",
+      cacheSeconds: 15,
+    },
+    message: "Member-submitted images loaded.",
+  };
+  assert(
+    serializeGalleryPublicListResponse(schemaV2Body),
+    "maximum legal schema-v2 Gallery response exceeded its reservation",
+  );
+
+  const submissions = items.map((item, index) => {
+    const fullUrl = asciiGalleryUrlAtByteLength(
+      GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
+      String((index + 1) % 10),
+    );
+    const legacyItem = toLegacyGalleryItem(item, fullUrl);
+    assert(legacyItem, "maximum legal legacy Gallery item was rejected");
+    return legacyItem;
+  });
+  assert(
+    serializeGalleryPublicListResponse({
+      ok: true,
+      data: { submissions, count: submissions.length },
+      message: "Member-submitted images loaded.",
+    }),
+    "maximum legal legacy Gallery response exceeded its reservation",
   );
 });
 
@@ -414,6 +734,33 @@ Deno.test("legacy Gallery items use metered Edge URLs without identity or paths"
   assert(
     toLegacyGalleryItem(publicItem, thumbnailUrl) === null,
     "legacy compatibility accepted identical thumbnail and full URLs",
+  );
+  const exactThumbnailUrl = asciiGalleryUrlAtByteLength(
+    GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
+    "1",
+  );
+  const exactFullUrl = asciiGalleryUrlAtByteLength(
+    GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES,
+    "2",
+  );
+  const exactPublicItem = {
+    ...publicItem,
+    thumbnail_url: exactThumbnailUrl,
+  };
+  assert(
+    toLegacyGalleryItem(exactPublicItem, exactFullUrl),
+    "legacy compatibility rejected exact-boundary media URLs",
+  );
+  assert(
+    toLegacyGalleryItem(
+      { ...publicItem, thumbnail_url: `${exactThumbnailUrl}a` },
+      exactFullUrl,
+    ) === null,
+    "legacy compatibility accepted an oversized thumbnail URL",
+  );
+  assert(
+    toLegacyGalleryItem(exactPublicItem, `${exactFullUrl}a`) === null,
+    "legacy compatibility accepted an oversized full URL",
   );
 });
 

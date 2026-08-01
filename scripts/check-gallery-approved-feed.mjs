@@ -368,7 +368,7 @@ if (galleryBrowser.includes("setRandomSeed") || galleryBrowser.includes("createR
   "toLegacyGalleryItem",
   "encodeGalleryCursor",
   'p_delivery_kind: "list"',
-  "p_reserved_bytes: 65536",
+  "p_reserved_bytes: GALLERY_PUBLIC_LIST_RESERVED_BYTES",
   "deliveryFailures",
   "partial: false",
   "deliveryFailures: 0",
@@ -417,11 +417,18 @@ assertMatches(
 assertMatches(
   "approved Gallery legacy browser response",
   approvedFeedFunction,
-  /if \(legacyListRequest\)[\s\S]*?toLegacyGalleryItem\([\s\S]*?publicMediaUrl\(supabaseUrl, "full", id\)[\s\S]*?data:\s*\{[\s\S]*?submissions,[\s\S]*?count: submissions\.length/,
+  /if \(legacyListRequest\)[\s\S]*?toLegacyGalleryItem\([\s\S]*?publicMediaUrl\(supabaseUrl, "full", id\)[\s\S]*?return boundedListResponse\(\s*\{[\s\S]*?data:\s*\{[\s\S]*?submissions,[\s\S]*?count: submissions\.length[\s\S]*?\},\s*"legacy",\s*submissions\.length,\s*\);/,
   "the exact legacy request must receive only mapped, quota-enforced Edge media URLs.",
 );
 
-const finalListResponseStart = approvedFeedFunction.lastIndexOf("return jsonResponse({\n    ok: true,");
+assertMatches(
+  "approved Gallery bounded response helper",
+  approvedFeedFunction,
+  /function boundedListResponse\([\s\S]*?buildGalleryPublicListResponse\(body, CORS_HEADERS\)[\s\S]*?if \(!result\.overflowed\) return result\.response;[\s\S]*?galleryPublicListOverflowEvent\(representation, itemCount\)[\s\S]*?return result\.response;/,
+  "both list representations must fail closed through one byte-bounded serializer and log only safe response metadata.",
+);
+
+const finalListResponseStart = approvedFeedFunction.lastIndexOf("return boundedListResponse(");
 const finalListResponse = finalListResponseStart >= 0
   ? approvedFeedFunction.slice(finalListResponseStart)
   : "";
@@ -431,6 +438,8 @@ assert(finalListResponseStart >= 0, "Approved Gallery list response: final respo
   "nextCursor,",
   'delivery: "bounded-edge-media"',
   "cacheSeconds: 15",
+  '"schema-v2",',
+  "items.length,",
 ].forEach((snippet) => assertIncludes("approved Gallery final list response", finalListResponse, snippet));
 [
   "full_url",
@@ -443,6 +452,8 @@ assert(finalListResponseStart >= 0, "Approved Gallery list response: final respo
 [
   "GALLERY_PUBLIC_SCHEMA_VERSION = 2",
   "GALLERY_PUBLIC_PAGE_SIZE = 24",
+  "GALLERY_PUBLIC_LIST_RESERVED_BYTES = 64 * 1024",
+  "GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES = 512",
   "GALLERY_PUBLIC_MAX_QUERY_LENGTH = 80",
   "GALLERY_PUBLIC_EVIDENCE_CACHE_TTL_MS = 15 * 1000",
   "GALLERY_PUBLIC_EVIDENCE_CACHE_MAX_ENTRIES = 32",
@@ -456,6 +467,12 @@ assert(finalListResponseStart >= 0, "Approved Gallery list response: final respo
   "parseGalleryDatabasePage",
   "parseGalleryDeliveryReservation",
   "isLegacyGalleryListRequest",
+  "safeGalleryPublicMediaUrl",
+  "serializeGalleryPublicListResponse",
+  "buildGalleryPublicListResponse",
+  "galleryPublicListOverflowEvent",
+  '"Cache-Control": "no-store"',
+  'error: "approved_submission_page_unavailable"',
   "toLegacyGalleryItem",
   'action: "list"',
   'action: "full"',
@@ -484,6 +501,11 @@ assert(finalListResponseStart >= 0, "Approved Gallery list response: final respo
   "atomic media reservations require exact bounded media evidence",
   "recognizes only the exact legacy empty-object request shape",
   "public Gallery items omit service-only references and originals",
+  "public Gallery text rejects unsafe controls without dropping ordinary multiline captions",
+  "legacy and schema-v2 response envelopes share the exact 64 KiB boundary",
+  "bounded list responses fail closed without leaking page content or log fields",
+  "public media URLs enforce one UTF-8-aware 512-byte HTTPS contract",
+  "maximum legal schema-v2 and legacy list responses fit the shared reservation",
   "legacy Gallery items use metered Edge URLs without identity or paths",
   'assert(!serialized.includes("StoragePath"), "raw Storage path leaked")',
   'serialized.includes("private-original")',

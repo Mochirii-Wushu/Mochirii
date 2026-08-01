@@ -135,6 +135,41 @@ const homeDoorsStyles = read("apps/web/app/styles/public-home-doors.css");
 const publicGalleryStyles = read("apps/web/app/styles/public-gallery.css");
 
 [
+  "GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES = 512",
+  "export function safeGalleryPublicMediaUrl",
+].forEach((snippet) => assertIncludes("Gallery public media URL contract", approvedPublicHelper, snippet));
+const publicResponseItemMatch = approvedPublicHelper.match(
+  /export function toPublicGalleryItem\([\s\S]*?^\}/m,
+);
+assert(Boolean(publicResponseItemMatch), "Gallery feed v2 public item serializer was not found.");
+if (publicResponseItemMatch) {
+  const responseItem = publicResponseItemMatch[0];
+  assertIncludes(
+    "Gallery feed v2 public item",
+    responseItem,
+    "const safeThumbnailUrl = safeGalleryPublicMediaUrl(thumbnailUrl);",
+  );
+  assertIncludes("Gallery feed v2 public item", responseItem, "thumbnail_url: safeThumbnailUrl,");
+}
+const legacyResponseItemMatch = approvedPublicHelper.match(
+  /export function toLegacyGalleryItem\([\s\S]*?^\}/m,
+);
+assert(Boolean(legacyResponseItemMatch), "Gallery legacy public item serializer was not found.");
+if (legacyResponseItemMatch) {
+  const responseItem = legacyResponseItemMatch[0];
+  assertIncludes(
+    "Gallery legacy public item",
+    responseItem,
+    "const thumbnailUrl = safeGalleryPublicMediaUrl(item.thumbnail_url);",
+  );
+  assertIncludes(
+    "Gallery legacy public item",
+    responseItem,
+    "const safeFullUrl = safeGalleryPublicMediaUrl(fullUrl);",
+  );
+}
+
+[
   'import { UniversalImageLightbox } from "@/components/UniversalImageLightbox";',
   "<UniversalImageLightbox",
   "previewSrc: openItem.image",
