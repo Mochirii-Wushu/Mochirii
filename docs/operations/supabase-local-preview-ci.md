@@ -99,44 +99,53 @@ npm exec -- supabase stop --no-backup --workdir $previewRoot
 Use a new temporary path/project ID for each concurrent run. Remove only the
 directory created for that run after `supabase stop` succeeds.
 
-## Approval-Gated Provider Transition
+## Completed Required-Check Transition
 
-The source workflow does not change GitHub or Supabase settings. After this
-workflow has merged and produced a successful exact-main check, use this
-rollback-safe sequence under a separate exact provider approval:
+The source workflow itself changes no provider setting. Under a separate exact
+owner approval, the Website ruleset transition completed on 2026-08-01:
 
-1. Capture the Website ruleset, its required checks, the Supabase GitHub
-   integration settings, and all existing Preview branches without secrets.
-2. In the Supabase GitHub integration, disable **Automatic branching** only.
-   Preserve **Deploy to production**, production branch `main`, working
-   directory `.`, and every other setting. This prevents new hosted PR
-   branches while retaining the protected-main migration/Function release
-   path documented by Supabase.
-3. Confirm a fresh PR reports `supabase-local-preview` at its exact head.
-4. In the GitHub ruleset, add required check `supabase-local-preview`, then
-   remove required check `Supabase Preview`. Preserve reviews, current-head
-   enforcement, all other required checks, and bypass rules.
-5. Rebase the selected transition PR onto the new `main`, require every
-   exact-head check, and use the deterministic no-op result when its final diff
-   has no Supabase-owned path.
-6. Inventory inactive Supabase branches and their linked PRs. Delete only
-   proven-stale branches under a separate target-specific approval; never
-   infer that an inactive branch is disposable.
+- strict current-head enforcement remains enabled;
+- required contexts are exactly `validate`, `validate-next`, `Vercel`,
+  `supabase-local-preview`, `validate-theme`, and `validate-social`;
+- hosted `Supabase Preview` is no longer required; and
+- deletion, non-fast-forward, review, bypass, and unrelated ruleset behavior
+  were preserved.
 
-Do not disable the production deployment option, disconnect GitHub, change the
-project working directory, or manually deploy Supabase as part of this
-transition.
+The Supabase integration was not modified. Automatic Branching was already
+disabled and plan-locked in the dated dashboard readback, while protected-main
+production deployment remained enabled for branch `main` with working
+directory `.`. Those provider observations are not evergreen; re-read them
+before every production-bound merge.
+
+The 2026-08-01 dashboard snapshot also showed two non-default branch records.
+Their runtime and cost state was not established, so they are not a cleanup
+allowlist. Preserve them until their linked PRs, source, migration evidence, and
+rollback impact are proved and the owner separately approves exact deletion.
+
+The current committed integration candidate is
+`bdbe9a7e8fb47646588754cf6fc1e4f6a15dc146` (tree
+`5ff295a4f5df0525a362dca5483243e7bfe3c9f9`). It contains 53 migrations and
+49 configured Functions with 31 `verify_jwt=true` and 18 false. A unique
+non-shared local run applied 53/53 migrations, passed 603/603 pgTAP assertions,
+reported zero warning-level database lint or security findings and zero
+unindexed foreign keys, and classified 60 `unused_index` findings as INFO-only
+fresh-empty-database observations. This evidence does not prove a hosted
+Preview or production release.
 
 ### Rollback
 
 If the local context fails to report reliably, do not bypass it. Restore in
 this order under exact provider approval:
 
-1. Re-enable Supabase Automatic branching with its captured settings.
-2. Open or refresh a harmless review branch and prove an exact-head
+1. Capture the current ruleset and Supabase integration state without secrets.
+2. If the current plan exposes a safe Automatic Branching control, enable it
+   only under a separate exact Supabase approval; otherwise stop because a
+   hosted Preview branch cannot be assumed available.
+3. Open or refresh a harmless review branch and prove an exact-head hosted
    `Supabase Preview` succeeds.
-3. Re-add `Supabase Preview` to the GitHub required-check set.
-4. Only after provider Preview is required and green, remove the local context
+4. Re-add `Supabase Preview` to the GitHub required-check set while preserving
+   strict head enforcement and every unrelated rule.
+5. Only after provider Preview is required and green, remove the local context
    from the required set if desired.
 
 Source rollback is a focused revert PR. Never revert or delete an already

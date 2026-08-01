@@ -1,10 +1,12 @@
 # Current Mochirii State
 
-Updated: 2026-07-30 PDT
+Updated: 2026-08-01 PDT
 
-This no-secret file records the current hosted and repository state. Update it
-after a completed release or ownership change; do not place credentials,
-provider exports, customer data, signed URLs, or mutable access details here.
+This no-secret file records current source truth and dated provider
+observations. Update it after a completed release or ownership change; do not
+place credentials, provider exports, customer data, signed URLs, or mutable
+access details here. Hosted facts are snapshots and must be refreshed before a
+release decision.
 
 ## Canonical Sources
 
@@ -74,12 +76,17 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   setting and does not deploy the local candidate.
 - Supabase project `deyvmtncimmcinldjyqe` remains the hosted Auth, Postgres, RLS,
   and Edge Function backend.
-- The last verified hosted baseline contains 34 applied migrations and exactly
-  33 ACTIVE Edge Functions with 20 `verify_jwt=true` and 13 false. The larger
-  local integration candidate described below has not been deployed, so its
-  50-migration and 46-function source inventories are not hosted-state claims.
-- `shop.mochirii.com` remains password-protected. Payments and checkout remain
-  disabled. Theme `141514408011` remains unpublished.
+- The last verified hosted baseline, recorded before the 2026-08-01 local
+  candidate, contained 34 applied migrations and exactly 33 ACTIVE Edge
+  Functions with 20 `verify_jwt=true` and 13 false. It is dated evidence and
+  requires a fresh read-only provider readback before release. The larger local
+  integration candidate described below has not been deployed; its 53-migration
+  and 49-function inventories are not hosted-state claims.
+- The 2026-07-18 authenticated Shopify readback recorded the storefront as
+  password-protected and candidate theme `141514408011` as unpublished.
+  Source keeps the candidate theme checkout CTA absent; Shopify checkout itself
+  remains provider-controlled. A fresh authenticated readback is required
+  before any current-state or release claim.
 - `social.mochirii.com` is assigned to the existing single DigitalOcean
   Droplet with Spaces-backed media. Registration is closed and ActivityPub is
   disabled. Public read-only probes at 2026-07-30T02:25Z returned Cloudflare
@@ -141,41 +148,41 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
   activation, or first genuine post remains separately approval-gated and
   requires current provider readback.
 
-GitHub protects `main` with strict required checks for `validate`,
-`validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The 2026-07-30 GitHub readback finds five open Website pull
-requests: #536, #538, and the stacked draft Meta PRs #539, #540, and #541.
-Mochi Pets PR #4 is also open; Social Mobile has no open pull request. The
-authoritative local union has not been pushed and has no pull request, so none
-of the open Website pull requests may be closed as superseded until exact
-replacement parity, review, and checks are proved. Website currently reports
-zero open Dependabot, code-scanning, and secret-scanning alerts. Social Mobile
-has one open high-severity `brace-expansion` development-tool advisory tracked
-by issue #9. Alert APIs are unavailable for the other private repositories on
-the current plan; unavailable is not recorded as zero. GitHub private
-vulnerability reporting is enabled for Website as of the 2026-07-31 readback.
-Both Website and Social source declare the repository's private vulnerability
-report form as the operational `security.txt` contact while retaining the
-GitHub security policy URL. The general support mailbox is not used as a
-vulnerability-reporting fallback.
+GitHub protects `main` with strict current-head enforcement and exactly these
+required contexts: `validate`, `validate-next`, `Vercel`,
+`supabase-local-preview`, `validate-theme`, and `validate-social`. The
+source-owned local Preview context has replaced hosted `Supabase Preview` as a
+required check. Supabase Automatic Branching was not changed during the ruleset
+transition and remains disabled and plan-locked in the dated dashboard
+readback. The 2026-08-01 GitHub snapshot finds 15 open Website pull requests:
+#536 and #538 through #551. Social and Social Mobile have no open PR, Mochi Pets
+PR #4 is open and unstable, and Reaper and Forums have no open PR. This is a
+dated snapshot, not a cleanup allowlist; every head, check, review, and
+replacement-parity claim must be refreshed before merge or closure. GitHub
+private vulnerability reporting is enabled for Website as of the 2026-07-31
+readback. Both Website and current Social source point to the Website
+repository's private vulnerability report form as the operational
+`security.txt` contact while retaining the GitHub security policy URL. The
+general support mailbox is not used as a vulnerability-reporting fallback.
 
 ## Local Full-Stack Integration Candidate
 
-- The clean source union through validated implementation head
-  `54962b6aee8ee1a602fbee376f62c098b949e1df` (tree
-  `ec31270c4300ff989fff5621510cd8e97ab73645`) contains exactly 50 migrations
-  and 46 functions declared in `supabase/config.toml`, with a source-expected
-  JWT split of 29 `verify_jwt=true` / 17 false. These figures describe local
-  source only; hosted production remains at the 34-migration, 33-function,
-  20/13 baseline until a separately reviewed and authorized release succeeds.
-- A uniquely named, non-shared local Supabase project reset all 50 migrations
-  and passed 521 of 521 top-level pgTAP assertions. Warning-level database lint
-  and strict security/performance advisor results were empty. Fresh empty-
-  database `unused_index` observations are not deletion evidence. The union
-  adds an explicit deny policy for the private raffle nonce table and an index
-  for the reviewed Gallery derivative foreign key.
-- The same isolated run did not use the quarantined shared local Supabase port
-  range and did not contact the hosted project. Cleanup proved no isolated
+- The validated predecessor source union is
+  `bdbe9a7e8fb47646588754cf6fc1e4f6a15dc146` (tree
+  `5ff295a4f5df0525a362dca5483243e7bfe3c9f9`). At the 2026-08-01 readback it
+  is based on `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b`,
+  114 commits ahead and zero behind before the successor documentation,
+  storefront-readiness, and official-profile packet. It contains exactly 53 migrations and 49
+  functions declared in `supabase/config.toml`, with a source-expected JWT
+  split of 31 `verify_jwt=true` / 18 false. These figures describe local source
+  only; the dated hosted baseline requires fresh readback before release.
+- A uniquely named, non-shared local Supabase project reset all 53 migrations
+  and passed 603 of 603 pgTAP assertions. Warning-level database lint and
+  security findings were zero, and the foreign-key audit found zero unindexed
+  foreign keys. Sixty `unused_index` INFO observations on a fresh empty database
+  are not deletion evidence.
+- The same isolated run did not use shared local Supabase ports 54321 through
+  54327 and did not contact the hosted project. Cleanup proved no isolated
   containers, volumes, networks, listeners, or registered worktree remained.
 - Server-side Supabase requests now use a bounded five-second transport that
   composes caller and request cancellation, cleans up timers and listeners, and
@@ -199,20 +206,26 @@ vulnerability-reporting fallback.
   executable contract covers 50 active Vue `v-html` sinks, 14 imperative DOM
   boundaries, and 45 exact raw-Blade outputs; all 27 formerly open boundaries
   are closed.
-- The union retains the source-only Meta publishing packet as a validated
-  subset: its isolated 46-migration reset, 109 focused pgTAP assertions, and
-  recorded manifest digest remain immutable evidence. Both publishing flags
-  remain false and no post was created. The broader 50/521 union result
-  supplements rather than rewrites that subset record.
-- The union has no remote branch or pull request and has caused no Vercel,
+- The union retains the source-only Meta and event-social publishing packets as
+  validated subsets. Publication templates and provider flags remain disabled;
+  no public post was created. The earlier Meta subset's isolated 46-migration
+  reset, 109 focused pgTAP assertions, and recorded manifest digest remain
+  immutable evidence. The broader 53/603 union result supplements rather than
+  rewrites that subset record.
+- The union branch has not been pushed and has no pull request. It has caused
+  no Vercel,
   Supabase, DigitalOcean, Meta, Discord, Shopify, Apple, Unity, or other
   provider change. Exact provider previews, accountable review, protected-main
   release authority, source-to-provider readback, and rollback evidence remain
   future gates.
-- Exact local verification at that head passed the complete repository suite,
-  Node 22.23.1/npm 10.9.8/Deno 2.9.4 toolchain contract, Docker 29.6.1 daemon
-  readback, all 266 public PNG, JPEG, GIF, and WebP decodes, Web lint, and the
-  Next 16.2.11 production build. Social passed 219 PHP tests with 1,488
+- At the exact predecessor head, the clean root install and Node 22.23.1/npm
+  10.9.8/Deno 2.9.4 toolchain contract passed. At the current successor
+  documentation/storefront-readiness/official-profile state, the complete repository suite,
+  `git diff --check`, Web toolchain check, Web lint, and the Next 16.2.11
+  production build also passed. Earlier broader validation on the unchanged
+  application surface covered the Docker 29.6.1 daemon readback and all 266
+  public PNG, JPEG, GIF, and WebP decodes.
+  Social passed 219 PHP tests with 1,488
   assertions, the 32-test focused security lane, Composer audit with no known
   advisories, the production dependency audit with no high or critical
   finding, 62 generated JavaScript syntax checks, and CSS semantics across 7
@@ -227,6 +240,11 @@ vulnerability-reporting fallback.
   complete route matrix passed 312/312 checks in each of Chromium, Firefox, and
   WebKit with no horizontal overflow, footer clipping, focus failure, or
   reduced-motion failure.
+- The successor storefront readiness ledger remains fail-closed and authorizes
+  no Shopify upload, theme publication, checkout, payment, or provider
+  mutation. The official-profile contract pins exact destinations, surfaces,
+  local asset hashes, accessible names, and zero provider requests before a
+  click; its cross-browser responsive matrix passed 28/28 cases.
 - The clean Mobile successor is
   `b417daaf546395ded535b3beebde5d74b459c7dd` (tree
   `e29fe53a69107df702525bfb5d8bdc7417c12872`). It remains local and unpushed;
@@ -308,7 +326,7 @@ vulnerability-reporting fallback.
   `main` as `075937a30a9509faa189e9b1917a2ad9b847c7b0`. It refreshes expired
   Discord role evidence on demand so an otherwise valid member is not stranded
   at Social consent when the bounded verification window expires. This merged
-  historical release does not authorize deployment of the newer 46-function
+  historical release does not authorize deployment of the newer 49-function
   local union or any DigitalOcean runtime change.
 - The approved Packet E write set only the server-side
   `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding as Sensitive for Vercel Preview and
@@ -463,9 +481,12 @@ generated archives belong only in ignored `.artifacts/operations`.
 - Payment setup and payment/order-lifecycle testing are intentionally the final
   readiness phase. They do not begin until every non-payment gate is Ready and
   the owner gives exact approval for that provider action.
-- Storefront password protection and disabled checkout remain in effect, and
-  theme `141514408011` remains unpublished. Publication, password removal,
-  purchases, real orders, and public launch remain separately approval-gated.
+- Launch policy requires storefront password protection, the theme checkout
+  CTA to remain absent, and theme `141514408011` to remain unpublished. The
+  current provider state requires fresh authenticated readback; Shopify
+  checkout is provider-controlled and is not claimed server-disabled here.
+  Publication, password removal, purchases, real orders, and public launch
+  remain separately approval-gated.
 
 ## Deferred
 

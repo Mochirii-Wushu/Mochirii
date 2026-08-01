@@ -19,7 +19,12 @@ import { BodyPageMarker } from "@/components/public-pages/BodyPageMarker";
 import { SpotlightWinnerTitle } from "@/components/public-pages/SpotlightWinnerTitle";
 import { StaticImage } from "@/components/public-pages/common";
 import { monthlyScheduleDate } from "@/lib/guild-schedule";
-import { DISCORD_INVITE_URL, SITE_ORIGIN, SOCIAL_HOST } from "@/lib/public-urls";
+import {
+  DISCORD_INVITE_URL,
+  ORGANIZATION_PROFILE_URLS,
+  SITE_ORIGIN,
+  SOCIAL_HOST,
+} from "@/lib/public-urls";
 import { SITE_DESCRIPTION, SITE_LANGUAGE } from "@/lib/site-metadata";
 
 export const revalidate = 3600;
@@ -58,7 +63,7 @@ const homeStructuredData = {
         url: `${SITE_ORIGIN}/assets/img/brand/social-card.png`,
       },
       areaServed: "Asia Pacific",
-      sameAs: [SOCIAL_HOST],
+      sameAs: [SOCIAL_HOST, ...ORGANIZATION_PROFILE_URLS],
     },
   ],
 };

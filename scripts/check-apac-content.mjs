@@ -114,7 +114,7 @@ assertIncludes("Next Home", homePage, "homeData.hero.subtitle");
 assertIncludes("Next Home", homePage, 'id="home-structured-data"');
 assertIncludes("Next Home", homePage, '"@type": "WebSite"');
 assertIncludes("Next Home", homePage, '"@type": "Organization"');
-assertIncludes("Next Home", homePage, 'sameAs: [SOCIAL_HOST]');
+assertIncludes("Next Home", homePage, 'sameAs: [SOCIAL_HOST, ...ORGANIZATION_PROFILE_URLS]');
 assertIncludes("Next Home", homePage, 'replace(/</g, "\\\\u003c")');
 
 const footerComponent = read("apps/web/components/SiteFooter.tsx");

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { closeSync, fstatSync, openSync, readSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import {
@@ -14,6 +15,12 @@ const assetRoots = [
 ];
 const largeThreshold = Number(process.env.ASSET_LARGE_BYTES || 1_000_000);
 const strict = process.env.STRICT_ASSETS === "1";
+const reviewedVendorAssetHashes = new Map([
+  [
+    "apps/web/public/assets/social-profiles/facebook-logo-secondary.png",
+    "EED4F69A017B533E7115397E47B6BA75077D0AF5FB13369C0C5E819694CEEF57",
+  ],
+]);
 
 function walk(dir) {
   const out = [];
@@ -66,7 +73,15 @@ for (const file of files) {
   const maximumBytes = maximumAssetFormatBytes(extension);
   if (maximumBytes !== null) {
     try {
-      validateAssetFormat(extension, readBoundedRegularFile(file, maximumBytes));
+      const bytes = readBoundedRegularFile(file, maximumBytes);
+      const relativePath = rel(file);
+      const reviewedHash = reviewedVendorAssetHashes.get(relativePath);
+      if (reviewedHash) {
+        const actualHash = createHash("sha256").update(bytes).digest("hex").toUpperCase();
+        if (actualHash !== reviewedHash) throw new Error("reviewed vendor asset hash drifted");
+      } else {
+        validateAssetFormat(extension, bytes);
+      }
     } catch (error) {
       malformedFiles.push([rel(file), error instanceof Error ? error.message : String(error)]);
     }

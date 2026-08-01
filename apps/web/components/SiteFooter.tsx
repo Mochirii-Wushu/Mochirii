@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { OfficialGuildProfiles } from "@/components/OfficialGuildProfiles";
 import type { HeaderAuthState } from "@/components/site-header/header-navigation";
 import { SpinnerViewerNavLink } from "@/components/site-header/spinner-viewer-nav-link";
 import {
   DISCORD_INVITE_URL,
-  OFFICIAL_GUILD_CHANNELS,
   SITE_DISPLAY_NAME,
   SOCIAL_HOST,
 } from "@/lib/public-urls";
@@ -39,12 +39,6 @@ const updateLinks = [
   { href: "/events", label: "Events" },
   { href: "/raffle", label: "Raffle" },
 ] satisfies FooterLink[];
-
-const channelLinks = OFFICIAL_GUILD_CHANNELS.map((link) => ({
-  ...link,
-  external: true,
-  newTab: true,
-})) satisfies FooterLink[];
 
 function FooterColumn({
   title,
@@ -147,7 +141,7 @@ export function SiteFooter({
                 />
               ) : null}
             </FooterColumn>
-            <FooterColumn title="Channels" links={channelLinks} />
+            <OfficialGuildProfiles placement="footer" />
           </div>
         </div>
 

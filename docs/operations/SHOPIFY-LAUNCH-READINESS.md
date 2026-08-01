@@ -1,6 +1,6 @@
 # Shopify Opening Readiness
 
-Updated: 2026-07-29 PDT
+Updated: 2026-08-01 PDT
 
 Status: **BLOCKED — the launch foundation and independently reviewed local
 source hardening are reconciled and locally revalidated; accountable human
@@ -71,6 +71,13 @@ detail, or credential here.
 Generated Shopify readbacks, screenshots, logs, exports, and rollback captures
 belong in the ignored .artifacts/operations/shopify boundary. A public status
 may point to a sanitized capture ID, but not to secret-bearing output.
+
+The no-secret machine-readable summary at
+[`shopify-launch-readiness.v1.json`](./shopify-launch-readiness.v1.json) mirrors
+the twenty-product counts, contract states, checklist dispositions, approval
+gates, and terminal Phase 4 evidence ownership in this ledger. The repository
+check rejects drift between those records. Neither the summary nor a passing
+parity check can make a product, provider, payment, or publication gate Ready.
 
 ## Reconciliation Decisions
 
@@ -393,6 +400,24 @@ All items in this section must be Ready before payment setup begins.
 | E — Release and rollback preparation | Gate D Ready | QA-07 through QA-09 Ready; every out-of-scope provider change separately approved | Blocked |
 | F — Final payment setup and order lifecycle | Every non-payment gate Ready | Payment verification and required test-order matrix pass; test mode disabled | Intentionally deferred final phase |
 | G — Public soft launch | Gate F Ready | Exact publication/password-removal approval and successful release smoke | Blocked |
+
+## Terminal Phase 4 Evidence Map
+
+This table assigns every required end-to-end evidence class to an existing
+ledger owner. A row remains Blocked until its owning checklist item or gate is
+Ready with admissible terminal evidence. Gate F remains intentionally deferred;
+that sequencing decision does not make its evidence Ready.
+
+| Evidence class | Accountable evidence owner | Current disposition |
+| --- | --- | --- |
+| `browse-search-collections` | QA-03 | Blocked |
+| `product-variant-pricing` | Gate A and CF-01 | Blocked |
+| `availability-inventory-fulfillment` | CF-02 and CF-03 | Blocked |
+| `cart-errors-cancel-returns` | CF-05 and QA-03 | Blocked |
+| `checkout-payment-order-lifecycle` | Gate F | Blocked |
+| `webhook-authenticity-replay-idempotency-retries-redaction` | Gate F provider integration | Blocked |
+| `responsive-accessibility` | QA-04 | Blocked |
+| `cache-privacy-security-performance` | PS-01 through PS-05 and QA-05 through QA-06 | Blocked |
 
 Updating a checklist or ledger status is a documentation change, not provider
 authorization. Every provider mutation packet must name the exact store,

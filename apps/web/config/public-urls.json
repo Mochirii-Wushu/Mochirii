@@ -4,26 +4,51 @@
   "socialHost": "https://social.mochirii.com",
   "discordInviteUrl": "https://discord.com/invite/dPafqMwWPK",
   "supabaseProjectRef": "deyvmtncimmcinldjyqe",
-  "officialGuildChannels": {
-    "facebookPage": {
-      "label": "Facebook Page",
-      "href": "https://www.facebook.com/mochiriiguildpage"
+  "officialGuildProfiles": [
+    {
+      "id": "facebook-page",
+      "label": "Facebook",
+      "accountLabel": "Mōchirīī Guild Page",
+      "href": "https://www.facebook.com/mochiriiguildpage",
+      "surfaces": ["header", "footer"],
+      "organizationIdentity": true,
+      "markAsset": "/assets/social-profiles/facebook-logo-secondary.png"
     },
-    "facebookGroup": {
-      "label": "Facebook Group",
-      "href": "https://www.facebook.com/groups/mochiriiguild"
-    },
-    "instagram": {
+    {
+      "id": "instagram",
       "label": "Instagram",
-      "href": "https://www.instagram.com/mochirii_guild/"
+      "accountLabel": "@mochirii_guild",
+      "href": "https://www.instagram.com/mochirii_guild",
+      "surfaces": ["header", "footer"],
+      "organizationIdentity": true,
+      "markAsset": "/assets/social-profiles/instagram-glyph-white.svg"
     },
-    "tiktok": {
+    {
+      "id": "tiktok",
       "label": "TikTok",
-      "href": "https://www.tiktok.com/@mochirii_guild"
+      "accountLabel": "@mochiriiguild",
+      "href": "https://www.tiktok.com/@mochiriiguild",
+      "surfaces": ["header", "footer"],
+      "organizationIdentity": true,
+      "markAsset": null
     },
-    "twitch": {
+    {
+      "id": "facebook-group",
+      "label": "Facebook Group",
+      "accountLabel": "Mōchirīī Guild",
+      "href": "https://www.facebook.com/groups/mochiriiguild",
+      "surfaces": ["footer"],
+      "organizationIdentity": false,
+      "markAsset": "/assets/social-profiles/facebook-logo-secondary.png"
+    },
+    {
+      "id": "twitch",
       "label": "Twitch",
-      "href": "https://www.twitch.tv/mochiriiguild"
+      "accountLabel": "@mochiriiguild",
+      "href": "https://www.twitch.tv/mochiriiguild",
+      "surfaces": ["footer"],
+      "organizationIdentity": true,
+      "markAsset": null
     }
-  }
+  ]
 }
