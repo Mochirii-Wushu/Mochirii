@@ -1,11 +1,13 @@
-import { createHash } from "node:crypto";
 import { closeSync, fstatSync, openSync, readSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import {
   assertAssetValidatorCanaries,
   maximumAssetFormatBytes,
-  validateAssetFormat,
 } from "./lib/asset-format-validation.mjs";
+import {
+  REVIEWED_VENDOR_ASSET_PATHS,
+  validatePublicAssetWithReviewedVendorPolicy,
+} from "./lib/reviewed-vendor-assets.mjs";
 
 const root = process.cwd();
 const assetRoots = [
@@ -15,12 +17,6 @@ const assetRoots = [
 ];
 const largeThreshold = Number(process.env.ASSET_LARGE_BYTES || 1_000_000);
 const strict = process.env.STRICT_ASSETS === "1";
-const reviewedVendorAssetHashes = new Map([
-  [
-    "apps/web/public/assets/social-profiles/facebook-logo-secondary.png",
-    "EED4F69A017B533E7115397E47B6BA75077D0AF5FB13369C0C5E819694CEEF57",
-  ],
-]);
 
 function walk(dir) {
   const out = [];
@@ -62,6 +58,7 @@ function readBoundedRegularFile(file, maximumBytes) {
 const files = assetRoots.flatMap((assetRoot) => walk(assetRoot));
 const malformedFiles = [];
 const largeFiles = [];
+const reviewedVendorAssetsSeen = new Set();
 
 assertAssetValidatorCanaries();
 
@@ -75,16 +72,17 @@ for (const file of files) {
     try {
       const bytes = readBoundedRegularFile(file, maximumBytes);
       const relativePath = rel(file);
-      const reviewedHash = reviewedVendorAssetHashes.get(relativePath);
-      if (reviewedHash) {
-        const actualHash = createHash("sha256").update(bytes).digest("hex").toUpperCase();
-        if (actualHash !== reviewedHash) throw new Error("reviewed vendor asset hash drifted");
-      } else {
-        validateAssetFormat(extension, bytes);
-      }
+      const { reviewedVendor } = validatePublicAssetWithReviewedVendorPolicy(relativePath, extension, bytes);
+      if (reviewedVendor) reviewedVendorAssetsSeen.add(relativePath);
     } catch (error) {
       malformedFiles.push([rel(file), error instanceof Error ? error.message : String(error)]);
     }
+  }
+}
+
+for (const relativePath of REVIEWED_VENDOR_ASSET_PATHS) {
+  if (!reviewedVendorAssetsSeen.has(relativePath)) {
+    malformedFiles.push([relativePath, "reviewed vendor asset is missing from the owned public asset trees"]);
   }
 }
 

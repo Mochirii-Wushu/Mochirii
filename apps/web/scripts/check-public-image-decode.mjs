@@ -7,6 +7,11 @@ import {
   maximumAssetFormatBytes,
   validateAssetFormat,
 } from "../../../scripts/lib/asset-format-validation.mjs";
+import {
+  assertReviewedVendorDecodedDimensions,
+  REVIEWED_VENDOR_ASSET_PATHS,
+  validatePublicAssetWithReviewedVendorPolicy,
+} from "../../../scripts/lib/reviewed-vendor-assets.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(scriptDirectory, "..");
@@ -261,6 +266,7 @@ const files = publicRoots
   .filter((file) => decodedExtensions.has(extname(file).toLowerCase()));
 if (files.length > maximumMediaFiles) throw new Error(`Public media trees exceed the ${maximumMediaFiles}-file decode bound`);
 const failures = [];
+const reviewedVendorAssetsSeen = new Set();
 
 for (const file of files) {
   const extension = extname(file).toLowerCase();
@@ -268,7 +274,9 @@ for (const file of files) {
     const maximumBytes = maximumAssetFormatBytes(extension);
     if (maximumBytes === null) throw new Error(`no structural size policy exists for ${extension}`);
     const data = readBoundedRegularFile(file, maximumBytes);
-    const structural = validateAssetFormat(extension, data);
+    const relativePath = displayPath(file);
+    const { reviewedVendor, structural } = validatePublicAssetWithReviewedVendorPolicy(relativePath, extension, data);
+    if (reviewedVendor) reviewedVendorAssetsSeen.add(relativePath);
     if (structural === null) throw new Error(`no structural validator exists for ${extension}`);
 
     if (extension === ".mp3") {
@@ -281,12 +289,20 @@ for (const file of files) {
         throw new Error(`no dimension-bearing structural validator exists for ${extension}`);
       }
       const decoded = await decodeImage(data, mimeTypes.get(extension));
-      if (decoded.width !== structural.width || decoded.height !== structural.height) {
+      if (reviewedVendor) {
+        assertReviewedVendorDecodedDimensions(relativePath, decoded);
+      } else if (decoded.width !== structural.width || decoded.height !== structural.height) {
         throw new Error(`decoded dimensions ${decoded.width}x${decoded.height} disagree with container ${structural.width}x${structural.height}`);
       }
     }
   } catch (error) {
     failures.push(`${displayPath(file)}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+for (const relativePath of REVIEWED_VENDOR_ASSET_PATHS) {
+  if (!reviewedVendorAssetsSeen.has(relativePath)) {
+    failures.push(`${relativePath}: reviewed vendor asset is missing from the public media decode inventory`);
   }
 }
 
