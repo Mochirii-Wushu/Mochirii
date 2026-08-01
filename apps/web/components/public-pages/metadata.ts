@@ -115,7 +115,7 @@ const pageMeta: Record<
   mochiPets: {
     title: "Mochi Pets • Mōchirīī Guild World",
     description:
-      "A shared 3D Mōchirīī guild home beyond the Jianghu, bringing members together with a Mochi companion of their own across iPhone and desktop.",
+      "A future shared 3D Mōchirīī guild home beyond the Jianghu, planned to bring members together with a Mochi companion of their own on iOS and desktop.",
     path: "/games/mochi-pets",
     image: "/assets/img/mochi-pets/gate-arrival.webp",
   },
