@@ -432,6 +432,7 @@ export async function renderEventSocialAssets({
   outputPublicRoot = path.join(repositoryRoot, "apps", "web", "public"),
   confirmTextFreeMasters = false,
   confirmCanonicalPublicWrite = false,
+  allowPlatformSpecificTemporaryOutputs = false,
   versionLabel = "event-social",
 }) {
   validateEventSocialManifest(manifest, schedule, repositoryRoot, {
@@ -440,6 +441,10 @@ export async function renderEventSocialAssets({
   const events = resolveRenderEvents(manifest, eventIds);
   invariant(confirmTextFreeMasters, "Rendering requires confirmTextFreeMasters=true after visual review for text, links, QR codes, and third-party marks.");
   const output = assertOutputRoot(outputPublicRoot, confirmCanonicalPublicWrite);
+  invariant(
+    !allowPlatformSpecificTemporaryOutputs || !output.canonical,
+    "Platform-specific temporary outputs cannot target the canonical public root.",
+  );
   if (output.canonical) {
     invariant(events.length === EXPECTED_EVENT_MASTER_COUNT, "Canonical public rendering must include all eight event types.");
   }
@@ -503,10 +508,12 @@ export async function renderEventSocialAssets({
         platform,
         outputSha256,
       );
-      invariant(
-        master.event.platformAssets[platform] === assetPath,
-        `${master.event.id}.${platform} manifest path does not contain the full rendered SHA-256.`,
-      );
+      if (!allowPlatformSpecificTemporaryOutputs) {
+        invariant(
+          master.event.platformAssets[platform] === assetPath,
+          `${master.event.id}.${platform} manifest path does not contain the full rendered SHA-256.`,
+        );
+      }
       const file = resolveOutputFile(output.resolved, assetPath, `${master.event.id}.${platform} output`);
       writeStableFile(file, buffer);
       outputs.push(Object.freeze({

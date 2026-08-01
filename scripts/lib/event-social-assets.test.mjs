@@ -34,6 +34,7 @@ test("renderer is deterministic, local-font-bound, static, and platform-native",
       schedule,
       eventIds: ["monthly-gathering"],
       confirmTextFreeMasters: true,
+      allowPlatformSpecificTemporaryOutputs: true,
     };
     const first = await renderEventSocialAssets({ ...options, outputPublicRoot: firstRoot });
     const second = await renderEventSocialAssets({ ...options, outputPublicRoot: secondRoot });
@@ -83,6 +84,17 @@ test("canonical public writes and text-free review require explicit confirmation
     renderEventSocialAssets({ manifest, schedule, eventIds: ["monthly-gathering"], outputPublicRoot: canonicalPublic, confirmTextFreeMasters: true }),
     /confirmCanonicalPublicWrite=true/u,
   );
+  await assert.rejects(
+    renderEventSocialAssets({
+      manifest,
+      schedule,
+      outputPublicRoot: canonicalPublic,
+      confirmTextFreeMasters: true,
+      confirmCanonicalPublicWrite: true,
+      allowPlatformSpecificTemporaryOutputs: true,
+    }),
+    /cannot target the canonical public root/u,
+  );
 });
 
 test("rendered bytes must match the manifest's full-SHA-256 output path", async () => {
@@ -116,6 +128,7 @@ test("renderer refuses to replace changed content-addressed output bytes", async
     eventIds: ["monthly-gathering"],
     outputPublicRoot: outputRoot,
     confirmTextFreeMasters: true,
+    allowPlatformSpecificTemporaryOutputs: true,
   };
   try {
     const report = await renderEventSocialAssets(options);
