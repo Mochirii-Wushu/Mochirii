@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
+import { findSecretEnvironmentAssignments } from "./lib/supabase-secret-assignment-scanner.mjs";
 
 const root = process.cwd();
 const allowedEnvFiles = new Set([
@@ -53,32 +54,6 @@ const strongSecretPatterns = [
   },
 ];
 
-const secretEnvironmentName =
-  "[A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|SERVICE_ROLE_KEY|DATABASE_URL|CLIENT_SECRET|WEBHOOK)[A-Z0-9_]*";
-const shellAssignmentValue = String.raw`(?:"[^"\r\n]*"|'[^'\r\n]*'|\`[^\`\r\n]*\`|[^\s#;&|)]+)`;
-const secretAssignmentPatterns = [
-  // Dotenv and POSIX-shell assignments. Anchoring to a command boundary keeps
-  // TypeScript declarations and assertion/regex strings out of this detector.
-  new RegExp(
-    String.raw`(?:^|[;&|]\s*)\s*(?:(?:export|env)\s+)?(?<key>${secretEnvironmentName})\s*=\s*(?<value>${shellAssignmentValue})`,
-    "g",
-  ),
-  // PowerShell environment assignment.
-  new RegExp(
-    String.raw`(?:^|[;|]\s*)\s*\$env:(?<key>${secretEnvironmentName})\s*=\s*(?<value>${shellAssignmentValue})`,
-    "gi",
-  ),
-  // cmd.exe supports both `set KEY=value` and `set "KEY=value"`.
-  new RegExp(
-    String.raw`(?:^|[&|]\s*)\s*set\s+"?(?<key>${secretEnvironmentName})\s*=\s*(?<value>[^"\r\n&|]*)"?`,
-    "gi",
-  ),
-  // `setx KEY value` persists a Windows environment value.
-  new RegExp(
-    String.raw`(?:^|[&|]\s*)\s*setx\s+(?<key>${secretEnvironmentName})\s+(?<value>${shellAssignmentValue})`,
-    "gi",
-  ),
-];
 const reviewedPlaceholderAssignments = new Set([
   "services/social/.env.example\0DB_PASSWORD\0pixelfed",
   "services/social/.env.docker.example\0DB_PASSWORD\0change_this_secure_password",
@@ -227,16 +202,13 @@ function checkTextFile(file, text) {
       });
     });
 
-    for (const pattern of secretAssignmentPatterns) {
-      pattern.lastIndex = 0;
-      for (const match of line.matchAll(pattern)) {
-        const key = match.groups?.key || "secret environment variable";
-        const value = normalizedAssignmentValue(match.groups?.value);
-        if (nonSecretAssignmentNames.has(key)) continue;
-        if (!isCredentialAssignmentKey(key)) continue;
-        if (!isPlaceholderValue(value) && !isReviewedPlaceholderAssignment(file, key, value)) {
-          addFailure(file, lineNumber, `${key} has a non-placeholder value (${maskValue(value)}).`);
-        }
+    for (const assignment of findSecretEnvironmentAssignments(file, line)) {
+      const key = assignment.key;
+      const value = normalizedAssignmentValue(assignment.value);
+      if (nonSecretAssignmentNames.has(key)) continue;
+      if (!isCredentialAssignmentKey(key)) continue;
+      if (!isPlaceholderValue(value) && !isReviewedPlaceholderAssignment(file, key, value)) {
+        addFailure(file, lineNumber, `${key} has a non-placeholder value (${maskValue(value)}).`);
       }
     }
 

@@ -40,6 +40,7 @@ const checks = [
   ["check:social", [...npmCommand, "--prefix", "services/social", "run", "check:mochirii-ops"]],
   ["check:code-cleanliness", ["node", "scripts/check-code-cleanliness.mjs"]],
   ["check:github-actions-security", ["node", "scripts/check-github-actions-security.mjs"]],
+  ["test:supabase-secret-assignment-scanner", ["node", "--test", "scripts/lib/supabase-secret-assignment-scanner.test.mjs"]],
   ["check:supabase-config", ["node", "scripts/check-supabase-public-config.mjs"]],
   ["check:discord-gallery-ingest", ["node", "scripts/check-discord-gallery-ingest.mjs"]],
   ["test:discord-gallery-ingest-auth", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/discord-gallery-ingest-auth_test.ts"]],

@@ -151,6 +151,7 @@
     "test:public-guild-copy-policy": "node --test scripts/lib/public-guild-copy-policy.test.mjs",
     "check:supabase-security-performance": "node scripts/check-supabase-security-performance.mjs",
     "check:spotlight-poll": "node scripts/check-spotlight-poll.mjs",
+    "test:supabase-secret-assignment-scanner": "node --test scripts/lib/supabase-secret-assignment-scanner.test.mjs",
     "check:supabase-config": "node scripts/check-supabase-public-config.mjs",
     "check:supabase-edge-types": "node scripts/check-supabase-edge-types.mjs",
     "check:universal-lightbox": "node scripts/check-universal-lightbox.mjs",
