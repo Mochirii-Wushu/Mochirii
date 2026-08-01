@@ -8,6 +8,13 @@ const oldGamePrefix = ["mochi", "social"].join("_");
 const currentGamePrefix = ["mochi", "pets"].join("_");
 
 const requiredIndexSnippets = [
+  "event_social_destination_settings_confirmed_by_idx",
+  "event_social_publication_templates_approved_by_idx",
+  "event_social_publication_jobs_template_id_idx",
+  "event_social_publication_jobs_approved_by_idx",
+  "event_social_publication_jobs_reconciled_by_idx",
+  "event_social_publication_events_occurrence_id_idx",
+  "event_social_publication_events_actor_id_idx",
   "gallery_submissions_user_id_idx",
   "gallery_submissions_reviewed_by_idx",
   "gallery_submissions_public_feed_order_idx",
@@ -80,6 +87,9 @@ const serviceOnlyPolicyMigration = read(
 );
 const facebookPagePublishingMigration = read(
   "supabase/migrations/20260729042835_add_facebook_page_gallery_publishing.sql",
+);
+const eventSocialActorRetentionMigration = read(
+  "supabase/migrations/20260801210500_enforce_event_social_event_actor_retention.sql",
 );
 const serviceOnlyPolicySql = `${serviceOnlyPolicyMigration}\n${facebookPagePublishingMigration}`;
 
@@ -247,6 +257,22 @@ assertIncludes("check-all", checkAll, "check:supabase-security-performance");
 for (const snippet of requiredIndexSnippets) {
   assertIncludes("Supabase FK index migrations", migrationText, snippet);
 }
+
+assertIncludes(
+  "Event-social actor retention migration",
+  eventSocialActorRetentionMigration,
+  "drop constraint event_social_publication_events_actor_id_fkey",
+);
+assertIncludes(
+  "Event-social actor retention migration",
+  eventSocialActorRetentionMigration,
+  "add constraint event_social_publication_events_actor_id_fkey",
+);
+assertIncludes(
+  "Event-social actor retention migration",
+  eventSocialActorRetentionMigration,
+  "on delete restrict",
+);
 
 [
   "revoke all on function public.gallery_public_feed_page_v2(integer, timestamptz, timestamptz, timestamptz, uuid, text, text, text)",

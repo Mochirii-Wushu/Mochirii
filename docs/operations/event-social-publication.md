@@ -19,7 +19,12 @@ artwork contain no website link, domain, QR code, link prompt, or hashtag.
 - Reusable copy: `apps/web/public/data/event-social-content.json`
 - Exact asset identities: `apps/web/public/data/event-social-assets.json`
 - Server template projection: `supabase/functions/_shared/event-social-templates.ts`
-- Scheduler and job schema: `supabase/migrations/20260731115926_add_event_social_publication_scheduler.sql`
+- Scheduler and job schema:
+  `supabase/migrations/20260731115926_add_event_social_publication_scheduler.sql`
+- Foreign-key performance hardening:
+  `supabase/migrations/20260801201945_add_event_social_foreign_key_indexes.sql`
+- Immutable actor-retention hardening:
+  `supabase/migrations/20260801210500_enforce_event_social_event_actor_retention.sql`
 - Moderator disable/list endpoint: `manage-event-social-publication`
 - Secret-authenticated worker: `run-event-social-publication`
 - Moderator reconciliation endpoint: `resolve-event-social-publication-reconciliation`
@@ -122,6 +127,8 @@ back exactly 24 approved-and-enabled templates and zero unreviewed enabled
 templates. An account owning an active authorization must not be deleted:
 disable destinations and revoke active templates first, then follow the
 separately reviewed retention/deletion procedure for historical job evidence.
+Historical publication-event actor references are immutable and explicitly
+restrict deletion; never detach attribution by rewriting an audit event.
 
 ## Independent destination activation
 

@@ -1,5 +1,5 @@
 begin;
-select plan(70);
+select plan(80);
 
 select has_table('public', 'event_social_occurrences', 'event-social occurrences exist');
 select has_table('public', 'event_social_destination_settings', 'independent destination settings exist');
@@ -33,6 +33,67 @@ select has_column(
 select has_column(
   'public', 'event_social_publication_jobs', 'reconciliation_note',
   'reconciliation preserves the private bounded moderator note'
+);
+select has_index(
+  'public',
+  'event_social_destination_settings',
+  'event_social_destination_settings_confirmed_by_idx',
+  array['confirmed_by'],
+  'destination confirmation actor references use a covering index'
+);
+select has_index(
+  'public',
+  'event_social_publication_templates',
+  'event_social_publication_templates_approved_by_idx',
+  array['approved_by'],
+  'template approval actor references use a covering index'
+);
+select has_index(
+  'public',
+  'event_social_publication_jobs',
+  'event_social_publication_jobs_template_id_idx',
+  array['template_id'],
+  'publication template references use a covering index'
+);
+select has_index(
+  'public',
+  'event_social_publication_jobs',
+  'event_social_publication_jobs_approved_by_idx',
+  array['approved_by'],
+  'publication approval actor references use a covering index'
+);
+select has_index(
+  'public',
+  'event_social_publication_jobs',
+  'event_social_publication_jobs_reconciled_by_idx',
+  array['reconciled_by'],
+  'publication reconciliation actor references use a covering index'
+);
+select has_index(
+  'public',
+  'event_social_publication_events',
+  'event_social_publication_events_occurrence_id_idx',
+  array['occurrence_id'],
+  'publication event occurrence references use a covering index'
+);
+select has_index(
+  'public',
+  'event_social_publication_events',
+  'event_social_publication_events_actor_id_idx',
+  array['actor_id'],
+  'publication event actor references use a covering index'
+);
+select is(
+  (
+    select constraint_record.confdeltype::text
+    from pg_catalog.pg_constraint constraint_record
+    where constraint_record.conrelid =
+      'public.event_social_publication_events'::regclass
+      and constraint_record.conname =
+        'event_social_publication_events_actor_id_fkey'
+  ),
+  'r',
+  'immutable publication event actors use explicit delete restriction'
 );
 select ok(
   position(
@@ -153,6 +214,41 @@ insert into auth.users (
 ) values (
   '81818181-8181-4818-8818-818181818181',
   'authenticated', 'authenticated', 'event-social-test@example.invalid', '', now(), now(), now()
+);
+
+insert into public.event_social_publication_events (actor_id, action)
+values ('81818181-8181-4818-8818-818181818181', 'actor_retention_contract');
+
+select lives_ok(
+  $command$do $actor_retention$
+  declare
+    violated_constraint text;
+  begin
+    begin
+      delete from auth.users
+      where id = '81818181-8181-4818-8818-818181818181';
+      raise exception 'event social actor deletion unexpectedly succeeded';
+    exception when foreign_key_violation then
+      get stacked diagnostics violated_constraint = constraint_name;
+      if violated_constraint <>
+        'event_social_publication_events_actor_id_fkey'
+      then
+        raise;
+      end if;
+    end;
+  end;
+  $actor_retention$;$command$,
+  'referenced event-social audit actors cannot be deleted'
+);
+
+select is(
+  (
+    select event.actor_id::text
+    from public.event_social_publication_events event
+    where event.action = 'actor_retention_contract'
+  ),
+  '81818181-8181-4818-8818-818181818181',
+  'failed actor deletion preserves immutable attribution'
 );
 
 create temporary view event_social_test_template_packet as
