@@ -80,9 +80,12 @@ Deno.test("Discord refresh converts timeout and network failures to unavailable"
   });
 });
 
-Deno.test("Discord 404 must clear access or fail closed when the write fails", async () => {
+Deno.test("exact Discord Unknown Member must clear access or fail closed when the write fails", async () => {
   await withDiscordConfig(async () => {
-    const missing = new Response("", { status: 404 });
+    const missing = Response.json(
+      { code: 10_007, message: "Unknown Member" },
+      { status: 404 },
+    );
 
     const successful = fakeAdminClient();
     const result = await updateDiscordProfile(
@@ -96,19 +99,19 @@ Deno.test("Discord 404 must clear access or fail closed when the write fails", a
     );
     assert(
       result.ok === true,
-      "a definitive 404 should be recorded as a completed check",
+      "the exact Unknown Member response should be recorded as a completed check",
     );
     assert(
       successful.writes.length === 1,
-      "404 must persist the fail-closed member state",
+      "Unknown Member must persist the fail-closed member state",
     );
     assert(
       successful.writes[0].has_required_discord_roles === false,
-      "404 must clear role evidence",
+      "Unknown Member must clear role evidence",
     );
     assert(
       successful.writes[0].discord_verified_at === null,
-      "404 must clear verified time",
+      "Unknown Member must clear verified time",
     );
 
     const failed = fakeAdminClient({
@@ -128,8 +131,32 @@ Deno.test("Discord 404 must clear access or fail closed when the write fails", a
             fetchImpl: (() => Promise.resolve(missing.clone())) as typeof fetch,
           },
         ),
-      "a failed 404 state write must never fall through to stale authorization",
+      "a failed membership-loss write must never fall through to stale authorization",
     );
+  });
+});
+
+Deno.test("ambiguous Discord 404 responses never overwrite verified evidence", async () => {
+  await withDiscordConfig(async () => {
+    for (
+      const response of [
+        Response.json({ code: 10_004, message: "Unknown Guild" }, { status: 404 }),
+        Response.json({ message: "Unknown Member" }, { status: 404 }),
+      ]
+    ) {
+      const { client, writes } = fakeAdminClient();
+      const result = await updateDiscordProfile(
+        client,
+        "member-id",
+        { id: "member-id" },
+        activeProfile(),
+        "discord-id",
+        NOW,
+        { fetchImpl: (() => Promise.resolve(response.clone())) as typeof fetch },
+      );
+      assert(result.ok === false, "ambiguous 404 must be unavailable");
+      assert(writes.length === 0, "ambiguous 404 must preserve verified evidence");
+    }
   });
 });
 

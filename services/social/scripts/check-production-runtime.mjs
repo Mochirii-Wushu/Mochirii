@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { securityTxtContractFailures } from "./security-txt-contract.mjs";
+import {
+  securityTxtCaddyContractFailures,
+  securityTxtContractFailures,
+} from "./security-txt-contract.mjs";
+import { caddyCloudflareOriginRangeFailures } from "./cloudflare-origin-ranges-contract.mjs";
 
 const root = process.cwd();
 const repositoryRoot = path.resolve(root, "../..");
@@ -340,11 +344,33 @@ if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_p
 if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
   failures.push(`${caddyPath} must never trust a caller-supplied request ID`);
 }
+for (const failure of caddyCloudflareOriginRangeFailures(caddy)) {
+  failures.push(`${caddyPath} ${failure}`);
+}
+if (
+  caddyCloudflareOriginRangeFailures(caddy.replace(" 104.16.0.0/13", ""))
+    .every((failure) => !failure.includes("missing reviewed")) ||
+  caddyCloudflareOriginRangeFailures(caddy.replace("trusted_proxies static", "trusted_proxies static 0.0.0.0/0"))
+    .every((failure) => !failure.includes("unreviewed"))
+) {
+  failures.push(`${caddyPath} Cloudflare range contract canaries must reject missing and unreviewed origin ranges`);
+}
 
 const securityTxtPath = "public/.well-known/security.txt";
 const securityTxt = read(securityTxtPath);
 for (const failure of securityTxtContractFailures(securityTxt)) {
   failures.push(`${securityTxtPath} ${failure}`);
+}
+for (const failure of securityTxtCaddyContractFailures(caddy, securityTxt)) {
+  failures.push(`${caddyPath} ${failure}`);
+}
+const caddyWithoutSecurityTxtFinalNewline = caddy.replace(
+  /(Expires: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)\n[\t ]*\n([\t ]*SECURITY 200)/u,
+  "$1\n$2",
+);
+if (securityTxtCaddyContractFailures(caddyWithoutSecurityTxtFinalNewline, securityTxt)
+  .every((failure) => !failure.includes("exactly match"))) {
+  failures.push(`${caddyPath} contract canary must reject a response body without the RFC 9116 final newline`);
 }
 if (
   securityTxtContractFailures(`${securityTxt}Hiring: https://example.com/jobs\n`)
@@ -355,8 +381,10 @@ if (
     .every((failure) => !failure.includes("exact UTC RFC 3339"))
   || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2027-04-31T00:00:00Z"))
     .every((failure) => !failure.includes("exact UTC RFC 3339"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2026-08-15T00:00:00Z"), new Date("2026-07-31T00:00:00Z"))
+    .every((failure) => !failure.includes("at least 30 days"))
 ) {
-  failures.push(`${securityTxtPath} parser canaries must reject appended fields, expired metadata, and normalized calendar dates`);
+  failures.push(`${securityTxtPath} parser canaries must reject appended fields, expired metadata, near-expiry metadata, and normalized calendar dates`);
 }
 if (/pixelfed|shopify/iu.test(securityTxt)) {
   failures.push(`${securityTxtPath} must remain Mochirii-only public security metadata`);
@@ -373,12 +401,22 @@ requireIncludes(caddyInstallerPath, caddyInstaller, [
   'install -m 0600 -o root -g root "$target_config" "$rollback_config"',
   'mv -f "$candidate_config" "$target_config"',
   'docker exec pixelfed-app curl',
+  '"Local origin"',
+  '"Cloudflare edge"',
+  'output_args=(--output /dev/null)',
+  'if [[ "$method" == GET && -s "$probe_body" ]]; then',
+  "public/.well-known/security.txt",
+  "verify_retired_route_denial",
+  "/installer/runtime-probe",
   "retired_paths=(",
   "for path in /oauth/token /oauth/authorize",
   "https://social.mochirii.com/",
   "https://social.mochirii.com/api/service/readiness-check",
   '[[ "$readiness_status" == "404" ]]',
 ]);
+if ((caddyInstaller.match(/output_args=\(--output \/dev\/null\)/gu) || []).length !== 2) {
+  failures.push(`${caddyInstallerPath} must discard curl HEAD output in both empty-response probe helpers`);
+}
 
 for (const [relativePath, text] of [
   [deployScriptPath, deployScript],

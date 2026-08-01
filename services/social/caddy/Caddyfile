@@ -12,6 +12,29 @@ social.mochirii.com {
 	request_body {
 		max_size 100MB
 	}
+	@securityTxtNonRead {
+		path /.well-known/security.txt
+		not method GET HEAD
+	}
+	header @securityTxtNonRead Cache-Control "private, no-store"
+	respond @securityTxtNonRead "" 404
+	@securityTxt {
+		path /.well-known/security.txt
+		method GET HEAD
+	}
+	header @securityTxt {
+		Content-Type "text/plain; charset=utf-8"
+		Cache-Control "public, max-age=3600, must-revalidate"
+		X-Content-Type-Options "nosniff"
+	}
+	respond @securityTxt <<SECURITY
+		Contact: https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new
+		Policy: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy
+		Preferred-Languages: en
+		Canonical: https://social.mochirii.com/.well-known/security.txt
+		Expires: 2027-06-10T00:00:00Z
+
+		SECURITY 200
 	@retiredCreationAndTokenManagement path /installer /installer/* /register* /auth/sign_up* /auth/invite* /auth/pci* /auth/raw/mastodon* /auth/mastodon* /i/app-email-verify* /i/app-email-resend* /api/auth/app-code-verify /api/auth/onboarding /api/v1.1/auth* /oauth/clients* /oauth/personal-access-tokens* /oauth/scopes /oauth/token/refresh* /oauth/tokens* /settings/developers* /settings/applications* /settings/invites*
 	header @retiredCreationAndTokenManagement Cache-Control "private, no-store"
 	respond @retiredCreationAndTokenManagement 404

@@ -67,6 +67,31 @@ changed Cloudflare range requires a reviewed Caddy source update and the
 rollback-safe Caddy installer; it must never be fetched dynamically during a
 request.
 
+## Origin And Disclosure Boundary
+
+The DigitalOcean Cloud Firewall permits public HTTP and HTTPS ingress only
+from the complete, reviewed Cloudflare IPv4 and IPv6 ranges. Unmatched origin
+traffic remains denied, the application port remains loopback-only, and the
+existing restricted SSH rule is a separate administrative boundary. A range
+change is handled as a reviewed source and provider transaction: capture the
+current firewall and Caddy checksums, validate the candidate Caddyfile, add or
+remove only the exact Cloudflare web rules, verify through the edge and by a
+direct-origin denial probe, and restore both captured boundaries if acceptance
+fails. Never weaken this to a public `0.0.0.0/0` or `::/0` origin rule.
+
+Caddy serves `/.well-known/security.txt` before the application reverse proxy
+with a bounded static body that exactly matches the tracked RFC 9116 document.
+It returns plain UTF-8 text, a one-hour revalidation policy, and `nosniff`, with
+no redirect, cookie, or private member request. Release checks require both
+local-origin and Cloudflare-edge `200` responses, exact body parity, and at
+least thirty days before expiry. The published contact is the repository's
+enabled GitHub private vulnerability reporting channel. Release ownership must
+keep that channel enabled, assign accountable administrators or security
+managers, monitor its security-alert notifications from MFA-protected accounts,
+and maintain a documented escalation path. Encryption or signing metadata must
+not be published until its key ownership, rotation, revocation, and recovery
+process exists.
+
 ## Release And Readback
 
 Source validation must cover browser, native, changed-factor, wrong-token,
@@ -91,5 +116,8 @@ member identifiers, or response bodies in release evidence.
 - [Laravel 12 Passport bearer authentication](https://laravel.com/docs/12.x/passport#protecting-routes)
 - [Caddy trusted proxy and client-IP options](https://caddyserver.com/docs/caddyfile/options#trusted-proxies)
 - [Cloudflare published IP ranges](https://www.cloudflare.com/ips/)
+- [Cloudflare origin protection](https://developers.cloudflare.com/fundamentals/security/protect-your-origin-server/)
+- [DigitalOcean Cloud Firewall rules](https://docs.digitalocean.com/products/networking/firewalls/how-to/configure-rules/)
+- [RFC 9116 security.txt](https://www.rfc-editor.org/rfc/rfc9116.html)
 - [OWASP authentication guidance](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 - [NIST SP 800-63B session management and reauthentication](https://pages.nist.gov/800-63-4/sp800-63b/session/)

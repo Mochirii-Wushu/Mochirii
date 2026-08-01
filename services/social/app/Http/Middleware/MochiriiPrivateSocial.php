@@ -22,6 +22,7 @@ class MochiriiPrivateSocial
      */
     private const PUBLIC_PATHS = [
         '/',
+        '.well-known/security.txt',
         'login',
         'auth/oidc/start',
         'auth/oidc/callback',
@@ -45,6 +46,10 @@ class MochiriiPrivateSocial
             // they authenticate with the normal server session. Native clients
             // use the API guard and an Authorization bearer token.
             $guard = $request->bearerToken() ? 'api' : 'web';
+        }
+
+        if ($this->isRejectedPublicMetadataMethod($request)) {
+            abort(404);
         }
 
         $authGuard = Auth::guard($guard);
@@ -84,7 +89,19 @@ class MochiriiPrivateSocial
             return ! $signedIn && $request->isMethodSafe();
         }
 
+        if ($path === '/.well-known/security.txt') {
+            return in_array($request->getMethod(), ['GET', 'HEAD'], true);
+        }
+
         return in_array(ltrim($path, '/'), array_map(fn ($item) => ltrim($item, '/'), self::PUBLIC_PATHS), true);
+    }
+
+    private function isRejectedPublicMetadataMethod($request): bool
+    {
+        $path = '/'.ltrim($request->path(), '/');
+
+        return $path === '/.well-known/security.txt'
+            && ! in_array($request->getMethod(), ['GET', 'HEAD'], true);
     }
 
     private function hasCurrentMochiriiAccess($request, $user, string $guard): bool

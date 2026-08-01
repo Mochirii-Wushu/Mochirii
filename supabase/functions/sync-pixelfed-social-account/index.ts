@@ -1,17 +1,32 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   constantTimeEquals,
+  type JsonRecord,
   parsePixelfedSocialSyncPayload,
   PIXELFED_SOCIAL_SYNC_SECRET_HEADER,
-  type JsonRecord,
 } from "../_shared/pixelfed-social-sync.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
-import { currentMemberAccess } from "../_shared/member-access-policy.ts";
 import {
   asRecord,
+  profileMatchesTrustedDiscordIdentity,
   resolveDiscordIdentity,
+  safeString,
 } from "../_shared/member-verification-identity.ts";
+import {
+  currentSocialDiscordMembership,
+  type SocialDiscordMembershipResult,
+} from "../_shared/social-discord-membership.ts";
+
+export type SyncPixelfedSocialAccountDependencies = {
+  readEnv?: (name: string) => string;
+  readServiceRoleKey?: () => string;
+  createAdminClient?: (url: string, key: string) => SupabaseClient;
+  checkDiscordMembership?: (
+    input: Parameters<typeof currentSocialDiscordMembership>[0],
+  ) => Promise<SocialDiscordMembershipResult>;
+  now?: () => number;
+};
 
 function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -22,34 +37,66 @@ function jsonResponse(body: JsonRecord, status = 200): Response {
   });
 }
 
-function verifySyncSecret(req: Request): boolean {
-  const expected = Deno.env.get("PIXELFED_SOCIAL_SYNC_SECRET") || "";
+function verifySyncSecret(
+  req: Request,
+  readEnv: (name: string) => string,
+): boolean {
+  const expected = readEnv("PIXELFED_SOCIAL_SYNC_SECRET");
   const actual = req.headers.get(PIXELFED_SOCIAL_SYNC_SECRET_HEADER) || "";
   return Boolean(expected && actual && constantTimeEquals(actual, expected));
 }
 
-Deno.serve(async (req: Request) => {
+function parseCsv(value: string | null | undefined): string[] {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+export async function handleSyncPixelfedSocialAccountRequest(
+  req: Request,
+  dependencies: SyncPixelfedSocialAccountDependencies = {},
+): Promise<Response> {
+  const readEnv = dependencies.readEnv ||
+    ((name: string) => Deno.env.get(name) || "");
+  const readServiceRoleKey = dependencies.readServiceRoleKey ||
+    getServiceRoleKey;
+  const createAdminClient = dependencies.createAdminClient ||
+    ((url: string, key: string) =>
+      createClient(url, key, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }));
+  const checkDiscordMembership = dependencies.checkDiscordMembership ||
+    currentSocialDiscordMembership;
+  const nowMs = (dependencies.now || Date.now)();
+
   if (req.method !== "POST") {
     return jsonResponse({ ok: false, error: "method_not_allowed" }, 405);
   }
 
-  if (!verifySyncSecret(req)) {
+  if (!verifySyncSecret(req, readEnv)) {
     return jsonResponse({ ok: false, error: "unauthorized" }, 401);
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const serviceRoleKey = getServiceRoleKey();
+  const supabaseUrl = readEnv("SUPABASE_URL");
+  const serviceRoleKey = readServiceRoleKey();
   if (!supabaseUrl || !serviceRoleKey) {
-    console.error("sync-pixelfed-social-account missing Supabase service configuration", {
-      hasSupabaseUrl: Boolean(supabaseUrl),
-      hasServiceRoleKey: Boolean(serviceRoleKey),
-    });
+    console.error(
+      "sync-pixelfed-social-account missing Supabase service configuration",
+      {
+        hasSupabaseUrl: Boolean(supabaseUrl),
+        hasServiceRoleKey: Boolean(serviceRoleKey),
+      },
+    );
     return jsonResponse({ ok: false, error: "service_not_configured" }, 500);
   }
 
   let payload;
   try {
-    payload = parsePixelfedSocialSyncPayload(await req.json());
+    payload = parsePixelfedSocialSyncPayload(await req.json(), nowMs);
   } catch (error) {
     return jsonResponse(
       {
@@ -61,28 +108,17 @@ Deno.serve(async (req: Request) => {
     );
   }
 
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+  const adminClient = createAdminClient(supabaseUrl, serviceRoleKey);
 
   const [
     { data: userData, error: userError },
     { data: profileData, error: profileError },
-    { data: verificationData, error: verificationError },
   ] = await Promise.all([
     adminClient.auth.admin.getUserById(payload.sub),
     adminClient
       .from("member_profiles")
-      .select("id,member_status,discord_user_id,has_required_discord_roles,discord_verified_at")
+      .select("id,member_status,discord_user_id")
       .eq("id", payload.sub)
-      .maybeSingle(),
-    adminClient
-      .from("member_verifications")
-      .select("gallery_access_status,gallery_access_verified_at,gallery_access_expires_at")
-      .eq("user_id", payload.sub)
       .maybeSingle(),
   ]);
 
@@ -101,23 +137,38 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: "profile_lookup_failed" }, 500);
   }
 
-  if (verificationError) {
-    console.error("sync-pixelfed-social-account verification lookup failed", {
-      code: verificationError.code,
-      message: verificationError.message,
-    });
-    return jsonResponse({ ok: false, error: "verification_lookup_failed" }, 500);
+  const now = new Date(nowMs).toISOString();
+  const user = asRecord(userData.user);
+  const profile = profileData ? asRecord(profileData) : null;
+  const trustedDiscordUserId = resolveDiscordIdentity(user);
+  const locallyEligible = safeString(profile?.member_status, 40) === "active" &&
+    profileMatchesTrustedDiscordIdentity(
+      profile?.discord_user_id,
+      trustedDiscordUserId,
+    );
+  const discordMembership = locallyEligible && trustedDiscordUserId
+    ? await checkDiscordMembership({
+      discordUserId: trustedDiscordUserId,
+      configuredGuildId: readEnv("DISCORD_GUILD_ID"),
+      configuredRequiredRoleIds: parseCsv(readEnv("DISCORD_REQUIRED_ROLE_IDS")),
+      botToken: readEnv("DISCORD_BOT_TOKEN"),
+    })
+    : { status: "denied" as const, reason: "not_member" as const };
+
+  if (discordMembership.status === "unavailable") {
+    console.warn(
+      "sync-pixelfed-social-account current Discord verification unavailable",
+      {
+        reason: discordMembership.reason,
+      },
+    );
+    return jsonResponse({
+      ok: false,
+      error: "discord_verification_unavailable",
+    }, 503);
   }
 
-  const now = new Date().toISOString();
-  const user = asRecord(userData.user);
-  const access = currentMemberAccess({
-    profile: profileData ? asRecord(profileData) : null,
-    verification: verificationData ? asRecord(verificationData) : null,
-    trustedDiscordUserId: resolveDiscordIdentity(user),
-  });
-
-  if (!access.eligible) {
+  if (discordMembership.status !== "verified") {
     const { error: revokeError } = await adminClient
       .from("social_accounts")
       .update({
@@ -135,10 +186,16 @@ Deno.serve(async (req: Request) => {
         code: revokeError.code,
         message: revokeError.message,
       });
-      return jsonResponse({ ok: false, error: "access_revocation_failed" }, 500);
+      return jsonResponse(
+        { ok: false, error: "access_revocation_failed" },
+        500,
+      );
     }
 
-    return jsonResponse({ ok: false, error: "current_member_access_required" }, 403);
+    return jsonResponse(
+      { ok: false, error: "current_member_access_required" },
+      403,
+    );
   }
 
   const socialAccount: JsonRecord = {
@@ -170,7 +227,10 @@ Deno.serve(async (req: Request) => {
       code: upsertError.code,
       message: upsertError.message,
     });
-    return jsonResponse({ ok: false, error: "social_account_upsert_failed" }, 500);
+    return jsonResponse(
+      { ok: false, error: "social_account_upsert_failed" },
+      500,
+    );
   }
 
   return jsonResponse({
@@ -178,4 +238,8 @@ Deno.serve(async (req: Request) => {
     status: "synced",
     profileUrl: payload.profile_url,
   });
-});
+}
+
+if (import.meta.main) {
+  Deno.serve((req: Request) => handleSyncPixelfedSocialAccountRequest(req));
+}

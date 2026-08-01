@@ -38,6 +38,10 @@ const requiredFiles = [
   "supabase/functions/_shared/pixelfed-social-sync_test.ts",
   "supabase/functions/_shared/member-access-policy.ts",
   "supabase/functions/_shared/member-access-policy_test.ts",
+  "supabase/functions/_shared/social-discord-membership.ts",
+  "supabase/functions/_shared/social-discord-membership_test.ts",
+  "supabase/functions/verify-discord-member/index.ts",
+  "supabase/functions/verify-member-access/index.ts",
 ];
 
 const snippetChecks = [
@@ -86,7 +90,7 @@ const snippetChecks = [
       "getAuthorizationDetails",
       "authorization_id",
       "verifyMemberAccess",
-      "profileIsActive",
+      "isDiscordVerifiedSocialMember",
       "activeMember",
       "createAuthorizationLoadQueue",
       "classifyAuthorizationDetailsFailure",
@@ -153,7 +157,7 @@ const snippetChecks = [
     file: "apps/web/app/api/oauth/decision/route.ts",
     snippets: [
       "verify-member-access",
-      "galleryEligible",
+      "isDiscordVerifiedSocialMember",
       "member_status",
       "submitAuthorizationDecision",
       "/oauth/authorizations/",
@@ -205,6 +209,9 @@ const snippetChecks = [
       ".from(\"social_accounts\")",
       "provider: \"pixelfed\"",
       "federation_enabled: false",
+      "current_member_access_required",
+      "currentSocialDiscordMembership",
+      "discord_verification_unavailable",
     ],
   },
   {
@@ -216,6 +223,20 @@ const snippetChecks = [
       "PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS",
       "constantTimeEquals",
       "parsePixelfedSocialSyncPayload",
+    ],
+  },
+  {
+    label: "Current Social Discord membership verifier",
+    file: "supabase/functions/_shared/social-discord-membership.ts",
+    snippets: [
+      "currentSocialDiscordMembership",
+      "discordFetch",
+      "discordMemberRoleState",
+      "SOCIAL_EXPECTED_DISCORD_GUILD_ID",
+      "SOCIAL_EXPECTED_REQUIRED_ROLE_IDS",
+      'status: "unavailable"',
+      'status: "denied"',
+      'status: "verified"',
     ],
   },
   {
@@ -562,6 +583,40 @@ for (const forbiddenConsentCopy of ["OAuth Consent", "Redirect URI", "client req
 if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("priorConsentRedirect(nextDetails")) {
   failures.push("Prior OAuth consent redirects must follow the current member access check.");
 }
+if (!consentPanel.includes("isDiscordVerifiedSocialMember")) {
+  failures.push("OAuth consent must require current Discord verification for Social access.");
+}
+
+const socialSync = read("supabase/functions/sync-pixelfed-social-account/index.ts");
+if (socialSync.includes("if (!access.eligible)")) {
+  failures.push("Social account sync must not accept generic or manual-only Gallery eligibility.");
+}
+if (!socialSync.includes("currentSocialDiscordMembership")) {
+  failures.push("Social account sync must perform a current Discord membership and role check.");
+}
+if (socialSync.includes('.from("member_verifications")')) {
+  failures.push("Social account sync must not depend on Gallery manual-verification data.");
+}
+
+const discordVerifier = read("supabase/functions/verify-discord-member/index.ts");
+const discordAuthorizationFailureStart = discordVerifier.indexOf(
+  "if (discordResponse.status === 401 || discordResponse.status === 403)",
+);
+const discordGenericFailureStart = discordVerifier.indexOf(
+  "if (!discordResponse.ok)",
+  discordAuthorizationFailureStart,
+);
+if (discordAuthorizationFailureStart < 0 || discordGenericFailureStart < 0) {
+  failures.push("Discord verification must distinguish provider authorization failure from membership loss.");
+} else if (
+  discordVerifier.slice(discordAuthorizationFailureStart, discordGenericFailureStart)
+    .includes("updateProfile(")
+) {
+  failures.push("Discord provider authorization failure must not overwrite verified member evidence.");
+}
+if (!discordVerifier.includes("isDiscordUnknownMemberResponse(discordResponse)")) {
+  failures.push("Discord verification may record membership loss only for the exact Unknown Member response.");
+}
 
 [
   "docs/pixelfed-guild-social-adr.md",
@@ -579,6 +634,8 @@ if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("p
   "supabase/functions/_shared/pixelfed-social-sync.ts",
   "supabase/functions/_shared/member-access-policy.ts",
   "supabase/functions/_shared/member-access-policy_test.ts",
+  "supabase/functions/_shared/social-discord-membership.ts",
+  "supabase/functions/_shared/social-discord-membership_test.ts",
   "scripts/check-pixelfed-first-login-readiness.mjs",
 ].forEach((file) => scanNoSecrets(file, read(file)));
 

@@ -17,6 +17,7 @@ import {
   discordRetryAfterSeconds,
   type DiscordFetchResult,
 } from "../_shared/discord-api.ts";
+import { isDiscordUnknownMemberResponse } from "../_shared/discord-membership-response.ts";
 import { OutboundHttpError } from "../_shared/outbound-http.ts";
 
 type VerificationResponse = {
@@ -322,7 +323,7 @@ async function handleRequest(req: Request): Promise<Response> {
     );
   }
 
-  if (discordResponse.status === 404) {
+  if (isDiscordUnknownMemberResponse(discordResponse)) {
     const updated = await updateProfile(adminClient, userId, {
       discord_user_id: discordUserId,
       display_name: safeString(profile?.display_name, 40) || defaultDisplayName(user),
@@ -352,17 +353,6 @@ async function handleRequest(req: Request): Promise<Response> {
     console.error("verify-discord-member Discord bot permission/configuration error", {
       status: discordResponse.status,
     });
-
-    const updated = await updateProfile(adminClient, userId, {
-      discord_user_id: discordUserId,
-      display_name: safeString(profile?.display_name, 40) || defaultDisplayName(user),
-      has_required_discord_roles: false,
-      discord_checked_at: now,
-      discord_verified_at: null,
-      member_status: lockedStatus ? currentStatus : "pending",
-    });
-
-    const memberStatus = safeString(updated?.member_status, 40) || "pending";
     return jsonResponse(
       verificationBody({
         verified: false,
@@ -370,7 +360,7 @@ async function handleRequest(req: Request): Promise<Response> {
         hasRequiredRoles: false,
         pending: false,
         missingRoleIds: requiredRoleIds,
-        memberStatus,
+        memberStatus: currentStatus,
         message: "Discord verification is not available yet. Please contact leadership.",
       }),
       502,

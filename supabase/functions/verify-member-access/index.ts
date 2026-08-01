@@ -21,6 +21,7 @@ import {
   discordRetryAfterSeconds,
   type DiscordFetchResult,
 } from "../_shared/discord-api.ts";
+import { isDiscordUnknownMemberResponse } from "../_shared/discord-membership-response.ts";
 import { OutboundHttpError } from "../_shared/outbound-http.ts";
 
 type SyncedIdentity = {
@@ -346,7 +347,7 @@ export async function updateDiscordProfile(
     member_status: lockedStatus ? currentStatus : "pending",
   };
 
-  if (discordResponse.status === 404) {
+  if (isDiscordUnknownMemberResponse(discordResponse)) {
     const { error } = await adminClient.from("member_profiles").upsert(
       {
         id: userId,

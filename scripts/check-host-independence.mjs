@@ -182,7 +182,7 @@ const reviewedLoopbacks = new Map([
     [
       { value: "http://127.0.0.1:8080/", count: 2 },
       { value: "http://127.0.0.1:8080/api/service/readiness-check", count: 1 },
-      { value: "social.mochirii.com:443:127.0.0.1", count: 2 },
+      { value: "social.mochirii.com:443:127.0.0.1", count: 4 },
     ],
   ],
   [

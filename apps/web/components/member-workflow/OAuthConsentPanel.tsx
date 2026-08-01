@@ -9,6 +9,9 @@ import {
   type AuthorizationDetailsFailureKind,
 } from "@/lib/oauth/authorization-details-error";
 import {
+  isDiscordVerifiedSocialMember,
+} from "@/lib/oauth/authorization-decision-core";
+import {
   approvedSocialOAuthRedirect,
   isApprovedSocialOAuthReturnDestination,
 } from "@/lib/oauth/approved-social-redirect";
@@ -21,7 +24,7 @@ import { priorConsentRedirect } from "@/lib/oauth/prior-consent-redirect";
 import { SOCIAL_HOST } from "@/lib/public-urls";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
 import { requireReadyBrowserSupabaseClient } from "@/lib/supabase/client";
-import { profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
+import { verifyMemberAccess } from "@/lib/supabase/profile";
 import { text, type MemberAccessResponse } from "@/lib/supabase/types";
 import { WorkflowNotice } from "./WorkflowState";
 
@@ -122,7 +125,7 @@ export function OAuthConsentPanel({ initialSignedIn = false }: { initialSignedIn
       }
 
       const nextAccess = access.data;
-      const nextActiveMember = profileIsActive(nextAccess.profile, nextAccess);
+      const nextActiveMember = isDiscordVerifiedSocialMember(nextAccess);
       const redirectUrl = priorConsentRedirect(nextDetails, nextActiveMember);
       if (redirectUrl) {
         window.location.assign(redirectUrl);
@@ -134,7 +137,7 @@ export function OAuthConsentPanel({ initialSignedIn = false }: { initialSignedIn
       setStatus(
         nextActiveMember
           ? "Guild social access is ready for review."
-          : "Active guild membership is required before authorizing guild social access.",
+          : "Current Discord verification is required before authorizing guild social access.",
       );
     } catch {
       setDetails(null);
@@ -206,7 +209,7 @@ export function OAuthConsentPanel({ initialSignedIn = false }: { initialSignedIn
   }
 
   const requestedAccess = scopeLabels(details?.scope);
-  const activeMember = profileIsActive(memberAccess?.profile, memberAccess);
+  const activeMember = isDiscordVerifiedSocialMember(memberAccess);
 
   return (
     <section className="glass-card glass-card--primary glass-pad auth-panel" aria-busy={busy} aria-live="polite">

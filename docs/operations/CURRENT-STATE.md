@@ -153,9 +153,11 @@ zero open Dependabot, code-scanning, and secret-scanning alerts. Social Mobile
 has one open high-severity `brace-expansion` development-tool advisory tracked
 by issue #9. Alert APIs are unavailable for the other private repositories on
 the current plan; unavailable is not recorded as zero. GitHub private
-vulnerability reporting is currently disabled for Website, so both Website and
-Social source declare `mailto:support@mochirii.com` as the operational
-`security.txt` contact while retaining the GitHub security policy URL.
+vulnerability reporting is enabled for Website as of the 2026-07-31 readback.
+Both Website and Social source declare the repository's private vulnerability
+report form as the operational `security.txt` contact while retaining the
+GitHub security policy URL. The general support mailbox is not used as a
+vulnerability-reporting fallback.
 
 ## Local Full-Stack Integration Candidate
 

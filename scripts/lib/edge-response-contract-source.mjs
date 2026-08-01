@@ -110,6 +110,14 @@ export const edgeResponseContractSource = {
       states: [
         text("cors-preflight", ["OPTIONS"], OPERATIONAL, "cors_preflight", 256, "Protocol-only CORS acknowledgement with no member data."),
         error(),
+        json("discord-membership-unavailable", ["POST when Discord does not return an exact current member result"], {
+          [CONFIDENTIAL]: ["verified", "hasGuildMembership", "hasRequiredRoles", "pending", "missingRoleIds[]", "memberStatus"],
+          [OPERATIONAL]: ["message"],
+        }),
+        json("discord-provider-authorization-unavailable", ["POST when the Discord service identity cannot perform the membership lookup; no member evidence is changed"], {
+          [CONFIDENTIAL]: ["verified", "hasGuildMembership", "hasRequiredRoles", "pending", "missingRoleIds[]", "memberStatus"],
+          [OPERATIONAL]: ["message"],
+        }),
         json("verification-result", ["POST verification completed or remains pending"], {
           [CONFIDENTIAL]: ["verified", "hasGuildMembership", "hasRequiredRoles", "pending", "missingRoleIds[]", "memberStatus"],
           [OPERATIONAL]: ["message"],
@@ -120,6 +128,9 @@ export const edgeResponseContractSource = {
       id: "verify-member-access",
       states: [
         error(),
+        json("discord-membership-unavailable", ["POST when the required current Discord refresh is unavailable"], {
+          [OPERATIONAL]: ["ok", "message"],
+        }),
         json("member-access-result", ["POST current-member access refresh"], {
           [OPERATIONAL]: ["ok", "message", "data.message", "data.next"],
           [CONFIDENTIAL]: [
@@ -447,7 +458,13 @@ export const edgeResponseContractSource = {
     },
     {
       id: "sync-pixelfed-social-account",
-      states: [error(), json("sync-result", ["POST signed Social login, create, update, or access-check event"], { [OPERATIONAL]: ["ok", "status", "error", "message"], [CONFIDENTIAL]: ["profileUrl"] })],
+      states: [
+        error(),
+        json("discord-verification-required", ["POST when current Discord verification is absent, stale, or no longer valid"], { [OPERATIONAL]: ["ok", "error"] }),
+        json("discord-verification-unavailable", ["POST when the bounded current Discord lookup fails closed"], { [OPERATIONAL]: ["ok", "error"] }),
+        json("discord-membership-loss", ["POST when Discord returns the exact Unknown Member response"], { [OPERATIONAL]: ["ok", "error"] }),
+        json("sync-result", ["POST signed Social login, create, update, or access-check event after current Discord verification"], { [OPERATIONAL]: ["ok", "status", "error", "message"], [CONFIDENTIAL]: ["profileUrl"] }),
+      ],
     },
   ],
 };

@@ -15,6 +15,15 @@ function object(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
+export function isDiscordVerifiedSocialMember(value: unknown): boolean {
+  const access = object(value);
+  const profile = object(access?.profile);
+
+  return Boolean(
+    profile?.member_status === "active" && access?.discordVerified === true,
+  );
+}
+
 export function isApprovedSocialAuthorization(
   value: unknown,
   expectedAuthorizationId: string,

@@ -518,9 +518,11 @@ const unauthenticatedFunctionGuardSpecs = {
     snippets: [
       "PIXELFED_SOCIAL_SYNC_SECRET",
       "PIXELFED_SOCIAL_SYNC_SECRET_HEADER",
-      "verifySyncSecret(req)",
+      "verifySyncSecret(req, readEnv)",
       "../_shared/supabase-service-role.ts",
-      "getServiceRoleKey()",
+      "dependencies.readServiceRoleKey ||",
+      "getServiceRoleKey;",
+      "readServiceRoleKey()",
     ],
   },
 };
@@ -603,12 +605,15 @@ for (const snippet of [
 [
   "PIXELFED_SOCIAL_SYNC_SECRET",
   "PIXELFED_SOCIAL_SYNC_SECRET_HEADER",
-  "verifySyncSecret(req)",
+  "verifySyncSecret(req, readEnv)",
   "auth.admin.getUserById",
   ".from(\"social_accounts\")",
   "federation_enabled: false",
   "../_shared/supabase-service-role.ts",
-  "getServiceRoleKey()",
+  "dependencies.readServiceRoleKey ||",
+  "getServiceRoleKey;",
+  "readServiceRoleKey()",
+  "if (import.meta.main)",
 ].forEach((snippet) => assertIncludes("sync-pixelfed-social-account", pixelfedSocialSync, snippet));
 
 [
@@ -879,10 +884,18 @@ assertMatches(
 
 [
   "Current Hardening Baseline",
+  "https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new",
   "CSP is enforced",
   "apps/web/next.config.ts",
   "Supabase service-role keys",
 ].forEach((snippet) => assertIncludes("security policy", securityPolicy, snippet));
+
+assertNotMatches(
+  "security policy",
+  securityPolicy,
+  /support@mochirii\.com/iu,
+  "The unverified support mailbox must not remain a vulnerability-reporting fallback.",
+);
 
 [
   "Security Headers",
@@ -904,7 +917,7 @@ assertMatches(
 ].forEach((snippet) => assertIncludes("current live state docs", currentLiveState, snippet));
 
 [
-  "Contact: mailto:support@mochirii.com",
+  "Contact: https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new",
   "Policy: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy",
   "Preferred-Languages: en",
   `Canonical: ${siteUrl("/.well-known/security.txt")}`,
@@ -914,8 +927,8 @@ assertMatches(
 assertMatches(
   "security.txt",
   securityTxt,
-  /^Contact:\s+mailto:support@mochirii\.com/m,
-  "Contact must use the reviewed security-reporting mailbox.",
+  /^Contact:\s+https:\/\/github\.com\/Mochirii-Wushu\/Mochirii-Website\/security\/advisories\/new$/m,
+  "Contact must use the enabled private vulnerability reporting channel.",
 );
 
 assertMatches(

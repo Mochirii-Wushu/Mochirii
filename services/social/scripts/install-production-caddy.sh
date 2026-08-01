@@ -13,8 +13,10 @@ target_config=/etc/caddy/Caddyfile
 candidate_config=
 rollback_config=
 changed=false
+probe_headers=
+probe_body=
 
-for command_name in caddy cmp curl cut docker install mktemp mv rm sha256sum systemctl; do
+for command_name in caddy cmp curl cut docker grep install mktemp mv rm sha256sum systemctl; do
   command -v "$command_name" >/dev/null || {
     echo "Missing Caddy deployment dependency: $command_name" >&2
     exit 1
@@ -40,6 +42,12 @@ rollback() {
   fi
   if [[ -n "$candidate_config" && -f "$candidate_config" ]]; then
     rm -f "$candidate_config"
+  fi
+  if [[ -n "$probe_headers" && -f "$probe_headers" ]]; then
+    rm -f "$probe_headers"
+  fi
+  if [[ -n "$probe_body" && -f "$probe_body" ]]; then
+    rm -f "$probe_body"
   fi
 }
 trap rollback ERR
@@ -99,6 +107,108 @@ readiness_status="$(curl \
   false
 }
 
+verify_security_txt() {
+  local label="$1"
+  local url="$2"
+  shift 2
+  local result
+  probe_headers="$(mktemp)"
+  probe_body="$(mktemp)"
+  result="$(curl \
+    --silent \
+    --show-error \
+    --max-time 20 \
+    --max-redirs 0 \
+    "$@" \
+    --dump-header "$probe_headers" \
+    --output "$probe_body" \
+    --write-out '%{http_code}' \
+    "$url")"
+  [[ "$result" == "200" ]] || {
+    echo "${label} security.txt returned HTTP ${result} instead of 200." >&2
+    return 1
+  }
+  cmp -s "$repo_root/public/.well-known/security.txt" "$probe_body" || {
+    echo "${label} security.txt body does not match the reviewed document." >&2
+    return 1
+  }
+  grep -Eiq '^content-type:[[:space:]]*text/plain;[[:space:]]*charset=utf-8\r?$' "$probe_headers"
+  grep -Eiq '^cache-control:[[:space:]]*public,[[:space:]]*max-age=3600,[[:space:]]*must-revalidate\r?$' "$probe_headers"
+  grep -Eiq '^x-content-type-options:[[:space:]]*nosniff\r?$' "$probe_headers"
+  if grep -Eiq '^(location|set-cookie):' "$probe_headers"; then
+    echo "${label} security.txt returned a redirect or cookie." >&2
+    return 1
+  fi
+  rm -f "$probe_headers" "$probe_body"
+  probe_headers=
+  probe_body=
+}
+
+verify_security_txt \
+  "Local origin" \
+  https://social.mochirii.com/.well-known/security.txt \
+  --noproxy '*' \
+  --resolve social.mochirii.com:443:127.0.0.1
+verify_security_txt \
+  "Cloudflare edge" \
+  "https://social.mochirii.com/.well-known/security.txt?source=${source_sha256}"
+
+verify_retired_route_denial() {
+  local label="$1"
+  local method="$2"
+  local path="$3"
+  shift 3
+  local result
+  local -a method_args=(--request "$method")
+  local -a output_args
+  probe_headers="$(mktemp)"
+  probe_body="$(mktemp)"
+  output_args=(--output "$probe_body")
+  if [[ "$method" == HEAD ]]; then
+    method_args=(--head)
+    output_args=(--output /dev/null)
+  fi
+  result="$(curl \
+    --silent \
+    --show-error \
+    --max-time 20 \
+    --max-redirs 0 \
+    "$@" \
+    "${method_args[@]}" \
+    --dump-header "$probe_headers" \
+    "${output_args[@]}" \
+    --write-out '%{http_code}:%{size_download}' \
+    "https://social.mochirii.com${path}")"
+  [[ "$result" == "404:0" ]] || {
+    echo "${label} ${method} ${path} did not return an empty 404." >&2
+    return 1
+  }
+  if [[ "$method" == GET && -s "$probe_body" ]]; then
+    echo "${label} ${method} ${path} returned an unexpected body." >&2
+    return 1
+  fi
+  grep -Eiq '^cache-control:[^\r]*private[^\r]*no-store|^cache-control:[^\r]*no-store[^\r]*private' "$probe_headers"
+  if grep -Eiq '^(location|set-cookie):' "$probe_headers"; then
+    echo "${label} ${method} ${path} returned a redirect or cookie." >&2
+    return 1
+  fi
+  rm -f "$probe_headers" "$probe_body"
+  probe_headers=
+  probe_body=
+}
+
+for method in GET HEAD; do
+  for path in /installer /installer/runtime-probe; do
+    verify_retired_route_denial \
+      "Local origin" \
+      "$method" \
+      "$path" \
+      --noproxy '*' \
+      --resolve social.mochirii.com:443:127.0.0.1
+    verify_retired_route_denial "Cloudflare edge" "$method" "$path"
+  done
+done
+
 retired_paths=(
   /installer
   /register
@@ -142,9 +252,14 @@ verify_private_storage_denial() {
   local body
   local result
   local -a method_args=(--request "$method")
-  [[ "$method" == HEAD ]] && method_args=(--head)
+  local -a output_args
   headers="$(mktemp)"
   body="$(mktemp)"
+  output_args=(--output "$body")
+  if [[ "$method" == HEAD ]]; then
+    method_args=(--head)
+    output_args=(--output /dev/null)
+  fi
   result="$(curl \
     --silent \
     --show-error \
@@ -154,11 +269,13 @@ verify_private_storage_denial() {
     --resolve social.mochirii.com:443:127.0.0.1 \
     "${method_args[@]}" \
     --dump-header "$headers" \
-    --output "$body" \
+    "${output_args[@]}" \
     --write-out '%{http_code}:%{size_download}' \
     "https://social.mochirii.com${path}")"
   [[ "$result" == 404:0 ]]
-  [[ ! -s "$body" ]]
+  if [[ "$method" == GET ]]; then
+    [[ ! -s "$body" ]]
+  fi
   if grep -Eiq '^(location|set-cookie):' "$headers"; then
     echo "A private-storage denial returned a redirect or cookie." >&2
     return 1

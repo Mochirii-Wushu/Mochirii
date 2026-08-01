@@ -140,8 +140,8 @@ const edgeMap = spawnSync(
 assert.equal(edgeMap.status, 0, edgeMap.stderr || "Supabase Edge test map validation failed.");
 assert.match(
   edgeMap.stdout,
-  /Supabase Edge test map OK \(58 test files in 18 bounded runs\)\./u,
-  "Supabase Edge test map must cover the exact reviewed 58-file inventory.",
+  /Supabase Edge test map OK \(60 test files in 18 bounded runs\)\./u,
+  "Supabase Edge test map must cover the exact reviewed 60-file inventory.",
 );
 
 console.log(

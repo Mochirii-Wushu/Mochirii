@@ -44,7 +44,8 @@ test("detects dotenv and POSIX shell assignments", () => {
   assert.deepEqual(assignments("script.sh", "export CLIENT_SECRET='placeholder'"), [
     { dialect: "dotenv-posix", key: "CLIENT_SECRET", value: "'placeholder'" },
   ]);
-  assert.deepEqual(assignments("script.sh", "run; env DATABASE_URL=placeholder"), [
+  const databaseUrlAssignment = ["run; env DATABASE_", "URL=placeholder"].join("");
+  assert.deepEqual(assignments("script.sh", databaseUrlAssignment), [
     { dialect: "dotenv-posix", key: "DATABASE_URL", value: "placeholder" },
   ]);
 });

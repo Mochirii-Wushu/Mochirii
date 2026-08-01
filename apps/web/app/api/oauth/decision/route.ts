@@ -1,6 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { runSocialAuthorizationDecision } from "@/lib/oauth/authorization-decision-core";
+import {
+  isDiscordVerifiedSocialMember,
+  runSocialAuthorizationDecision,
+} from "@/lib/oauth/authorization-decision-core";
 import { approvedSocialOAuthRedirect } from "@/lib/oauth/approved-social-redirect";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 import { supabaseServerFetch } from "@/lib/supabase/server-fetch";
@@ -13,7 +16,6 @@ type DecisionBody = {
 type MemberAccessPayload = {
   ok?: boolean;
   data?: MemberAccessPayload;
-  galleryEligible?: boolean;
   discordVerified?: boolean;
   profile?: {
     member_status?: string | null;
@@ -67,14 +69,6 @@ function memberAccessPayload(value: unknown): MemberAccessPayload {
   if (!value || typeof value !== "object") return {};
   const payload = value as MemberAccessPayload;
   return payload.data && typeof payload.data === "object" ? payload.data : payload;
-}
-
-function memberAccessIsActive(access: MemberAccessPayload) {
-  const profile = access.profile || null;
-  return Boolean(
-    profile?.member_status === "active" &&
-      (access.galleryEligible === true || access.discordVerified === true),
-  );
 }
 
 async function submitAuthorizationDecision({
@@ -167,7 +161,7 @@ export async function POST(request: Request) {
       if (accessResult.error) return "unavailable";
 
       const access = memberAccessPayload(accessResult.data);
-      return memberAccessIsActive(access) ? "active" : "inactive";
+      return isDiscordVerifiedSocialMember(access) ? "active" : "inactive";
     },
     submitDecision: () => submitAuthorizationDecision({ authorizationId, decision: decision as "approve" | "deny", token }),
   });
@@ -179,7 +173,7 @@ export async function POST(request: Request) {
     return json({ error: "Guild membership could not be verified." }, { status: 503 });
   }
   if (gate.status === "membership-required") {
-    return json({ error: "Active guild membership is required before authorizing guild social access." }, { status: 403 });
+    return json({ error: "Current Discord verification is required before authorizing guild social access." }, { status: 403 });
   }
 
   const result = gate.submission;

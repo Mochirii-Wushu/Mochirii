@@ -105,8 +105,10 @@ const suites = [
       "--node-modules-dir=auto",
       "--import-map=supabase/functions/sync-pixelfed-social-account/deno.json",
       ...rootLock,
+      shared("discord-membership-response"),
       shared("member-access-policy"),
       shared("pixelfed-social-sync"),
+      shared("social-discord-membership"),
     ],
   ],
   [

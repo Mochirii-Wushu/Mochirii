@@ -76,6 +76,84 @@
           "inheritedContainers": []
         },
         {
+          "id": "discord-membership-unavailable",
+          "when": [
+            "POST when Discord does not return an exact current member result"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "hasGuildMembership",
+              "classification": "confidential"
+            },
+            {
+              "path": "hasRequiredRoles",
+              "classification": "confidential"
+            },
+            {
+              "path": "memberStatus",
+              "classification": "confidential"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "missingRoleIds[]",
+              "classification": "confidential"
+            },
+            {
+              "path": "pending",
+              "classification": "confidential"
+            },
+            {
+              "path": "verified",
+              "classification": "confidential"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "discord-provider-authorization-unavailable",
+          "when": [
+            "POST when the Discord service identity cannot perform the membership lookup; no member evidence is changed"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "hasGuildMembership",
+              "classification": "confidential"
+            },
+            {
+              "path": "hasRequiredRoles",
+              "classification": "confidential"
+            },
+            {
+              "path": "memberStatus",
+              "classification": "confidential"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "missingRoleIds[]",
+              "classification": "confidential"
+            },
+            {
+              "path": "pending",
+              "classification": "confidential"
+            },
+            {
+              "path": "verified",
+              "classification": "confidential"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
           "id": "verification-result",
           "when": [
             "POST verification completed or remains pending"
@@ -119,6 +197,7 @@
         "deno.lock",
         "supabase/functions/_shared/cors.ts",
         "supabase/functions/_shared/discord-api.ts",
+        "supabase/functions/_shared/discord-membership-response.ts",
         "supabase/functions/_shared/member-verification-identity.ts",
         "supabase/functions/_shared/outbound-http.ts",
         "supabase/functions/_shared/public-origins.ts",
@@ -126,9 +205,9 @@
         "supabase/functions/verify-discord-member/deno.json",
         "supabase/functions/verify-discord-member/index.ts"
       ],
-      "reviewedSourceSha256": "1be7ea564abba3dd78d96f3fa472ca32715526466ae73cd1bb209d0ada34245e",
-      "semanticContractSha256": "e085c8b531cd92c190c1a0eaf2c9561c8bdf618827b7c0114f35dfe1ab5304ff",
-      "responseShapeContractSha256": "85dfc3364036c3be601b423d22070401073cfbba9570774949216f383784ebd9"
+      "reviewedSourceSha256": "c27e4f7ac012cf399bfe1ac132470b5165b32d7c3f46dc7e52c9c256b0834850",
+      "semanticContractSha256": "6270b8696112026afe61d03e59642086d5148c83e67fec3941b24664ab8c60e8",
+      "responseShapeContractSha256": "4f5128cfc83d4662c5d0be97ee0cc0c17f454b933c709839c38b30b63ace413d"
     },
     {
       "id": "verify-member-access",
@@ -166,6 +245,25 @@
             },
             {
               "path": "status",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "discord-membership-unavailable",
+          "when": [
+            "POST when the required current Discord refresh is unavailable"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
               "classification": "operational"
             }
           ],
@@ -296,6 +394,7 @@
         "deno.lock",
         "supabase/functions/_shared/cors.ts",
         "supabase/functions/_shared/discord-api.ts",
+        "supabase/functions/_shared/discord-membership-response.ts",
         "supabase/functions/_shared/member-access-policy.ts",
         "supabase/functions/_shared/member-verification-identity.ts",
         "supabase/functions/_shared/outbound-http.ts",
@@ -304,9 +403,9 @@
         "supabase/functions/verify-member-access/deno.json",
         "supabase/functions/verify-member-access/index.ts"
       ],
-      "reviewedSourceSha256": "47e4c4053ed21f0827574f303a0d13d28f564feb4862bb01284d85d5a18de650",
-      "semanticContractSha256": "28b419fd9d26db9dc2c0d4fd37ddd761f3cc9a7c6a5bf8032b894916fc9a1bdc",
-      "responseShapeContractSha256": "14c7dd49c4011649240d51fc32e112f9b810ceed8ef2a49dcdd1f3b3e7294c02"
+      "reviewedSourceSha256": "9c42ab7466a22e2beea2945c611af2c3076a107034db220cc687051ee50cbb5a",
+      "semanticContractSha256": "efaf489508b50bbf27d783fe7a462c2dd598baed8d17b5b8803a11bc5af55d99",
+      "responseShapeContractSha256": "428525ca809ebe57fc72470fc6f76f9d67f4f31ebb000b248bb1b6a69ae3b99e"
     },
     {
       "id": "review-member-verification",
@@ -7007,9 +7106,66 @@
           "inheritedContainers": []
         },
         {
+          "id": "discord-verification-required",
+          "when": [
+            "POST when current Discord verification is absent, stale, or no longer valid"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "discord-verification-unavailable",
+          "when": [
+            "POST when the bounded current Discord lookup fails closed"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
+          "id": "discord-membership-loss",
+          "when": [
+            "POST when Discord returns the exact Unknown Member response"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "error",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": []
+        },
+        {
           "id": "sync-result",
           "when": [
-            "POST signed Social login, create, update, or access-check event"
+            "POST signed Social login, create, update, or access-check event after current Discord verification"
           ],
           "bodyKind": "json",
           "body": null,
@@ -7040,17 +7196,20 @@
       ],
       "reviewedSourceRefs": [
         "deno.lock",
-        "supabase/functions/_shared/member-access-policy.ts",
+        "supabase/functions/_shared/discord-api.ts",
+        "supabase/functions/_shared/discord-membership-response.ts",
         "supabase/functions/_shared/member-verification-identity.ts",
+        "supabase/functions/_shared/outbound-http.ts",
         "supabase/functions/_shared/pixelfed-social-sync.ts",
         "supabase/functions/_shared/public-origins.ts",
+        "supabase/functions/_shared/social-discord-membership.ts",
         "supabase/functions/_shared/supabase-service-role.ts",
         "supabase/functions/sync-pixelfed-social-account/deno.json",
         "supabase/functions/sync-pixelfed-social-account/index.ts"
       ],
-      "reviewedSourceSha256": "4d2c41353103a7d6aceb23258c83f12763cdb1b997f80f4283ecf9443de03870",
-      "semanticContractSha256": "bcecd8d7f56a5a7c6fe351d366738ff031231f0c91ea33be441da1624f01411e",
-      "responseShapeContractSha256": "da0336d682060ca162c541ada9c7f95fce1d6e071d0d9467898cb95dc76bf4a0"
+      "reviewedSourceSha256": "f10ae221994c12297abe202d35b63053c494ca794ea3d4fc4b58727908338bf1",
+      "semanticContractSha256": "02ffde11b3e09fdd01eee559500c2696e1d2bf432f5f14d6b88e19a2311d4170",
+      "responseShapeContractSha256": "2dcd68f986f5be144c668903994eccbe46482824951099f78f68f26af6ee0bbc"
     }
   ]
 }

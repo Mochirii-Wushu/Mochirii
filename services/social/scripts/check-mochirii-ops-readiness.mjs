@@ -2,7 +2,11 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { securityTxtContractFailures } from "./security-txt-contract.mjs";
+import {
+  securityTxtCaddyContractFailures,
+  securityTxtContractFailures,
+} from "./security-txt-contract.mjs";
+import { caddyCloudflareOriginRangeFailures } from "./cloudflare-origin-ranges-contract.mjs";
 
 const root = process.cwd();
 const repositoryRoot = path.resolve(root, "../..");
@@ -588,10 +592,16 @@ if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_p
 if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
   failures.push("caddy/Caddyfile must overwrite rather than trust a caller-supplied request ID");
 }
+for (const failure of caddyCloudflareOriginRangeFailures(caddy)) {
+  failures.push(`caddy/Caddyfile ${failure}`);
+}
 
 const securityTxt = read("public/.well-known/security.txt");
 for (const failure of securityTxtContractFailures(securityTxt)) {
   failures.push(`public/.well-known/security.txt ${failure}`);
+}
+for (const failure of securityTxtCaddyContractFailures(caddy, securityTxt)) {
+  failures.push(`caddy/Caddyfile ${failure}`);
 }
 if (/pixelfed|shopify/iu.test(securityTxt)) {
   failures.push("public/.well-known/security.txt must remain Mochirii-only public security metadata");
@@ -599,12 +609,15 @@ if (/pixelfed|shopify/iu.test(securityTxt)) {
 
 const securityPolicy = read("SECURITY.md");
 requireIncludes("SECURITY.md", securityPolicy, [
-  "support@mochirii.com",
+  "https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new",
   "https://social.mochirii.com/.well-known/security.txt",
   "https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy",
 ]);
 if (/hello@pixelfed\.org/iu.test(securityPolicy)) {
   failures.push("SECURITY.md must not direct Mochirii vulnerability reports to an upstream contact");
+}
+if (/support@mochirii\.com/iu.test(securityPolicy)) {
+  failures.push("SECURITY.md must not use the unverified support mailbox as a vulnerability-reporting fallback");
 }
 
 const requestIdMiddleware = read("app/Http/Middleware/MochiriiRequestId.php");
@@ -626,6 +639,13 @@ requireIncludes("scripts/install-production-caddy.sh", caddyInstaller, [
   'install -m 0600 -o root -g root "$target_config" "$rollback_config"',
   'mv -f "$candidate_config" "$target_config"',
   "docker exec pixelfed-app curl",
+  '"Local origin"',
+  '"Cloudflare edge"',
+  'output_args=(--output /dev/null)',
+  'if [[ "$method" == GET && -s "$probe_body" ]]; then',
+  "public/.well-known/security.txt",
+  "verify_retired_route_denial",
+  "/installer/runtime-probe",
   "retired_paths=(",
   "for path in /oauth/token /oauth/authorize",
 ]);
@@ -830,6 +850,7 @@ requireIncludes("app/Http/Middleware/AdminOrNotFound.php", routeMiddleware, [
 const privateSocialMiddleware = read("app/Http/Middleware/MochiriiPrivateSocial.php");
 requireIncludes("app/Http/Middleware/MochiriiPrivateSocial.php", privateSocialMiddleware, [
   "class MochiriiPrivateSocial",
+  ".well-known/security.txt",
   "auth/oidc/start",
   "auth/oidc/callback",
   "oauth/authorize",

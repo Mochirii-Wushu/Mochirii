@@ -1,10 +1,14 @@
 const expectedFields = new Map([
-  ["Contact", "mailto:support@mochirii.com"],
+  [
+    "Contact",
+    "https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new",
+  ],
   ["Policy", "https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy"],
   ["Preferred-Languages", "en"],
   ["Canonical", "https://social.mochirii.com/.well-known/security.txt"],
 ]);
 const expectedOrder = [...expectedFields.keys(), "Expires"];
+const minimumFutureLifetimeMs = 30 * 24 * 60 * 60 * 1000;
 const maximumFutureLifetimeMs = 366 * 24 * 60 * 60 * 1000;
 
 export function securityTxtContractFailures(value, now = new Date()) {
@@ -64,7 +68,54 @@ export function securityTxtContractFailures(value, now = new Date()) {
     failures.push("Expires must be an exact UTC RFC 3339 timestamp");
   } else {
     if (expiresTime <= nowTime) failures.push("Expires must remain in the future");
+    if (expiresTime - nowTime < minimumFutureLifetimeMs) failures.push("Expires must remain at least 30 days in the future");
     if (expiresTime - nowTime > maximumFutureLifetimeMs) failures.push("Expires must be no more than 366 days in the future");
+  }
+
+  return [...new Set(failures)];
+}
+
+export function securityTxtCaddyContractFailures(caddyValue, securityTxtValue) {
+  const failures = [];
+  const caddy = String(caddyValue || "").replace(/\r\n/g, "\n");
+  const securityTxt = String(securityTxtValue || "").replace(/\r\n/g, "\n");
+  const requiredSnippets = [
+    "@securityTxtNonRead {",
+    "not method GET HEAD",
+    'header @securityTxtNonRead Cache-Control "private, no-store"',
+    'respond @securityTxtNonRead "" 404',
+    "@securityTxt {",
+    "path /.well-known/security.txt",
+    "method GET HEAD",
+    'Content-Type "text/plain; charset=utf-8"',
+    'Cache-Control "public, max-age=3600, must-revalidate"',
+    'X-Content-Type-Options "nosniff"',
+    "respond @securityTxt <<SECURITY",
+  ];
+
+  for (const snippet of requiredSnippets) {
+    if (!caddy.includes(snippet)) failures.push(`must include ${snippet}`);
+  }
+  if ((caddy.match(/path \/\.well-known\/security\.txt/gu) || []).length !== 2) {
+    failures.push("must define exactly two security.txt path matchers");
+  }
+  if (caddy.indexOf("respond @securityTxt <<SECURITY") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
+    failures.push("must serve security.txt before the application reverse proxy");
+  }
+
+  const bodyMatch = /respond @securityTxt <<SECURITY\n([\s\S]*?)\n[\t ]*SECURITY 200(?:\n|$)/u.exec(caddy);
+  if (!bodyMatch) {
+    failures.push("must contain a bounded 200 security.txt response body");
+  } else {
+    const lines = bodyMatch[1].split("\n");
+    const nonEmptyIndents = lines
+      .filter((line) => line.trim())
+      .map((line) => /^(\s*)/u.exec(line)?.[1] || "");
+    const commonIndentLength = nonEmptyIndents.length
+      ? Math.min(...nonEmptyIndents.map((indent) => indent.length))
+      : 0;
+    const responseBody = lines.map((line) => line.slice(commonIndentLength)).join("\n");
+    if (responseBody !== securityTxt) failures.push("response body must exactly match public/.well-known/security.txt");
   }
 
   return [...new Set(failures)];
