@@ -118,7 +118,7 @@ export function QueueSummary({ queue, shown }: { queue: GalleryReviewQueue | nul
   const cards = [
     ["Pending", summary.pending],
     ["Approved", summary.approved],
-    ["Needs thumbnail", summary.missingThumbnails],
+    ["Needs publication", summary.missingPublications],
     ["Rejected", summary.rejected],
     ["Archived", summary.archived],
     ["Shown", shown],

@@ -1,7 +1,7 @@
 # Supabase Cost Usage Runbook
 
 Source contract checked: 2026-08-01
-Provider usage snapshot: 2026-07-28
+Provider usage snapshot: 2026-08-02 UTC
 
 This runbook gives leaders a safe way to monitor Supabase usage for the member Gallery, Discord verification, approved Gallery feed, and moderation workflows. It is operational guidance, not a billing quote. Before making billing or quota decisions, check the current Supabase dashboard and the live Supabase pricing/docs pages.
 
@@ -27,10 +27,12 @@ metered, and the current repository already uses Node.js 22.
 
 ## July 2026 Egress Incident Snapshot
 
-The read-only dashboard snapshot on 2026-07-28 showed:
+The latest read-only dashboard snapshot showed:
 
-- current-cycle egress: `9.623 GB` used from `5 GB` included in the Free plan;
-- current-cycle overage: approximately `4.623 GB`;
+- current-cycle egress: `9.635 GB` used from `5 GB` included in the Free plan;
+- current-cycle overage: approximately `4.635 GB`;
+- Edge Function invocations: `12,193` in the displayed period;
+- password-authenticated users: `0` in the displayed period;
 - 2026-07-06: `2.483 GB` Storage egress, `99.8%` of that day's displayed service breakdown;
 - 2026-07-27: `2.75 GB` Storage egress, `98.1%` of that day's displayed service breakdown;
 - cached egress remained much smaller than origin egress; and
@@ -109,7 +111,8 @@ The active upload policy from the repo and production review is:
 
 - Bucket: `member-gallery`
 - Bucket visibility: private
-- Browser and bucket Gallery submission cap: `8 MB` / `8388608` bytes
+- Ordinary browser and validation cap: `8 MiB` / `8388608` bytes
+- Transitional private bucket ceiling: the historical `50 MiB`; lowering it is deferred until the reviewed 13-row publication backfill and cutover are complete
 - Allowed MIME types: `image/jpeg`, `image/png`, `image/webp`
 - Public Gallery delivery: approved immutable publications only, through stable credential-free Edge media URLs; the service reserves expected bytes globally before each private-object download
 - Pending, rejected, and archived submissions: not listed in the public Gallery

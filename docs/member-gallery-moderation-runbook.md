@@ -122,7 +122,16 @@ After approval:
 - no static Gallery JSON is edited
 - no automatic external publishing happens
 
-If an older approved item says `Not prepared`, use the Approved queue's `Needs thumbnail` filter and paginated controls. Treat that label as an explicit publication-media review, not a mechanical thumbnail backfill. Republish only after confirming the prepared private preview still matches the reviewed unit and selecting one canonical category. The workflow creates both bounded assets and an immutable publication revision. The legacy row remains private until that transaction succeeds and records its moderation audit event; approval status or old thumbnail fields alone are never publication evidence.
+If an older approved item says `Not prepared`, use the Approved queue's `Needs publication` filter and paginated controls. Treat that label as an explicit publication-media review, not a mechanical thumbnail backfill. Republish only after confirming the prepared private preview still matches the reviewed unit and selecting one canonical category. The workflow creates both bounded assets and an immutable publication revision. The legacy row remains private until that transaction succeeds and records its moderation audit event; approval status or old thumbnail fields alone are never publication evidence.
+
+The ordinary moderator path remains limited to sources at or below 8 MiB. An
+approved pre-foundation source above that limit must stop and enter the
+separately authorized historical operator lane. That lane is service-role only,
+available only while Gallery cutover is closed, retains operator attribution,
+and binds a trusted offline decoder result to the exact source row and Storage
+object revision. Never download such a source through the browser or Edge
+preview path. The source remains private and unchanged; only its bounded WebP
+display and thumbnail derivatives may become publication evidence.
 
 Historical approved rows with a null or noncanonical visual category require a separate human review. Do not infer a category from the upload source, filename, caption, or old provider metadata. They remain private until explicit republication with a canonical category. Category review and publication-media preparation may be coordinated for the same unit, but neither is a bulk backfill; each remains a separate authorized operation with its own exact provider-data approval.
 

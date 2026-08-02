@@ -6,7 +6,7 @@ This runbook defines the source-only bridge from an authoritative official spinn
 
 The raffle route is server-rendered with the latest reviewed result and refreshes the same minimal same-origin contract after authentication changes, focus/visibility return, and at a bounded interval.
 
-- Signed-out and unverified visitors receive exactly `Winner Confirmed`, the Singapore selection time, and their localized visitor time.
+- Signed-out and unverified visitors receive exactly `Winner Confirmed`, the UTC+8 selection time, and their localized visitor time.
 - A signed-in member who currently satisfies the existing active-member verification rule may also receive the stored guild display name.
 - The public RPC and same-origin API return only `publicLabel`, `cycleMonth`, `selectedAt`, and nullable `displayName`. Draw IDs, member IDs, rosters, hashes, receipts, moderation data, and delivery records are rejected by the exact client parser and never enter public JSON.
 - The colorful winner card uses the canonical Mochirii emblem, remains within the content container at 320 CSS pixels and 200% text, and disables decorative animation under `prefers-reduced-motion`.
@@ -69,7 +69,7 @@ Before merge, require the exact-head Vercel and non-skipped Supabase Preview che
 - exactly one reviewed July publication and no duplicate month;
 - official classification parity across that publication's receipt, completed delivery,
   and current revealed live state;
-- anonymous RPC output with a null display name;
+- anonymous and authenticated-but-unverified RPC output with a null display name;
 - verified-member output with the reviewed guild display name;
 - current 49-function inventory and 31/18 JWT parity; and
 - exact Vercel production binding plus the `/raffle` responsive/runtime matrix.

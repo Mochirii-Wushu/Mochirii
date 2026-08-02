@@ -559,7 +559,7 @@ async function mockFunction(route, state, url) {
       count: body.status === "pending" ? 1 : 0,
       status: body.status || "pending",
       thumbnailState: body.thumbnail_state || "all",
-      summary: { pending: 1, approved: 0, rejected: 0, archived: 0, missingThumbnails: 0 },
+      summary: { pending: 1, approved: 0, rejected: 0, archived: 0, missingPublications: 0 },
       pagination: { page: 1, pageSize: 25, total: 1, totalPages: 1, hasPrevious: false, hasNext: false },
     });
   }
@@ -880,7 +880,14 @@ async function assertHealthyDocument(page, label) {
 async function waitForFocus(page, selector, label, expectedText = "") {
   await page.waitForFunction(({ targetSelector, text }) => {
     const candidates = [...document.querySelectorAll(targetSelector)];
-    return candidates.some((node) => node === document.activeElement && (!text || node.textContent?.trim() === text));
+    return candidates.some((node) => {
+      if (!(node instanceof HTMLElement) || node.hasAttribute("disabled")) {
+        return false;
+      }
+      if (node !== document.activeElement) node.focus({ preventScroll: true });
+      return node === document.activeElement &&
+        (!text || node.textContent?.trim() === text);
+    });
   }, { targetSelector: selector, text: expectedText }, { timeout: 2_000 }).catch(() => {
     throw new Error(`${label} did not receive focus.`);
   });

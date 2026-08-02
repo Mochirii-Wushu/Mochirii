@@ -792,6 +792,7 @@ const databasePageKeys = new Set([
   "items",
   "hasMore",
   "nextCursor",
+  "cutoverEnabled",
   "totalEligible",
   "sourceApprovedCount",
   "publicationReadyCount",
@@ -849,12 +850,24 @@ export function parseGalleryDatabasePage(value: unknown): JsonRecord | null {
   const unknownCategoryCount = safeIntegerForEvidence(
     page.unknownCategoryCount,
   );
+  const cutoverEnabled = page.cutoverEnabled;
   if (
     totalEligible === null || totalEligible < page.items.length ||
     sourceApprovedCount === null || publicationReadyCount === null ||
-    sourceApprovedCount !== publicationReadyCount ||
-    publicationReadyCount < totalEligible ||
-    unknownCategoryCount !== 0
+    unknownCategoryCount === null ||
+    typeof cutoverEnabled !== "boolean" ||
+    publicationReadyCount > sourceApprovedCount
+  ) return null;
+
+  if (cutoverEnabled) {
+    if (
+      sourceApprovedCount !== publicationReadyCount ||
+      publicationReadyCount < totalEligible ||
+      unknownCategoryCount !== 0
+    ) return null;
+  } else if (
+    totalEligible !== 0 || page.items.length !== 0 || page.hasMore ||
+    page.nextCursor !== null
   ) return null;
 
   const facets = record(page.facets);
@@ -863,6 +876,10 @@ export function parseGalleryDatabasePage(value: unknown): JsonRecord | null {
     databaseFacetKeys.some((key) =>
       safeIntegerForEvidence(facets[key]) === null
     )
+  ) return null;
+  if (
+    !cutoverEnabled &&
+    databaseFacetKeys.some((key) => facets[key] !== 0)
   ) return null;
 
   const itemsValid = page.items.every((value) => {

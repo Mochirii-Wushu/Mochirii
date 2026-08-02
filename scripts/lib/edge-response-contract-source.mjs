@@ -167,7 +167,14 @@ export const edgeResponseContractSource = {
       states: [
         error(),
         json("moderator-queue", ["POST list queue by requested status and page"], {
-          [OPERATIONAL]: ["ok", "message", "hasAccess", "data.hasAccess", "data.count", "data.status", "data.summary", "data.thumbnailState", "data.pagination.page", "data.pagination.pageSize", "data.pagination.total", "data.pagination.totalPages", "data.pagination.hasNext", "data.pagination.hasPrevious"],
+          [OPERATIONAL]: [
+            "ok", "message", "hasAccess", "data.hasAccess", "data.count", "data.status",
+            "data.summary", "data.summary.pending", "data.summary.approved", "data.summary.rejected",
+            "data.summary.archived", "data.summary.missingPublications", "data.summary.total",
+            "data.summary.shown", "data.thumbnailState", "data.pagination.page",
+            "data.pagination.pageSize", "data.pagination.total", "data.pagination.totalPages",
+            "data.pagination.hasNext", "data.pagination.hasPrevious",
+          ],
           [CONFIDENTIAL]: ["data.submissions[]"],
         }, {
           inheritedContainers: [classifiedContainer("data.submissions[]", CONFIDENTIAL, "private_gallery_submission", 524288, "Each queue item is a bounded moderator-only submission/media/audit projection; descendants inherit confidential classification.")],
@@ -224,7 +231,8 @@ export const edgeResponseContractSource = {
       states: [
         error(),
         json("legacy-approved-list", ["GET or POST legacy approved list within the shared 64 KiB serialized response ceiling"], { [OPERATIONAL]: ["ok", "message", "data.count"], [PUBLIC]: ["data.submissions[]"] }, { inheritedContainers: [classifiedContainer("data.submissions[]", PUBLIC, "public_gallery_media", 65536, "The complete legacy response is capped at 64 KiB; each reviewed public Gallery projection and all descendants inherit public classification.")] }),
-        json("public-feed-list", ["GET or POST v2 list within the shared 64 KiB serialized response ceiling"], { [OPERATIONAL]: ["ok", "message", "data.schemaVersion", "data.count", "data.totalEligible", "data.hasMore", "data.nextCursor", "data.cacheSeconds", "data.complete", "data.partial", "data.delivery", "data.deliveryFailures", "data.facets"], [PUBLIC]: ["data.items[]"] }, { inheritedContainers: [classifiedContainer("data.items[]", PUBLIC, "public_gallery_media", 65536, "The complete schema-v2 response is capped at 64 KiB; each reviewed public Gallery projection and all descendants inherit public classification.")] }),
+        json("public-feed-closed", ["GET or POST v2 list while the private cutover gate is closed; returns the public schema with empty items and facets without exposing gate state"], { [OPERATIONAL]: ["ok", "message", "data.schemaVersion", "data.count", "data.totalEligible", "data.hasMore", "data.nextCursor", "data.cacheSeconds", "data.complete", "data.partial", "data.delivery", "data.deliveryFailures", "data.facets"], [PUBLIC]: ["data.items[]"] }, { inheritedContainers: [classifiedContainer("data.items[]", PUBLIC, "public_gallery_media", 65536, "The closed schema-v2 response contains an empty public item set and remains capped at 64 KiB.")] }),
+        json("public-feed-list", ["GET or POST v2 list within the shared 64 KiB serialized response ceiling after the private cutover gate is enabled"], { [OPERATIONAL]: ["ok", "message", "data.schemaVersion", "data.count", "data.totalEligible", "data.hasMore", "data.nextCursor", "data.cacheSeconds", "data.complete", "data.partial", "data.delivery", "data.deliveryFailures", "data.facets"], [PUBLIC]: ["data.items[]"] }, { inheritedContainers: [classifiedContainer("data.items[]", PUBLIC, "public_gallery_media", 65536, "The complete schema-v2 response is capped at 64 KiB; each reviewed public Gallery projection and all descendants inherit public classification.")] }),
         binary("approved-image", ["GET or POST full or thumbnail media action"], PUBLIC, "approved_gallery_media", 52428800, "Approved public Gallery media is bounded by the stored media-size constraint."),
       ],
     },

@@ -227,6 +227,9 @@ for (const required of [
     failures.push(`The event-social migration is missing: ${required}`);
   }
 }
+if (/\bcron\.schedule\s*\(/i.test(migrationSource)) {
+  failures.push("The event-social foundation migration must not activate a cron job.");
+}
 if (
   !migrationSource.includes("set status = 'failed'") ||
   !migrationSource.includes("'expiredPreparationFailures'")

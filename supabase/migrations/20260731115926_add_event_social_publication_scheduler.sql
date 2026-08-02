@@ -2368,23 +2368,6 @@ $$;
 revoke all on function private.event_social_invoke_scheduler() from public, anon, authenticated;
 grant execute on function private.event_social_invoke_scheduler() to service_role;
 
-do $event_social_cron$
-declare
-  existing_job_id bigint;
-begin
-  for existing_job_id in
-    select jobid from cron.job where jobname = 'event-social-publication-every-minute'
-  loop
-    perform cron.unschedule(existing_job_id);
-  end loop;
-  perform cron.schedule(
-    'event-social-publication-every-minute',
-    '* * * * *',
-    $job$select private.event_social_invoke_scheduler();$job$
-  );
-end;
-$event_social_cron$;
-
 comment on table public.event_social_occurrences is
   'Service-only occurrences derived from the committed UTC+8 guild schedule. Monthly ownership survives cancellation so same-time Guild Party rows do not revive.';
 comment on table public.event_social_destination_settings is

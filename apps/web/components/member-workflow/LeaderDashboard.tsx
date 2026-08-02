@@ -1138,11 +1138,11 @@ export function LeaderDashboard({ initialAuthorized = false }: { initialAuthoriz
       </div>
 
       {activeStatus === "approved" ? (
-        <div className="queue-tabs" role="group" aria-label="Approved thumbnail filter">
+        <div className="queue-tabs" role="group" aria-label="Approved publication filter">
           {([
             ["all", "All approved"],
-            ["missing", "Needs thumbnail"],
-            ["ready", "Thumbnail ready"],
+            ["missing", "Needs publication"],
+            ["ready", "Publication ready"],
           ] as Array<[GalleryThumbnailState, string]>).map(([state, label]) => (
             <button
               className="queue-tab"

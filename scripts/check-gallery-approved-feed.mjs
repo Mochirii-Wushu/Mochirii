@@ -63,6 +63,7 @@ const publicFeedMigration = read("supabase/migrations/20260728130000_add_gallery
 const publicationMigration = read("supabase/migrations/20260728132000_add_gallery_publication_revisions.sql");
 const thumbnailDatabaseTests = read("supabase/tests/gallery_submission_thumbnails_test.sql");
 const publicFeedDatabaseTests = read("supabase/tests/gallery_public_feed_v2_test.sql");
+const publicFeedReconciliation = read("supabase/operations/reconcile_gallery_public_feed_v2.sql");
 const galleryGuide = read("docs/gallery-guide.md");
 const moderationRunbook = read("docs/member-gallery-moderation-runbook.md");
 const deliveryContract = read("docs/integrations/gallery-public-media-delivery.md");
@@ -491,6 +492,7 @@ assert(finalListResponseStart >= 0, "Approved Gallery list response: final respo
   "thumbnailHeight",
   "sourceApprovedCount",
   "publicationReadyCount",
+  "cutoverEnabled",
 ].forEach((snippet) => assertIncludes("Gallery public helper", publicFeedHelper, snippet));
 
 [
@@ -546,6 +548,9 @@ assert(finalListResponseStart >= 0, "Approved Gallery list response: final respo
   "safeString(commit.validated_at, 80)",
   'thumbnailState === "missing"',
   'thumbnailState === "ready"',
+  '.is("gallery_publication_id", null)',
+  '.not("gallery_publication_id", "is", null)',
+  "missingPublications",
   "sourceValidationState: sourceValidation ? \"validated\" : \"required\"",
   "thumbnail_width",
   "thumbnail_height",
@@ -566,7 +571,8 @@ assertNotIncludes("private Gallery queue", reviewQueue, "signedPreviewUrl");
 assertNotIncludes("durable Gallery validation timestamp", reviewQueue, "validatedAt: new Date()");
 
 [
-  '["missing", "Needs thumbnail"]',
+  '["missing", "Needs publication"]',
+  '["ready", "Publication ready"]',
   "queue?.pagination?.hasPrevious",
   "queue?.pagination?.hasNext",
 ].forEach((snippet) => assertIncludes("Leader Dashboard thumbnail backfill", leaderDashboard, snippet));
@@ -796,10 +802,19 @@ if (/create policy "Members update own pending gallery originals"/.test(publicat
   "create table private.gallery_source_validations",
   "gallery_source_validation_candidate",
   "gallery_commit_source_validation",
+  "gallery_historical_source_validation_candidate",
+  "gallery_commit_historical_source_validation",
   "gallery_source_validation_states",
   "source_not_validated",
   "source_validation_conflict",
   "gallery-source-v1",
+  "gallery-historical-source-v1",
+  "source_size_bytes between 8388609 and 52428800",
+  "source_width between 1 and 8192",
+  "source_height between 1 and 8192",
+  "source_width::bigint * source_height::bigint <= 40000000",
+  "approved_historical_gallery_backfill",
+  "cutover_already_enabled",
   "source_size_bytes between 1 and 8388608",
   "source_width between 1 and 4096",
   "source_height between 1 and 4096",
@@ -841,6 +856,13 @@ if (/create policy "Members update own pending gallery originals"/.test(publicat
   "join public.gallery_submissions as submission",
   "'sourceApprovedCount'",
   "'publicationReadyCount'",
+  "'cutoverEnabled'",
+  "private.gallery_public_feed_transition",
+  "private.gallery_public_feed_readiness_counts()",
+  "Gallery public feed is not ready for cutover.",
+  "publication.id = source.thumbnail_revision_id",
+  "publication.thumbnail_storage_path = source.thumbnail_storage_path",
+  "publication.public_category = source.category",
   "join storage.objects as original_object",
   "join storage.objects as thumbnail_object",
   "publication.visible_from <= requested_snapshot_at",
@@ -856,6 +878,22 @@ if (/create policy "Members update own pending gallery originals"/.test(publicat
   "'validated_at', existing_validation.validated_at",
   "returning * into existing_validation",
 ].forEach((snippet) => assertIncludes("immutable Gallery publication database contract", publicationMigration, snippet));
+
+[
+  "private.gallery_public_feed_readiness_counts()",
+  "sourceBucketPrivate",
+  "ordinaryUploadPolicyBytes",
+  "historicalEvidenceCeilingBytes",
+  "thumbnailDerivativeCeilingBytes",
+].forEach((snippet) => assertIncludes("Gallery transition aggregate inspection", publicFeedReconciliation, snippet));
+
+[
+  "closedContractReconciled",
+  "openContractReconciled",
+  "missingPublicationCount",
+  "oversizedSourceCount",
+  "private.gallery_public_feed_readiness_counts()",
+].forEach((snippet) => assertIncludes("Gallery gate-aware reconciliation", publicFeedReconciliation, snippet));
 
 [
   "selected_revision_id uuid",
@@ -988,8 +1026,8 @@ assertIncludes(
   "all six facets",
   "keyset",
   "snapshot",
-  "45",
-  "28/17",
+  "49",
+  "31/18",
   "not a global rate limit",
   "CORS is also",
   "not authorization or abuse prevention",

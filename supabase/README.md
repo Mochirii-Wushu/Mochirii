@@ -194,11 +194,12 @@ first disable every destination and revoke every active template; any account
 deletion that still conflicts with retained publication evidence requires a
 separately reviewed retention/deletion decision rather than a cascading write.
 
-The migration creates the one-minute cron source, but it cannot invoke the Edge
-worker until `project_url` is exactly
+The migration installs the service-only scheduler foundation but creates no
+active cron job. A separately reviewed activation must install the one-minute
+job only after `project_url` is exactly
 `https://deyvmtncimmcinldjyqe.supabase.co` and
-`event_social_scheduler_secret` exists in Vault.
-Deploying the migration/functions, installing secrets, enabling any switch, or
+`event_social_scheduler_secret` exists in Vault. Deploying the migration or
+functions, installing secrets, creating the cron job, enabling any switch, or
 publishing remains a separately approved provider/production action.
 
 Migration history note: keep `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` and `supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql` in place. The Instagram publishing schema now lives in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`, and the manual sharing status schema now lives in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`, but Supabase Preview compares remote migration versions to local files and needs the original timestamps represented locally.
@@ -717,8 +718,11 @@ publication revision.
 `private.gallery_source_validations` stores immutable trusted evidence for the
 exact private source selected by a moderator or accepted through the trusted
 Discord ingest. Evidence is bound to the submission revision and Storage
-object ID, version, timestamp, MIME type, byte size, dimensions, SHA-256, and
-`gallery-source-v1` validator. Direct table privileges are revoked, and a
+  object ID, version, timestamp, MIME type, byte size, dimensions, SHA-256, and
+  validator class. Ordinary evidence is `gallery-source-v1`; an approved
+  pre-foundation source above 8 MiB may use only the separately authorized,
+  operator-attributed `gallery-historical-source-v1` path while cutover is
+  closed. Direct table privileges are revoked, and a
 publication commit fails closed unless current matching evidence exists.
 
 `private.gallery_publication_revisions` is the service-only public-delivery
@@ -764,10 +768,12 @@ The migration creates a private bucket:
 member-gallery
 ```
 
-The bucket is restricted to image uploads only:
+The bucket is private and restricted to image MIME types. During the additive
+publication transition its historical ceiling remains 50 MiB so existing
+approved sources are not stranded:
 
 ```text
-file_size_limit = 8388608
+file_size_limit = 52428800
 allowed_mime_types = image/jpeg, image/png, image/webp
 ```
 
@@ -777,7 +783,10 @@ Upload paths begin with the signed-in user id:
 {auth.uid()}/{timestamp-or-random-safe-filename}
 ```
 
-No public read access is granted.
+The browser, submission functions, and ordinary source validator still enforce
+an 8 MiB policy. The bucket ceiling is not an application permission. A later
+cutover migration may lower it only after all reviewed historical sources have
+bounded immutable derivatives. No public read access is granted.
 
 ## RLS And Storage Policy Summary
 
@@ -816,8 +825,16 @@ No public read access is granted.
 
 - RLS is enabled as defense in depth.
 - `public`, `anon`, `authenticated`, and direct `service_role` table privileges are revoked.
-- service-only validation functions accept static JPEG, PNG, or WebP sources no larger than 8 MiB, 4096 pixels per edge, or 12.6 megapixels.
+- ordinary service-only validation accepts static JPEG, PNG, or WebP sources no larger than 8 MiB, 4096 pixels per edge, or 12.6 megapixels.
+- a separate historical operator function accepts only already-approved pre-foundation sources above 8 MiB while cutover is closed, requires exact Storage compare-and-set evidence and operator attribution, and remains bounded by 50 MiB, 8192 pixels per edge, and 40 megapixels.
 - only evidence matching the current submission and Storage object can authorize a preview or publication.
+
+`private.gallery_public_feed_transition`:
+
+- defaults closed and has no direct API grants;
+- returns a valid empty schema-v2 feed and no media resolution while closed;
+- may be enabled only by a separately reviewed migration after aggregate readiness proves every approved source has one exact active publication and no unknown category;
+- may be disabled for application rollback without deleting immutable publication evidence.
 
 `gallery_instagram_publish_jobs` and `gallery_instagram_publish_events`:
 

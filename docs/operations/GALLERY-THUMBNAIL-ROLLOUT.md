@@ -112,14 +112,28 @@ and contains no fallback shared secret. If the token is absent or its exact
 team/project/environment claims fail verification, raw-source preview delivery
 fails closed and the release stops rather than weakening the boundary.
 
-## Explicit historical republication
+## Expand, reviewed backfill, and cutover
 
-After an approved deployment, a moderator may work through historical approved
-rows that are intentionally selected for public Gallery publication. Each unit
-requires a fresh visual review, one canonical category, and confirmation that
-the prepared private preview matches the reviewed source. The same moderation
-action prepares both bounded assets and writes one immutable publication
-revision.
+The publication migration is expand-only. It installs the immutable ledgers and
+a private singleton transition gate, but that gate defaults to `false`. While
+closed, schema-v2 list requests return a valid empty page and public media
+resolution returns no object. Existing source approvals and source objects are
+not changed or deleted.
+
+The current reviewed inventory contains 13 approved source rows. A later,
+separately authorized operator run must process them one at a time and reach
+exactly `13 approved / 13 publication-ready / 0 unknown category` before a
+separate cutover migration may enable the gate. Each unit requires a fresh
+visual review, one canonical category, exact source-row and Storage-object
+evidence, and both bounded derivatives. No row becomes public at 12/13.
+
+Ordinary preview and validation remain capped at 8 MiB, 4096 pixels per edge,
+and 12.6 megapixels. Two reviewed historical sources exceed 8 MiB. They retain
+their immutable private bytes and may use only the dedicated service-role
+`gallery-historical-source-v1` operator lane, bounded by the retained 50 MiB
+legacy ceiling, 8192 pixels per edge, and 40 megapixels. They must not be decoded
+through the ordinary browser or Edge preview path; only their metadata-stripped
+2 MiB display and 80 KiB thumbnail derivatives can cross the public boundary.
 
 This is not an automatic backfill. Rows that are incomplete, null-category,
 noncanonical, or not deliberately selected remain private even if their source
@@ -136,11 +150,12 @@ Stop if:
 - a list response exposes a display URL or returns a partial page
 - an on-demand display response resolves to a thumbnail or source-original URL
 
-Run `supabase/operations/validate_gallery_submission_thumbnails.sql` and
+Run `supabase/operations/reconcile_gallery_public_feed_v2.sql`,
+`supabase/operations/validate_gallery_submission_thumbnails.sql`, and
 `supabase/operations/validate_gallery_submission_categories.sql` only as
-reviewed, read-only closeouts. They verify active publication evidence; they do
-not require every legacy approved source row to become public and do not alter
-constraints or data.
+reviewed, read-only evidence. The reconciliation includes aggregate transition
+and bucket-policy evidence; it never exposes member IDs, object paths, or
+hashes. None of these operations alter constraints or data.
 
 ## Reproducible decoder evidence
 
@@ -161,14 +176,18 @@ constraints or data.
 
 Use this compatibility matrix during rollout and rollback:
 
-| Website browser | Gallery Edge | New database | Runtime behavior |
+| Website browser | Gallery Edge | Database phase | Runtime behavior |
 | --- | --- | --- | --- |
-| Current v2 | Current | Yes | Full v2 feed. |
-| Prior v1 | Current | Yes | Legacy DTO backed only by quota-enforced Edge media URLs. |
-| Current v2 | Prior | Yes | Fails closed to the static Gallery. |
-| Prior v1 | Prior | Yes | Empty runtime feed; no signed media is created. |
+| Current v2 | Current | Expand; gate closed | Valid empty v2 feed; no public media resolves. |
+| Prior v1 | Current | Expand; gate closed | Valid empty legacy DTO; no public media resolves. |
+| Current v2 | Current | Reviewed cutover enabled | Full v2 feed through bounded Edge media URLs. |
+| Prior v1 | Current | Reviewed cutover enabled | Legacy DTO backed only by bounded Edge media URLs. |
+| Current v2 | Prior | Either | Fails closed to the static Gallery. |
+| Prior v1 | Prior | Either | Empty runtime feed; no signed media is created. |
 
-Apply the migration before the current Edge source, then publish the Website.
+Apply the expand migration with the gate closed before the current Edge source,
+then publish the Website. Complete and verify the separately reviewed backfill
+before enabling the gate through a later exact cutover migration.
 The temporary `gallery_publishable_submissions(integer, integer)` signature is
 service-role-only, charges one 64 KiB list reservation, and always returns an
 empty set. This intentionally prevents a restored prior Edge Function from
@@ -188,8 +207,8 @@ destructive actions require a separately reviewed retirement packet.
 
 The Gallery delivery change reuses the existing public Gallery Edge Function.
 After the separately disabled monthly-raffle foundation is composed on the
-final integrated release source, `supabase/config.toml` contains exactly 45 functions
-with 28 `verify_jwt=true` and 17 false. Recalculate both counts from the final
+final integrated release source, `supabase/config.toml` contains exactly 49 functions
+with 31 `verify_jwt=true` and 18 false. Recalculate both counts from the final
 exact head before requesting production approval. Any other inventory is not
 authorized by this packet.
 

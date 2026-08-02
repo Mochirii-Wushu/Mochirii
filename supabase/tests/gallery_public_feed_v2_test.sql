@@ -1,5 +1,5 @@
 begin;
-select plan(72);
+select plan(83);
 
 select has_table(
   'private',
@@ -17,6 +17,38 @@ select has_table(
   'private',
   'gallery_moderation_preview_windows',
   'isolated Gallery moderator-preview usage ledger exists'
+);
+
+select has_table(
+  'private',
+  'gallery_public_feed_transition',
+  'private Gallery expand-to-cutover gate exists'
+);
+
+select ok(
+  (
+    select relrowsecurity
+    from pg_class
+    where oid = 'private.gallery_public_feed_transition'::regclass
+  )
+  and not has_table_privilege('anon', 'private.gallery_public_feed_transition', 'SELECT')
+  and not has_table_privilege('authenticated', 'private.gallery_public_feed_transition', 'SELECT')
+  and not has_table_privilege('service_role', 'private.gallery_public_feed_transition', 'SELECT')
+  and not has_table_privilege('service_role', 'private.gallery_public_feed_transition', 'UPDATE'),
+  'the cutover gate has RLS and no direct API grants'
+);
+
+select ok(
+  not has_function_privilege('anon', 'public.gallery_public_feed_transition_state()', 'execute')
+  and not has_function_privilege('authenticated', 'public.gallery_public_feed_transition_state()', 'execute')
+  and has_function_privilege('service_role', 'public.gallery_public_feed_transition_state()', 'execute'),
+  'aggregate transition readiness is callable only through the service role'
+);
+
+select is(
+  (select cutover_enabled from private.gallery_public_feed_transition where singleton),
+  false,
+  'the Gallery v2 cutover gate defaults closed'
 );
 
 select is(
@@ -224,7 +256,10 @@ select
   'member-gallery',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feed-' || series || '.webp',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
-  '{"size":1000,"mimetype":"image/webp"}'::jsonb
+  jsonb_build_object(
+    'size', case when series = 1 then 9000000 else 1000 end,
+    'mimetype', 'image/webp'
+  )
 from fixtures
 union all
 select
@@ -292,7 +327,7 @@ select
   'member-gallery',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/feed-' || series || '.webp',
   'image/webp',
-  1000,
+  case when series = 1 then 9000000 else 1000 end,
   case when series = 88 then 'Unicode Mōchī moment' else 'Gallery item ' || series end,
   'Approved guild image ' || series,
   category,
@@ -308,6 +343,56 @@ select
   640,
   400
 from fixtures;
+
+with fixtures as (
+  select
+    series,
+    ('00000000-0000-4000-8000-' || lpad(series::text, 12, '0'))::uuid as submission_id,
+    ('20000000-0000-4000-8000-' || lpad(series::text, 12, '0'))::uuid as source_object_id
+  from generate_series(1, 90) as series
+)
+insert into private.gallery_source_validations (
+  submission_id,
+  storage_object_id,
+  storage_bucket,
+  storage_path,
+  storage_object_version,
+  storage_object_updated_at,
+  source_mime_type,
+  source_size_bytes,
+  source_width,
+  source_height,
+  source_sha256,
+  validator_version,
+  validated_by,
+  validation_reason
+)
+select
+  fixtures.submission_id,
+  source.id,
+  source.bucket_id,
+  source.name,
+  source.version,
+  source.updated_at,
+  'image/webp',
+  case when fixtures.series = 1 then 9000000 else 1000 end,
+  case when fixtures.series = 1 then 6000 else 1200 end,
+  case when fixtures.series = 1 then 4000 else 800 end,
+  repeat('d', 64),
+  case when fixtures.series = 1
+    then 'gallery-historical-source-v1'
+    else 'gallery-source-v1'
+  end,
+  case when fixtures.series = 1
+    then 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid
+    else null
+  end,
+  case when fixtures.series = 1
+    then 'approved_historical_gallery_backfill'
+    else null
+  end
+from fixtures
+join storage.objects as source on source.id = fixtures.source_object_id;
 
 with fixtures as (
   select
@@ -737,6 +822,106 @@ select throws_ok(
   '22023',
   'Incomplete gallery cursor.',
   'partial cursor tuples are rejected'
+);
+
+delete from private.gallery_source_validations
+where submission_id = '00000000-0000-4000-8000-000000000001';
+
+select throws_ok(
+  $$update private.gallery_public_feed_transition set cutover_enabled = true where singleton$$,
+  '23514',
+  'Gallery public feed is not ready for cutover.',
+  'an incomplete derivative ledger cannot enable the public feed'
+);
+
+select is(
+  (select cutover_enabled from private.gallery_public_feed_transition where singleton),
+  false,
+  'a rejected cutover leaves the private transition gate closed'
+);
+
+insert into private.gallery_source_validations (
+  submission_id,
+  storage_object_id,
+  storage_bucket,
+  storage_path,
+  storage_object_version,
+  storage_object_updated_at,
+  source_mime_type,
+  source_size_bytes,
+  source_width,
+  source_height,
+  source_sha256,
+  validator_version,
+  validated_by,
+  validation_reason
+)
+select
+  submission.id,
+  source.id,
+  source.bucket_id,
+  source.name,
+  source.version,
+  source.updated_at,
+  submission.mime_type,
+  submission.size_bytes,
+  6000,
+  4000,
+  repeat('d', 64),
+  'gallery-historical-source-v1',
+  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'::uuid,
+  'approved_historical_gallery_backfill'
+from public.gallery_submissions as submission
+join storage.objects as source
+  on source.bucket_id = submission.storage_bucket
+  and source.name = submission.storage_path
+where submission.id = '00000000-0000-4000-8000-000000000001';
+
+select ok(
+  (public.gallery_public_feed_transition_state() ->> 'cutoverReady')::boolean
+  and (public.gallery_public_feed_transition_state() ->> 'sourceApprovedCount')::integer = 90
+  and (public.gallery_public_feed_transition_state() ->> 'publicationReadyCount')::integer = 90
+  and (public.gallery_public_feed_transition_state() ->> 'missingPublicationCount')::integer = 0
+  and (public.gallery_public_feed_transition_state() ->> 'oversizedSourceCount')::integer = 1
+  and (public.gallery_public_feed_transition_state() ->> 'unknownCategoryCount')::integer = 0,
+  'aggregate readiness proves complete derivative coverage while retaining the historical source class'
+);
+
+select ok(
+  jsonb_array_length(
+    public.gallery_public_feed_page_v2(24, null, null, null, null, 'newest', null, null) -> 'items'
+  ) = 0
+  and (
+    public.gallery_public_feed_page_v2(24, null, null, null, null, 'newest', null, null)
+      ->> 'cutoverEnabled'
+  )::boolean is false
+  and (
+    public.gallery_public_feed_page_v2(24, null, null, null, null, 'newest', null, null)
+      ->> 'sourceApprovedCount'
+  )::integer = 90,
+  'the additive phase preserves approved sources while exposing no v2 publication rows'
+);
+
+select is(
+  public.gallery_reserve_public_media_v2(
+    '10000000-0000-4000-8000-000000000001',
+    'full'
+  ),
+  null::jsonb,
+  'public media resolution remains closed before the reviewed cutover'
+);
+
+update private.gallery_public_feed_transition
+set cutover_enabled = true
+where singleton;
+
+select ok(
+  (
+    select cutover_enabled and cutover_enabled_at is not null
+    from private.gallery_public_feed_transition
+    where singleton
+  ),
+  'a complete derivative ledger may be enabled only by a privileged migration'
 );
 
 create temporary table gallery_page_one (payload jsonb) on commit drop;
@@ -1326,6 +1511,31 @@ select is(
   ),
   0,
   'a fresh snapshot removes an archived publication from the list feed'
+);
+
+update private.gallery_public_feed_transition
+set cutover_enabled = false
+where singleton;
+
+select ok(
+  not (
+    select cutover_enabled
+    from private.gallery_public_feed_transition
+    where singleton
+  )
+  and (
+    select cutover_enabled_at is null
+    from private.gallery_public_feed_transition
+    where singleton
+  )
+  and jsonb_array_length(
+    public.gallery_public_feed_page_v2(24, null, null, null, null, 'newest', null, null) -> 'items'
+  ) = 0
+  and public.gallery_reserve_public_media_v2(
+    '10000000-0000-4000-8000-000000000001',
+    'full'
+  ) is null,
+  'rollback closes both Gallery list and media delivery without deleting immutable evidence'
 );
 
 select * from finish();

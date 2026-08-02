@@ -1,5 +1,5 @@
 begin;
-select plan(62);
+select plan(73);
 
 select has_column('public', 'gallery_submissions', 'thumbnail_width', 'thumbnail width exists');
 select has_column('public', 'gallery_submissions', 'thumbnail_height', 'thumbnail height exists');
@@ -48,6 +48,7 @@ select is(
       and tablename in (
         'gallery_source_validations',
         'gallery_publication_revisions',
+        'gallery_public_feed_transition',
         'gallery_public_delivery_windows',
         'gallery_moderation_preview_windows'
       )
@@ -58,7 +59,7 @@ select is(
       and qual = 'false'
       and with_check = 'false'
   ),
-  4,
+  5,
   'private Gallery ledgers retain explicit restrictive client-deny policies'
 );
 select ok(
@@ -95,6 +96,15 @@ select ok(
   'source validation RPCs are service-role only'
 );
 select ok(
+  not has_function_privilege('anon', 'public.gallery_historical_source_validation_candidate(uuid)', 'execute')
+  and not has_function_privilege('authenticated', 'public.gallery_historical_source_validation_candidate(uuid)', 'execute')
+  and has_function_privilege('service_role', 'public.gallery_historical_source_validation_candidate(uuid)', 'execute')
+  and not has_function_privilege('anon', 'public.gallery_commit_historical_source_validation(uuid,uuid,timestamptz,uuid,text,timestamptz,text,bigint,integer,integer,text)', 'execute')
+  and not has_function_privilege('authenticated', 'public.gallery_commit_historical_source_validation(uuid,uuid,timestamptz,uuid,text,timestamptz,text,bigint,integer,integer,text)', 'execute')
+  and has_function_privilege('service_role', 'public.gallery_commit_historical_source_validation(uuid,uuid,timestamptz,uuid,text,timestamptz,text,bigint,integer,integer,text)', 'execute'),
+  'historical source validation is isolated to service-role operator tooling'
+);
+select ok(
   to_regprocedure('public.gallery_publishable_submissions(integer,integer)') is not null
   and not has_function_privilege('anon', 'public.gallery_publishable_submissions(integer,integer)', 'execute')
   and not has_function_privilege('authenticated', 'public.gallery_publishable_submissions(integer,integer)', 'execute')
@@ -119,6 +129,7 @@ insert into storage.objects (id, bucket_id, name, owner, metadata) values
   ('10000000-0000-4000-8000-000000000001', 'member-gallery', '11111111-1111-4111-8111-111111111111/original-one.jpg', '11111111-1111-4111-8111-111111111111', '{"size":1000,"mimetype":"image/jpeg"}'),
   ('10000000-0000-4000-8000-000000000002', 'member-gallery', '11111111-1111-4111-8111-111111111111/pending.webp', '11111111-1111-4111-8111-111111111111', '{"size":1100,"mimetype":"image/webp"}'),
   ('10000000-0000-4000-8000-000000000003', 'member-gallery', '11111111-1111-4111-8111-111111111111/unclassified.webp', '11111111-1111-4111-8111-111111111111', '{"size":1200,"mimetype":"image/webp"}'),
+  ('10000000-0000-4000-8000-000000000009', 'member-gallery', '11111111-1111-4111-8111-111111111111/historical-large.jpg', '11111111-1111-4111-8111-111111111111', '{"size":9000000,"mimetype":"image/jpeg"}'),
   ('20000000-0000-4000-8000-000000000001', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000001/display.webp', null, '{"size":900000,"mimetype":"image/webp"}'),
   ('20000000-0000-4000-8000-000000000002', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000001/revisions/31000000-0000-4000-8000-000000000001/thumbnail.webp', null, '{"size":70000,"mimetype":"image/webp"}'),
   ('20000000-0000-4000-8000-000000000004', 'member-gallery', '_approved/publications/30000000-0000-4000-8000-000000000001/revisions/31000000-0000-4000-8000-000000000002/thumbnail.webp', null, '{"size":71000,"mimetype":"image/webp"}'),
@@ -136,7 +147,144 @@ insert into public.gallery_submissions (
   ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/pending.webp', 'image/webp', 1100, 'Pending fixture', 'action', false, false, null, null, null, null),
   ('22222222-2222-4222-8222-222222222223', '11111111-1111-4111-8111-111111111111', '11111111-1111-4111-8111-111111111111/unclassified.webp', 'image/webp', 1200, 'Unclassified fixture', null, false, false, null, null, null, null);
 
+insert into public.gallery_submissions (
+  id, user_id, storage_path, mime_type, size_bytes, title, category,
+  upload_rights_confirmed, status, reviewed_by, reviewed_at, created_at
+) values (
+  '22222222-2222-4222-8222-222222222229',
+  '11111111-1111-4111-8111-111111111111',
+  '11111111-1111-4111-8111-111111111111/historical-large.jpg',
+  'image/jpeg',
+  9000000,
+  'Historical approval fixture',
+  'scenery',
+  true,
+  'approved',
+  '99999999-9999-4999-8999-999999999999',
+  timestamptz '2026-07-01 00:00:00+00',
+  timestamptz '2026-07-01 00:00:00+00'
+);
+
 set local "request.jwt.claim.role" = 'service_role';
+
+select is(
+  (public.gallery_historical_source_validation_candidate(
+    '22222222-2222-4222-8222-222222222229'
+  ) ->> 'validator_version'),
+  'gallery-historical-source-v1',
+  'an approved pre-foundation oversized source is available only to the historical validator'
+);
+
+select is(
+  (public.gallery_source_validation_candidate(
+    '22222222-2222-4222-8222-222222222229'
+  ) ->> 'reason'),
+  'source_outside_validation_limits',
+  'the ordinary source validator keeps the 8 MiB ceiling'
+);
+
+select is(
+  (public.gallery_commit_source_validation(
+    '22222222-2222-4222-8222-222222222229',
+    (select updated_at from public.gallery_submissions where id = '22222222-2222-4222-8222-222222222229'),
+    '10000000-0000-4000-8000-000000000009',
+    (select version from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    'image/jpeg', 9000000, 6000, 4000, repeat('9', 64)
+  ) ->> 'reason'),
+  'invalid_source_validation',
+  'oversized historical evidence cannot enter through the ordinary commit path'
+);
+
+select is(
+  (public.gallery_commit_historical_source_validation(
+    '22222222-2222-4222-8222-222222222229',
+    '99999999-9999-4999-8999-999999999999',
+    (select updated_at from public.gallery_submissions where id = '22222222-2222-4222-8222-222222222229'),
+    '10000000-0000-4000-8000-000000000009',
+    (select version from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    'image/jpeg', 9000000, 8192, 8192, repeat('9', 64)
+  ) ->> 'reason'),
+  'invalid_historical_source_validation',
+  'historical validation keeps a bounded decoded-pixel ceiling'
+);
+
+select is(
+  (public.gallery_commit_historical_source_validation(
+    '22222222-2222-4222-8222-222222222229',
+    '99999999-9999-4999-8999-999999999999',
+    (select updated_at from public.gallery_submissions where id = '22222222-2222-4222-8222-222222222229'),
+    '10000000-0000-4000-8000-000000000009',
+    (select version from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    'image/jpeg', 9000000, 6000, 4000, repeat('9', 64)
+  ) ->> 'committed')::boolean,
+  true,
+  'bounded historical evidence commits without rewriting the approved source'
+);
+
+select ok(
+  (
+    select validator_version = 'gallery-historical-source-v1'
+      and validated_by = '99999999-9999-4999-8999-999999999999'::uuid
+      and validation_reason = 'approved_historical_gallery_backfill'
+    from private.gallery_source_validations
+    where submission_id = '22222222-2222-4222-8222-222222222229'
+  ),
+  'historical validation retains private operator attribution and reason'
+);
+
+select is(
+  (public.gallery_commit_historical_source_validation(
+    '22222222-2222-4222-8222-222222222229',
+    '99999999-9999-4999-8999-999999999999',
+    (select updated_at from public.gallery_submissions where id = '22222222-2222-4222-8222-222222222229'),
+    '10000000-0000-4000-8000-000000000009',
+    (select version from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    'image/jpeg', 9000000, 6000, 4000, repeat('9', 64)
+  ) ->> 'already_validated')::boolean,
+  true,
+  'the exact historical evidence is idempotent'
+);
+
+select throws_ok(
+  $$select public.gallery_commit_moderation(
+    '22222222-2222-4222-8222-222222222229'::uuid,
+    '99999999-9999-4999-8999-999999999999'::uuid,
+    'thumbnail'::text, null::text,
+    null::uuid, null::text, null::text, null::bigint, null::integer, null::integer, null::text,
+    null::uuid, null::text, null::text, null::bigint, null::integer, null::integer, null::text,
+    null::uuid,
+    (select updated_at from public.gallery_submissions where id = '22222222-2222-4222-8222-222222222229')
+  )$$,
+  '22023',
+  'A complete bounded Gallery publication is required.',
+  'historical validation satisfies source review but never bypasses bounded derivative requirements'
+);
+
+select is(
+  (public.gallery_historical_source_validation_candidate(
+    '22222222-2222-4222-8222-222222222221'
+  ) ->> 'reason'),
+  'submission_not_historical_approved',
+  'the historical candidate path rejects ordinary pending submissions'
+);
+
+select is(
+  (public.gallery_commit_historical_source_validation(
+    '22222222-2222-4222-8222-222222222229',
+    '11111111-1111-4111-8111-111111111111',
+    (select updated_at from public.gallery_submissions where id = '22222222-2222-4222-8222-222222222229'),
+    '10000000-0000-4000-8000-000000000009',
+    (select version from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    (select updated_at from storage.objects where id = '10000000-0000-4000-8000-000000000009'),
+    'image/jpeg', 9000000, 6000, 4000, repeat('9', 64)
+  ) ->> 'reason'),
+  'source_validation_conflict',
+  'historical evidence cannot be re-attributed after commit'
+);
 
 select is(
   (public.gallery_commit_moderation(

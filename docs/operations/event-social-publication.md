@@ -72,7 +72,8 @@ Store values only in Supabase Edge Function secrets and Vault. Use name-only
 inventory readback. Required names are documented in
 `supabase/functions/.env.example`; committed values stay empty or `false`.
 
-The one-minute database job requires:
+The foundation migration creates no cron job. A later, separately approved
+one-minute database job requires:
 
 - Vault `project_url`, exactly the Mochirii Supabase project URL;
 - Vault `event_social_scheduler_secret`; and
@@ -93,13 +94,21 @@ After separate exact approvals:
 3. Deploy the manager, scheduler, and reconciliation functions from the exact
    reviewed commit with their reviewed JWT classifications.
 4. Read back migration identity, function version, function count, JWT parity,
-   cron name/schedule, Vault-name presence, destination rows, and template
-   rows. Do not invoke a provider.
+   the absence of `event-social-publication-every-minute`, destination rows,
+   and template rows. Do not invoke a provider.
 5. Invoke the worker only in Preview with exact `{}` and the Preview secret.
    Require zero provider requests while all flags are false.
-6. In production, allow the normal one-minute tick only after the no-provider
-   readback is complete. With destinations disabled it may project future
-   occurrences, but it cannot stage or publish provider content.
+6. Stop with no production scheduler secret and no cron job. Scheduler
+   activation is a separate release decision.
+
+For a later scheduler activation, obtain exact approval for the Vault-name
+installation and a separately reviewed `cron.schedule` change. Keep every
+destination and publication flag false, revalidate the exact project URL and
+secret-name parity, then read back exactly one
+`event-social-publication-every-minute` job at `* * * * *`. With destinations
+disabled, the tick may project future occurrences but cannot stage or publish
+provider content. Any unexpected job, schedule, or function invocation fails
+the activation gate.
 
 ## Exact reusable-template approval
 

@@ -2,15 +2,14 @@
 
 ## Status
 
-The Gallery publishes reviewed, immutable, service-owned WebP derivatives from
-the private `member-gallery` bucket. The current schema-v2 application gives
-visitors stable, credential-free Edge media URLs keyed only by an opaque
-publication UUID. Member upload paths, member identity, raw originals,
-provider credentials, and bearer-capability URLs never cross the public DTO
-boundary. The current Edge Function also recognizes the prior browser's exact
-empty-object list request and maps the same public evidence into its legacy DTO
-field names. Those historical URL fields contain metered Edge URLs, never
-Storage paths or signed Storage capabilities.
+The Gallery foundation publishes only reviewed, immutable, service-owned WebP
+derivatives from the private `member-gallery` bucket. Its private cutover gate
+defaults closed: schema-v2 and legacy list requests return valid empty pages and
+media resolution returns no object until a later migration proves complete
+backfill and enables the gate. Once enabled, visitors receive stable,
+credential-free Edge media URLs keyed only by an opaque publication UUID.
+Member upload paths, member identity, raw originals, provider credentials, and
+bearer-capability URLs never cross the public DTO boundary.
 
 This document describes source behavior only. Migration application, function
 deployment, historical publication work, and Website release remain separately
@@ -32,11 +31,19 @@ source:
 - display WebP: at most 2 MiB and 2560 pixels on either edge
 - thumbnail WebP: at most 80 KiB and 720 pixels on either edge
 
-The private source validator accepts only static JPEG, PNG, or WebP input no
-larger than 8 MiB, 4096 pixels per edge, or 12.6 megapixels. Its evidence is
+The ordinary private source validator accepts only static JPEG, PNG, or WebP
+input no larger than 8 MiB, 4096 pixels per edge, or 12.6 megapixels. Its evidence is
 bound to the submission revision and exact Storage object ID, version,
 timestamp, MIME type, size, decoded dimensions, SHA-256, and validator version.
 Stale or mismatched evidence fails closed.
+
+Approved pre-foundation sources above 8 MiB use a distinct service-role-only
+historical evidence path. It is available only while cutover is closed, keeps
+the original private and immutable, requires operator attribution plus exact
+row/object compare-and-set evidence, and is capped at the retained 50 MiB,
+8192-edge, 40-megapixel legacy class. Ordinary uploads never inherit those
+limits. Historical decoding is an approval-gated operator task outside the
+Edge preview runtime; public derivatives keep the same 2 MiB and 80 KiB caps.
 
 For moderator review, `prepare_preview` reserves the exact source bytes before
 the private object is downloaded, performs the structural validation and a
@@ -218,7 +225,7 @@ Before merge or provider authorization:
 7. Recalculate migrations, function inventory, JWT parity, and exact source
    head before requesting Vercel or Supabase authorization.
 
-The integrated source baseline contains exactly 45 Edge Functions with 28/17
+The integrated source baseline contains exactly 49 Edge Functions with 31/18
 JWT parity. Recalculate that exact inventory from the final source head before
 release. That count is evidence for this source head, not permission to deploy a
 later head. No provider write, preview, migration application, function deploy,
@@ -228,13 +235,15 @@ Use this release-order and rollback matrix:
 
 | Website browser | Gallery Edge | Publication migration | Result |
 | --- | --- | --- | --- |
-| Current v2 | Current | Applied | Full schema-v2 feed and per-request metered media. |
-| Prior v1 | Current | Applied | Exact `{}` request receives legacy DTO field names containing current metered Edge thumbnail and display URLs. |
+| Current v2 | Current | Expand applied, gate closed | Valid empty schema-v2 page; no media resolution. |
+| Prior v1 | Current | Expand applied, gate closed | Valid empty legacy DTO; no media resolution. |
 | Current v2 | Prior | Applied | Runtime feed fails closed; the static Gallery remains available. |
 | Prior v1 | Prior | Applied | Runtime feed is empty; the static Gallery remains available and no media capability is minted. |
+| Current v2 | Current | Reviewed backfill complete and cutover enabled | Full schema-v2 feed and per-request metered derivative media. |
 
-The safe rollout order is migration first, current Edge second, then the
-Website. The migration retains the service-role-only
+The safe rollout order is expand migration first, current Edge second, then the
+Website, followed by the separately reviewed 13-row backfill and finally an
+exact readiness-checked cutover migration. The expand migration retains the service-role-only
 `gallery_publishable_submissions(integer, integer)` signature solely as a
 list-budgeted empty-set guard. This makes a separately restored prior Edge
 Function unable to mint replayable Storage URLs. Deploying the current Edge

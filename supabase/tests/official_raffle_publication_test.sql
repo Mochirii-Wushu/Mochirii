@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(29);
+SELECT plan(30);
 
 CREATE TEMP TABLE spinner_dispatch_probe (
   call_count integer NOT NULL DEFAULT 0
@@ -24,12 +24,20 @@ INSERT INTO auth.users (
 ) VALUES (
   '91919191-9191-4919-8919-919191919191',
   'authenticated', 'authenticated', 'raffle-publication-test@example.invalid', '', now(), now(), now()
+), (
+  '92929292-9292-4929-8929-929292929292',
+  'authenticated', 'authenticated', 'raffle-unverified-test@example.invalid', '', now(), now(), now()
 );
 
 UPDATE public.member_profiles
 SET display_name = 'Jade Lantern', member_status = 'active',
   has_required_discord_roles = true, discord_verified_at = now()
 WHERE id = '91919191-9191-4919-8919-919191919191';
+
+UPDATE public.member_profiles
+SET display_name = 'Unverified Lantern', member_status = 'active',
+  has_required_discord_roles = false, discord_verified_at = null
+WHERE id = '92929292-9292-4929-8929-929292929292';
 
 SELECT ok(to_regclass('public.spinner_raffle_result_publications') IS NOT NULL, 'official result bridge exists');
 SELECT ok(to_regclass('public.spinner_raffle_result_revocations') IS NOT NULL, 'result revocation ledger exists');
@@ -259,6 +267,15 @@ SELECT is(
   NULL,
   'an anonymous viewer receives no guild display name'
 );
+
+SELECT set_config('request.jwt.claim.sub', '92929292-9292-4929-8929-929292929292', true);
+SET LOCAL ROLE authenticated;
+SELECT ok(
+  (SELECT public_label = 'Winner Confirmed' AND display_name is null
+   FROM public.get_latest_official_raffle_winner()),
+  'an authenticated but unverified member receives only the privacy-safe winner label'
+);
+RESET ROLE;
 
 SELECT set_config('request.jwt.claim.sub', '91919191-9191-4919-8919-919191919191', true);
 SET LOCAL ROLE authenticated;

@@ -27,12 +27,13 @@ Current member Gallery behavior:
 
 - Storage bucket: `member-gallery`
 - Bucket visibility: private
-- Upload cap: `8 MB` / `8388608` bytes
+- Ordinary browser/validation upload policy: `8 MiB` / `8388608` bytes
+- Transitional private bucket ceiling: retained at the historical `50 MiB` until the 13-row derivative backfill and a separately reviewed cutover are complete
 - Allowed MIME types: `image/jpeg`, `image/png`, `image/webp`
 - Submission statuses: `pending`, `approved`, `rejected`, `archived`
 - Review queue signed preview lifetime: 10 minutes
 - Public media retention overlap: at least 1 hour for in-progress immutable snapshot delivery; successful browser media caches remain private for 5 minutes
-- Public Gallery reads approved member submissions through `list-approved-gallery-submissions`
+- Public Gallery reads only cutover-enabled immutable publications through `list-approved-gallery-submissions`; the expand phase returns an empty runtime feed
 - Leader Dashboard reads queue states through `list-gallery-review-queue`
 - Moderation actions are expected to create `gallery_moderation_events`
 - Rejected smoke-test cleanup is implemented through `delete-rejected-gallery-submission` and the Leader Dashboard rejected queue. It remains deploy-gated until the Edge Function is explicitly deployed.

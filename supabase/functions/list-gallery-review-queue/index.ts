@@ -61,7 +61,7 @@ function emptySummary(status: string) {
     approved: 0,
     rejected: 0,
     archived: 0,
-    missingThumbnails: 0,
+    missingPublications: 0,
     total: 0,
     shown: 0,
   };
@@ -379,27 +379,27 @@ async function handleRequest(req: Request): Promise<Response> {
     summary.total += count;
   }
 
-  const { count: missingThumbnailCount, error: missingThumbnailCountError } =
+  const { count: missingPublicationCount, error: missingPublicationCountError } =
     await access.adminClient
       .from("gallery_submissions")
       .select("id", { count: "exact", head: true })
       .eq("status", "approved")
-      .is("thumbnail_revision_id", null);
+      .is("gallery_publication_id", null);
 
-  if (missingThumbnailCountError) {
-    console.error("list-gallery-review-queue thumbnail count failed", {
-      code: missingThumbnailCountError.code,
+  if (missingPublicationCountError) {
+    console.error("list-gallery-review-queue publication count failed", {
+      code: missingPublicationCountError.code,
     });
     return jsonResponse(
       {
         ok: false,
-        error: "thumbnail_count_failed",
-        message: "Gallery thumbnail backfill count could not be loaded.",
+        error: "publication_count_failed",
+        message: "Gallery publication backfill count could not be loaded.",
       },
       500,
     );
   }
-  summary.missingThumbnails = Number(missingThumbnailCount || 0);
+  summary.missingPublications = Number(missingPublicationCount || 0);
 
   let submissionQuery = access.adminClient
     .from("gallery_submissions")
@@ -410,9 +410,9 @@ async function handleRequest(req: Request): Promise<Response> {
     .eq("status", requestedStatus);
 
   if (thumbnailState === "missing") {
-    submissionQuery = submissionQuery.is("thumbnail_revision_id", null);
+    submissionQuery = submissionQuery.is("gallery_publication_id", null);
   } else if (thumbnailState === "ready") {
-    submissionQuery = submissionQuery.not("thumbnail_revision_id", "is", null);
+    submissionQuery = submissionQuery.not("gallery_publication_id", "is", null);
   }
 
   if (requestedStatus === "pending") {

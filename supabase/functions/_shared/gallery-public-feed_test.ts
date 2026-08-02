@@ -243,6 +243,7 @@ function databasePage(): Record<string, unknown> {
       id: cursorValue.id,
       snapshotAt: cursorValue.snapshotAt,
     },
+    cutoverEnabled: true,
     totalEligible: 2,
     sourceApprovedCount: 2,
     publicationReadyCount: 2,
@@ -283,6 +284,36 @@ Deno.test("strict database page evidence rejects malformed empty and aggregate e
   assert(
     parseGalleryDatabasePage({ ...databasePage(), hasMore: false }) === null,
     "cursor and pagination mismatch was accepted",
+  );
+  const transitionPage = {
+    ...databasePage(),
+    items: [],
+    hasMore: false,
+    nextCursor: null,
+    cutoverEnabled: false,
+    totalEligible: 0,
+    sourceApprovedCount: 13,
+    publicationReadyCount: 0,
+    facets: {
+      "member-submissions": 0,
+      portraits: 0,
+      gatherings: 0,
+      action: 0,
+      scenery: 0,
+      companions: 0,
+    },
+    unknownCategoryCount: 0,
+  };
+  assert(
+    parseGalleryDatabasePage(transitionPage),
+    "closed expand-phase Gallery evidence was rejected",
+  );
+  assert(
+    parseGalleryDatabasePage({
+      ...transitionPage,
+      items: databasePage().items,
+    }) === null,
+    "the closed expand-phase gate exposed a publication item",
   );
   assert(
     parseGalleryDatabasePage({

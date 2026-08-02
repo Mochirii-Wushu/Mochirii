@@ -37,16 +37,12 @@ alter table public.gallery_submissions
     )
   ) not valid;
 
-alter table public.gallery_submissions
-  drop constraint if exists gallery_submissions_size_bytes_check;
-
-alter table public.gallery_submissions
-  add constraint gallery_submissions_size_bytes_check
-  check (size_bytes between 1 and 8388608) not valid;
-
-update storage.buckets
-set file_size_limit = 8388608
-where id = 'member-gallery';
+-- Keep the existing source-upload ceiling during the additive rollout. Two
+-- reviewed historical sources are larger than the future 8 MiB policy, and a
+-- lower bucket limit would make their normalization path asymmetric before
+-- the reviewed publication derivatives exist. The later cutover migration may
+-- lower both limits only after the readiness gate proves every approved source
+-- has an active immutable display/thumbnail revision.
 
 create table private.gallery_source_validations (
   submission_id uuid primary key
@@ -62,23 +58,54 @@ create table private.gallery_source_validations (
   source_height integer not null,
   source_sha256 text not null,
   validator_version text not null,
+  validated_by uuid references auth.users(id) on delete restrict,
+  validation_reason text,
   validated_at timestamptz not null default statement_timestamp(),
   constraint gallery_source_validation_bucket_check
     check (storage_bucket = 'member-gallery'),
   constraint gallery_source_validation_mime_check
     check (source_mime_type in ('image/jpeg', 'image/png', 'image/webp')),
   constraint gallery_source_validation_size_check
-    check (source_size_bytes between 1 and 8388608),
+    check (
+      (validator_version = 'gallery-source-v1'
+        and source_size_bytes between 1 and 8388608)
+      or (validator_version = 'gallery-historical-source-v1'
+        and source_size_bytes between 8388609 and 52428800)
+    ),
   constraint gallery_source_validation_width_check
-    check (source_width between 1 and 4096),
+    check (
+      (validator_version = 'gallery-source-v1'
+        and source_width between 1 and 4096)
+      or (validator_version = 'gallery-historical-source-v1'
+        and source_width between 1 and 8192)
+    ),
   constraint gallery_source_validation_height_check
-    check (source_height between 1 and 4096),
+    check (
+      (validator_version = 'gallery-source-v1'
+        and source_height between 1 and 4096)
+      or (validator_version = 'gallery-historical-source-v1'
+        and source_height between 1 and 8192)
+    ),
   constraint gallery_source_validation_pixels_check
-    check (source_width::bigint * source_height::bigint <= 12600000),
+    check (
+      (validator_version = 'gallery-source-v1'
+        and source_width::bigint * source_height::bigint <= 12600000)
+      or (validator_version = 'gallery-historical-source-v1'
+        and source_width::bigint * source_height::bigint <= 40000000)
+    ),
   constraint gallery_source_validation_sha256_check
     check (source_sha256 ~ '^[0-9a-f]{64}$'),
   constraint gallery_source_validation_version_check
-    check (validator_version = 'gallery-source-v1')
+    check (validator_version in ('gallery-source-v1', 'gallery-historical-source-v1')),
+  constraint gallery_source_validation_attribution_check
+    check (
+      (validator_version = 'gallery-source-v1'
+        and validated_by is null
+        and validation_reason is null)
+      or (validator_version = 'gallery-historical-source-v1'
+        and validated_by is not null
+        and validation_reason = 'approved_historical_gallery_backfill')
+    )
 );
 
 alter table private.gallery_source_validations enable row level security;
@@ -86,6 +113,10 @@ revoke all on table private.gallery_source_validations
 from public, anon, authenticated, service_role;
 create policy service_only_default_deny on private.gallery_source_validations
   as restrictive for all to anon, authenticated using (false) with check (false);
+
+create index gallery_source_validations_validated_by_idx
+on private.gallery_source_validations (validated_by)
+where validated_by is not null;
 
 create table private.gallery_publication_revisions (
   id uuid primary key,
@@ -167,6 +198,38 @@ alter table private.gallery_publication_revisions enable row level security;
 revoke all on table private.gallery_publication_revisions
 from public, anon, authenticated, service_role;
 create policy service_only_default_deny on private.gallery_publication_revisions
+  as restrictive for all to anon, authenticated using (false) with check (false);
+
+-- The immutable publication ledger is installed before it becomes the public
+-- read source. This singleton gate is private, defaults closed, and has no API
+-- mutation path. A later reviewed migration may enable it only after the
+-- database-enforced readiness trigger proves complete source-to-publication
+-- coverage.
+create table private.gallery_public_feed_transition (
+  singleton boolean primary key default true,
+  cutover_enabled boolean not null default false,
+  cutover_enabled_at timestamptz,
+  updated_at timestamptz not null default statement_timestamp(),
+  constraint gallery_public_feed_transition_singleton_check
+    check (singleton),
+  constraint gallery_public_feed_transition_timestamp_check
+    check (
+      (not cutover_enabled and cutover_enabled_at is null)
+      or (cutover_enabled and cutover_enabled_at is not null)
+    )
+);
+
+insert into private.gallery_public_feed_transition (
+  singleton,
+  cutover_enabled,
+  cutover_enabled_at
+) values (true, false, null)
+on conflict (singleton) do nothing;
+
+alter table private.gallery_public_feed_transition enable row level security;
+revoke all on table private.gallery_public_feed_transition
+from public, anon, authenticated, service_role;
+create policy service_only_default_deny on private.gallery_public_feed_transition
   as restrictive for all to anon, authenticated using (false) with check (false);
 
 create table private.gallery_public_delivery_windows (
@@ -472,6 +535,172 @@ on private.gallery_publication_revisions (
   id desc
 );
 
+create function private.gallery_public_feed_readiness_counts()
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with approved_sources as (
+    select submission.*
+    from public.gallery_submissions as submission
+    where submission.status = 'approved'
+      and submission.reviewed_at is not null
+  ), publication_ready as (
+    select distinct source.id
+    from approved_sources as source
+    join private.gallery_source_validations as validation
+      on validation.submission_id = source.id
+      and validation.storage_bucket = source.storage_bucket
+      and validation.storage_path = source.storage_path
+      and validation.source_mime_type = source.mime_type
+      and validation.source_size_bytes = source.size_bytes
+      and validation.validator_version in ('gallery-source-v1', 'gallery-historical-source-v1')
+    join storage.objects as source_object
+      on source_object.id = validation.storage_object_id
+      and source_object.bucket_id = validation.storage_bucket
+      and source_object.name = validation.storage_path
+      and source_object.version is not distinct from validation.storage_object_version
+      and source_object.updated_at = validation.storage_object_updated_at
+      and coalesce(source_object.metadata ->> 'size', '') ~ '^[0-9]+$'
+      and (source_object.metadata ->> 'size')::bigint = validation.source_size_bytes
+      and lower(coalesce(source_object.metadata ->> 'mimetype', '')) = validation.source_mime_type
+    join private.gallery_publication_revisions as publication
+      on publication.submission_id = source.id
+      and publication.publication_id = source.gallery_publication_id
+      and publication.id = source.thumbnail_revision_id
+      and publication.thumbnail_storage_path = source.thumbnail_storage_path
+      and publication.thumbnail_mime_type = source.thumbnail_mime_type
+      and publication.thumbnail_size_bytes = source.thumbnail_size_bytes
+      and publication.thumbnail_width = source.thumbnail_width
+      and publication.thumbnail_height = source.thumbnail_height
+      and publication.public_category = source.category
+      and publication.visible_until is null
+    join storage.objects as display_object
+      on display_object.id = publication.original_storage_object_id
+      and display_object.bucket_id = publication.storage_bucket
+      and display_object.name = publication.original_storage_path
+      and display_object.version is not distinct from publication.original_storage_object_version
+      and display_object.updated_at = publication.original_storage_object_updated_at
+      and coalesce(display_object.metadata ->> 'size', '') ~ '^[0-9]+$'
+      and (display_object.metadata ->> 'size')::bigint = publication.original_size_bytes
+      and lower(coalesce(display_object.metadata ->> 'mimetype', '')) = publication.original_mime_type
+    join storage.objects as thumbnail_object
+      on thumbnail_object.id = publication.thumbnail_storage_object_id
+      and thumbnail_object.bucket_id = publication.storage_bucket
+      and thumbnail_object.name = publication.thumbnail_storage_path
+      and thumbnail_object.version is not distinct from publication.thumbnail_storage_object_version
+      and thumbnail_object.updated_at = publication.thumbnail_storage_object_updated_at
+      and coalesce(thumbnail_object.metadata ->> 'size', '') ~ '^[0-9]+$'
+      and (thumbnail_object.metadata ->> 'size')::bigint = publication.thumbnail_size_bytes
+      and lower(coalesce(thumbnail_object.metadata ->> 'mimetype', '')) = publication.thumbnail_mime_type
+  ), counts as (
+    select
+      (select count(*) from approved_sources)::bigint as source_approved_count,
+      (select count(*) from publication_ready)::bigint as publication_ready_count,
+      (
+        select count(*)
+        from approved_sources
+        where size_bytes > 8388608
+      )::bigint as oversized_source_count,
+      (
+        select count(*)
+        from approved_sources
+        where category is null
+          or category not in ('portraits', 'gatherings', 'action', 'scenery', 'companions')
+      )::bigint as unknown_category_count
+  ), transition as (
+    select coalesce(
+      (
+        select cutover_enabled
+        from private.gallery_public_feed_transition
+        where singleton
+      ),
+      false
+    ) as cutover_enabled
+  )
+  select jsonb_build_object(
+    'cutoverEnabled', transition.cutover_enabled,
+    'cutoverReady',
+      counts.source_approved_count = counts.publication_ready_count
+      and counts.unknown_category_count = 0,
+    'sourceApprovedCount', counts.source_approved_count,
+    'publicationReadyCount', counts.publication_ready_count,
+    'missingPublicationCount', greatest(
+      counts.source_approved_count - counts.publication_ready_count,
+      0
+    ),
+    'oversizedSourceCount', counts.oversized_source_count,
+    'unknownCategoryCount', counts.unknown_category_count
+  )
+  from counts
+  cross join transition;
+$$;
+
+revoke all on function private.gallery_public_feed_readiness_counts()
+from public, anon, authenticated, service_role;
+
+create function public.gallery_public_feed_transition_state()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if coalesce(
+    nullif(current_setting('request.jwt.claim.role', true), ''),
+    auth.jwt() ->> 'role',
+    ''
+  ) <> 'service_role' then
+    raise exception 'Service role required.' using errcode = '42501';
+  end if;
+
+  return private.gallery_public_feed_readiness_counts();
+end;
+$$;
+
+revoke all on function public.gallery_public_feed_transition_state()
+from public, anon, authenticated;
+grant execute on function public.gallery_public_feed_transition_state()
+to service_role;
+
+create function private.guard_gallery_public_feed_transition()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  readiness jsonb;
+begin
+  if new.singleton is distinct from true then
+    raise exception 'Gallery public feed transition is a singleton.' using errcode = '23514';
+  end if;
+
+  if new.cutover_enabled and not old.cutover_enabled then
+    readiness := private.gallery_public_feed_readiness_counts();
+    if coalesce((readiness ->> 'cutoverReady')::boolean, false) is not true then
+      raise exception 'Gallery public feed is not ready for cutover.' using errcode = '23514';
+    end if;
+    new.cutover_enabled_at := statement_timestamp();
+  elsif not new.cutover_enabled then
+    new.cutover_enabled_at := null;
+  end if;
+
+  new.updated_at := statement_timestamp();
+  return new;
+end;
+$$;
+
+revoke all on function private.guard_gallery_public_feed_transition()
+from public, anon, authenticated, service_role;
+
+create trigger guard_gallery_public_feed_transition
+before update on private.gallery_public_feed_transition
+for each row execute function private.guard_gallery_public_feed_transition();
+
 -- Keep the exact v1 RPC signature during the bounded application rollback
 -- window, but fail closed with an empty, list-budgeted result. The retired Edge
 -- source minted replayable Storage bearer URLs and must never remain a media
@@ -702,6 +931,100 @@ from public, anon, authenticated;
 grant execute on function public.gallery_source_validation_candidate(uuid)
 to service_role;
 
+-- Historical sources keep their immutable owner-uploaded bytes. This separate
+-- candidate path is intentionally unavailable to the ordinary review worker:
+-- it covers only approved pre-foundation records above the new 8 MiB policy
+-- and never makes those bytes public.
+create function public.gallery_historical_source_validation_candidate(
+  p_submission_id uuid
+)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  current_submission public.gallery_submissions%rowtype;
+  source_object storage.objects%rowtype;
+  object_size bigint;
+  object_mime text;
+begin
+  select *
+  into current_submission
+  from public.gallery_submissions
+  where id = p_submission_id;
+
+  if not found then
+    return jsonb_build_object('ok', false, 'reason', 'submission_not_found');
+  end if;
+
+  if current_submission.status <> 'approved'
+    or current_submission.reviewed_at is null
+    or current_submission.created_at >= timestamptz '2026-07-28 13:20:00+00'
+  then
+    return jsonb_build_object('ok', false, 'reason', 'submission_not_historical_approved');
+  end if;
+
+  if exists (
+    select 1
+    from private.gallery_public_feed_transition
+    where singleton and cutover_enabled
+  ) then
+    return jsonb_build_object('ok', false, 'reason', 'cutover_already_enabled');
+  end if;
+
+  if current_submission.storage_bucket <> 'member-gallery'
+    or current_submission.size_bytes not between 8388609 and 52428800
+    or current_submission.mime_type not in ('image/jpeg', 'image/png', 'image/webp')
+  then
+    return jsonb_build_object('ok', false, 'reason', 'source_outside_historical_limits');
+  end if;
+
+  select *
+  into source_object
+  from storage.objects
+  where bucket_id = current_submission.storage_bucket
+    and name = current_submission.storage_path;
+
+  if not found then
+    return jsonb_build_object('ok', false, 'reason', 'source_object_missing');
+  end if;
+
+  object_size := case
+    when coalesce(source_object.metadata ->> 'size', '') ~ '^[0-9]+$'
+      then (source_object.metadata ->> 'size')::bigint
+    else null
+  end;
+  object_mime := lower(coalesce(source_object.metadata ->> 'mimetype', ''));
+
+  if object_size is distinct from current_submission.size_bytes
+    or object_mime <> current_submission.mime_type
+  then
+    return jsonb_build_object('ok', false, 'reason', 'source_object_mismatch');
+  end if;
+
+  return jsonb_build_object(
+    'ok', true,
+    'submission_id', current_submission.id,
+    'submission_updated_at', current_submission.updated_at,
+    'storage_bucket', current_submission.storage_bucket,
+    'storage_path', current_submission.storage_path,
+    'source_mime_type', current_submission.mime_type,
+    'source_size_bytes', current_submission.size_bytes,
+    'storage_object_id', source_object.id,
+    'storage_object_version', source_object.version,
+    'storage_object_updated_at', source_object.updated_at,
+    'validator_version', 'gallery-historical-source-v1'
+  );
+end;
+$$;
+
+revoke all on function public.gallery_historical_source_validation_candidate(uuid)
+from public, anon, authenticated;
+grant execute on function public.gallery_historical_source_validation_candidate(uuid)
+to service_role;
+
 create or replace function public.gallery_commit_source_validation(
   p_submission_id uuid,
   p_expected_submission_updated_at timestamptz,
@@ -869,6 +1192,207 @@ grant execute on function public.gallery_commit_source_validation(
   uuid, timestamptz, uuid, text, timestamptz, text, bigint, integer, integer, text
 ) to service_role;
 
+-- A later, separately approved operator run may bind trusted decoder evidence
+-- to an already-approved oversized historical source. The immutable source is
+-- never rewritten, the exact submission and Storage revisions are compared,
+-- and the operator identity is retained in the private ledger.
+create function public.gallery_commit_historical_source_validation(
+  p_submission_id uuid,
+  p_operator_id uuid,
+  p_expected_submission_updated_at timestamptz,
+  p_expected_storage_object_id uuid,
+  p_expected_storage_object_version text,
+  p_expected_storage_object_updated_at timestamptz,
+  p_source_mime_type text,
+  p_source_size_bytes bigint,
+  p_source_width integer,
+  p_source_height integer,
+  p_source_sha256 text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  current_submission public.gallery_submissions%rowtype;
+  source_object storage.objects%rowtype;
+  existing_validation private.gallery_source_validations%rowtype;
+  object_size bigint;
+  object_mime text;
+begin
+  if p_operator_id is null
+    or not exists (select 1 from auth.users where id = p_operator_id)
+  then
+    return jsonb_build_object('committed', false, 'reason', 'operator_not_found');
+  end if;
+
+  select *
+  into current_submission
+  from public.gallery_submissions
+  where id = p_submission_id
+  for update;
+
+  if not found then
+    return jsonb_build_object('committed', false, 'reason', 'submission_not_found');
+  end if;
+
+  if current_submission.status <> 'approved'
+    or current_submission.reviewed_at is null
+    or current_submission.created_at >= timestamptz '2026-07-28 13:20:00+00'
+  then
+    return jsonb_build_object('committed', false, 'reason', 'submission_not_historical_approved');
+  end if;
+
+  if exists (
+    select 1
+    from private.gallery_public_feed_transition
+    where singleton and cutover_enabled
+  ) then
+    return jsonb_build_object('committed', false, 'reason', 'cutover_already_enabled');
+  end if;
+
+  if p_expected_submission_updated_at is null
+    or current_submission.updated_at is distinct from p_expected_submission_updated_at
+  then
+    return jsonb_build_object('committed', false, 'reason', 'stale_submission_revision');
+  end if;
+
+  select *
+  into source_object
+  from storage.objects
+  where id = p_expected_storage_object_id
+    and bucket_id = current_submission.storage_bucket
+    and name = current_submission.storage_path
+  for key share;
+
+  if not found
+    or source_object.version is distinct from p_expected_storage_object_version
+    or source_object.updated_at is distinct from p_expected_storage_object_updated_at
+  then
+    return jsonb_build_object('committed', false, 'reason', 'stale_source_object');
+  end if;
+
+  object_size := case
+    when coalesce(source_object.metadata ->> 'size', '') ~ '^[0-9]+$'
+      then (source_object.metadata ->> 'size')::bigint
+    else null
+  end;
+  object_mime := lower(coalesce(source_object.metadata ->> 'mimetype', ''));
+
+  if p_source_size_bytes is distinct from current_submission.size_bytes
+    or p_source_size_bytes is distinct from object_size
+    or p_source_mime_type is distinct from current_submission.mime_type
+    or p_source_mime_type is distinct from object_mime
+    or p_source_size_bytes not between 8388609 and 52428800
+    or p_source_mime_type not in ('image/jpeg', 'image/png', 'image/webp')
+    or p_source_width not between 1 and 8192
+    or p_source_height not between 1 and 8192
+    or p_source_width::bigint * p_source_height::bigint > 40000000
+    or p_source_sha256 !~ '^[0-9a-f]{64}$'
+  then
+    return jsonb_build_object('committed', false, 'reason', 'invalid_historical_source_validation');
+  end if;
+
+  select *
+  into existing_validation
+  from private.gallery_source_validations
+  where submission_id = current_submission.id;
+
+  if found then
+    if row(
+      existing_validation.storage_object_id,
+      existing_validation.storage_bucket,
+      existing_validation.storage_path,
+      existing_validation.storage_object_version,
+      existing_validation.storage_object_updated_at,
+      existing_validation.source_mime_type,
+      existing_validation.source_size_bytes,
+      existing_validation.source_width,
+      existing_validation.source_height,
+      existing_validation.source_sha256,
+      existing_validation.validator_version,
+      existing_validation.validated_by,
+      existing_validation.validation_reason
+    ) is distinct from row(
+      source_object.id,
+      current_submission.storage_bucket,
+      current_submission.storage_path,
+      source_object.version,
+      source_object.updated_at,
+      p_source_mime_type,
+      p_source_size_bytes,
+      p_source_width,
+      p_source_height,
+      p_source_sha256,
+      'gallery-historical-source-v1'::text,
+      p_operator_id,
+      'approved_historical_gallery_backfill'::text
+    ) then
+      return jsonb_build_object('committed', false, 'reason', 'source_validation_conflict');
+    end if;
+
+    return jsonb_build_object(
+      'committed', true,
+      'already_validated', true,
+      'width', existing_validation.source_width,
+      'height', existing_validation.source_height,
+      'validator_version', existing_validation.validator_version,
+      'validated_at', existing_validation.validated_at
+    );
+  end if;
+
+  insert into private.gallery_source_validations (
+    submission_id,
+    storage_object_id,
+    storage_bucket,
+    storage_path,
+    storage_object_version,
+    storage_object_updated_at,
+    source_mime_type,
+    source_size_bytes,
+    source_width,
+    source_height,
+    source_sha256,
+    validator_version,
+    validated_by,
+    validation_reason
+  ) values (
+    current_submission.id,
+    source_object.id,
+    current_submission.storage_bucket,
+    current_submission.storage_path,
+    source_object.version,
+    source_object.updated_at,
+    p_source_mime_type,
+    p_source_size_bytes,
+    p_source_width,
+    p_source_height,
+    p_source_sha256,
+    'gallery-historical-source-v1',
+    p_operator_id,
+    'approved_historical_gallery_backfill'
+  )
+  returning * into existing_validation;
+
+  return jsonb_build_object(
+    'committed', true,
+    'already_validated', false,
+    'width', existing_validation.source_width,
+    'height', existing_validation.source_height,
+    'validator_version', existing_validation.validator_version,
+    'validated_at', existing_validation.validated_at
+  );
+end;
+$$;
+
+revoke all on function public.gallery_commit_historical_source_validation(
+  uuid, uuid, timestamptz, uuid, text, timestamptz, text, bigint, integer, integer, text
+) from public, anon, authenticated;
+grant execute on function public.gallery_commit_historical_source_validation(
+  uuid, uuid, timestamptz, uuid, text, timestamptz, text, bigint, integer, integer, text
+) to service_role;
+
 create or replace function public.gallery_source_validation_states(
   p_submission_ids uuid[]
 )
@@ -1034,7 +1558,7 @@ begin
       and validation.storage_path = current_submission.storage_path
       and validation.source_mime_type = current_submission.mime_type
       and validation.source_size_bytes = current_submission.size_bytes
-      and validation.validator_version = 'gallery-source-v1';
+      and validation.validator_version in ('gallery-source-v1', 'gallery-historical-source-v1');
 
     if not found then
       return jsonb_build_object('committed', false, 'reason', 'source_not_validated');
@@ -1397,8 +1921,16 @@ declare
   has_cursor boolean := p_after_reviewed_at is not null
     or p_after_created_at is not null
     or p_after_id is not null;
+  cutover_enabled boolean := false;
   result jsonb;
 begin
+  select transition.cutover_enabled
+  into cutover_enabled
+  from private.gallery_public_feed_transition as transition
+  where transition.singleton;
+
+  cutover_enabled := coalesce(cutover_enabled, false);
+
   if requested_sort not in ('newest', 'oldest') then
     raise exception 'Invalid gallery sort.' using errcode = '22023';
   end if;
@@ -1431,7 +1963,7 @@ begin
     raise exception 'Gallery snapshot expired.' using errcode = '22023';
   end if;
 
-  with eligible as (
+  with publication_ready as (
     select
       publication.publication_id as id,
       publication.id as revision_id,
@@ -1449,6 +1981,13 @@ begin
     join public.gallery_submissions as submission
       on submission.id = publication.submission_id
       and submission.gallery_publication_id = publication.publication_id
+      and submission.thumbnail_revision_id = publication.id
+      and submission.thumbnail_storage_path = publication.thumbnail_storage_path
+      and submission.thumbnail_mime_type = publication.thumbnail_mime_type
+      and submission.thumbnail_size_bytes = publication.thumbnail_size_bytes
+      and submission.thumbnail_width = publication.thumbnail_width
+      and submission.thumbnail_height = publication.thumbnail_height
+      and submission.category = publication.public_category
       and submission.status = 'approved'
       and submission.reviewed_at is not null
       and submission.reviewed_at <= requested_snapshot_at
@@ -1478,6 +2017,10 @@ begin
         else null
       end) = publication.thumbnail_size_bytes
       and lower(coalesce(thumbnail_object.metadata ->> 'mimetype', '')) = publication.thumbnail_mime_type
+  ), eligible as (
+    select publication_ready.*
+    from publication_ready
+    where cutover_enabled
   ), searched as (
     select
       eligible.*,
@@ -1579,6 +2122,7 @@ begin
       )
       else null
     end,
+    'cutoverEnabled', cutover_enabled,
     'totalEligible', (select count(*) from filtered),
     'sourceApprovedCount', (
       select count(*)
@@ -1587,7 +2131,7 @@ begin
         and submission.reviewed_at is not null
         and submission.reviewed_at <= requested_snapshot_at
     ),
-    'publicationReadyCount', (select count(*) from eligible),
+    'publicationReadyCount', (select count(*) from publication_ready),
     'facets', (
       select jsonb_build_object(
         'member-submissions', count(*),
@@ -1599,7 +2143,17 @@ begin
       )
       from searched
     ),
-    'unknownCategoryCount', 0
+    'unknownCategoryCount', (
+      select count(*)
+      from public.gallery_submissions as submission
+      where submission.status = 'approved'
+        and submission.reviewed_at is not null
+        and submission.reviewed_at <= requested_snapshot_at
+        and (
+          submission.category is null
+          or submission.category not in ('portraits', 'gatherings', 'action', 'scenery', 'companions')
+        )
+    )
   )
   into result;
 
@@ -1638,6 +2192,15 @@ declare
 begin
   if requested_kind is null or requested_kind not in ('thumbnail', 'full') then
     raise exception 'Invalid Gallery media reservation.' using errcode = '22023';
+  end if;
+
+  if not exists (
+    select 1
+    from private.gallery_public_feed_transition as transition
+    where transition.singleton
+      and transition.cutover_enabled
+  ) then
+    return null;
   end if;
 
   -- Select only the indexed revision identity and immutable byte count before

@@ -608,6 +608,34 @@
               "classification": "operational"
             },
             {
+              "path": "data.summary.approved",
+              "classification": "operational"
+            },
+            {
+              "path": "data.summary.archived",
+              "classification": "operational"
+            },
+            {
+              "path": "data.summary.missingPublications",
+              "classification": "operational"
+            },
+            {
+              "path": "data.summary.pending",
+              "classification": "operational"
+            },
+            {
+              "path": "data.summary.rejected",
+              "classification": "operational"
+            },
+            {
+              "path": "data.summary.shown",
+              "classification": "operational"
+            },
+            {
+              "path": "data.summary.total",
+              "classification": "operational"
+            },
+            {
               "path": "data.thumbnailState",
               "classification": "operational"
             },
@@ -651,9 +679,9 @@
         "supabase/functions/list-gallery-review-queue/deno.lock",
         "supabase/functions/list-gallery-review-queue/index.ts"
       ],
-      "reviewedSourceSha256": "4b861bd702e2544ffb96986ed20a4f9ff5db7a526130247b30758f96a7be60ed",
-      "semanticContractSha256": "d7cd686fad2e4b5f875cec54ab7956e6d5495b1cd0e80d2b22111f2aa6b9ba57",
-      "responseShapeContractSha256": "4d143ad85c551a10f216f603b4cb6acff745a0511eb2e9c901cba1726f08c7fa"
+      "reviewedSourceSha256": "bf28932b2d43eff440813ab8cf6dda3fb82d4659ef6bb8516a3a399bc4e45245",
+      "semanticContractSha256": "0352bef29942c498d89f4781682f065ab3c8b35384bb453a93d4a089dc54273a",
+      "responseShapeContractSha256": "275b468ada2513fb6e6c516eeaf2ffc8b223a8179ed71fc67284e49b1558027a"
     },
     {
       "id": "spinner-live-session",
@@ -1501,9 +1529,85 @@
           ]
         },
         {
+          "id": "public-feed-closed",
+          "when": [
+            "GET or POST v2 list while the private cutover gate is closed; returns the public schema with empty items and facets without exposing gate state"
+          ],
+          "bodyKind": "json",
+          "body": null,
+          "fields": [
+            {
+              "path": "data.cacheSeconds",
+              "classification": "operational"
+            },
+            {
+              "path": "data.complete",
+              "classification": "operational"
+            },
+            {
+              "path": "data.count",
+              "classification": "operational"
+            },
+            {
+              "path": "data.delivery",
+              "classification": "operational"
+            },
+            {
+              "path": "data.deliveryFailures",
+              "classification": "operational"
+            },
+            {
+              "path": "data.facets",
+              "classification": "operational"
+            },
+            {
+              "path": "data.hasMore",
+              "classification": "operational"
+            },
+            {
+              "path": "data.items[]",
+              "classification": "public"
+            },
+            {
+              "path": "data.nextCursor",
+              "classification": "operational"
+            },
+            {
+              "path": "data.partial",
+              "classification": "operational"
+            },
+            {
+              "path": "data.schemaVersion",
+              "classification": "operational"
+            },
+            {
+              "path": "data.totalEligible",
+              "classification": "operational"
+            },
+            {
+              "path": "message",
+              "classification": "operational"
+            },
+            {
+              "path": "ok",
+              "classification": "operational"
+            }
+          ],
+          "inheritedContainers": [
+            {
+              "path": "data.items[]",
+              "classification": "public",
+              "dataClass": "public_gallery_media",
+              "maximumBytes": 65536,
+              "descendants": "inherit",
+              "rationale": "The closed schema-v2 response contains an empty public item set and remains capped at 64 KiB."
+            }
+          ]
+        },
+        {
           "id": "public-feed-list",
           "when": [
-            "GET or POST v2 list within the shared 64 KiB serialized response ceiling"
+            "GET or POST v2 list within the shared 64 KiB serialized response ceiling after the private cutover gate is enabled"
           ],
           "bodyKind": "json",
           "body": null,
@@ -1600,9 +1704,9 @@
         "supabase/functions/list-approved-gallery-submissions/deno.lock",
         "supabase/functions/list-approved-gallery-submissions/index.ts"
       ],
-      "reviewedSourceSha256": "c13c466a235a878aa23ad1b2694d78c1e42193382348503a75ade562b0d55dec",
-      "semanticContractSha256": "f1f4591eea9d7bbf5f66a898becc78a79850e9c7028b5d32c2cad76e253b1bbe",
-      "responseShapeContractSha256": "e2675cd2c8099be04a887af7749eca82f5030d64e9985cff7ba3d613c46b89b6"
+      "reviewedSourceSha256": "e7a852e17d9b5395431d28fab7f81a95ddaae1f227eb65e6a9ed19a292b821a9",
+      "semanticContractSha256": "d16061ffe0230b067775845110ae1ed253eca9a7f7dd178aa858b6f74c265ae9",
+      "responseShapeContractSha256": "f47744f4d32e63d8e9e3cb5a6be74a359bf6b93a50f1d6cc3efbe5cfd4142807"
     },
     {
       "id": "submit-discord-gallery-image",

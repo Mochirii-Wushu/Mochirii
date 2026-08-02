@@ -12,7 +12,7 @@
     },
     {
       "path": "supabase/migrations/20260728132000_add_gallery_publication_revisions.sql",
-      "sha256": "a8be4b715d461dfac2fbbf441b006060efa0997e384c9bba2070d2eda320e030"
+      "sha256": "369d19694a4f167fd02d6280c80d0913b9fd20ebfa05cc859df4d44ca302cc4b"
     },
     {
       "path": "supabase/migrations/20260729042835_add_facebook_page_gallery_publishing.sql",
@@ -59,5 +59,5 @@
       "sha256": "68f57265bfc2f796db5cdd1366ee895180c9a3201b339ba2c600bf65dcb6ba25"
     }
   ],
-  "manifestSha256": "f9baa0aebe94fc96eeb16e38bb048261a7eab167fecb3e1a4a13e2ea3c0260a8"
+  "manifestSha256": "c1ee904c3a0601aee1efd1b9ea00f53bfced1bcd290c8fbd3822c1d4847db2ee"
 }

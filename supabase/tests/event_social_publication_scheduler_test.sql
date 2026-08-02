@@ -193,12 +193,12 @@ select is(
 );
 
 select ok(
-  exists (
+  not exists (
     select 1 from cron.job
     where jobname = 'event-social-publication-every-minute'
-      and schedule = '* * * * *'
+       or command ilike '%event_social_invoke_scheduler%'
   ),
-  'the due-time scheduler ticks once per minute'
+  'the scheduler foundation installs without an active cron job'
 );
 
 select ok(

@@ -51,8 +51,20 @@ last_page as (
   order by page_number desc
   limit 1
 ),
+transition as (
+  select private.gallery_public_feed_readiness_counts() as readiness
+),
 summary as (
   select
+    transition.readiness,
+    (transition.readiness ->> 'cutoverEnabled')::boolean as cutover_enabled,
+    (transition.readiness ->> 'cutoverReady')::boolean as cutover_ready,
+    (transition.readiness ->> 'sourceApprovedCount')::bigint as source_approved_count,
+    (transition.readiness ->> 'publicationReadyCount')::bigint as publication_ready_count,
+    (transition.readiness ->> 'missingPublicationCount')::bigint as missing_publication_count,
+    (transition.readiness ->> 'oversizedSourceCount')::bigint as oversized_source_count,
+    (transition.readiness ->> 'unknownCategoryCount')::bigint as unknown_category_count,
+    (first_page.page_data ->> 'cutoverEnabled')::boolean as page_cutover_enabled,
     (first_page.page_data ->> 'totalEligible')::bigint as eligible_count,
     (select count(*) from feed_items) as traversed_count,
     (select count(distinct publication_id) from feed_items) as distinct_count,
@@ -67,8 +79,13 @@ summary as (
     ) as page_contract_stable
   from first_page
   cross join last_page
+  cross join transition
   cross join feed_pages as page
-  group by first_page.page_data, last_page.page_number, last_page.page_data
+  group by
+    transition.readiness,
+    first_page.page_data,
+    last_page.page_number,
+    last_page.page_data
 ),
 result as (
   select
@@ -96,17 +113,46 @@ result as (
       and traversed_count = distinct_count
       and not traversal_incomplete
       and page_contract_stable
-      as traversal_reconciled
+      as traversal_reconciled,
+    not cutover_enabled
+      and not page_cutover_enabled
+      and eligible_count = 0
+      and traversed_count = 0
+      and distinct_count = 0
+      and not traversal_incomplete
+      and page_count = 1
+      and (select bool_and(value::bigint = 0) from jsonb_each_text(facets))
+      as closed_contract_reconciled,
+    cutover_enabled
+      and page_cutover_enabled
+      and cutover_ready
+      and source_approved_count = publication_ready_count
+      and missing_publication_count = 0
+      and unknown_category_count = 0
+      and eligible_count = publication_ready_count
+      as open_contract_reconciled
   from summary
 ),
 guarded as (
   select
     *,
-    facets_reconciled and traversal_reconciled as reconciled
+    facets_reconciled
+      and traversal_reconciled
+      and case
+        when cutover_enabled then open_contract_reconciled
+        else closed_contract_reconciled
+      end as reconciled
   from result
 )
 select
   jsonb_build_object(
+    'cutoverEnabled', cutover_enabled,
+    'cutoverReady', cutover_ready,
+    'sourceApprovedCount', source_approved_count,
+    'publicationReadyCount', publication_ready_count,
+    'missingPublicationCount', missing_publication_count,
+    'oversizedSourceCount', oversized_source_count,
+    'unknownCategoryCount', unknown_category_count,
     'eligibleCount', eligible_count,
     'traversedCount', traversed_count,
     'distinctCount', distinct_count,
@@ -114,7 +160,28 @@ select
     'pageCount', page_count,
     'facetsReconciled', facets_reconciled,
     'traversalReconciled', traversal_reconciled,
-    'reconciled', reconciled
+    'closedContractReconciled', closed_contract_reconciled,
+    'openContractReconciled', open_contract_reconciled,
+    'reconciled', reconciled,
+    'sourceBucketPrivate', (
+      select public is false
+      from storage.buckets
+      where id = 'member-gallery'
+    ),
+    'sourceBucketLimitBytes', (
+      select file_size_limit
+      from storage.buckets
+      where id = 'member-gallery'
+    ),
+    'sourceBucketMimeTypes', (
+      select to_jsonb(allowed_mime_types)
+      from storage.buckets
+      where id = 'member-gallery'
+    ),
+    'ordinaryUploadPolicyBytes', 8388608,
+    'historicalEvidenceCeilingBytes', 52428800,
+    'displayDerivativeCeilingBytes', 2097152,
+    'thumbnailDerivativeCeilingBytes', 81920
   ) as gallery_public_feed_reconciliation,
   case
     when reconciled then 1
