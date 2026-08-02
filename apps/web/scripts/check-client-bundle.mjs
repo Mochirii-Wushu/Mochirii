@@ -1,4 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { isIP } from "node:net";
 import path from "node:path";
 import { brotliCompressSync, constants as zlibConstants } from "node:zlib";
 
@@ -17,6 +18,57 @@ const forbiddenGallerySanitizerMarkers = [
   "prepareGalleryModerationPreview",
   "preview_output_unavailable",
 ];
+const forbiddenClientDisclosureMarkers = [
+  "local-fixture-v1",
+  "http://127.0.0.1:8765",
+];
+const reviewedSupabaseDefaultOrigin = "http://localhost:9999";
+
+function isLoopbackHostname(hostname) {
+  const normalized = hostname.toLowerCase().replace(/^\[|\]$/gu, "");
+  if (normalized === "localhost" || normalized === "localhost.") return true;
+  if (isIP(normalized) === 4) return normalized.split(".")[0] === "127";
+  if (isIP(normalized) !== 6) return false;
+  return normalized === "::1" || /^::ffff:(?:127\.|7f[0-9a-f]{2}:)/u.test(normalized);
+}
+
+function containsUnreviewedLoopbackUrl(source) {
+  const candidates = source.match(/https?:\/\/[^\s"'`<>{}\\,;]+/giu) || [];
+  return candidates.some((candidate) => {
+    try {
+      const parsed = new URL(candidate);
+      if (!isLoopbackHostname(parsed.hostname)) return false;
+      return parsed.origin !== reviewedSupabaseDefaultOrigin || parsed.pathname !== "/" || parsed.search || parsed.hash;
+    } catch {
+      return false;
+    }
+  });
+}
+
+function containsPrivateWindowsPath(source) {
+  if (/\bfile:\/{2,3}/iu.test(source)) return true;
+  if (/(?:^|["'`\s=(\[])\\\\[^\\/\0\r\n"'`]+\\[^\\/\0\r\n"'`]+(?:\\|$)/u.test(source)) return true;
+  const boundary = String.raw`(?:^|["'\x60\s=(\[])`;
+  const drive = String.raw`[A-Za-z]:`;
+  const segment = String.raw`[^\\/\0\r\n"'\x60]+`;
+  return new RegExp(`${boundary}${drive}\\\\+(?:${segment}\\\\+)+`, "u").test(source) ||
+    new RegExp(`${boundary}${drive}\/(?:${segment}\/)+`, "u").test(source);
+}
+
+const forbiddenClientDisclosurePatterns = [
+  {
+    label: "unreviewed loopback URL",
+    test: containsUnreviewedLoopbackUrl,
+  },
+  {
+    label: "private Windows workstation path",
+    test: containsPrivateWindowsPath,
+  },
+  {
+    label: "source map directive",
+    test: (source) => /[#@]\s*sourceMappingURL\s*=/u.test(source),
+  },
+];
 const galleryMarker = "galleryMemberFeedStatus";
 const ordinaryShellMarker = "/assets/bg/wuxia-bg.webp";
 const ordinaryHeaderMarker = "Profile & Settings";
@@ -32,6 +84,13 @@ function appPageRoutes(directory = path.resolve("app"), segments = []) {
     if (entry.isDirectory()) return appPageRoutes(path.join(directory, entry.name), [...segments, entry.name]);
     if (entry.name !== "page.tsx") return [];
     return [segments.length ? `/${segments.join("/")}` : "/"];
+  });
+}
+
+function filesUnder(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const absolute = path.join(directory, entry.name);
+    return entry.isDirectory() ? filesUnder(absolute) : [absolute];
   });
 }
 
@@ -135,12 +194,16 @@ const homeIncrementalChunks = homeIncrementalFiles.map((file) => ({ file, buffer
 const layoutBrotli = layoutChunks.reduce((total, chunk) => total + brotliBytes(chunk.buffer), 0);
 const homeIncrementalBrotli = homeIncrementalChunks.reduce((total, chunk) => total + brotliBytes(chunk.buffer), 0);
 
-const staticChunkDirectory = path.join(buildRoot, "static", "chunks");
-const staticChunks = readdirSync(staticChunkDirectory, { withFileTypes: true })
-  .filter((entry) => entry.isFile() && entry.name.endsWith(".js"))
-  .map((entry) => ({
-    file: `static/chunks/${entry.name}`,
-    buffer: readFileSync(path.join(staticChunkDirectory, entry.name)),
+const staticFiles = filesUnder(path.join(buildRoot, "static"));
+const publicSourceMaps = staticFiles.filter((file) => file.endsWith(".map"));
+if (publicSourceMaps.length) {
+  failures.push(`public client source maps were emitted: ${publicSourceMaps.map((file) => path.relative(buildRoot, file)).join(", ")}`);
+}
+const staticChunks = staticFiles
+  .filter((file) => file.endsWith(".js"))
+  .map((file) => ({
+    file: path.relative(buildRoot, file).replaceAll("\\", "/"),
+    buffer: readFileSync(file),
   }));
 function chunksContaining(marker) {
   const encoded = Buffer.from(marker);
@@ -148,6 +211,41 @@ function chunksContaining(marker) {
 }
 const controllerChunks = chunksContaining("Bulk paste");
 const viewerChunks = chunksContaining("raffle-app--viewer");
+const reviewedSupabaseDefaultChunks = chunksContaining(reviewedSupabaseDefaultOrigin);
+for (const file of reviewedSupabaseDefaultChunks) {
+  const chunk = staticChunks.find((candidate) => candidate.file === file);
+  const count = chunk?.buffer.toString("utf8").split(reviewedSupabaseDefaultOrigin).length - 1;
+  if (count !== 1 || !chunk?.buffer.includes(Buffer.from("supabase.auth.token"))) {
+    failures.push(`reviewed Supabase SDK default origin drifted in ${file}`);
+  }
+}
+for (const marker of forbiddenClientDisclosureMarkers) {
+  const offenders = chunksContaining(marker);
+  if (offenders.length) {
+    failures.push(`private fixture marker ${marker} appears in client chunks: ${offenders.join(", ")}`);
+  }
+}
+for (const { label, test } of forbiddenClientDisclosurePatterns) {
+  const offenders = staticChunks
+    .filter((chunk) => test(chunk.buffer.toString("utf8")))
+    .map((chunk) => chunk.file);
+  if (offenders.length) {
+    failures.push(`${label} appears in client chunks: ${offenders.join(", ")}`);
+  }
+}
+
+for (const loopbackCanary of ["http://127.1:8765", "http://127.0.1:8765", "http://localhost.:8765", "http://[::1]:8765"]) {
+  if (!containsUnreviewedLoopbackUrl(loopbackCanary)) failures.push(`loopback disclosure canary was not rejected: ${loopbackCanary}`);
+}
+if (containsUnreviewedLoopbackUrl(reviewedSupabaseDefaultOrigin)) {
+  failures.push("reviewed Supabase SDK default origin was rejected by the loopback disclosure guard");
+}
+if (!containsPrivateWindowsPath("D:\\Projects\\Mochirii\\fixture.json") ||
+    !containsPrivateWindowsPath("D:/Projects/Mochirii/fixture.json") ||
+    !containsPrivateWindowsPath("file:///D:/Projects/Mochirii/fixture.json") ||
+    !containsPrivateWindowsPath("\\\\server\\share\\Mochirii\\fixture.json")) {
+  failures.push("private Windows workstation path canary was not rejected");
+}
 for (const marker of forbiddenGallerySanitizerMarkers) {
   const offenders = chunksContaining(marker);
   if (offenders.length) {
@@ -227,6 +325,16 @@ for (const route of publicRoutes) {
   }
 }
 
+const publicRouteChunkFiles = new Set(
+  [...routeBundles.values()].flatMap((bundle) => bundle.files),
+);
+const publicSupabaseDefaultChunks = reviewedSupabaseDefaultChunks.filter((file) =>
+  publicRouteChunkFiles.has(file)
+);
+if (publicSupabaseDefaultChunks.length) {
+  failures.push(`reviewed Supabase SDK default loopback leaked into public route entries: ${publicSupabaseDefaultChunks.join(", ")}`);
+}
+
 const ordinaryShellChunks = chunksContaining(ordinaryShellMarker);
 if (ordinaryShellChunks.length !== 1) {
   failures.push(`expected one lazy ordinary-shell chunk, found ${ordinaryShellChunks.length}`);
@@ -300,5 +408,6 @@ console.log(`- Route inventory classifies ${publicRoutes.length} public and ${no
 console.log("- Gallery-only code is absent from unrelated public entries, and Supabase SDK modules and markers are absent from all public entries.");
 console.log("- Private spinner controller and viewer code remain distinct, lazy chunks.");
 console.log("- Gallery native sanitizer code remains server-only and absent from every client chunk.");
+console.log("- Client chunks contain no local fixture markers, project-owned loopback URLs, private workstation paths, source map directives, or public source maps; the pinned Supabase SDK default stays outside public route entries.");
 console.log("- Private raffle entries exclude the ordinary shell, auth cutover, and observability chunks.");
 console.log("- Public /raffle keeps its server-rendered header, skip link, main landmark, and footer.");
