@@ -212,6 +212,8 @@ client bundle.
 - Only the true page hero or route LCP image should use a priority preload.
 - Supporting cards, seals, gallery thumbnails, event board images, and repeated list images should stay lazy.
 - Keep explicit image `width`, `height`, and `sizes` values on high-impact media so Next can reserve stable layout space.
+- The deterministic local Lighthouse gate is a synthetic empty-feed regression floor. It requires performance at least `80`, accessibility, best practices, and SEO at least `90`, cumulative layout shift at most `0.1`, and total blocking time at most `200 ms` on Home, Recruitment, and Gallery. Immutable Preview or production Lighthouse evidence and Vercel Speed Insights remain authoritative for deployed performance.
+- The audit proxy forces identity encoding only for HTML navigation responses that it must inspect. JavaScript, CSS, fonts, and images retain browser-requested compression, and the verifier rejects reports whose aggregate JavaScript/CSS transfer-to-decoded-size ratio exceeds `0.75` once at least 4 KiB of those resources is present.
 - Do not compress, re-encode, replace, delete, externalize, or otherwise optimize `apps/web/public/assets/audio/mochiriiiiii.mp3` without explicit approval.
 
 ## 14. Protected Content

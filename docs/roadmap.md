@@ -114,5 +114,5 @@ PR checklist:
 - Framework migration.
 - Broad redesign.
 - Deleting large asset groups without a usage audit.
-- Required Lighthouse score gates.
+- Production-network Lighthouse score gates; deterministic local score gates remain enforced without provider traffic.
 - Making production network checks part of `npm run check`.

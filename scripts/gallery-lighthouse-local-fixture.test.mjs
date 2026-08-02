@@ -5,6 +5,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import test from "node:test";
+import { gzipSync } from "node:zlib";
 
 const verifier = resolve("scripts/gallery-lighthouse-local-fixture.mjs");
 const origin = "http://127.0.0.1:8765";
@@ -12,18 +13,46 @@ const origin = "http://127.0.0.1:8765";
 function report(
   pathname,
   requestUrls = [`${origin}${pathname}`],
-  { consoleItems = [], statusCode = 200 } = {},
+  {
+    accessibilityScore = 1,
+    bestPracticesScore = 1,
+    consoleItems = [],
+    cumulativeLayoutShift = 0,
+    performanceScore = 0.9,
+    seoScore = 1,
+    statusCode = 200,
+    scriptResourceSize = 8192,
+    scriptTransferSize = 2048,
+    totalBlockingTime = 100,
+  } = {},
 ) {
+  const networkItems = requestUrls.map((url) => ({ statusCode, url }));
+  networkItems.push({
+    mimeType: "application/javascript",
+    resourceSize: scriptResourceSize,
+    resourceType: "Script",
+    statusCode: 200,
+    transferSize: scriptTransferSize,
+    url: `${origin}/_next/static/chunks/app.js`,
+  });
   return {
     requestedUrl: `${origin}${pathname}`,
     finalDisplayedUrl: `${origin}${pathname}`,
+    categories: {
+      accessibility: { score: accessibilityScore },
+      "best-practices": { score: bestPracticesScore },
+      performance: { score: performanceScore },
+      seo: { score: seoScore },
+    },
     audits: {
+      "cumulative-layout-shift": { numericValue: cumulativeLayoutShift },
       "network-requests": {
-        details: { items: requestUrls.map((url) => ({ statusCode, url })) },
+        details: { items: networkItems },
       },
       "errors-in-console": {
         details: { items: consoleItems },
       },
+      "total-blocking-time": { numericValue: totalBlockingTime },
     },
   };
 }
@@ -32,7 +61,12 @@ function writeEvidence(
   directory,
   {
     galleryConsoleItems,
+    galleryCumulativeLayoutShift,
+    galleryPerformanceScore,
     galleryStatusCode,
+    galleryScriptResourceSize,
+    galleryScriptTransferSize,
+    galleryTotalBlockingTime,
     galleryUrls,
     logRow,
     malformedHome = false,
@@ -60,7 +94,12 @@ function writeEvidence(
     gallery,
     JSON.stringify(report("/gallery", galleryUrls, {
       consoleItems: galleryConsoleItems,
+      cumulativeLayoutShift: galleryCumulativeLayoutShift,
+      performanceScore: galleryPerformanceScore,
       statusCode: galleryStatusCode,
+      scriptResourceSize: galleryScriptResourceSize,
+      scriptTransferSize: galleryScriptTransferSize,
+      totalBlockingTime: galleryTotalBlockingTime,
     })),
   );
   return [log, home, recruitment, gallery];
@@ -189,14 +228,63 @@ test("local Lighthouse evidence rejects failed requests and console errors", () 
   }
 });
 
+test("local Lighthouse evidence rejects performance, layout-shift, and blocking-time budget failures", () => {
+  const directory = mkdtempSync(join(tmpdir(), "mochirii-gallery-lighthouse-"));
+  try {
+    assert.throws(
+      () => verify(writeEvidence(directory, { galleryPerformanceScore: 0.79 })),
+      /Command failed/,
+    );
+    assert.throws(
+      () => verify(writeEvidence(directory, { galleryCumulativeLayoutShift: 0.101 })),
+      /Command failed/,
+    );
+    assert.throws(
+      () => verify(writeEvidence(directory, { galleryTotalBlockingTime: 201 })),
+      /Command failed/,
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("local Lighthouse evidence requires compressed JavaScript or CSS transfer evidence", () => {
+  const directory = mkdtempSync(join(tmpdir(), "mochirii-gallery-lighthouse-"));
+  try {
+    assert.throws(
+      () => verify(writeEvidence(directory, {
+        galleryScriptResourceSize: 8192,
+        galleryScriptTransferSize: 8192,
+      })),
+      /Command failed/,
+    );
+    assert.throws(
+      () => verify(writeEvidence(directory, {
+        galleryScriptResourceSize: 4095,
+        galleryScriptTransferSize: 1024,
+      })),
+      /Command failed/,
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test("the local audit proxy injects its interceptor without changing built assets", async () => {
   const directory = mkdtempSync(join(tmpdir(), "mochirii-gallery-lighthouse-"));
   const log = join(directory, "fixture.jsonl");
+  const upstreamEncodings = new Map();
   writeFileSync(log, "");
   const upstream = createServer((request, response) => {
+    upstreamEncodings.set(request.url, request.headers["accept-encoding"] || "");
     if (request.url === "/asset.js") {
-      response.writeHead(200, { "Content-Type": "application/javascript" });
-      response.end("globalThis.__unchangedAsset=true;");
+      const body = gzipSync("globalThis.__unchangedAsset=true;");
+      response.writeHead(200, {
+        "Content-Encoding": "gzip",
+        "Content-Length": body.byteLength,
+        "Content-Type": "application/javascript",
+      });
+      response.end(body);
       return;
     }
     response.writeHead(200, {
@@ -218,13 +306,23 @@ test("the local audit proxy injects its interceptor without changing built asset
     ], { stdio: "pipe" });
     await waitForHealth(`http://127.0.0.1:${proxyPort}/healthz`, child);
 
-    const pageResponse = await fetch(`http://127.0.0.1:${proxyPort}/`);
+    const pageResponse = await fetch(`http://127.0.0.1:${proxyPort}/`, {
+      headers: {
+        Accept: "text/html",
+        "Accept-Encoding": "br, gzip",
+      },
+    });
     const page = await pageResponse.text();
     assert.equal(pageResponse.status, 200);
     assert.match(page, /data-mochirii-gallery-audit-interceptor/);
     assert.match(page, /\/__mochirii_gallery_lighthouse_fixture/);
+    assert.equal(upstreamEncodings.get("/"), "identity");
 
-    const assetResponse = await fetch(`http://127.0.0.1:${proxyPort}/asset.js`);
+    const assetResponse = await fetch(`http://127.0.0.1:${proxyPort}/asset.js`, {
+      headers: { "Accept-Encoding": "gzip" },
+    });
+    assert.equal(upstreamEncodings.get("/asset.js"), "gzip");
+    assert.equal(assetResponse.headers.get("content-encoding"), "gzip");
     assert.equal(await assetResponse.text(), "globalThis.__unchangedAsset=true;");
 
     const fixtureResponse = await fetch(

@@ -12,6 +12,16 @@ const analyticsScriptPaths = new Set([
   "/_vercel/insights/script.js",
   "/_vercel/speed-insights/script.js",
 ]);
+const categoryScoreMinimums = new Map([
+  ["performance", 0.8],
+  ["accessibility", 0.9],
+  ["best-practices", 0.9],
+  ["seo", 0.9],
+]);
+const maximumCumulativeLayoutShift = 0.1;
+const maximumTotalBlockingTimeMs = 200;
+const minimumCompressionEvidenceBytes = 4 * 1024;
+const maximumScriptStyleTransferRatio = 0.75;
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const publicUrls = JSON.parse(
   readFileSync(resolve(repositoryRoot, "apps/web/config/public-urls.json"), "utf8"),
@@ -148,10 +158,12 @@ if (mode === "serve") {
         throw new Error(`${reportPath} recorded a failed HTTP request.`);
       }
     }
+    verifyCompressionEvidence(items, reportPath);
     const consoleItems = report.audits?.["errors-in-console"]?.details?.items;
     if (!Array.isArray(consoleItems) || consoleItems.length !== 0) {
       throw new Error(`${reportPath} recorded a browser console error.`);
     }
+    verifyPerformanceBudgets(report, reportPath);
   }
   console.log(
     "Local Lighthouse network contract OK: 3 reports, zero hosted/provider HTTP requests.",
@@ -168,7 +180,8 @@ function galleryFetchInterceptor() {
 
 function proxyToNext(request, response, upstreamOrigin, interceptor) {
   const target = new URL(request.url || "/", upstreamOrigin);
-  const headers = { ...request.headers, host: target.host, "accept-encoding": "identity" };
+  const headers = { ...request.headers, host: target.host };
+  if (isHtmlNavigation(request)) headers["accept-encoding"] = "identity";
   delete headers.connection;
   const upstream = requestHttp(target, { method: request.method, headers }, (incoming) => {
     const contentType = String(incoming.headers["content-type"] || "").toLowerCase();
@@ -215,6 +228,13 @@ function proxyToNext(request, response, upstreamOrigin, interceptor) {
   request.pipe(upstream);
 }
 
+function isHtmlNavigation(request) {
+  if (request.method !== "GET" && request.method !== "HEAD") return false;
+  const destination = String(request.headers["sec-fetch-dest"] || "").trim().toLowerCase();
+  const accept = String(request.headers.accept || "").toLowerCase();
+  return destination === "document" || accept.includes("text/html");
+}
+
 function withoutHopByHopHeaders(headers) {
   const result = { ...headers };
   for (const name of [
@@ -256,6 +276,74 @@ function galleryFixtureBody() {
     },
     message: "No member-submitted images are available yet.",
   });
+}
+
+function verifyPerformanceBudgets(report, reportPath) {
+  for (const [category, minimum] of categoryScoreMinimums) {
+    const score = report.categories?.[category]?.score;
+    if (!Number.isFinite(score) || score < minimum) {
+      throw new Error(
+        `${reportPath} ${category} score must be at least ${Math.round(minimum * 100)}.`,
+      );
+    }
+  }
+
+  const cumulativeLayoutShift = report.audits?.["cumulative-layout-shift"]?.numericValue;
+  if (
+    !Number.isFinite(cumulativeLayoutShift) ||
+    cumulativeLayoutShift > maximumCumulativeLayoutShift
+  ) {
+    throw new Error(
+      `${reportPath} cumulative layout shift must be at most ${maximumCumulativeLayoutShift}.`,
+    );
+  }
+
+  const totalBlockingTime = report.audits?.["total-blocking-time"]?.numericValue;
+  if (!Number.isFinite(totalBlockingTime) || totalBlockingTime > maximumTotalBlockingTimeMs) {
+    throw new Error(
+      `${reportPath} total blocking time must be at most ${maximumTotalBlockingTimeMs} ms.`,
+    );
+  }
+}
+
+function verifyCompressionEvidence(items, reportPath) {
+  let decodedBytes = 0;
+  let transferredBytes = 0;
+
+  for (const item of items) {
+    if (!isScriptOrStyleRequest(item)) continue;
+    if (
+      !Number.isFinite(item.resourceSize) || item.resourceSize <= 0 ||
+      !Number.isFinite(item.transferSize) || item.transferSize < 0
+    ) continue;
+    decodedBytes += item.resourceSize;
+    transferredBytes += item.transferSize;
+  }
+
+  if (decodedBytes < minimumCompressionEvidenceBytes) {
+    throw new Error(
+      `${reportPath} has insufficient JavaScript/CSS compression evidence.`,
+    );
+  }
+
+  const transferRatio = transferredBytes / decodedBytes;
+  if (transferRatio > maximumScriptStyleTransferRatio) {
+    throw new Error(
+      `${reportPath} JavaScript/CSS transfer ratio must be at most ${maximumScriptStyleTransferRatio}.`,
+    );
+  }
+}
+
+function isScriptOrStyleRequest(item) {
+  if (!item || typeof item !== "object") return false;
+  const resourceType = String(item.resourceType || "").trim().toLowerCase();
+  if (resourceType === "script" || resourceType === "stylesheet") return true;
+  const mimeType = String(item.mimeType || "").trim().toLowerCase();
+  return (
+    mimeType.includes("javascript") ||
+    mimeType.includes("ecmascript") ||
+    mimeType === "text/css"
+  );
 }
 
 function respond(response, status, body, contentType) {
