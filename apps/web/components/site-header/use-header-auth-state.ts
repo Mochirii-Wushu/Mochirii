@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createDedupedLoader,
   scheduleDeferredTask,
+  shouldScheduleAutomaticAuthLoad,
 } from "./deferred-task";
 import type { HeaderAuthState } from "./header-navigation";
+import { SUPABASE_AUTH_STORAGE_KEY } from "@/lib/public-urls";
 
 const signedOutState: HeaderAuthState = {
   signedIn: false,
@@ -94,11 +96,17 @@ export function useHeaderAuthState() {
     const lifecycle = lifecycleRef.current + 1;
     lifecycleRef.current = lifecycle;
     mountedRef.current = true;
-    const cancelDeferredLoad = scheduleDeferredTask(
-      window,
-      () => void ensureAuthLoaded(),
-      1500,
+    const scheduleAutomaticLoad = shouldScheduleAutomaticAuthLoad(
+      () => document.cookie,
+      SUPABASE_AUTH_STORAGE_KEY,
     );
+    const cancelDeferredLoad = scheduleAutomaticLoad
+      ? scheduleDeferredTask(
+        window,
+        () => void ensureAuthLoaded(),
+        1500,
+      )
+      : () => {};
 
     return () => {
       mountedRef.current = false;

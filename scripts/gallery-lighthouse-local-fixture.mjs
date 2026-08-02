@@ -2,6 +2,7 @@ import { appendFileSync, readFileSync } from "node:fs";
 import { createServer, request as requestHttp } from "node:http";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gzipSync } from "node:zlib";
 
 const host = "127.0.0.1";
 const defaultAppPort = 8765;
@@ -180,6 +181,9 @@ function galleryFetchInterceptor() {
 
 function proxyToNext(request, response, upstreamOrigin, interceptor) {
   const target = new URL(request.url || "/", upstreamOrigin);
+  const responseEncoding = acceptsGzip(request.headers["accept-encoding"])
+    ? "gzip"
+    : "identity";
   const headers = { ...request.headers, host: target.host };
   if (isHtmlNavigation(request)) headers["accept-encoding"] = "identity";
   delete headers.connection;
@@ -203,13 +207,22 @@ function proxyToNext(request, response, upstreamOrigin, interceptor) {
       }
       const insertion = head.index + head[0].length;
       const html = `${body.slice(0, insertion)}${interceptor}${body.slice(insertion)}`;
+      const responseBody = responseEncoding === "gzip"
+        ? gzipSync(Buffer.from(html))
+        : Buffer.from(html);
       const responseHeaders = withoutHopByHopHeaders(incoming.headers);
       delete responseHeaders["content-length"];
       delete responseHeaders["content-encoding"];
+      delete responseHeaders.etag;
+      delete responseHeaders["last-modified"];
       responseHeaders["cache-control"] = "no-store";
-      responseHeaders["content-length"] = Buffer.byteLength(html);
+      responseHeaders["content-length"] = responseBody.byteLength;
+      responseHeaders.vary = appendVaryToken(responseHeaders.vary, "Accept-Encoding");
+      if (responseEncoding !== "identity") {
+        responseHeaders["content-encoding"] = responseEncoding;
+      }
       response.writeHead(incoming.statusCode || 200, responseHeaders);
-      response.end(html);
+      response.end(responseBody);
     }).catch(() => {
       if (!response.headersSent) {
         respond(response, 502, "Local audit proxy could not read the HTML response.", "text/plain; charset=utf-8");
@@ -233,6 +246,29 @@ function isHtmlNavigation(request) {
   const destination = String(request.headers["sec-fetch-dest"] || "").trim().toLowerCase();
   const accept = String(request.headers.accept || "").toLowerCase();
   return destination === "document" || accept.includes("text/html");
+}
+
+function acceptsGzip(header) {
+  return String(header || "")
+    .split(",")
+    .map((value) => value.trim().toLowerCase())
+    .some((value) => {
+      const [coding, ...parameters] = value.split(";").map((part) => part.trim());
+      if (coding !== "gzip") return false;
+      const quality = parameters.find((parameter) => parameter.startsWith("q="));
+      return quality === undefined || Number(quality.slice(2)) > 0;
+    });
+}
+
+function appendVaryToken(value, token) {
+  const values = String(value || "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  if (!values.some((entry) => entry.toLowerCase() === token.toLowerCase())) {
+    values.push(token);
+  }
+  return values.join(", ");
 }
 
 function withoutHopByHopHeaders(headers) {
@@ -307,14 +343,29 @@ function verifyPerformanceBudgets(report, reportPath) {
 }
 
 function verifyCompressionEvidence(items, reportPath) {
+  verifyResourceCompression(
+    items,
+    reportPath,
+    "JavaScript/CSS",
+    isScriptOrStyleRequest,
+  );
+  verifyResourceCompression(
+    items,
+    reportPath,
+    "HTML document",
+    isDocumentRequest,
+  );
+}
+
+function verifyResourceCompression(items, reportPath, label, predicate) {
   let decodedBytes = 0;
   let transferredBytes = 0;
 
   for (const item of items) {
-    if (!isScriptOrStyleRequest(item)) continue;
+    if (!predicate(item)) continue;
     if (
       !Number.isFinite(item.resourceSize) || item.resourceSize <= 0 ||
-      !Number.isFinite(item.transferSize) || item.transferSize < 0
+      !Number.isFinite(item.transferSize) || item.transferSize <= 0
     ) continue;
     decodedBytes += item.resourceSize;
     transferredBytes += item.transferSize;
@@ -322,14 +373,14 @@ function verifyCompressionEvidence(items, reportPath) {
 
   if (decodedBytes < minimumCompressionEvidenceBytes) {
     throw new Error(
-      `${reportPath} has insufficient JavaScript/CSS compression evidence.`,
+      `${reportPath} has insufficient ${label} compression evidence.`,
     );
   }
 
   const transferRatio = transferredBytes / decodedBytes;
   if (transferRatio > maximumScriptStyleTransferRatio) {
     throw new Error(
-      `${reportPath} JavaScript/CSS transfer ratio must be at most ${maximumScriptStyleTransferRatio}.`,
+      `${reportPath} ${label} transfer ratio must be at most ${maximumScriptStyleTransferRatio}.`,
     );
   }
 }
@@ -344,6 +395,13 @@ function isScriptOrStyleRequest(item) {
     mimeType.includes("ecmascript") ||
     mimeType === "text/css"
   );
+}
+
+function isDocumentRequest(item) {
+  if (!item || typeof item !== "object") return false;
+  const resourceType = String(item.resourceType || "").trim().toLowerCase();
+  const mimeType = String(item.mimeType || "").trim().toLowerCase();
+  return resourceType === "document" || mimeType === "text/html";
 }
 
 function respond(response, status, body, contentType) {

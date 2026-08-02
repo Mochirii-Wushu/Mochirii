@@ -101,7 +101,7 @@ Current link/audio/media behavior:
 - The MP3 remains public because public playback is required. The custom player removes page-level download affordances, but a public MP3 can still be fetched by determined users through network tools.
 - If `audio.sources` is empty, `recruitment.js` disables the custom player and reports audio as unavailable through the description text.
 - The current hero image is `./assets/img/recruitment/hero.webp`.
-- The current atmosphere image is `./assets/img/recruitment/atmosphere.webp`, but it remains hidden and `aria-hidden`.
+- `hero.atmosphere` remains a reserved data field. The current design does not render it, so hidden decorative media is not downloaded.
 
 Maintenance rules:
 

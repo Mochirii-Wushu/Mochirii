@@ -1,7 +1,10 @@
-import { SUPABASE_PROJECT_REF } from "@/lib/public-urls";
+import {
+  SUPABASE_AUTH_STORAGE_KEY,
+  SUPABASE_PROJECT_REF,
+} from "@/lib/public-urls";
 export { SUPABASE_AUTH_COOKIE_OPTIONS } from "./auth-cookie-policy";
 
-export { SUPABASE_PROJECT_REF };
+export { SUPABASE_AUTH_STORAGE_KEY, SUPABASE_PROJECT_REF };
 export const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/+$/, "");
 export const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
 export const NEXT_PUBLIC_SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/+$/, "");
@@ -16,8 +19,6 @@ export const NEXT_PUBLIC_PHONE_AUTH_READY = process.env.NEXT_PUBLIC_PHONE_AUTH_R
 export const NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED === "true";
 export const NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER || "";
 export const NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY || "";
-export const SUPABASE_AUTH_STORAGE_KEY = `sb-${SUPABASE_PROJECT_REF}-auth-token`;
-
 export const DISCORD_GUILD_ID = "1078630751077142608";
 export const DISCORD_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"] as const;
 export const DISCORD_REQUIRED_ROLE_NAMES = ["Mōchirīī - WWM", "✅Verified"] as const;

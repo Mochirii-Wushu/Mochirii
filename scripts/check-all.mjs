@@ -97,7 +97,7 @@ const checks = [
   ["test:gallery-approved-feed-client", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/gallery/approved-feed_test.ts"]],
   ["test:gallery-browser-state", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/gallery/browser-state_test.ts"]],
   ["test:gallery-safe-preview", ["node", "--experimental-default-type=module", "--experimental-strip-types", "--test", "apps/web/lib/gallery/safe-preview_test.ts"]],
-  ["test:live-gallery-media-smoke-guard", ["node", "--test", "scripts/lib/live-gallery-media-smoke-guard.test.mjs", "scripts/gallery-lighthouse-local-fixture.test.mjs"]],
+  ["test:live-gallery-media-smoke-guard", ["node", "--test", "scripts/lib/live-gallery-media-smoke-guard.test.mjs", "scripts/lib/gallery-static-thumbnail-contract.test.mjs", "scripts/gallery-lighthouse-local-fixture.test.mjs"]],
   ["test:gallery-thumbnail", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/gallery-thumbnail_test.ts"]],
   ["test:gallery-source-image", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/gallery-source-image_test.ts"]],
   ["test:gallery-source-decode", ["deno", "test", "--lock=deno.lock", "--frozen=true", "supabase/functions/_shared/gallery-source-decode_test.ts"]],

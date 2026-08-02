@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
+import { validateWebp } from "./lib/asset-format-validation.mjs";
+import { expectedStaticThumbnailDimensions } from "./lib/gallery-static-thumbnail-contract.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -54,7 +56,8 @@ const galleryItems = (Array.isArray(galleryData.albums) ? galleryData.albums : [
 
 assert(galleryItems.length > 0, "apps/web/public/data/gallery.json: expected at least one gallery item.");
 
-const galleryStaticThumbnailMaximumBytes = 300 * 1024;
+const galleryStaticThumbnailMaximumBytes = 80 * 1024;
+const galleryStaticThumbnailMaximumEdge = 640;
 const galleryMemberThumbnailMaximumBytes = 80 * 1024;
 const galleryInitialTransferMaximumBytes = 2 * 1024 * 1024;
 const galleryRenderBatchSize = 24;
@@ -68,6 +71,12 @@ for (const item of galleryItems) {
   assert(thumb.includes("assets/img/gallery/thumbs/"), `${id}: grid thumbnail must use assets/img/gallery/thumbs/.`);
   assert(!full.includes("/thumbs/"), `${id}: full/lightbox image must not use a thumbnail path.`);
   assert(thumb !== full, `${id}: thumbnail and full image paths must be different.`);
+  assert(
+    path.basename(thumb) === path.basename(full),
+    `${id}: thumbnail and full image filenames must match.`,
+  );
+
+  let thumbnailDimensions = null;
 
   if (thumb) {
     const thumbnailPath = path.join("apps/web/public", thumb).split(path.sep).join("/");
@@ -79,11 +88,39 @@ for (const item of galleryItems) {
         thumbnailBytes <= galleryStaticThumbnailMaximumBytes,
         `${id}: thumbnail is ${thumbnailBytes} bytes; maximum is ${galleryStaticThumbnailMaximumBytes}.`,
       );
+      try {
+        const { width, height } = validateWebp(readFileSync(path.join(root, thumbnailPath)));
+        thumbnailDimensions = { width, height };
+        assert(
+          width <= galleryStaticThumbnailMaximumEdge && height <= galleryStaticThumbnailMaximumEdge,
+          `${id}: thumbnail is ${width}x${height}; maximum edge is ${galleryStaticThumbnailMaximumEdge}.`,
+        );
+      } catch (error) {
+        fail(`${id}: thumbnail validation failed: ${error instanceof Error ? error.message : String(error)}.`);
+      }
     }
   }
 
   if (full) {
-    assertFileExists(`${id} full image`, path.join("apps/web/public", full).split(path.sep).join("/"));
+    const fullPath = path.join("apps/web/public", full).split(path.sep).join("/");
+    assertFileExists(`${id} full image`, fullPath);
+    if (thumbnailDimensions && existsSync(path.join(root, fullPath))) {
+      try {
+        const fullDimensions = validateWebp(readFileSync(path.join(root, fullPath)));
+        const expectedDimensions = expectedStaticThumbnailDimensions(
+          fullDimensions.width,
+          fullDimensions.height,
+          galleryStaticThumbnailMaximumEdge,
+        );
+        assert(
+          thumbnailDimensions.width === expectedDimensions.width &&
+          thumbnailDimensions.height === expectedDimensions.height,
+          `${id}: thumbnail must be exactly ${expectedDimensions.width}x${expectedDimensions.height} for its full image.`,
+        );
+      } catch (error) {
+        fail(`${id}: full-image parity validation failed: ${error instanceof Error ? error.message : String(error)}.`);
+      }
+    }
   }
 }
 

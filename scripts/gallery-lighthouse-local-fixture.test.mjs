@@ -18,6 +18,8 @@ function report(
     bestPracticesScore = 1,
     consoleItems = [],
     cumulativeLayoutShift = 0,
+    documentResourceSize = 16384,
+    documentTransferSize = 4096,
     performanceScore = 0.9,
     seoScore = 1,
     statusCode = 200,
@@ -26,7 +28,16 @@ function report(
     totalBlockingTime = 100,
   } = {},
 ) {
-  const networkItems = requestUrls.map((url) => ({ statusCode, url }));
+  const networkItems = requestUrls.map((url, index) => index === 0
+    ? {
+      mimeType: "text/html",
+      resourceSize: documentResourceSize,
+      resourceType: "Document",
+      statusCode,
+      transferSize: documentTransferSize,
+      url,
+    }
+    : { statusCode, url });
   networkItems.push({
     mimeType: "application/javascript",
     resourceSize: scriptResourceSize,
@@ -62,6 +73,8 @@ function writeEvidence(
   {
     galleryConsoleItems,
     galleryCumulativeLayoutShift,
+    galleryDocumentResourceSize,
+    galleryDocumentTransferSize,
     galleryPerformanceScore,
     galleryStatusCode,
     galleryScriptResourceSize,
@@ -95,6 +108,8 @@ function writeEvidence(
     JSON.stringify(report("/gallery", galleryUrls, {
       consoleItems: galleryConsoleItems,
       cumulativeLayoutShift: galleryCumulativeLayoutShift,
+      documentResourceSize: galleryDocumentResourceSize,
+      documentTransferSize: galleryDocumentTransferSize,
       performanceScore: galleryPerformanceScore,
       statusCode: galleryStatusCode,
       scriptResourceSize: galleryScriptResourceSize,
@@ -265,6 +280,42 @@ test("local Lighthouse evidence requires compressed JavaScript or CSS transfer e
       })),
       /Command failed/,
     );
+    assert.throws(
+      () => verify(writeEvidence(directory, {
+        galleryScriptResourceSize: 8192,
+        galleryScriptTransferSize: 0,
+      })),
+      /Command failed/,
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("local Lighthouse evidence requires compressed document transfer evidence", () => {
+  const directory = mkdtempSync(join(tmpdir(), "mochirii-gallery-lighthouse-"));
+  try {
+    assert.throws(
+      () => verify(writeEvidence(directory, {
+        galleryDocumentResourceSize: 16384,
+        galleryDocumentTransferSize: 16384,
+      })),
+      /Command failed/,
+    );
+    assert.throws(
+      () => verify(writeEvidence(directory, {
+        galleryDocumentResourceSize: 4095,
+        galleryDocumentTransferSize: 1024,
+      })),
+      /Command failed/,
+    );
+    assert.throws(
+      () => verify(writeEvidence(directory, {
+        galleryDocumentResourceSize: 16384,
+        galleryDocumentTransferSize: 0,
+      })),
+      /Command failed/,
+    );
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }
@@ -317,6 +368,8 @@ test("the local audit proxy injects its interceptor without changing built asset
     assert.match(page, /data-mochirii-gallery-audit-interceptor/);
     assert.match(page, /\/__mochirii_gallery_lighthouse_fixture/);
     assert.equal(upstreamEncodings.get("/"), "identity");
+    assert.equal(pageResponse.headers.get("content-encoding"), "gzip");
+    assert.match(pageResponse.headers.get("vary") || "", /Accept-Encoding/iu);
 
     const assetResponse = await fetch(`http://127.0.0.1:${proxyPort}/asset.js`, {
       headers: { "Accept-Encoding": "gzip" },

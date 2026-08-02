@@ -28,7 +28,8 @@ The Gallery is Mōchirīī's visual memory: screenshots of scenes, members, gath
 
 - Thumbnail paths must use `apps/web/public/assets/img/gallery/thumbs/`.
 - Full image paths must use the optimized full-size Gallery path, such as `apps/web/public/assets/img/gallery/shot-01.webp`.
-- The grid uses thumbnails for page speed.
+- The grid uses committed, metadata-stripped WebP thumbnails for page speed. Static thumbnails are derived offline from their full image, remain within 640 pixels on either edge and 80 KiB, and never require a runtime image-transformation provider.
+- Owned static Gallery pairs currently use matching WebP filenames. Adding another full-image format requires format-aware dimension validation before it enters the static contract.
 - The lightbox opens full images.
 - Never let the lightbox open `/thumbs/` images.
 - Every runtime publication needs two private, metadata-stripped WebP assets prepared by the moderator browser: a display image no larger than 2560 pixels on either edge and 2 MiB, and a thumbnail no larger than 720 pixels on either edge and 80 KiB. The Edge Function verifies both WebP structures and fully decodes every pixel before storage.
@@ -213,7 +214,7 @@ client bundle.
 - Supporting cards, seals, gallery thumbnails, event board images, and repeated list images should stay lazy.
 - Keep explicit image `width`, `height`, and `sizes` values on high-impact media so Next can reserve stable layout space.
 - The deterministic local Lighthouse gate is a synthetic empty-feed regression floor. It requires performance at least `80`, accessibility, best practices, and SEO at least `90`, cumulative layout shift at most `0.1`, and total blocking time at most `200 ms` on Home, Recruitment, and Gallery. Immutable Preview or production Lighthouse evidence and Vercel Speed Insights remain authoritative for deployed performance.
-- The audit proxy forces identity encoding only for HTML navigation responses that it must inspect. JavaScript, CSS, fonts, and images retain browser-requested compression, and the verifier rejects reports whose aggregate JavaScript/CSS transfer-to-decoded-size ratio exceeds `0.75` once at least 4 KiB of those resources is present.
+- The audit proxy requests identity encoding only for HTML navigation responses that it must inspect, then recompresses the transformed response when the browser accepts gzip. JavaScript, CSS, fonts, and images retain browser-requested compression. The verifier rejects reports whose HTML-document or aggregate JavaScript/CSS transfer-to-decoded-size ratio exceeds `0.75` once at least 4 KiB of the applicable resource class is present.
 - Do not compress, re-encode, replace, delete, externalize, or otherwise optimize `apps/web/public/assets/audio/mochiriiiiii.mp3` without explicit approval.
 
 ## 14. Protected Content

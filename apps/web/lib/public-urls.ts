@@ -23,6 +23,7 @@ export const SITE_DISPLAY_NAME = publicUrls.siteDisplayName;
 export const SOCIAL_HOST = publicUrls.socialHost;
 export const DISCORD_INVITE_URL = publicUrls.discordInviteUrl;
 export const SUPABASE_PROJECT_REF = publicUrls.supabaseProjectRef;
+export const SUPABASE_AUTH_STORAGE_KEY = `sb-${SUPABASE_PROJECT_REF}-auth-token`;
 export const OFFICIAL_GUILD_PROFILES = publicUrls.officialGuildProfiles.map((profile) => ({
   ...profile,
   surfaces: profile.surfaces as OfficialGuildProfileSurface[],

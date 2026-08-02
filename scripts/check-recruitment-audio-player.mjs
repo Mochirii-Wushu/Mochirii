@@ -52,7 +52,7 @@ assert(!recruitmentPage.includes("controls={sources.length > 0}"), "Next Recruit
   "onContextMenu={(event) => event.preventDefault()}",
   'controlsList="nodownload"',
   'aria-label={isPlaying ? "Pause recruitment audio" : "Play recruitment audio"}',
-  'aria-label={isMuted ? "Unmute recruitment audio" : "Mute recruitment audio"}',
+  'aria-label={isMuted ? "Vol: Unmute recruitment audio" : "Vol: Mute recruitment audio"}',
   'aria-label="Seek recruitment audio"',
   'aria-label="Recruitment audio volume"',
   "data-audio-play",
