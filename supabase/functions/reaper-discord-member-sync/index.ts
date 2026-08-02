@@ -21,8 +21,8 @@ import {
 } from "../_shared/pending-verification-containment.ts";
 import { SITE_ORIGIN } from "../_shared/public-origins.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
+import { discordFetch as boundedDiscordFetch } from "../_shared/discord-api.ts";
 
-const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
 const DISCORD_API_USER_AGENT = `Mochirii-Reaper-MemberSync/1.0 (${SITE_ORIGIN})`;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const PENDING_VERIFICATION_AUDIT_REASON = "Reaper pending verification containment";
@@ -94,8 +94,8 @@ function discordApiHeaders(contentType = false): Headers {
   return headers;
 }
 
-function retryAfterMs(response: Response, data: unknown): number {
-  const headerSeconds = Number(response.headers.get("Retry-After") || "");
+function retryAfterMs(headers: Headers, data: unknown): number {
+  const headerSeconds = Number(headers.get("Retry-After") || "");
   const bodySeconds = Number(asRecord(data).retry_after || "");
   const seconds = Number.isFinite(headerSeconds) && headerSeconds > 0 ? headerSeconds : bodySeconds;
   if (!Number.isFinite(seconds) || seconds <= 0) return 0;
@@ -104,19 +104,14 @@ function retryAfterMs(response: Response, data: unknown): number {
 
 async function discordApi(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; data: unknown }> {
   for (let attempt = 0; attempt <= DISCORD_API_MAX_RETRIES; attempt += 1) {
-    const response = await fetch(`${DISCORD_API_BASE_URL}${path}`, init);
-    const text = await response.text();
-    let data: unknown = null;
-    if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = text;
-      }
-    }
+    const response = await boundedDiscordFetch(path, {
+      ...init,
+      token: Deno.env.get("DISCORD_BOT_TOKEN") || "",
+    });
+    const data = response.ok ? response.data : response.error;
 
     if (response.status === 429 && attempt < DISCORD_API_MAX_RETRIES) {
-      const delay = retryAfterMs(response, data);
+      const delay = retryAfterMs(response.headers, data);
       if (delay > 0 && delay <= DISCORD_FUNCTION_RETRY_BUDGET_MS) {
         await wait(delay);
         continue;

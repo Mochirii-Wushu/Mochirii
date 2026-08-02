@@ -1,5 +1,11 @@
 import { asArray, asRecord, safeString, type JsonRecord } from "./discord-interaction-helpers.ts";
 import {
+  exactHttpsUrl,
+  fetchWithTimeout,
+  readBoundedResponseJson,
+} from "./outbound-http.ts";
+import { SITE_ORIGIN } from "./public-origins.ts";
+import {
   DISCORD_EVENT_ENTITY_EXTERNAL,
   desiredEventsFromSchedule,
   eventLocation,
@@ -26,22 +32,73 @@ export type ReaperEventSyncDependencies = {
   discordApiHeaders(contentType?: boolean): Headers;
   editOriginalInteractionResponse(applicationId: string, interactionToken: string, content: string): Promise<void>;
   serviceAdminClient(purpose: string): SupabaseAdminClient;
+  fetcher?: typeof fetch;
 };
 
-async function fetchGuildSchedule(deps: ReaperEventSyncDependencies): Promise<JsonRecord> {
-  const scheduleUrl = Deno.env.get("GUILD_SCHEDULE_URL") || deps.guildScheduleUrl;
-  const response = await fetch(scheduleUrl, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": deps.discordApiUserAgent,
-    },
+const GUILD_SCHEDULE_TIMEOUT_MS = 10_000;
+const GUILD_SCHEDULE_MAX_RESPONSE_BYTES = 256 * 1024;
+const WEBSITE_ORIGINS = new Set([SITE_ORIGIN]);
+
+export function trustedGuildScheduleUrl(value: unknown): string | null {
+  return exactHttpsUrl(value, {
+    allowedOrigins: WEBSITE_ORIGINS,
+    exactPathname: "/data/guild-schedule.json",
   });
+}
+
+function validatedGuildSchedule(value: unknown): JsonRecord {
+  const schedule = asRecord(value);
+  const timezone = asRecord(schedule.timezone);
+  const monthly = asRecord(schedule.monthly);
+  const weekly = schedule.weekly;
+  const offsetMinutes = Number(timezone.offsetMinutes);
+  if (
+    !Object.keys(schedule).length ||
+    !Object.keys(timezone).length ||
+    !Number.isInteger(offsetMinutes) ||
+    offsetMinutes < -840 ||
+    offsetMinutes > 840 ||
+    !Object.keys(monthly).length ||
+    Object.keys(monthly).length > 32 ||
+    !Array.isArray(weekly) ||
+    weekly.length > 32
+  ) {
+    throw new Error("Website schedule response was invalid.");
+  }
+  return schedule;
+}
+
+export async function fetchGuildSchedule(deps: ReaperEventSyncDependencies): Promise<JsonRecord> {
+  const configuredUrl = Deno.env.get("GUILD_SCHEDULE_URL") || deps.guildScheduleUrl;
+  const scheduleUrl = trustedGuildScheduleUrl(configuredUrl);
+  if (!scheduleUrl) throw new Error("Website schedule URL is not allowed.");
+
+  const response = await fetchWithTimeout(
+    scheduleUrl,
+    {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": deps.discordApiUserAgent,
+      },
+    },
+    { fetcher: deps.fetcher, timeoutMs: GUILD_SCHEDULE_TIMEOUT_MS },
+  );
 
   if (!response.ok) {
     throw new Error(`Schedule fetch failed with HTTP ${response.status}.`);
   }
+  const contentType = response.headers.get("content-type")?.split(";", 1)[0]
+    ?.trim().toLowerCase();
+  if (contentType !== "application/json") {
+    throw new Error("Website schedule response type was invalid.");
+  }
 
-  return asRecord(await response.json());
+  return validatedGuildSchedule(
+    await readBoundedResponseJson(
+      response,
+      GUILD_SCHEDULE_MAX_RESPONSE_BYTES,
+    ),
+  );
 }
 
 async function loadManagedEventResources(deps: ReaperEventSyncDependencies): Promise<JsonRecord[]> {

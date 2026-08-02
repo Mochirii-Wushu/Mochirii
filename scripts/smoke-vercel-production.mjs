@@ -1,61 +1,36 @@
+import { readFileSync } from "node:fs";
+
 const DEFAULT_BASE_URL = "https://mochirii.vercel.app";
 const TIMEOUT_MS = 30000;
 const retiredGameRoute = `/games/${["mochi", "social"].join("-")}`;
 const unknownRoute = "/__mochirii-unknown-route__";
+const routeMatrix = JSON.parse(readFileSync(new URL("../apps/web/config/app-route-matrix.v1.json", import.meta.url), "utf8"));
 
-const cleanRoutes = [
-  "/",
-  "/join",
-  "/ranks",
-  "/leaders",
-  "/tome",
-  "/events",
-  "/announcements",
-  "/raffle",
-  "/raffle/rules",
-  "/gallery",
-  "/spotlight",
-  "/spotify",
-  "/recruitment",
-  "/twills",
-  "/auth",
-  "/account",
-  "/gallery-submit",
-  "/leader-dashboard",
-  "/games/mochi-pets",
-];
+const cleanRoutes = routeMatrix.routes
+  .filter((route) => route.kind === "page" && route.productionSmoke === true)
+  .map((route) => route.path);
 
 const retiredRoutes = [
   "/members",
   "/members/twills",
   retiredGameRoute,
+  "/raffle/rules",
+  "/raffle/rules/example-cycle",
 ];
 
-const legacyRedirects = new Map([
-  ["/index.html", "/"],
-  ["/join.html", "/join"],
-  ["/ranks.html", "/ranks"],
-  ["/leaders.html", "/leaders"],
-  ["/events.html", "/events"],
-  ["/announcements.html", "/announcements"],
-  ["/raffles", "/raffle"],
-  ["/raffles.html", "/raffle"],
-  ["/gallery.html", "/gallery"],
-  ["/spotlight.html", "/spotlight"],
-  ["/spotify.html", "/spotify"],
-  ["/recruitment.html", "/recruitment"],
-  ["/twills.html", "/twills"],
-  ["/auth.html", "/auth"],
-  ["/account.html", "/account"],
-  ["/gallery-submit.html", "/gallery-submit"],
-  ["/leader-dashboard.html", "/leader-dashboard"],
-]);
+const legacyRedirects = new Map(
+  routeMatrix.redirects.map((redirect) => [redirect.source, redirect.destination]),
+);
 
 const bodyChecks = new Map([
+  ["/privacy", /Mōchirīī Privacy Notice|Destination-specific consent/i],
+  ["/meta-data-deletion", /Meta Data Deletion Instructions|Mōchirīī data deletion request/i],
   ["/auth", /Mochirii Login|Sign-in connects your website account|Website Sign-In/i],
   ["/account", /Choose a Sign-In Method|Sign In Required/i],
   ["/gallery-submit", /Login Required|Access Check/i],
   ["/leader-dashboard", /Choose a Sign-In Method|Sign In Required|Access Denied/i],
+  ["/leader-dashboard/raffle", /Mochirii Login|Choose a Sign-In Method|Sign In Required/i],
+  ["/raffle/claim", /Mochirii Login|Choose a Sign-In Method|Sign In Required/i],
   ["/games/mochi-pets", /Mochi Pets|tester doorway|fresh Unity project/i],
 ]);
 

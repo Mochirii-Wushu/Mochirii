@@ -1,14 +1,19 @@
 # Current Mochirii State
 
-Updated: 2026-07-27 PDT
+Updated: 2026-08-01 PDT
 
-This no-secret file records the current hosted and repository state. Update it
-after a completed release or ownership change; do not place credentials,
-provider exports, customer data, signed URLs, or mutable access details here.
+This no-secret file records current source truth and dated provider
+observations. Update it after a completed release or ownership change; do not
+place credentials, provider exports, customer data, signed URLs, or mutable
+access details here. Hosted facts are snapshots and must be refreshed before a
+release decision.
 
 ## Canonical Sources
 
-- Repository: `Mochirii-Wushu/Mochirii`.
+- Repository: `Mochirii-Wushu/Mochirii-Website`.
+- Active source, automation, release metadata, and navigational links use that
+  canonical name. Dated evidence may retain the contemporaneous pre-rename
+  slug under the documented immutable-evidence exception.
 - Local checkout: `C:\Github Repo's\Mochirii Website\Website`.
 - Resolve current production source with `git fetch --prune origin` and
   `git rev-parse origin/main`; do not rely on an undated copied SHA.
@@ -64,29 +69,211 @@ Generated local evidence now lives only under ignored `.artifacts/operations`.
 
 - `mochirii.com` remains hosted by the existing Vercel project and deploys from
   protected `main` with Root Directory `apps/web`.
+- An authenticated read-only Vercel Settings -> Git readback on 2026-07-30
+  confirms that project `mochirii` is connected to the canonical
+  `Mochirii-Wushu/Mochirii-Website` repository. The project overview identifies
+  `main/apps/web` as the current production source. This readback changed no
+  setting and does not deploy the local candidate.
 - Supabase project `deyvmtncimmcinldjyqe` remains the hosted Auth, Postgres, RLS,
   and Edge Function backend.
-- `shop.mochirii.com` remains password-protected. Payments and checkout remain
-  disabled. Theme `141514408011` remains unpublished.
-- `social.mochirii.com` remains on the single Singapore DigitalOcean Droplet
-  with Spaces-backed media. Registration is closed and ActivityPub is disabled.
+- The last verified hosted baseline, recorded before the 2026-08-01 local
+  candidate, contained 34 applied migrations and exactly 33 ACTIVE Edge
+  Functions with 20 `verify_jwt=true` and 13 false. It is dated evidence and
+  requires a fresh read-only provider readback before release. The larger local
+  integration candidate described below has not been deployed; its 53-migration
+  and 49-function inventories are not hosted-state claims.
+- The 2026-07-18 authenticated Shopify readback recorded the storefront as
+  password-protected and candidate theme `141514408011` as unpublished.
+  Source keeps the candidate theme checkout CTA absent; Shopify checkout itself
+  remains provider-controlled. A fresh authenticated readback is required
+  before any current-state or release claim.
+- `social.mochirii.com` is assigned to the existing single DigitalOcean
+  Droplet with Spaces-backed media. Registration is closed and ActivityPub is
+  disabled. Public read-only probes at 2026-07-30T02:25Z returned Cloudflare
+  `522` for `/`, `/login`, `/.well-known/security.txt`, `/installer`, and an
+  installer child path after about 20 seconds each. The current origin cause
+  is not verified; historical healthy checks are not current availability
+  evidence, and no host, Cloudflare, DNS, image, database, or secret mutation
+  was made during this source review.
 - Core customer serving, authentication, media, releases, Social queues, and
   the two active Supabase spotlight schedules do not depend on the local
   workstation. Complete auxiliary continuity remains Pending until the Reaper
   Gateway worker's hosted supervisor and a current Social backup/restore drill
   are read back; see [`HOST-INDEPENDENCE.md`](./HOST-INDEPENDENCE.md).
 
-GitHub protects `main` with strict required checks for `validate`,
-`validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview`. The current readback finds one open canonical pull request:
-Social replacement PR #535. Conflicting draft PR #532 was closed unmerged and
-its remote `agent/social-reliability` branch was deleted only after replacement
-traceability, exact-head checks, Vercel Preview, and a non-skipped Supabase
-Preview passed. PR #535 remains unreleased and must be rechecked at its current
-exact head after every update; the pull request is the authoritative source for
-that mutable head. Security and dependency alert counts are mutable provider
-state and must be read back at release time rather than inferred from the
-earlier closeout.
+## Meta Publishing Source Packet
+
+- The moderator-reviewed Facebook Page and Instagram publishing packet is
+  source-only and has not been deployed to the hosted Website or Supabase
+  project. It makes no automatic Facebook Group mutation; a published Page post
+  can only be handed off to the official private guild Group manually.
+- `FACEBOOK_PAGE_PUBLISH_ENABLED=false` and
+  `INSTAGRAM_PUBLISH_ENABLED=false`, and no live Meta post was created. The
+  current Employee System User has Content access only to the Page and linked
+  Instagram asset plus partial Develop-app access; it has no full app
+  management, ad account, or ad scope. The Marketing API use case exists only
+  because Meta's System User installation flow requires Ads Management API
+  Standard Access.
+- A 60-day token with exactly `pages_manage_posts`,
+  `pages_read_engagement`, and `pages_show_list` was revoked after every Graph
+  request returned OAuthException 200 `API access blocked` behind the unresolved
+  `Account confirmation needed` checkpoint. No Page-task, Instagram
+  identity/account-type, or Instagram Graph-ID verification is current
+  evidence. The former Admin System User has no assets, installed apps, or
+  tokens and is retained as `Mochirii Gallery Publisher Legacy`.
+- Hosted secret values are not documented or assumed. Activation requires fresh
+  name-only secret-inventory evidence and a successful read-only provider
+  identity check. Instagram Graph-ID discovery, verification, and independent
+  pinning remain pending.
+- Public profile readback shows Instagram `mochirii_guild` beside the existing
+  TikTok and Twitch links. The Facebook Page and Instagram Website fields must
+  remain empty, and Meta/Instagram profile or publication copy must not include
+  or link `mochirii.com`.
+- Instagram and TikTok use the preferred `mochirii_guild` handle. Facebook
+  does not permit underscores and the preferred non-underscore variants were
+  unavailable, so the Page is `mochiriiguildpage` and the existing Group stays
+  `mochiriiguild`. Twitch remains `mochiriiguild` until its rename cooldown
+  ends and the preferred handle can be checked in account settings.
+- Facebook, Instagram, TikTok, and Twitch use the same canonical lotus emblem.
+  The Facebook Page, Facebook Group, and Twitch use the matching banner family;
+  Instagram and TikTok do not expose an equivalent profile-banner surface.
+- The final source-only 46-migration packet was validated on 2026-07-29 in a
+  uniquely named isolated local Supabase project: all 46 migrations reset,
+  all 109 focused Meta pgTAP assertions passed, and strict warning-level
+  database lint returned no findings. The migration manifest SHA-256 is
+  `8E9062A5452D40C7859F74FD47552322B030CCFF4724A6A9EC090961DC7C0A46`.
+  This is local source evidence only; the hosted project and quarantined shared
+  local stack were not contacted.
+- Any hosted migration, Edge Function deployment, Meta secret change,
+  activation, or first genuine post remains separately approval-gated and
+  requires current provider readback.
+
+GitHub protects `main` with strict current-head enforcement and exactly these
+required contexts: `validate`, `validate-next`, `Vercel`,
+`supabase-local-preview`, `validate-theme`, and `validate-social`. The
+source-owned local Preview context has replaced hosted `Supabase Preview` as a
+required check. Supabase Automatic Branching was not changed during the ruleset
+transition and remains disabled and plan-locked in the dated dashboard
+readback. The 2026-08-01 GitHub snapshot finds 15 open Website pull requests:
+#536 and #538 through #551. Social and Social Mobile have no open PR, Mochi Pets
+PR #4 is open and unstable, and Reaper and Forums have no open PR. This is a
+dated snapshot, not a cleanup allowlist; every head, check, review, and
+replacement-parity claim must be refreshed before merge or closure. GitHub
+private vulnerability reporting is enabled for Website as of the 2026-07-31
+readback. Both Website and current Social source point to the Website
+repository's private vulnerability report form as the operational
+`security.txt` contact while retaining the GitHub security policy URL. The
+general support mailbox is not used as a vulnerability-reporting fallback.
+
+## Local Full-Stack Integration Candidate
+
+- The validated predecessor source union is
+  `bdbe9a7e8fb47646588754cf6fc1e4f6a15dc146` (tree
+  `5ff295a4f5df0525a362dca5483243e7bfe3c9f9`). At the 2026-08-01 readback it
+  is based on `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b`,
+  114 commits ahead and zero behind before the successor documentation,
+  storefront-readiness, and official-profile packet. It contains exactly 53 migrations and 49
+  functions declared in `supabase/config.toml`, with a source-expected JWT
+  split of 31 `verify_jwt=true` / 18 false. These figures describe local source
+  only; the dated hosted baseline requires fresh readback before release.
+- A uniquely named, non-shared local Supabase project reset all 53 migrations
+  and passed 603 of 603 pgTAP assertions. Warning-level database lint and
+  security findings were zero, and the foreign-key audit found zero unindexed
+  foreign keys. Sixty `unused_index` INFO observations on a fresh empty database
+  are not deletion evidence.
+- The same isolated run did not use shared local Supabase ports 54321 through
+  54327 and did not contact the hosted project. Cleanup proved no isolated
+  containers, volumes, networks, listeners, or registered worktree remained.
+- Server-side Supabase requests now use a bounded five-second transport that
+  composes caller and request cancellation, cleans up timers and listeners, and
+  fails closed with generic outage responses at protected authorization
+  boundaries. Local unit, repository, Web build, and browser checks exercise
+  that boundary; they are not a live-provider availability claim.
+- Discord request bodies are rejected above a streaming 64 KiB ceiling before
+  parsing or signature verification. Discord signatures are verified against
+  the exact received bytes after strict UTF-8 validation, and scheduled-task
+  secrets use the shared bounded SHA-256 constant-time comparator. The shared
+  outbound HTTP client bounds redirects, protocols, destinations, time, and
+  response size. These changes do not alter migrations, function inventory, or
+  JWT parity; the reviewed Web lockfile change only adds the test tooling used
+  by the new public-artifact checks.
+- Social output boundaries now use escaped text or typed DOM nodes by default.
+  Fixed application markup and fixed-allowlist rich text are separately
+  classified. Stored Page and Newsroom HTML is normalized on write and legacy
+  rows are re-sanitized when rendered; style-element content is protected only
+  against breakout and remains a trusted-administrator boundary. Script JSON
+  uses Laravel `Js::from` or all four JSON hexadecimal encoding flags. The
+  executable contract covers 50 active Vue `v-html` sinks, 14 imperative DOM
+  boundaries, and 45 exact raw-Blade outputs; all 27 formerly open boundaries
+  are closed.
+- The union retains the source-only Meta and event-social publishing packets as
+  validated subsets. Publication templates and provider flags remain disabled;
+  no public post was created. The earlier Meta subset's isolated 46-migration
+  reset, 109 focused pgTAP assertions, and recorded manifest digest remain
+  immutable evidence. The broader 53/603 union result supplements rather than
+  rewrites that subset record.
+- The union branch has not been pushed and has no pull request. It has caused
+  no Vercel,
+  Supabase, DigitalOcean, Meta, Discord, Shopify, Apple, Unity, or other
+  provider change. Exact provider previews, accountable review, protected-main
+  release authority, source-to-provider readback, and rollback evidence remain
+  future gates.
+- At the exact predecessor head, the clean root install and Node 22.23.1/npm
+  10.9.8/Deno 2.9.4 toolchain contract passed. At the current successor
+  documentation/storefront-readiness/official-profile state, the complete repository suite,
+  `git diff --check`, Web toolchain check, Web lint, and the Next 16.2.11
+  production build also passed. Earlier broader validation on the unchanged
+  application surface covered the Docker 29.6.1 daemon readback and all 266
+  public PNG, JPEG, GIF, and WebP decodes.
+  Social passed 219 PHP tests with 1,488
+  assertions, the 32-test focused security lane, Composer audit with no known
+  advisories, the production dependency audit with no high or critical
+  finding, 62 generated JavaScript syntax checks, and CSS semantics across 7
+  files, 39,896 declarations, and 200 bounded URLs. Two production asset builds
+  produced the same aggregate SHA-256
+  `14D427D0EDB59FACA42B0209A85F999940343A2ECBB3E2D1A403B1D24876A46E`.
+  Asset/CSP validators fail closed on malformed media, unexpected external
+  origin/file pairs, and unreviewed multiline runtime-load sites.
+- Local browser acceptance passed the Home/Gallery lightbox across 19 Chromium
+  viewports plus representative Firefox, WebKit, touch, safe-area, 200%, and
+  400% reflow cases; the approved-feed fixture passed 90 publications; and the
+  complete route matrix passed 312/312 checks in each of Chromium, Firefox, and
+  WebKit with no horizontal overflow, footer clipping, focus failure, or
+  reduced-motion failure.
+- The successor storefront readiness ledger remains fail-closed and authorizes
+  no Shopify upload, theme publication, checkout, payment, or provider
+  mutation. The official-profile contract pins exact destinations, surfaces,
+  local asset hashes, accessible names, and zero provider requests before a
+  click; its cross-browser responsive matrix passed 28/28 cases.
+- The clean Mobile successor is
+  `b417daaf546395ded535b3beebde5d74b459c7dd` (tree
+  `e29fe53a69107df702525bfb5d8bdc7417c12872`). It remains local and unpushed;
+  no Apple, EAS, or provider action occurred.
+
+## Legal and Privacy Readiness
+
+- The source-only
+  [`LEGAL-PRIVACY-READINESS-2026-07-29.md`](./LEGAL-PRIVACY-READINESS-2026-07-29.md)
+  decision packet and
+  [`legal-privacy-readiness.v1.json`](./legal-privacy-readiness.v1.json)
+  inventory cover ten repository-owned or planned surfaces, thirteen
+  processing activities, processor and transfer evidence, retention, rights,
+  twelve registered public-claim conflicts, and exact future approval gates.
+- The fail-closed validator reports 5 `SOURCE_OBSERVED`,
+  1 `RUNTIME_READBACK_REQUIRED`, 42 `BLOCKED_APPROVAL`,
+  35 `BLOCKED_EXTERNAL`, 10 `DEFERRED_BY_EXPLICIT_POLICY`, and
+  0 `NOT_APPLICABLE_REVIEWED` rows. An explicit blocker is valid inventory
+  state, not evidence of readiness.
+- No legal operator, jurisdiction, legal basis, retention period, rights
+  deadline, processor contract, transfer mechanism, counsel review, or public
+  legal copy is inferred or approved. Website and Social public copy remains
+  unchanged.
+- Social terms, guidelines, legal-notice source authority, absolute privacy
+  description, deletion promises, and age or parental-control posture remain
+  blocked pending exact owner decisions, qualified review, and authorized
+  runtime evidence.
+- The packet used repository source only. It did not inspect credentials, use a
+  shared Supabase stack, contact providers, or change hosted state.
 
 ## Website Reliability Release
 
@@ -121,7 +308,7 @@ earlier closeout.
   protection remains a separately approval-gated Auth setting.
 - Detailed scope, advisor rationale, worktree disposition, and release gates are
   in [`WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md`](./WEBSITE-RELIABILITY-RECONCILIATION-2026-07-27.md).
-- The complete public-safe organization, branch, issue, and 28-worktree
+- The complete public-safe organization, branch, issue, and current-worktree
   classification is recorded in
   [`ORGANIZATION-RECONCILIATION-2026-07-27.md`](./ORGANIZATION-RECONCILIATION-2026-07-27.md).
 
@@ -131,15 +318,16 @@ earlier closeout.
   `ghcr.io/mochirii-wushu/mochirii-pixelfed-ops`.
 - The deployed canonical image digest is
   `sha256:1fd27c8f76595595912e6f12f1677c7f108aa50f64b38a85089006b47ad395f1`.
-- Social hardening replacement PR #535 is based on the current protected-main
-  baseline. It contains no database migration or `supabase/config.toml` change,
-  but it changes reviewed source consumed by existing declared functions. Its
-  Supabase Preview must therefore remain non-skipped. A protected-main merge
-  requires separate exact authorization to redeploy the same 33 functions while
-  preserving 20/13 JWT parity; any inventory or parity drift is a stop
-  condition. It also refreshes expired Discord role evidence on demand so an
-  otherwise valid member cannot become stranded at Social consent when the
-  bounded verification window expires.
+- The historical hosted checks below do not supersede the current Cloudflare
+  `522` observation recorded in Hosted Services. Social should be treated as
+  publicly unavailable until a read-only origin/provider diagnosis and a
+  separately approved rollback-safe recovery packet prove otherwise.
+- Social hardening replacement PR #535 was squash-merged through protected
+  `main` as `075937a30a9509faa189e9b1917a2ad9b847c7b0`. It refreshes expired
+  Discord role evidence on demand so an otherwise valid member is not stranded
+  at Social consent when the bounded verification window expires. This merged
+  historical release does not authorize deployment of the newer 49-function
+  local union or any DigitalOcean runtime change.
 - The approved Packet E write set only the server-side
   `MOCHIRII_SOCIAL_OAUTH_CLIENT_ID` binding as Sensitive for Vercel Preview and
   Production. The exact registered first-party identifier, callback, and S256
@@ -147,12 +335,11 @@ earlier closeout.
   No public variable, client secret, OAuth registration, callback, or other
   provider setting changed, and the existing Production deployment remained
   bound to protected `main` without a deployment solely for this setting.
-- PR #535 has been pushed and reviewed through exact-head GitHub, Vercel, and
-  non-skipped Supabase Preview gates. Protected Preview checks reached the
+- PR #535 passed its reviewed exact-head GitHub, Vercel, and non-skipped
+  Supabase Preview gates before merge. Protected Preview checks reached the
   application authorization boundary, preserved private/no-store rejection,
-  and found no identifier in rendered HTML or client assets. The replacement
-  has not been merged, published to GHCR, or deployed to DigitalOcean; those
-  effects remain separately exact-gated. The private-media runtime remains
+  and found no identifier in rendered HTML or client assets. DigitalOcean
+  deployment remains a separate exact gate. The private-media runtime remains
   blocked until anonymous object/CDN denial and one authorized
   application-media read are proven in the separately approved cutover packet.
 - Image workflow run `29664477462`, protected deployment run `29664673632`,
@@ -294,9 +481,12 @@ generated archives belong only in ignored `.artifacts/operations`.
 - Payment setup and payment/order-lifecycle testing are intentionally the final
   readiness phase. They do not begin until every non-payment gate is Ready and
   the owner gives exact approval for that provider action.
-- Storefront password protection and disabled checkout remain in effect, and
-  theme `141514408011` remains unpublished. Publication, password removal,
-  purchases, real orders, and public launch remain separately approval-gated.
+- Launch policy requires storefront password protection, the theme checkout
+  CTA to remain absent, and theme `141514408011` to remain unpublished. The
+  current provider state requires fresh authenticated readback; Shopify
+  checkout is provider-controlled and is not claimed server-disabled here.
+  Publication, password removal, purchases, real orders, and public launch
+  remain separately approval-gated.
 
 ## Deferred
 

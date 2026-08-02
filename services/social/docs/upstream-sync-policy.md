@@ -8,7 +8,7 @@ Mochirii push.
 ## Remote Policy
 
 - `origin` fetch and push points to
-  `https://github.com/Mochirii-Wushu/Mochirii.git`.
+  `https://github.com/Mochirii-Wushu/Mochirii-Website.git`.
 - The official upstream source is `https://github.com/pixelfed/pixelfed.git`.
 - Do not add an upstream push URL to the canonical checkout.
 - Record the reviewed upstream base in `SOURCE-SNAPSHOT.md`.

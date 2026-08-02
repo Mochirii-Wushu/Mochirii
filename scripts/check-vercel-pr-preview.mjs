@@ -104,7 +104,7 @@ try {
   const rollupStatus = normalizeGithubVercelStatus(findVercelRollup(prData.statusCheckRollup));
   const commitStatus = runJson("gh", [
     "api",
-    `repos/Mochirii-Wushu/Mochirii/commits/${sha}/status`,
+    `repos/Mochirii-Wushu/Mochirii-Website/commits/${sha}/status`,
   ]);
   const latestVercelStatus =
     (commitStatus.statuses || []).find((status) => status.context === vercelContext) ||

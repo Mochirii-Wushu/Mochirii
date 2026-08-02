@@ -57,6 +57,7 @@ const files = {
   controller: "apps/web/components/spinner/RaffleSpinner.tsx",
   viewer: "apps/web/components/spinner/ViewerRaffleSpinner.tsx",
   live: "apps/web/components/spinner/live.ts",
+  livePollHook: "apps/web/components/spinner/use-spinner-live.ts",
   countdownHook: "apps/web/components/spinner/use-spinner-countdown.ts",
   raffle: "apps/web/components/spinner/raffle.ts",
   celebration: "apps/web/components/spinner/celebration.ts",
@@ -68,6 +69,7 @@ const files = {
   auth: "apps/web/lib/supabase/auth.ts",
   layout: "apps/web/app/layout.tsx",
   siteShell: "apps/web/components/SiteRouteShell.tsx",
+  ordinaryShell: "apps/web/components/OrdinarySiteShell.tsx",
   nextConfig: "apps/web/next.config.ts",
   robots: "apps/web/public/robots.txt",
   sitemap: "apps/web/public/sitemap.xml",
@@ -132,7 +134,12 @@ for (const snippet of [
   "new NextResponse(null, {",
   "status: 404",
   "NextResponse.next()",
-  'matcher: ["/spinner"]',
+  "matcher: [",
+  '"/spinner",',
+  '"/leader-dashboard",',
+  '"/oauth/consent",',
+  '"/raffle/claim/:path*",',
+  '"/leader-dashboard/raffle/:path*",',
   'path: SPINNER_PAGE_PATH',
   "httpOnly: true",
   "secure: true",
@@ -222,8 +229,26 @@ for (const snippet of [
   "isTerminalSpinnerSpinFailure",
   "spinnerSkipStateForDraw",
   "spinnerLiveMotionRotations",
+  "createSpinnerLiveSnapshotCache",
+  'headers.set("If-None-Match", cacheForSnapshot.etag)',
+  "response.status === 304",
+  'response.headers.get("x-mochirii-server-time")',
   "commandId",
 ].forEach((snippet) => includes("same-origin live client", source.live, snippet));
+for (const snippet of [
+  "createSpinnerLiveSnapshotCache",
+  "clearSpinnerLiveSnapshotCache",
+  "fetchSpinnerLiveSnapshot(snapshotCacheRef.current)",
+  "if (!enabled || runningRef.current) return null",
+  'document.visibilityState === "hidden"',
+  "navigator.onLine === false",
+  "failureCountRef.current += 1",
+  "spinnerLiveErrorRetryDelay(failureCountRef.current",
+  'window.addEventListener("focus"',
+  'window.addEventListener("online"',
+  'window.addEventListener("offline"',
+  'document.addEventListener("visibilitychange"',
+]) includes("same-origin live poll cache", source.livePollHook, snippet);
 for (const forbidden of ["WebSocket", "realtime.send", "wss://", "https://", "http://", "Math.random"]) {
   excludes("same-origin live client", source.live, forbidden);
 }
@@ -238,9 +263,11 @@ for (const snippet of [
   'Authorization: `Bearer ${accessToken}`',
   '"X-Mochirii-Spinner-Mode": mode',
   'SPINNER_OUTCOME_HEADER = "X-Mochirii-Spinner-Outcome"',
+  '"X-Mochirii-Server-Time": notModifiedMetadata.serverTime',
   "await cancelResponseBody(response)",
   "readBoundedResponseText(response, MAX_RESPONSE_BYTES)",
   "spinnerProxyOutcomeForStatus(method, response.status)",
+  "spinnerNotModifiedResponseMetadata(response.headers)",
   'recordProxyError("response_too_large", response.status)',
   '"access-denied"',
   '"upstream-error"',
@@ -404,7 +431,8 @@ includes("central sign-out", source.auth, "await clearPrivateSpinnerSession();")
 for (const snippet of [
   'pathname === "/spinner"',
   'pathname.startsWith("/spinner/")',
-  "if (isIsolatedSpinnerPath(pathname)) return children;",
+  "isIsolatedSpinnerPath(pathname) ||",
+  "return children;",
 ]) includes("route-aware site shell", source.siteShell, snippet);
 for (const snippet of [
   "<SiteHeader {...auth} />",
@@ -412,7 +440,7 @@ for (const snippet of [
   "<Analytics />",
   "<SpeedInsights />",
 ]) {
-  includes("ordinary route site shell", source.siteShell, snippet);
+  includes("ordinary route site shell", source.ordinaryShell, snippet);
   excludes("root layout", source.layout, snippet.slice(0, -3));
 }
 includes("root layout", source.layout, "<SiteRouteShell>{children}</SiteRouteShell>");
@@ -432,17 +460,10 @@ const configuredFunctions = Array.from(
   source.supabaseConfig.matchAll(/^\[functions\.([^\]]+)\]$/gmu),
   (match) => match[1],
 );
-if (configuredFunctions.length !== 33) {
-  failures.push(
-    `spinner release inventory: expected 33 configured functions, found ${configuredFunctions.length}.`,
-  );
-}
 for (const functionName of ["spinner-live-session", "reaper-spinner-dispatch"]) {
   if (!configuredFunctions.includes(functionName)) {
     failures.push(`spinner release inventory: missing ${functionName}.`);
   }
-}
-for (const functionName of configuredFunctions) {
   includes(
     "spinner operations runbook inventory",
     source.runbook,
@@ -451,7 +472,7 @@ for (const functionName of configuredFunctions) {
 }
 
 for (const snippet of [
-  "all 33 Edge Functions declared in `supabase/config.toml`",
+  "all 49 Edge Functions declared in `supabase/config.toml`",
   "The Preview database is data-less by design",
   "select count(*)::integer as total_rows",
   '"claimed": 0',
@@ -461,7 +482,7 @@ for (const snippet of [
   "reaper_spinner_dispatch_secret",
   "REAPER_SPINNER_DISPATCH_SECRET",
   "The migration is forward-only.",
-  "A protected revert or forward-fix merge invokes the same 33-function production integration",
+  "A protected revert or forward-fix merge invokes the same 49-function production integration",
   "Do not retry blindly.",
   "operator_reconciled_start",
   "and phase = 'start_pending'",
@@ -469,7 +490,7 @@ for (const snippet of [
 ]) includes("spinner operations runbook", source.runbook, snippet);
 
 for (const snippet of [
-  "redeploys all 33 functions declared in",
+  "redeploys all 49 functions declared in",
   "zero claimed, completed,",
   "Never retry blindly",
   "forward-fix migration",

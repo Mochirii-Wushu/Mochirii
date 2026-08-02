@@ -45,6 +45,16 @@ const contentSecurityPolicy = [
   "upgrade-insecure-requests",
 ].join("; ");
 
+const authContentSecurityPolicy = contentSecurityPolicy
+  .replace(
+    "script-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+  )
+  .replace(
+    "frame-src 'self' https://discord.com https://open.spotify.com",
+    "frame-src 'self' https://discord.com https://open.spotify.com https://challenges.cloudflare.com",
+  );
+
 const spinnerContentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -80,7 +90,8 @@ const securityHeaders = [
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+    value:
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
   },
   {
     key: "Cross-Origin-Opener-Policy",
@@ -119,6 +130,15 @@ const nextConfig: NextConfig = {
         headers: [...securityHeaders],
       },
       {
+        source: "/auth",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: authContentSecurityPolicy,
+          },
+        ],
+      },
+      {
         source: "/spinner/:path*",
         headers: [
           {
@@ -128,6 +148,23 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "private, no-store, max-age=0",
+          },
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow, noarchive, nosnippet, noimageindex",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "no-referrer",
+          },
+        ],
+      },
+      {
+        source: "/auth/callback",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, must-revalidate, max-age=0",
           },
           {
             key: "X-Robots-Tag",

@@ -1,5 +1,10 @@
 # Pixelfed Guild Social ADR
 
+> **Superseded on 2026-07-29.** This dated packet is retained unchanged as
+> historical evidence and must not be used as current operational guidance.
+> Current operations are governed by the
+> [Mochirii Social Delivery Contract](integrations/mochirii-social-delivery.md).
+
 Date: 2026-07-02
 
 Status: staging integration in progress; provider mutations and production runtime are approval-gated.

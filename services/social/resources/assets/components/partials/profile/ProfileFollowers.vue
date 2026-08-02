@@ -39,7 +39,9 @@
 
 								<div class="media-body">
 									<p class="mb-0 text-truncate">
-										<span class="text-dark font-weight-bold text-decoration-none" v-html="getUsername(account)"></span>
+										<span class="text-dark font-weight-bold text-decoration-none">
+											<display-name :profile="account" :emojis="getCustomEmoji" />
+										</span>
 									</p>
 									<p class="mb-0 mt-n1 text-muted small text-break">&commat;{{ account.acct }}</p>
 								</div>
@@ -82,6 +84,7 @@
 <script type="text/javascript">
 	import Intersect from 'vue-intersect'
 	import Placeholder from './../post/LikeListPlaceholder.vue';
+	import DisplayName from './DisplayName.vue';
 	import ProfileHoverCard from './ProfileHoverCard.vue';
 	import { mapGetters } from 'vuex';
 	import { parseLinkHeader } from '@web3-storage/parse-link-header';
@@ -94,6 +97,7 @@
 		},
 
 		components: {
+			DisplayName,
 			ProfileHoverCard,
 			Intersect,
 			Placeholder
@@ -177,28 +181,6 @@
 				}
 				this.isFetchingMore = true;
 				this.fetchFollowers();
-			},
-
-			getUsername(profile) {
-				let self = this;
-				let dn = profile.display_name;
-				if(!dn || !dn.trim().length) {
-					return profile.username;
-				}
-
-				if(dn.includes(':')) {
-					let re = /(<a?)?:\w+:(\d{18}>)?/g;
-					let un = dn.replaceAll(re, function(em) {
-						let shortcode = em.slice(1, em.length - 1);
-						let emoji = self.getCustomEmoji.filter(e => {
-							return e.shortcode == shortcode;
-						});
-						return emoji.length ? `<img draggable="false" class="emojione custom-emoji" alt="${emoji[0].shortcode}" title="${emoji[0].shortcode}" src="${emoji[0].url}" data-original="${emoji[0].url}" data-static="${emoji[0].static_url}" width="16" height="16" onerror="this.onerror=null;this.src='/storage/emoji/missing.png';" />`: em;
-					});
-					return un;
-				} else {
-					return dn;
-				}
 			},
 
 			goToProfile(account) {

@@ -15,6 +15,7 @@ const functions = [
   "spinner-live-session",
   "moderate-gallery-submission",
   "delete-rejected-gallery-submission",
+  "withdraw-gallery-publication-consent",
   "list-approved-gallery-submissions",
   "submit-discord-gallery-image",
   "reaper-discord-interactions",
@@ -24,10 +25,25 @@ const functions = [
   "send-member-spotlight-poll",
   "publish-member-spotlight-winner",
   "get-current-spotlight-winner",
+  "get-current-raffle",
+  "manage-raffle-entry",
+  "moderate-raffle",
+  "run-raffle-schedule",
+  "manage-raffle-claim",
+  "run-raffle-fulfillment",
+  "reward-provider-webhook",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
+  "resolve-instagram-publish-reconciliation",
   "mark-instagram-gallery-submission-shared",
   "check-instagram-api-status",
+  "list-facebook-page-publish-queue",
+  "publish-facebook-page-gallery-submission",
+  "resolve-facebook-page-publish-reconciliation",
+  "check-facebook-page-api-status",
+  "manage-event-social-publication",
+  "run-event-social-publication",
+  "resolve-event-social-publication-reconciliation",
   "list-member-profiles",
   "list-visible-profile-cards",
   "get-member-profile",
@@ -41,6 +57,29 @@ const functions = [
   "mochi-pets-alpha-admin",
   "submit-mochi-pets-feedback",
   "sync-pixelfed-social-account",
+];
+const committedLockFunctions = [
+  "check-facebook-page-api-status",
+  "get-current-raffle",
+  "list-approved-gallery-submissions",
+  "list-facebook-page-publish-queue",
+  "list-gallery-review-queue",
+  "manage-event-social-publication",
+  "manage-raffle-claim",
+  "manage-raffle-entry",
+  "moderate-gallery-submission",
+  "moderate-raffle",
+  "publish-facebook-page-gallery-submission",
+  "resolve-facebook-page-publish-reconciliation",
+  "resolve-event-social-publication-reconciliation",
+  "resolve-instagram-publish-reconciliation",
+  "reaper-spinner-dispatch",
+  "reward-provider-webhook",
+  "run-event-social-publication",
+  "run-raffle-fulfillment",
+  "run-raffle-schedule",
+  "spinner-live-session",
+  "submit-discord-gallery-image",
 ];
 
 function denoBinary() {
@@ -67,6 +106,18 @@ if (JSON.stringify(discoveredFunctions) !== JSON.stringify(expectedFunctions)) {
   console.error("Supabase Edge Function manifest inventory does not match the reviewed function list.");
   console.error(`Expected: ${expectedFunctions.join(", ")}`);
   console.error(`Found: ${discoveredFunctions.join(", ")}`);
+}
+
+const discoveredCommittedLockFunctions = readdirSync(functionRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory() && existsSync(path.join(functionRoot, entry.name, "deno.lock")))
+  .map((entry) => entry.name)
+  .sort();
+const expectedCommittedLockFunctions = [...committedLockFunctions].sort();
+if (JSON.stringify(discoveredCommittedLockFunctions) !== JSON.stringify(expectedCommittedLockFunctions)) {
+  failed = true;
+  console.error("Committed Supabase Edge Function lock inventory does not match the reviewed list.");
+  console.error(`Expected: ${expectedCommittedLockFunctions.join(", ")}`);
+  console.error(`Found: ${discoveredCommittedLockFunctions.join(", ")}`);
 }
 
 for (const name of functions) {
@@ -161,6 +212,26 @@ try {
       runDeno(
         ["audit", "--quiet", `--lock=${resolutionLock}`, "--frozen=true"],
         `${name} resolved dependency audit`,
+      );
+    }
+
+    if (committedLockFunctions.includes(name)) {
+      const committedLock = `supabase/functions/${name}/deno.lock`;
+      runDeno(
+        [
+          "check",
+          "--quiet",
+          "--node-modules-dir=auto",
+          `--config=${config}`,
+          `--lock=${committedLock}`,
+          "--frozen=true",
+          entrypoint,
+        ],
+        `${name} committed dependency lock`,
+      );
+      runDeno(
+        ["audit", "--quiet", `--lock=${committedLock}`, "--frozen=true"],
+        `${name} committed dependency audit`,
       );
     }
   }

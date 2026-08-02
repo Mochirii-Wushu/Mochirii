@@ -6,12 +6,15 @@ import {
   eventLocation,
   managedEventLine,
   recurrenceRule,
+  scheduleAssetUrl,
   scheduledEventBody,
 } from "./reaper-discord-events.ts";
 import {
+  fetchGuildSchedule,
   indexManagedEventResources,
   selectExistingScheduledEvent,
   supersededManagedEventResources,
+  trustedGuildScheduleUrl,
 } from "./reaper-event-sync-workflow.ts";
 import { siteUrl } from "./public-origins.ts";
 
@@ -162,27 +165,35 @@ Deno.test("scheduledEventBody preserves Discord event contract and limits text f
 
 Deno.test("eventCoverImageData sends Discord-safe headers and rejects unsupported images", async () => {
   const originalFetch = globalThis.fetch;
-  const calls: Array<{ url: string; accept: string; userAgent: string }> = [];
+  const calls: Array<{ url: string; accept: string; userAgent: string; redirect?: RequestRedirect; hasSignal: boolean }> = [];
+  const png = Uint8Array.from(
+    atob("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="),
+    (character) => character.charCodeAt(0),
+  );
   try {
     globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) => {
       calls.push({
         url: String(input),
         accept: String(new Headers(init?.headers).get("Accept") || ""),
         userAgent: String(new Headers(init?.headers).get("User-Agent") || ""),
+        redirect: init?.redirect,
+        hasSignal: init?.signal instanceof AbortSignal,
       });
       return Promise.resolve(
-        new Response(new Uint8Array([1, 2, 3]), {
-          headers: { "Content-Type": "image/jpeg" },
+        new Response(png, {
+          headers: { "Content-Type": "image/png" },
         }),
       );
     }) as typeof fetch;
 
-    const data = await eventCoverImageData(siteUrl("assets/test-cover.jpg?case=valid"), "Mochirii-Test/1.0");
-    assert(data.startsWith("data:image/jpeg;base64,"));
+    const data = await eventCoverImageData(siteUrl("assets/test-cover.png?v=valid"), "Mochirii-Test/1.0");
+    assert(data.startsWith("data:image/png;base64,"));
     assertEquals(calls[0], {
-      url: siteUrl("assets/test-cover.jpg?case=valid"),
+      url: siteUrl("assets/test-cover.png?v=valid"),
       accept: "image/png,image/jpeg,image/webp",
       userAgent: "Mochirii-Test/1.0",
+      redirect: "error",
+      hasSignal: true,
     });
 
     globalThis.fetch = (() =>
@@ -193,11 +204,94 @@ Deno.test("eventCoverImageData sends Discord-safe headers and rejects unsupporte
       )) as typeof fetch;
 
     await assertRejects(
-      () => eventCoverImageData(siteUrl("assets/test-cover.html?case=invalid"), "Mochirii-Test/1.0"),
+      () => eventCoverImageData(siteUrl("assets/test-cover.html?v=invalid"), "Mochirii-Test/1.0"),
       "unsupported content type should reject",
     );
   } finally {
     globalThis.fetch = originalFetch;
+  }
+});
+
+Deno.test("event cover and schedule URLs stay on exact Website paths", () => {
+  assert(
+    scheduleAssetUrl("./assets/img/discord-events/monthly-raffle.png", "v1") ===
+      siteUrl("assets/img/discord-events/monthly-raffle.png?v=v1"),
+    "approved event cover rejected",
+  );
+  for (
+    const value of [
+      "https://evil.test/assets/cover.png",
+      "https://user:secret@mochirii.com/assets/cover.png",
+      "https://mochirii.com:8443/assets/cover.png",
+      "https://mochirii.com/assets/cover.png#fragment",
+      `https://${[127, 0, 0, 1].join(".")}/assets/cover.png`,
+      "../assets/cover.png",
+    ]
+  ) {
+    assert(scheduleAssetUrl(value) === null, `unsafe cover URL accepted: ${value}`);
+  }
+
+  assert(
+    trustedGuildScheduleUrl(siteUrl("data/guild-schedule.json")) ===
+      siteUrl("data/guild-schedule.json"),
+    "approved schedule URL rejected",
+  );
+  assert(trustedGuildScheduleUrl("https://evil.test/data/guild-schedule.json") === null);
+  assert(trustedGuildScheduleUrl("https://mochirii.com/data/guild-schedule.json?cache=1") === null);
+});
+
+Deno.test("fetchGuildSchedule bounds and validates the Website response", async () => {
+  const prior = Deno.env.get("GUILD_SCHEDULE_URL");
+  Deno.env.delete("GUILD_SCHEDULE_URL");
+  let captured: RequestInit | undefined;
+  const schedule = {
+    timezone: { offsetMinutes: 480 },
+    monthly: { gathering: { id: "monthly-gathering" } },
+    weekly: [],
+  };
+  const deps = {
+    expectedGuildId: "123456789012345678",
+    guildScheduleUrl: siteUrl("data/guild-schedule.json"),
+    discordApiUserAgent: "Mochirii-Test/1.0",
+    discordApi: () => Promise.resolve({ ok: true, status: 200, data: null }),
+    discordApiHeaders: () => new Headers(),
+    editOriginalInteractionResponse: () => Promise.resolve(),
+    serviceAdminClient: () => ({ from: () => ({}) }),
+    fetcher: ((_input, init) => {
+      captured = init;
+      return Promise.resolve(Response.json(schedule));
+    }) as typeof fetch,
+  };
+
+  try {
+    const result = await fetchGuildSchedule(deps);
+    assertEquals(result, schedule);
+    assert(captured?.redirect === "error", "schedule redirects were not disabled");
+    assert(captured?.signal instanceof AbortSignal, "schedule timeout signal missing");
+
+    await assertRejects(
+      () =>
+        fetchGuildSchedule({
+          ...deps,
+          fetcher: (() => Promise.resolve(Response.json({ weekly: [] }))) as typeof fetch,
+        }),
+      "malformed schedule should reject",
+    );
+    await assertRejects(
+      () =>
+        fetchGuildSchedule({
+          ...deps,
+          fetcher: (() =>
+            Promise.resolve(Response.json({
+              ...schedule,
+              weekly: Array.from({ length: 33 }, () => ({})),
+            }))) as typeof fetch,
+        }),
+      "unbounded weekly schedule should reject",
+    );
+  } finally {
+    if (prior == null) Deno.env.delete("GUILD_SCHEDULE_URL");
+    else Deno.env.set("GUILD_SCHEDULE_URL", prior);
   }
 });
 

@@ -10,7 +10,7 @@ This report is intentionally no-secret. It records local setup, route parity, pr
 - Working branch: `codex/website-recovery-parity-audit`.
 - Base branch preserved: `codex/full-stack-dev-tooling` at `900ab77`.
 - Production source: `apps/web` remains the Vercel/Next app for `https://mochirii.com`; root static files remain rollback/reference material.
-- Credential boundary: `C:\Users\xtyty\Documents\Creds` exists, is owned by the local Windows user, and was not read for raw secret contents.
+- Credential boundary: the private credential directory exists, is owned by the local Windows user, and was not read for raw secret contents.
 
 ## Tooling
 
@@ -24,7 +24,7 @@ This report is intentionally no-secret. It records local setup, route parity, pr
 ## Provider Access
 
 - GitHub CLI: authenticated as the active GitHub account with repo/workflow scope.
-- Vercel CLI: installed locally; read-only provider reads now work with the approved Vercel token stored in `C:\Users\xtyty\Documents\Creds`.
+- Vercel CLI: installed locally; read-only provider reads now work with the approved Vercel token stored in the private credential boundary.
 - Supabase CLI: installed locally; the project is linked and authenticated for read-only provider evidence via the approved local PAT.
 - Initial credential vault scan: no unambiguous Vercel or Supabase token candidate was found by conservative filename-pattern search, so no credential file contents were read at that time.
 - Full-stack evidence: `npm run check:full-stack-release-evidence -- --providers --strict-provider --write` completed with approved Vercel and Supabase tokens in child-process environments and wrote redacted provider-readiness reports. Vercel is checked; Supabase migrations and Edge Functions are checked.
@@ -45,7 +45,7 @@ This report is intentionally no-secret. It records local setup, route parity, pr
 
 ## Chrome Bridge
 
-- Global Codex config was repaired at `C:\Users\xtyty\.codex\config.toml` by setting `mcp_servers.node_repl.args = ["--disable-sandbox"]`.
+- Global Codex config was repaired under `%USERPROFILE%\.codex` by setting `mcp_servers.node_repl.args = ["--disable-sandbox"]`.
 - This fresh thread verified the global Codex config still contains `mcp_servers.node_repl.args = ["--disable-sandbox"]`.
 - Chrome is running on Windows, the Codex Chrome Extension is installed and enabled in the selected Chrome profile, and the native-host manifest is present, registered, and points to the expected extension origin.
 - Official Codex Chrome extension troubleshooting docs checked: confirm the extension shows Connected, confirm the Chrome plugin is on, use the same Chrome profile, try a new thread, restart Chrome/Codex, and reinstall the extension/plugin path if it still does not connect.

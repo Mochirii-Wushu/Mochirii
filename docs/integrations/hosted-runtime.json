@@ -58,7 +58,7 @@
       "id": "release-automation",
       "provider": "GitHub-hosted Actions and GHCR",
       "source": ".github/workflows",
-      "public_origins": ["https://github.com/Mochirii-Wushu/Mochirii"],
+      "public_origins": ["https://github.com/Mochirii-Wushu/Mochirii-Website"],
       "continuity": "provider_managed",
       "workstation_requirement": "none"
     }

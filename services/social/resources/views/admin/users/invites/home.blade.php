@@ -22,7 +22,7 @@
             <div class="row justify-content-center">
                 <div class="col-12" id="flash">
                     <div class="alert alert-success">
-                        {!! session('status') !!}
+                        {{ session('status') }}
                     </div>
                 </div>
             </div>

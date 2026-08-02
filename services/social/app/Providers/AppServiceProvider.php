@@ -22,6 +22,7 @@ use App\Observers\UserFilterObserver;
 use App\Observers\UserObserver;
 use App\Profile;
 use App\Services\AccountService;
+use App\Services\MochiriiPrivateSocialRateLimiter;
 use App\Services\UserOidcService;
 use App\Status;
 use App\StatusHashtag;
@@ -49,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(MochiriiPrivateSocialRateLimiter $privateSocialRateLimiter)
     {
         if (config('instance.force_https_urls', true)) {
             URL::forceScheme('https');
@@ -110,6 +111,40 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('account-lookup', function (Request $request) {
             return Limit::perDay(50)->by($request->ip());
+        });
+
+        RateLimiter::for('private-media', function (Request $request) use ($privateSocialRateLimiter) {
+            [$identity, $ip] = $privateSocialRateLimiter->keys($request);
+            $response = $privateSocialRateLimiter->response();
+
+            return [
+                Limit::perMinute(max(1, (int) config('mochirii-private-media.rate_limits.requests_per_minute_per_identity', 240)))
+                    ->by('private-media:identity:'.$identity)
+                    ->response($response),
+                Limit::perMinute(max(1, (int) config('mochirii-private-media.rate_limits.requests_per_minute_per_ip', 360)))
+                    ->by('private-media:ip:'.$ip)
+                    ->response($response),
+            ];
+        });
+
+        RateLimiter::for('private-media-checkpoint', function (Request $request) use ($privateSocialRateLimiter) {
+            [$identity, $ip] = $privateSocialRateLimiter->keys($request);
+            $response = $privateSocialRateLimiter->response();
+
+            return [
+                Limit::perMinute(max(1, (int) config('mochirii-private-media.rate_limits.checkpoints_per_minute_per_identity', 5)))
+                    ->by('private-media-checkpoint:identity:minute:'.$identity)
+                    ->response($response),
+                Limit::perHour(max(1, (int) config('mochirii-private-media.rate_limits.checkpoints_per_hour_per_identity', 15)))
+                    ->by('private-media-checkpoint:identity:hour:'.$identity)
+                    ->response($response),
+                Limit::perMinute(max(1, (int) config('mochirii-private-media.rate_limits.checkpoints_per_minute_per_ip', 10)))
+                    ->by('private-media-checkpoint:ip:minute:'.$ip)
+                    ->response($response),
+                Limit::perHour(max(1, (int) config('mochirii-private-media.rate_limits.checkpoints_per_hour_per_ip', 30)))
+                    ->by('private-media-checkpoint:ip:hour:'.$ip)
+                    ->response($response),
+            ];
         });
 
         RateLimiter::for('oauth-token-revoke', function (Request $request) {

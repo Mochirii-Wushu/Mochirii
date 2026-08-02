@@ -28,6 +28,15 @@ function filesUnder(relativeDirectory) {
   });
 }
 
+function maskApprovedFragments(line, applicableExceptions) {
+  let masked = line;
+  for (const { fragment } of applicableExceptions) {
+    if (!masked.includes(fragment)) continue;
+    masked = masked.replaceAll(fragment, " ".repeat(fragment.length));
+  }
+  return masked;
+}
+
 if (!existsSync(exceptionPath)) failures.push("scripts/public-brand-exceptions.json: missing exception register.");
 const exceptions = existsSync(exceptionPath)
   ? JSON.parse(readFileSync(exceptionPath, "utf8"))
@@ -39,18 +48,19 @@ for (const absolute of scanRoots.flatMap(filesUnder)) {
   const source = readFileSync(absolute, "utf8");
   source.split(/\r?\n/u).forEach((line, index) => {
     if (!/\bMochirii\b/u.test(line)) return;
-    const match = exceptions.find((entry) =>
+    const applicableExceptions = exceptions.filter((entry) =>
       entry?.path === relative
       && typeof entry?.fragment === "string"
       && entry.fragment.length > 0
       && line.includes(entry.fragment)
       && typeof entry?.reason === "string"
       && entry.reason.trim().length >= 12);
-    if (match) {
+    for (const match of applicableExceptions) {
       usedExceptions.add(exceptions.indexOf(match));
-      return;
     }
-    failures.push(`${relative}:${index + 1}: plain Mochirii is not approved on a public Website surface.`);
+    if (/\bMochirii\b/u.test(maskApprovedFragments(line, applicableExceptions))) {
+      failures.push(`${relative}:${index + 1}: plain Mochirii is not approved on a public Website surface.`);
+    }
   });
 
   for (const brand of [expected.publicGuild, expected.publicShort]) {
@@ -59,6 +69,14 @@ for (const absolute of scanRoots.flatMap(filesUnder)) {
       failures.push(`${relative}: decomposed Unicode brand text must be normalized to NFC.`);
     }
   }
+}
+
+const occurrenceScopeCanary = maskApprovedFragments(
+  "technical: Mochirii; visible: Mochirii",
+  [{ fragment: "technical: Mochirii" }],
+);
+if (!/\bMochirii\b/u.test(occurrenceScopeCanary)) {
+  failures.push("public-brand exception masking must not hide a second unapproved token on the same line.");
 }
 
 exceptions.forEach((entry, index) => {

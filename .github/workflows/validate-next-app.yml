@@ -39,8 +39,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Validate public SVG and Lottie semantics
+        run: npm run check:public-artifact-semantics
+
+      - name: Decode public images, icons, and audio
+        run: npm run check:public-image-decode
+
       - name: Test private spinner media
         run: npm run test:spinner-private
+
+      - name: Test private raffle leaderboard contract
+        run: npm run test:raffle-leaderboard
 
       - name: Build
         run: npm run build

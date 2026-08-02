@@ -9,6 +9,8 @@ const files = {
   checkAll: "scripts/check-all.mjs",
   config: "supabase/config.toml",
   function: "supabase/functions/reaper-discord-interactions/index.ts",
+  boundedBody: "supabase/functions/_shared/bounded-request-body.ts",
+  boundedBodyTest: "supabase/functions/_shared/bounded-request-body_test.ts",
   discordSignature: "supabase/functions/_shared/discord-signature.ts",
   reaperEvents: "supabase/functions/_shared/reaper-discord-events.ts",
   reaperEventSyncWorkflow: "supabase/functions/_shared/reaper-event-sync-workflow.ts",
@@ -66,6 +68,8 @@ const packageJson = read(files.packageJson);
 const checkAll = read(files.checkAll);
 const config = read(files.config);
 const functionSource = read(files.function);
+const boundedBody = read(files.boundedBody);
+const boundedBodyTest = read(files.boundedBodyTest);
 const discordSignature = read(files.discordSignature);
 const reaperEvents = read(files.reaperEvents);
 const reaperEventSyncWorkflow = read(files.reaperEventSyncWorkflow);
@@ -123,6 +127,7 @@ assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.
   '"check:reaper-discord-interactions"',
   '"check:reaper-pending-verification"',
   '"test:photo-day-poll"',
+  '"test:edge-request-security"',
   '"register:reaper-gallery-submit-command"',
   '"register:reaper-photo-day-poll-command"',
   '"register:reaper-pending-verification-command"',
@@ -130,6 +135,7 @@ assertNotIncludes("shared Supabase service role", supabaseServiceRole, "console.
 ].forEach((snippet) => assertIncludes("package.json", packageJson, snippet));
 assertIncludes("check-all", checkAll, "check:reaper-discord-interactions");
 assertIncludes("check-all", checkAll, "test:photo-day-poll");
+assertIncludes("check-all", checkAll, "test:edge-request-security");
 assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
 
 [
@@ -165,8 +171,12 @@ assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
   "INTERACTION_RESPONSE_DEFERRED_CHANNEL_MESSAGE",
   "EdgeRuntime.waitUntil",
   "submit-discord-gallery-image",
-  "x-mochirii-reaper-secret",
-  "DISCORD_GALLERY_INGEST_SECRET",
+  "createDiscordGalleryIngestHeaders",
+  "DISCORD_GALLERY_INGEST_HMAC_KEYS_ENV",
+  "DISCORD_GALLERY_INGEST_ACTIVE_KEY_ID_ENV",
+  "discordGalleryIngestActiveKey",
+  "const rawBody = JSON.stringify(payload);",
+  "...authHeaders",
   "DISCORD_APPLICATION_ID",
   "DISCORD_GUILD_ID",
   "DISCORD_GALLERY_CHANNEL_ID",
@@ -181,7 +191,7 @@ assertIncludes("check-all", checkAll, "test:reaper-pending-verification");
   'const title = stringOption(data, "title", 90);',
   'const caption = stringOption(data, "subtitle", 220);',
   "Use this command in the gallery submissions channel.",
-  "Refresh Discord verification on mochirii.com/account before submitting gallery images.",
+  "Refresh Discord verification on [mochirii.com](https://mochirii.com/account) before submitting gallery images.",
   "sync-ranks",
   "sync-events",
   "sync-pending-verification",
@@ -514,9 +524,22 @@ assertNotMatches(
 assertMatches(
   "reaper-discord-interactions",
   functionSource,
-  /const rawBody = await req\.text\(\);[\s\S]*verifyDiscordSignature\(req, rawBody, publicKey\)[\s\S]*JSON\.parse\(rawBody\)/,
-  "Discord signature must be verified against the raw body before JSON parsing.",
+  /readBoundedUtf8RequestBody\([\s\S]*MAX_DISCORD_INTERACTION_BODY_BYTES[\s\S]*verifyDiscordSignature\(req, bodyResult\.bytes, publicKey\)[\s\S]*JSON\.parse\(bodyResult\.text\)/,
+  "Discord interactions must bound the exact signed body before signature verification and JSON parsing.",
 );
+assertNotIncludes("reaper-discord-interactions", functionSource, "await req.text()");
+[
+  "readBoundedUtf8RequestBody",
+  "content-length",
+  'reason: "too-large"',
+  "reader.cancel()",
+  'new TextDecoder("utf-8", { fatal: true })',
+].forEach((snippet) => assertIncludes("bounded interaction body", boundedBody, snippet));
+[
+  "declared oversized interaction body fails before stream reads",
+  "streamed oversized interaction body is cancelled",
+  "bounded request body rejects invalid UTF-8",
+].forEach((snippet) => assertIncludes("bounded interaction body tests", boundedBodyTest, snippet));
 
 assertMatches(
   "reaper-discord-interactions",
@@ -555,8 +578,8 @@ assertMatches(
 assertNotMatches(
   "reaper-discord-interactions",
   functionSource,
-  /console\.(log|error|warn)\([^)]*(DISCORD_BOT_TOKEN|DISCORD_GALLERY_INGEST_SECRET|DISCORD_PUBLIC_KEY|interactionToken|attachmentUrl)/,
-  "function logs must not expose Discord tokens, interaction tokens, ingest secret, public key, or attachment URLs.",
+  /console\.(log|error|warn)\([^)]*(DISCORD_BOT_TOKEN|DISCORD_GALLERY_INGEST_HMAC_KEYS_JSON|DISCORD_PUBLIC_KEY|interactionToken|attachmentUrl)/,
+  "function logs must not expose Discord tokens, interaction tokens, ingest HMAC keys, public key, or attachment URLs.",
 );
 
 [
@@ -564,7 +587,8 @@ assertNotMatches(
   "DISCORD_APPLICATION_ID=1156448856565887066",
   "DISCORD_BOT_TOKEN=",
   "DISCORD_GALLERY_CHANNEL_ID=1508077313965817856",
-  "DISCORD_GALLERY_INGEST_SECRET=",
+  "DISCORD_GALLERY_INGEST_HMAC_KEYS_JSON=",
+  "DISCORD_GALLERY_INGEST_HMAC_ACTIVE_KEY_ID=",
   "REAPER_PENDING_VERIFICATION_SYNC_SECRET=",
 ].forEach((snippet) => assertIncludes("supabase functions .env.example", envExample, snippet));
 

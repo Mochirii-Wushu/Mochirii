@@ -11,14 +11,22 @@ export function hexToBytes(value: string): Uint8Array | null {
   return output;
 }
 
-export function verifyDiscordSignature(req: Request, rawBody: string, publicKey: string, nowMs = Date.now()): boolean {
+export function verifyDiscordSignature(
+  req: Request,
+  rawBody: string | Uint8Array,
+  publicKey: string,
+  nowMs = Date.now(),
+): boolean {
   const signatureHeader = req.headers.get("x-signature-ed25519") || "";
   const timestampHeader = req.headers.get("x-signature-timestamp") || "";
   const signature = hexToBytes(signatureHeader);
   const key = hexToBytes(publicKey);
   const timestampMs = Number(timestampHeader) * 1000;
 
-  if (!signature || signature.length !== 64 || !key || key.length !== 32 || !Number.isFinite(timestampMs)) {
+  if (
+    !signature || signature.length !== 64 || !key || key.length !== 32 ||
+    !Number.isFinite(timestampMs)
+  ) {
     return false;
   }
 
@@ -26,6 +34,11 @@ export function verifyDiscordSignature(req: Request, rawBody: string, publicKey:
     return false;
   }
 
-  const message = new TextEncoder().encode(`${timestampHeader}${rawBody}`);
+  const encoder = new TextEncoder();
+  const timestamp = encoder.encode(timestampHeader);
+  const body = typeof rawBody === "string" ? encoder.encode(rawBody) : rawBody;
+  const message = new Uint8Array(timestamp.byteLength + body.byteLength);
+  message.set(timestamp);
+  message.set(body, timestamp.byteLength);
   return nacl.sign.detached.verify(message, signature, key);
 }

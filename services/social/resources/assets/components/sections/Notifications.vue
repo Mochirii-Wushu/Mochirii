@@ -410,10 +410,32 @@
 			},
 
 			showAutospamInfo(status) {
-				let el = document.createElement('p');
+				let el = document.createElement('div');
 				el.classList.add('text-left');
 				el.classList.add('mb-0');
-				el.innerHTML = '<p class="">We use automated systems to help detect potential abuse and spam. Your recent <a href="/i/web/post/' + status.id + '" class="font-weight-bold">post</a> was flagged for review. <br /> <p class=""><span class="font-weight-bold">Don\'t worry! Your post will be reviewed by a human</span>, and they will restore your post if they determine it appropriate.</p><p style="font-size:12px">Once a human approves your post, any posts you create after will not be marked as unlisted. If you delete this post and share more posts before a human can approve any of them, you will need to wait for at least one unlisted post to be reviewed by a human.';
+
+				let summary = document.createElement('p');
+				summary.appendChild(document.createTextNode('We use automated systems to help detect potential abuse and spam. Your recent '));
+				let postLink = document.createElement('a');
+				postLink.href = `/i/web/post/${encodeURIComponent(String(status.id))}`;
+				postLink.classList.add('font-weight-bold');
+				postLink.textContent = 'post';
+				summary.appendChild(postLink);
+				summary.appendChild(document.createTextNode(' was flagged for review.'));
+				el.appendChild(summary);
+
+				let review = document.createElement('p');
+				let reassurance = document.createElement('span');
+				reassurance.classList.add('font-weight-bold');
+				reassurance.textContent = "Don't worry! Your post will be reviewed by a human";
+				review.appendChild(reassurance);
+				review.appendChild(document.createTextNode(', and they will restore your post if they determine it appropriate.'));
+				el.appendChild(review);
+
+				let details = document.createElement('p');
+				details.style.fontSize = '12px';
+				details.textContent = 'Once a human approves your post, any posts you create after will not be marked as unlisted. If you delete this post and share more posts before a human can approve any of them, you will need to wait for at least one unlisted post to be reviewed by a human.';
+				el.appendChild(details);
 				let wrapper = document.createElement('div');
 				wrapper.appendChild(el);
 				swal({

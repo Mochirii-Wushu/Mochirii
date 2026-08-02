@@ -74,6 +74,11 @@ class GroupService
             }
         );
 
+        if ($res) {
+            $res['description'] = app(SanitizeService::class)->richText($res['description'] ?? '');
+            $res['short_description'] = str_limit(app(SanitizeService::class)->plainText($res['description']), 120);
+        }
+
         if ($pid) {
             $res['self'] = self::getSelf($id, $pid);
         }

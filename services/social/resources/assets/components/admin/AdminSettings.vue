@@ -96,7 +96,7 @@
                                         <checkbox
                                             name="Instagram Import"
                                             :value="features.instagram_import"
-                                            description="Enable users to use the <span class='font-weight-bold'>experimental</span> Instagram Import support."
+                                            description="Enable users to use the experimental Instagram Import support."
                                             @change="handleChange($event, 'features', 'instagram_import')"
                                         />
 
@@ -1462,7 +1462,9 @@
                         if(err.response.data.s3_vce) {
                             let el = document.createElement('div');
                             el.classList.add('text-left');
-                            el.innerHTML = err.response.data.message;
+                            el.textContent = typeof err.response.data.message === 'string'
+                                ? err.response.data.message
+                                : 'Unable to validate the storage credentials.';
                             let wrapper = document.createElement('div');
                             wrapper.appendChild(el);
                             swal({

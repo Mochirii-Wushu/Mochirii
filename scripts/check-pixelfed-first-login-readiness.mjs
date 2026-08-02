@@ -17,6 +17,7 @@ const stagingReady = process.env.PIXELFED_FIRST_LOGIN_STAGING_READY === "1";
 const requiredFiles = [
   "docs/pixelfed-guild-social-adr.md",
   "docs/pixelfed-first-login-testing.md",
+  "docs/pixelfed-staging-ops.md",
   "apps/web/app/social/page.tsx",
   "apps/web/app/oauth/consent/page.tsx",
   "apps/web/app/api/oauth/decision/route.ts",
@@ -37,6 +38,10 @@ const requiredFiles = [
   "supabase/functions/_shared/pixelfed-social-sync_test.ts",
   "supabase/functions/_shared/member-access-policy.ts",
   "supabase/functions/_shared/member-access-policy_test.ts",
+  "supabase/functions/_shared/social-discord-membership.ts",
+  "supabase/functions/_shared/social-discord-membership_test.ts",
+  "supabase/functions/verify-discord-member/index.ts",
+  "supabase/functions/verify-member-access/index.ts",
 ];
 
 const snippetChecks = [
@@ -49,6 +54,8 @@ const snippetChecks = [
       "Authorization Path is `/oauth/consent`",
       "provider mutations",
       "federation disabled",
+      "Superseded on 2026-07-29",
+      "integrations/mochirii-social-delivery.md",
     ],
   },
   {
@@ -63,6 +70,17 @@ const snippetChecks = [
       "Federation disabled.",
       "Negative Smokes",
       "Never paste OAuth client secrets",
+      "Superseded on 2026-07-29",
+      "integrations/mochirii-social-delivery.md",
+    ],
+  },
+  {
+    label: "historical staging operations packet",
+    file: "docs/pixelfed-staging-ops.md",
+    snippets: [
+      "Superseded on 2026-07-29",
+      "historical evidence",
+      "integrations/mochirii-social-delivery.md",
     ],
   },
   {
@@ -72,7 +90,7 @@ const snippetChecks = [
       "getAuthorizationDetails",
       "authorization_id",
       "verifyMemberAccess",
-      "profileIsActive",
+      "isDiscordVerifiedSocialMember",
       "activeMember",
       "createAuthorizationLoadQueue",
       "classifyAuthorizationDetailsFailure",
@@ -110,8 +128,18 @@ const snippetChecks = [
     label: "OAuth browser client",
     file: "apps/web/lib/supabase/client.ts",
     snippets: [
+      "createBrowserClient",
       'flowType: "pkce"',
-      "detectSessionInUrl: true",
+      "detectSessionInUrl: false",
+    ],
+  },
+  {
+    label: "OAuth PKCE callback",
+    file: "apps/web/app/auth/callback/route.ts",
+    snippets: [
+      "exchangeAuthCodeForCookieSession(supabase.auth, code)",
+      "resolveAuthReturnPath",
+      'getAll("code")',
     ],
   },
   {
@@ -129,7 +157,7 @@ const snippetChecks = [
     file: "apps/web/app/api/oauth/decision/route.ts",
     snippets: [
       "verify-member-access",
-      "galleryEligible",
+      "isDiscordVerifiedSocialMember",
       "member_status",
       "submitAuthorizationDecision",
       "/oauth/authorizations/",
@@ -181,6 +209,9 @@ const snippetChecks = [
       ".from(\"social_accounts\")",
       "provider: \"pixelfed\"",
       "federation_enabled: false",
+      "current_member_access_required",
+      "currentSocialDiscordMembership",
+      "discord_verification_unavailable",
     ],
   },
   {
@@ -192,6 +223,20 @@ const snippetChecks = [
       "PIXELFED_SOCIAL_SYNC_MAX_SKEW_MS",
       "constantTimeEquals",
       "parsePixelfedSocialSyncPayload",
+    ],
+  },
+  {
+    label: "Current Social Discord membership verifier",
+    file: "supabase/functions/_shared/social-discord-membership.ts",
+    snippets: [
+      "currentSocialDiscordMembership",
+      "discordFetch",
+      "discordMemberRoleState",
+      "SOCIAL_EXPECTED_DISCORD_GUILD_ID",
+      "SOCIAL_EXPECTED_REQUIRED_ROLE_IDS",
+      'status: "unavailable"',
+      'status: "denied"',
+      'status: "verified"',
     ],
   },
   {
@@ -227,10 +272,21 @@ const secretPatterns = [
 
 const oauthDecisionRoute = read("apps/web/app/api/oauth/decision/route.ts");
 if (!oauthDecisionRoute.includes("if (!response.ok || !redirectUrl)")) {
-  failures.push("OAuth decision route must accept every successful HTTP 2xx response through Response.ok.");
+  if (!oauthDecisionRoute.includes("if (response.ok && redirectUrl)")) {
+    failures.push("OAuth decision route must accept every successful HTTP 2xx response through Response.ok.");
+  }
 }
 if (/response\.status\s*={2,3}\s*201/.test(oauthDecisionRoute)) {
   failures.push("OAuth decision route must not require the legacy HTTP 201 success status.");
+}
+for (const snippet of [
+  'from "@/lib/supabase/server-fetch"',
+  "fetch: supabaseServerFetch",
+  "await supabaseServerFetch(endpoint",
+]) {
+  if (!oauthDecisionRoute.includes(snippet)) {
+    failures.push(`OAuth decision route must use the bounded server transport: ${snippet}`);
+  }
 }
 
 function read(file) {
@@ -527,10 +583,45 @@ for (const forbiddenConsentCopy of ["OAuth Consent", "Redirect URI", "client req
 if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("priorConsentRedirect(nextDetails")) {
   failures.push("Prior OAuth consent redirects must follow the current member access check.");
 }
+if (!consentPanel.includes("isDiscordVerifiedSocialMember")) {
+  failures.push("OAuth consent must require current Discord verification for Social access.");
+}
+
+const socialSync = read("supabase/functions/sync-pixelfed-social-account/index.ts");
+if (socialSync.includes("if (!access.eligible)")) {
+  failures.push("Social account sync must not accept generic or manual-only Gallery eligibility.");
+}
+if (!socialSync.includes("currentSocialDiscordMembership")) {
+  failures.push("Social account sync must perform a current Discord membership and role check.");
+}
+if (socialSync.includes('.from("member_verifications")')) {
+  failures.push("Social account sync must not depend on Gallery manual-verification data.");
+}
+
+const discordVerifier = read("supabase/functions/verify-discord-member/index.ts");
+const discordAuthorizationFailureStart = discordVerifier.indexOf(
+  "if (discordResponse.status === 401 || discordResponse.status === 403)",
+);
+const discordGenericFailureStart = discordVerifier.indexOf(
+  "if (!discordResponse.ok)",
+  discordAuthorizationFailureStart,
+);
+if (discordAuthorizationFailureStart < 0 || discordGenericFailureStart < 0) {
+  failures.push("Discord verification must distinguish provider authorization failure from membership loss.");
+} else if (
+  discordVerifier.slice(discordAuthorizationFailureStart, discordGenericFailureStart)
+    .includes("updateProfile(")
+) {
+  failures.push("Discord provider authorization failure must not overwrite verified member evidence.");
+}
+if (!discordVerifier.includes("isDiscordUnknownMemberResponse(discordResponse)")) {
+  failures.push("Discord verification may record membership loss only for the exact Unknown Member response.");
+}
 
 [
   "docs/pixelfed-guild-social-adr.md",
   "docs/pixelfed-first-login-testing.md",
+  "docs/pixelfed-staging-ops.md",
   "apps/web/app/api/oauth/decision/route.ts",
   "apps/web/components/member-workflow/OAuthConsentPanel.tsx",
   "apps/web/lib/oauth/authorization-details-error.ts",
@@ -543,6 +634,8 @@ if (consentPanel.indexOf("await verifyMemberAccess()") > consentPanel.indexOf("p
   "supabase/functions/_shared/pixelfed-social-sync.ts",
   "supabase/functions/_shared/member-access-policy.ts",
   "supabase/functions/_shared/member-access-policy_test.ts",
+  "supabase/functions/_shared/social-discord-membership.ts",
+  "supabase/functions/_shared/social-discord-membership_test.ts",
   "scripts/check-pixelfed-first-login-readiness.mjs",
 ].forEach((file) => scanNoSecrets(file, read(file)));
 

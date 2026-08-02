@@ -1,6 +1,6 @@
 # Supabase Advisor Remediation Plan
 
-Last refreshed: 2026-07-12
+Last refreshed: 2026-07-29
 
 Project: `deyvmtncimmcinldjyqe`
 
@@ -14,15 +14,19 @@ This packet records the linked Supabase advisor evidence and the protected-PR re
 - Repo RLS summary: `supabase/README.md`
 - Operations approval rules: `docs/operations/integration-operations-runbook.md`
 
-## Current Advisor Evidence
+## Hosted Linked Advisor Snapshot
 
 Linked CLI readback with Supabase CLI `2.108.0` succeeded on 2026-07-07 using the repo-local Windows binary and credentials loaded only into child-process environment variables.
 
-The exact requested credential file
-`C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase\supabase-db-password.txt`
-was not present during this refresh. No alternate password file was read or
-substituted. The linked readbacks below succeeded with
-`SUPABASE_ACCESS_TOKEN` only.
+This is a historical hosted-project snapshot, not a claim about the current
+hosted advisor state. It is retained so the reason for the reviewed July 12
+remediation remains auditable. The local union validation recorded below did
+not query or mutate the hosted project.
+
+The requested `Supabase\supabase-db-password.txt` file under the configured
+`MOCHIRII_CREDS_DIR` boundary was not present during this refresh. No alternate
+password file was read or substituted. The linked readbacks below succeeded
+with `SUPABASE_ACCESS_TOKEN` only.
 
 - Security advisors: 14 findings.
 - `rls_enabled_no_policy`: 13 info findings.
@@ -32,9 +36,47 @@ substituted. The linked readbacks below succeeded with
 - Local and remote migration IDs matched through `20260704120856`.
 - Linked schema lint returned no warning-level findings.
 
+## Local Union Candidate Evidence
+
+The authoritative union's database source was replayed on 2026-07-29 in an
+isolated, Postgres-only Supabase lane using CLI `2.109.1`. The lane used a
+unique temporary project identifier and dedicated `56100`-series ports. It did
+not use the shared local Supabase ports `54321` through `54327`, did not read
+provider credentials, and did not connect to or mutate the hosted project.
+
+The exact local replay produced:
+
+- 49 of 49 migrations applied in order.
+- 480 of 480 pgTAP assertions passed across the 11 top-level database test
+  files. Fixture SQL was not treated as an independent test file.
+- Warning-level database lint returned `[]`.
+- Security advisors at info level returned `[]`.
+- Performance advisors at warning level returned `[]`.
+- Performance advisors at info level returned 54 `unused_index` notices and no
+  structural finding of another type.
+
+Two local source corrections closed the structural advisor gaps discovered
+during that replay:
+
+- `private.raffle_leaderboard_nonces` now has an explicit restrictive
+  `api_roles_default_deny` policy for `anon` and `authenticated`. The
+  security-definer nonce RPC remains the only intended access path.
+- `private.gallery_social_derivatives.created_by` now has the supporting
+  `gallery_social_derivatives_created_by_idx` index for its foreign key to
+  `auth.users`.
+
+Both contracts are covered by pgTAP. These changes are candidate-source
+evidence only until an approved protected-main release applies them and a new
+linked readback confirms hosted state.
+
 ## RLS No-Policy Classification
 
-The current `rls_enabled_no_policy` findings are classified as service-only/default-deny tables. Migration `20260712164503_service_only_default_deny_policies.sql` keeps RLS enabled, reasserts revoked client grants, retains service-role privileges, and adds an explicit restrictive false policy for `anon` and `authenticated`. Writes remain limited to trusted Edge Functions, Reaper workflows, or scheduled jobs.
+The hosted July 7 `rls_enabled_no_policy` findings were classified as
+service-only/default-deny tables. Migration
+`20260712164503_service_only_default_deny_policies.sql` keeps RLS enabled,
+reasserts revoked client grants, retains service-role privileges, and adds an
+explicit restrictive false policy for `anon` and `authenticated`. Writes
+remain limited to trusted Edge Functions, Reaper workflows, or scheduled jobs.
 
 | Table | Classification | Next action |
 | --- | --- | --- |
@@ -58,11 +100,21 @@ Supabase's 2026 default-grants timeline makes explicit grants a separate, delibe
 
 ## Leaked-Password Protection
 
-The remaining warning is Supabase Auth leaked-password protection. It is intentionally accepted and cost-deferred while this project remains on the Free plan. Do not upgrade the plan or change Auth settings as part of this remediation.
+The remaining warning in the hosted July 7 snapshot was Supabase Auth
+leaked-password protection. It was intentionally accepted and cost-deferred
+while this project remains on the Free plan. Do not infer its current hosted
+state from the isolated union replay, upgrade the plan, or change Auth settings
+as part of this remediation.
 
 ## Unused Index Findings
 
-The 47 `unused_index` findings are observation-only for now. Do not drop indexes before launch traffic and query usage prove they are safe removal candidates.
+The hosted July 7 snapshot contained 47 `unused_index` findings. The isolated
+July 29 union replay reported 54, but that database was freshly created and had
+no representative production traffic or query-statistics history. Those 54
+info notices are not deletion evidence and are not directly comparable to the
+hosted count. Do not drop indexes based on either count before representative
+traffic and query usage prove that a specific index is a safe removal
+candidate.
 
 Recommended future process:
 
@@ -72,16 +124,46 @@ Recommended future process:
 
 ## Verification Commands
 
-Use the repo-local Supabase binary on Windows and disable telemetry to avoid local telemetry-file races:
+Hosted readbacks must remain explicitly approval-scoped. Use the pinned
+repo-local Supabase CLI on Windows, disable telemetry to avoid local
+telemetry-file races, and load credentials only into the child process. Never
+run isolated candidate validation against the linked project or the shared
+`54321`-through-`54327` local stack.
 
 ```powershell
-$supa = "C:\Github Repo's\Mochirii Website\Website\node_modules\@supabase\cli-windows-x64\bin\supabase.exe"
-# Load the access token and DB password from
-# C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase
-# into child-process environment variables before running these commands.
-# Do not print, commit, or paste those values into docs or PR text.
-& $supa functions list --project-ref deyvmtncimmcinldjyqe --output-format json
-& $supa migration list --linked --password $dbPasswordFromCredsFile
-& $supa db advisors --linked --type security --level info --fail-on none --output-format json
-& $supa db advisors --linked --type performance --level info --fail-on none --output-format json
+$workspaceRoot = $env:MOCHIRII_WORKSPACE_ROOT
+$activeCreds = $env:MOCHIRII_CREDS_DIR
+if ([string]::IsNullOrWhiteSpace($workspaceRoot) -or !(Test-Path -LiteralPath $workspaceRoot -PathType Container)) {
+  throw 'MOCHIRII_WORKSPACE_ROOT must name the existing Mochirii umbrella workspace.'
+}
+if ([string]::IsNullOrWhiteSpace($activeCreds) -or !(Test-Path -LiteralPath $activeCreds -PathType Container)) {
+  throw 'MOCHIRII_CREDS_DIR must name Mochirii-Website\Creds\Active inside the private credential boundary.'
+}
+$repoRoot = Join-Path $workspaceRoot 'Website'
+$supabaseCreds = Join-Path $activeCreds 'Supabase'
+$supa = Join-Path $repoRoot 'node_modules\@supabase\cli-windows-x64\bin\supabase.exe'
+if (!(Test-Path -LiteralPath $repoRoot -PathType Container)) { throw 'Canonical Website checkout not found.' }
+if (!(Test-Path -LiteralPath $supabaseCreds -PathType Container)) { throw 'Supabase credential directory not found.' }
+if (!(Test-Path -LiteralPath $supa -PathType Leaf)) { throw 'Pinned repo-local Supabase CLI not found.' }
+# Confirm this resolves to the reviewed 2.109.1 CLI before a new union replay.
+& $supa --version
+# An approved operator resolves the exact access-token and database-password
+# files below $supabaseCreds without printing either value. Pass both only via
+# the CLI-supported process environment; never place them in child-process
+# arguments, shell history, docs, or PR text.
+if ([string]::IsNullOrWhiteSpace([string]$tokenFromActiveBoundary)) { throw 'Approved Supabase access token was not loaded.' }
+if ([string]::IsNullOrWhiteSpace([string]$dbPasswordFromActiveBoundary)) { throw 'Approved Supabase database password was not loaded.' }
+[Environment]::SetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', $tokenFromActiveBoundary, 'Process')
+[Environment]::SetEnvironmentVariable('SUPABASE_DB_PASSWORD', $dbPasswordFromActiveBoundary, 'Process')
+try {
+  & $supa functions list --project-ref deyvmtncimmcinldjyqe --output-format json
+  & $supa migration list --linked
+  & $supa db advisors --linked --type security --level info --fail-on none --output-format json
+  & $supa db advisors --linked --type performance --level info --fail-on none --output-format json
+} finally {
+  Remove-Item Env:\SUPABASE_ACCESS_TOKEN -ErrorAction SilentlyContinue
+  Remove-Item Env:\SUPABASE_DB_PASSWORD -ErrorAction SilentlyContinue
+  Remove-Variable tokenFromActiveBoundary -ErrorAction SilentlyContinue
+  Remove-Variable dbPasswordFromActiveBoundary -ErrorAction SilentlyContinue
+}
 ```

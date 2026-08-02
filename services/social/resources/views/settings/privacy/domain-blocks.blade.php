@@ -23,7 +23,16 @@
                 <div class="input-group align-items-center">
                     <input class="form-control form-control-sm rounded-lg" v-model="q" placeholder="Search by domain..." style="padding-right: 60px;" :disabled="!blocks || !blocks.length">
                     <div style="margin-left: -60px;width: 60px;z-index:3">
-                        <button class="btn btn-link" type="button" style="font-size: 12px;text-decoration: none;" v-html="q && q.length ? 'Clear': '&nbsp;'" @click="searchAction()"></button>
+                        <button
+                            class="btn btn-link"
+                            type="button"
+                            style="font-size: 12px;text-decoration: none;"
+                            aria-label="Clear domain search"
+                            :disabled="!q || !q.length"
+                            @click="searchAction()">
+                            <span v-if="q && q.length">Clear</span>
+                            <span v-else aria-hidden="true">&nbsp;</span>
+                        </button>
                     </div>
                 </div>
             </div>

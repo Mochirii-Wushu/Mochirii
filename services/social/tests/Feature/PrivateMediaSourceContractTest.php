@@ -78,8 +78,24 @@ class PrivateMediaSourceContractTest extends TestCase
     {
         $source = file_get_contents(base_path('caddy/Caddyfile'));
 
-        $this->assertStringContainsString('respond @privateMemberStorage 404', $source);
-        foreach (['/storage/m/*', '/storage/_esm.t3/*', '/storage/g/*', '/storage/g1/*', '/storage/avatars/*'] as $path) {
+        $this->assertStringContainsString('respond @privateMemberStorage "" 404', $source);
+        $this->assertStringContainsString('Cache-Control "private, no-store"', $source);
+        $this->assertStringContainsString('X-Content-Type-Options "nosniff"', $source);
+        $this->assertStringContainsString('Referrer-Policy "no-referrer"', $source);
+        foreach ([
+            '/storage/m',
+            '/storage/m/*',
+            '/storage/_esm.t3',
+            '/storage/_esm.t3/*',
+            '/storage/g',
+            '/storage/g/*',
+            '/storage/g1',
+            '/storage/g1/*',
+            '/storage/avatars',
+            '/storage/avatars/*',
+            '/storage/cache/avatars',
+            '/storage/cache/avatars/*',
+        ] as $path) {
             $this->assertStringContainsString($path, $source);
         }
         $this->assertStringContainsString('/storage/avatars/default.jpg', $source);
@@ -93,12 +109,110 @@ class PrivateMediaSourceContractTest extends TestCase
         $this->assertStringContainsString("Route::get('media/private/{kind}/{id}/{variant?}'", $routes);
         $this->assertStringContainsString("'kind' => 'media|avatar|story|group|group-media'", $routes);
         $this->assertStringNotContainsString('story-item', $routes);
-        $this->assertStringContainsString("->middleware(['private-media', 'mochirii.private:private-media', 'validemail'])", $routes);
+        foreach ([
+            "'private-media'",
+            "'mochirii.private:private-media'",
+            "'mochirii.private-media-2fa'",
+            "'throttle:private-media'",
+            "'validemail'",
+        ] as $middleware) {
+            $this->assertStringContainsString($middleware, $routes);
+        }
+        $this->assertLessThan(
+            strpos($routes, "'mochirii.private-media-2fa'"),
+            strpos($routes, "'throttle:private-media'")
+        );
+        $this->assertStringContainsString("Route::post('security/private-media-assurance'", $routes);
+        $this->assertStringContainsString("'throttle:private-media-checkpoint'", $routes);
 
         $kernel = file_get_contents(base_path('app/Http/Kernel.php'));
         $this->assertStringContainsString("'private-media' => [", $kernel);
         $this->assertStringContainsString('EncryptCookies::class', $kernel);
         $this->assertStringContainsString('StartSession::class', $kernel);
+        $this->assertStringContainsString("'mochirii.private-media-2fa' => MochiriiPrivateMediaTwoFactor::class", $kernel);
+
+        $provider = file_get_contents(base_path('app/Providers/AppServiceProvider.php'));
+        $this->assertStringContainsString("RateLimiter::for('private-media'", $provider);
+        $this->assertStringContainsString("RateLimiter::for('private-media-checkpoint'", $provider);
+        $this->assertStringContainsString('requests_per_minute_per_identity', $provider);
+        $this->assertStringContainsString('requests_per_minute_per_ip', $provider);
+
+        $handler = file_get_contents(base_path('app/Exceptions/Handler.php'));
+        $this->assertMatchesRegularExpression('/protected \$dontFlash = \[[^]]*\'code\'/s', $handler);
+    }
+
+    #[Test]
+    public function current_member_refreshes_are_bounded_before_remote_sync(): void
+    {
+        $sync = file_get_contents(base_path('app/Services/MochiriiSocialSyncService.php'));
+        $limiter = file_get_contents(base_path('app/Services/MochiriiPrivateSocialRateLimiter.php'));
+
+        $this->assertStringContainsString("Cache::lock(\$cacheKey.':refresh'", $sync);
+        $this->assertStringContainsString('->block($timeout + 1', $sync);
+        $this->assertGreaterThanOrEqual(2, substr_count($sync, 'Cache::get($cacheKey) === true'));
+        $this->assertStringContainsString('Cache::get($failureCacheKey) === true', $sync);
+        $this->assertStringContainsString('$this->rateLimiter->ensureMemberSyncAllowed(request(), $user)', $sync);
+        $this->assertLessThan(
+            strpos($sync, '$this->performSync($user, $oidcId, \'access_check\')'),
+            strpos($sync, '$this->rateLimiter->ensureMemberSyncAllowed(request(), $user)'),
+        );
+        $publicSync = substr($sync, strpos($sync, 'public function sync('));
+        $this->assertLessThan(
+            strpos($publicSync, 'return $this->performSync($user, $oidcId, $event)'),
+            strpos($publicSync, '$this->rateLimiter->ensureMemberSyncAllowed(request(), $user)'),
+        );
+        $this->assertStringContainsString('catch (LockTimeoutException)', $sync);
+        $this->assertStringContainsString('catch (HttpResponseException $error)', $sync);
+
+        $this->assertStringContainsString('RateLimiter::hit($identityKey, 60)', $limiter);
+        $this->assertStringContainsString('RateLimiter::hit($ipKey, 60)', $limiter);
+        $this->assertStringContainsString('member_syncs_per_minute_per_identity', $limiter);
+        $this->assertStringContainsString('member_syncs_per_minute_per_ip', $limiter);
+        $this->assertStringNotContainsString("'u:'", $limiter);
+        $this->assertStringNotContainsString("'ip:'", $limiter);
+    }
+
+    #[Test]
+    public function the_edge_and_application_share_one_sanitized_client_address_contract(): void
+    {
+        $caddy = file_get_contents(base_path('caddy/Caddyfile'));
+        $runtime = file_get_contents(base_path('scripts/production-runtime-lib.sh'));
+
+        foreach ([
+            'trusted_proxies static 103.21.244.0/22',
+            '198.41.128.0/17',
+            '2c0f:f248::/32',
+            'client_ip_headers CF-Connecting-IP X-Forwarded-For',
+            'trusted_proxies_strict',
+            'header_up X-Forwarded-For {client_ip}',
+        ] as $contract) {
+            $this->assertStringContainsString($contract, $caddy);
+        }
+        $this->assertLessThan(
+            strpos($caddy, 'reverse_proxy 127.0.0.1:8080'),
+            strpos($caddy, 'respond @retiredCreationAndTokenManagement 404'),
+        );
+
+        foreach ([
+            'verify_private_media_proxy_runtime_contract',
+            'caddy validate --config "$caddy_config" --adapter caddyfile',
+            'caddy adapt --config "$caddy_config" --adapter caddyfile',
+            'http://127.0.0.1:2019/config/',
+            'if active != expected:',
+            '"127.0.0.1:8080"',
+            '$defaultCache !== "redis" || $limiterCache !== "redis"',
+            'config("trustedproxy.proxies") !== "*"',
+            '$firstIp !== "198.51.100.10"',
+            '$secondIp !== "203.0.113.20"',
+            'hash_equals($firstIp, $secondIp)',
+        ] as $contract) {
+            $this->assertStringContainsString($contract, $runtime);
+        }
+        $permanent = substr($runtime, strpos($runtime, 'verify_permanent_private_media_runtime_local()'));
+        $this->assertLessThan(
+            strpos($permanent, 'docker exec pixelfed-app php artisan tinker'),
+            strpos($permanent, 'verify_private_media_proxy_runtime_contract || return 1'),
+        );
     }
 
     #[Test]

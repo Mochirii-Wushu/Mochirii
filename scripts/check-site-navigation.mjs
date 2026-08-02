@@ -1,9 +1,20 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { SOCIAL_HOST } from "./lib/public-urls.mjs";
+import {
+  OFFICIAL_GUILD_PROFILES,
+  SITE_DISPLAY_NAME,
+  SOCIAL_HOST,
+} from "./lib/public-urls.mjs";
 
 const root = process.cwd();
 const failures = [];
+const expectedOfficialGuildProfileUrls = [
+  "https://www.facebook.com/mochiriiguildpage",
+  "https://www.instagram.com/mochirii_guild",
+  "https://www.tiktok.com/@mochiriiguild",
+  "https://www.facebook.com/groups/mochiriiguild",
+  "https://www.twitch.tv/mochiriiguild",
+];
 
 const header = read("apps/web/components/SiteHeader.tsx");
 const headerAuthState = read("apps/web/components/site-header/use-header-auth-state.ts");
@@ -12,9 +23,11 @@ const headerNavigation = read("apps/web/components/site-header/header-navigation
 const spinnerViewerNavLink = read("apps/web/components/site-header/spinner-viewer-nav-link.tsx");
 const navSource = read("apps/web/lib/site-navigation.ts");
 const footer = read("apps/web/components/SiteFooter.tsx");
+const officialGuildProfiles = read("apps/web/components/OfficialGuildProfiles.tsx");
 const socialPanel = read("apps/web/components/member-workflow/SocialHubPanel.tsx");
 const socialPage = read("apps/web/app/social/page.tsx");
 const accountPanel = read("apps/web/components/member-workflow/AccountPanel.tsx");
+const facebookPagePublishQueue = read("apps/web/components/member-workflow/FacebookPagePublishQueue.tsx");
 const currentState = read("docs/current-live-state.md");
 const runbook = read("docs/operations/integration-operations-runbook.md");
 
@@ -47,6 +60,8 @@ assertIncludes("SiteHeader deferred auth import", headerAuthState, 'import("./he
 assertIncludes("SiteHeader moderator probe", headerAuthRuntime, "checkLeaderGalleryModerationAccess");
 assertIncludes("SiteHeader lazy moderator trigger", header, `void ensureModeratorAccess();`);
 assertIncludes("SiteHeader mobile moderator trigger", header, "setMobileOpen(true)");
+assertIncludes("SiteHeader official profiles", header, 'placement="header"');
+assertIncludes("SiteHeader mobile official profiles", header, 'placement="mobile"');
 assertIncludes("SiteHeader account controls", header, `aria-controls="nav-menu-account"`);
 assertIncludes("SiteHeader account controls", header, `aria-haspopup="true"`);
 assertIncludes("SiteHeader account controls", header, `aria-expanded={openGroup === "account"}`);
@@ -78,12 +93,31 @@ for (const file of retiredMembersRouteFiles) {
 assertIncludes("SiteFooter public URL config", footer, `"@/lib/public-urls"`);
 assertIncludes("SiteFooter Social", footer, `href: SOCIAL_HOST, label: "Social", external: true`);
 assertIncludes("SiteFooter Mochi Pets", footer, `href: "/games/mochi-pets", label: "Mochi Pets"`);
+assertIncludes("SiteFooter official profiles", footer, '<OfficialGuildProfiles placement="footer" />');
+assertIncludes("SiteFooter exact website display", footer, "{SITE_DISPLAY_NAME}");
 assertNotIncludes("SiteFooter", footer, "hidden:");
 assertNotIncludes("SiteFooter", footer, "data-auth-");
 assertNotIncludes("SiteFooter public Social", footer, `href: "/social", label: "Social"`);
 assertNotIncludes("SiteFooter signed-out HTML", footer, `href="/spinner"`);
 assertIncludes("SiteFooter authenticated Spinner", footer, "<SpinnerViewerNavLink");
 assertIncludes("SiteFooter authenticated Spinner", footer, "hidden={!authState.spinnerViewer}");
+assertIncludes("official profile semantics", officialGuildProfiles, 'role="group"');
+assertIncludes("official profile semantics", officialGuildProfiles, "Official Mōchirīī profiles in the Guild menu");
+assertIncludes("official profile semantics", officialGuildProfiles, "Official Mōchirīī profiles in the mobile menu");
+assertIncludes("official profile semantics", officialGuildProfiles, "Official Mōchirīī profiles in the footer");
+
+if (SITE_DISPLAY_NAME !== "mochirii.com") {
+  failures.push(`public website display must be exactly mochirii.com; found ${JSON.stringify(SITE_DISPLAY_NAME)}.`);
+}
+if (JSON.stringify(OFFICIAL_GUILD_PROFILES.map((profile) => profile.href)) !== JSON.stringify(expectedOfficialGuildProfileUrls)) {
+  failures.push("official guild channel URLs or handle choices do not match the approved canonical set.");
+}
+if (OFFICIAL_GUILD_PROFILES.some((profile) => /(?:^|\.)mochirii\.com\b/iu.test(new URL(profile.href).hostname))) {
+  failures.push("official channel entries must stay provider-profile URLs and must not configure a mochirii.com Instagram profile link.");
+}
+assertIncludes("Facebook Group handoff public URL config", facebookPagePublishQueue, `"@/lib/public-urls"`);
+assertIncludes("Facebook Group handoff", facebookPagePublishQueue, "href={FACEBOOK_GROUP_URL}");
+assertNotIncludes("Facebook Group handoff duplicate URL", facebookPagePublishQueue, "https://www.facebook.com/groups/mochiriiguild");
 
 assertIncludes("SocialHubPanel public URL config", socialPanel, `"@/lib/public-urls"`);
 assertIncludes("SocialHubPanel", socialPanel, `href={SOCIAL_HOST}`);
@@ -123,6 +157,8 @@ if (failures.length) {
 console.log("Site navigation OK.");
 console.log("- Header Social and the public Mochi Pets page live in the Guild dropdown.");
 console.log("- Footer Social and Mochi Pets links are public.");
+console.log("- Official profile surfaces pin the approved Facebook Page, Facebook Group, Instagram, TikTok, and Twitch URLs.");
+console.log("- Visible website text is exactly mochirii.com; no Instagram profile website link is configured.");
 console.log("- Watch Spinner appears only after exact active verified viewer authorization.");
 console.log("- /social redirects signed-in members and keeps signed-out help.");
 

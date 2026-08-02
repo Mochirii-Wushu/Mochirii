@@ -1,5 +1,5 @@
 /* =========================================================
-   HOME â€” Doors (grid spacing)
+   HOME — Doors (grid spacing)
    ========================================================= */
 .home-doors{
   display:grid;
@@ -14,7 +14,7 @@
 }
 
 /* =========================================================
-   HOME â€” Doors (plate rhythm and typography)
+   HOME — Doors (plate rhythm and typography)
    ========================================================= */
 .home-door__plate{
   display:flex;
@@ -44,7 +44,7 @@
 }
 
 /* =========================================================
-   HOME â€” Doors (label pill; visual only)
+   HOME — Doors (label pill; visual only)
    ========================================================= */
 .home-door__label{
   display:inline-flex;
@@ -73,12 +73,6 @@
 }
 
 .home-thumb{
-  position:relative;
-  display:block;
-  width:100%;
-  aspect-ratio:16 / 10;
-  overflow:hidden;
-  padding:0;
   border-radius:18px;
   border:1px solid var(--line);
   background:rgba(10,12,14,.55);
@@ -90,10 +84,6 @@
 .home-thumb:focus-visible{
   transform:translateY(-1px);
   border-color:rgba(200,162,75,.42);
-}
-
-.home-thumb__img{
-  display:block;
 }
 
 @media (min-width:760px){

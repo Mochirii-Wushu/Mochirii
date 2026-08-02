@@ -52,8 +52,6 @@ async function handleRequest(req: Request): Promise<Response> {
   if (lookupError) {
     console.error("delete-rejected-gallery-submission lookup failed", {
       code: lookupError.code,
-      message: lookupError.message,
-      submissionId: request.submissionId,
     });
 
     return jsonResponse(
@@ -83,12 +81,15 @@ async function handleRequest(req: Request): Promise<Response> {
   const userId = safeString(record.user_id, 80) || "";
 
   if (!isSafeMemberGalleryObject(storageBucket, storagePath, userId)) {
-    console.error("delete-rejected-gallery-submission unsafe storage reference", {
-      submissionId: request.submissionId,
-      storageBucket,
-      hasStoragePath: Boolean(storagePath),
-      hasUserId: Boolean(userId),
-    });
+    console.error(
+      "delete-rejected-gallery-submission unsafe storage reference",
+      {
+        category: "unsafe_storage_reference",
+        bucketMatches: storageBucket === "member-gallery",
+        hasStoragePath: Boolean(storagePath),
+        hasUserId: Boolean(userId),
+      },
+    );
 
     return jsonResponse(
       {
@@ -107,8 +108,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
   if (storageError) {
     console.error("delete-rejected-gallery-submission storage delete failed", {
-      message: storageError.message,
-      submissionId: request.submissionId,
+      category: "storage_delete_rejected",
     });
 
     return jsonResponse(
@@ -131,8 +131,6 @@ async function handleRequest(req: Request): Promise<Response> {
   if (deleteError) {
     console.error("delete-rejected-gallery-submission row delete failed", {
       code: deleteError.code,
-      message: deleteError.message,
-      submissionId: request.submissionId,
     });
 
     return jsonResponse(
@@ -159,19 +157,19 @@ async function handleRequest(req: Request): Promise<Response> {
 
   const deletedAt = new Date().toISOString();
   console.info("delete-rejected-gallery-submission completed", {
-    submissionId: request.submissionId,
-    storageBucket,
-    removedObjectCount: Array.isArray(removedObjects) ? removedObjects.length : 0,
-    deletedAt,
+    removedObjectCount: Array.isArray(removedObjects)
+      ? removedObjects.length
+      : 0,
+    category: "rejected_submission_removed",
   });
 
   return jsonResponse({
     ok: true,
     data: {
       submissionId: request.submissionId,
-      storageBucket,
-      storagePath,
-      removedObjectCount: Array.isArray(removedObjects) ? removedObjects.length : 0,
+      removedObjectCount: Array.isArray(removedObjects)
+        ? removedObjects.length
+        : 0,
       deletedAt,
     },
     message: "Rejected gallery submission and Storage object cleaned up.",

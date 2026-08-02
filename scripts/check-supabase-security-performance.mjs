@@ -8,11 +8,24 @@ const oldGamePrefix = ["mochi", "social"].join("_");
 const currentGamePrefix = ["mochi", "pets"].join("_");
 
 const requiredIndexSnippets = [
+  "event_social_destination_settings_confirmed_by_idx",
+  "event_social_publication_templates_approved_by_idx",
+  "event_social_publication_jobs_template_id_idx",
+  "event_social_publication_jobs_approved_by_idx",
+  "event_social_publication_jobs_reconciled_by_idx",
+  "event_social_publication_events_occurrence_id_idx",
+  "event_social_publication_events_actor_id_idx",
   "gallery_submissions_user_id_idx",
   "gallery_submissions_reviewed_by_idx",
+  "gallery_submissions_public_feed_order_idx",
+  "gallery_submissions_public_feed_category_order_idx",
   "gallery_instagram_publish_jobs_queued_by_idx",
   "gallery_instagram_publish_jobs_published_by_idx",
   "gallery_instagram_publish_events_actor_id_idx",
+  "gallery_facebook_page_publish_jobs_queued_by_idx",
+  "gallery_facebook_page_publish_jobs_published_by_idx",
+  "gallery_facebook_page_publish_jobs_stale_lease_idx",
+  "gallery_facebook_page_publish_events_actor_id_idx",
   "member_profile_media_reviewed_by_idx",
   "member_profile_media_events_actor_id_idx",
   "member_verifications_reviewed_by_idx",
@@ -57,6 +70,8 @@ const serviceOnlyTables = [
   "discord_sync_log",
   "gallery_instagram_publish_events",
   "gallery_instagram_publish_jobs",
+  "gallery_facebook_page_publish_events",
+  "gallery_facebook_page_publish_jobs",
   "gallery_moderation_events",
   "member_auth_identities",
   "member_verifications",
@@ -70,6 +85,13 @@ const serviceOnlyTables = [
 const serviceOnlyPolicyMigration = read(
   "supabase/migrations/20260712164503_service_only_default_deny_policies.sql",
 );
+const facebookPagePublishingMigration = read(
+  "supabase/migrations/20260729042835_add_facebook_page_gallery_publishing.sql",
+);
+const eventSocialActorRetentionMigration = read(
+  "supabase/migrations/20260801210500_enforce_event_social_event_actor_retention.sql",
+);
+const serviceOnlyPolicySql = `${serviceOnlyPolicyMigration}\n${facebookPagePublishingMigration}`;
 
 const socialAccountSnippets = [
   "create table if not exists public.social_accounts",
@@ -95,7 +117,13 @@ const protectedFunctions = [
   "moderate-gallery-submission",
   "list-instagram-publish-queue",
   "publish-instagram-gallery-submission",
+  "resolve-instagram-publish-reconciliation",
   "mark-instagram-gallery-submission-shared",
+  "check-instagram-api-status",
+  "list-facebook-page-publish-queue",
+  "publish-facebook-page-gallery-submission",
+  "resolve-facebook-page-publish-reconciliation",
+  "check-facebook-page-api-status",
   "list-member-profiles",
   "get-member-profile",
   "submit-member-profile-media",
@@ -111,6 +139,10 @@ const publicFunctions = [
   "list-approved-gallery-submissions",
   "list-visible-profile-cards",
   "get-current-spotlight-winner",
+];
+
+const hybridFunctions = [
+  "get-current-raffle",
 ];
 
 function read(rel) {
@@ -197,7 +229,7 @@ function assertServiceOnlyBoundary(table) {
   ];
 
   for (const [label, pattern] of checks) {
-    if (!pattern.test(serviceOnlyPolicyMigration)) {
+    if (!pattern.test(serviceOnlyPolicySql)) {
       failures.push(`Service-only boundary for public.${table}: missing ${label}.`);
     }
   }
@@ -225,6 +257,33 @@ assertIncludes("check-all", checkAll, "check:supabase-security-performance");
 for (const snippet of requiredIndexSnippets) {
   assertIncludes("Supabase FK index migrations", migrationText, snippet);
 }
+
+assertIncludes(
+  "Event-social actor retention migration",
+  eventSocialActorRetentionMigration,
+  "drop constraint event_social_publication_events_actor_id_fkey",
+);
+assertIncludes(
+  "Event-social actor retention migration",
+  eventSocialActorRetentionMigration,
+  "add constraint event_social_publication_events_actor_id_fkey",
+);
+assertIncludes(
+  "Event-social actor retention migration",
+  eventSocialActorRetentionMigration,
+  "on delete restrict",
+);
+
+[
+  "revoke all on function public.gallery_public_feed_page_v2(integer, timestamptz, timestamptz, timestamptz, uuid, text, text, text)",
+  "grant execute on function public.gallery_public_feed_page_v2(integer, timestamptz, timestamptz, timestamptz, uuid, text, text, text)",
+  "revoke all on function public.gallery_reserve_public_media_v2(uuid, text)",
+  "grant execute on function public.gallery_reserve_public_media_v2(uuid, text)",
+  "revoke all on function public.gallery_reserve_moderation_preview(bigint)",
+  "grant execute on function public.gallery_reserve_moderation_preview(bigint)",
+  "from public, anon, authenticated;",
+  "to service_role;",
+].forEach((snippet) => assertIncludes("Gallery service-only function grants", migrationText, snippet));
 
 for (const table of extractCreatedPublicTables(migrationText)) {
   if (!hasRlsEnableForTable(migrationText, table)) {
@@ -264,7 +323,12 @@ for (const snippet of socialAccountSnippets) {
   assertIncludes("Pixelfed social account mapping migration", migrationText, snippet);
 }
 
-assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_accounts` maps a signed-in website member");
+[
+  "`services/social` is the canonical application source",
+  "`social_accounts` maps a signed-in website member to their current Mochirii",
+  "../docs/integrations/mochirii-social-delivery.md",
+  "superseded historical evidence",
+].forEach((snippet) => assertIncludes("Supabase README Social mapping docs", readme, snippet));
 
 [
   "import { SITE_ORIGIN } from \"./public-origins.ts\"",
@@ -285,7 +349,10 @@ assertIncludes("Supabase README Pixelfed mapping docs", readme, "`social_account
 
 for (const name of protectedFunctions) {
   const source = read(`supabase/functions/${name}/index.ts`);
-  assertIncludes(`${name} CORS wrapper`, source, "withProtectedCors(req, handleRequest(req))");
+  const corsWrapper = name === "submit-discord-gallery-image"
+    ? "withProtectedCors(req, handleRequest(req), CORS_OPTIONS)"
+    : "withProtectedCors(req, handleRequest(req))";
+  assertIncludes(`${name} CORS wrapper`, source, corsWrapper);
   assertIncludes(`${name} request handler`, source, "async function handleRequest(req: Request): Promise<Response>");
 }
 
@@ -294,6 +361,15 @@ for (const name of publicFunctions) {
   if (source.includes("withProtectedCors")) {
     failures.push(`${name}: public-safe DTO endpoint must not use protected-origin CORS.`);
   }
+}
+
+for (const name of hybridFunctions) {
+  const source = read(`supabase/functions/${name}/index.ts`);
+  assertIncludes(`${name} public GET`, source, "handlePublicGet(dependencies)");
+  assertIncludes(`${name} protected member POST`, source, "withProtectedCors(");
+  assertIncludes(`${name} verified website member boundary`, source, "requireRaffleMember");
+  assertIncludes(`${name} verified Social member boundary`, source, "verifySocialLeaderboardRequest");
+  assertIncludes(`${name} private leaderboard cache boundary`, source, '"Cache-Control": LEADERBOARD_CACHE_CONTROL');
 }
 
 assertIncludes("list-approved-gallery-submissions public CORS", read("supabase/functions/list-approved-gallery-submissions/index.ts"), "\"Access-Control-Allow-Origin\": \"*\"");

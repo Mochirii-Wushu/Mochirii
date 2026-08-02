@@ -11,8 +11,13 @@ const providerReads =
   args.has("--providers") || process.env.FULL_STACK_RELEASE_EVIDENCE_PROVIDERS === "true";
 const writeReports =
   args.has("--write") || process.env.FULL_STACK_RELEASE_EVIDENCE_WRITE === "true";
+const allowPartialProviderEvidence =
+  args.has("--allow-partial-provider-evidence") ||
+  process.env.FULL_STACK_RELEASE_EVIDENCE_ALLOW_PARTIAL_PROVIDER_EVIDENCE === "true";
 const strictProviders =
-  args.has("--strict-provider") || process.env.FULL_STACK_RELEASE_EVIDENCE_STRICT_PROVIDER === "true";
+  args.has("--strict-provider") ||
+  process.env.FULL_STACK_RELEASE_EVIDENCE_STRICT_PROVIDER === "true" ||
+  (providerReads && !allowPartialProviderEvidence);
 const productionUrl = process.env.FULL_STACK_RELEASE_EVIDENCE_URL || SITE_ORIGIN;
 const vercelProject = process.env.FULL_STACK_RELEASE_EVIDENCE_VERCEL_PROJECT || "mochirii";
 const supabaseProjectRef =
@@ -71,6 +76,9 @@ if (!report.ok) {
 
 console.log("Full-stack release evidence OK.");
 console.log(`- Provider reads: ${providerReads ? "enabled" : "disabled"}`);
+console.log(
+  `- Provider evidence mode: ${providerReads ? (strictProviders ? "fail-closed" : "partial evidence allowed") : "not requested"}`,
+);
 console.log(`- Required local scripts: ${report.local.requiredScripts.present}/${report.local.requiredScripts.total}`);
 console.log(`- Supabase local migrations: ${report.supabase.localMigrations?.total ?? "not checked"}`);
 console.log(`- Supabase Edge functions in config: ${report.supabase.localFunctions?.total ?? "not checked"}`);

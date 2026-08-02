@@ -22,6 +22,7 @@ use App\Profile;
 use App\Services\AccountService;
 use App\Services\AdminStatsService;
 use App\Services\ConfigCacheService;
+use App\Services\SanitizeService;
 use App\Services\StatusService;
 use App\Services\StoryService;
 use App\Status;
@@ -390,11 +391,14 @@ class AdminController extends Controller
         foreach ($fields as $field => $type) {
             switch ($type) {
                 case 'string':
-                    if ($request->{$field} != $news->{$field}) {
+                    $value = $field === 'body'
+                        ? app(SanitizeService::class)->richText($request->{$field})
+                        : $request->{$field};
+                    if ($value != $news->{$field}) {
                         if ($field == 'title') {
                             $news->slug = $slug;
                         }
-                        $news->{$field} = $request->{$field};
+                        $news->{$field} = $value;
                         $changed = true;
                         array_push($changedFields, $field);
                     }
@@ -457,11 +461,14 @@ class AdminController extends Controller
         foreach ($fields as $field => $type) {
             switch ($type) {
                 case 'string':
-                    if ($request->{$field} != $news->{$field}) {
+                    $value = $field === 'body'
+                        ? app(SanitizeService::class)->richText($request->{$field})
+                        : $request->{$field};
+                    if ($value != $news->{$field}) {
                         if ($field == 'title') {
                             $news->slug = $slug;
                         }
-                        $news->{$field} = $request->{$field};
+                        $news->{$field} = $value;
                         $changed = true;
                         array_push($changedFields, $field);
                     }

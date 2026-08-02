@@ -1,46 +1,218 @@
-# Gallery Thumbnail Rollout Packet
+# Gallery Publication Media And Public Feed Rollout Packet
 
 ## Scope
 
-This packet adds one stored, bounded WebP derivative for each approved member Gallery submission. It does not use Supabase Image Transformations, create a paid resource, make the private bucket public, or change the static Gallery assets.
+This packet adds an immutable public-delivery contract for reviewed member
+Gallery submissions. It keeps `member-gallery` private, does not add a paid
+resource or managed image transformation, and does not change static Gallery
+assets.
+
+Every publication uses two metadata-stripped WebP assets prepared once during
+moderation:
+
+- a display derivative no larger than 2560 pixels on either edge or 2 MiB
+- a thumbnail no larger than 720 pixels on either edge or 80 KiB
+
+The member-owned source original remains private and is never a public viewer
+asset.
 
 ## Source changes
 
-- Migration `20260727145241_add_gallery_submission_thumbnails.sql` adds private derivative metadata and fail-closed constraints.
-- `moderate-gallery-submission` validates and stores a maximum-720px, maximum-80-KiB WebP before a new approval can complete.
-- The validation path uses official libwebp 1.6.0 compiled with the digest-pinned `emscripten/emsdk:4.0.12` builder. The release archive and generated module are SHA-256 pinned, and corrupt VP8/VP8L fixtures must fail full decode.
-- Each moderation attempt writes a unique revision under `_approved/thumbs/{submission}/{revision}.webp`; the database selects the winning revision and writes its moderation audit in one transaction.
-- `list-approved-gallery-submissions` returns distinct short-lived thumbnail and full-image URLs and skips historical rows that have not been backfilled.
-- The Leader Dashboard can prepare the same derivative for a historical approved row.
+- Migration `20260727145241_add_gallery_submission_thumbnails.sql` adds the
+  transitional source-row thumbnail metadata.
+- Migration `20260728130000_add_gallery_public_feed_v2.sql` adds decoded
+  geometry and the schema-v2 feed foundation while deliberately leaving
+  incomplete legacy rows private.
+- Migration `20260728132000_add_gallery_publication_revisions.sql` creates the
+  service-only immutable `private.gallery_publication_revisions` ledger,
+  exact object/version/hash bindings, stable publication identities,
+  per-revision thumbnails, snapshot-safe feed lookups, and the serialized
+  global delivery budget.
+- `moderate-gallery-submission` validates and fully decodes both bounded assets
+  with pinned libwebp 1.6.0 before the database transition can commit.
+- The stable display path is
+  `_approved/publications/{publication}/display.webp`.
+- Every thumbnail refresh creates a new revision at
+  `_approved/publications/{publication}/revisions/{revision}/thumbnail.webp`
+  without changing the public publication ID.
+- The moderation event, source-row state, retirement of the prior revision,
+  new immutable revision, and opted-in social-publishing outbox record commit
+  atomically.
+- Referenced source objects are member-immutable, and the moderation commit
+  compares the reviewed source-row timestamp. A stale queue item fails closed
+  and must be reviewed again before publication.
+- One moderator-selected source is metered before download, structurally
+  validated, fully decoded in the Edge runtime, and bound to an exact durable
+  validation timestamp. The same-origin Node route independently decodes and
+  re-renders a metadata-free WebP; the browser never receives the raw source
+  URL or a signed Storage capability.
+- `list-approved-gallery-submissions` returns schema-v2 pages with at most 24
+  stable, credential-free thumbnail Edge URLs. It delivers one bounded display
+  derivative only after the viewer requests the stable opaque publication ID.
+- The current Edge Function recognizes only the prior browser's exact `{}` list
+  request and maps current public evidence into the old DTO field names. Its
+  historical URL fields contain metered Edge URLs, not signed Storage URLs.
+- The service-role-only v1 compatibility RPC retains its historical signature
+  only as a list-budgeted empty-set guard, preventing a separately restored old
+  Edge Function from minting replayable media capabilities.
 
-The public feed never returns a raw bucket or Storage path. The Gallery grid loads only the derivative; the private original is requested only after the visitor opens the viewer. The shared Home/Gallery image surface keeps the cached thumbnail visible while the full image transfers and decodes, exposes an accessible loading or error state, and never blocks viewer dismissal on that request.
+The list contract is all-or-nothing. If any publication selected for a page is
+missing, mismatched, malformed, or outside the delivery budget, the function returns a redacted
+temporary-unavailability response with no items or cursor. It never skips an
+item, advances past an undelivered item, leaks an object path, or returns a
+partial page.
 
-The existing member-original limit remains 50 MiB. A second bounded viewer derivative could reduce high-percentile opening time, but it would add another service-owned object, metadata contract, decoder limit, atomic-selection branch, cleanup path, migration, backfill, and rollback surface. Keep that as a separate evidence-gated packet unless production measurements justify the added state.
+The first page records a stable ten-minute snapshot and sorts by the frozen
+reviewed/created/publication keyset. Every opaque cursor preserves that
+snapshot, so concurrent publications or thumbnail revisions wait for a fresh
+traversal. Runtime totals and all six facets describe the complete filtered
+snapshot, not only the current page.
+
+## Security and retention contract
+
+- `private.gallery_publication_revisions` has RLS enabled and no direct client
+  or `service_role` table privileges.
+- Only explicitly granted service-only functions may create or query revisions.
+- A revision freezes reviewed copy, canonical category, internal attribution,
+  source dates, exact Storage object identities/versions/timestamps, display
+  and thumbnail metadata, and SHA-256 digests. Anonymous DTOs omit attribution.
+- Revision rows cannot be deleted or rewritten. Only `visible_until` may move
+  once from null to a retirement timestamp.
+- Archiving or removing approval retires the active revision immediately.
+- Retired publication objects remain available for at least one hour, covering
+  the ten-minute cursor and bounded in-flight delivery window. Do not delete
+  them earlier.
+- Legacy approved rows with no complete publication revision remain private.
+  Never infer, bulk-promote, or expose them from source-row fields.
+
+Supabase documents that private-bucket assets require authorized access and
+that service credentials bypass Storage RLS. The Edge delivery boundary keeps
+that credential server-only and never returns it or a signed bearer URL:
+
+- <https://supabase.com/docs/guides/storage/serving/downloads>
+- <https://supabase.com/docs/guides/storage/security/access-control>
 
 ## Deployment boundary
 
-This branch must stay unmerged and undeployed until an exact release approval covers the migration, the changed Edge Functions, Supabase Preview, the protected-main Supabase deployment, and the normal Vercel publication. No manual provider write is part of this packet.
+This branch stays unmerged and undeployed until exact release approval covers
+the migrations, changed Edge Functions, Supabase Preview, protected-main
+Supabase deployment, and normal Vercel publication. No manual provider write is
+part of this packet.
 
-Before deployment, capture the current migration inventory, configured function inventory, `verify_jwt` parity, and provider backups. Recalculate those values at the exact reviewed head instead of copying an older release count.
+Before deployment, capture the current migration inventory, configured
+function inventory, `verify_jwt` parity, and provider backups. Recalculate
+those values at the exact reviewed head instead of copying an older release
+count.
 
-## Backfill and stop conditions
+Read-only project state confirms Secure Backend Access/OIDC Federation is
+enabled in team-issuer mode. The exact-head Vercel Preview must still prove that
+Vercel injects a valid `x-vercel-oidc-token` into the same-origin
+moderation-preview Function request. This branch changes no provider setting
+and contains no fallback shared secret. If the token is absent or its exact
+team/project/environment claims fail verification, raw-source preview delivery
+fails closed and the release stops rather than weakening the boundary.
 
-After an approved deployment, an authorized moderator can open the paginated Approved queue, select `Needs thumbnail`, and choose `Prepare gallery thumbnail` for each historical row. Each action uses the existing signed private preview and creates one immutable object under the service-owned derivative prefix. A conflicting attempt deletes only its own unselected revision.
+## Expand, reviewed backfill, and cutover
 
-Stop if the preview does not match the approved image, WebP generation fails, the stored byte limit cannot be met, the audit event fails, or the public feed returns equal thumbnail and full-image URLs. Do not infer or fabricate a thumbnail.
+The publication migration is expand-only. It installs the immutable ledgers and
+a private singleton transition gate, but that gate defaults to `false`. While
+closed, schema-v2 list requests return a valid empty page and public media
+resolution returns no object. Existing source approvals and source objects are
+not changed or deleted.
 
-Backfill is not complete until the reviewed closeout query reports zero incomplete approved rows, zero missing or mismatched original/derivative objects, and the approved-thumbnail constraint has been validated in a separately authorized schema change. Do not validate that constraint early or treat a successful application deployment as backfill evidence.
+The current reviewed inventory contains 13 approved source rows. A later,
+separately authorized operator run must process them one at a time and reach
+exactly `13 approved / 13 publication-ready / 0 unknown category` before a
+separate cutover migration may enable the gate. Each unit requires a fresh
+visual review, one canonical category, exact source-row and Storage-object
+evidence, and both bounded derivatives. No row becomes public at 12/13.
+
+Ordinary preview and validation remain capped at 8 MiB, 4096 pixels per edge,
+and 12.6 megapixels. Two reviewed historical sources exceed 8 MiB. They retain
+their immutable private bytes and may use only the dedicated service-role
+`gallery-historical-source-v1` operator lane, bounded by the retained 50 MiB
+legacy ceiling, 8192 pixels per edge, and 40 megapixels. They must not be decoded
+through the ordinary browser or Edge preview path; only their metadata-stripped
+2 MiB display and 80 KiB thumbnail derivatives can cross the public boundary.
+
+This is not an automatic backfill. Rows that are incomplete, null-category,
+noncanonical, or not deliberately selected remain private even if their source
+status says approved. Never map categories from provenance, filenames,
+captions, or provider metadata.
+
+Stop if:
+
+- the preview does not match the reviewed image
+- either bounded WebP cannot be generated or fully decoded
+- an asset exceeds its byte or dimension bound
+- Storage metadata does not match the proposed revision
+- the audit or immutable revision transaction fails
+- a list response exposes a display URL or returns a partial page
+- an on-demand display response resolves to a thumbnail or source-original URL
+
+Run `supabase/operations/reconcile_gallery_public_feed_v2.sql`,
+`supabase/operations/validate_gallery_submission_thumbnails.sql`, and
+`supabase/operations/validate_gallery_submission_categories.sql` only as
+reviewed, read-only evidence. The reconciliation includes aggregate transition
+and bucket-policy evidence; it never exposes member IDs, object paths, or
+hashes. None of these operations alter constraints or data.
 
 ## Reproducible decoder evidence
 
 - libwebp release: `1.6.0`
-- official release archive: <https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz>
-- official archive SHA-256: `e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564`
+- official release archive:
+  <https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz>
+- official archive SHA-256:
+  `e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564`
 - source commit: `4fa21912338357f89e4fd51cf2368325b59e9bd9`
-- upstream source: <https://chromium.googlesource.com/webm/libwebp/+/4fa21912338357f89e4fd51cf2368325b59e9bd9>
-- builder: `emscripten/emsdk:4.0.12@sha256:744fb6a68941970951bacf9d6632041a0398260492232691ef22bbf54b0585c6`
-- generated module SHA-256: recorded beside `validator.generated.js`; `scripts/build-gallery-webp-validator.sh` must reproduce it exactly before release.
+- upstream source:
+  <https://chromium.googlesource.com/webm/libwebp/+/4fa21912338357f89e4fd51cf2368325b59e9bd9>
+- builder:
+  `emscripten/emsdk:4.0.12@sha256:744fb6a68941970951bacf9d6632041a0398260492232691ef22bbf54b0585c6`
+- generated module SHA-256: recorded beside `validator.generated.js`;
+  `scripts/build-gallery-webp-validator.sh` must reproduce it before release
 
 ## Rollback
 
-Application rollback may restore the prior Vercel deployment and prior function source. The new nullable columns are additive and should remain in place during application rollback. Do not drop columns or delete thumbnail objects during an incident; those destructive steps require a separately reviewed data-retirement packet.
+Use this compatibility matrix during rollout and rollback:
+
+| Website browser | Gallery Edge | Database phase | Runtime behavior |
+| --- | --- | --- | --- |
+| Current v2 | Current | Expand; gate closed | Valid empty v2 feed; no public media resolves. |
+| Prior v1 | Current | Expand; gate closed | Valid empty legacy DTO; no public media resolves. |
+| Current v2 | Current | Reviewed cutover enabled | Full v2 feed through bounded Edge media URLs. |
+| Prior v1 | Current | Reviewed cutover enabled | Legacy DTO backed only by bounded Edge media URLs. |
+| Current v2 | Prior | Either | Fails closed to the static Gallery. |
+| Prior v1 | Prior | Either | Empty runtime feed; no signed media is created. |
+
+Apply the expand migration with the gate closed before the current Edge source,
+then publish the Website. Complete and verify the separately reviewed backfill
+before enabling the gate through a later exact cutover migration.
+The temporary `gallery_publishable_submissions(integer, integer)` signature is
+service-role-only, charges one 64 KiB list reservation, and always returns an
+empty set. This intentionally prevents a restored prior Edge Function from
+returning Storage paths or creating replayable signed URLs. A prior Website
+deployment remains a functional rollback only when paired with the current
+Edge Function and the new database; its exact empty-object request receives
+legacy field names mapped to the same per-request metered media boundary.
+
+Additive columns, the immutable publication ledger, and its evidence remain in
+place. Do not remove the compatibility signature until the rollback window has
+closed and retained rollback source is no longer usable; retire it only in a
+separate reviewed migration. Do not drop columns, delete revision rows, delete
+publication objects, or rewrite moderation evidence during an incident; those
+destructive actions require a separately reviewed retirement packet.
+
+## Release inventory
+
+The Gallery delivery change reuses the existing public Gallery Edge Function.
+After the separately disabled monthly-raffle foundation is composed on the
+final integrated release source, `supabase/config.toml` contains exactly 49 functions
+with 31 `verify_jwt=true` and 18 false. Recalculate both counts from the final
+exact head before requesting production approval. Any other inventory is not
+authorized by this packet.
+
+See
+[`../integrations/gallery-public-media-delivery.md`](../integrations/gallery-public-media-delivery.md)
+for the public DTO, bounded Edge delivery, global quota, pagination, retry, and
+security decision.

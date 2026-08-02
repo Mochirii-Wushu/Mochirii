@@ -805,10 +805,32 @@
 				try {
 					return await this.parseJsonFile(ev);
 				} catch(err) {
-					let el = document.createElement('p');
+					let el = document.createElement('div');
 					el.classList.add('text-left');
 					el.classList.add('mb-0');
-					el.innerHTML = '<p class="lead">An error occured when attempting to parse the import file. <span class="font-weight-bold">Please try again later.</span></p><br /><p class="small text-danger mb-0">Error message:</p><div class="card card-body"><code>' + err.message + '</code></div>';
+
+					let summary = document.createElement('p');
+					summary.classList.add('lead');
+					summary.appendChild(document.createTextNode('An error occurred when attempting to parse the import file. '));
+					let retry = document.createElement('span');
+					retry.classList.add('font-weight-bold');
+					retry.textContent = 'Please try again later.';
+					summary.appendChild(retry);
+					el.appendChild(summary);
+
+					let label = document.createElement('p');
+					label.classList.add('small', 'text-danger', 'mb-0');
+					label.textContent = 'Error message:';
+					el.appendChild(label);
+
+					let errorCard = document.createElement('div');
+					errorCard.classList.add('card', 'card-body');
+					let code = document.createElement('code');
+					code.textContent = err instanceof Error && err.message
+						? err.message
+						: 'The selected file could not be parsed.';
+					errorCard.appendChild(code);
+					el.appendChild(errorCard);
 					let wrapper = document.createElement('div');
 					wrapper.appendChild(el);
 					swal({

@@ -1,64 +1,43 @@
-import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import type { SpinnerAccessMode } from "@/lib/spinner/session-policy";
 import {
   AUTH_PROVIDER_REGISTRY,
-  isOAuthProviderId,
+  isIdentityLinkProviderEnabled,
+  isSignInProviderEnabled,
+  phoneAuthReady,
   providerToSupabaseProvider,
   type OAuthProviderId,
 } from "./auth-providers";
-import { requireBrowserSupabaseClient } from "./client";
-import { failedResult, okResult, createResult, createError, type AuthSessionResult, type AuthUserResult } from "./types";
-
-export async function getCurrentSession() {
-  try {
-    const client = requireBrowserSupabaseClient();
-    const { data, error } = await client.auth.getSession();
-    if (error) return failedResult<AuthSessionResult>(error);
-    return okResult<AuthSessionResult>({ session: data.session || null });
-  } catch (error) {
-    return failedResult<AuthSessionResult>(error);
-  }
-}
-
-export async function getCurrentUser() {
-  try {
-    const client = requireBrowserSupabaseClient();
-    const { data, error } = await client.auth.getUser();
-    if (error) return failedResult<AuthUserResult>(error);
-    if (!data.user) {
-      return createResult<AuthUserResult>({
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
-        data: null,
-        error: createError("Choose a sign-in method first."),
-      });
-    }
-    return okResult<AuthUserResult>({ user: data.user });
-  } catch (error) {
-    return failedResult<AuthUserResult>(error);
-  }
-}
-
-export function onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
-  try {
-    const client = requireBrowserSupabaseClient();
-    return okResult(client.auth.onAuthStateChange(callback).data);
-  } catch (error) {
-    return failedResult(error);
-  }
-}
+import { authCallbackPath, resolveAuthReturnPath } from "./auth-redirect";
+import { PRIVATE_RAFFLE_AUTH_RETURN_PATHS } from "./raffle-auth-paths";
+import {
+  clearLegacyBrowserAuthStorage,
+  requireReadyBrowserSupabaseClient,
+} from "./client";
+import { getCurrentSession, getCurrentUser } from "./auth-session";
+export { getCurrentSession, getCurrentUser, onAuthStateChange, requireAuth } from "./auth-session";
+import {
+  PHONE_OTP_VERIFY_PUBLIC_ERROR_MESSAGE,
+  normalizePhoneForOtp,
+  normalizePhoneOtpCode,
+  phoneOtpRequestPublicOutcome,
+  requirePhoneCaptchaToken,
+} from "./phone-auth-policy";
+import { failedResult, okResult } from "./types";
 
 function resolveRedirectTo(value = "/account") {
-  if (typeof window === "undefined") return value;
-  return new URL(value, window.location.origin).href;
+  const callback = authCallbackPath(
+    resolveAuthReturnPath(value, PRIVATE_RAFFLE_AUTH_RETURN_PATHS),
+    PRIVATE_RAFFLE_AUTH_RETURN_PATHS,
+  );
+  if (typeof window === "undefined") return callback;
+  return new URL(callback, window.location.origin).href;
 }
 
 export async function signInWithProvider(provider: OAuthProviderId, options: { redirectTo?: string } = {}) {
   try {
-    if (!isOAuthProviderId(provider)) throw new Error("That sign-in provider is not supported.");
+    if (!isSignInProviderEnabled(provider)) throw new Error("That sign-in provider is not enabled.");
 
-    const client = requireBrowserSupabaseClient();
+    const client = await requireReadyBrowserSupabaseClient();
     const config = AUTH_PROVIDER_REGISTRY[provider];
     const { data, error } = await client.auth.signInWithOAuth({
       provider: providerToSupabaseProvider(provider),
@@ -76,9 +55,9 @@ export async function signInWithProvider(provider: OAuthProviderId, options: { r
 
 export async function linkProviderIdentity(provider: OAuthProviderId, options: { redirectTo?: string } = {}) {
   try {
-    if (!isOAuthProviderId(provider)) throw new Error("That sign-in provider is not supported.");
+    if (!isIdentityLinkProviderEnabled(provider)) throw new Error("That identity-linking provider is not enabled.");
 
-    const client = requireBrowserSupabaseClient();
+    const client = await requireReadyBrowserSupabaseClient();
     const config = AUTH_PROVIDER_REGISTRY[provider];
     const { data, error } = await client.auth.linkIdentity({
       provider: providerToSupabaseProvider(provider),
@@ -96,7 +75,7 @@ export async function linkProviderIdentity(provider: OAuthProviderId, options: {
 
 export async function getLinkedIdentities() {
   try {
-    const client = requireBrowserSupabaseClient();
+    const client = await requireReadyBrowserSupabaseClient();
     const authWithIdentities = client.auth as typeof client.auth & {
       getUserIdentities?: () => Promise<{ data?: { identities?: unknown[] } | unknown[] | null; error?: unknown }>;
     };
@@ -118,47 +97,59 @@ export async function getLinkedIdentities() {
 export async function signInWithPhoneOtp({
   phone,
   captchaToken,
-  shouldCreateUser = true,
 }: {
   phone: string;
-  captchaToken?: string;
-  shouldCreateUser?: boolean;
+  captchaToken: string;
 }) {
+  let cleanPhone: string;
+  let cleanCaptchaToken: string;
   try {
-    const cleanPhone = String(phone || "").trim();
-    if (!cleanPhone) throw new Error("Enter a phone number before requesting a code.");
+    if (!phoneAuthReady()) throw new Error("Phone sign-in is unavailable.");
+    cleanPhone = normalizePhoneForOtp(phone);
+    cleanCaptchaToken = requirePhoneCaptchaToken(captchaToken);
+  } catch (error) {
+    return failedResult(error);
+  }
 
-    const client = requireBrowserSupabaseClient();
+  try {
+    const client = await requireReadyBrowserSupabaseClient();
     const { data, error } = await client.auth.signInWithOtp({
       phone: cleanPhone,
       options: {
-        shouldCreateUser,
-        ...(captchaToken ? { captchaToken } : {}),
+        shouldCreateUser: false,
+        captchaToken: cleanCaptchaToken,
       },
     });
-    if (error) return failedResult(error);
-    return okResult(data, "Code sent. Check your phone.");
-  } catch (error) {
-    return failedResult(error);
+    const publicOutcome = phoneOtpRequestPublicOutcome(error);
+    return okResult(error ? null : data, publicOutcome.message);
+  } catch (providerError) {
+    const publicOutcome = phoneOtpRequestPublicOutcome(providerError);
+    return okResult(null, publicOutcome.message);
   }
 }
 
 export async function verifyPhoneOtp({ phone, token }: { phone: string; token: string }) {
+  let cleanPhone: string;
+  let cleanToken: string;
   try {
-    const cleanPhone = String(phone || "").trim();
-    const cleanToken = String(token || "").trim();
-    if (!cleanPhone || !cleanToken) throw new Error("Enter the phone number and verification code.");
+    if (!phoneAuthReady()) throw new Error("Phone sign-in is unavailable.");
+    cleanPhone = normalizePhoneForOtp(phone);
+    cleanToken = normalizePhoneOtpCode(token);
+  } catch (error) {
+    return failedResult(error);
+  }
 
-    const client = requireBrowserSupabaseClient();
+  try {
+    const client = await requireReadyBrowserSupabaseClient();
     const { data, error } = await client.auth.verifyOtp({
       phone: cleanPhone,
       token: cleanToken,
       type: "sms",
     });
-    if (error) return failedResult(error);
+    if (error) return failedResult(new Error(PHONE_OTP_VERIFY_PUBLIC_ERROR_MESSAGE));
     return okResult(data, "Phone sign-in complete.");
-  } catch (error) {
-    return failedResult(error);
+  } catch {
+    return failedResult(new Error(PHONE_OTP_VERIFY_PUBLIC_ERROR_MESSAGE));
   }
 }
 
@@ -253,15 +244,13 @@ export async function clearPrivateSpinnerSession() {
 export async function signOut() {
   try {
     await clearPrivateSpinnerSession();
-    const client = requireBrowserSupabaseClient();
+    const client = await requireReadyBrowserSupabaseClient();
     const { error } = await client.auth.signOut();
+    clearLegacyBrowserAuthStorage();
     if (error) return failedResult(error);
     return okResult(true, "Signed out.");
   } catch (error) {
+    clearLegacyBrowserAuthStorage();
     return failedResult(error);
   }
-}
-
-export async function requireAuth() {
-  return getCurrentUser();
 }

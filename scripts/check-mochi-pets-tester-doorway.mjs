@@ -82,7 +82,9 @@ assertNotIncludes("public page", page, [
 assertIncludes("public metadata", metadata, [
   "mochiPets:",
   'path: "/games/mochi-pets"',
-  "A shared 3D Mōchirīī guild home beyond the Jianghu",
+  "A future shared 3D Mōchirīī guild home beyond the Jianghu",
+  "planned to bring members together",
+  "iOS and desktop",
 ]);
 
 const privateDoorway = read(paths.privateDoorway);
@@ -96,8 +98,9 @@ assertIncludes("configured doorway loader", configuredDoorway, [
 assertIncludes("public concept", publicConcept, [
   "MochiPetsArrivalScene publicOnly",
   "mochi-game-shell--concept",
-  "A shared 3D guild home beyond the Jianghu",
-  "iPhone and desktop",
+  "A future shared 3D guild home beyond the Jianghu",
+  "planned to bring Mōchirīī members together",
+  "iOS and desktop",
 ]);
 assertNotIncludes("public concept", publicConcept, [
   "tester",
@@ -275,7 +278,9 @@ assertIncludes("tester gate", gate, [
   'role={memberState === "unavailable" ? "alert" : undefined}',
   'role="alert"',
   "/assets/img/brand/emblem.webp",
-  "A shared 3D guild home beyond the Jianghu",
+  "A future shared 3D guild home beyond the Jianghu",
+  "planned to bring Mōchirīī members together",
+  "iOS and desktop",
   "Verified Mōchirīī website membership.",
   "The current Mochi Pets tester passcode.",
 ]);
@@ -298,6 +303,7 @@ assertIncludes("local smoke harness", read(paths.localSmokeHarness), [
   "startHttpsProxy({",
   "startMockMemberVerifier({",
   "NODE_EXTRA_CA_CERTS",
+  '"--supabase-auth-cookie-name"',
   '"sb-localhost-auth-token"',
   '"--allow-self-signed-localhost"',
   'readArg("--browser", "all")',
@@ -308,6 +314,8 @@ assertIncludes("browser smoke", read(paths.browserSmoke), [
   'page.goto(`${baseUrl}/games/mochi-pets`',
   "assertResponsiveLayout",
   "assertSessionCookie",
+  "page.context().addCookies",
+  "base64-",
   "verifyMalformedSuccessFailsClosed",
 ]);
 assertIncludes("root check runner", read(paths.checkAll), [
@@ -399,6 +407,13 @@ const mochiPetsMetadata = metadataStart >= 0 && metadataEnd > metadataStart
   ? metadata.slice(metadataStart, metadataEnd + 5)
   : "";
 const visibleCopy = customerCopy(`${publicConcept}\n${gate}\n${waitingRoom}\n${mochiPetsMetadata}`);
+const approvedFuturePlatformCopy =
+  "A future shared 3D guild home beyond the Jianghu, planned to bring Mōchirīī members together with a Mochi companion of their own on iOS and desktop.";
+const approvedFuturePlatformMetadata =
+  "A future shared 3D Mōchirīī guild home beyond the Jianghu, planned to bring members together with a Mochi companion of their own on iOS and desktop.";
+const policyVisibleCopy = visibleCopy
+  .replaceAll(approvedFuturePlatformCopy, "")
+  .replaceAll(approvedFuturePlatformMetadata, "");
 for (const [label, pattern] of [
   ["retired alpha claim", /\bclosed\s+alpha\b/i],
   ["retired shared-room claim", /\bshared\s+(?:3D\s+)?room\b/i],
@@ -408,7 +423,7 @@ for (const [label, pattern] of [
   ["implementation language", /\b(?:backend|repository|artifact|runtime|protocol|contract|integration|development)\b/i],
   ["implementation status", /\b(?:planned|not playable|not available|not connected|launch status|project status)\b/i],
 ]) {
-  if (pattern.test(visibleCopy)) failures.push(`customer-facing copy contains ${label}`);
+  if (pattern.test(policyVisibleCopy)) failures.push(`customer-facing copy contains ${label}`);
 }
 
 const durableDocs = [

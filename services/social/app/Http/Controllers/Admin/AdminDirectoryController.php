@@ -6,6 +6,7 @@ use App\Http\Controllers\PixelfedDirectoryController;
 use App\Models\ConfigCache;
 use App\Services\AccountService;
 use App\Services\ConfigCacheService;
+use App\Services\SanitizeService;
 use App\Services\StatusService;
 use App\Status;
 use App\User;
@@ -91,7 +92,7 @@ trait AdminDirectoryController
                 ->map(function ($t) {
                     return [
                         'profile' => AccountService::get($t['profile_id']),
-                        'body' => $t['body'],
+                        'body' => app(SanitizeService::class)->plainText($t['body']),
                     ];
                 });
             $res['testimonials'] = $testimonials;
@@ -393,6 +394,8 @@ trait AdminDirectoryController
             'body' => 'required|string|min:5|max:500',
         ]);
 
+        $body = $this->validatedPlainTextTestimonialBody($request);
+
         $user = User::whereUsername($request->input('username'))->whereNull('status')->firstOrFail();
 
         $configCache = ConfigCache::firstOrCreate([
@@ -407,7 +410,7 @@ trait AdminDirectoryController
         $testimonials->push([
             'profile_id' => (string) $user->profile_id,
             'username' => $request->input('username'),
-            'body' => $request->input('body'),
+            'body' => $body,
         ]);
 
         $configCache->v = json_encode($testimonials->toArray());
@@ -415,7 +418,7 @@ trait AdminDirectoryController
         ConfigCacheService::put('pixelfed.directory.testimonials', $configCache->v);
         $res = [
             'profile' => AccountService::get($user->profile_id),
-            'body' => $request->input('body'),
+            'body' => $body,
         ];
 
         return $res;
@@ -429,7 +432,7 @@ trait AdminDirectoryController
         ]);
 
         $profile_id = $request->input('profile_id');
-        $body = $request->input('body');
+        $body = $this->validatedPlainTextTestimonialBody($request);
         $user = User::whereProfileId($profile_id)->firstOrFail();
 
         $configCache = ConfigCache::firstOrCreate([
@@ -452,5 +455,15 @@ trait AdminDirectoryController
         ConfigCacheService::put('pixelfed.directory.testimonials', $configCache->v);
 
         return $updated;
+    }
+
+    private function validatedPlainTextTestimonialBody(Request $request): string
+    {
+        $body = app(SanitizeService::class)->plainText($request->input('body'));
+        Validator::make(['body' => $body], [
+            'body' => 'required|string|min:5|max:500',
+        ])->validate();
+
+        return $body;
     }
 }

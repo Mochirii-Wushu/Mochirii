@@ -3,7 +3,6 @@ import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   asRecord,
-  asStringArray,
   defaultDisplayName,
   discordAvatarUrl,
   providerSubject,
@@ -16,6 +15,14 @@ import {
   currentMemberAccess,
   discordVerificationNeedsRefresh,
 } from "../_shared/member-access-policy.ts";
+import {
+  discordFetch,
+  discordMemberRoleState,
+  discordRetryAfterSeconds,
+  type DiscordFetchResult,
+} from "../_shared/discord-api.ts";
+import { isDiscordUnknownMemberResponse } from "../_shared/discord-membership-response.ts";
+import { OutboundHttpError } from "../_shared/outbound-http.ts";
 
 type SyncedIdentity = {
   provider: string;
@@ -36,7 +43,6 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const DISCORD_API_BASE = "https://discord.com/api/v10";
 const DISCORD_REQUEST_TIMEOUT_MS = 5_000;
 const EXPECTED_DISCORD_GUILD_ID = "1078630751077142608";
 const EXPECTED_REQUIRED_ROLE_IDS = ["1468659807736299520", "1078630751077142615"];
@@ -295,23 +301,20 @@ export async function updateDiscordProfile(
     return { ok: false, status: 500, message: "Discord verification is not configured yet. Please contact leadership." };
   }
 
-  let discordResponse: Response;
+  let discordResponse: DiscordFetchResult;
   try {
-    discordResponse = await (options.fetchImpl || fetch)(
-      `${DISCORD_API_BASE}/guilds/${encodeURIComponent(EXPECTED_DISCORD_GUILD_ID)}/members/${encodeURIComponent(discordUserId)}`,
+    discordResponse = await discordFetch(
+      `/guilds/${encodeURIComponent(EXPECTED_DISCORD_GUILD_ID)}/members/${encodeURIComponent(discordUserId)}`,
       {
-        headers: {
-          Authorization: `Bot ${botToken}`,
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(
-          options.requestTimeoutMs || DISCORD_REQUEST_TIMEOUT_MS,
-        ),
+        token: botToken,
+        fetcher: options.fetchImpl,
+        timeoutMs: options.requestTimeoutMs || DISCORD_REQUEST_TIMEOUT_MS,
       },
     );
   } catch (error) {
     console.warn("verify-member-access Discord lookup unavailable", {
-      cause: error instanceof DOMException && error.name === "TimeoutError"
+      cause: error instanceof DOMException && error.name === "TimeoutError" ||
+          error instanceof OutboundHttpError && error.code === "request_timeout"
         ? "timeout"
         : "network",
     });
@@ -323,11 +326,11 @@ export async function updateDiscordProfile(
   }
 
   if (discordResponse.status === 429) {
-    const retryAfter = discordResponse.headers.get("retry-after");
+    const retryAfter = discordRetryAfterSeconds(discordResponse.headers);
     return {
       ok: false,
       status: 429,
-      message: retryAfter
+      message: retryAfter !== null
         ? `Discord verification is rate limited. Try again in ${retryAfter} seconds.`
         : "Discord verification is rate limited. Please try again soon.",
     };
@@ -344,7 +347,7 @@ export async function updateDiscordProfile(
     member_status: lockedStatus ? currentStatus : "pending",
   };
 
-  if (discordResponse.status === 404) {
+  if (isDiscordUnknownMemberResponse(discordResponse)) {
     const { error } = await adminClient.from("member_profiles").upsert(
       {
         id: userId,
@@ -368,12 +371,23 @@ export async function updateDiscordProfile(
     return { ok: false, status: discordResponse.status, message: "Discord verification could not be completed. Please try again later." };
   }
 
-  const member = await discordResponse.json() as JsonRecord;
+  const roleState = discordMemberRoleState(
+    discordResponse.data,
+    discordUserId,
+  );
+  if (!roleState) {
+    return {
+      ok: false,
+      status: 502,
+      message: "Discord verification could not be completed. Please try again later.",
+    };
+  }
+  const member = asRecord(discordResponse.data) as JsonRecord;
   const discordUser = asRecord(member.user);
-  const roles = asStringArray(member.roles);
+  const roles = roleState.roles;
   const roleSet = new Set(roles);
   const missingRoleIds = EXPECTED_REQUIRED_ROLE_IDS.filter((roleId) => !roleSet.has(roleId));
-  const pending = member.pending === true;
+  const pending = roleState.pending;
   const hasRequiredRoles = missingRoleIds.length === 0;
   const eligibleStatus = hasRequiredRoles && !pending;
   const nextStatus = lockedStatus ? currentStatus : eligibleStatus ? "active" : "pending";

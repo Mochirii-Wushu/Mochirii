@@ -31,7 +31,8 @@ class CustomEmoji extends Model
                 });
 
                 if ($tag) {
-                    $url = url('/storage/'.$tag->media_path);
+                    $mediaPath = implode('/', array_map('rawurlencode', explode('/', ltrim((string) $tag->media_path, '/'))));
+                    $url = url('/storage/'.$mediaPath);
 
                     if ($activitypub == true) {
                         $mediaType = Str::endsWith($url, '.png') ? 'image/png' : 'image/jpg';

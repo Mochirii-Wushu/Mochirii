@@ -40,6 +40,7 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 [
   '"apple"',
   "label: \"Apple\"",
+  'signInLabel: "Continue with Apple"',
   "approvalRequired: true",
   "automaticVerification: false",
   "six-month rotation cadence",
@@ -48,6 +49,7 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 
 [
   "NEXT_PUBLIC_AUTH_PROVIDER_IDS",
+  "NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS",
   "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS",
 ].forEach((snippet) => assertIncludes("Supabase public config", config, snippet));
 
@@ -61,19 +63,19 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 });
 
 [
-  "placeholderOAuthProviders",
-  "Setup pending",
+  "provider.signInLabel",
   "signInWithProvider",
 ].forEach((snippet) => assertIncludes("AuthPanel", authPanel, snippet));
 
 [
   "linkProviderIdentity",
-  "placeholderOAuthProviders",
-  "Setup pending",
+  "enabledIdentityLinkProviders",
 ].forEach((snippet) => assertIncludes("AccountPanel", accountPanel, snippet));
+assertNotIncludes("AccountPanel Apple linking", accountPanel, "placeholderOAuthProviders");
+assertNotIncludes("AccountPanel Apple linking", accountPanel, "Setup pending");
 
 [
-  'provider === "apple"',
+  "/assets/auth-providers/apple-logo.generated.png",
   "provider-logo--apple",
 ].forEach((snippet) => assertIncludes("Apple provider logo support", `${providerLogo}\n${readAppCss()}`, snippet));
 
@@ -88,6 +90,9 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
   "six-month",
   "C:\\Github Repo's\\Mochirii Website\\Mochi Creds\\Apple",
   "identity evidence only",
+  "NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch",
+  "NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple",
+  "Continue with Apple",
 ].forEach((snippet) => {
   assertIncludes("multi-provider Apple activation docs", multiProviderDoc, snippet);
   assertIncludes("Supabase Apple activation docs", supabaseReadme, snippet);
@@ -97,7 +102,10 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
   "Vercel Release Policy",
   "GitHub repository is currently public",
   "fresh required checks",
-  "npx vercel deploy --prod --yes --token $token",
+  "apps\\web\\node_modules\\.bin\\vercel.cmd",
+  "SetEnvironmentVariable('VERCEL_TOKEN'",
+  "& $vercel deploy --prod --yes",
+  "Remove-Item Env:\\VERCEL_TOKEN",
   "private",
 ].forEach((snippet) => assertIncludes("deployment docs", deploymentDoc, snippet));
 
@@ -117,8 +125,11 @@ assertIncludes("check-all", checkAll, '["check:apple-auth-readiness", ["node", "
 
 if (expectActive) {
   [
-    "| Active | Discord, Google, Twitch, Apple |",
-    "NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple",
+    "| Approved source registry | Apple, Facebook, Google, Discord, Twitch, Spotify |",
+    "| Production-enabled initiation | Discord, Google, Twitch, Apple |",
+    "| Account identity linking | Discord, Google, Twitch, Apple |",
+    "NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch",
+    "NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple",
     "NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=",
     "Apple: active identity evidence",
   ].forEach((snippet) => {

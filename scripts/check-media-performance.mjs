@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
+import { validateWebp } from "./lib/asset-format-validation.mjs";
+import { expectedStaticThumbnailDimensions } from "./lib/gallery-static-thumbnail-contract.mjs";
 
 const root = process.cwd();
 const failures = [];
@@ -30,6 +32,14 @@ function assertIncludes(label, text, snippet) {
   assert(text.includes(snippet), `${label}: expected snippet not found: ${snippet}`);
 }
 
+function cssRuleBody(source, selector) {
+  const start = source.indexOf(`${selector}{`);
+  if (start < 0) return "";
+  const bodyStart = start + selector.length + 1;
+  const end = source.indexOf("}", bodyStart);
+  return end < 0 ? "" : source.slice(bodyStart, end);
+}
+
 function extractStaticImageBlock(source, id) {
   const idIndex = source.indexOf(`id="${id}"`);
   if (idIndex < 0) return "";
@@ -46,7 +56,8 @@ const galleryItems = (Array.isArray(galleryData.albums) ? galleryData.albums : [
 
 assert(galleryItems.length > 0, "apps/web/public/data/gallery.json: expected at least one gallery item.");
 
-const galleryStaticThumbnailMaximumBytes = 300 * 1024;
+const galleryStaticThumbnailMaximumBytes = 80 * 1024;
+const galleryStaticThumbnailMaximumEdge = 640;
 const galleryMemberThumbnailMaximumBytes = 80 * 1024;
 const galleryInitialTransferMaximumBytes = 2 * 1024 * 1024;
 const galleryRenderBatchSize = 24;
@@ -60,6 +71,12 @@ for (const item of galleryItems) {
   assert(thumb.includes("assets/img/gallery/thumbs/"), `${id}: grid thumbnail must use assets/img/gallery/thumbs/.`);
   assert(!full.includes("/thumbs/"), `${id}: full/lightbox image must not use a thumbnail path.`);
   assert(thumb !== full, `${id}: thumbnail and full image paths must be different.`);
+  assert(
+    path.basename(thumb) === path.basename(full),
+    `${id}: thumbnail and full image filenames must match.`,
+  );
+
+  let thumbnailDimensions = null;
 
   if (thumb) {
     const thumbnailPath = path.join("apps/web/public", thumb).split(path.sep).join("/");
@@ -71,11 +88,39 @@ for (const item of galleryItems) {
         thumbnailBytes <= galleryStaticThumbnailMaximumBytes,
         `${id}: thumbnail is ${thumbnailBytes} bytes; maximum is ${galleryStaticThumbnailMaximumBytes}.`,
       );
+      try {
+        const { width, height } = validateWebp(readFileSync(path.join(root, thumbnailPath)));
+        thumbnailDimensions = { width, height };
+        assert(
+          width <= galleryStaticThumbnailMaximumEdge && height <= galleryStaticThumbnailMaximumEdge,
+          `${id}: thumbnail is ${width}x${height}; maximum edge is ${galleryStaticThumbnailMaximumEdge}.`,
+        );
+      } catch (error) {
+        fail(`${id}: thumbnail validation failed: ${error instanceof Error ? error.message : String(error)}.`);
+      }
     }
   }
 
   if (full) {
-    assertFileExists(`${id} full image`, path.join("apps/web/public", full).split(path.sep).join("/"));
+    const fullPath = path.join("apps/web/public", full).split(path.sep).join("/");
+    assertFileExists(`${id} full image`, fullPath);
+    if (thumbnailDimensions && existsSync(path.join(root, fullPath))) {
+      try {
+        const fullDimensions = validateWebp(readFileSync(path.join(root, fullPath)));
+        const expectedDimensions = expectedStaticThumbnailDimensions(
+          fullDimensions.width,
+          fullDimensions.height,
+          galleryStaticThumbnailMaximumEdge,
+        );
+        assert(
+          thumbnailDimensions.width === expectedDimensions.width &&
+          thumbnailDimensions.height === expectedDimensions.height,
+          `${id}: thumbnail must be exactly ${expectedDimensions.width}x${expectedDimensions.height} for its full image.`,
+        );
+      } catch (error) {
+        fail(`${id}: full-image parity validation failed: ${error instanceof Error ? error.message : String(error)}.`);
+      }
+    }
   }
 }
 
@@ -94,10 +139,12 @@ assert(
 );
 
 const galleryBrowser = read("apps/web/components/public-pages/GalleryBrowser.tsx");
+const galleryBrowserState = read("apps/web/lib/gallery/browser-state.ts");
 const homeGalleryLightbox = read("apps/web/components/HomeGalleryLightbox.tsx");
-const homeGalleryLightboxModal = read("apps/web/components/HomeGalleryLightboxModal.tsx");
+const universalImageLightbox = read("apps/web/components/UniversalImageLightbox.tsx");
 const approvedGalleryFeed = read("apps/web/lib/gallery/approved-feed.ts");
 const approvedFunction = read("supabase/functions/list-approved-gallery-submissions/index.ts");
+const approvedPublicHelper = read("supabase/functions/_shared/gallery-public-feed.ts");
 const thumbnailParser = read("supabase/functions/_shared/gallery-thumbnail.ts");
 const thumbnailDecoder = read("supabase/functions/_shared/gallery-webp-decoder.ts");
 const thumbnailValidatorSource = read("supabase/functions/_shared/gallery-webp-validator.c");
@@ -106,48 +153,163 @@ const thumbnailValidatorModulePath = "supabase/functions/_shared/vendor/libwebp/
 const thumbnailValidatorModule = read(thumbnailValidatorModulePath);
 const thumbnailValidatorDigest = read(`${thumbnailValidatorModulePath}.sha256`).trim().split(/\s+/)[0];
 const homePage = read("apps/web/app/page.tsx");
-const routeShell = read("apps/web/components/SiteRouteShell.tsx");
+const ordinaryShell = read("apps/web/components/OrdinarySiteShell.tsx");
 const sharedPublicComponents = read("apps/web/components/public-pages/common.tsx");
 const siteHeader = read("apps/web/components/SiteHeader.tsx");
 const siteFooter = read("apps/web/components/SiteFooter.tsx");
 const spotifyBrowser = read("apps/web/components/public-pages/SpotifyBrowser.tsx");
 const tokenStyles = read("apps/web/app/styles/tokens-base.css");
 const sidePagesGuide = read("docs/side-pages-guide.md");
+const responsiveGalleryMediaPath = "apps/web/components/ResponsiveGalleryMedia.tsx";
+const sharedGalleryMediaStylesPath = "apps/web/app/styles/shell-gallery-media.css";
+const responsiveGalleryMedia = existsSync(path.join(root, responsiveGalleryMediaPath))
+  ? read(responsiveGalleryMediaPath)
+  : "";
+const sharedGalleryMediaStyles = existsSync(path.join(root, sharedGalleryMediaStylesPath))
+  ? read(sharedGalleryMediaStylesPath)
+  : "";
+const homeDoorsStyles = read("apps/web/app/styles/public-home-doors.css");
+const publicGalleryStyles = read("apps/web/app/styles/public-gallery.css");
 
 [
-  "lazy(() =>",
-  'import("@/components/HomeGalleryLightboxModal")',
-  "<HomeGalleryLightboxFallback",
+  "GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES = 512",
+  "export function safeGalleryPublicMediaUrl",
+].forEach((snippet) => assertIncludes("Gallery public media URL contract", approvedPublicHelper, snippet));
+const publicResponseItemMatch = approvedPublicHelper.match(
+  /export function toPublicGalleryItem\([\s\S]*?^\}/m,
+);
+assert(Boolean(publicResponseItemMatch), "Gallery feed v2 public item serializer was not found.");
+if (publicResponseItemMatch) {
+  const responseItem = publicResponseItemMatch[0];
+  assertIncludes(
+    "Gallery feed v2 public item",
+    responseItem,
+    "const safeThumbnailUrl = safeGalleryPublicMediaUrl(thumbnailUrl);",
+  );
+  assertIncludes("Gallery feed v2 public item", responseItem, "thumbnail_url: safeThumbnailUrl,");
+}
+const legacyResponseItemMatch = approvedPublicHelper.match(
+  /export function toLegacyGalleryItem\([\s\S]*?^\}/m,
+);
+assert(Boolean(legacyResponseItemMatch), "Gallery legacy public item serializer was not found.");
+if (legacyResponseItemMatch) {
+  const responseItem = legacyResponseItemMatch[0];
+  assertIncludes(
+    "Gallery legacy public item",
+    responseItem,
+    "const thumbnailUrl = safeGalleryPublicMediaUrl(item.thumbnail_url);",
+  );
+  assertIncludes(
+    "Gallery legacy public item",
+    responseItem,
+    "const safeFullUrl = safeGalleryPublicMediaUrl(fullUrl);",
+  );
+}
+
+[
+  'import { UniversalImageLightbox } from "@/components/UniversalImageLightbox";',
+  "<UniversalImageLightbox",
+  "previewSrc: openItem.image",
+  "fullSrc: openItem.full",
   "{openItem && portalRoot ? (",
   "useBodyScrollLock(openItem !== null && portalRoot !== null);",
-].forEach((snippet) => assertIncludes("Home gallery deferred lightbox", homeGalleryLightbox, snippet));
-assertIncludes("Home gallery immediate loading portal", homeGalleryLightbox, "return createPortal(");
-assert(!homeGalleryLightbox.includes("<Suspense fallback={null}>"), "Home gallery first-open loading state must not be blank.");
+].forEach((snippet) => assertIncludes("Home gallery shared lightbox", homeGalleryLightbox, snippet));
+[
+  "function getStableGallerySpotlightItems(",
+  ".slice(0, gallerySpotlightLimit);",
+  "<HomeGalleryLightbox items={gallerySpotlightItems} />",
+].forEach((snippet) => assertIncludes("Home stable Gallery Spotlight", homePage, snippet));
+assert(!homeGalleryLightbox.includes("lazy("), "Home Gallery must not defer the shared viewer behind a weaker fallback.");
+assert(!homeGalleryLightbox.includes("HomeGalleryLightboxFallback"), "Home Gallery must not maintain a second modal implementation.");
 [
   'import { createPortal } from "react-dom";',
   'role="dialog"',
   'aria-modal="true"',
-  'src={item.full}',
-].forEach((snippet) => assertIncludes("Home gallery deferred modal", homeGalleryLightboxModal, snippet));
-assert(!homeGalleryLightboxModal.includes("useBodyScrollLock("), "Home gallery lazy modal must not replace the parent-owned scroll lock.");
+  "<LightboxImage",
+  "src={item.fullSrc}",
+  "previewSrc={item.previewSrc}",
+].forEach((snippet) => assertIncludes("universal deferred lightbox", universalImageLightbox, snippet));
 
 [
-  "const galleryRenderBatchSize = 24;",
+  "const galleryRenderBatchSize = APPROVED_GALLERY_PAGE_SIZE;",
   "const renderedItems = useMemo(() => visibleItems.slice(0, effectiveRenderLimit)",
   'id="galleryLoadMore"',
-  "<img src={item.thumb} alt={item.alt} width={16} height={10} loading=\"lazy\" decoding=\"async\" />",
-  "src={openItem.full}",
-  "const fullSignedUrl = text(submission.full_signed_url);",
-  "const thumbnailSignedUrl = text(submission.thumbnail_signed_url);",
-  "full: fullSignedUrl,",
-  "thumb: thumbnailSignedUrl,",
-  "fullSignedUrl === thumbnailSignedUrl",
-  "thumbnailSizeBytes > 80 * 1024",
-  "function stableMixOrder(items: NormalizedGalleryItem[], seed: number)",
-  "const randomSeed = useMemo(",
-  "stableMixSeed(",
-  "submission.preview_error",
+  "src: submission.thumbnail_url,",
+  "thumb: submission.thumbnail_url,",
+  "thumbnailWidth: submission.thumbnail_width,",
+  "thumbnailHeight: submission.thumbnail_height,",
+  "submission.categories",
+  "nextCursor",
+  "hasMore",
+  "const randomSeed = useMemo(() => stableGalleryMixSeed(staticItems)",
+  "orderGalleryPresentation({",
 ].forEach((snippet) => assertIncludes("GalleryBrowser media contract", galleryBrowser, snippet));
+[
+  "stableGalleryMixOrder",
+  "stableGalleryMixSeed",
+  "return [...stableGalleryMixOrder(staticItems, randomSeed), ...runtimeItems]",
+].forEach((snippet) => assertIncludes("Gallery stable presentation contract", galleryBrowserState, snippet));
+assert(!galleryBrowser.includes("submission.full_url"), "GalleryBrowser list conversion must not receive an original URL.");
+assert(!galleryBrowser.includes("submission.uploader_display_name"), "GalleryBrowser must not receive member identity attribution.");
+
+assertFileExists("shared Gallery media component", responsiveGalleryMediaPath);
+assertFileExists("shared Gallery media styles", sharedGalleryMediaStylesPath);
+[
+  'import { ResponsiveGalleryMedia } from "@/components/ResponsiveGalleryMedia";',
+  "<ResponsiveGalleryMedia",
+  "src={item.thumb}",
+].forEach((snippet) => assertIncludes("Gallery shared thumbnail media", galleryBrowser, snippet));
+[
+  'import { ResponsiveGalleryMedia } from "@/components/ResponsiveGalleryMedia";',
+  "<ResponsiveGalleryMedia",
+  "src={item.image}",
+].forEach((snippet) => assertIncludes("Home shared thumbnail media", homeGalleryLightbox, snippet));
+[
+  "responsive-gallery-media__image",
+  'loading={loading}',
+  'decoding="async"',
+  'status: "loading"',
+  'status: "ready"',
+  'status: "error"',
+  "Image unavailable",
+  "intrinsicWidth?: number;",
+  "intrinsicHeight?: number;",
+  "width={imageWidth}",
+  "height={imageHeight}",
+].forEach((snippet) => assertIncludes("shared Gallery media component", responsiveGalleryMedia, snippet));
+[
+  "intrinsicWidth={item.thumbnailWidth}",
+  "intrinsicHeight={item.thumbnailHeight}",
+].forEach((snippet) => assertIncludes("Gallery intrinsic thumbnail geometry", galleryBrowser, snippet));
+[
+  ".responsive-gallery-frame{",
+  "aspect-ratio:16 / 10;",
+  ".responsive-gallery-media{",
+  "width:100%;",
+  "height:100%;",
+  ".responsive-gallery-media__image{",
+  "object-fit:cover;",
+  "object-position:center;",
+].forEach((snippet) => assertIncludes("shared Gallery media geometry", sharedGalleryMediaStyles, snippet));
+assertIncludes("Gallery shared frame", galleryBrowser, 'className="gallery-thumb responsive-gallery-frame"');
+assertIncludes("Home shared frame", homeGalleryLightbox, 'className="home-thumb responsive-gallery-frame"');
+for (const [label, rule] of [
+  ["Gallery page frame", cssRuleBody(publicGalleryStyles, ".gallery-thumb")],
+  ["Home page frame", cssRuleBody(homeDoorsStyles, ".home-thumb")],
+]) {
+  assert(rule, `${label}: rule not found.`);
+  for (const property of ["position:", "display:", "width:", "aspect-ratio:", "overflow:", "padding:"]) {
+    assert(!rule.includes(property), `${label}: ${property} must remain owned by the shared frame contract.`);
+  }
+}
+assert(
+  !homeGalleryLightbox.includes('className="home-thumb__img"'),
+  "Home Gallery must not bypass the shared responsive media component.",
+);
+assert(
+  !galleryBrowser.includes('<img src={item.thumb}'),
+  "Gallery must not render the thumbnail outside the shared responsive media component.",
+);
 
 assert(!galleryBrowser.includes("setRandomSeed"), "GalleryBrowser must not reshuffle after first paint.");
 assert(!galleryBrowser.includes("createRandomSeed"), "GalleryBrowser must not use a per-render random seed.");
@@ -157,38 +319,54 @@ assert(!galleryBrowser.includes("storage_path"), "GalleryBrowser must not read r
 assert(!galleryBrowser.includes("storage_bucket"), "GalleryBrowser must not read raw Supabase storage buckets.");
 assertIncludes("approved gallery client", approvedGalleryFeed, "list-approved-gallery-submissions");
 assertIncludes("approved gallery client", approvedGalleryFeed, "method: \"POST\"");
+assertIncludes("approved gallery client", approvedGalleryFeed, 'action: "list"');
+assertIncludes("approved gallery client", approvedGalleryFeed, 'action: "full" | "thumbnail"');
+assertIncludes("approved gallery client", approvedGalleryFeed, 'url.searchParams.set("asset", kind)');
+assertIncludes("approved gallery client", approvedGalleryFeed, 'url.searchParams.set("id", id)');
+assertIncludes("approved gallery client", approvedGalleryFeed, "refreshApprovedGalleryThumbnail");
+assertIncludes("approved gallery full-image loader", approvedGalleryFeed, "loadApprovedGalleryOriginal");
+assertIncludes("approved gallery client", approvedGalleryFeed, "nextCursor");
 
 const approvedTypeMatch = approvedGalleryFeed.match(/export type ApprovedGallerySubmission = \{[\s\S]*?\n\};/);
 assert(Boolean(approvedTypeMatch), "ApprovedGallerySubmission type was not found.");
 if (approvedTypeMatch) {
   const approvedType = approvedTypeMatch[0];
-  assertIncludes("ApprovedGallerySubmission", approvedType, "full_signed_url?: string | null;");
-  assertIncludes("ApprovedGallerySubmission", approvedType, "thumbnail_signed_url?: string | null;");
-  assertIncludes("ApprovedGallerySubmission", approvedType, "thumbnail_size_bytes?: number | null;");
+  assertIncludes("ApprovedGallerySubmission", approvedType, "thumbnail_url: string;");
+  assertIncludes("ApprovedGallerySubmission", approvedType, "thumbnail_size_bytes: number;");
+  assertIncludes("ApprovedGallerySubmission", approvedType, "thumbnail_width: number;");
+  assertIncludes("ApprovedGallerySubmission", approvedType, "thumbnail_height: number;");
+  assert(!approvedType.includes("full_url"), "ApprovedGallerySubmission list DTO must not expose an original URL.");
+  assert(!approvedType.includes("uploader"), "ApprovedGallerySubmission must not expose member identity attribution.");
   assert(!approvedType.includes("storage_path"), "ApprovedGallerySubmission must not expose storage_path.");
   assert(!approvedType.includes("storage_bucket"), "ApprovedGallerySubmission must not expose storage_bucket.");
 }
 
-const responseItemMatch = approvedFunction.match(/const item: JsonRecord = \{[\s\S]*?\n    \};/);
-assert(Boolean(responseItemMatch), "list-approved-gallery-submissions response item was not found.");
-if (responseItemMatch) {
-  const responseItem = responseItemMatch[0];
-  assertIncludes("approved gallery response item", responseItem, "thumbnail_signed_url: thumbnailSignedUrl,");
-  assertIncludes("approved gallery response item", responseItem, "full_signed_url: fullSignedUrl,");
-  assertIncludes("approved gallery response item", responseItem, "thumbnail_size_bytes: thumbnailSizeBytes,");
-  assert(!responseItem.includes("storage_path"), "Approved gallery response item must not expose storage_path.");
-  assert(!responseItem.includes("storage_bucket"), "Approved gallery response item must not expose storage_bucket.");
-}
-
 [
-  'adminClient.rpc(\n    "gallery_publishable_submissions"',
-  "const SIGNING_PATH_BATCH = 40;",
-  "Promise.all(",
-  ".createSignedUrls(paths, SIGNED_URL_SECONDS)",
-  "thumbnailSizeBytes > 80 * 1024",
-  'thumbnailMimeType !== "image/webp"',
-  "if (!thumbnailSignedUrl || !fullSignedUrl)",
-].forEach((snippet) => assertIncludes("approved gallery derivative contract", approvedFunction, snippet));
+  '"gallery_public_feed_page_v2"',
+  '"gallery_reserve_public_media_v2"',
+  'request.action === "full" || request.action === "thumbnail"',
+  'if (req.method !== "GET")',
+  "parseGalleryMediaReservation(mediaData, request.id, request.action)",
+  ".download(storagePath)",
+  "mediaBlob.size !== mediaSize",
+  "await sha256Hex(mediaBytes) !== mediaSha256",
+  '"Cache-Control": "private, max-age=300, stale-while-revalidate=60"',
+].forEach((snippet) => assertIncludes("approved Gallery derivative contract", approvedFunction, snippet));
+[
+  "createSignedUrl(",
+  "createSignedUrls(",
+  "thumbnail_signed_url",
+  "full_signed_url",
+  "uploader_display_name",
+].forEach((snippet) => assert(!approvedFunction.includes(snippet), `Approved Gallery endpoint retained retired capability ${snippet}.`));
+[
+  "thumbnail_width: thumbnailWidth",
+  "thumbnail_height: thumbnailHeight",
+].forEach((snippet) => assertIncludes("approved Gallery public thumbnail DTO", approvedPublicHelper, snippet));
+assert(
+  !approvedFunction.includes('"gallery_publishable_submissions"'),
+  "Approved Gallery endpoint must not retain the fixed-limit v1 database function.",
+);
 
 const generatedValidatorDigest = createHash("sha256").update(thumbnailValidatorModule).digest("hex");
 assert(
@@ -216,7 +394,10 @@ assert(
 [
   'GALLERY_THUMBNAIL_MAX_BYTES = 80 * 1024',
   'GALLERY_THUMBNAIL_MAX_EDGE = 720',
-  'return `_approved/thumbs/${submissionId}/${revisionId}.webp`;',
+  'GALLERY_DISPLAY_MAX_BYTES = 2 * 1024 * 1024',
+  'GALLERY_DISPLAY_MAX_EDGE = 2560',
+  'return `_approved/publications/${publicationId}/display.webp`;',
+  'return `_approved/publications/${publicationId}/revisions/${revisionId}/thumbnail.webp`;',
 ].forEach((snippet) => assertIncludes("gallery thumbnail parser", thumbnailParser, snippet));
 [
   'LIBWEBP_VERSION="1.6.0"',
@@ -241,7 +422,7 @@ assert(homePriorityCount === 1, `Home page should have exactly one priority imag
   "fill",
   'sizes="100vw"',
   'loading="eager"',
-].forEach((snippet) => assertIncludes("responsive global background", routeShell, snippet));
+].forEach((snippet) => assertIncludes("responsive global background", ordinaryShell, snippet));
 assertIncludes("responsive global background styles", tokenStyles, ".bg-photo__image{");
 assertIncludes("responsive global background styles", tokenStyles, "object-fit:cover;");
 assert(!tokenStyles.includes('background:url("/assets/bg/wuxia-bg.webp")'), "Next background must not retain the full-size CSS request.");

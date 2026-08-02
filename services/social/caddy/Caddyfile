@@ -1,8 +1,40 @@
+{
+	servers {
+		trusted_proxies static 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 104.16.0.0/13 104.24.0.0/14 108.162.192.0/18 131.0.72.0/22 141.101.64.0/18 162.158.0.0/15 172.64.0.0/13 173.245.48.0/20 188.114.96.0/20 190.93.240.0/20 197.234.240.0/22 198.41.128.0/17 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		client_ip_headers CF-Connecting-IP X-Forwarded-For
+		trusted_proxies_strict
+	}
+}
+
 social.mochirii.com {
 	encode zstd gzip
+	header -Server
 	request_body {
 		max_size 100MB
 	}
+	@securityTxtNonRead {
+		path /.well-known/security.txt
+		not method GET HEAD
+	}
+	header @securityTxtNonRead Cache-Control "private, no-store"
+	respond @securityTxtNonRead "" 404
+	@securityTxt {
+		path /.well-known/security.txt
+		method GET HEAD
+	}
+	header @securityTxt {
+		Content-Type "text/plain; charset=utf-8"
+		Cache-Control "public, max-age=3600, must-revalidate"
+		X-Content-Type-Options "nosniff"
+	}
+	respond @securityTxt <<SECURITY
+		Contact: https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new
+		Policy: https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy
+		Preferred-Languages: en
+		Canonical: https://social.mochirii.com/.well-known/security.txt
+		Expires: 2027-06-10T00:00:00Z
+
+		SECURITY 200
 	@retiredCreationAndTokenManagement path /installer /installer/* /register* /auth/sign_up* /auth/invite* /auth/pci* /auth/raw/mastodon* /auth/mastodon* /i/app-email-verify* /i/app-email-resend* /api/auth/app-code-verify /api/auth/onboarding /api/v1.1/auth* /oauth/clients* /oauth/personal-access-tokens* /oauth/scopes /oauth/token/refresh* /oauth/tokens* /settings/developers* /settings/applications* /settings/invites*
 	header @retiredCreationAndTokenManagement Cache-Control "private, no-store"
 	respond @retiredCreationAndTokenManagement 404
@@ -10,12 +42,19 @@ social.mochirii.com {
 	header @dependencyReadiness Cache-Control "private, no-store"
 	respond @dependencyReadiness 404
 	@privateMemberStorage {
-		path /storage/m/* /storage/_esm.t3/* /storage/g/* /storage/g1/* /storage/avatars/* /storage/cache/avatars/*
+		path /storage/m /storage/m/* /storage/_esm.t3 /storage/_esm.t3/* /storage/g /storage/g/* /storage/g1 /storage/g1/* /storage/avatars /storage/avatars/* /storage/cache/avatars /storage/cache/avatars/*
 		not path /storage/avatars/default.jpg /storage/avatars/default.png
 	}
-	respond @privateMemberStorage 404
+	header @privateMemberStorage {
+		Cache-Control "private, no-store"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+	respond @privateMemberStorage "" 404
 	reverse_proxy 127.0.0.1:8080 {
+		header_up X-Forwarded-For {client_ip}
 		header_up X-Request-ID {http.request.uuid}
+		header_down -Server
 		header_down X-Request-ID {http.request.uuid}
 	}
 }

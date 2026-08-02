@@ -1,6 +1,6 @@
 # Mochirii Full-Stack Release Evidence
 
-Generated: 2026-07-05T12:11:58.375Z
+Generated: 2026-07-30T06:03:56.200Z
 
 This file is intentionally no-secret. It records release-readiness evidence only and omits raw tokens, service-role keys, webhook URLs, secret digests, private message content, cookies, and raw headers.
 
@@ -8,34 +8,34 @@ This file is intentionally no-secret. It records release-readiness evidence only
 
 - OK: yes
 - Production URL: https://mochirii.com
-- Provider reads: enabled
-- Git branch: main
-- Git head: f1b2b354c9b8
+- Provider reads: disabled
+- Git branch: agent/full-stack-integration-rehearsal-20260729
+- Git head: dcaa33750e81
 - Git dirty entries: 0
 
 ## Local Release Surface
 
 - Required scripts present: 20/20
-- Required files present: 10/10
+- Required files present: 12/12
 - CI whitespace gate: git diff --check BASE_SHA..HEAD_SHA
 
 ## Vercel
 
-- Status: checked
-- Production state: READY
-- Production aliases: mochirii.com, mochirii.vercel.app, www.mochirii.com, mochirii-mochirii.vercel.app, mochirii-git-main-mochirii.vercel.app
-- Production env names: MOCHI_PETS_ALPHA_ACCESS_MODE, MOCHI_PETS_TESTER_PASSWORD, NEXT_PUBLIC_AUTH_PROVIDER_IDS, NEXT_PUBLIC_MOCHI_PETS_URL, NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SUPABASE_URL, POSTGRES_DATABASE, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PRISMA_URL, POSTGRES_URL, POSTGRES_URL_NON_POOLING, POSTGRES_USER, SUPABASE_ANON_KEY, SUPABASE_JWT_SECRET, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
-- Preview env names: MOCHI_SOCIAL_TESTER_PASSWORD_SHA256, NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, NEXT_PUBLIC_SUPABASE_URL
+- Status: skipped
+- Production state: not checked
+- Production aliases: not checked
+- Production env names: not checked
+- Preview env names: not checked
 
 ## Supabase
 
-- Status: skipped
-- CLI version: 2.108.0
-- Local migrations: 23
+- Status: local-only
+- CLI version: 2.109.1
+- Local migrations: 50
 - Remote migrations: not checked
 - Migration local-only: none/not checked
 - Migration remote-only: none/not checked
-- Local function config count: 30
+- Local function config count: 46
 - Remote function count: not checked
 - Inactive remote functions: none/not checked
 - Secrets: not read by this no-secret evidence command
@@ -48,21 +48,14 @@ This file is intentionally no-secret. It records release-readiness evidence only
 - ModMail audit command: /audit-modmail
 - Gateway direct permission mutation expected here: no
 
-## Mochi Pets, Fly, And Enjin
-
-- Mochi Pets preview report present: no
-- Mochi Pets hosted checks allowed in last report: no/not checked
-- Fly deployment requires separate approval: yes
-- Enjin preview-only expected: yes
-- Enjin funded-chain actions authorized: no
-
 ## Warnings
 
 - None
 
 ## Skipped
 
-- supabase linked migration list failed
+- provider reads disabled
+- supabase provider reads disabled
 
 ## Failures
 

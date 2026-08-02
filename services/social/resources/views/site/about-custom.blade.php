@@ -11,7 +11,7 @@
 	<div class="container d-flex justify-content-center">
 		<div class="card mr-3" style="width:800px;margin-top:-30px;">
 			<div class="card-body">
-				{!! $page->content !!}
+				{!! app(\App\Services\SanitizeService::class)->richText($page->content ?? '') !!}
 			</div>
 		</div>
 		<div style="width:300px;margin-top:-30px;text-align: center;">

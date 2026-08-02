@@ -9,8 +9,8 @@ This no-secret ledger freezes the current release baseline for bringing Mochirii
 - Current Vercel production deployment: `mochirii-gywsxob6w-mochirii.vercel.app`, status `Ready`.
 - Production aliases: `https://mochirii.com`, `https://www.mochirii.com`, `https://mochirii.vercel.app`.
 - DNS readback: apex resolves to Vercel A records; `www.mochirii.com` is a CNAME to Vercel DNS.
-- Primary checkout warning: `C:\Users\xtyty\Documents\Mochirii` is dirty and behind on `codex/reaper-modmail-audit`; do not use it as the release base.
-- Clean release base used for this ledger: `C:\Users\xtyty\Documents\Mochirii-twills-avatar`.
+- Primary checkout warning: the Website checkout is dirty and behind on `codex/reaper-modmail-audit`; do not use it as the release base.
+- Clean release base used for this ledger: the `Mochirii-twills-avatar` worktree.
 
 ## Provider Readback
 

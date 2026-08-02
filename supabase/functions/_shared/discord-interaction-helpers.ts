@@ -1,3 +1,8 @@
+import {
+  fetchWithTimeout,
+  readBoundedResponseBytes,
+} from "./outbound-http.ts";
+
 export type JsonRecord = Record<string, unknown>;
 
 const EPHEMERAL_FLAG = 1 << 6;
@@ -11,6 +16,8 @@ const OPTION_TYPE_BOOLEAN = 5;
 const OPTION_TYPE_ATTACHMENT = 11;
 const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const DISCORD_API_BASE_URL = "https://discord.com/api/v10";
+const DISCORD_INTERACTION_EDIT_TIMEOUT_MS = 10_000;
+const DISCORD_INTERACTION_EDIT_MAX_RESPONSE_BYTES = 64 * 1024;
 
 export function jsonResponse(body: JsonRecord, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -83,14 +90,29 @@ export async function editOriginalInteractionPayload(
   interactionToken: string,
   payload: JsonRecord,
 ): Promise<void> {
-  const endpoint = `${DISCORD_API_BASE_URL}/webhooks/${applicationId}/${interactionToken}/messages/@original`;
-  const response = await fetch(endpoint, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const endpoint = `${DISCORD_API_BASE_URL}/webhooks/${
+    encodeURIComponent(applicationId)
+  }/${encodeURIComponent(interactionToken)}/messages/@original`;
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(
+      endpoint,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+      { timeoutMs: DISCORD_INTERACTION_EDIT_TIMEOUT_MS },
+    );
+    await readBoundedResponseBytes(
+      response,
+      DISCORD_INTERACTION_EDIT_MAX_RESPONSE_BYTES,
+    );
+  } catch {
+    throw new Error("Discord interaction response edit failed.");
+  }
 
   if (!response.ok) {
     console.error("reaper-discord-interactions original response edit failed", {

@@ -86,6 +86,36 @@ Analytics and Core Web Vitals data can take a few minutes, and enough real produ
 
 The account, OAuth consent, and leader-dashboard clients also record a local User Timing measure when Supabase Auth emits the initial session event and on later auth-state loads. The components do not start a second eager load before that event. Measure names contain only the fixed route, `load` phase, completion state, and one of five bounded duration buckets. The helper sends no network request, has no production collector, and records no member identifier; developers inspect it manually in browser performance tooling before changing those authenticated routes.
 
+Supabase Auth uses cookie-based PKCE through `@supabase/ssr`. The allowlisted
+`/auth/callback` exchanges OAuth codes server-side, and Proxy refreshes sessions
+only for `/raffle/claim` and `/leader-dashboard/raffle`. Both private routes
+authorize again in their request-scoped data-access boundary, return no-store
+and noindex responses, and render no claim or administration controls while the
+raffle foundation is disabled. `/raffle` remains cacheable and uses its existing
+lazy authenticated APIs; it does not enter the cookie-refresh matcher.
+
+The first cookie release retires bounded legacy browser sessions only when an
+auth client is needed. An ordinary signed-out public page performs no cutover
+auth request and never redirects because stale browser storage exists. Old
+in-flight implicit/PKCE results are stripped from reviewed auth destinations.
+A valid legacy session is handed once to the cookie client; malformed or failed
+handoffs delete the token, verifier, and user cache and require a fresh sign-in
+on the next authenticated surface. Rollback to the prior browser-storage build
+can therefore require members to sign in again; it never restores retired token
+material.
+
+Before merging this boundary, run `npm run smoke:raffle-auth-preview` against
+the exact protected Preview with a one-use JSON fixture stored only under the
+ignored `.artifacts/operations` boundary. Set
+`MOCHIRII_RAFFLE_PREVIEW_BASE_URL` to the HTTPS Preview origin and
+`MOCHIRII_RAFFLE_PREVIEW_AUTH_FIXTURE` to an absolute file containing only
+`callbackUrl` and `cookieHeader`. The input must be a fresh `/auth/callback`
+for `/raffle/claim`, its PKCE verifier cookie, and no existing auth-session
+cookie. The smoke records no URL, code, cookie, or member data; it requires the
+callback to set the cookie session and the same session to pass the freshly
+verified protected claim boundary. Delete the private one-use fixture after the
+run. Never place it in source, CI logs, PR text, or durable documentation.
+
 Essential Account and leader-dashboard access reads run together. Optional submission,
 Gallery, Instagram, and Social status reads settle afterward; the moderator spinner card
 renders before its independent moderation queues complete. The live-spinner proxy
@@ -113,38 +143,52 @@ Phase 3 member workflows use only browser-safe public Supabase values in the Nex
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch
+NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple
 ```
 
 Do not print or commit secret values. Do not add service-role keys, Discord bot tokens, Instagram access tokens, OAuth client secrets, or other privileged credentials to browser code. Privileged verification, moderation, Instagram publishing, signed preview URLs, and audit behavior stay inside Supabase Edge Functions.
 
-## Migrated Routes
+Supabase Auth remains the sole OAuth broker. The six-provider source registry,
+runtime sign-in allowlist, and Account
+identity-link list are intentionally independent: source can stage a reviewed
+sign-in option without automatically exposing one-click account linking.
+Discord, Google, Twitch, and Apple are the current production-enabled
+initiation lanes; initiation redirects alone do not prove full sign-in.
+Facebook and Spotify stay production-disabled until their provider
+configuration, full callback evidence, app review where required, and
+provider-specific brand approval are complete. Kakao and Phone remain outside
+the approved six-provider sign-in presentation.
 
-Current Next routes:
+Only after Facebook and Spotify pass those gates should the runtime allowlist
+be extended to `apple,facebook,google,discord,twitch,spotify`; until then their
+buttons remain absent rather than failing after user activation.
 
-- `/`
-- `/join`
-- `/ranks`
-- `/leaders`
-- `/tome`
-- `/events`
-- `/announcements`
-- `/raffle`
-- `/raffle/rules`
-- `/gallery`
-- `/spotlight`
-- `/spotify`
-- `/recruitment`
-- `/twills`
-- `/auth`
-- `/account`
-- `/social`
-- `/oauth/consent`
-- `/gallery-submit`
-- `/leader-dashboard`
-- `/games/mochi-pets`
-- `/spinner` (private, dynamic, and excluded from the ordinary site shell)
+The six exact labels are `Continue with Apple`, `Continue with Facebook`,
+`Continue with Google`, `Sign in with Discord`, `Log in with Twitch`, and
+`Log in with Spotify`. Their official marks are served locally from
+`public/assets/auth-providers`; that directory's `README.md` records official
+sources and checksums and excludes the marks from the Mochirii project license.
+Do not fetch marks from provider CDNs at runtime or add a provider SDK that
+bypasses Supabase.
 
-Legacy `.html` redirects for migrated pages are configured in `next.config.ts`.
+## App Router Contract
+
+`config/app-route-matrix.v1.json` is the versioned, public-safe inventory of
+every App Router page, route handler, explicit handler method, route surface,
+production document smoke, and legacy redirect. It contains no credentials,
+request payloads, provider identifiers, or private evidence.
+
+Run `npm run check:app-route-inventory` from the repository root after adding,
+removing, or moving an `app/**/page.*` or `app/**/route.*` file. The check
+derives the implemented inventory from the filesystem, fails on undocumented
+or stale entries and handler-method drift, and requires the redirect matrix to
+match `next.config.ts`. `npm run test:app-route-inventory` covers the fail-closed
+discovery and redirect parser. Browser, accessibility, observability, client-
+bundle, and production-smoke route classification all consume this same matrix;
+their keyed overrides contain behavior assertions only. Legacy redirects such as
+`/tome.html` and `/social.html` come from the same contract. Retired
+`/raffle/rules` paths are intentionally absent and must remain not found.
 
 ## Mochi Pets Tester Doorway
 
@@ -196,7 +240,8 @@ Visual-only shell releases should verify Home and all shared routes at `360`, `3
 
 - Public/static routes migrated into App Router pages:
   `/join`, `/ranks`, `/leaders`, `/tome`, `/events`, `/announcements`,
-  `/raffle`, `/raffle/rules`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
+  `/raffle`, `/gallery`, `/spotlight`, `/spotify`, `/recruitment`, and `/twills`.
+- `/raffle` is the sole canonical raffle page; retired rule URLs no longer exist.
 - Route content continues to render from the copied JSON files in `public/data/`.
 - Public client-side interactions migrated where needed: gallery filters/query links/lightbox, event filters, and Spotify filtering.
 - Legacy `.html` redirects for migrated pages are verified in `next.config.ts`.
@@ -226,7 +271,7 @@ vercel build --prod --cwd apps/web
 - Member workflow React components added under `components/member-workflow/`.
 - The header now shows member workflow links based on browser auth state, while protected pages still enforce access themselves.
 - Root GitHub Pages auth/member/upload/moderation files remain untouched as rollback/reference material.
-- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram queue migration and Supabase Edge Functions are deployed in production. The private Reaper source repo now exists at `Mochirii-Wushu/Reaper`; direct Meta API secrets and any real Instagram API post remain external owner-approved steps. Current Instagram launch mode is moderator-controlled manual sharing from the Leader Dashboard.
+- Vercel settings, Discord settings, dashboard settings, and DNS remain unchanged by the Next UI. The Instagram queue migration and Supabase Edge Functions are deployed in production. The private Reaper source repo is `Mochirii-Wushu/Reaper-Discord-Bot`; direct Meta API secrets and any real Instagram API post remain external owner-approved steps. Current Instagram launch mode is moderator-controlled manual sharing from the Leader Dashboard.
 
 What stays in Supabase:
 
@@ -308,7 +353,7 @@ restorable historical artifact, not a live hosting or authentication fallback.
 
 ## Accepted or Deferred Warnings
 
-- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. It is preserved exactly as-is because audio quality is preferred over file-size optimization. This is not a Vercel blocker. Do not compress, re-encode, replace, delete, externalize, or otherwise optimize this audio without explicit user approval.
+- `assets/audio/mochiriiiiii.mp3` is intentionally over the static asset warning threshold. Its audio packets are preserved because audio quality is preferred over file-size optimization; public user tags are stripped and validated. This is not a Vercel blocker. Do not compress, re-encode, replace, delete, externalize, or otherwise optimize this audio without explicit user approval.
 - A local `vercel build --prod` can warn if `.next` exists. Run `npm run vercel:build:local` to clean local generated output first.
 - The previous local `outputFileTracingRoot` / `turbopack.root` mismatch is fixed by matching `turbopack.root` to the `apps/web` project root used by `vercel build --prod --cwd apps/web`.
 - Vercel Development env is intentionally skipped for now. Production and Preview envs are what matter for current deployed and PR-preview builds.

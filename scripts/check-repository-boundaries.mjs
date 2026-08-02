@@ -34,10 +34,20 @@ const infrastructureNames = [
 const generatedArchivePattern = /\.(?:7z|bak|bundle|dump|gz|rar|tar|tgz|zip)$/i;
 const databaseArtifactPattern = /\.(?:sql|sqlite|sqlite3)$/i;
 const reviewedDatabaseTestPaths = new Set([
+  "supabase/tests/discord_gallery_ingest_hmac_test.sql",
+  "supabase/tests/event_social_publication_scheduler_test.sql",
+  "supabase/tests/facebook_page_gallery_publishing_test.sql",
+  "supabase/tests/instagram_gallery_publishing_hardening_test.sql",
   "supabase/tests/member_social_links_test.sql",
+  "supabase/tests/raffle_backend_test.sql",
+  "supabase/tests/social_gallery_derivative_test.sql",
   "supabase/tests/fixtures/reviewed_sya_spinner_classification.sql",
   "supabase/operations/validate_gallery_submission_thumbnails.sql",
+  "supabase/operations/validate_gallery_submission_categories.sql",
+  "supabase/operations/reconcile_gallery_public_feed_v2.sql",
   "supabase/operations/validate_reviewed_sya_spinner_classification.sql",
+  "supabase/tests/gallery_public_feed_v2_test.sql",
+  "supabase/tests/gallery_social_consent_withdrawal_test.sql",
   "supabase/tests/gallery_submission_thumbnails_test.sql",
   "supabase/tests/private_live_spinner_test.sql",
   "supabase/tests/spinner_media_jobs_test.sql",
@@ -53,10 +63,18 @@ const allowedEnvFiles = new Set([
   "services/social/.env.example",
   "services/social/.env.docker.example",
   "services/social/.env.testing",
+  "services/reward-relay/.env.example",
 ]);
 const textExtensions = new Set([
-  ".css", ".html", ".js", ".json", ".jsx", ".liquid", ".md", ".mjs",
-  ".php", ".scss", ".svg", ".ts", ".tsx", ".txt", ".xml", ".yaml", ".yml",
+  ".asmdef", ".bash", ".c", ".conf", ".cs", ".css", ".gradle", ".graphql", ".h",
+  ".html", ".ini", ".js", ".json", ".jsx", ".kt", ".kts", ".liquid", ".lock",
+  ".md", ".mjs", ".php", ".plist", ".ps1", ".py", ".rb", ".scss", ".sh", ".sql",
+  ".svg", ".swift", ".toml", ".ts", ".tsx", ".txt", ".vue", ".xml", ".yaml", ".yml",
+]);
+const textBasenames = new Set([
+  ".dockerignore", ".editorconfig", ".gitattributes", ".gitignore", ".npmrc",
+  "AGENTS.md", "Caddyfile", "CODEOWNERS", "CNAME", "Dockerfile", "Gemfile",
+  "Makefile", "Procfile", "Rakefile",
 ]);
 const highConfidenceSecretPatterns = [
   { label: "private key material", pattern: /-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/ },
@@ -75,6 +93,31 @@ const renderedRoots = [
   "services/social/resources/lang/",
   "services/social/resources/views/",
 ];
+const formerWebsiteRepository = ["Mochirii-Wushu", "Mochirii"].join("/");
+const formerWebsiteRepositoryPattern = new RegExp(
+  `${formerWebsiteRepository.replaceAll("/", "\\/")}(?![-A-Za-z0-9_])`,
+  "i",
+);
+const formerWebsiteRepositoryAllowedRoots = [
+  "docs/operations/evidence/",
+  "docs/operations/history/",
+  "reports/",
+];
+const formerWebsiteRepositoryAllowedFiles = new Set([
+  "apps/shopify-theme/MIGRATION-MANIFEST.json",
+  "apps/shopify-theme/content/approved-customer-copy.json",
+]);
+const formerWebsiteRepositoryCompatibilityLines = new Map([
+  ["services/social/scripts/production-runtime-lib.sh", new Map([
+    [`legacy_repository = "${formerWebsiteRepository}"`, 1],
+  ])],
+  ["services/social/scripts/test-private-media-bootstrap-runtime.sh", new Map([
+    [`"repository=${formerWebsiteRepository}\\n"`, 1],
+    [`'s#repository=${formerWebsiteRepository}-Website#repository=${formerWebsiteRepository}#' \\`, 1],
+    [`'s#repository=${formerWebsiteRepository}#repository=${formerWebsiteRepository}-Website#' \\`, 1],
+    [`'s#repository=${formerWebsiteRepository}#repository=Mochirii-Wushu/Unknown#' \\`, 1],
+  ])],
+]);
 const failures = [];
 
 function git(args, options = {}) {
@@ -99,7 +142,7 @@ function listTrackedAndPendingFiles() {
 function isTextCandidate(relativePath, size) {
   if (size > 5 * mib) return false;
   return textExtensions.has(path.extname(relativePath).toLowerCase()) ||
-    ["AGENTS.md", "CODEOWNERS", "CNAME", "Dockerfile"].includes(path.basename(relativePath));
+    textBasenames.has(path.basename(relativePath));
 }
 
 function scanReachableHistory() {
@@ -141,6 +184,33 @@ function renderedTextContainsProvider(relativePath, content) {
     }
   }
   return findings;
+}
+
+function normalizedRepositoryReferences(content) {
+  return content
+    .replaceAll("\\/", "/")
+    .replaceAll(/%252f/gi, "/")
+    .replaceAll(/%2f/gi, "/");
+}
+
+function stripReviewedRepositoryCompatibilityLines(relativePath, content) {
+  const expectedLines = formerWebsiteRepositoryCompatibilityLines.get(relativePath);
+  if (!expectedLines) return content;
+
+  const observed = new Map([...expectedLines.keys()].map((line) => [line, 0]));
+  const filteredLines = content.split(/\r?\n/).map((line) => {
+    const trimmed = line.trim();
+    if (!expectedLines.has(trimmed)) return line;
+    observed.set(trimmed, (observed.get(trimmed) || 0) + 1);
+    return "";
+  });
+  for (const [line, expectedCount] of expectedLines) {
+    const observedCount = observed.get(line) || 0;
+    if (observedCount !== expectedCount) {
+      failures.push(`${relativePath}: reviewed legacy compatibility line count changed (${observedCount}/${expectedCount})`);
+    }
+  }
+  return filteredLines.join("\n");
 }
 
 if (!existsSync(path.join(repoRoot, ".git"))) {
@@ -191,6 +261,17 @@ for (const relativePath of files) {
 
   if (!isTextCandidate(normalizedPath, stats.size)) continue;
   const content = readFileSync(absolutePath, "utf8");
+
+  const mayPreserveFormerWebsiteRepository = formerWebsiteRepositoryAllowedRoots
+    .some((root) => normalizedPath.startsWith(root)) ||
+    formerWebsiteRepositoryAllowedFiles.has(normalizedPath);
+  const repositoryReferenceContent = stripReviewedRepositoryCompatibilityLines(normalizedPath, content);
+  if (
+    !mayPreserveFormerWebsiteRepository &&
+    formerWebsiteRepositoryPattern.test(normalizedRepositoryReferences(repositoryReferenceContent))
+  ) {
+    failures.push(`${normalizedPath}: contains the former Website repository slug`);
+  }
 
   for (const rule of formerTokens) {
     if (normalized(normalizedPath).includes(rule.value) || normalized(content).includes(rule.value)) {

@@ -1,5 +1,5 @@
 /* =========================================================
-   LISTS â€” Bullet-dot list layout used across pages
+   LISTS — Bullet-dot list layout used across pages
    ========================================================= */
 .list-stack{
   list-style:none;
@@ -26,6 +26,6 @@
 }
 
 /* =========================================================
-   SPOTLIGHT â€” Shared hero intro width
+   SPOTLIGHT — Shared hero intro width
    ========================================================= */
 .hero-intro{max-width:72ch;}

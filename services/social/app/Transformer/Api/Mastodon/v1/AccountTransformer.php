@@ -3,6 +3,7 @@
 namespace App\Transformer\Api\Mastodon\v1;
 
 use App\Profile;
+use App\Services\SanitizeService;
 use League\Fractal;
 
 class AccountTransformer extends Fractal\TransformerAbstract
@@ -16,11 +17,11 @@ class AccountTransformer extends Fractal\TransformerAbstract
             'id' => (string) $profile->id,
             'username' => $username,
             'acct' => $username,
-            'display_name' => $profile->name,
+            'display_name' => app(SanitizeService::class)->plainText($profile->name),
             'locked' => (bool) $profile->is_private,
             'bot' => false,
             'created_at' => $profile->created_at->toJSON(),
-            'note' => $profile->bio ?? '',
+            'note' => app(SanitizeService::class)->richText($profile->bio ?? ''),
             'url' => $profile->url(),
             'avatar' => $profile->avatarUrl(),
             'avatar_static' => $profile->avatarUrl(),

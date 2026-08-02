@@ -4,6 +4,7 @@ namespace App\Transformer\Api\Mastodon\v1;
 
 use App\Services\MediaService;
 use App\Services\ProfileService;
+use App\Services\SanitizeService;
 use App\Services\StatusHashtagService;
 use App\Status;
 use App\Util\Lexer\Autolink;
@@ -13,7 +14,7 @@ class StatusTransformer extends Fractal\TransformerAbstract
 {
     public function transform(Status $status)
     {
-        $content = $status->caption ? nl2br(Autolink::create()->autolink($status->caption)) : '';
+        $content = $status->caption ? app(SanitizeService::class)->richText(nl2br(Autolink::create()->autolink($status->caption))) : '';
 
         return [
             'id' => (string) $status->id,

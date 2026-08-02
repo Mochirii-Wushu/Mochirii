@@ -40,7 +40,7 @@ Renderer notes:
 - `apps/web/app/page.tsx` imports `home.json`, `gallery.json`, and `guild-schedule.json` at build time and renders the canonical `/` route.
 - Monthly gathering and raffle dates come from `guild-schedule.json` when a bulletin has `scheduleId`.
 - `SpotlightWinnerTitle` may replace the configured fallback title with the finalized monthly Discord poll winner name from `get-current-spotlight-winner`; the path is name-only and must not expose Discord handles, profile links, avatars, vote counts, or candidate lists.
-- `HomeGallerySpotlight` and `HomeGalleryLightboxModal` own Screenshot Spotlight selection and dialog behavior.
+- The Home server route selects exactly four stable Screenshot Spotlight items, and `HomeGalleryLightbox` opens them through the same shared viewer used by `/gallery`.
 - Home descriptor strings render as paragraphs, badges render as plain spans, and bulletin dates use the UTC formatter in `page.tsx`.
 - Door, bulletin, spotlight, and gallery media render from controlled data fields through owned image components or elements.
 - Inline HTML and Markdown are not supported in Home JSON copy.
@@ -63,6 +63,7 @@ The header and footer brand blocks match: the prominent `Mōchirīī` guild name
 Current desktop navigation:
 
 - Guild: Home, Spotlight, Gallery, Social, Mochi Pets.
+- The Guild dropdown also contains the three canonical official profile links from `apps/web/config/public-urls.json`: Facebook, Instagram, and TikTok.
 - Culture: Join, Ranks, Leaders, Tome, Playlists.
 - Updates: Announcements, Events, Raffle.
 - Recruitment as a top-level link.
@@ -76,6 +77,7 @@ Current mobile navigation:
 - Close button, scrim click, and mobile link click close the menu.
 - Closing by Escape or close button returns focus to the trigger.
 - Tab is trapped inside the open menu.
+- The dedicated Official profiles group reuses the same canonical Facebook, Instagram, and TikTok data as desktop.
 
 Current dropdown behavior:
 
@@ -102,10 +104,13 @@ Current footer content:
 - Discord Join CTA with `target="_blank"` and `rel="noopener noreferrer"`.
 - Recruitment Tips link.
 - Guild, Culture, and Updates navigation columns.
+- Official profiles render from the shared canonical profile collection. Facebook, Instagram, and TikTok appear in both header and footer; the Facebook Group and Twitch remain footer-only destinations.
 - Copyright year rendered by the Footer component.
 - Footer metadata line with the game name.
 
 Keep the footer compact. It should remain a shared navigation and identity surface, not a full mission statement or duplicate Recruitment/Join content.
+
+Official profiles are direct HTTPS links, not embeds. Keep provider URLs out of components, never add social widgets or SDKs, and do not load provider assets or requests before a visitor activates a link. General-purpose provider marks belong only under `apps/web/public/assets/social-profiles` and must satisfy that directory's provenance and permission contract; authentication-provider marks are not reusable.
 
 ## 6. App Router Ownership
 
@@ -144,6 +149,7 @@ Current conventions:
 - Open Graph tags for type, locale `en_SG`, site name, title, description, URL, and image.
 - Twitter summary-large-image tags for title, description, and image.
 - A home-only JSON-LD graph containing `WebSite` and `Organization`, with canonical IDs, `en-SG`, Asia Pacific service area, and only verified identity links.
+- The `Organization.sameAs` list is derived from the same canonical official-profile collection; community-only destinations such as the Facebook Group are excluded.
 - Favicon and Apple touch icon references.
 - Home hero preload.
 
@@ -156,7 +162,7 @@ Home image behavior:
 - Hero image: `./assets/img/hero/hero.webp`
 - Background image: `./assets/bg/wuxia-bg.webp`
 - Seal image: `./assets/img/brand/emblem.webp`
-- Bulletin, door, and spotlight images render from `apps/web/public/data/home.json`; Home Gallery candidates come from `apps/web/public/data/gallery.json`, with `home.json` gallery entries retained only as fallback.
+- Bulletin, door, and spotlight images render from `apps/web/public/data/home.json`; Home Gallery candidates come from `apps/web/public/data/gallery.json`, with `home.json` gallery entries retained only as fallback. The server selects one stable, deduplicated set of four so hydration never reorders visible images.
 - Home gallery thumbnails should use thumbnail paths where intended, and `full` should point to the full image used by the lightbox.
 - Home Screenshot Spotlight uses the same fluid, proportional lightbox geometry as `/gallery`; shared sizing belongs in `apps/web/app/styles/shell-lightbox.css`, not Home- or Gallery-only CSS.
 
@@ -217,6 +223,8 @@ Run these checks before opening or merging Home/Shell work:
 
 ```sh
 npm run check
+npm run check:official-guild-profiles
+npm run smoke:official-guild-profiles
 git diff --check
 node scripts/check-json.mjs
 node scripts/check-js.mjs
@@ -249,6 +257,7 @@ responsive contract on that production-mode Next app at `127.0.0.1:8765`.
 - The lightbox passes mobile portrait/landscape, tablet, desktop, reflow, long-caption, keyboard, and touch checks without horizontal overflow.
 - Seal poem renders unchanged.
 - Key links resolve.
+- The exact Facebook, Instagram, and TikTok profiles appear in the desktop Guild dropdown, mobile Official profiles group, and footer without provider requests before activation.
 - Mobile widths `360px`, `390px`, and `768px` have no horizontal overflow.
 - No console-breaking errors occur.
 - Supabase page shell does not cause signed-out runtime errors.

@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { SUPABASE_PROJECT_REF } from "./lib/public-urls.mjs";
+import { findSecretEnvironmentAssignments } from "./lib/supabase-secret-assignment-scanner.mjs";
 
 const root = process.cwd();
 const allowedEnvFiles = new Set([
@@ -10,6 +11,7 @@ const allowedEnvFiles = new Set([
   "services/social/.env.docker.example",
   "services/social/.env.example",
   "services/social/.env.testing",
+  "services/reward-relay/.env.example",
   "supabase/functions/.env.example",
 ]);
 const expectedProjectRef = SUPABASE_PROJECT_REF;
@@ -52,8 +54,21 @@ const strongSecretPatterns = [
   },
 ];
 
-const secretAssignmentPattern =
-  /\b([A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|SERVICE_ROLE_KEY|DATABASE_URL|CLIENT_SECRET|WEBHOOK)[A-Z0-9_]*)\s*=\s*([^`'"\s)]*)/g;
+const reviewedPlaceholderAssignments = new Set([
+  "services/social/.env.example\0DB_PASSWORD\0pixelfed",
+  "services/social/.env.docker.example\0DB_PASSWORD\0change_this_secure_password",
+  "services/social/.env.docker.example\0DB_ROOT_PASSWORD\0change_this_root_password",
+  "services/social/scripts/check-clean-database-migrations.sh\0DB_PASSWORD\0ci-database-password",
+  "services/social/scripts/check-clean-database-migrations.sh\0DB_ROOT_PASSWORD\0ci-root-password",
+]);
+
+// These names describe public, compile-time validation ceilings rather than
+// credentials. Keep this list exact so a broadly named TOKEN variable cannot
+// bypass the committed-secret scanner.
+const nonSecretAssignmentNames = new Set([
+  "MAX_TOKEN_BYTES",
+  "MAX_TOKEN_LIFETIME_SECONDS",
+]);
 
 const failures = [];
 const warnings = [];
@@ -78,7 +93,7 @@ function readText(file) {
 }
 
 function isTextFile(file) {
-  return /\.(?:css|html|js|json|md|mjs|npmrc|sql|toml|ts|txt|yml|yaml)$/i.test(file) || file === ".gitignore" || file.endsWith(".example");
+  return /\.(?:bash|bat|cmd|css|html|js|json|md|mjs|npmrc|ps1|sh|sql|toml|ts|txt|yml|yaml|zsh)$/i.test(file) || file === ".gitignore" || file.endsWith(".example");
 }
 
 function isBrowserFile(file) {
@@ -95,11 +110,31 @@ function isPlaceholderValue(rawValue) {
   if (/^(?:true|false|null|undefined)$/i.test(value)) return true;
   if (/^(?:example|placeholder|redacted)$/i.test(value)) return true;
   if (/^%[a-z](?:\\n)?$/i.test(value)) return true;
+  if (/^(?:\$[A-Z_][A-Z0-9_]*|\$\{[A-Z_][A-Z0-9_]*\}|\$env:[A-Z_][A-Z0-9_]*|%[A-Z_][A-Z0-9_]*%|![A-Z_][A-Z0-9_]*!)$/i.test(value)) return true;
   if (/^[<[{]/.test(value)) return true;
   if (/^(?:<.*>|\[.*\])$/.test(value)) return true;
   if (/PASTE|REPLACE|SET_MANUALLY|set manually|never commit|\.\.\./i.test(value)) return true;
   if (/[|*]/.test(value)) return true;
   return false;
+}
+
+function normalizedAssignmentValue(rawValue) {
+  const value = String(rawValue || "").trim();
+  if (value.length >= 2) {
+    const quote = value[0];
+    if ((quote === '"' || quote === "'" || quote === "`") && value.at(-1) === quote) {
+      return value.slice(1, -1).trim();
+    }
+  }
+  return value;
+}
+
+function isCredentialAssignmentKey(key) {
+  return !/(?:^|_)AUTH_METHOD$/i.test(key);
+}
+
+function isReviewedPlaceholderAssignment(file, key, value) {
+  return reviewedPlaceholderAssignments.has(`${file}\0${key}\0${value}`);
 }
 
 function maskValue(value) {
@@ -167,11 +202,12 @@ function checkTextFile(file, text) {
       });
     });
 
-    secretAssignmentPattern.lastIndex = 0;
-    for (const match of line.matchAll(secretAssignmentPattern)) {
-      const key = match[1];
-      const value = match[2];
-      if (!isPlaceholderValue(value)) {
+    for (const assignment of findSecretEnvironmentAssignments(file, line)) {
+      const key = assignment.key;
+      const value = normalizedAssignmentValue(assignment.value);
+      if (nonSecretAssignmentNames.has(key)) continue;
+      if (!isCredentialAssignmentKey(key)) continue;
+      if (!isPlaceholderValue(value) && !isReviewedPlaceholderAssignment(file, key, value)) {
         addFailure(file, lineNumber, `${key} has a non-placeholder value (${maskValue(value)}).`);
       }
     }

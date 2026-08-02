@@ -14,7 +14,7 @@ it is a schema-drift assumption in migration
 | Repo branch before fix | `main` was clean and synced before creating `codex/guard-mochi-social-spirits-migration`. |
 | Supabase CLI version | `2.108.0`; CLI reported `2.109.0` is available. |
 | Project ref | `supabase/config.toml` and `supabase/README.md` both point to `deyvmtncimmcinldjyqe`. |
-| Linked CLI auth | Linked reads work when `SUPABASE_ACCESS_TOKEN` is provided from `C:\Users\xtyty\Documents\Creds\Supabase Key.txt` as a child-process environment variable. |
+| Linked CLI auth | Linked reads work when `SUPABASE_ACCESS_TOKEN` is provided from the private credential boundary as a child-process environment variable. |
 | Linked migrations | `20260702043644` exists locally and was not applied remotely at the time of the read. |
 | Linked table check | Read-only linked SQL returned `public.mochi_social_spirits = NULL` and `public.mochi_social_pets = mochi_social_pets`. |
 | Root cause | The migration directly referenced `public.mochi_social_spirits` for an index/policy and `public.mochi_social_progress_snapshots` for a policy even though those tables are absent in the linked project lineage. |

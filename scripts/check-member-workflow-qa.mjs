@@ -45,8 +45,11 @@ const listMemberProfiles = read("supabase/functions/list-member-profiles/index.t
 const getMemberProfile = read("supabase/functions/get-member-profile/index.ts");
 const visibleProfileCards = read("supabase/functions/list-visible-profile-cards/index.ts");
 const approvedFeed = read("supabase/functions/list-approved-gallery-submissions/index.ts");
+const publicFeedHelper = read("supabase/functions/_shared/gallery-public-feed.ts");
 const migrationGallery = read("supabase/migrations/20260513081523_create_discord_role_gated_gallery_uploads.sql");
 const migrationGalleryModeration = read("supabase/migrations/20260513195853_create_gallery_moderation_events.sql");
+const migrationGalleryPublicFeed = read("supabase/migrations/20260728130000_add_gallery_public_feed_v2.sql");
+const migrationGalleryPublications = read("supabase/migrations/20260728132000_add_gallery_publication_revisions.sql");
 const migrationProfiles = read("supabase/migrations/20260608210000_add_member_profiles_and_media.sql");
 const migrationRefine = read("supabase/migrations/20260608233000_refine_member_profile_identity_media.sql");
 
@@ -83,7 +86,9 @@ for (const file of retiredFiles) {
 
 [
   "The current static Gallery source has 73 images",
-  "Approved member and Discord submissions are added at runtime",
+  "Published member and Discord submissions are added at runtime",
+  "schema version 2",
+  "opaque cursor",
   "All - 73",
   "Member Submissions",
 ].forEach((snippet) => assertIncludes("gallery guide", galleryGuide, snippet));
@@ -92,7 +97,9 @@ for (const file of retiredFiles) {
   "public.handle_new_member_profile()",
   "security definer",
   "member-gallery",
-  "Approved submissions with a validated derivative become eligible for the approved public Gallery feed",
+  "Pending, rejected, archived, and historical approved submissions without an active immutable publication revision are not returned",
+  "exactly 49 configured Edge Functions",
+  "31 `verify_jwt=true` and 18 false",
   "member profile publishing is retired",
   "shared backend identity data",
   "list-visible-profile-cards",
@@ -221,12 +228,70 @@ assertRegex("profile client", profileClient, /\.update\(\s*clean\s*\)/, "Profile
 ].forEach((snippet) => assertIncludes("visible profile cards", visibleProfileCards, snippet));
 
 [
-  "MEMBER_GALLERY_BUCKET",
-  "signedUrlSeconds",
-  "createSignedUrls",
-  "storage_path",
-  "thumbnail_storage_path",
+  '"gallery_reserve_public_delivery"',
+  '"gallery_reserve_public_media_v2"',
+  '"bounded-edge-media"',
+  "publicMediaUrl(",
+  '"Cache-Control": "private, max-age=300, stale-while-revalidate=60"',
+  '"gallery_public_feed_page_v2"',
+  "parseGalleryMediaReservation",
 ].forEach((snippet) => assertIncludes("approved gallery feed", approvedFeed, snippet));
+
+[
+  "GALLERY_THUMBNAIL_SIGNED_URL_SECONDS",
+  "GALLERY_ORIGINAL_SIGNED_URL_SECONDS",
+  "createSignedUrls",
+  "createSignedUrl",
+].forEach((snippet) => assertNotIncludes("approved gallery feed", approvedFeed, snippet));
+
+[
+  "GALLERY_PUBLIC_SCHEMA_VERSION = 2",
+  "GALLERY_PUBLIC_PAGE_SIZE = 24",
+  "GALLERY_PUBLIC_MEDIA_URL_MAX_BYTES = 512",
+  "export function safeGalleryPublicMediaUrl",
+  'action: "list"',
+  'action: "full"',
+  "snapshotAt",
+  "member-submissions",
+  "thumbnailWidth",
+  "thumbnailHeight",
+  "thumbnail_width: thumbnailWidth",
+  "thumbnail_height: thumbnailHeight",
+  "const safeThumbnailUrl = safeGalleryPublicMediaUrl(thumbnailUrl);",
+  "thumbnail_url: safeThumbnailUrl",
+  "const thumbnailUrl = safeGalleryPublicMediaUrl(item.thumbnail_url);",
+  "const safeFullUrl = safeGalleryPublicMediaUrl(fullUrl);",
+  "full_signed_url: safeFullUrl",
+].forEach((snippet) => assertIncludes("approved gallery public helper", publicFeedHelper, snippet));
+
+assertRegex(
+  "approved Gallery v2 public item",
+  publicFeedHelper,
+  /export function toPublicGalleryItem\([\s\S]*?return \{(?:(?!storagePath|storageBucket|userId|full_signed_url|thumbnail_signed_url)[\s\S])*thumbnail_url: safeThumbnailUrl,[\s\S]*?^\}/m,
+  "Gallery feed v2 must expose only the bounded Edge thumbnail URL without private storage or member fields.",
+);
+assertRegex(
+  "approved Gallery legacy public item",
+  publicFeedHelper,
+  /export function toLegacyGalleryItem\([\s\S]*?const thumbnailUrl = safeGalleryPublicMediaUrl\(item\.thumbnail_url\);[\s\S]*?const safeFullUrl = safeGalleryPublicMediaUrl\(fullUrl\);[\s\S]*?full_signed_url: safeFullUrl,[\s\S]*?thumbnail_signed_url: thumbnailUrl,/,
+  "legacy compatibility must apply the same bounded URL validator to thumbnail and full Edge URLs.",
+);
+
+[
+  "gallery_submissions_thumbnail_dimensions_check",
+].forEach((snippet) => assertIncludes("gallery public feed v2 migration", migrationGalleryPublicFeed, snippet));
+
+[
+  "gallery_publication_category_check",
+  "create table private.gallery_publication_revisions",
+  "gallery_public_feed_page_v2",
+  "gallery_reserve_public_media_v2",
+  "gallery_reserve_moderation_preview",
+  "grant execute on function public.gallery_public_feed_page_v2",
+  "grant execute on function public.gallery_reserve_public_media_v2",
+  "grant execute on function public.gallery_reserve_moderation_preview",
+  "to service_role;",
+].forEach((snippet) => assertIncludes("gallery publication migration", migrationGalleryPublications, snippet));
 
 [
   "alter table public.member_profiles enable row level security;",

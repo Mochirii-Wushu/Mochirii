@@ -35,7 +35,7 @@
 	@stack('styles')
 
 	@if(config_cache('uikit.show_custom.css'))
-	<style type="text/css">{!!config_cache('uikit.custom.css')!!}</style>
+	<style type="text/css">{!! app(\App\Services\SanitizeService::class)->cssText(config_cache('uikit.custom.css')) !!}</style>
 	@endif
 
 	<script type="text/javascript">window._sharedData = {curUser: {}, version: 0}; window.App = {config: {!!App\Util\Site\Config::json()!!}};</script>

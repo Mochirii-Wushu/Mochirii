@@ -7,7 +7,7 @@ The website and Supabase side of moderator-controlled Instagram publishing remai
 ## Completed
 
 - Created private GitHub repo: <https://github.com/Mochirii-Wushu/Reaper>.
-- Cloned local workspace: `C:\Users\xtyty\Documents\Reaper`.
+- Cloned local workspace: the canonical Reaper checkout.
 - Added Node 20 / TypeScript / `discord.js` v14 bot scaffold.
 - Added guild-scoped `/submit` command schema with optional boolean `share_to_instagram`.
 - Added Supabase ingest client using `x-mochirii-reaper-secret`.

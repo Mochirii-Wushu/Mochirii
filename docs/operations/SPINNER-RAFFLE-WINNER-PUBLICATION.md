@@ -6,7 +6,7 @@ This runbook defines the source-only bridge from an authoritative official spinn
 
 The raffle route is server-rendered with the latest reviewed result and refreshes the same minimal same-origin contract after authentication changes, focus/visibility return, and at a bounded interval.
 
-- Signed-out and unverified visitors receive exactly `Winner Confirmed`, the Singapore selection time, and their localized visitor time.
+- Signed-out and unverified visitors receive exactly `Winner Confirmed`, the UTC+8 selection time, and their localized visitor time.
 - A signed-in member who currently satisfies the existing active-member verification rule may also receive the stored guild display name.
 - The public RPC and same-origin API return only `publicLabel`, `cycleMonth`, `selectedAt`, and nullable `displayName`. Draw IDs, member IDs, rosters, hashes, receipts, moderation data, and delivery records are rejected by the exact client parser and never enter public JSON.
 - The colorful winner card uses the canonical Mochirii emblem, remains within the content container at 320 CSS pixels and 200% text, and disables decorative animation under `prefers-reduced-motion`.
@@ -61,7 +61,7 @@ complete wholly-official state. After deployment it must additionally return
 
 ## Release And Readback Gate
 
-The migration adds tables and therefore needs an exact schema-change approval. A protected-main merge also invokes the existing Supabase Git integration, which applies migrations and redeploys every function in `supabase/config.toml`; this source does not change that 33-function inventory or its 20 `verify_jwt=true` / 13 false contract. Never deploy this migration manually.
+The migration adds tables and therefore needs an exact schema-change approval. A protected-main merge also invokes the existing Supabase Git integration, which applies migrations and redeploys every function in `supabase/config.toml`; the integrated source has a 49-function inventory with 31 `verify_jwt=true` and 18 false. Never deploy this migration manually.
 
 Before merge, require the exact-head Vercel and non-skipped Supabase Preview checks plus repository, Web, database-reset, pgTAP, browser, and accessibility gates. After the authorized integration completes, read back:
 
@@ -69,9 +69,9 @@ Before merge, require the exact-head Vercel and non-skipped Supabase Preview che
 - exactly one reviewed July publication and no duplicate month;
 - official classification parity across that publication's receipt, completed delivery,
   and current revealed live state;
-- anonymous RPC output with a null display name;
+- anonymous and authenticated-but-unverified RPC output with a null display name;
 - verified-member output with the reviewed guild display name;
-- unchanged 33-function inventory and 20/13 JWT parity; and
+- current 49-function inventory and 31/18 JWT parity; and
 - exact Vercel production binding plus the `/raffle` responsive/runtime matrix.
 
 Stop on any source-binding mismatch, migration ambiguity, extra public field, wrong name-visibility state, changed function inventory, or layout/runtime regression. Rollback is a reviewed forward fix or append-only revocation; do not delete or rewrite the result ledger.

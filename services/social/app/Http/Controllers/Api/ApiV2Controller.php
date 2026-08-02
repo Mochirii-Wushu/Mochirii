@@ -66,7 +66,7 @@ class ApiV2Controller extends Controller
                 'domain' => config('pixelfed.domain.app'),
                 'title' => config('mochirii-branding.display_name'),
                 'version' => '3.5.3 (compatible; Mōchirīī Social)',
-                'source_url' => 'https://github.com/Mochirii-Wushu/Mochirii',
+                'source_url' => 'https://github.com/Mochirii-Wushu/Mochirii-Website',
                 'description' => config('mochirii-branding.description'),
                 'usage' => [
                     'users' => [

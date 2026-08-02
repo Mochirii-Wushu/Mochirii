@@ -262,7 +262,7 @@
             "no_filters": "You don't have any content filters yet",
             "no_filters_message": "Filters help you hide content containing specific words or phrases from your timelines.",
             "create_first_filter": "Create Your First Filter",
-            "no_matching_filters": "You don't have any content filters that match <strong>:searchQuery</strong>.",
+            "no_matching_filters": "You don't have any content filters that match {searchQuery}.",
             "no_matching_filters_message": "Filters help you hide content containing specific words or phrases from your timelines.",
             "create_new_filter": "Create new Filter",
             "filter_title": "Filter Title",

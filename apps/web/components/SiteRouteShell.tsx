@@ -1,45 +1,42 @@
 "use client";
 
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
-import { useHeaderAuthState } from "@/components/site-header/use-header-auth-state";
+
+const OrdinarySiteShell = dynamic(() => import("@/components/OrdinarySiteShell").then(
+  (module) => module.OrdinarySiteShell,
+));
+const AuthCutoverGuard = dynamic(() => import("@/components/AuthCutoverGuard").then(
+  (module) => module.AuthCutoverGuard,
+));
+
+const AUTH_CUTOVER_PATHS = new Set([
+  "/account",
+  "/auth",
+  "/gallery-submit",
+  "/leader-dashboard",
+  "/oauth/consent",
+  "/social",
+]);
 
 function isIsolatedSpinnerPath(pathname: string) {
   return pathname === "/spinner" || pathname.startsWith("/spinner/");
 }
 
-export function SiteRouteShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  if (isIsolatedSpinnerPath(pathname)) return children;
-
-  return <OrdinarySiteShell>{children}</OrdinarySiteShell>;
+function isIsolatedPrivateRafflePath(pathname: string) {
+  return pathname === "/raffle/claim" || pathname === "/raffle/claim/"
+    || pathname === "/leader-dashboard/raffle" || pathname === "/leader-dashboard/raffle/";
 }
 
-function OrdinarySiteShell({ children }: { children: ReactNode }) {
-  const auth = useHeaderAuthState();
+export function SiteRouteShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  if (isIsolatedSpinnerPath(pathname) || isIsolatedPrivateRafflePath(pathname)) return children;
 
   return (
-    <>
-      <SiteHeader {...auth} />
-      <div className="bg-photo" aria-hidden="true">
-        <Image
-          src="/assets/bg/wuxia-bg.webp"
-          alt=""
-          className="bg-photo__image"
-          fill
-          sizes="100vw"
-          loading="eager"
-        />
-      </div>
+    <OrdinarySiteShell>
+      {AUTH_CUTOVER_PATHS.has(pathname) ? <AuthCutoverGuard /> : null}
       {children}
-      <SiteFooter authState={auth.authState} launchSpinnerViewer={auth.launchSpinnerViewer} />
-      <Analytics />
-      <SpeedInsights />
-    </>
+    </OrdinarySiteShell>
   );
 }

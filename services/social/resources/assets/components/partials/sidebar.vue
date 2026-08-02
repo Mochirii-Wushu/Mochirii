@@ -14,7 +14,9 @@
                         </button>
                     </div>
                     <div class="media-body">
-                        <p class="display-name" v-html="getDisplayName()"></p>
+                        <p class="display-name">
+                            <display-name :profile="user" :emojis="getCustomEmoji" />
+                        </p>
                         <p class="username primary">&commat;{{ user.username }}</p>
                         <p class="stats">
 							<span class="stats-following">
@@ -299,6 +301,7 @@
 import {mapGetters} from 'vuex'
 // import ComposeSimple from './../sections/ComposeSimple.vue';
 import UpdateAvatar from './modal/UpdateAvatar.vue';
+import DisplayName from './profile/DisplayName.vue';
 
 export default {
     props: {
@@ -371,7 +374,8 @@ export default {
 
     components: {
         // ComposeSimple,
-        UpdateAvatar
+        UpdateAvatar,
+        DisplayName
     },
 
     computed: {
@@ -405,28 +409,6 @@ export default {
     },
 
     methods: {
-        getDisplayName() {
-            let self = this;
-            let profile = this.user;
-            let dn = profile.display_name;
-            if (!dn) {
-                return profile.username;
-            }
-            if (dn.includes(':')) {
-                let re = /(<a?)?:\w+:(\d{18}>)?/g;
-                let un = dn.replaceAll(re, function (em) {
-                    let shortcode = em.slice(1, em.length - 1);
-                    let emoji = self.getCustomEmoji.filter(e => {
-                        return e.shortcode == shortcode;
-                    });
-                    return emoji.length ? `<img draggable="false" class="emojione custom-emoji" alt="${emoji[0].shortcode}" title="${emoji[0].shortcode}" src="${emoji[0].url}" data-original="${emoji[0].url}" data-static="${emoji[0].static_url}" width="16" height="16" onerror="this.onerror=null;this.src='/storage/emoji/missing.png';" />` : em;
-                });
-                return un;
-            } else {
-                return dn;
-            }
-        },
-
         gotoMyProfile() {
             let user = this.user;
             this.$router.push({

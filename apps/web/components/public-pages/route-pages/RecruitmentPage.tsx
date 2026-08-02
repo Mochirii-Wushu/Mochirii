@@ -24,7 +24,6 @@ export function RecruitmentPage() {
         ariaLabel="Recruitment hero"
         image={text(hero.image, "./assets/img/recruitment/hero.webp")}
         imageAlt={text(hero.alt, "Recruitment banner artwork")}
-        atmosphere={text(hero.atmosphere)}
         kicker={text(meta.kicker, "Recruitment")}
         title={text(meta.heading, "Recruitment & Membership")}
         meta={<MetaRow label="Recruitment metadata" items={[meta.author, meta.updated ? monthYearUTC(meta.updated) : ""]} />}

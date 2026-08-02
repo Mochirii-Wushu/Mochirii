@@ -2,6 +2,17 @@ name: Manual Lighthouse audit
 
 on:
   workflow_dispatch:
+    inputs:
+      gallery_origin:
+        description: Exact local origin or immutable reviewed Vercel deployment origin
+        required: true
+        default: http://127.0.0.1:8765
+        type: string
+      allow_live_gallery_media_smoke_once:
+        description: Exact one-shot approval for Preview or Production Gallery traffic
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -21,29 +32,100 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/web/package-lock.json
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
 
+      - name: Install Web dependencies
+        run: npm ci --prefix apps/web
+
+      - name: Validate Gallery audit target
+        id: gallery-target
+        env:
+          GALLERY_AUDIT_ORIGIN: ${{ inputs.gallery_origin }}
+          MOCHIRII_ALLOW_LIVE_GALLERY_MEDIA_SMOKE_ONCE: ${{ inputs.allow_live_gallery_media_smoke_once }}
+        run: |
+          set -euo pipefail
+          gallery_target="$(node scripts/resolve-gallery-lighthouse-url.mjs "$GALLERY_AUDIT_ORIGIN")"
+          node - "$gallery_target" "$GITHUB_OUTPUT" <<'NODE'
+          const fs = require("node:fs");
+          const target = JSON.parse(process.argv[2]);
+          if (
+            !["local", "preview", "production"].includes(target.kind) ||
+            typeof target.url !== "string" ||
+            typeof target.normalizedOrigin !== "string"
+          ) throw new Error("Gallery audit target output was invalid.");
+          fs.appendFileSync(
+            process.argv[3],
+            `kind=${target.kind}\nurl=${target.url}\nnormalized_origin=${target.normalizedOrigin}\n`,
+          );
+          NODE
+
+      - name: Build exact local Gallery audit target
+        if: steps.gallery-target.outputs.kind == 'local'
+        run: npm --prefix apps/web run build
+
       - name: Run Lighthouse audits
+        env:
+          GALLERY_AUDIT_KIND: ${{ steps.gallery-target.outputs.kind }}
+          GALLERY_AUDIT_URL: ${{ steps.gallery-target.outputs.url }}
+          GALLERY_AUDIT_ORIGIN: ${{ steps.gallery-target.outputs.normalized_origin }}
         run: |
           set -euo pipefail
           mkdir -p reports/lighthouse
 
-          npx lighthouse "https://mochirii.com/" \
+          local_server_pid=""
+          local_audit_proxy_pid=""
+          lighthouse_chrome_flags="--headless --no-sandbox"
+          if [[ "$GALLERY_AUDIT_KIND" == "local" ]]; then
+            : >reports/lighthouse/local-gallery-fixture-requests.jsonl
+            npm --prefix apps/web run start -- --hostname 127.0.0.1 --port 8766 >reports/lighthouse/local-next.log 2>&1 &
+            local_server_pid="$!"
+            node scripts/gallery-lighthouse-local-fixture.mjs serve \
+              reports/lighthouse/local-gallery-fixture-requests.jsonl \
+              http://127.0.0.1:8766 8765 \
+              >reports/lighthouse/local-gallery-audit-proxy.log 2>&1 &
+            local_audit_proxy_pid="$!"
+            lighthouse_chrome_flags='--headless --no-sandbox --disable-background-networking --host-resolver-rules="MAP * ~NOTFOUND, EXCLUDE 127.0.0.1"'
+            trap 'if [[ -n "$local_server_pid" ]]; then kill "$local_server_pid" 2>/dev/null || true; fi; if [[ -n "$local_audit_proxy_pid" ]]; then kill "$local_audit_proxy_pid" 2>/dev/null || true; fi' EXIT
+            for attempt in {1..60}; do
+              if curl --fail --silent --show-error --output /dev/null "$GALLERY_AUDIT_ORIGIN/" && \
+                curl --fail --silent --show-error --output /dev/null "$GALLERY_AUDIT_ORIGIN/healthz"; then
+                break
+              fi
+              if [[ "$attempt" == "60" ]]; then
+                echo "Local audit target or Gallery fixture did not become ready." >&2
+                exit 1
+              fi
+              sleep 1
+            done
+          fi
+
+          ./node_modules/.bin/lighthouse "$GALLERY_AUDIT_ORIGIN/" \
             --output=html --output=json \
             --output-path=reports/lighthouse/home \
-            --chrome-flags="--headless --no-sandbox"
+            --chrome-flags="$lighthouse_chrome_flags"
 
-          npx lighthouse "https://mochirii.com/recruitment" \
+          ./node_modules/.bin/lighthouse "$GALLERY_AUDIT_ORIGIN/recruitment" \
             --output=html --output=json \
             --output-path=reports/lighthouse/recruitment \
-            --chrome-flags="--headless --no-sandbox"
+            --chrome-flags="$lighthouse_chrome_flags"
 
-          npx lighthouse "https://mochirii.com/gallery" \
+          ./node_modules/.bin/lighthouse "$GALLERY_AUDIT_URL" \
             --output=html --output=json \
             --output-path=reports/lighthouse/gallery \
-            --chrome-flags="--headless --no-sandbox"
+            --chrome-flags="$lighthouse_chrome_flags"
+
+          if [[ "$GALLERY_AUDIT_KIND" == "local" ]]; then
+            node scripts/gallery-lighthouse-local-fixture.mjs verify \
+              reports/lighthouse/local-gallery-fixture-requests.jsonl \
+              reports/lighthouse/home.report.json \
+              reports/lighthouse/recruitment.report.json \
+              reports/lighthouse/gallery.report.json
+          fi
 
       - name: Upload Lighthouse reports
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

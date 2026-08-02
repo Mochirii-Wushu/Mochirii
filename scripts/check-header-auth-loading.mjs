@@ -29,6 +29,7 @@ expectExcludes("header auth hook", hook, 'from "./header-auth-runtime"');
   "createDedupedLoader<HeaderAuthRuntime>",
   '() => import("./header-auth-runtime")',
   "scheduleDeferredTask(",
+  "shouldScheduleAutomaticAuthLoad(",
   "1500,",
   "failClosed",
   "ensureAuthLoaded",
@@ -50,6 +51,7 @@ expectExcludes("header auth hook", hook, 'from "./header-auth-runtime"');
   "activeLoad = null",
   "requestIdleCallback",
   "setTimeout",
+  "(?:\\\\.0|\\\\.[1-9]\\\\d*)?=",
 ].forEach((snippet) => expectIncludes("deferred task helper", deferredTask, snippet));
 
 [
@@ -57,6 +59,7 @@ expectExcludes("header auth hook", hook, 'from "./header-auth-runtime"');
   "retries after a failed load",
   "prefers idle work with a deadline",
   "falls back to a cancellable timer",
+  "automatic auth loading follows exact cookie presence",
 ].forEach((snippet) => expectIncludes("deferred task tests", deferredTaskTest, snippet));
 
 [

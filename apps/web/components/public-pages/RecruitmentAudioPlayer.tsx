@@ -201,7 +201,7 @@ export function RecruitmentAudioPlayer({ sources }: RecruitmentAudioPlayerProps)
             onClick={toggleMute}
             disabled={!hasAudio}
             data-audio-mute
-            aria-label={isMuted ? "Unmute recruitment audio" : "Mute recruitment audio"}
+            aria-label={isMuted ? "Vol: Unmute recruitment audio" : "Vol: Mute recruitment audio"}
             data-muted={isMuted ? "true" : "false"}
           >
             Vol

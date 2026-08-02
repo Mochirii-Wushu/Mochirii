@@ -22,7 +22,7 @@ Reaper gallery submissions are now implemented as a Supabase-hosted Discord Inte
 - Added the new function to `scripts/check-all.mjs` and `scripts/check-supabase-edge-types.mjs`.
 - Updated Supabase docs and the Instagram deployment runbook to record the Supabase-hosted Reaper model.
 - Updated the private Reaper repo docs so the Node Gateway scaffold is treated as a helper and rollback reference, not the primary production runtime.
-- Created ignored local Reaper env file `C:\Users\xtyty\Documents\Reaper\.env.local` from the owner-provided token file. Secret values were not printed or committed.
+- Created an ignored local Reaper `.env.local` file from the owner-provided token file. Secret values were not printed or committed.
 
 ## Validation
 

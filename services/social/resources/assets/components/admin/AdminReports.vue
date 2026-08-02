@@ -177,7 +177,7 @@
                                 </a>
                             </td>
                             <td class="align-middle">
-                                <p class="text-capitalize font-weight-bold mb-0" v-html="reportLabel(report)"></p>
+                                <p class="text-capitalize font-weight-bold mb-0" v-text="reportLabel(report)"></p>
                             </td>
                             <td class="align-middle">
                                 <a v-if="report.reported && report.reported.id" :href="`/i/web/profile/${report.reported.id}`" target="_blank" class="text-white">
@@ -471,7 +471,14 @@
                                 </p>
                             </td>
                             <td class="align-middle">
-                                <p class="mb-0" v-html="getModerationLabels(report)"></p>
+								<p class="mb-0">
+									<span
+										v-for="label in getModerationLabels(report)"
+										:key="label"
+										class="badge mr-1"
+										:class="label === 'Banned' ? 'badge-danger' : 'badge-primary'"
+										v-text="label"></span>
+								</p>
                             </td>
                             <td class="align-middle">
                                 <p class="small mb-0 text-wrap" style="max-width: 200px;word-break: break-word;">{{ truncateText(report.note, 140) }}</p>
@@ -533,7 +540,7 @@
             <div v-if="viewingReport" class="list-group">
                 <div class="list-group-item d-flex align-items-center justify-content-between">
                     <div class="text-muted small">Type</div>
-                    <div class="font-weight-bold text-capitalize" v-html="reportLabel(viewingReport)"></div>
+                    <div class="font-weight-bold text-capitalize" v-text="reportLabel(viewingReport)"></div>
                 </div>
                 <div v-if="viewingReport.admin_seen_at" class="list-group-item d-flex align-items-center justify-content-between">
                     <div class="text-muted small">Report Closed</div>
@@ -1478,7 +1485,7 @@
 
             getModerationLabels(acct) {
                 if(acct.is_banned) {
-                    return `<span class="badge badge-danger">Banned</span>`
+					return ['Banned']
                 }
 
                 let labels = [];
@@ -1490,10 +1497,7 @@
                 if(acct.is_nsfw) labels.push('NSFW')
                 if(acct.is_unlisted) labels.push('Unlisted')
 
-                return labels.map((item, index) => {
-                    const colorClass = item === 'Banned' ? 'danger' : 'primary';
-                    return `<span class="badge badge-${colorClass}">${item}</span>`;
-                }).join(' ');
+				return labels;
             },
 
             handleModeratedProfileSearch(event) {

@@ -42,6 +42,12 @@ const protectedFunctions = [
     body: {},
   },
   {
+    name: "withdraw-gallery-publication-consent",
+    body: {
+      submission_id: "00000000-0000-4000-8000-000000000000",
+    },
+  },
+  {
     name: "list-instagram-publish-queue",
     body: { status: "queued" },
   },
@@ -52,6 +58,15 @@ const protectedFunctions = [
       caption: "Smoke test only.",
       alt_text: "Smoke test placeholder.",
       confirmPublish: true,
+    },
+  },
+  {
+    name: "resolve-instagram-publish-reconciliation",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      resolution: "confirmed_not_published",
+      note: "Smoke test only.",
+      confirm_reconciliation: true,
     },
   },
   {
@@ -66,6 +81,45 @@ const protectedFunctions = [
   {
     name: "check-instagram-api-status",
     body: {},
+  },
+  {
+    name: "list-facebook-page-publish-queue",
+    body: { status: "queued", page_size: 20 },
+  },
+  {
+    name: "publish-facebook-page-gallery-submission",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      message: "Smoke test only.",
+      confirm_facebook_publish: true,
+    },
+  },
+  {
+    name: "resolve-facebook-page-publish-reconciliation",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      resolution: "confirmed_not_published",
+      note: "Smoke test only.",
+      confirm_reconciliation: true,
+    },
+  },
+  {
+    name: "check-facebook-page-api-status",
+    body: {},
+  },
+  {
+    name: "manage-event-social-publication",
+    body: { action: "list" },
+  },
+  {
+    name: "resolve-event-social-publication-reconciliation",
+    body: {
+      job_id: "00000000-0000-4000-8000-000000000000",
+      expected_updated_at: "2026-07-31T00:00:00.000Z",
+      resolution: "confirmed_not_published",
+      note: "Smoke test only.",
+      confirm_reconciliation: true,
+    },
   },
   {
     name: "list-member-profiles",
@@ -87,6 +141,18 @@ const protectedFunctions = [
     name: "moderate-member-profile-media",
     body: {},
   },
+  {
+    name: "manage-raffle-entry",
+    body: { action: "status" },
+  },
+  {
+    name: "moderate-raffle",
+    body: { action: "readiness" },
+  },
+  {
+    name: "manage-raffle-claim",
+    body: { action: "status" },
+  },
 ];
 
 const secretProtectedFunctions = [
@@ -101,7 +167,12 @@ const secretProtectedFunctions = [
   },
   {
     name: "submit-discord-gallery-image",
-    secretHeader: "x-mochirii-reaper-secret",
+    invalidHeaders: {
+      "x-mochirii-gallery-key-id": "primary",
+      "x-mochirii-gallery-timestamp": "0",
+      "x-mochirii-gallery-nonce": "00000000000000000000000000000000",
+      "x-mochirii-gallery-signature": `v1=${"0".repeat(64)}`,
+    },
     body: {
       guildId: "1078630751077142608",
       channelId: "1078630751077142608",
@@ -134,6 +205,12 @@ const secretProtectedFunctions = [
     body: { limit: 1 },
   },
   {
+    name: "run-event-social-publication",
+    secretHeader: "x-mochirii-event-social-secret",
+    cors: false,
+    body: {},
+  },
+  {
     name: "send-vote-reminder",
     secretHeader: "x-mochirii-vote-reminder-secret",
     body: { preview: true },
@@ -159,6 +236,26 @@ const secretProtectedFunctions = [
 const publicReadOnlyFunctions = [
   "list-visible-profile-cards",
   "get-current-spotlight-winner",
+  "get-current-raffle",
+];
+
+const disabledOperationalFunctions = [
+  {
+    name: "run-raffle-schedule",
+    invalidHeaders: { "x-raffle-cron-secret": "invalid-smoke-secret" },
+  },
+  {
+    name: "run-raffle-fulfillment",
+    invalidHeaders: {
+      "x-raffle-fulfillment-secret": "invalid-smoke-secret",
+    },
+  },
+  {
+    name: "reward-provider-webhook",
+    invalidHeaders: {
+      "Tremendous-Webhook-Signature": "invalid-smoke-signature",
+    },
+  },
 ];
 
 function readSupabasePublicConfig() {
@@ -210,6 +307,12 @@ async function fetchContract(url, init = {}) {
     ok: response.ok,
     contentType: response.headers.get("content-type") || "",
     cors: response.headers.get("access-control-allow-origin") || "",
+    cacheControl: response.headers.get("cache-control") || "",
+    contentLength: response.headers.get("content-length") || "",
+    vary: response.headers.get("vary") || "",
+    contentSecurityPolicy: response.headers.get("content-security-policy") || "",
+    contentTypeOptions: response.headers.get("x-content-type-options") || "",
+    robots: response.headers.get("x-robots-tag") || "",
     json,
     text,
   };
@@ -222,14 +325,15 @@ function assert(condition, message) {
 function summarizeBody(body) {
   if (!body || typeof body !== "object") return String(body || "").slice(0, 120);
   const copy = JSON.parse(JSON.stringify(body));
-  const submissions = copy?.data?.submissions;
-  if (Array.isArray(submissions)) {
-    copy.data.submissions = submissions.map((item) => ({
+  const items = copy?.data?.items;
+  if (Array.isArray(items)) {
+    copy.data.items = items.map((item) => ({
       ...item,
-      thumbnail_signed_url: item?.thumbnail_signed_url ? "[redacted signed URL]" : item?.thumbnail_signed_url,
-      full_signed_url: item?.full_signed_url ? "[redacted signed URL]" : item?.full_signed_url,
+      thumbnail_url: item?.thumbnail_url ? "[bounded Edge media URL]" : item?.thumbnail_url,
     }));
   }
+  if (copy?.data?.full_url) copy.data.full_url = "[bounded Edge media URL]";
+  if (copy?.data?.thumbnail_url) copy.data.thumbnail_url = "[bounded Edge media URL]";
   return JSON.stringify(copy).slice(0, 500);
 }
 
@@ -254,6 +358,7 @@ async function checkProtectedRejects(config, target, label, authorization) {
     deniedStatuses.includes(result.status),
     `${target.name} ${label} expected ${deniedStatuses.join("/")} fail-closed response, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
   );
+  return result;
 }
 
 async function checkSecretProtectedRejects(config, target, label, extraHeaders = {}) {
@@ -280,33 +385,155 @@ async function checkMethodNotAllowed(config, name) {
   assert(result.status === 405, `${name} DELETE expected 405 Method not allowed, got ${result.status}.`);
 }
 
-function validateApprovedFeedBody(body) {
+async function checkDisabledOperationalFunction(config, target) {
+  for (const [label, method, extraHeaders] of [
+    ["without authentication", "POST", {}],
+    ["with invalid authentication", "POST", target.invalidHeaders],
+    ["with unsupported method", "GET", {}],
+  ]) {
+    const result = await fetchContract(functionUrl(config, target.name), {
+      method,
+      headers: headers(config, extraHeaders),
+      ...(method === "POST" ? { body: JSON.stringify({}) } : {}),
+    });
+    assert(
+      result.status === 404 && result.ok === false,
+      `${target.name} ${label} must remain closed as an opaque 404, got ${result.status}: ${summarizeBody(result.json || result.text)}`,
+    );
+  }
+}
+
+function assertApprovedMediaUrl(value, config, asset, id, label) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${label} was not an absolute URL.`);
+  }
+  const expectedOrigin = new URL(config.url).origin;
+  assert(url.origin === expectedOrigin, `${label} used an unexpected origin.`);
+  assert(url.pathname === "/functions/v1/list-approved-gallery-submissions", `${label} used an unexpected path.`);
+  assert([...url.searchParams.keys()].sort().join(",") === "asset,id", `${label} exposed unexpected query fields.`);
+  assert(url.searchParams.get("asset") === asset, `${label} used an unexpected asset kind.`);
+  assert(url.searchParams.get("id") === id, `${label} used a different opaque publication ID.`);
+  assert(!url.username && !url.password && !url.hash, `${label} exposed a URL capability or fragment.`);
+  return url;
+}
+
+function validateApprovedFeedBody(body, config) {
   assert(body && typeof body === "object", "approved feed response was not JSON.");
   assert(body.ok === true, `approved feed response ok flag was not true: ${summarizeBody(body)}`);
   assert(body.data && typeof body.data === "object", "approved feed response missing data object.");
-  assert(Array.isArray(body.data.submissions), "approved feed response data.submissions must be an array.");
-  assert(Number.isFinite(Number(body.data.count)), "approved feed response data.count must be numeric.");
-  assert(Number(body.data.count) === body.data.submissions.length, "approved feed count did not match submissions length.");
-  assert(Number(body.data.signedUrlSeconds) === 3600, "approved feed signedUrlSeconds should be 3600.");
+  assert(Number(body.data.schemaVersion) === 2, "approved feed schemaVersion must be 2.");
+  assert(Array.isArray(body.data.items), "approved feed response data.items must be an array.");
+  const listDataKeys = new Set([
+    "schemaVersion",
+    "items",
+    "count",
+    "totalEligible",
+    "facets",
+    "hasMore",
+    "nextCursor",
+    "partial",
+    "complete",
+    "deliveryFailures",
+    "delivery",
+    "cacheSeconds",
+  ]);
+  Object.keys(body.data).forEach((key) => assert(listDataKeys.has(key), `approved feed data exposed unexpected key ${key}.`));
+  assert(typeof body.data.count === "number" && Number.isSafeInteger(body.data.count), "approved feed response data.count must be an integer.");
+  assert(Number(body.data.count) === body.data.items.length, "approved feed count did not match items length.");
+  assert(typeof body.data.totalEligible === "number" && Number.isSafeInteger(body.data.totalEligible), "approved feed totalEligible must be an integer.");
+  assert(body.data.facets && typeof body.data.facets === "object", "approved feed facets must be an object.");
+  assert(typeof body.data.hasMore === "boolean", "approved feed hasMore must be boolean.");
+  assert(body.data.nextCursor === null || typeof body.data.nextCursor === "string", "approved feed nextCursor must be null or an opaque string.");
+  assert(!body.data.hasMore || /^[A-Za-z0-9_-]{1,512}$/.test(body.data.nextCursor || ""), "approved feed hasMore requires a bounded opaque cursor.");
+  assert(body.data.hasMore || body.data.nextCursor === null, "approved feed terminal page must not return a cursor.");
+  assert(typeof body.data.partial === "boolean", "approved feed partial must be boolean.");
+  assert(typeof body.data.complete === "boolean", "approved feed complete must be boolean.");
+  assert(typeof body.data.deliveryFailures === "number" && Number.isSafeInteger(body.data.deliveryFailures), "approved feed deliveryFailures must be an integer.");
+  assert(body.data.partial === (body.data.deliveryFailures > 0), "approved feed partial state drifted from delivery failures.");
+  assert(body.data.complete === (!body.data.hasMore && !body.data.partial), "approved feed complete state drifted from traversal state.");
+  assert(body.data.delivery === "bounded-edge-media", "approved feed delivery mode must be bounded-edge-media.");
+  assert(Number.isSafeInteger(body.data.cacheSeconds) && body.data.cacheSeconds >= 1 && body.data.cacheSeconds <= 60, "approved feed cacheSeconds must be bounded.");
 
-  const forbiddenKeys = new Set(["user_id", "storage_path", "storage_bucket", "reviewed_by", "rejection_reason"]);
+  const allowedCategories = new Set(["member-submissions", "portraits", "gatherings", "action", "scenery", "companions"]);
+  assert(
+    Object.keys(body.data.facets).length === allowedCategories.size &&
+      Object.keys(body.data.facets).every((key) => allowedCategories.has(key)),
+    "approved feed facets did not match the reviewed category set.",
+  );
+  Object.entries(body.data.facets).forEach(([key, value]) => {
+    assert(typeof value === "number" && Number.isSafeInteger(value) && value >= 0, `approved feed facet ${key} must be a nonnegative integer.`);
+  });
 
-  body.data.submissions.forEach((submission, index) => {
+  const forbiddenKeys = new Set([
+    "user_id",
+    "storage_path",
+    "storage_bucket",
+    "thumbnail_storage_path",
+    "reviewed_by",
+    "rejection_reason",
+    "full_url",
+    "uploader_display_name",
+    "thumbnail_signed_url",
+    "full_signed_url",
+    "signedUrlSeconds",
+  ]);
+  const allowedItemKeys = new Set([
+    "id",
+    "title",
+    "caption",
+    "category",
+    "categories",
+    "mime_type",
+    "size_bytes",
+    "created_at",
+    "reviewed_at",
+    "thumbnail_url",
+    "thumbnail_size_bytes",
+    "thumbnail_width",
+    "thumbnail_height",
+  ]);
+
+  body.data.items.forEach((submission, index) => {
     assert(submission && typeof submission === "object", `approved feed submission ${index} was not an object.`);
     Object.keys(submission).forEach((key) => {
       assert(!forbiddenKeys.has(key), `approved feed submission ${index} exposed private key ${key}.`);
+      assert(allowedItemKeys.has(key), `approved feed submission ${index} exposed unexpected key ${key}.`);
     });
     assert(typeof submission.id === "string" && submission.id, `approved feed submission ${index} missing id.`);
-    assert(typeof submission.thumbnail_signed_url === "string", `approved feed submission ${index} thumbnail_signed_url must be a string.`);
-    assert(/^https?:\/\//.test(submission.thumbnail_signed_url), `approved feed submission ${index} thumbnail_signed_url did not look like an HTTP URL.`);
-    assert(typeof submission.full_signed_url === "string", `approved feed submission ${index} full_signed_url must be a string.`);
-    assert(/^https?:\/\//.test(submission.full_signed_url), `approved feed submission ${index} full_signed_url did not look like an HTTP URL.`);
-    assert(submission.thumbnail_signed_url !== submission.full_signed_url, `approved feed submission ${index} reused its original as its thumbnail.`);
+    assert(typeof submission.thumbnail_url === "string", `approved feed submission ${index} thumbnail_url must be a string.`);
+    assertApprovedMediaUrl(submission.thumbnail_url, config, "thumbnail", submission.id, `approved feed submission ${index} thumbnail_url`);
     assert(
       Number.isFinite(Number(submission.thumbnail_size_bytes)) &&
         Number(submission.thumbnail_size_bytes) >= 1 &&
         Number(submission.thumbnail_size_bytes) <= 80 * 1024,
       `approved feed submission ${index} thumbnail_size_bytes was outside the bounded contract.`,
+    );
+    assert(
+      Number.isInteger(Number(submission.thumbnail_width)) &&
+        Number(submission.thumbnail_width) >= 1 &&
+        Number(submission.thumbnail_width) <= 720,
+      `approved feed submission ${index} thumbnail_width was outside the bounded contract.`,
+    );
+    assert(
+      Number.isInteger(Number(submission.thumbnail_height)) &&
+        Number(submission.thumbnail_height) >= 1 &&
+        Number(submission.thumbnail_height) <= 720,
+      `approved feed submission ${index} thumbnail_height was outside the bounded contract.`,
+    );
+    assert(
+      Array.isArray(submission.categories) && submission.categories.includes("member-submissions"),
+      `approved feed submission ${index} did not include member-submissions category membership.`,
+    );
+    assert(
+      submission.categories.every((category) => allowedCategories.has(category)),
+      `approved feed submission ${index} exposed a noncanonical category.`,
+    );
+    assert(
+      submission.category === null || allowedCategories.has(submission.category),
+      `approved feed submission ${index} exposed a noncanonical visual category.`,
     );
   });
 }
@@ -315,16 +542,68 @@ async function checkApprovedFeed(config) {
   const name = "list-approved-gallery-submissions";
   await checkOptions(config, name);
 
+  const listResult = await fetchContract(functionUrl(config, name), {
+    method: "POST",
+    headers: headers(config),
+    body: JSON.stringify({ action: "list", pageSize: 24, sort: "newest" }),
+  });
+
+  assert(
+    listResult.status === 200,
+    `${name} list expected 200 public response, got ${listResult.status}: ${summarizeBody(listResult.json || listResult.text)}`,
+  );
+  validateApprovedFeedBody(listResult.json, config);
+
+  const firstItem = listResult.json?.data?.items?.[0];
+  if (firstItem?.id) {
+    const thumbnailUrl = firstItem.thumbnail_url || "";
+    assertApprovedMediaUrl(thumbnailUrl, config, "thumbnail", firstItem.id, `${name} thumbnail URL`);
+
+    const thumbnailMedia = await fetchContract(thumbnailUrl, {
+      method: "GET",
+      headers: headers(config, { Accept: "image/webp" }),
+    });
+    assert(thumbnailMedia.status === 200, `${name} thumbnail media expected 200, got ${thumbnailMedia.status}.`);
+    assert(thumbnailMedia.contentType.toLowerCase().startsWith("image/webp"), `${name} thumbnail media type drifted.`);
+    assert(
+      thumbnailMedia.cacheControl === "private, max-age=300, stale-while-revalidate=60",
+      `${name} thumbnail media cache contract drifted.`,
+    );
+    assert(thumbnailMedia.contentTypeOptions.toLowerCase() === "nosniff", `${name} thumbnail media must set nosniff.`);
+    assert(Number(thumbnailMedia.contentLength) >= 1 && Number(thumbnailMedia.contentLength) <= 80 * 1024, `${name} thumbnail media length was outside the bounded contract.`);
+
+    const fullUrl = new URL(functionUrl(config, name));
+    fullUrl.searchParams.set("asset", "full");
+    fullUrl.searchParams.set("id", firstItem.id);
+    assertApprovedMediaUrl(fullUrl.toString(), config, "full", firstItem.id, `${name} on-demand display URL`);
+    const fullMedia = await fetchContract(fullUrl.toString(), {
+      method: "GET",
+      headers: headers(config, { Accept: "image/webp" }),
+    });
+    assert(fullMedia.status === 200, `${name} display media expected 200, got ${fullMedia.status}.`);
+    assert(fullMedia.contentType.toLowerCase().startsWith("image/webp"), `${name} display media type drifted.`);
+    assert(Number(fullMedia.contentLength) >= 1 && Number(fullMedia.contentLength) <= 2 * 1024 * 1024, `${name} display media length was outside the bounded contract.`);
+
+    const forbiddenResolver = await fetchContract(functionUrl(config, name), {
+      method: "POST",
+      headers: headers(config),
+      body: JSON.stringify({ action: "full", id: firstItem.id }),
+    });
+    assert(forbiddenResolver.status === 400, `${name} POST media resolver expected 400, got ${forbiddenResolver.status}.`);
+  }
+
+  const invalidFullResult = await fetchContract(functionUrl(config, name), {
+    method: "POST",
+    headers: headers(config),
+    body: JSON.stringify({ action: "full", id: "not-a-submission-id" }),
+  });
+  assert(invalidFullResult.status === 400, `${name} invalid display id expected 400, got ${invalidFullResult.status}.`);
+
   const getResult = await fetchContract(functionUrl(config, name), {
     method: "GET",
     headers: headers(config),
   });
-
-  assert(
-    getResult.status === 200,
-    `${name} GET expected 200 public response, got ${getResult.status}: ${summarizeBody(getResult.json || getResult.text)}`,
-  );
-  validateApprovedFeedBody(getResult.json);
+  assert(getResult.status === 400, `${name} GET without exact asset/id query expected 400, got ${getResult.status}.`);
 
   const deleteResult = await fetchContract(functionUrl(config, name), {
     method: "DELETE",
@@ -384,9 +663,76 @@ async function checkCurrentSpotlightWinner(config) {
   await checkMethodNotAllowed(config, name);
 }
 
+async function checkCurrentRaffle(config) {
+  const name = "get-current-raffle";
+  await checkOptions(config, name);
+
+  const publicResult = await fetchContract(functionUrl(config, name), {
+    method: "GET",
+    headers: headers(config),
+  });
+  assert(
+    publicResult.status === 200,
+    `${name} GET expected 200, got ${publicResult.status}: ${summarizeBody(publicResult.json || publicResult.text)}`,
+  );
+  assert(publicResult.json?.ok === true, `${name} public response did not return ok=true.`);
+  assert(
+    publicResult.json?.data === null || typeof publicResult.json?.data === "object",
+    `${name} public data must be an object or null.`,
+  );
+
+  const rejectedPrivateResults = [];
+  rejectedPrivateResults.push(await checkProtectedRejects(
+    config,
+    { name, body: { action: "member_leaderboard" } },
+    "member leaderboard without JWT",
+    "",
+  ));
+  rejectedPrivateResults.push(await checkProtectedRejects(
+    config,
+    { name, body: { action: "member_leaderboard" } },
+    "member leaderboard with malformed JWT",
+    "Bearer malformed.jwt.token",
+  ));
+  rejectedPrivateResults.push(await checkProtectedRejects(
+    config,
+    { name, body: { action: "member_leaderboard" } },
+    "member leaderboard with publishable key as bearer",
+    `Bearer ${config.publishableKey}`,
+  ));
+
+  const unsignedSocial = await fetchContract(functionUrl(config, name), {
+    method: "POST",
+    headers: headers(config),
+    body: JSON.stringify({ sub: "00000000-0000-4000-8000-000000000000" }),
+  });
+  assert(
+    [401, 503].includes(unsignedSocial.status),
+    `${name} unsigned Social request expected 401/503 fail-closed response, got ${unsignedSocial.status}: ${summarizeBody(unsignedSocial.json || unsignedSocial.text)}`,
+  );
+  rejectedPrivateResults.push(unsignedSocial);
+
+  for (const result of rejectedPrivateResults) {
+    assert(result.cacheControl === "private, no-store, max-age=0", `${name} private response cache policy drifted.`);
+    assert(
+      result.vary.split(",").some((value) => value.trim().toLowerCase() === "authorization"),
+      `${name} private response must vary on Authorization.`,
+    );
+    assert(result.contentSecurityPolicy.includes("frame-ancestors 'none'"), `${name} private response CSP drifted.`);
+    assert(result.contentTypeOptions.toLowerCase() === "nosniff", `${name} private response must set nosniff.`);
+    assert(result.robots.toLowerCase().includes("noindex"), `${name} private response must be noindex.`);
+  }
+  await checkMethodNotAllowed(config, name);
+}
+
 assert(
-  publicReadOnlyFunctions.length === 2,
+  publicReadOnlyFunctions.length === 3,
   "Public read-only Supabase smoke inventory changed without a reviewed contract update.",
+);
+
+assert(
+  disabledOperationalFunctions.length === 3,
+  "Disabled operational Supabase smoke inventory changed without a reviewed contract update.",
 );
 
 try {
@@ -414,9 +760,14 @@ try {
     );
   }
 
+  for (const target of disabledOperationalFunctions) {
+    await checkDisabledOperationalFunction(config, target);
+  }
+
   await checkApprovedFeed(config);
   await checkVisibleProfileCards(config);
   await checkCurrentSpotlightWinner(config);
+  await checkCurrentRaffle(config);
   console.log("Supabase Edge Function contract smoke OK.");
 } catch (error) {
   const message = error?.message || String(error);

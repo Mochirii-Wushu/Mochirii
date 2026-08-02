@@ -29,11 +29,35 @@ manual recovery deployment, run the CLI from the repository root so the linked
 credential boundary without printing it:
 
 ```powershell
-$token = (Get-Content -LiteralPath "C:\Github Repo's\Mochirii Website\Mochi Creds\Vercel\Vercel Token.txt" -Raw).Trim()
+$workspaceRoot = $env:MOCHIRII_WORKSPACE_ROOT
+$activeCreds = $env:MOCHIRII_CREDS_DIR
+if ([string]::IsNullOrWhiteSpace($workspaceRoot) -or !(Test-Path -LiteralPath $workspaceRoot -PathType Container)) {
+  throw 'MOCHIRII_WORKSPACE_ROOT must name the existing Mochirii umbrella workspace.'
+}
+if ([string]::IsNullOrWhiteSpace($activeCreds) -or !(Test-Path -LiteralPath $activeCreds -PathType Container)) {
+  throw 'MOCHIRII_CREDS_DIR must name Mochirii-Website\Creds\Active inside the private credential boundary.'
+}
+$repoRoot = Join-Path $workspaceRoot 'Website'
+$tokenPath = Join-Path $activeCreds 'Vercel\Vercel Token.txt'
+$vercel = Join-Path $repoRoot 'apps\web\node_modules\.bin\vercel.cmd'
+if (!(Test-Path -LiteralPath $repoRoot -PathType Container)) { throw 'Canonical Website checkout not found.' }
+if (!(Test-Path -LiteralPath $tokenPath -PathType Leaf)) { throw 'Vercel credential file not found.' }
+if (!(Test-Path -LiteralPath $vercel -PathType Leaf)) { throw 'Pinned repo-local Vercel CLI not found.' }
+Set-Location -LiteralPath $repoRoot
+$tokenFromActiveBoundary = (Get-Content -LiteralPath $tokenPath -Raw).Trim()
+if ([string]::IsNullOrWhiteSpace($tokenFromActiveBoundary)) { throw 'Vercel credential file is empty.' }
 $project = Get-Content -LiteralPath 'apps\web\.vercel\project.json' -Raw | ConvertFrom-Json
 $env:VERCEL_ORG_ID = $project.orgId
 $env:VERCEL_PROJECT_ID = $project.projectId
-npx vercel deploy --prod --yes --token $token
+[Environment]::SetEnvironmentVariable('VERCEL_TOKEN', $tokenFromActiveBoundary, 'Process')
+try {
+  & $vercel deploy --prod --yes
+} finally {
+  Remove-Item Env:\VERCEL_TOKEN -ErrorAction SilentlyContinue
+  Remove-Item Env:\VERCEL_ORG_ID -ErrorAction SilentlyContinue
+  Remove-Item Env:\VERCEL_PROJECT_ID -ErrorAction SilentlyContinue
+  Remove-Variable tokenFromActiveBoundary -ErrorAction SilentlyContinue
+}
 ```
 
 ### Website Verification
@@ -104,12 +128,21 @@ recovery path. ActivityPub remains disabled.
   security headers for the website.
 - Cloudflare remains DNS-only for the Vercel website records; edge changes are
   separate evidence-backed provider actions.
-- Public security contact metadata is served only from
-  `apps/web/public/.well-known/security.txt`.
-- GitHub Actions use full-SHA-pinned actions, minimum permissions, and disabled
-  persisted checkout credentials.
+- Public security contact metadata is served from the Website-owned
+  `apps/web/public/.well-known/security.txt` and the Social-host-specific
+  `services/social/public/.well-known/security.txt`; both remain source checked
+  and require separate hosted readback after an approved release.
+- GitHub Actions use full-SHA-pinned actions, minimum permissions, disabled
+  persisted checkout credentials, and no `pull_request_target` workflows.
+  Mutable pull-request, event, ref, and actor values must enter shell steps only
+  through quoted environment variables; never interpolate those contexts
+  directly into `run` scripts.
 - Credentials live only in protected hosted secret stores or the private
   `Mochi Creds` boundary.
+- `scripts/public-disclosure-policy.json` records each retained public metadata
+  class and explicit removal decision, accountable repository owner, purpose,
+  exposure, retention, exact source files, and executable verification. The repository check rejects
+  untracked or repository-escaping sources and nonexistent package scripts.
 
 ## Evidence
 

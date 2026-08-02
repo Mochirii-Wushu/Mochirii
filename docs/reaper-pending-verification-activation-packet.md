@@ -21,7 +21,7 @@ Dry runs, static validation, local type checks, and PR checks are safe local/rep
 
 ## Local Validation
 
-Run from `C:\Users\xtyty\Documents\Mochirii`:
+Run from the canonical Website checkout:
 
 ```sh
 npm run check:reaper-discord-interactions
@@ -146,7 +146,7 @@ Gateway requirements:
 - Do not mutate roles or channel permissions directly.
 - Do not store Supabase service-role keys in the Gateway runtime.
 
-Validation from `C:\Users\xtyty\Documents\Reaper`:
+Validation from the canonical Reaper checkout:
 
 ```sh
 bun install

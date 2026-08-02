@@ -21,7 +21,18 @@
                                             <p class="font-weight-bold small text-muted mb-0">{{ timeago(thread.last_status.created_at) }} ago</p>
                                         </div>
 
-                                        <p class="dm-thread-summary text-muted mr-4" v-html="threadSummary(thread.last_status)"></p>
+										<div
+											v-if="isMediaSummary(thread.last_status)"
+											class="dm-thread-summary border px-2 py-1 mt-1 mr-4 rounded"
+											:class="isOwnMessage(thread.last_status) ? 'text-muted' : 'text-primary'"
+											style="font-size:11px;width:fit-content">
+											<i :class="thread.last_status.pf_type === 'photo' ? 'far fa-image mr-1' : 'far fa-video mr-1'" aria-hidden="true"></i>
+											<span v-text="threadSummary(thread.last_status)"></span>
+										</div>
+										<p v-else class="dm-thread-summary text-muted mr-4">
+											<i v-if="isOwnMessage(thread.last_status)" class="far fa-reply-all fa-flip-both" aria-hidden="true"></i>
+											<span v-text="threadSummary(thread.last_status)"></span>
+										</p>
                                     </div>
 
                                     <router-link class="btn btn-link stretched-link align-self-center mr-n3" :to="`/i/web/direct/thread/${thread.accounts[0].id}`">
@@ -234,32 +245,30 @@
             threadSummary(status, len = 50) {
                 if(status.pf_type == 'photo') {
                     let sender = this.profile.id == status.account.id;
-                    let icon = '<div class="' + (sender ? 'text-muted' : 'text-primary') + ' border px-2 py-1 mt-1 rounded" style="font-size:11px;width: fit-content"><i class="far fa-image mr-1"></i> <span>';
-                    icon += sender ? 'Sent a photo' : 'Received a photo';
-                    return icon + '</span></div>';
+                    return sender ? 'Sent a photo' : 'Received a photo';
                 }
 
                 if(status.pf_type == 'video') {
                     let sender = this.profile.id == status.account.id;
-                    let icon = '<div class="' + (sender ? 'text-muted' : 'text-primary') + ' border px-2 py-1 mt-1 rounded" style="font-size:11px;width: fit-content"><i class="far fa-video mr-1"></i> <span>';
-                    icon += sender ? 'Sent a video' : 'Received a video';
-                    return icon + '</span></div>';
+                    return sender ? 'Sent a video' : 'Received a video';
                 }
 
-                let res = '';
-
-                if(this.profile.id == status.account.id) {
-                    res += '<i class="far fa-reply-all fa-flip-both"></i> ';
-                }
-
-                let content = status.content;
+				let content = typeof status.content === 'string' ? status.content : '';
                 let text = content.replace(/(<([^>]+)>)/gi, "");
 
                 if(text.length > len) {
-                    return res + text.slice(0, len) + '...';
+					return text.slice(0, len) + '...';
                 }
 
-                return res + text;
+				return text;
+            },
+
+			isMediaSummary(status) {
+				return status && ['photo', 'video'].includes(status.pf_type);
+			},
+
+			isOwnMessage(status) {
+				return Boolean(status?.account) && String(this.profile.id) === String(status.account.id);
             },
 
             openCompose() {

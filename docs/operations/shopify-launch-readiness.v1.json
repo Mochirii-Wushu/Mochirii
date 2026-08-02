@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "updated": "2026-08-01",
+  "status": "blocked",
+  "sources": {
+    "ledger": "docs/operations/SHOPIFY-LAUNCH-READINESS.md",
+    "product_facts": "apps/shopify-theme/content/product-facts.v3.json",
+    "launch_pages": "apps/shopify-theme/content/launch-pages.v1.json",
+    "search_expectations": "apps/shopify-theme/content/storefront-search-expectations.v1.json",
+    "mandatory_name_exceptions": "apps/shopify-theme/content/mandatory-name-exceptions.v1.json",
+    "theme_settings": "apps/shopify-theme/config/settings_data.json"
+  },
+  "product_evidence": {
+    "total": 20,
+    "complete": 0,
+    "pending": 19,
+    "blocked": 1,
+    "facts_present": 0,
+    "release_rows_ready": 0,
+    "release_rows_pending": 0,
+    "release_rows_blocked": 20,
+    "release_rows_na_reviewed": 0,
+    "brand_mark": {
+      "failed": 1,
+      "pending": 19,
+      "failed_handles": [
+        "peptide-smoothing-serum"
+      ]
+    }
+  },
+  "public_contracts": {
+    "launch_pages": {
+      "status": "prepared-not-applied",
+      "count": 3
+    },
+    "search_expectations": {
+      "status": "prepared",
+      "count": 6
+    },
+    "mandatory_name_exceptions": {
+      "status": "pending-review"
+    },
+    "checkout_cta_enabled": false
+  },
+  "ledger_sections": {
+    "product_compliance": {
+      "PC-01": "pending",
+      "PC-02": "pending",
+      "PC-03": "pending",
+      "PC-04": "pending",
+      "PC-05": "pending",
+      "PC-06": "pending"
+    },
+    "non_payment_commerce": {
+      "CF-01": "blocked",
+      "CF-02": "blocked",
+      "CF-03": "blocked",
+      "CF-04": "blocked",
+      "CF-05": "pending",
+      "CF-06": "blocked",
+      "CF-07": "blocked"
+    },
+    "privacy_and_safety": {
+      "PS-01": "blocked",
+      "PS-02": "blocked",
+      "PS-03": "blocked",
+      "PS-04": "pending",
+      "PS-05": "pending"
+    },
+    "theme_and_storefront_qa": {
+      "QA-01": "blocked",
+      "QA-02": "blocked",
+      "QA-03": "blocked",
+      "QA-04": "blocked",
+      "QA-05": "blocked",
+      "QA-06": "blocked",
+      "QA-07": "blocked",
+      "QA-08": "blocked",
+      "QA-09": "blocked"
+    }
+  },
+  "gates": {
+    "A": "blocked",
+    "B": "blocked",
+    "C": "blocked",
+    "D": "blocked",
+    "E": "blocked",
+    "F": "intentionally-deferred-final-phase",
+    "G": "blocked"
+  },
+  "phase_4_evidence": [
+    {
+      "id": "browse-search-collections",
+      "evidence_owner": "QA-03",
+      "status": "blocked"
+    },
+    {
+      "id": "product-variant-pricing",
+      "evidence_owner": "Gate A and CF-01",
+      "status": "blocked"
+    },
+    {
+      "id": "availability-inventory-fulfillment",
+      "evidence_owner": "CF-02 and CF-03",
+      "status": "blocked"
+    },
+    {
+      "id": "cart-errors-cancel-returns",
+      "evidence_owner": "CF-05 and QA-03",
+      "status": "blocked"
+    },
+    {
+      "id": "checkout-payment-order-lifecycle",
+      "evidence_owner": "Gate F",
+      "status": "blocked"
+    },
+    {
+      "id": "webhook-authenticity-replay-idempotency-retries-redaction",
+      "evidence_owner": "Gate F provider integration",
+      "status": "blocked"
+    },
+    {
+      "id": "responsive-accessibility",
+      "evidence_owner": "QA-04",
+      "status": "blocked"
+    },
+    {
+      "id": "cache-privacy-security-performance",
+      "evidence_owner": "PS-01 through PS-05 and QA-05 through QA-06",
+      "status": "blocked"
+    }
+  ],
+  "assertions": {
+    "prepayment_complete": false,
+    "candidate_package_final": false,
+    "provider_readback_current": false,
+    "storefront_publication_authorized": false,
+    "checkout_or_payment_activation_authorized": false
+  }
+}

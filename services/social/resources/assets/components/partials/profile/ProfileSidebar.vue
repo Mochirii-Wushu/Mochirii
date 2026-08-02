@@ -8,7 +8,9 @@
                              onerror="this.onerror=null;this.src='/storage/avatars/default.png?v=0';">
                     </div>
                     <div class="media-body">
-                        <p class="display-name" v-html="getDisplayName()"></p>
+                        <p class="display-name">
+                            <display-name :profile="profile" :emojis="getCustomEmoji" />
+                        </p>
                         <p class="username" :class="{ remote: !profile.local }">
                             <a v-if="!profile.local" :href="profile.url" class="primary">&commat;{{ profile.acct }}</a>
                             <span v-else>&commat;{{ profile.acct }}</span>
@@ -109,7 +111,9 @@
             </div>
 
             <div class="d-none d-md-block text-center">
-                <p v-html="getDisplayName()" class="display-name"></p>
+                <p class="display-name">
+                    <display-name :profile="profile" :emojis="getCustomEmoji" />
+                </p>
 
                 <p class="username" :class="{ remote: !profile.local }">
                     <a v-if="!profile.local" :href="profile.url" class="primary">&commat;{{ profile.acct }}</a>
@@ -358,6 +362,7 @@
 
 <script type="text/javascript">
 import {mapGetters} from 'vuex'
+import DisplayName from './DisplayName.vue';
 
 export default {
     props: {
@@ -380,6 +385,10 @@ export default {
         }
     },
 
+    components: {
+        DisplayName
+    },
+
     computed: {
         ...mapGetters([
             'getCustomEmoji'
@@ -400,29 +409,6 @@ export default {
     },
 
     methods: {
-        getDisplayName() {
-            let self = this;
-            let profile = this.profile;
-            let dn = profile.display_name;
-            if (!dn) {
-                return profile.username;
-            }
-            if (dn.includes(':')) {
-                // let re = /:(::|[^:\n])+:/g;
-                let re = /(<a?)?:\w+:(\d{18}>)?/g;
-                let un = dn.replaceAll(re, function (em) {
-                    let shortcode = em.slice(1, em.length - 1);
-                    let emoji = self.getCustomEmoji.filter(e => {
-                        return e.shortcode == shortcode;
-                    });
-                    return emoji.length ? `<img draggable="false" class="emojione custom-emoji" alt="${emoji[0].shortcode}" title="${emoji[0].shortcode}" src="${emoji[0].url}" data-original="${emoji[0].url}" data-static="${emoji[0].static_url}" width="16" height="16" onerror="this.onerror=null;this.src='/storage/emoji/missing.png';" />` : em;
-                });
-                return un;
-            } else {
-                return dn;
-            }
-        },
-
         truncate(str) {
             if (!str) {
                 return;

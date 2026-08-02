@@ -89,7 +89,7 @@ installation, and Pixelfed OAuth token-auth compatibility.
 
 3. Store the returned client ID and client secret only in the approved private
    host secret store and local credential vault under
-   `C:\Users\xtyty\Documents\Creds`; never commit or print them.
+   the private credential boundary; never commit or print them.
 
 4. Provision Pixelfed staging outside Vercel with closed registration, OIDC-only
    login, federation disabled, upload limits, queue worker, scheduler, HTTPS,

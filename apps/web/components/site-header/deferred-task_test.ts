@@ -1,6 +1,8 @@
 import {
   createDedupedLoader,
+  hasExactCookieName,
   scheduleDeferredTask,
+  shouldScheduleAutomaticAuthLoad,
   type DeferredTaskHost,
 } from "./deferred-task.ts";
 
@@ -112,4 +114,48 @@ Deno.test("scheduleDeferredTask falls back to a cancellable timer", () => {
   assert(runs === 1, "the fallback timer must run the task");
   cancel();
   assert(cancelled === 23, "cleanup must cancel the fallback timer");
+});
+
+Deno.test("hasExactCookieName accepts only the reviewed session cookie and numeric chunks", () => {
+  const expected = "sb-reviewed-project-auth-token";
+  assert(hasExactCookieName(`${expected}=opaque`, expected), "the exact cookie must be recognized");
+  assert(
+    hasExactCookieName(`other=value; ${expected}.0=opaque; ${expected}.1=opaque`, expected),
+    "numeric session chunks must be recognized",
+  );
+  assert(
+    !hasExactCookieName(`${expected}-code-verifier=opaque`, expected),
+    "the PKCE cookie must not schedule the member runtime",
+  );
+  assert(
+    !hasExactCookieName(`${expected}.attacker=opaque; prefix-${expected}=opaque`, expected),
+    "confusable cookie names must be rejected",
+  );
+  assert(
+    !hasExactCookieName(`${expected}.00=opaque; ${expected}.01=opaque`, expected),
+    "noncanonical numeric chunks must be rejected",
+  );
+  assert(!hasExactCookieName(`${expected}=opaque`, "bad.name"), "invalid expected names must fail closed");
+});
+
+Deno.test("automatic auth loading follows exact cookie presence and fails safe when cookies are unreadable", () => {
+  const expected = "sb-reviewed-project-auth-token";
+  assert(
+    !shouldScheduleAutomaticAuthLoad(() => "unrelated=value", expected),
+    "a signed-out page must not schedule the member runtime",
+  );
+  assert(
+    shouldScheduleAutomaticAuthLoad(() => `${expected}=opaque`, expected),
+    "the exact session cookie must schedule authoritative auth readback",
+  );
+  assert(
+    shouldScheduleAutomaticAuthLoad(() => `${expected}.1=opaque`, expected),
+    "a canonical chunked session cookie must schedule authoritative auth readback",
+  );
+  assert(
+    shouldScheduleAutomaticAuthLoad(() => {
+      throw new Error("cookie access unavailable");
+    }, expected),
+    "unavailable cookie access must preserve authoritative auth readback",
+  );
 });

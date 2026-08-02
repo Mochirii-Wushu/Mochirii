@@ -4,9 +4,9 @@ This runbook is for leaders reviewing member Gallery submissions through the web
 
 It does not contain secrets, tokens, private URLs, or deployment credentials.
 
-Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/123>
+Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii-Website/pull/123>
 
-Instagram deployment and Reaper rollout steps are separate from routine moderation and are tracked in [`instagram-gallery-publishing-deployment-runbook.md`](./instagram-gallery-publishing-deployment-runbook.md).
+Meta deployment and Reaper rollout steps are separate from routine moderation and are tracked in [`instagram-gallery-publishing-deployment-runbook.md`](./instagram-gallery-publishing-deployment-runbook.md).
 
 ## 1. What Moderation Controls
 
@@ -16,16 +16,16 @@ Moderation does not:
 
 - edit `apps/web/public/data/gallery.json`
 - publish static Gallery images
-- automatically publish images to Instagram
+- automatically publish images to Instagram or the official Facebook Page
 - make the `member-gallery` Storage bucket public
 - assign Discord roles
 - bypass Supabase RLS or Storage policies
 - require `supabase db push`
 - require Edge Function deployment during normal review
 
-Approved submissions are served to the public Gallery by the approved-feed Edge Function through distinct short-lived thumbnail and full-image URLs. Pending, rejected, archived, and historical approved rows without a validated thumbnail stay out of the public Gallery.
+Published submissions are served to the public Gallery by the approved-feed Edge Function. Its list returns only short-lived bounded thumbnails; the viewer resolves one bounded display derivative on demand from a stable opaque publication ID. The member-owned source original remains private. Pending, rejected, archived, and historical approved rows without a complete immutable publication revision stay out of the public Gallery.
 
-If a member opted in to Instagram sharing, approving the website Gallery submission creates an Instagram Queue job. It does not publish to Instagram. A moderator must review that separate queue and use a final confirmation before any external public post is sent.
+If a member selected Instagram or the official Facebook Page, approving the website Gallery submission may create one destination-specific queue job. It does not publish externally. A moderator must review the separate destination queue and use a second confirmation before any public provider request is sent.
 
 ## 2. Access Requirements
 
@@ -52,10 +52,12 @@ The dashboard has four queue tabs:
 - Archived
 
 Use Refresh Queue after a moderation action or when coordinating with another moderator.
+The queue entry is a reviewed snapshot. A referenced source object cannot be replaced or deleted by the member, and the final moderation transaction compares the row revision shown to the moderator. If any descriptive field changes before commit, the action fails closed; refresh and review the current item again.
 
 Each submission may show:
 
-- preview image from a short-lived signed URL
+- a `Prepare private preview` action until that one source is structurally and fully decoded
+- a preview image only after current validation evidence exists
 - title
 - caption
 - uploader display details
@@ -64,27 +66,42 @@ Each submission may show:
 - MIME type
 - file size
 - prepared Gallery thumbnail size or `Not prepared`
+- prepared Gallery thumbnail decoded width and height
 - submitted date
 - reviewed date
-- Instagram opt-in state
+- upload-rights confirmation
+- independent Instagram and Facebook Page opt-in states
 - Storage reference
 - moderation history
 
-Treat Storage references and signed preview URLs as operational details. Do not paste them into public Discord channels, public docs, issue comments, or screenshots.
+Treat Storage references and private preview evidence as operational details. Do not paste them into public Discord channels, public docs, issue comments, or screenshots.
 
 ## 4. Pending Review Checklist
 
 Before approving a submission, check:
 
+- `Prepare private preview` completes for the selected item before any prepared image is loaded
 - the preview loads and matches the submitted title/caption
 - the image is appropriate for the guild website
 - the title is clear enough for public display
 - the caption does not contain private information, harassment, slurs, spam, or unrelated promotion
 - the category is reasonable for Gallery browsing
+- the category is one canonical Gallery category: Portraits, Gatherings, Action, Scenery, or Companions
 - the image does not reveal sensitive account, server, or personal information
-- any Instagram opt-in is intentional and shown on the submission
+- upload rights and permission involving identifiable people were explicitly confirmed
+- any Instagram or Facebook Page opt-in is intentional and shown independently on the submission
 
-If the preview is unavailable, do not approve by title alone. Refresh the queue once. If it remains unavailable, leave it pending and escalate.
+Preparing a preview reserves the exact source bytes, validates and fully decodes the exact current Storage object, and binds its MIME type, encoded byte size, dimensions, SHA-256, object identity, and durable validation timestamp to the submission revision. Accepted sources are static JPEG, PNG, or WebP no larger than 8 MiB, 4096 pixels on either edge, or 12.6 megapixels. The same-origin website route independently decodes and re-renders a metadata-free WebP no larger than 2560 pixels per edge or 2 MiB. Only that derivative reaches the browser; no source URL or signed Storage capability does. Validation evidence is service-only and becomes stale if the object identity or row revision changes. The ordinary queue does not bulk-download or bulk-validate private originals.
+
+The private source-byte step also requires a verified, short-lived Website
+workload identity in addition to the moderator session. A moderator bearer sent
+directly to the Edge endpoint receives no bytes. If the workload identity is
+missing, expired, has the wrong project/environment claims, or cannot be
+verified, the preview stays unavailable and the response remains opaque. Do
+not bypass that gate or copy identity headers into a browser, log, ticket, or
+manual request.
+
+If validation fails or the preview is unavailable, do not approve by title alone. Refresh the queue once. If it remains unavailable, leave it pending and escalate. Never bypass validation by opening a raw Storage path.
 
 ## 5. Approving A Submission
 
@@ -92,26 +109,54 @@ Use Approve only when the submission is safe for the public Gallery.
 
 After approval:
 
-- the browser prepares a bounded WebP thumbnail from the signed private preview
-- the Edge Function verifies that the derivative is static WebP, no larger than 720 pixels on either edge, no larger than 80 KiB, and fully decodable by the pinned libwebp validator
-- the function uploads a unique immutable revision under the service-only derivative prefix
-- the row status, derivative reference, review metadata, and moderation event commit atomically
+- the moderation browser reuses the one validated preview download to create a metadata-stripped WebP display image and thumbnail; it must not fetch the private original a second time
+- the display image is no larger than 2560 pixels on either edge or 2 MiB
+- the thumbnail is no larger than 720 pixels on either edge or 80 KiB
+- the Edge Function verifies that both assets are static WebP and fully decodable by the pinned libwebp validator
+- the stable publication ID owns one service-only display path, while each thumbnail refresh receives a new immutable revision ID and path
+- reviewed copy, category, display name, timestamps, media metadata, and the per-revision thumbnail are frozen in the private publication ledger
+- the row status, moderation event, prior-revision retirement, and new publication revision commit atomically
+- a stale queue snapshot cannot commit; the moderator must refresh and review the current text and image again
 - the approved public Gallery feed may include the item
-- an opted-in image may create an Instagram Queue job for later review
+- an opted-in image may create one Instagram and/or Facebook Page job for later review
 - no static Gallery JSON is edited
-- no automatic Instagram publishing happens
+- no automatic external publishing happens
 
-If an older approved item says `Not prepared`, use the Approved queue's `Needs thumbnail` filter and paginated controls. Choose `Prepare gallery thumbnail` only after confirming the signed preview still matches the approved unit. The item remains absent from the public feed until that backfill succeeds and records a `thumbnail_refreshed` audit event.
+If an older approved item says `Not prepared`, use the Approved queue's `Needs publication` filter and paginated controls. Treat that label as an explicit publication-media review, not a mechanical thumbnail backfill. Republish only after confirming the prepared private preview still matches the reviewed unit and selecting one canonical category. The workflow creates both bounded assets and an immutable publication revision. The legacy row remains private until that transaction succeeds and records its moderation audit event; approval status or old thumbnail fields alone are never publication evidence.
+
+The ordinary moderator path remains limited to sources at or below 8 MiB. An
+approved pre-foundation source above that limit must stop and enter the
+separately authorized historical operator lane. That lane is service-role only,
+available only while Gallery cutover is closed, retains operator attribution,
+and binds a trusted offline decoder result to the exact source row and Storage
+object revision. Never download such a source through the browser or Edge
+preview path. The source remains private and unchanged; only its bounded WebP
+display and thumbnail derivatives may become publication evidence.
+
+Historical approved rows with a null or noncanonical visual category require a separate human review. Do not infer a category from the upload source, filename, caption, or old provider metadata. They remain private until explicit republication with a canonical category. Category review and publication-media preparation may be coordinated for the same unit, but neither is a bulk backfill; each remains a separate authorized operation with its own exact provider-data approval.
 
 If an approved item needs later removal from the public feed, do not edit `apps/web/public/data/gallery.json`. Use the moderation/admin path for changing the submission status, or escalate if that path is unavailable.
 
-## 6. Instagram Queue
+Archiving or otherwise removing approval retires the active revision immediately.
+Retired revision records remain immutable, and their service-owned objects must
+be retained for at least one hour so in-flight snapshot delivery can finish.
+Do not delete or rewrite them during routine moderation.
+
+## 6. Destination Publishing Queues
+
+Instagram and Facebook Page queues are moderator-only second steps. Gallery approval and each destination publication are separate audited decisions. Both server-side publication flags default to false, and a diagnostic is read-only: it must not create media or posts.
+
+Every publish action has a prepare step followed by a separate confirmation. The confirmation fingerprint binds the destination, current job ID/state/revision, attempt count, final caption, Instagram alt text when applicable, and current moderator. Editing copy, refreshing the queue, changing the job, or receiving a stale revision disarms it. Never retry an ambiguous provider request; inspect and reconcile it first.
+
+Automated destination copy rejects URL-like text. Do not place `mochirii.com` or any external link in Instagram publication copy or profile fields.
+
+### Instagram
 
 The Instagram Queue is a moderator-only second step for approved images where the member explicitly opted in. It is separate from website Gallery approval.
 
 The queue may show:
 
-- preview image from signed preview URLs
+- credential-free approved Gallery thumbnail
 - title
 - caption/subtitle
 - uploader and submission source
@@ -119,25 +164,36 @@ The queue may show:
 - eligibility
 - job state
 - last error
-- Instagram permalink after publish or manual share
+- Instagram permalink after Graph publishing or on a historical record
 
 JPEG images are eligible for the v1 single-image feed workflow. PNG and WebP submissions are marked ineligible instead of being converted or posted.
 
-Current launch mode is manual sharing:
+The hardened source is designed for queue review only after an authorized
+deployment; this runbook does not prove the current hosted queue state. Manual
+Instagram completion is disabled because the Leader Dashboard does not expose the private frozen
+metadata-stripped JPEG. The compatibility endpoint returns `409`, and no
+database RPC can mark a job `shared_manually`. That status is historical only.
 
-- review the image and consent state
-- review or edit the Instagram caption
-- review or edit the alt text
-- download the image from the signed preview URL
-- copy the caption and alt text
-- post manually from the official Instagram account or Meta Business Suite
-- paste the Instagram permalink if available
-- click `Mark shared manually`
-- review the in-card confirmation prompt and click `Confirm manual share`
+- review the consent state, caption, alt text, and approved Gallery thumbnail
+- leave the job queued while Graph publishing is unavailable
+- do not download or substitute the Gallery thumbnail, WebP display asset, or
+  original member upload for an Instagram post
+- use reconciliation only when an actual Graph attempt has an ambiguous result
+  and the job is already `reconcile_required`
 
 Meta API publishing should remain disabled until Meta developer registration is complete, `INSTAGRAM_*` Supabase secrets are set, and the moderator-only `Check Meta API` diagnostic passes. The diagnostic does not create media containers or publish posts.
 
 Do not publish test images, live images, or retry failed jobs unless the owner has approved the live Instagram action. Do not paste signed preview URLs into Discord, GitHub, public docs, screenshots, or Meta setup notes.
+
+### Facebook Page
+
+The Facebook Page queue follows the same two-step confirmation and stale-revision controls. It sends only the private sanitized social derivative to the server-pinned official Page. The browser must not compare, display, or persist raw provider IDs, secret names, or credential details.
+
+After a verified Page post exists, the dashboard may expose a moderator-only link for a manual Page-to-Guild-group handoff. No Facebook Groups API is used, and group sharing must never be described as automatic.
+
+### Consent withdrawal
+
+Members withdraw one destination at a time from Account. Queued, failed, or ineligible work is canceled atomically; publishing or uncertain work is quarantined for inspection; published work creates a removal request. Preserve the original consent and immutable withdrawal event, and never claim an external copy was removed until that outcome is separately verified.
 
 ## 7. Declining A Submission
 
@@ -184,7 +240,9 @@ The audit trail is for operational accountability. Do not manually edit audit ro
 | Signed out | Browser has no active website session. | Choose a sign-in method again. |
 | Access denied | The signed-in account does not pass moderator verification. | Confirm Discord Moderator role and server-side config. |
 | No pending submissions | The pending queue is empty. | No action needed. |
-| Preview unavailable | Signed preview URL could not be created or object is missing. | Refresh once; if still missing, leave pending and escalate. |
+| Private preview required | This exact source has no current trusted validation evidence. | Choose `Prepare private preview` for that one item before reviewing it. |
+| Source validation failed | The file is malformed, animated, mismatched, or outside the reviewed limits. | Leave it pending and ask the member for a static JPEG, PNG, or WebP within the stated limits. |
+| Preview unavailable | The metered validation or prepared same-origin preview failed. | Refresh once; if still missing, leave pending and escalate. |
 | Decline reason required | Decline was clicked without enough reason text. | Add a short reason and try again. |
 | Function request failed | Edge Function returned an error or network failed. | Refresh once, avoid repeated clicking, then escalate with time and visible message. |
 | Counts look stale | Another moderator may have acted or the queue changed. | Refresh Queue. |

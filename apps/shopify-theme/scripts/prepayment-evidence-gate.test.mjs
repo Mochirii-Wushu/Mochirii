@@ -14,6 +14,7 @@ import { deflateSync } from "node:zlib";
 import { calculateRetailPriceUsd, redactedPriceVerification, verifyPrivatePriceLedger } from "./lib/private-price-rule.mjs";
 import {
   EXPECTED_PRODUCT_HANDLES,
+  PREPAYMENT_RESPONSIVE_VIEWPORTS,
   PREPAYMENT_GATE_POLICY,
   REQUIRED_EVIDENCE_KINDS,
   REQUIRED_SEARCH_QUERIES,
@@ -539,7 +540,8 @@ function fixtureSourceContracts() {
     reviewed_route_categories: [...REQUIRED_RENDERED_ROUTE_CATEGORIES],
   };
   return {
-    manifest: readSourceJson("apps/shopify-theme/MIGRATION-MANIFEST.json"),
+    activeSourceManifest: readSourceJson("apps/shopify-theme/ACTIVE-SOURCE-MANIFEST.v1.json"),
+    activeSourceManifestSchema: readSourceJson("apps/shopify-theme/ACTIVE-SOURCE-MANIFEST.v1.schema.json"),
     productFacts,
     launchPages: readSourceJson("apps/shopify-theme/content/launch-pages.v1.json"),
     mandatoryNames,
@@ -860,7 +862,7 @@ function buildFixture(directory) {
   const sourceContracts = fixtureSourceContracts();
   const packageRelativePath = `${relativeDirectory}/candidate-theme.zip`;
   const packagePath = path.join(repositoryRoot, ...packageRelativePath.split("/"));
-  const packageBuffer = storedZip(sourceContracts.manifest.files.map((entry) => [
+  const packageBuffer = storedZip(sourceContracts.activeSourceManifest.files.map((entry) => [
     entry.path.slice("apps/shopify-theme/".length),
     readFileSync(path.join(repositoryRoot, ...entry.path.split("/"))),
   ]));
@@ -1229,7 +1231,7 @@ function buildFixture(directory) {
       captured_at: CAPTURED_AT,
       theme_id: "141514408011",
       status: "Draft",
-      checkout_enabled: false,
+      checkout_cta_enabled: false,
       password_protected: true,
       published: false,
       dedicated_hero_pass: true,
@@ -1398,7 +1400,7 @@ function buildFixture(directory) {
       voiceover_safari_pass: true,
       automated_accessibility_critical: 0,
       automated_accessibility_serious: 0,
-      responsive_viewports: ["360x800", "390x844", "768x1024", "1440x900"],
+      responsive_viewports: [...PREPAYMENT_RESPONSIVE_VIEWPORTS],
       lighthouse: ["home", "collection", "product", "cart"].map((routeType) => ({
         route_type: routeType,
         accessibility: 95,
@@ -1485,8 +1487,8 @@ function buildFixture(directory) {
       package_path: packageRelativePath,
       package_sha256: packageSha,
       size_bytes: packageBuffer.length,
-      manifest_sha256: contractSha(sourceContracts.manifest),
-      runtime_file_count: sourceContracts.manifest.files.length,
+      active_source_manifest_sha256: contractSha(sourceContracts.activeSourceManifest),
+      runtime_file_count: sourceContracts.activeSourceManifest.files.length,
       source_commit_sha: COMMIT_SHA,
       source_tree_sha: TREE_SHA,
       candidate_theme_id: PREPAYMENT_GATE_POLICY.candidate_theme_id,
@@ -2485,7 +2487,7 @@ test("merge-commit checks are required while a skipped Supabase preview remains 
 
 test("a self-consistently rehashed but source-divergent candidate ZIP fails", () => {
   withFixture((fixture) => {
-    const entries = fixture.sourceContracts.manifest.files.map((entry, index) => [
+    const entries = fixture.sourceContracts.activeSourceManifest.files.map((entry, index) => [
       entry.path.slice("apps/shopify-theme/".length),
       index === 0
         ? Buffer.from("altered runtime bytes", "utf8")
@@ -2499,10 +2501,34 @@ test("a self-consistently rehashed but source-divergent candidate ZIP fails", ()
   });
 });
 
+test("a self-consistent package cannot omit runtime through an incomplete active-source manifest", () => {
+  withFixture((fixture) => {
+    const contracts = structuredClone(fixture.sourceContracts);
+    contracts.activeSourceManifest.files = contracts.activeSourceManifest.files.slice(1);
+    const entries = contracts.activeSourceManifest.files.map((entry) => [
+      entry.path.slice("apps/shopify-theme/".length),
+      readFileSync(path.join(repositoryRoot, ...entry.path.split("/"))),
+    ]);
+    const packageBuffer = storedZip(entries);
+    const packageSha256 = sha256(packageBuffer);
+    replaceCandidatePackage(fixture, packageBuffer);
+    rewriteEvidence(fixture, "theme-package", (document) => {
+      document.claim.package_sha256 = packageSha256;
+      document.claim.size_bytes = packageBuffer.length;
+      document.claim.active_source_manifest_sha256 = contractSha(contracts.activeSourceManifest);
+      document.claim.runtime_file_count = contracts.activeSourceManifest.files.length;
+    });
+    const result = validate(fixture.bundle, fixture.bundlePath, NOW, contracts);
+    assert.equal(result.ok, false);
+    assert.equal(result.issues.some((issue) =>
+      issue.gate === "theme-package" && issue.category === "artifact.active-source-manifest"), true);
+  });
+});
+
 test("package inventory and ZIP integrity fail for missing or duplicate entries", () => {
   for (const scenario of ["missing", "duplicate"]) {
     withFixture((fixture) => {
-      const entries = fixture.sourceContracts.manifest.files.map((entry) => [
+      const entries = fixture.sourceContracts.activeSourceManifest.files.map((entry) => [
         entry.path.slice("apps/shopify-theme/".length),
         readFileSync(path.join(repositoryRoot, ...entry.path.split("/"))),
       ]);

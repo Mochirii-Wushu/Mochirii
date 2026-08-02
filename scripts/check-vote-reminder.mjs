@@ -13,6 +13,8 @@ const files = {
   helper: "supabase/functions/_shared/vote-reminders.ts",
   helperTest: "supabase/functions/_shared/vote-reminders_test.ts",
   serviceRole: "supabase/functions/_shared/supabase-service-role.ts",
+  secretAuth: "supabase/functions/_shared/secret-auth.ts",
+  secretAuthTest: "supabase/functions/_shared/secret-auth_test.ts",
   sender: "supabase/functions/send-vote-reminder/index.ts",
   senderImportMap: "supabase/functions/send-vote-reminder/deno.json",
   reaper: "supabase/functions/reaper-discord-interactions/index.ts",
@@ -55,6 +57,8 @@ const migration = read(files.migration);
 const helper = read(files.helper);
 const helperTest = read(files.helperTest);
 const serviceRole = read(files.serviceRole);
+const secretAuth = read(files.secretAuth);
+const secretAuthTest = read(files.secretAuthTest);
 const sender = read(files.sender);
 const senderImportMap = read(files.senderImportMap);
 const reaper = [read(files.reaper), read(files.interactionHelpers), read(files.reaperVoteInteractions)].join("\n");
@@ -134,7 +138,18 @@ assertNotMatches(
   "vote_reminder_sends",
   "status: \"pending\"",
   "duplicate: true",
+  "constantTimeSecretEqual",
+  "await constantTimeSecretEqual(bearerOrHeaderSecret(req), cronSecret)",
 ].forEach((snippet) => assertIncludes("send-vote-reminder", sender, snippet));
+[
+  'crypto.subtle.digest("SHA-256"',
+  "MAX_SHARED_SECRET_BYTES",
+  "mismatch |= providedDigest[index] ^ expectedDigest[index]",
+].forEach((snippet) => assertIncludes("shared secret authentication", secretAuth, snippet));
+[
+  "constant-time secret comparison accepts only an exact match",
+  "Different or empty secrets must fail closed.",
+].forEach((snippet) => assertIncludes("shared secret authentication tests", secretAuthTest, snippet));
 
 [
   "../_shared/supabase-service-role.ts",
@@ -179,8 +194,8 @@ assertNotMatches(
 assertMatches(
   "reaper-discord-interactions",
   reaper,
-  /const rawBody = await req\.text\(\);[\s\S]*verifyDiscordSignature\(req, rawBody, publicKey\)[\s\S]*JSON\.parse\(rawBody\)/,
-  "Discord signature must still be verified against the raw body before JSON parsing.",
+  /readBoundedUtf8RequestBody\([\s\S]*verifyDiscordSignature\(req, bodyResult\.bytes, publicKey\)[\s\S]*JSON\.parse\(bodyResult\.text\)/,
+  "Discord signature must still verify the bounded exact body before JSON parsing.",
 );
 
 assertNotMatches(

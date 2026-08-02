@@ -84,6 +84,55 @@ class PrivateSocialBoundaryTest extends TestCase
     }
 
     #[Test]
+    public function signed_out_security_metadata_remains_reachable(): void
+    {
+        $getResponse = app(MochiriiPrivateSocial::class)->handle(
+            Request::create('/.well-known/security.txt', 'GET'),
+            fn () => response('security metadata'),
+        );
+        $headResponse = app(MochiriiPrivateSocial::class)->handle(
+            Request::create('/.well-known/security.txt', 'HEAD'),
+            fn () => response('security metadata'),
+        );
+
+        $this->assertSame(200, $getResponse->getStatusCode());
+        $this->assertSame('security metadata', $getResponse->getContent());
+        $this->assertSame(200, $headResponse->getStatusCode());
+    }
+
+    #[Test]
+    public function signed_out_security_metadata_rejects_non_read_methods(): void
+    {
+        $this->expectException(NotFoundHttpException::class);
+        app(MochiriiPrivateSocial::class)->handle(
+            Request::create('/.well-known/security.txt', 'POST'),
+            fn () => response('security metadata'),
+        );
+    }
+
+    #[Test]
+    public function authenticated_security_metadata_rejects_non_read_methods_before_access_checks(): void
+    {
+        $user = User::create([
+            'name' => 'Verified Member',
+            'username' => 'verifiedmember',
+            'email' => 'verified.member@gmail.com',
+            'password' => 'not-used',
+            'register_source' => 'oidc',
+        ]);
+        $this->partialMock(MochiriiSocialSyncService::class, function (MockInterface $mock) {
+            $mock->shouldNotReceive('hasCurrentAccess');
+        });
+        Auth::guard('web')->setUser($user);
+
+        $this->expectException(NotFoundHttpException::class);
+        app(MochiriiPrivateSocial::class)->handle(
+            Request::create('/.well-known/security.txt', 'POST'),
+            fn () => response('security metadata'),
+        );
+    }
+
+    #[Test]
     public function an_oidc_verified_social_member_passes_the_private_boundary(): void
     {
         $user = User::create([

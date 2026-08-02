@@ -11,7 +11,7 @@ Working branch:
 - `codex/current-state-docs-and-hygiene`
 - Base: `origin/main` at `78da5f3 Fix events image aspect ratio`
 
-Before cleanup, the checkout was on `codex/events-image-ratio-fix` tracking a gone remote branch. Local `main` is checked out in the sibling worktree `C:\Users\xtyty\Documents\Mochirii-discord-upload-hotfix`, so this packet branched directly from `origin/main`.
+Before cleanup, the checkout was on `codex/events-image-ratio-fix` tracking a gone remote branch. Local `main` was checked out in a sibling `Mochirii-discord-upload-hotfix` worktree, so this packet branched directly from `origin/main`.
 
 Deleted local-only stale branches whose remote branches were gone and whose release titles are present on current `origin/main` history:
 

@@ -1,5 +1,5 @@
 /* =========================================================
-   HOME â€” Bulletins (grid spacing and rhythm)
+   HOME — Bulletins (grid spacing and rhythm)
    ========================================================= */
 .home-bulletins{
   display:grid;
@@ -70,7 +70,7 @@
 }
 
 /* =========================================================
-   HOME â€” Bulletins (title typography)
+   HOME — Bulletins (title typography)
    ========================================================= */
 .home-title,
 .home-bulletin__title{
@@ -90,7 +90,7 @@
 }
 
 /* =========================================================
-   HOME â€” Bulletins (pill labels; visual only)
+   HOME — Bulletins (pill labels; visual only)
    ========================================================= */
 .home-pill,
 .home-bulletin__tag{

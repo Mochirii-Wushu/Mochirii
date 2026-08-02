@@ -4,6 +4,7 @@ namespace App\Transformer\Api;
 
 use App\Profile;
 use App\Services\PronounService;
+use App\Services\SanitizeService;
 use App\User;
 use App\UserSetting;
 use Cache;
@@ -54,14 +55,14 @@ class AccountTransformer extends Fractal\TransformerAbstract
             'id' => (string) $profile->id,
             'username' => $username,
             'acct' => $acct,
-            'display_name' => $profile->name,
+            'display_name' => app(SanitizeService::class)->plainText($profile->name),
             'discoverable' => true,
             'locked' => (bool) $profile->is_private,
             'followers_count' => $hideFollowers ? 0 : (int) $profile->followers_count,
             'following_count' => $hideFollowing ? 0 : (int) $profile->following_count,
             'statuses_count' => (int) $profile->status_count,
-            'note' => $profile->bio ?? '',
-            'note_text' => $profile->bio ? strip_tags($profile->bio) : null,
+            'note' => app(SanitizeService::class)->richText($profile->bio ?? ''),
+            'note_text' => $profile->bio ? app(SanitizeService::class)->plainText($profile->bio) : null,
             'url' => $profile->url(),
             'avatar' => $profile->avatarUrl(),
             'website' => $profile->website,

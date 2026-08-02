@@ -302,6 +302,7 @@ async function requestRenderedMedia(
     const response = await fetch(MEDIA_RENDER_URL, {
       method: "POST",
       cache: "no-store",
+      redirect: "error",
       headers: { [MEDIA_TOKEN_HEADER]: token },
       signal: controller.signal,
     });

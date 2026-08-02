@@ -4,7 +4,13 @@ Please do not report security issues in public issues or pull requests.
 
 ## Reporting
 
-Use GitHub private vulnerability reporting if available for this repository. If it is not available, contact a repository administrator privately and include:
+Use GitHub private vulnerability reporting for confidential security reports:
+
+```text
+https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new
+```
+
+Do not use public issues or pull requests. Include:
 
 - A concise description of the issue
 - Affected URL, route, function, or workflow
@@ -19,6 +25,13 @@ https://mochirii.com/.well-known/security.txt
 
 ## Scope
 
+In-scope production hosts are `https://mochirii.com` and
+`https://social.mochirii.com`, plus source owned by this repository. Test only
+assets and accounts you own or are expressly authorized to use. Third-party
+provider services and infrastructure are outside this policy unless Mochirii
+owns the affected configuration; follow each provider's own security policy
+and terms.
+
 Security-sensitive areas include:
 
 - Supabase authentication, RLS, storage, and Edge Functions
@@ -27,7 +40,22 @@ Security-sensitive areas include:
 - Environment variables and credentials
 - Member-only upload, account, and leader dashboard flows
 
-Do not include real secrets, tokens, private member data, or exploit payloads beyond what is necessary to explain the issue.
+## Research Guidelines
+
+- Use the minimum requests, accounts, and data needed to demonstrate the issue.
+- Do not perform denial-of-service or availability testing, social engineering,
+  phishing, spam, credential attacks, destructive actions, persistence,
+  malware delivery, bulk collection, or automated testing that could disrupt
+  members or providers.
+- Do not access another person's account or data. If member data, credentials,
+  or service instability are encountered, stop testing and report immediately.
+- Do not change, delete, download, retain, or disclose production data beyond
+  the smallest redacted proof needed to explain the issue.
+- Allow time for investigation and remediation before any public disclosure.
+
+Do not include real secrets, tokens, private member data, or exploit payloads
+beyond what is necessary to explain the issue. This policy does not promise a
+bounty or a fixed response time.
 
 ## Current Hardening Baseline
 

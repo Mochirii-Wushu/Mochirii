@@ -24,6 +24,7 @@ const globalStyles = [
   "shell-header-nav.css",
   "shell-mobile-menu.css",
   "shell-footer.css",
+  "shell-official-guild-profiles.css",
 ];
 const routeStyles = [
   "public-join.css",
@@ -47,6 +48,7 @@ const routeStyles = [
   "shell-lightbox.css",
   "mochi-pets.css",
   "public-not-found.css",
+  "public-legal.css",
 ];
 
 globalStyles.forEach((style) => expectIncludes("root layout", rootLayout, style));
@@ -72,7 +74,6 @@ const routeContracts = {
   "apps/web/app/events/page.tsx": ["public-events.css", "public-side-pages.css", "public-content-shared.css", "public-gallery.css"],
   "apps/web/app/announcements/page.tsx": ["public-side-pages.css", "public-content-shared.css"],
   "apps/web/app/raffle/page.tsx": ["public-side-pages.css", "public-content-shared.css"],
-  "apps/web/app/raffle/rules/page.tsx": ["public-side-pages.css", "public-content-shared.css"],
   "apps/web/app/spotify/page.tsx": ["public-side-pages.css", "public-content-shared.css", "public-gallery.css"],
   "apps/web/app/spotlight/page.tsx": ["public-side-pages.css", "public-content-shared.css", "public-profiles.css", "public-profile-cards.css"],
   "apps/web/app/gallery/page.tsx": ["public-content-shared.css", "public-gallery.css", "shell-lightbox.css"],
@@ -81,6 +82,8 @@ const routeContracts = {
   "apps/web/app/tome/page.tsx": ["public-content-shared.css", "public-ceremony.css"],
   "apps/web/app/recruitment/page.tsx": ["public-content-shared.css", "public-profiles.css"],
   "apps/web/app/twills/page.tsx": ["public-content-shared.css", "public-profiles.css"],
+  "apps/web/app/privacy/page.tsx": ["public-content-shared.css", "public-legal.css"],
+  "apps/web/app/meta-data-deletion/page.tsx": ["public-content-shared.css", "public-legal.css"],
   "apps/web/app/account/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-account.css", "member-forms.css"],
   "apps/web/app/auth/page.tsx": ["public-content-shared.css", "member-workflow.css", "member-forms.css"],
   "apps/web/app/social/page.tsx": ["public-content-shared.css", "member-workflow.css"],
@@ -130,7 +133,6 @@ for (const file of [
   "apps/web/app/announcements/page.tsx",
   "apps/web/app/events/page.tsx",
   "apps/web/app/raffle/page.tsx",
-  "apps/web/app/raffle/rules/page.tsx",
 ]) {
   expectExcludes(file, read(file), "export const revalidate");
 }
@@ -157,14 +159,14 @@ expectIncludes("spotlight lookup", spotlightLookup, 'import "server-only";');
 expectIncludes("spotlight lookup", spotlightLookup, "next: { revalidate: 3600 }");
 
 const lightbox = read("apps/web/components/HomeGalleryLightbox.tsx");
-const lightboxModal = read("apps/web/components/HomeGalleryLightboxModal.tsx");
-expectIncludes("home gallery", lightbox, "lazy(() =>");
-expectIncludes("home gallery", lightbox, "<HomeGalleryLightboxFallback");
-expectIncludes("home gallery", lightbox, "return createPortal(");
+const universalLightbox = read("apps/web/components/UniversalImageLightbox.tsx");
+expectIncludes("home gallery", lightbox, "<UniversalImageLightbox");
 expectIncludes("home gallery", lightbox, "useBodyScrollLock(openItem !== null && portalRoot !== null);");
-expectExcludes("home gallery", lightbox, "<Suspense fallback={null}>");
-expectIncludes("home gallery modal", lightboxModal, "createPortal");
-expectExcludes("home gallery modal", lightboxModal, "useBodyScrollLock(");
+expectExcludes("home gallery", lightbox, "lazy(");
+expectExcludes("home gallery", lightbox, "HomeGalleryLightboxFallback");
+expectIncludes("home Gallery selection", homePage, "function getStableGallerySpotlightItems(");
+expectIncludes("home Gallery selection", homePage, "<HomeGalleryLightbox items={gallerySpotlightItems} />");
+expectIncludes("universal image lightbox", universalLightbox, "createPortal");
 
 if (failures.length) {
   console.error(`Next route delivery validation failed (${failures.length} issue${failures.length === 1 ? "" : "s"}).`);

@@ -181,7 +181,7 @@
         let wrapper = document.createElement('div');
         let warning = document.createElement('p');
         warning.classList.add('text-left');
-        warning.innerHTML = 'Are you sure you want to ' + actionMap[action];
+        warning.textContent = 'Are you sure you want to ' + actionMap[action];
         wrapper.appendChild(warning)
 
         swal({
@@ -206,13 +206,13 @@
                     let warning = document.createElement('p');
                     wrapper.classList.add('list-group')
                     warning.classList.add('text-left');
-                    warning.innerHTML = 'Select a message to send:';
+                    warning.textContent = 'Select a message to send:';
                     wrapper.appendChild(warning);
 
                     messages.forEach(m => {
                         let mr = document.createElement('button');
                         mr.classList.add('list-group-item');
-                        mr.innerHTML = m.name;
+                        mr.textContent = typeof m.name === 'string' ? m.name : '';
                         mr.onclick = () => {
                             swal.close();
                             handleRequestType(m, ids)

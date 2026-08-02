@@ -20,9 +20,9 @@
 		@if($post->body)
 		<div class="col-12 mt-4">
 			<div class="d-flex justify-content-center border-top">
-				<p class="lead py-5" style="max-width: 550px;">
-					{!!$post->body!!}
-				</p>
+				<div class="lead py-5" style="max-width: 550px;">
+					{!! app(\App\Services\SanitizeService::class)->richText($post->body ?? '') !!}
+				</div>
 			</div>
 		</div>
 		@else

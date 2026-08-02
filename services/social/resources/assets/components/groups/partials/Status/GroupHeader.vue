@@ -51,9 +51,8 @@
                             v-else
                             :to="`/groups/${status.gid}/user/${status?.account.id}`"
                             class="group-name-link username"
-                            v-html="statusCardUsernameFormat(status)"
                         >
-                            Loading...
+                            <account-username :account="status.account" />
                         </router-link>
 
                         <span v-if="showGroupChevron">
@@ -78,9 +77,8 @@
                             <router-link
                                 :to="`/groups/${status.gid}/user/${status?.account.id}`"
                                 class="group-name-link-small username"
-                                v-html="statusCardUsernameFormat(status)"
                             >
-                                Loading...
+                                <account-username :account="status.account" />
                             </router-link>
                             <span class="text-lighter" style="padding-left:2px;padding-right:2px;">·</span>
                             <router-link
@@ -129,7 +127,13 @@
 </template>
 
 <script>
+    import AccountUsername from '../../../partials/AccountUsername.vue';
+
     export default {
+        components: {
+            AccountUsername
+        },
+
         props: {
             group: {
                 type: Object
@@ -188,44 +192,13 @@
                 return window.App.util.format.timeAgo(ts);
             },
 
-            statusCardUsernameFormat(status) {
-                if(status.account.local == true) {
-                    return status.account.username;
-                }
-
-                let fmt = window.App.config.username.remote.format;
-                let txt = window.App.config.username.remote.custom;
-                let usr = status.account.username;
-                let dom = document.createElement('a');
-                dom.href = status.account.url;
-                dom = dom.hostname;
-
-                switch(fmt) {
-                    case '@':
-                    return usr + '<span class="text-lighter font-weight-bold">@' + dom + '</span>';
-                    break;
-
-                    case 'from':
-                    return usr + '<span class="text-lighter font-weight-bold"> <span class="font-weight-normal">from</span> ' + dom + '</span>';
-                    break;
-
-                    case 'custom':
-                    return usr + '<span class="text-lighter font-weight-bold"> ' + txt + ' ' + dom + '</span>';
-                    break;
-
-                    default:
-                    return usr + '<span class="text-lighter font-weight-bold">@' + dom + '</span>';
-                    break;
-                }
-            },
-
             sendReport(type) {
                 let el = document.createElement('div');
                 el.classList.add('list-group');
                 this.reportTypes.forEach(rt => {
                     let button = document.createElement('button');
                     button.classList.add('list-group-item', 'small');
-                    button.innerHTML = rt.title;
+                    button.textContent = typeof rt.title === 'string' ? rt.title : '';
                     button.onclick = () => {
                         document.dispatchEvent(new CustomEvent('reportOption', {
                             detail: { key: rt.key, title: rt.title }

@@ -2,6 +2,11 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import {
+  securityTxtCaddyContractFailures,
+  securityTxtContractFailures,
+} from "./security-txt-contract.mjs";
+import { caddyCloudflareOriginRangeFailures } from "./cloudflare-origin-ranges-contract.mjs";
 
 const root = process.cwd();
 const repositoryRoot = path.resolve(root, "../..");
@@ -13,6 +18,7 @@ const requiredDocs = [
   "docs/fediverse-activation-runbook.md",
   "docs/online-hosted-runtime.md",
   "docs/online-backup-recovery.md",
+  "docs/open-source-release-readiness.md",
 ];
 
 const failures = [];
@@ -101,6 +107,7 @@ const publicDenyTokens = [
   "youtube.com/embed",
   "321493203255693312",
 ];
+const legalAttributionSurface = "resources/views/site/open-source.blade.php";
 
 function read(file) {
   const fullPath = path.join(root, file);
@@ -151,6 +158,8 @@ function walkFiles(relativeDir) {
 }
 
 function assertNoPublicResidue(file) {
+  if (file === legalAttributionSurface) return;
+
   const text = read(file);
   for (const token of publicDenyTokens) {
     if (text.includes(token)) {
@@ -173,7 +182,7 @@ function gitRemote(args) {
 }
 
 function isCanonicalRemote(remote) {
-  return /github\.com[:/]Mochirii-Wushu\/Mochirii(?:\.git)?\/?$/i.test(remote);
+  return /github\.com[:/]Mochirii-Wushu\/Mochirii-Website(?:\.git)?\/?$/i.test(remote);
 }
 
 for (const doc of requiredDocs) {
@@ -201,6 +210,24 @@ for (const removedFile of ["funding.json", ".github/FUNDING.yml"]) {
 
 for (const file of [...publicSurfaceFiles, ...publicSurfaceDirs.flatMap(walkFiles)]) {
   assertNoPublicResidue(file);
+}
+
+const openSourceNotice = read(legalAttributionSurface);
+requireIncludes(legalAttributionSurface, openSourceNotice, [
+  "Open-source notices",
+  "modified Pixelfed software",
+  "GNU Affero General Public License, version 3",
+  "$sourceRelease->revision()",
+  "$sourceRelease->browseUrl()",
+  "$sourceRelease->archiveUrl()",
+  "$sourceRelease->commitUrl()",
+  "$sourceRelease->licenseUrl()",
+  "Exact source release information is temporarily unavailable.",
+]);
+for (const unrelatedProvider of ["Mastodon", "Fediverse", "ActivityPub", "Instagram"]) {
+  if (openSourceNotice.includes(unrelatedProvider)) {
+    failures.push(`${legalAttributionSurface} contains unrelated provider branding: ${unrelatedProvider}`);
+  }
 }
 
 for (const file of publicSurfaceDirs.flatMap(walkFiles)) {
@@ -384,6 +411,24 @@ requireIncludes("README.md", readme, [
   "Federation disabled",
   "Do not commit host `.env` files",
   "isolated temporary clone",
+  "GNU Affero General Public License version 3",
+  "not a blanket license for unrelated paths",
+]);
+
+const repositoryReadme = readRepository("README.md");
+requireIncludes("README.md", repositoryReadme, [
+  "## License Boundaries",
+  "services/social/LICENSE",
+  "does not use one root-level license for every source boundary",
+]);
+
+const sourceReadinessDoc = read("docs/open-source-release-readiness.md");
+requireIncludes("docs/open-source-release-readiness.md", sourceReadinessDoc, [
+  "does not provide a legal conclusion",
+  "Qualified counsel approval",
+  "`/site/open-source`",
+  "lowercase 40-character revision equals the checked-out commit",
+  "Do not deploy an image whose source page shows the unavailable state",
 ]);
 
 const staleReadmeMarketing = [
@@ -567,7 +612,15 @@ requireIncludes("caddy/Caddyfile", caddy, [
   "@retiredCreationAndTokenManagement path /installer /installer/*",
   "respond @retiredCreationAndTokenManagement 404",
   "reverse_proxy 127.0.0.1:8080",
+  "header -Server",
+  "trusted_proxies static 103.21.244.0/22",
+  "198.41.128.0/17",
+  "2c0f:f248::/32",
+  "client_ip_headers CF-Connecting-IP X-Forwarded-For",
+  "trusted_proxies_strict",
+  "header_up X-Forwarded-For {client_ip}",
   "header_up X-Request-ID {http.request.uuid}",
+  "header_down -Server",
   "header_down X-Request-ID {http.request.uuid}",
 ]);
 if (caddy.split(/\s+/u).includes("/installer*")) {
@@ -578,6 +631,33 @@ if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_p
 }
 if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
   failures.push("caddy/Caddyfile must overwrite rather than trust a caller-supplied request ID");
+}
+for (const failure of caddyCloudflareOriginRangeFailures(caddy)) {
+  failures.push(`caddy/Caddyfile ${failure}`);
+}
+
+const securityTxt = read("public/.well-known/security.txt");
+for (const failure of securityTxtContractFailures(securityTxt)) {
+  failures.push(`public/.well-known/security.txt ${failure}`);
+}
+for (const failure of securityTxtCaddyContractFailures(caddy, securityTxt)) {
+  failures.push(`caddy/Caddyfile ${failure}`);
+}
+if (/pixelfed|shopify/iu.test(securityTxt)) {
+  failures.push("public/.well-known/security.txt must remain Mochirii-only public security metadata");
+}
+
+const securityPolicy = read("SECURITY.md");
+requireIncludes("SECURITY.md", securityPolicy, [
+  "https://github.com/Mochirii-Wushu/Mochirii-Website/security/advisories/new",
+  "https://social.mochirii.com/.well-known/security.txt",
+  "https://github.com/Mochirii-Wushu/Mochirii-Website/security/policy",
+]);
+if (/hello@pixelfed\.org/iu.test(securityPolicy)) {
+  failures.push("SECURITY.md must not direct Mochirii vulnerability reports to an upstream contact");
+}
+if (/support@mochirii\.com/iu.test(securityPolicy)) {
+  failures.push("SECURITY.md must not use the unverified support mailbox as a vulnerability-reporting fallback");
 }
 
 const requestIdMiddleware = read("app/Http/Middleware/MochiriiRequestId.php");
@@ -599,6 +679,13 @@ requireIncludes("scripts/install-production-caddy.sh", caddyInstaller, [
   'install -m 0600 -o root -g root "$target_config" "$rollback_config"',
   'mv -f "$candidate_config" "$target_config"',
   "docker exec pixelfed-app curl",
+  '"Local origin"',
+  '"Cloudflare edge"',
+  'output_args=(--output /dev/null)',
+  'if [[ "$method" == GET && -s "$probe_body" ]]; then',
+  "public/.well-known/security.txt",
+  "verify_retired_route_denial",
+  "/installer/runtime-probe",
   "retired_paths=(",
   "for path in /oauth/token /oauth/authorize",
 ]);
@@ -657,10 +744,13 @@ requireIncludes("scripts/check-clean-database-migrations.sh", cleanDatabaseCheck
 const dockerfile = read("Dockerfile");
 requireIncludes("Dockerfile", dockerfile, [
   "serversideup/php:8.4-fpm-nginx@sha256:8eec7ce8d9d6a38bbc6f0f70ef439aab2279646bc01d74cbe538dbeada4da828",
-  'org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii"',
+  'org.opencontainers.image.source="https://github.com/Mochirii-Wushu/Mochirii-Website"',
   "COPY --chmod=755 ./docker/entrypoint.d/ /etc/entrypoint.d/",
   "composer install --no-ansi --no-interaction --no-dev --optimize-autoloader",
   "php scripts/check-production-composer-dependencies.php",
+  "ARG MOCHIRII_SOURCE_REVISION",
+  "@MOCHIRII_SOURCE_REVISION@",
+  "MOCHIRII_SOURCE_REVISION must be a lowercase 40-character commit",
 ]);
 
 const productionImageBuild = read("scripts/build-production-image.sh");
@@ -671,6 +761,33 @@ requireIncludes("scripts/build-production-image.sh", productionImageBuild, [
   "docker buildx build",
   "BUILD_CACHE_FROM",
   "BUILD_CACHE_TO",
+  '--build-arg "MOCHIRII_SOURCE_REVISION=$revision"',
+  '[[ "$revision" != "$current_revision" ]]',
+  'git status --porcelain --untracked-files=all',
+  'source checkout must be clean before an exact release build',
+]);
+
+const sourceConfig = read("config/mochirii-source.php");
+requireIncludes("config/mochirii-source.php", sourceConfig, [
+  "'revision' => '@MOCHIRII_SOURCE_REVISION@'",
+  "'repository_url' => 'https://github.com/Mochirii-Wushu/Mochirii-Website'",
+  "'subdirectory' => 'services/social'",
+]);
+for (const runtimeSource of ["env(", "getenv(", "$_ENV", "$_SERVER"]) {
+  if (sourceConfig.includes(runtimeSource)) {
+    failures.push(`config/mochirii-source.php must not accept runtime source metadata: ${runtimeSource}`);
+  }
+}
+
+const sourceReleaseService = read("app/Services/MochiriiSourceRelease.php");
+requireIncludes("app/Services/MochiriiSourceRelease.php", sourceReleaseService, [
+  "final class MochiriiSourceRelease",
+  "preg_match('/\\A[0-9a-f]{40}\\z/D', $revision)",
+  "return null;",
+  "'/tree/'",
+  "'/archive/'",
+  "'/commit/'",
+  "'/blob/'",
 ]);
 
 const verifiedBuildTools = readRepository("scripts/install-verified-social-build-tools.sh");
@@ -696,8 +813,10 @@ requireIncludes(".github/workflows/validate-social.yml", validationWorkflow, [
   "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0",
   "Rebuild and verify committed Social assets",
+  "tests/Unit/SanitizeServiceTest.php",
   "tests/Feature/DisabledUpstreamServicesTest.php",
   "tests/Feature/MochiriiBrandingTest.php",
+  "tests/Feature/OpenSourceNoticeTest.php",
   "tests/Feature/ReadinessBoundarySourceContractTest.php",
   "tests/Feature/RetiredAccountCreationBoundaryTest.php",
   "tests/Feature/PassportSurfaceBoundaryTest.php",
@@ -732,9 +851,13 @@ const deploymentWorkflow = readRepository(".github/workflows/deploy-social-produ
 requireIncludes(".github/workflows/deploy-social-production.yml", deploymentWorkflow, [
   "environment: social-production",
   "services/social/docker-compose.production.yml",
-  "repository=Mochirii-Wushu/Mochirii",
+  "repository=Mochirii-Wushu/Mochirii-Website",
   "DEPLOY social.mochirii.com",
+  "STAGE_PRIVATE_MEDIA_GATEWAY_UNDER_MAINTENANCE",
   "ANONYMOUS DENIAL AND CUTOVER VERIFIED",
+  "gh attestation verify",
+  "--source-digest",
+  "--predicate-type https://spdx.dev/Document/v2.3",
   "persist-credentials: false",
 ]);
 
@@ -798,6 +921,7 @@ requireIncludes("app/Http/Middleware/AdminOrNotFound.php", routeMiddleware, [
 const privateSocialMiddleware = read("app/Http/Middleware/MochiriiPrivateSocial.php");
 requireIncludes("app/Http/Middleware/MochiriiPrivateSocial.php", privateSocialMiddleware, [
   "class MochiriiPrivateSocial",
+  ".well-known/security.txt",
   "auth/oidc/start",
   "auth/oidc/callback",
   "oauth/authorize",
@@ -812,6 +936,7 @@ requireIncludes("app/Http/Middleware/MochiriiPrivateSocial.php", privateSocialMi
   "$authGuard->logout()",
   "$request->session()->invalidate()",
   "$path === '/oauth/authorize'",
+  "'site/open-source'",
 ]);
 
 const localAccountPolicy = read("app/Services/MochiriiLocalAccountPolicy.php");
@@ -866,12 +991,13 @@ if (guestLayout.includes("maximum-scale=1") || guestLayout.includes("user-scalab
 
 const runtimeLibrary = read("scripts/production-runtime-lib.sh");
 requireIncludes("scripts/production-runtime-lib.sh", runtimeLibrary, [
-  "redact_runtime_diagnostics",
   "emit_container_diagnostics",
-  "authorization_id|code|code_verifier|state|access_token|refresh_token",
+  "Container logs can contain signed object URLs",
+  "state={{.State.Status}}",
+  "restart_count={{.RestartCount}}",
 ]);
-if ((runtimeLibrary.match(/docker logs --tail/g) || []).length !== 1) {
-  failures.push("scripts/production-runtime-lib.sh must emit container logs only through the redaction helper");
+if (runtimeLibrary.includes("docker logs")) {
+  failures.push("scripts/production-runtime-lib.sh must not emit container logs into deployment diagnostics");
 }
 
 const webRoutes = read("routes/web.php");
@@ -891,7 +1017,17 @@ requireIncludes("routes/web.php", webRoutes, [
   "Route::get('labs', 'SettingsController@labs')->name('settings.labs')->middleware('admin.notfound')",
   "Route::group(['prefix' => 'import', 'middleware' => ['dangerzone', 'admin.notfound']]",
   "middleware('mochirii.federation-disabled')",
+  "Route::get('open-source', 'SiteController@openSource')->name('site.opensource')",
 ]);
+
+const sharedFooter = read("resources/views/layouts/partial/footer.blade.php");
+requireIncludes("resources/views/layouts/partial/footer.blade.php", sharedFooter, [
+  "route('site.opensource')",
+  "Open-source notices",
+]);
+if (sharedFooter.trimStart().startsWith("@if(config('instance.restricted.enabled') == false)")) {
+  failures.push("The restricted shell must retain the open-source notice footer link");
+}
 for (const retiredControllerRoute of [
   "SettingsController@applications",
   "SettingsController@developers",
@@ -923,7 +1059,7 @@ requireIncludes("app/Http/Controllers/Api/ApiV1Controller.php", instanceApiV1, [
 ]);
 requireIncludes("app/Http/Controllers/Api/ApiV2Controller.php", instanceApiV2, [
   "3.5.3 (compatible; Mōchirīī Social)",
-  "https://github.com/Mochirii-Wushu/Mochirii",
+  "https://github.com/Mochirii-Wushu/Mochirii-Website",
 ]);
 for (const [file, text] of [
   ["app/Http/Controllers/Api/ApiV1Controller.php", instanceApiV1],

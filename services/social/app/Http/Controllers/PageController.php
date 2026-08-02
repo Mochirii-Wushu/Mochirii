@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Page;
 use App\Services\ConfigCacheService;
+use App\Services\SanitizeService;
 use Auth;
 use Cache;
 use Illuminate\Http\Request;
@@ -61,7 +62,7 @@ class PageController extends Controller
         ]);
         $slug = urldecode($request->input('slug'));
         $page = Page::firstOrCreate(['slug' => $slug]);
-        $page->content = $request->input('content');
+        $page->content = app(SanitizeService::class)->richText($request->input('content'));
         $page->title = $request->input('title');
         $page->active = (bool) $request->input('active');
         $page->save();

@@ -1,5 +1,11 @@
 # Pixelfed First Login Testing Runbook
 
+> **Superseded on 2026-07-29.** This dated packet is retained as historical
+> evidence, with workstation paths replaced by environment-relative examples,
+> and must not be used as current operational guidance.
+> Current operations are governed by the
+> [Mochirii Social Delivery Contract](integrations/mochirii-social-delivery.md).
+
 Status: admin-first staging readiness packet. Provider mutations remain approval-gated.
 
 This runbook prepares the first Pixelfed login test without committing Pixelfed
@@ -122,12 +128,23 @@ After the OAuth Server approval is applied, assert the live Supabase provider
 state without printing token values:
 
 ```powershell
-$tokenFromCreds = (Get-Content -LiteralPath "C:\Github Repo's\Mochirii Website\Mochi Creds\Supabase\Supabase Key.txt" -Raw).Trim()
+$activeCreds = $env:MOCHIRII_CREDS_DIR
+if ([string]::IsNullOrWhiteSpace($activeCreds) -or !(Test-Path -LiteralPath $activeCreds -PathType Container)) {
+  throw 'MOCHIRII_CREDS_DIR must name Mochirii-Website\Creds\Active inside the private credential boundary.'
+}
+$tokenPath = Join-Path $activeCreds 'Supabase\Supabase Key.txt'
+if (!(Test-Path -LiteralPath $tokenPath -PathType Leaf)) { throw 'Supabase credential file not found.' }
+$tokenFromCreds = (Get-Content -LiteralPath $tokenPath -Raw).Trim()
+if ([string]::IsNullOrWhiteSpace($tokenFromCreds)) { throw 'Supabase credential file is empty.' }
 [Environment]::SetEnvironmentVariable('SUPABASE_ACCESS_TOKEN', $tokenFromCreds, 'Process')
 $env:PIXELFED_FIRST_LOGIN_PROVIDER_READY = '1'
-npm run check:pixelfed-first-login-readiness
-Remove-Item Env:\SUPABASE_ACCESS_TOKEN
-Remove-Item Env:\PIXELFED_FIRST_LOGIN_PROVIDER_READY
+try {
+  npm run check:pixelfed-first-login-readiness
+} finally {
+  Remove-Item Env:\SUPABASE_ACCESS_TOKEN -ErrorAction SilentlyContinue
+  Remove-Item Env:\PIXELFED_FIRST_LOGIN_PROVIDER_READY -ErrorAction SilentlyContinue
+  Remove-Variable tokenFromCreds -ErrorAction SilentlyContinue
+}
 ```
 
 This verifies the Management API auth config, OAuth discovery, OIDC discovery,

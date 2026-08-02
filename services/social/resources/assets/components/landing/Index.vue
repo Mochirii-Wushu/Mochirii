@@ -98,7 +98,7 @@
 
 						    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
 						      <div class="card-body about-text">
-						        <p v-html="config.about.description"></p>
+						        <p v-text="config.about.description"></p>
 						      </div>
 						    </div>
 						  </div>

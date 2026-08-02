@@ -100,6 +100,72 @@ const runtimeTextExtensions = new Set([
 ]);
 const reviewedLoopbacks = new Map([
   [
+    ".github/workflows/manual-lighthouse.yml",
+    [
+      { value: "http://127.0.0.1:8765", count: 1 },
+      { value: "http://127.0.0.1:8766", count: 1 },
+      { value: "--hostname 127.0.0.1", count: 1 },
+      { value: "EXCLUDE 127.0.0.1", count: 1 },
+    ],
+  ],
+  [
+    "apps/web/lib/gallery/approved-feed_test.ts",
+    [{ value: "http://127.0.0.1:8765", count: 1 }],
+  ],
+  [
+    "apps/web/lib/gallery/moderation-preview-server-core.ts",
+    [
+      { value: '"localhost"', count: 1 },
+      { value: '"127.0.0.1"', count: 1 },
+    ],
+  ],
+  [
+    "apps/web/lib/gallery/moderation-preview-server_test.ts",
+    [
+      { value: "localhost", count: 2 },
+      { value: "127.0.0.1", count: 2 },
+    ],
+  ],
+  [
+    "apps/web/lib/gallery/moderation-preview-route.ts",
+    [
+      { value: '"localhost"', count: 1 },
+      { value: '"127.0.0.1"', count: 1 },
+    ],
+  ],
+  [
+    "apps/web/lib/gallery/moderation-preview-route_test.ts",
+    [
+      { value: "localhost", count: 4 },
+      { value: "127.0.0.1", count: 2 },
+    ],
+  ],
+  [
+    "supabase/functions/_shared/gallery-preview-attestation.ts",
+    [
+      { value: '"localhost"', count: 1 },
+      { value: '"127.0.0.1"', count: 1 },
+    ],
+  ],
+  [
+    "supabase/functions/_shared/gallery-preview-attestation_test.ts",
+    [
+      { value: "localhost", count: 1 },
+      { value: "127.0.0.1", count: 5 },
+    ],
+  ],
+  [
+    "supabase/functions/_shared/social-publication-copy.ts",
+    [{ value: "localhost", count: 1 }],
+  ],
+  [
+    "supabase/functions/_shared/social-publication-copy_test.ts",
+    [
+      { value: "localhost", count: 1 },
+      { value: "127.0.0.1", count: 1 },
+    ],
+  ],
+  [
     "apps/web/lib/member-social-links/profile-links-core.ts",
     [{ value: "localhost", count: 2 }],
   ],
@@ -129,7 +195,7 @@ const reviewedLoopbacks = new Map([
     [
       { value: "http://127.0.0.1:8080/", count: 2 },
       { value: "http://127.0.0.1:8080/api/service/readiness-check", count: 1 },
-      { value: "social.mochirii.com:443:127.0.0.1", count: 1 },
+      { value: "social.mochirii.com:443:127.0.0.1", count: 4 },
     ],
   ],
   [
@@ -137,6 +203,9 @@ const reviewedLoopbacks = new Map([
     [
       { value: "http://127.0.0.1:8080/", count: 2 },
       { value: "http://127.0.0.1:8080/api/service/readiness-check", count: 1 },
+      { value: "http://127.0.0.1:2019/config/", count: 1 },
+      { value: "reverse_proxy 127.0.0.1:8080", count: 1 },
+      { value: '"127.0.0.1:8080"', count: 1 },
     ],
   ],
   [
@@ -187,7 +256,7 @@ const expectedOrigins = new Map([
   ["backend", [`https://${publicUrls?.supabaseProjectRef}.supabase.co`]],
   ["social", [publicUrls?.socialHost]],
   ["discord-interactions", ["https://discord.com", `https://${publicUrls?.supabaseProjectRef}.supabase.co`]],
-  ["release-automation", ["https://github.com/Mochirii-Wushu/Mochirii"]],
+  ["release-automation", ["https://github.com/Mochirii-Wushu/Mochirii-Website"]],
 ]);
 
 for (const runtime of runtimes) {
@@ -230,7 +299,8 @@ for (const relativePath of listFiles()) {
   if (!existsSync(absolutePath)) continue;
   const content = readFileSync(absolutePath, "utf8");
 
-  if (normalizedPath.startsWith(".github/workflows/") && /\bself-hosted\b/i.test(content)) {
+  const workflowRunnerContent = content.replaceAll("--deny-self-hosted-runners", "");
+  if (normalizedPath.startsWith(".github/workflows/") && /\bself-hosted\b/i.test(workflowRunnerContent)) {
     failures.push(`${normalizedPath}: self-hosted runner is forbidden`);
   }
   if (/(?:\b[A-Za-z]:\\(?:Users|Github Repo's)\\|\/mnt\/[a-z]\/(?:Users|Github Repo's)\/)/i.test(content)) {

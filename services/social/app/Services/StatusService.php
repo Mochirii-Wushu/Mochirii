@@ -48,6 +48,10 @@ class StatusService
             unset($res['_pid']);
         }
 
+        if ($res && array_key_exists('content', $res)) {
+            $res['content'] = app(SanitizeService::class)->richText($res['content']);
+        }
+
         return $res;
     }
 

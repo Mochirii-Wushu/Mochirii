@@ -379,19 +379,51 @@
 				let title = document.createElement('div');
 				let list = document.createElement('ul');
 				list.classList.add('list-group')
-				title.innerHTML = '<p class="font-weight-bold text-danger">Are you sure you want to delete the following accounts:</p>';
+				let titleText = document.createElement('p');
+				titleText.classList.add('font-weight-bold', 'text-danger');
+				titleText.textContent = 'Are you sure you want to delete the following accounts:';
+				title.appendChild(titleText);
 				wrapper.appendChild(title);
 				this.accountsSelected.map(a => {
 					let el = document.createElement('li');
 					el.classList.add('list-group-item')
 					el.classList.add('text-left')
-					el.innerHTML = `<div class="media align-items-center">
-						<img src="${a.avatar}" width="40" height="40" class="rounded-circle mr-3" onerror="this.src='/storage/avatars/default.png';this.onerror=null;" />
-						<div class="media-body">
-							<p class="mb-0 username font-weight-bold">${a.username}</p>
-							<div class="note small text-muted">${this.renderNote(a.note_text)}</div>
-						</div>
-					</div>`
+
+					let media = document.createElement('div');
+					media.classList.add('media', 'align-items-center');
+
+					let avatar = document.createElement('img');
+					avatar.width = 40;
+					avatar.height = 40;
+					avatar.classList.add('rounded-circle', 'mr-3');
+					try {
+						let avatarValue = typeof a.avatar === 'string' ? a.avatar.trim() : '';
+						let avatarUrl = avatarValue ? new URL(avatarValue, window.location.origin) : null;
+						let allowedProtocol = avatarUrl && (avatarUrl.protocol === 'https:' || (avatarUrl.protocol === 'http:' && avatarUrl.origin === window.location.origin));
+						avatar.src = allowedProtocol && !avatarUrl.username && !avatarUrl.password
+							? avatarUrl.href
+							: '/storage/avatars/default.png';
+					} catch (error) {
+						avatar.src = '/storage/avatars/default.png';
+					}
+					avatar.addEventListener('error', () => {
+						avatar.src = '/storage/avatars/default.png';
+					}, { once: true });
+					media.appendChild(avatar);
+
+					let body = document.createElement('div');
+					body.classList.add('media-body');
+					let username = document.createElement('p');
+					username.classList.add('mb-0', 'username', 'font-weight-bold');
+					username.textContent = String(a.username || '');
+					body.appendChild(username);
+
+					let note = document.createElement('div');
+					note.classList.add('note', 'small', 'text-muted');
+					note.textContent = this.renderNote(a.note_text);
+					body.appendChild(note);
+					media.appendChild(body);
+					el.appendChild(media);
 					list.appendChild(el)
 				})
 				wrapper.appendChild(list);

@@ -6,8 +6,10 @@ import {
   decodeSpinnerSessionCookie,
   validateSpinnerAccessTokenForMode,
 } from "./lib/spinner/session-policy.ts";
+import { refreshSupabaseSession } from "./lib/supabase/proxy.ts";
 
 const SPINNER_PAGE_PATH = "/spinner";
+const SUPABASE_SESSION_PATHS = new Set(["/leader-dashboard", "/oauth/consent"]);
 
 function clearSpinnerCookie(response: NextResponse) {
   response.cookies.set({
@@ -31,13 +33,17 @@ function opaqueDenied() {
 }
 
 export async function proxy(request: NextRequest) {
+  if (SUPABASE_SESSION_PATHS.has(request.nextUrl.pathname)) {
+    return refreshSupabaseSession(request);
+  }
+
   // The matcher is intentionally exact. Keep this guard so a future matcher
   // expansion cannot put the session, live-state, or media handlers behind
   // the page preflight by accident.
   if (
     request.nextUrl.pathname !== SPINNER_PAGE_PATH &&
     request.nextUrl.pathname !== `${SPINNER_PAGE_PATH}/`
-  ) return NextResponse.next();
+  ) return refreshSupabaseSession(request);
   if (request.method !== "GET" && request.method !== "HEAD") return opaqueDenied();
 
   const session = decodeSpinnerSessionCookie(
@@ -57,5 +63,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/spinner"],
+  matcher: [
+    "/spinner",
+    "/leader-dashboard",
+    "/oauth/consent",
+    "/raffle/claim/:path*",
+    "/leader-dashboard/raffle/:path*",
+  ],
 };

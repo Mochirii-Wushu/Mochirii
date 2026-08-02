@@ -15,7 +15,26 @@ class SanitizeService
 
     public function html($html)
     {
-        return $this->cleanHtmlWithSpacing($html);
+        return $this->richText($html);
+    }
+
+    public function richText($html): string
+    {
+        return $this->cleanHtmlWithSpacing((string) $html);
+    }
+
+    public function plainText($html): string
+    {
+        $plainText = strip_tags(Purify::clean((string) $html));
+
+        return str_replace(["\r\n", "\r"], "\n", $plainText);
+    }
+
+    public function cssText($css): string
+    {
+        // This contains trusted administrator CSS inside a style element. It is
+        // not a general-purpose CSS sanitizer.
+        return str_replace('<', '\\3C ', (string) $css);
     }
 
     public function cleanHtmlWithSpacing($html)
@@ -28,7 +47,7 @@ class SanitizeService
 
         $html = preg_replace("/<br\s*\/?>/i", '<br /> ', $html);
 
-        $cleaned = Purify::clean($html);
+        $cleaned = Purify::config('mochirii_rich_text')->clean($html);
 
         $cleaned = preg_replace('/\s+/', ' ', $cleaned);
         $cleaned = trim($cleaned);

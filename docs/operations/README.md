@@ -7,7 +7,7 @@ canonical Mochirii repository and hosted production surfaces.
 
 ```text
 C:\Github Repo's\Mochirii Website\
-  Website\      GitHub: Mochirii-Wushu/Mochirii
+  Website\      GitHub: Mochirii-Wushu/Mochirii-Website
   Mochirii-Social-Mobile\  GitHub: Mochirii-Wushu/Mochirii-Social-Mobile
   Mochirii-Pets\  GitHub: Mochirii-Wushu/Mochirii-Pets; fresh Unity source
   Mochi Creds\  Private credential and recovery boundary, never Git tracked
@@ -26,16 +26,35 @@ Web or iOS artifact is connected.
 - `CURRENT-STATE.md`: current hosted state and exact resume point.
 - `deployment.md`: release, verification, and rollback boundaries.
 - `integration-operations-runbook.md`: provider-adjacent operating rules.
+- `LEGAL-PRIVACY-READINESS-2026-07-29.md`: source-only legal and privacy
+  decision packet; not legal advice or release authority.
+- `legal-privacy-readiness.v1.json`: machine-readable operator, jurisdiction,
+  processing, processor, retention, rights, claim, and approval inventory.
 - `ORGANIZATION-RECONCILIATION-2026-07-27.md`: public-safe repository,
   branch, issue, worktree, provider-effect, and cleanup disposition ledger.
 - `private-spinner.md`: role-separated live-spinner operation, privacy,
   delivery, release, and recovery boundaries.
+- `GALLERY-THUMBNAIL-ROLLOUT.md`: immutable Gallery publication revisions,
+  bounded display/thumbnail media, schema-v2 feed, explicit historical
+  republication, retention, release, and rollback gates.
+- `STOREFRONT-SURFACE-LIFECYCLE-2026-07-29.md`: evidence-based active,
+  replaced, retired, privacy, cache, test, and terminal decisions for every
+  storefront journey before provider acceptance.
 - `repository-ownership.md`: source and hosted ownership matrix.
+- `REPOSITORY-SEPARATION-ADR-2026-07-29.md`: proposed, non-activating repository
+  boundary decision for review.
+- `REPOSITORY-REORGANIZATION-THREAT-MODEL-2026-07-29.md`: threat model for
+  staged repository separation without adding a second shared-backend owner.
+- `history/REPOSITORY-RENAME-2026-07-28.md`: canonical Website repository
+  rename record and legacy-evidence handling rule.
 - `history/`: superseded plans and dated handoffs retained as evidence.
 - `evidence/`: durable no-secret approval and readiness packets.
 
 Generated screenshots, logs, JSON readbacks, provider exports, and rollback
 captures do not belong here. Store them under ignored `.artifacts/operations`.
+Contracts, counsel communications, personal data, private business records,
+credentials, and provider evidence remain in their approved restricted
+boundaries and must not be copied into either legal/privacy readiness file.
 
 ## Rules
 

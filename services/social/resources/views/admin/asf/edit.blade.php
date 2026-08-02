@@ -38,7 +38,7 @@
                             <div class="list-group mb-3">
                                 <div class="list-group-item">
                                     <div class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" id="hide_from_public_feeds" name="hide_from_public_feeds" {!! $filter->hide_from_public_feeds ? 'checked=""' : '' !!}>
+                                        <input type="checkbox" class="custom-control-input" id="hide_from_public_feeds" name="hide_from_public_feeds" @checked($filter->hide_from_public_feeds)>
                                         <label class="custom-control-label" for="hide_from_public_feeds">Hide public posts from public feed</label>
                                     </div>
                                 </div>

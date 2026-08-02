@@ -7,7 +7,8 @@
 					<img class="rounded-circle box-shadow mr-2" :src="status.account.avatar" width="32px" height="32px" onerror="this.onerror=null;this.src='/storage/avatars/default.png?v=2'" alt="avatar">
 					<div class="media-body">
 						<div class="pl-2 d-flex align-items-top">
-							<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)" v-html="statusCardUsernameFormat(status)">
+							<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)">
+								<account-username :account="status.account" />
 							</a>
 							<span class="px-1 text-lighter">
 								·
@@ -59,7 +60,8 @@
 					<img class="rounded-circle box-shadow" :src="status.account.avatar" width="32px" height="32px" onerror="this.onerror=null;this.src='/storage/avatars/default.png?v=2'" alt="avatar">
 				</div>
 				<div class="pl-2">
-					<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)" v-html="statusCardUsernameFormat(status)">
+					<a class="username font-weight-bold text-dark text-decoration-none text-break" v-bind:href="profileUrl(status)">
+						<account-username :account="status.account" />
 					</a>
 					<span v-if="status.account.is_admin" class="fa-stack" title="Admin Account" data-toggle="tooltip" style="height:1em; line-height:1em; max-width:19px;">
 						<i class="fas fa-certificate text-danger fa-stack-1x"></i>
@@ -184,6 +186,7 @@
 <script type="text/javascript">
 	import ContextMenu from './ContextMenu.vue';
 	import PollCard from './PollCard.vue';
+	import AccountUsername from '../../../components/partials/AccountUsername.vue';
 
 	export default {
 		props: {
@@ -214,6 +217,7 @@
 		},
 
 		components: {
+			"account-username": AccountUsername,
 			"context-menu": ContextMenu,
 			"poll-card": PollCard
 		},
@@ -274,37 +278,6 @@
 
 			shortTimestamp(ts) {
 				return window.App.util.format.timeAgo(ts);
-			},
-
-			statusCardUsernameFormat(status) {
-				if(status.account.local == true) {
-					return status.account.username;
-				}
-
-				let fmt = window.App.config.username.remote.format;
-				let txt = window.App.config.username.remote.custom;
-				let usr = status.account.username;
-				let dom = document.createElement('a');
-				dom.href = status.account.url;
-				dom = dom.hostname;
-
-				switch(fmt) {
-					case '@':
-					return usr + '<span class="text-lighter font-weight-bold">@' + dom + '</span>';
-					break;
-
-					case 'from':
-					return usr + '<span class="text-lighter font-weight-bold"> <span class="font-weight-normal">from</span> ' + dom + '</span>';
-					break;
-
-					case 'custom':
-					return usr + '<span class="text-lighter font-weight-bold"> ' + txt + ' ' + dom + '</span>';
-					break;
-
-					default:
-					return usr + '<span class="text-lighter font-weight-bold">@' + dom + '</span>';
-					break;
-				}
 			},
 
 			lightbox(status) {

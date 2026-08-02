@@ -1,10 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import {
+  securityTxtCaddyContractFailures,
+  securityTxtContractFailures,
+} from "./security-txt-contract.mjs";
+import { caddyCloudflareOriginRangeFailures } from "./cloudflare-origin-ranges-contract.mjs";
 
 const root = process.cwd();
 const repositoryRoot = path.resolve(root, "../..");
 const failures = [];
+const canonicalRepository = "Mochirii-Wushu/Mochirii-Website";
+const retiredRepository = ["Mochirii-Wushu", "Mochirii"].join("/");
 
 function read(relativePath) {
   const fullPath = path.join(root, relativePath);
@@ -84,7 +91,15 @@ requireIncludes(deployWorkflowPath, deployWorkflow, [
   "persist-credentials: false",
   "DEPLOY social.mochirii.com",
   "MIGRATIONS APPROVED",
+  "STAGE_PRIVATE_MEDIA_GATEWAY_UNDER_MAINTENANCE",
   "ANONYMOUS DENIAL AND CUTOVER VERIFIED",
+  "gh attestation verify",
+  "--source-digest",
+  "--source-ref refs/heads/main",
+  `--signer-workflow ${canonicalRepository}/.github/workflows/validate-social.yml`,
+  '--signer-digest "$RELEASE_COMMIT"',
+  "--predicate-type https://spdx.dev/Document/v2.3",
+  "--deny-self-hosted-runners",
   "StrictHostKeyChecking=yes",
   "UserKnownHostsFile=~/.ssh/known_hosts",
   "docker buildx imagetools inspect",
@@ -93,10 +108,13 @@ requireIncludes(deployWorkflowPath, deployWorkflow, [
   "The public edge blocked the GitHub runner after the hosted public health gates passed.",
 ]);
 rejectIncludes(deployWorkflowPath, deployWorkflow, [
-  "self-hosted",
+  "runs-on: self-hosted",
   "StrictHostKeyChecking=no",
   "ssh-keyscan",
   "pull_request_target",
+  `--repo ${retiredRepository}\n`,
+  `${retiredRepository}/.github/workflows/validate-social.yml`,
+  `repos/${retiredRepository}/commits/main`,
 ]);
 
 const onlineVerificationWorkflowPath = ".github/workflows/verify-social-online-hosting.yml";
@@ -137,7 +155,23 @@ requireIncludes(deployScriptPath, deployScript, [
   '"--verify-online-hosting"',
   "verify_online_hosting",
   "The release Compose file does not match the approved host template.",
-  "Deployment requires anonymous object/CDN denial and private-media cutover readback.",
+  "Private-media gateway staging permits only migration approval NONE.",
+  "require_private_media_maintenance_proof",
+  "verify_public_maintenance_boundary",
+  "captured_horizon_state",
+  "captured_scheduler_state",
+  "write_private_media_cutover_state",
+  "transition_private_media_cutover_phase intent staged",
+  "transition_private_media_cutover_phase staged finalizing",
+  "transition_private_media_cutover_phase finalizing completed",
+  "compose_release \"$current_release\" stop --timeout 90 horizon scheduler",
+  "horizon:terminate",
+  "verify_staged_private_media_gateway",
+  "stage_rollback_armed=true",
+  "rollback_private_media_stage",
+  "recovery_required",
+  "verify_private_media_migration_tree_parity",
+  "Cutover finalization failed; finalizing state remains for forward recovery.",
 ]);
 
 const runtimeLibraryPath = "scripts/production-runtime-lib.sh";
@@ -157,6 +191,29 @@ requireIncludes(runtimeLibraryPath, runtimeLibrary, [
   "verify_spaces_round_trip",
   'Storage::disk("s3")',
   "Spaces write, read, and delete gates passed.",
+  'PRIVATE_MEDIA_MAINTENANCE_PROOF="$PRIVATE_MEDIA_STATE_ROOT/maintenance.proof"',
+  'PRIVATE_MEDIA_CUTOVER_STATE="$PRIVATE_MEDIA_STATE_ROOT/cutover.state"',
+  "root:root:700",
+  "root:root:600",
+  "expected_status=503",
+  "validate_private_media_cutover_state",
+  "write_private_media_cutover_state",
+  "reject_active_private_media_cutover_state",
+  "verify_installed_deploy_runtime_contract",
+  "verify_candidate_migration_tree",
+  "verify_private_media_migration_tree_parity",
+  "container_runtime_state",
+  "wait_for_container_stopped",
+  "verify_staged_private_media_gateway_local",
+  "Staged private-media gateway gates passed behind maintenance.",
+]);
+rejectIncludes(runtimeLibraryPath, runtimeLibrary, [
+  "PRIVATE_MEDIA_PENDING_MARKER",
+  "PRIVATE_MEDIA_COMPLETED_MARKER",
+  "gateway-stage.pending",
+  "cutover.completed",
+  "reject_private_media_bootstrap_replay",
+  "write_private_media_pending_marker",
 ]);
 
 const entrypointPath = "scripts/deploy-production-entrypoint.sh";
@@ -169,6 +226,8 @@ requireIncludes(entrypointPath, entrypoint, [
   "head -c 1048577",
   "sudo -n /usr/local/sbin/mochirii-social-deploy",
   "ANONYMOUS_DENIAL_AND_CUTOVER_VERIFIED",
+  "STAGE_PRIVATE_MEDIA_GATEWAY_UNDER_MAINTENANCE",
+  "A reviewed deployment mode is required.",
 ]);
 
 const healthControllerPath = "app/Http/Controllers/HealthCheckController.php";
@@ -199,8 +258,35 @@ requireIncludes(installerPath, installer, [
   "github-deploy",
   'restrict,command=\"/usr/local/sbin/mochirii-social-deploy-entry\"',
   '"$runtime_root/shared/docker-compose.production.yml"',
+  '"$runtime_root/shared/private-media-cutover"',
   "passwd --lock",
   "visudo -cf",
+  "require_clean_installer_checkout",
+  "status --porcelain=v1 --untracked-files=all",
+  "ls-files --error-unmatch",
+  "ls-tree",
+  "hash-object --",
+  "regular non-symlink file",
+]);
+
+const deploymentRuntimeUpdaterPath = "scripts/install-production-deploy-runtime-update.sh";
+const deploymentRuntimeUpdater = read(deploymentRuntimeUpdaterPath);
+requireIncludes(deploymentRuntimeUpdaterPath, deploymentRuntimeUpdater, [
+  "expected_commit",
+  "require_exact_updater_checkout",
+  'git -C "$checkout_root" rev-parse HEAD',
+  'status --porcelain=v1 --untracked-files=all',
+  "ls-files --error-unmatch",
+  "ls-tree",
+  "hash-object --",
+  "regular non-symlink file",
+  "bash -n",
+  "root:root:700",
+  "deploy-runtime-$expected_commit",
+  "mktemp",
+  "mv -T",
+  "rollback",
+  "no service was restarted or reloaded",
 ]);
 
 const migrationPath = "scripts/migrate-production-runtime.sh";
@@ -241,7 +327,15 @@ requireIncludes(caddyPath, caddy, [
   'header @dependencyReadiness Cache-Control "private, no-store"',
   "respond @dependencyReadiness 404",
   "reverse_proxy 127.0.0.1:8080",
+  "header -Server",
+  "trusted_proxies static 103.21.244.0/22",
+  "198.41.128.0/17",
+  "2c0f:f248::/32",
+  "client_ip_headers CF-Connecting-IP X-Forwarded-For",
+  "trusted_proxies_strict",
+  "header_up X-Forwarded-For {client_ip}",
   "header_up X-Request-ID {http.request.uuid}",
+  "header_down -Server",
   "header_down X-Request-ID {http.request.uuid}",
 ]);
 if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_proxy 127.0.0.1:8080")) {
@@ -249,6 +343,51 @@ if (caddy.indexOf("respond @dependencyReadiness 404") > caddy.indexOf("reverse_p
 }
 if (/\{http\.request\.header\.x-request-id\}/iu.test(caddy)) {
   failures.push(`${caddyPath} must never trust a caller-supplied request ID`);
+}
+for (const failure of caddyCloudflareOriginRangeFailures(caddy)) {
+  failures.push(`${caddyPath} ${failure}`);
+}
+if (
+  caddyCloudflareOriginRangeFailures(caddy.replace(" 104.16.0.0/13", ""))
+    .every((failure) => !failure.includes("missing reviewed")) ||
+  caddyCloudflareOriginRangeFailures(caddy.replace("trusted_proxies static", "trusted_proxies static 0.0.0.0/0"))
+    .every((failure) => !failure.includes("unreviewed"))
+) {
+  failures.push(`${caddyPath} Cloudflare range contract canaries must reject missing and unreviewed origin ranges`);
+}
+
+const securityTxtPath = "public/.well-known/security.txt";
+const securityTxt = read(securityTxtPath);
+for (const failure of securityTxtContractFailures(securityTxt)) {
+  failures.push(`${securityTxtPath} ${failure}`);
+}
+for (const failure of securityTxtCaddyContractFailures(caddy, securityTxt)) {
+  failures.push(`${caddyPath} ${failure}`);
+}
+const caddyWithoutSecurityTxtFinalNewline = caddy.replace(
+  /(Expires: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)\n[\t ]*\n([\t ]*SECURITY 200)/u,
+  "$1\n$2",
+);
+if (securityTxtCaddyContractFailures(caddyWithoutSecurityTxtFinalNewline, securityTxt)
+  .every((failure) => !failure.includes("exactly match"))) {
+  failures.push(`${caddyPath} contract canary must reject a response body without the RFC 9116 final newline`);
+}
+if (
+  securityTxtContractFailures(`${securityTxt}Hiring: https://example.com/jobs\n`)
+    .every((failure) => !failure.includes("unexpected field"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2020-01-01T00:00:00Z"))
+    .every((failure) => !failure.includes("remain in the future"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2027-02-29T00:00:00Z"))
+    .every((failure) => !failure.includes("exact UTC RFC 3339"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2027-04-31T00:00:00Z"))
+    .every((failure) => !failure.includes("exact UTC RFC 3339"))
+  || securityTxtContractFailures(securityTxt.replace(/^Expires: .*$/mu, "Expires: 2026-08-15T00:00:00Z"), new Date("2026-07-31T00:00:00Z"))
+    .every((failure) => !failure.includes("at least 30 days"))
+) {
+  failures.push(`${securityTxtPath} parser canaries must reject appended fields, expired metadata, near-expiry metadata, and normalized calendar dates`);
+}
+if (/pixelfed|shopify/iu.test(securityTxt)) {
+  failures.push(`${securityTxtPath} must remain Mochirii-only public security metadata`);
 }
 
 const caddyInstallerPath = "scripts/install-production-caddy.sh";
@@ -262,12 +401,22 @@ requireIncludes(caddyInstallerPath, caddyInstaller, [
   'install -m 0600 -o root -g root "$target_config" "$rollback_config"',
   'mv -f "$candidate_config" "$target_config"',
   'docker exec pixelfed-app curl',
+  '"Local origin"',
+  '"Cloudflare edge"',
+  'output_args=(--output /dev/null)',
+  'if [[ "$method" == GET && -s "$probe_body" ]]; then',
+  "public/.well-known/security.txt",
+  "verify_retired_route_denial",
+  "/installer/runtime-probe",
   "retired_paths=(",
   "for path in /oauth/token /oauth/authorize",
   "https://social.mochirii.com/",
   "https://social.mochirii.com/api/service/readiness-check",
   '[[ "$readiness_status" == "404" ]]',
 ]);
+if ((caddyInstaller.match(/output_args=\(--output \/dev\/null\)/gu) || []).length !== 2) {
+  failures.push(`${caddyInstallerPath} must discard curl HEAD output in both empty-response probe helpers`);
+}
 
 for (const [relativePath, text] of [
   [deployScriptPath, deployScript],

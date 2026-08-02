@@ -7,7 +7,7 @@
 		<div class="card border shadow-none">
 			<div class="card-body p-md-5 text-justify mx-md-3">
 				@if($page && $page->content)
-				{!! $page->content !!}
+				{!! app(\App\Services\SanitizeService::class)->richText($page->content ?? '') !!}
 				@else
 				<div class="terms">
 					<h5 class="font-weight-bold">1. Terms</h5>

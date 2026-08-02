@@ -1,3 +1,9 @@
+import {
+  fetchWithTimeout,
+  OutboundHttpError,
+  readBoundedResponseText,
+} from "./outbound-http.ts";
+
 export type JsonRecord = Record<string, unknown>;
 
 export type DiscordFetchOptions = Omit<RequestInit, "body" | "headers"> & {
@@ -5,6 +11,9 @@ export type DiscordFetchOptions = Omit<RequestInit, "body" | "headers"> & {
   headers?: HeadersInit;
   token?: string;
   tokenEnvName?: string;
+  fetcher?: typeof fetch;
+  timeoutMs?: number;
+  maximumResponseBytes?: number;
 };
 
 export type DiscordFetchResult = {
@@ -16,7 +25,14 @@ export type DiscordFetchResult = {
   headers: Headers;
 };
 
+export type DiscordMemberRoleState = {
+  roles: string[];
+  pending: boolean;
+};
+
 export const DISCORD_API_BASE = "https://discord.com/api/v10";
+export const DISCORD_API_TIMEOUT_MS = 10_000;
+export const DISCORD_API_MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 
 export function getRequiredEnv(name: string): string {
   const value = Deno.env.get(name)?.trim() || "";
@@ -31,9 +47,58 @@ export function getDiscordBotToken(envName = "DISCORD_BOT_TOKEN"): string {
 export function buildDiscordApiUrl(path: string): string {
   const cleanPath = String(path || "").trim();
   if (!cleanPath) throw new Error("Discord API path is required.");
-  if (/^https?:\/\//i.test(cleanPath)) throw new Error("Discord API path must be relative.");
+  if (
+    /^[a-z][a-z\d+.-]*:/i.test(cleanPath) ||
+    cleanPath.startsWith("//") ||
+    cleanPath.includes("\\")
+  ) {
+    throw new Error("Discord API path must be relative.");
+  }
 
-  return new URL(cleanPath.replace(/^\/+/, ""), `${DISCORD_API_BASE}/`).toString();
+  const candidate = new URL(
+    cleanPath.replace(/^\/+/, ""),
+    `${DISCORD_API_BASE}/`,
+  );
+  if (
+    candidate.protocol !== "https:" ||
+    candidate.origin !== "https://discord.com" ||
+    !candidate.pathname.startsWith("/api/v10/") ||
+    candidate.username ||
+    candidate.password ||
+    candidate.port ||
+    candidate.hash
+  ) {
+    throw new Error("Discord API path must stay within the v10 API.");
+  }
+  return candidate.toString();
+}
+
+export function discordMemberRoleState(
+  value: unknown,
+  expectedUserId?: string,
+): DiscordMemberRoleState | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as JsonRecord;
+  if (!Array.isArray(record.roles) || record.roles.length > 250) return null;
+  if (!record.roles.every((role) => typeof role === "string")) return null;
+  const roles = [...record.roles] as string[];
+  if (!roles.every((role) => /^\d{16,22}$/.test(role))) return null;
+  if (record.pending != null && typeof record.pending !== "boolean") return null;
+  if (expectedUserId) {
+    const user = record.user;
+    if (!user || typeof user !== "object" || Array.isArray(user)) return null;
+    if ((user as JsonRecord).id !== expectedUserId) return null;
+  }
+  return { roles, pending: record.pending === true };
+}
+
+export function discordRetryAfterSeconds(headers: Headers): number | null {
+  const value = headers.get("retry-after")?.trim() || "";
+  if (!/^\d{1,4}$/.test(value)) return null;
+  const seconds = Number(value);
+  return Number.isSafeInteger(seconds) && seconds >= 1 && seconds <= 3_600
+    ? seconds
+    : null;
 }
 
 export function redactSecret(value: unknown, visible = 4): string {
@@ -71,14 +136,20 @@ function normalizeBody(body: DiscordFetchOptions["body"]): { body?: BodyInit; js
   return { body: JSON.stringify(body), jsonBody: true };
 }
 
-async function readDiscordPayload(response: Response): Promise<unknown> {
-  const raw = await response.text();
+async function readDiscordPayload(response: Response, maximumBytes: number): Promise<unknown> {
+  const raw = await readBoundedResponseText(response, maximumBytes);
   if (!raw) return null;
+
+  const contentType = response.headers.get("content-type")?.split(";", 1)[0]
+    ?.trim().toLowerCase();
+  if (contentType !== "application/json") {
+    throw new OutboundHttpError("response_json_invalid");
+  }
 
   try {
     return JSON.parse(raw);
   } catch {
-    return raw;
+    throw new OutboundHttpError("response_json_invalid");
   }
 }
 
@@ -88,22 +159,31 @@ export async function discordFetch(path: string, options: DiscordFetchOptions = 
     headers: rawHeaders,
     token,
     tokenEnvName,
+    fetcher,
+    timeoutMs = DISCORD_API_TIMEOUT_MS,
+    maximumResponseBytes = DISCORD_API_MAX_RESPONSE_BYTES,
     ...init
   } = options;
   const { body, jsonBody } = normalizeBody(rawBody);
   const headers = new Headers(rawHeaders || {});
-  const botToken = token?.trim() || getDiscordBotToken(tokenEnvName);
 
-  if (!headers.has("Authorization")) headers.set("Authorization", `Bot ${botToken}`);
+  if (!headers.has("Authorization")) {
+    const botToken = token?.trim() || getDiscordBotToken(tokenEnvName);
+    headers.set("Authorization", `Bot ${botToken}`);
+  }
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
   if (jsonBody && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
 
-  const response = await fetch(buildDiscordApiUrl(path), {
-    ...init,
-    body,
-    headers,
-  });
-  const payload = await readDiscordPayload(response);
+  const response = await fetchWithTimeout(
+    buildDiscordApiUrl(path),
+    {
+      ...init,
+      body,
+      headers,
+    },
+    { fetcher, timeoutMs },
+  );
+  const payload = await readDiscordPayload(response, maximumResponseBytes);
 
   return {
     ok: response.ok,

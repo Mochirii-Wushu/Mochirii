@@ -1,7 +1,7 @@
 const args = process.argv.slice(2);
 const baseUrl = readArg("--base-url", process.env.MOCHI_PETS_TEST_BASE_URL || "https://localhost:8765").replace(/\/$/, "");
 const browserArg = readArg("--browser", "chromium");
-const storageKey = readArg("--supabase-storage-key", "sb-localhost-auth-token");
+const authCookieName = readArg("--supabase-auth-cookie-name", "sb-localhost-auth-token");
 const expectUnconfigured = args.includes("--expect-unconfigured");
 const allowSelfSignedLocalhost = args.includes("--allow-self-signed-localhost");
 const password = process.env.MOCHI_PETS_SMOKE_PASSWORD || "";
@@ -465,7 +465,15 @@ async function setBrowserSession(page, token) {
       created_at: "2026-01-01T00:00:00.000Z",
     },
   };
-  await page.evaluate(([key, value]) => localStorage.setItem(key, value), [storageKey, JSON.stringify(session)]);
+  await page.context().addCookies([{
+    name: authCookieName,
+    value: `base64-${Buffer.from(JSON.stringify(session), "utf8").toString("base64url")}`,
+    url: baseUrl,
+    expires: claims.exp,
+    httpOnly: false,
+    secure: new URL(baseUrl).protocol === "https:",
+    sameSite: "Lax",
+  }]);
 }
 
 function syntheticToken(scenario, sub) {

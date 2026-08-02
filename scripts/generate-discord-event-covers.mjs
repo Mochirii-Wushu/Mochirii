@@ -7,7 +7,11 @@ const require = createRequire(import.meta.url);
 const sharp = require("../apps/web/node_modules/sharp");
 
 const root = process.cwd();
-const source = "C:/Users/xtyty/Pictures/Mochirii/Guild Event Images.png";
+const configuredSource = process.env.MOCHIRII_DISCORD_EVENT_COVER_SOURCE;
+const source = path.resolve(
+  configuredSource ??
+    path.join(root, ".artifacts", "operations", "Guild Event Images.png"),
+);
 const outputSize = { width: 1600, height: 640 };
 
 const panels = [
@@ -24,7 +28,11 @@ const panels = [
 const crop = { width: 858, height: 229 };
 
 if (!existsSync(source)) {
-  throw new Error(`Discord event cover source sheet is missing: ${source}`);
+  throw new Error(
+    "Discord event cover source sheet is missing. Set " +
+      "MOCHIRII_DISCORD_EVENT_COVER_SOURCE or place it in the ignored " +
+      ".artifacts/operations boundary.",
+  );
 }
 
 function sha256(buffer) {
@@ -77,4 +85,14 @@ for (const panel of panels) {
   }
 }
 
-console.log(JSON.stringify({ source, outputSize, hashes }, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      sourceMode: configuredSource === undefined ? "ignored-default" : "configured",
+      outputSize,
+      hashes,
+    },
+    null,
+    2,
+  ),
+);

@@ -9,6 +9,9 @@ import {
   type AuthorizationDetailsFailureKind,
 } from "@/lib/oauth/authorization-details-error";
 import {
+  isDiscordVerifiedSocialMember,
+} from "@/lib/oauth/authorization-decision-core";
+import {
   approvedSocialOAuthRedirect,
   isApprovedSocialOAuthReturnDestination,
 } from "@/lib/oauth/approved-social-redirect";
@@ -20,8 +23,8 @@ import { oauthConsentLoginHref } from "@/lib/oauth/consent-login-url";
 import { priorConsentRedirect } from "@/lib/oauth/prior-consent-redirect";
 import { SOCIAL_HOST } from "@/lib/public-urls";
 import { getCurrentSession, onAuthStateChange } from "@/lib/supabase/auth";
-import { requireBrowserSupabaseClient } from "@/lib/supabase/client";
-import { profileIsActive, verifyMemberAccess } from "@/lib/supabase/profile";
+import { requireReadyBrowserSupabaseClient } from "@/lib/supabase/client";
+import { verifyMemberAccess } from "@/lib/supabase/profile";
 import { text, type MemberAccessResponse } from "@/lib/supabase/types";
 import { WorkflowNotice } from "./WorkflowState";
 
@@ -50,12 +53,12 @@ function scopeLabels(scope: unknown) {
   return [...new Set(scopeList(scope).map((item) => SOCIAL_SCOPE_LABELS[item] || "Additional account access"))];
 }
 
-export function OAuthConsentPanel() {
+export function OAuthConsentPanel({ initialSignedIn = false }: { initialSignedIn?: boolean }) {
   const searchParams = useSearchParams();
   const authorizationId = text(searchParams.get("authorization_id"));
   const loginHref = useMemo(() => oauthConsentLoginHref(authorizationId), [authorizationId]);
   const [busy, setBusy] = useState(true);
-  const [signedIn, setSignedIn] = useState(false);
+  const [signedIn, setSignedIn] = useState(initialSignedIn);
   const [details, setDetails] = useState<AuthorizationDetails | null>(null);
   const [memberAccess, setMemberAccess] = useState<MemberAccessResponse | null>(null);
   const [status, setStatus] = useState("Checking guild social access.");
@@ -95,7 +98,7 @@ export function OAuthConsentPanel() {
         return;
       }
 
-      const client = requireBrowserSupabaseClient();
+      const client = await requireReadyBrowserSupabaseClient();
       const { data, error: detailsError } = await client.auth.oauth.getAuthorizationDetails(authorizationId);
       if (detailsError || !data) {
         const failure = classifyAuthorizationDetailsFailure(detailsError);
@@ -122,7 +125,7 @@ export function OAuthConsentPanel() {
       }
 
       const nextAccess = access.data;
-      const nextActiveMember = profileIsActive(nextAccess.profile, nextAccess);
+      const nextActiveMember = isDiscordVerifiedSocialMember(nextAccess);
       const redirectUrl = priorConsentRedirect(nextDetails, nextActiveMember);
       if (redirectUrl) {
         window.location.assign(redirectUrl);
@@ -134,7 +137,7 @@ export function OAuthConsentPanel() {
       setStatus(
         nextActiveMember
           ? "Guild social access is ready for review."
-          : "Active guild membership is required before authorizing guild social access.",
+          : "Current Discord verification is required before authorizing guild social access.",
       );
     } catch {
       setDetails(null);
@@ -206,7 +209,7 @@ export function OAuthConsentPanel() {
   }
 
   const requestedAccess = scopeLabels(details?.scope);
-  const activeMember = profileIsActive(memberAccess?.profile, memberAccess);
+  const activeMember = isDiscordVerifiedSocialMember(memberAccess);
 
   return (
     <section className="glass-card glass-card--primary glass-pad auth-panel" aria-busy={busy} aria-live="polite">

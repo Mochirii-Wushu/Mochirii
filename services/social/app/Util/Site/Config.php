@@ -115,8 +115,11 @@ class Config
         return self::get();
     }
 
-    public static function json()
+    public static function json(): string
     {
-        return json_encode(self::get(), JSON_FORCE_OBJECT);
+        return json_encode(
+            self::get(),
+            JSON_FORCE_OBJECT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
     }
 }

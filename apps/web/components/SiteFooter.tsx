@@ -1,15 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { OfficialGuildProfiles } from "@/components/OfficialGuildProfiles";
 import type { HeaderAuthState } from "@/components/site-header/header-navigation";
 import { SpinnerViewerNavLink } from "@/components/site-header/spinner-viewer-nav-link";
-import { DISCORD_INVITE_URL, SOCIAL_HOST } from "@/lib/public-urls";
+import {
+  DISCORD_INVITE_URL,
+  SITE_DISPLAY_NAME,
+  SOCIAL_HOST,
+} from "@/lib/public-urls";
 import { accountWorkflowLinks } from "@/lib/site-navigation";
 
 type FooterLink = {
   href: string;
   label: string;
   external?: boolean;
+  newTab?: boolean;
 };
 
 const guildLinks = [
@@ -48,7 +54,13 @@ function FooterColumn({
       <div className="footer-col-title">{title}</div>
       {links.map((link) => (
         link.external ? (
-          <a className="footer-nav" href={link.href} key={`${title}-${link.href}`}>
+          <a
+            className="footer-nav"
+            href={link.href}
+            key={`${title}-${link.href}`}
+            target={link.newTab ? "_blank" : undefined}
+            rel={link.newTab ? "noopener noreferrer" : undefined}
+          >
             {link.label}
           </a>
         ) : (
@@ -129,6 +141,7 @@ export function SiteFooter({
                 />
               ) : null}
             </FooterColumn>
+            <OfficialGuildProfiles placement="footer" />
           </div>
         </div>
 
@@ -136,8 +149,13 @@ export function SiteFooter({
           <div className="footer-meta">
             <span id="copyright-text">© {year} Mōchirīī</span>
             <span className="dot" aria-hidden="true">•</span>
-            <span className="footer-dim">Where Winds Meet</span>
+            <span className="footer-dim">{SITE_DISPLAY_NAME}</span>
           </div>
+          <nav className="footer-legal" aria-label="Privacy and support">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/meta-data-deletion">Data Deletion</Link>
+            <a href="mailto:support@mochirii.com">support@mochirii.com</a>
+          </nav>
         </div>
       </div>
     </footer>

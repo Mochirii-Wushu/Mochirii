@@ -11,29 +11,54 @@ const reportMdPath = resolve(root, "reports/accessibility-route-matrix.md");
 const checkedAt = new Date().toISOString();
 const failures = [];
 const warnings = [];
+const routeMatrix = JSON.parse(readFileSync(resolve(root, "apps/web/config/app-route-matrix.v1.json"), "utf8"));
 
+const accessibilityOverrides = new Map([
+  ["/", { label: "Home", type: "public", workflow: "guild overview", expectsLiveRegion: true }],
+  ["/join", { label: "Join", type: "public", workflow: "website to Discord funnel", componentFiles: ["apps/web/components/public-pages/DiscordServerPreview.tsx"] }],
+  ["/events", { label: "Events", type: "public", workflow: "community schedule", componentFiles: ["apps/web/components/public-pages/EventsBoard.tsx"], expectsLiveRegion: true }],
+  ["/gallery", { label: "Gallery", type: "public", workflow: "media browsing", componentFiles: ["apps/web/components/public-pages/GalleryBrowser.tsx"], expectsLiveRegion: true }],
+  ["/ranks", { label: "Ranks", type: "public", workflow: "progression reference" }],
+  ["/leaders", { label: "Leaders", type: "public", workflow: "stewardship reference" }],
+  ["/tome", { label: "Tome", type: "public", workflow: "conduct reference" }],
+  ["/recruitment", { label: "Recruitment", type: "public", workflow: "recruiting copy", expectsDescribedBy: true }],
+  ["/announcements", { label: "Announcements", type: "public", workflow: "updates" }],
+  ["/raffle", { label: "Raffle", type: "public", workflow: "monthly raffle program and inactive drawing status", componentFiles: ["apps/web/components/public-pages/route-pages/RafflePage.tsx"] }],
+  ["/privacy", { label: "Privacy", type: "public", workflow: "privacy notice", componentFiles: ["apps/web/components/public-pages/common.tsx"], expectsHeading: true }],
+  ["/meta-data-deletion", { label: "Meta Data Deletion", type: "public", workflow: "data deletion instructions", componentFiles: ["apps/web/components/public-pages/common.tsx"], expectsHeading: true }],
+  ["/spotify", { label: "Spotify", type: "public", workflow: "embedded playlists", componentFiles: ["apps/web/components/public-pages/SpotifyBrowser.tsx"], expectsIframe: true }],
+  ["/spotlight", { label: "Spotlight", type: "public", workflow: "member spotlight" }],
+  ["/twills", { label: "Twills", type: "public", workflow: "profile reference", componentFiles: ["apps/web/components/public-pages/ProfileDisplay.tsx"] }],
+  ["/auth", { label: "Auth", type: "protected-entry", workflow: "Discord OAuth", componentFiles: ["apps/web/components/member-workflow/AuthPanel.tsx"], expectsForm: false, expectsLiveRegion: true, expectsAlert: true }],
+  ["/account", { label: "Account", type: "member", workflow: "profile and verification", componentFiles: ["apps/web/components/member-workflow/AccountPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true }],
+  ["/social", { label: "Social", type: "member", workflow: "guild social doorway", componentFiles: ["apps/web/components/member-workflow/SocialHubPanel.tsx"], expectsLiveRegion: true, expectsAlert: true }],
+  ["/oauth/consent", { label: "OAuth Consent", type: "protected-entry", workflow: "Supabase OAuth consent", componentFiles: ["apps/web/components/member-workflow/OAuthConsentPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true }],
+  ["/gallery-submit", { label: "Gallery Submit", type: "member", workflow: "member upload", componentFiles: ["apps/web/components/member-workflow/GallerySubmitForm.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true }],
+  ["/leader-dashboard", { label: "Leader Dashboard", type: "moderator", workflow: "moderation queues", componentFiles: ["apps/web/components/member-workflow/LeaderDashboard.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true }],
+  ["/leader-dashboard/raffle", { label: "Raffle Administration", type: "moderator", workflow: "private monthly raffle administration" }],
+  ["/raffle/claim", { label: "Raffle Reward Claim", type: "member", workflow: "private winner reward claim" }],
+  ["/games/mochi-pets", { label: "Mochi Pets", type: "public-with-protected-entry", workflow: "public concept and private tester doorway", componentFiles: ["apps/web/components/mochi-pets/MochiPetsPublicConcept.tsx", "apps/web/components/mochi-pets/MochiPetsPrivateDoorway.tsx", "apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx", "apps/web/components/mochi-pets/MochiPetsTesterWaitingRoom.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true }],
+]);
+const accessibilityPageRoutes = routeMatrix.routes.filter(
+  (entry) => entry.kind === "page"
+    && ["public", "member", "moderator"].includes(entry.surface)
+    && !entry.path.includes("["),
+);
+const accessibilityPagePaths = new Set(accessibilityPageRoutes.map((entry) => entry.path));
+for (const entry of accessibilityPageRoutes) {
+  if (!accessibilityOverrides.has(entry.path)) failures.push(`accessibility behavior is missing for classified route: ${entry.path}`);
+}
+for (const routePath of accessibilityOverrides.keys()) {
+  if (!accessibilityPagePaths.has(routePath)) failures.push(`accessibility behavior references an unclassified route: ${routePath}`);
+}
 const routes = [
-  { route: "/", label: "Home", file: "apps/web/app/page.tsx", type: "public", workflow: "guild overview", expectsLiveRegion: true },
-  { route: "/join", label: "Join", file: "apps/web/app/join/page.tsx", type: "public", workflow: "website to Discord funnel", componentFiles: ["apps/web/components/public-pages/DiscordServerPreview.tsx"] },
-  { route: "/events", label: "Events", file: "apps/web/app/events/page.tsx", type: "public", workflow: "community schedule", componentFiles: ["apps/web/components/public-pages/EventsBoard.tsx"], expectsLiveRegion: true },
-  { route: "/gallery", label: "Gallery", file: "apps/web/app/gallery/page.tsx", type: "public", workflow: "media browsing", componentFiles: ["apps/web/components/public-pages/GalleryBrowser.tsx"], expectsLiveRegion: true },
-  { route: "/ranks", label: "Ranks", file: "apps/web/app/ranks/page.tsx", type: "public", workflow: "progression reference" },
-  { route: "/leaders", label: "Leaders", file: "apps/web/app/leaders/page.tsx", type: "public", workflow: "stewardship reference" },
-  { route: "/tome", label: "Tome", file: "apps/web/app/tome/page.tsx", type: "public", workflow: "conduct reference" },
-  { route: "/recruitment", label: "Recruitment", file: "apps/web/app/recruitment/page.tsx", type: "public", workflow: "recruiting copy", expectsDescribedBy: true },
-  { route: "/announcements", label: "Announcements", file: "apps/web/app/announcements/page.tsx", type: "public", workflow: "updates" },
-  { route: "/raffle", label: "Raffle", file: "apps/web/app/raffle/page.tsx", type: "public", workflow: "monthly raffle program and inactive drawing status", componentFiles: ["apps/web/components/public-pages/route-pages/RafflePage.tsx"] },
-  { route: "/raffle/rules", label: "Raffle Rules", file: "apps/web/app/raffle/rules/page.tsx", type: "public", workflow: "standing, current, and archived raffle rules" },
-  { route: "/spotify", label: "Spotify", file: "apps/web/app/spotify/page.tsx", type: "public", workflow: "embedded playlists", componentFiles: ["apps/web/components/public-pages/SpotifyBrowser.tsx"], expectsIframe: true },
-  { route: "/spotlight", label: "Spotlight", file: "apps/web/app/spotlight/page.tsx", type: "public", workflow: "member spotlight" },
-  { route: "/twills", label: "Twills", file: "apps/web/app/twills/page.tsx", type: "public", workflow: "profile reference", componentFiles: ["apps/web/components/public-pages/ProfileDisplay.tsx"] },
-  { route: "/auth", label: "Auth", file: "apps/web/app/auth/page.tsx", type: "protected-entry", workflow: "Discord OAuth", componentFiles: ["apps/web/components/member-workflow/AuthPanel.tsx"], expectsForm: false, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/account", label: "Account", file: "apps/web/app/account/page.tsx", type: "member", workflow: "profile and verification", componentFiles: ["apps/web/components/member-workflow/AccountPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/social", label: "Social", file: "apps/web/app/social/page.tsx", type: "member", workflow: "guild social doorway", componentFiles: ["apps/web/components/member-workflow/SocialHubPanel.tsx"], expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/oauth/consent", label: "OAuth Consent", file: "apps/web/app/oauth/consent/page.tsx", type: "protected-entry", workflow: "Supabase OAuth consent", componentFiles: ["apps/web/components/member-workflow/OAuthConsentPanel.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/gallery-submit", label: "Gallery Submit", file: "apps/web/app/gallery-submit/page.tsx", type: "member", workflow: "member upload", componentFiles: ["apps/web/components/member-workflow/GallerySubmitForm.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/leader-dashboard", label: "Leader Dashboard", file: "apps/web/app/leader-dashboard/page.tsx", type: "moderator", workflow: "moderation queues", componentFiles: ["apps/web/components/member-workflow/LeaderDashboard.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true, protectedNoindex: true },
-  { route: "/games/mochi-pets", label: "Mochi Pets", file: "apps/web/app/games/mochi-pets/page.tsx", type: "public-with-protected-entry", workflow: "public concept and private tester doorway", componentFiles: ["apps/web/components/mochi-pets/MochiPetsPublicConcept.tsx", "apps/web/components/mochi-pets/MochiPetsPrivateDoorway.tsx", "apps/web/components/mochi-pets/MochiPetsTesterPasswordGate.tsx", "apps/web/components/mochi-pets/MochiPetsTesterWaitingRoom.tsx"], expectsForm: true, expectsLiveRegion: true, expectsAlert: true },
+  ...accessibilityPageRoutes.map((entry) => ({
+    route: entry.path,
+    file: `apps/web/${entry.source}`,
+    type: entry.surface,
+    protectedNoindex: entry.surface === "member" || entry.surface === "moderator",
+    ...(accessibilityOverrides.get(entry.path) || {}),
+  })),
   { route: "/__mochirii-unknown-route__", label: "Not Found", file: "apps/web/app/not-found.tsx", type: "public", workflow: "unknown-route recovery", expectsHeading: true },
 ];
 

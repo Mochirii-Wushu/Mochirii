@@ -124,6 +124,18 @@ export type GallerySubmission = {
   instagram_opt_in_at?: string | null;
   instagram_opt_in_source?: string | null;
   instagram_opt_in_copy_version?: string | null;
+  instagram_opt_in_contract_version?: string | null;
+  instagram_consent_version?: string | null;
+  facebook_page_opt_in?: boolean | null;
+  facebook_page_opt_in_at?: string | null;
+  facebook_page_opt_in_source?: string | null;
+  facebook_page_opt_in_copy_version?: string | null;
+  facebook_page_opt_in_contract_version?: string | null;
+  facebook_page_consent_version?: string | null;
+  upload_rights_confirmed?: boolean | null;
+  social_withdrawals?: GallerySocialWithdrawalStatus[];
+  thumbnail_width?: number | null;
+  thumbnail_height?: number | null;
 };
 
 export type GallerySubmissionMetadata = {
@@ -131,6 +143,32 @@ export type GallerySubmissionMetadata = {
   caption?: string | null;
   category?: string | null;
   instagramOptIn?: boolean | null;
+  facebookPageOptIn?: boolean | null;
+  uploadRightsConfirmed?: boolean | null;
+};
+
+export type GallerySocialDestination = "instagram" | "facebook_page";
+
+export type GallerySocialWithdrawalStatus = {
+  submission_id: string;
+  destination: GallerySocialDestination;
+  state:
+    | "withdrawn_before_queue"
+    | "canceled"
+    | "quarantined"
+    | "removal_requested"
+    | string;
+  external_removal_required: boolean;
+  requested_at?: string | null;
+  updated_at?: string | null;
+};
+
+export type GallerySocialWithdrawalResponse = {
+  destination?: GallerySocialDestination | string | null;
+  action?: string | null;
+  status?: string | null;
+  requiresModeratorInspection?: boolean | null;
+  removalRequestCreated?: boolean | null;
 };
 
 export type VerificationResponse = {
@@ -229,12 +267,24 @@ export type GalleryReviewSubmission = {
   thumbnailStoragePath?: string | null;
   thumbnailMimeType?: string | null;
   thumbnailSizeBytes?: number | null;
-  signedPreviewUrl?: string | null;
+  thumbnailWidth?: number | null;
+  thumbnailHeight?: number | null;
+  publicationReady?: boolean;
+  sourceValidationState?: "required" | "validated" | string | null;
+  sourceWidth?: number | null;
+  sourceHeight?: number | null;
+  sourceValidatedAt?: string | null;
   previewError?: string | null;
   instagramOptIn?: boolean | null;
   instagramOptInAt?: string | null;
   instagramOptInSource?: string | null;
   instagramOptInCopyVersion?: string | null;
+  instagramOptInContractVersion?: string | null;
+  facebookPageOptIn?: boolean | null;
+  facebookPageOptInAt?: string | null;
+  facebookPageOptInSource?: string | null;
+  facebookPageOptInCopyVersion?: string | null;
+  facebookPageOptInContractVersion?: string | null;
   moderationEvents?: GalleryModerationEvent[];
 };
 
@@ -243,7 +293,6 @@ export type GalleryReviewQueue = {
   count?: number;
   status?: string;
   thumbnailState?: string;
-  signedUrlSeconds?: number;
   summary?: Record<string, number | string | undefined>;
   pagination?: {
     page?: number;
@@ -257,13 +306,34 @@ export type GalleryReviewQueue = {
 
 export type RejectedGalleryCleanupResponse = {
   submissionId?: string | null;
-  storageBucket?: string | null;
-  storagePath?: string | null;
   removedObjectCount?: number | null;
   deletedAt?: string | null;
 };
 
-export type InstagramPublishJobStatus = "queued" | "ineligible" | "publishing" | "published" | "failed" | "canceled" | "shared_manually";
+export type InstagramPublishJobStatus =
+  | "queued"
+  | "ineligible"
+  | "publishing"
+  | "published"
+  | "failed"
+  | "reconcile_required"
+  | "canceled"
+  | "shared_manually";
+
+export type InstagramReconciliationResolution =
+  | "confirmed_published"
+  | "confirmed_not_published";
+
+export type InstagramReconciliationResult = {
+  jobId?: string | null;
+  submissionId?: string | null;
+  status?: InstagramPublishJobStatus | string | null;
+  instagramMediaId?: string | null;
+  instagramPermalink?: string | null;
+  lastError?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+};
 
 export type InstagramPublishEvent = {
   id?: string | null;
@@ -283,14 +353,17 @@ export type InstagramPublishJob = {
   eligibilityReason?: string | null;
   caption?: string | null;
   altText?: string | null;
+  instagramContainerId?: string | null;
   instagramMediaId?: string | null;
   instagramPermalink?: string | null;
   lastError?: string | null;
   attemptCount?: number | null;
+  attemptStartedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   publishedAt?: string | null;
-  signedPreviewUrl?: string | null;
+  galleryPublicationId?: string | null;
+  thumbnailUrl?: string | null;
   previewError?: string | null;
   submission?: GalleryReviewSubmission | null;
   events?: InstagramPublishEvent[];
@@ -298,9 +371,11 @@ export type InstagramPublishJob = {
 
 export type InstagramPublishQueue = {
   jobs: InstagramPublishJob[];
+  items?: InstagramPublishJob[];
   count?: number;
   status?: string;
-  signedUrlSeconds?: number;
+  pageSize?: number;
+  nextCursor?: string | null;
   summary?: Record<string, number | string | undefined>;
 };
 
@@ -308,12 +383,198 @@ export type InstagramApiStatus = {
   configured?: boolean | null;
   accountReachable?: boolean | null;
   publishEnabled?: boolean | null;
+  accountIdPinned?: boolean | null;
   provider?: string | null;
   apiVersion?: string | null;
+  appId?: string | null;
+  expectedAppId?: string | null;
+  account?: {
+    id?: string | null;
+    username?: string | null;
+    accountType?: string | null;
+  } | null;
   statusCode?: number | null;
   checkedAt?: string | null;
   message?: string | null;
   missingSecrets?: string[];
+  invalidFields?: string[];
+  tokenDebuggerCalled?: boolean | null;
+  tokenDebuggerTransportApproved?: boolean | null;
+  tokenBindingVerified?: boolean | null;
+  tokenTypeVerified?: boolean | null;
+  scopesVerified?: boolean | null;
+  expiryVerified?: boolean | null;
+  dataAccessExpiryVerified?: boolean | null;
+  tokenExpiryWindow?: string | null;
+  dataAccessExpiryWindow?: string | null;
+  identityReachable?: boolean | null;
+  identityMatches?: boolean | null;
+  ready?: boolean | null;
+  errorCategory?: string | null;
+  providerErrorCategory?: string | null;
+  facebookPageReachable?: boolean | null;
+  facebookPageIdentityMatches?: boolean | null;
+  instagramBusinessAccountPresent?: boolean | null;
+  instagramBusinessAccountMatches?: boolean | null;
+  pageToInstagramLinkageVerified?: boolean | null;
+  quotaReadable?: boolean | null;
+  quotaExhausted?: boolean | null;
+  businessAccountSubtypeVerification?: string | null;
+};
+
+export type FacebookPagePublishJobStatus =
+  | "queued"
+  | "ineligible"
+  | "publishing"
+  | "published"
+  | "failed"
+  | "reconcile_required"
+  | "canceled";
+
+export type FacebookPageReconciliationResolution =
+  | "confirmed_published"
+  | "confirmed_not_published";
+
+export type FacebookPageReconciliationResult = {
+  jobId?: string | null;
+  submissionId?: string | null;
+  status?: FacebookPagePublishJobStatus | string | null;
+  facebookPhotoId?: string | null;
+  facebookPostId?: string | null;
+  facebookPermalink?: string | null;
+  lastError?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+};
+
+export type FacebookPagePublishEvent = {
+  id?: string | null;
+  action?: string | null;
+  message?: string | null;
+  createdAt?: string | null;
+  actor?: {
+    displayName?: string | null;
+    discordUsername?: string | null;
+    discordGlobalName?: string | null;
+    discordUserId?: string | null;
+  } | null;
+};
+
+export type FacebookPagePublishSubmission = {
+  id?: string | null;
+  status?: string | null;
+  source?: string | null;
+  discord?: {
+    guildId?: string | null;
+    channelId?: string | null;
+    messageId?: string | null;
+    attachmentId?: string | null;
+    userId?: string | null;
+  } | null;
+  uploader?: {
+    displayName?: string | null;
+    discordUsername?: string | null;
+    discordGlobalName?: string | null;
+    discordUserId?: string | null;
+  } | null;
+  title?: string | null;
+  caption?: string | null;
+  category?: string | null;
+  originalFilename?: string | null;
+  mimeType?: string | null;
+  sizeBytes?: number | null;
+  createdAt?: string | null;
+  reviewedAt?: string | null;
+  facebookPageOptIn?: boolean | null;
+  facebookPageOptInAt?: string | null;
+  facebookPageOptInSource?: string | null;
+  facebookPageOptInCopyVersion?: string | null;
+  facebookPageOptInContractVersion?: string | null;
+};
+
+export type FacebookPagePublishJob = {
+  id?: string | null;
+  status?: FacebookPagePublishJobStatus | string | null;
+  eligibilityReason?: string | null;
+  message?: string | null;
+  caption?: string | null;
+  sourceMimeType?: string | null;
+  sourceSizeBytes?: number | null;
+  galleryPublicationId?: string | null;
+  thumbnailUrl?: string | null;
+  facebookPhotoId?: string | null;
+  facebookPostId?: string | null;
+  facebookPermalink?: string | null;
+  lastError?: string | null;
+  attemptCount?: number | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  publishedAt?: string | null;
+  submission?: FacebookPagePublishSubmission | null;
+  events?: FacebookPagePublishEvent[];
+};
+
+export type FacebookPagePublishQueue = {
+  jobs: FacebookPagePublishJob[];
+  count?: number;
+  status?: string;
+  pageSize?: number;
+  nextCursor?: string | null;
+  hasMore?: boolean;
+  summary?: Record<string, number | string | undefined>;
+};
+
+export type FacebookPageApiStatus = {
+  configured?: boolean | null;
+  pageReachable?: boolean | null;
+  publishEnabled?: boolean | null;
+  publishAuthorityConfirmed?: boolean | null;
+  provider?: string | null;
+  apiVersion?: string | null;
+  page?: {
+    id?: string | null;
+    name?: string | null;
+    link?: string | null;
+    tasks?: string[];
+  } | null;
+  statusCode?: number | null;
+  checkedAt?: string | null;
+  message?: string | null;
+  missingSecrets?: string[];
+  tokenDebuggerCalled?: boolean | null;
+  tokenDebuggerTransportApproved?: boolean | null;
+  tokenBindingVerified?: boolean | null;
+  tokenTypeVerified?: boolean | null;
+  scopesVerified?: boolean | null;
+  expiryVerified?: boolean | null;
+  dataAccessExpiryVerified?: boolean | null;
+  tokenExpiryWindow?: string | null;
+  dataAccessExpiryWindow?: string | null;
+  identityReachable?: boolean | null;
+  identityMatches?: boolean | null;
+  ready?: boolean | null;
+  errorCategory?: string | null;
+  providerErrorCategory?: string | null;
+  createContentTaskVerified?: boolean | null;
+};
+
+export type ModerateGallerySubmissionResponse = {
+  submission?: JsonRecord | null;
+  action?: string | null;
+  reviewedAt?: string | null;
+  instagramJob?: {
+    id?: string | null;
+    status?: InstagramPublishJobStatus | string | null;
+    eligibility_reason?: string | null;
+    created_at?: string | null;
+  } | null;
+  facebookPageJob?: {
+    id?: string | null;
+    status?: FacebookPagePublishJobStatus | string | null;
+    eligibility_reason?: string | null;
+    created_at?: string | null;
+  } | null;
+  warnings?: string[];
 };
 
 export type PublicMemberProfile = {

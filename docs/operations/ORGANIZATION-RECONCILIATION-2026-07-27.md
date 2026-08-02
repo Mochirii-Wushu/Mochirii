@@ -1,188 +1,234 @@
-# Mōchirīī Organization Reconciliation Ledger — 2026-07-27
+# Mōchirīī Organization Reconciliation Ledger
 
-This public-safe ledger records the exact source and governance baseline used to
-reconcile the repositories owned by `Mochirii-Wushu`. It contains no secrets,
-host addresses, private provider exports, member data, or credential values.
-Provider state and branch heads are mutable and must be read back again at each
-release gate.
+This public-safe mutable ledger records the canonical GitHub organization,
+repository, pull-request, issue, branch, worktree, and production-ownership
+baseline. It contains no secrets, host addresses, private provider exports,
+member data, or credential values. Repository and pull-request values were
+read back on 2026-08-01; provider observations retain their own dates and must
+be rechecked at every release gate.
 
-## Repository Baseline
+Sealed evidence, merged pull requests, historical check output, and provider
+audit metadata are immutable records. Old repository URLs that occur only in
+those records are retained; GitHub redirects them to the canonical repository.
+Active source, documentation, configuration, and new pull-request prose use the
+canonical names below.
 
-| Repository | Visibility/state | Default branch and exact SHA | Current work | Latest recorded `main` workflow | Production ownership and merge effect |
-| --- | --- | --- | --- | --- | --- |
-| `Mochirii-Wushu/Mochirii` | Public, active | `main` at `21f195458a87ae96eea84af51d0e1420b770ca74` | PR #534 is released; conflicting PR #532 is closed unmerged; reviewed Social replacement PR #535 is the only open organization PR and remains production-gated; issues #443 and #475 remain classified trackers | PR #535 exact-head repository, CodeQL, Vercel, Supabase Preview, and Social production-image checks: success before the current documentation reconciliation | Owns Website, Shopify theme, Social source, and Supabase. Protected-`main` merges publish Website through Vercel and invoke the connected Supabase deployment. Social-source merges also publish an immutable GHCR image; neither Shopify nor DigitalOcean is deployed automatically. |
-| `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, active/dormant | `main` at `7e840fe337a425b659b065abf7e04e5256614cba` | PR #17 closed unmerged at preserved head `2bcab5e7f58ebcae087dc07de81ca15fcd20a2e4`; issue #9 is classified | Dependency workflow run `30242819447`: success | Source validation only. No Apple build, submission, or provider mutation follows from `main`. |
-| `Mochirii-Wushu/Mochirii-Pets` | Private, active/dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | Issue #3 is classified as dormant future work | Dependency workflow run `30273752691`: success | Fresh future Unity source only. No hosted runtime, deployment, Apple submission, or recurring provider cost. |
-| `Mochirii-Wushu/Reaper` | Private, active | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 merged from reviewed head `8179c80af5a16c14911a99f6d199edbbe834116e`; only `main` remains | CI run `30329689062`: success | The source merge ran CI only. It did not deploy the Discord Gateway worker or send a Discord message. |
-| `Mochirii-Wushu/Mochirii-Raffle-Spinner` | Private, archived | `main` at `95e917357517faeb43be9e2da6551baec213aed8` | No PRs or issues; two historical Dependabot branches are intentionally retained | Dependency workflow run `30231800839`: success | Historical source only. No current deployment or schedule depends on this repository. |
+## Canonical Repository Inventory
 
-Private-repository plan limits leave Social Mobile, Mochi Pets, Reaper, and the
-archived spinner without enforceable branch protection. Their review and CI
-gates remain procedural. The Website rulesets require current successful
-`validate`, `validate-next`, `validate-theme`, `validate-social`, `Vercel`, and
-`Supabase Preview` contexts. The ruleset currently permits an owner bypass and
-does not require an approving review, so releases must explicitly refuse the
-bypass and record accountable review.
+| Repository | Visibility/state | Default branch and verified SHA | Current classification | Production ownership |
+| --- | --- | --- | --- | --- |
+| `Mochirii-Wushu/Mochirii-Website` | Public, active | `main` at `2eec9e467b4679fd77648ef61e77cf246ec9589b` | The 2026-08-01 snapshot has 15 open PRs: #536 and #538–#551. The validated predecessor integration candidate is `bdbe9a7e8fb47646588754cf6fc1e4f6a15dc146` (tree `5ff295a4f5df0525a362dca5483243e7bfe3c9f9`), based on that `main`, 114 commits ahead and zero behind before the successor documentation, storefront-readiness, and official-profile packet. The local branch has no remote branch or PR. Existing PRs remain until exact replacement parity, review, and checks are proved. | Owns the Vercel Website, Shopify theme source, Social source, and Supabase source. A protected-`main` merge invokes the connected Vercel and Supabase integrations; Social-source merges can also publish a GHCR image. Provider effects remain release-gated. |
+| `Mochirii-Wushu/Mochirii-Social-Mobile` | Private, dormant | `main` at `57deb668620da6312d571090dee55e8fb58547d2` | PR #19 merged with exact reviewed-tree parity; its feature branch was deleted and merge-SHA CI passed. No open PRs. Issue #9 remains a classified dependency/toolchain tracker. The clean local security and documentation successor is `b417daaf546395ded535b3beebde5d74b459c7dd` (tree `e29fe53a69107df702525bfb5d8bdc7417c12872`); it records that Website remains the current Social source owner until a separately approved extraction and cutover. | Source validation only; no Apple build, submission, or provider mutation occurred. |
+| `Mochirii-Wushu/Mochirii-Pets` | Private, dormant | `main` at `09357c0432bf6aeb55742a27699110f0a0cb76ac` | PR #4 is open at naming-only head `aadaaedc19aaf6e85d7bd742102c616c35b3c77f`. Its repository contract passes, but the Unity editor job fails before testing because neither approved Unity license secret is configured. A clean local activation-gated/manual-policy successor is `f088bbab9a4786fa13ce6c8e92d0ef5f7ca0d902` (tree `6fa35bc0c938e6167a9ffed1f302ae4ed772f214`); adopting that policy remains an owner decision and is not part of PR #4. Issue #3 is classified future Unity work. | Fresh Unity source only; no hosted runtime, deployment, Apple submission, or recurring provider cost. |
+| `Mochirii-Wushu/Reaper-Discord-Bot` | Private, active source | `main` at `79023914ee5c6502520b88aebe861904af9c2472` | PR #7 is merged; no open PRs or issues; only `main` remains remotely. The clean local contract-consumer candidate is `88d06147159ba3b9ea8d62fee08e50187c394a5b` (tree `c0b2b3268104f81c818e49bbfaff0ee1231074f3`); it tracks zero `supabase/` files and passes 39/39 tests against the Website producer contract. | Source and rollback reference only. Website remains the shared-schema and Edge-Function owner. No Reaper deployment or Discord send is authorized. |
+| `Mochirii-Wushu/Mochirii-Raffle-Spinner` | Private, archived | `main` at `95e917357517faeb43be9e2da6551baec213aed8` | No open PRs or issues. Two historical Dependabot branches are intentionally retained. | Historical source only; no current deployment or schedule depends on it. |
+| `Mochirii-Wushu/Mochirii-Forums` | Private, empty; governance and source packets prepared | No branch refs; `main` is reserved for an approval-gated bootstrap. | No PRs, issues, or remote source. The clean local governance seed is `ed98cf8d8b6fe624468cca8b8e4fef6954ec276b`; its source-introduction successor is `564f52292aca11d40c7aeaf78a42acfa03b39c55` (tree `1ac991b49f5fd63909ec6bea7c0e05cf64577d94`). Both remain unpushed and create no runtime or provider state. | No production dependency, provider effect, runtime, or recurring cost. Provider connection requires separate future approval. |
+| `Mochirii-Wushu/Mochirii-Social` | Private, empty placeholder | No branch refs | No PRs, issues, or remote source. The hosted Social source remains under `Mochirii-Website/services/social`. Clean local extraction and modernization candidates exist at `98c006c425c96b86239c60e19252d03e15ef93f2` and `afcdccfe415f5bc9bc790690ead464198cc04fa2`; neither establishes ownership or production without a separately approved cutover. | Intended successor only. It has no production dependency or provider effect while empty. |
 
-## Remote Branch Classification
+GitHub reports exactly these seven repositories. The configured default branch
+for either empty repository does not create a branch ref. Private-repository plan
+limits leave procedural review and CI gates where enforceable rulesets are not
+available. Website releases must use protected `main`, current exact-head
+checks, accountable review, and no owner bypass.
 
-### Website
+## Pull Requests, Issues, and Remote Branches
 
-- `agent/member-profile-links` at
-  `36c27cf9608f9620ecb2035ddef0297d4c4b1a6b`: merged into current `main`;
-  remove after final patch-parity readback.
-- `agent/raffle-winner-flair` at
-  `7cbda0d81eadbbebf52f77e36a859292c0cda764`: merged through PR #533;
-  remove after final patch-parity readback.
-- `agent/web-runtime-performance` at
-  `4c9ff637e455984b5bb8776eb2f6c2fae6354e1c`: merged through PR #533;
-  remove after final patch-parity readback.
-- `fix/universal-lightbox` at
-  `73e17b945b09f7ba4806880c0182b50b943e8de5`: merged through PR #533;
-  remove after final patch-parity readback.
-- `agent/social-reliability` at reviewed head
-  `4f157d7c1adc7ba530044c35a83c12c102fd9810`: PR #532 was closed unmerged and
-  the remote branch was deleted after PR #535 proved replacement traceability
-  and passed exact-head checks and both provider previews.
-- `agent/social-hardening-replacement-20260727`: active PR #535. Preserve until
-  its separately authorized production merge and post-release readbacks are
-  complete; use the pull request as the authoritative exact-head record.
-
-### Other repositories
-
-- Social Mobile has only `main`; the closed PR #17 branch was removed after its
-  pull-request head remained retrievable.
-- Mochi Pets has only `main`.
-- Reaper PR #7 merged as `79023914ee5c6502520b88aebe861904af9c2472`.
-  Its final tree exactly matches reviewed head
-  `8179c80af5a16c14911a99f6d199edbbe834116e`; push CI passed. The reviewed
-  branch and superseded legacy head
-  `79fbabd9bd0c0528d7c0f331d195088c3410dcff` were deleted only after both PR
-  heads remained retrievable. Reaper now has only `main`.
-- The archived spinner retains
-  `dependabot/github_actions/main/github-actions-901392d03b` at
-  `46fe90ceeea592888eec49b9135ef8f43dcd9f0e` and
-  `dependabot/npm_and_yarn/main/npm-dependencies-7fdb227275` at
-  `29372056a6e75966694664ea120ea14a36242c45` as immutable historical
-  references. Do not unarchive the repository merely to remove them.
-
-## Issue Classification
-
-The following open issues are intentional records, not incomplete current
-releases. Each issue contains its owner, risk, activation trigger, and next
-review date:
-
-- Mochi Pets #3: dormant future Unity validation.
-- Social Mobile #9: tracked Expo/React Native/Jest toolchain advisory paths.
-- Website #475: tracked Vue 2/Laravel Mix Social modernization.
-- Website #443: tracked ESLint 10/TypeScript 7 ecosystem compatibility.
-
-They must remain open until their documented acceptance criteria are met; they
-must not be closed merely to produce a zero issue count.
+- Website PR #535 was squash-merged through protected `main` as
+  `075937a30a9509faa189e9b1917a2ad9b847c7b0`; it is historical merged work,
+  not an open release candidate or authority for the local union.
+- The fresh 2026-08-01 read-only snapshot reports exactly 15 open Website PRs:
+  #536 and #538 through #551. This is a dated snapshot and must be refreshed
+  before any merge, closure, or branch deletion.
+- PRs #536 and #538–#541 are represented and evolved in the local integration
+  candidate, but none may be closed until a pushed replacement PR proves exact
+  traceability, accountable review, and all required exact-head checks.
+- Dependabot PRs #542–#551 are not incorporated in the integration candidate.
+  They require independent provenance, compatibility, lockfile, audit, build,
+  and generated-asset review; do not merge or close them by association with
+  the union.
+- Website `main` now requires exactly `validate`, `validate-next`, `Vercel`,
+  `supabase-local-preview`, `validate-theme`, and `validate-social` with strict
+  current-head enforcement. Hosted `Supabase Preview` is no longer a required
+  context. Historical per-PR hosted Preview results remain evidence from their
+  recorded time, not a current merge gate.
+- Mochirii Pets PR #4 remains at naming-only head
+  `aadaaedc19aaf6e85d7bd742102c616c35b3c77f`. The automatic repository
+  contract succeeds, while exact-editor fails before running Unity because the
+  protected Unity license environment is not configured. Resolving that CI
+  policy or configuring provider secrets is a separate owner decision; it must
+  not be hidden inside the naming change.
+- Provider-generated CodeQL output for the current PR still contains a former
+  Website URL. That immutable output redirects correctly and is not source
+  drift. Recheck newly generated output after the PR head changes.
+- The 2026-07-30 issue snapshot recorded Website #443 and #475, Social Mobile
+  #9, and Mochi Pets #3. Refresh it before a completion claim; zero open issues
+  is not the acceptance criterion when future-risk trackers are classified.
+- Remote feature branches include branches for the 15 open Website PRs and one
+  open Mochi Pets PR in the 2026-08-01 snapshot, plus two retained historical
+  Dependabot branches in the archived spinner repository:
+  - `dependabot/github_actions/main/github-actions-901392d03b` at
+    `46fe90ceeea592888eec49b9135ef8f43dcd9f0e`.
+  - `dependabot/npm_and_yarn/main/npm-dependencies-7fdb227275` at
+    `29372056a6e75966694664ea120ea14a36242c45`.
+- The two archived branches are immutable historical references. Do not
+  unarchive the repository merely to remove them.
 
 ## Local Website Worktrees
 
-The 2026-07-27 audit recorded 28 Website worktrees: 22 clean and 6 dirty. No
-worktree, ref, credential, or archive was changed during that audit.
+The latest 2026-07-30 readback finds 51 registered Website worktrees. The canonical
+`Website` checkout remains at the exact upstream SHA with two known user-owned
+`.codex/` paths; those paths and every intentional dirty lane must be
+preserved. The worktree count is not a cleanup allowlist: every path requires a
+fresh status, exact-head, patch/tree parity, and unique-file proof before any
+separately approved removal.
 
-### Active integration lanes
+| Worktree | Exact head | Classification |
+| --- | --- | --- |
+| `Website` | `2eec9e467b4679fd77648ef61e77cf246ec9589b` | HEAD equals `origin/main` while the checked-out branch is `mochi/vendor-mcp-setup`; preserve its two user-owned `.codex/` paths. |
+| `Website-full-stack-integration-rehearsal-20260729` | Validated predecessor head `bdbe9a7e8fb47646588754cf6fc1e4f6a15dc146` (tree `5ff295a4f5df0525a362dca5483243e7bfe3c9f9`) plus the successor mutable ledger, storefront-readiness, and official-profile packet. | Authoritative local union: 53 migrations, 49 functions, 31/18 source JWT expectation, bounded server-auth and outbound HTTP transports, exact-byte Discord verification, constant-time secret comparison, hardened public asset/CSP and Social rendering contracts, and preserved/evolved implementation intent from #536 and #538–#541. An isolated lane applied 53/53 migrations and passed 603/603 pgTAP assertions; warning-level database lint and security findings were zero, unindexed foreign keys were zero, and 60 fresh-empty-database unused-index INFO findings remain observation-only. The successor source packet also passed the full repository suite, Web production build, fail-closed storefront parity, and 28/28 official-profile browser cases. It has no PR or provider effect. |
+| `Website-repository-name-reconciliation-20260728` | `661afd9299221f521e2f1bf805728442ff6be4c1` | Canonical-name reconciliation source for PR #538; retain until replacement parity is proved. |
+| `Website-repository-separation-adrs-20260729` | `331ed1e91e8cee65b4b1478b30fc545f41b57dd0` | Architecture/governance candidate; no provider or source-ownership transfer. |
+| `Website-shopify-prepayment-safety-20260729` | `5b3834ca2558df9bc5063119f673662b04e5bb62` | Storefront prepayment-safety candidate; preserves sealed copy evidence and authorizes no Shopify mutation or publication. |
+| `Website-phone-auth-fail-closed-20260729` | `c6f0702762b9135d7dacdcb055bcabfae98a9313` | Clean fail-closed phone-login source candidate; phone authentication remains disabled and provider activation is not authorized. |
+| `Website-social-private-media-bootstrap-20260728` | `7f19b9cbf51a4cc2ec3a3d680cc99e02a2bb704a` | Active PR #536 replacement/hardening lane. |
+| `Website-gallery-data-v2-20260728` | `bd6f4f50ed8201c029ab2f588e18e63dc66dd580` | Clean, sealed Gallery data/media release source. |
+| `Website-raffle-full-stack-disabled-20260728` | `7b0001c86843aefbeb4aa5724105456f7a3d293a` | Clean, sealed disabled raffle-foundation source. |
+| `Website-meta-gallery-publishing-20260728` | `db6aac31a58f054c6ad9491d7274153890984955` | Intentional concurrent Meta publishing worktree; preserve all tracked and untracked work. |
+| `Website-meta-gallery-backend-20260729` | `7796a4517bc4cdffaacdaa2a531e369982bb59af` | Parallel Meta backend source lane and draft PR #540; provider state and the shared Supabase stack remain outside this documentation task. |
+| `Website-meta-gallery-ui-20260729` | `35fe1a8d081367cfcfaa4490ebf9f2789e9b33b8` | Parallel Meta UI source lane and draft PR #541; no production authority or provider effect. |
+| `Website-meta-gallery-release-20260729` | `c9e1da01524b2721a7a88e385c07c94501a6b78f` | Source-only Meta handoff; both publish flags remain false and no post was created. |
+| `Website-meta-public-readiness-20260729` | `71d71d092d87be4dab4f6eb733dec36980cdd545` | Draft PR #539 source; retained until union replacement parity is proved. |
+| `Website-gallery-full-stack-p0-20260728` | `9d0303250fdbc99d99b87af8ff2ddf8ccbf127ad` | Superseded candidate; retain until Gallery replacement parity is proved. |
+| `Website-gallery-raffle-integration-20260728` | `e920f7b93070f2c25fa343405f8957aab5052747` | Ordered Gallery/raffle verification composition; not a production branch. |
+| `Website-raffle-consolidation-utc8-20260728` | `313ef528f73cbf1f629d703aa0eb8a2f0fc8bf21` | Superseded candidate; retain until integrated raffle parity is proved. |
+| `Website-raffle-edge-port-20260728` | `23c3b500b63b3e2166de9089ff79a0b848a48cdd` | Superseded extraction candidate; retain until ownership parity is proved. |
+| `Website-raffle-integrated-20260728` | `9494561368797c5eb06e20f40896dcb89e573d07` | Superseded integration candidate; retain until disabled-foundation parity is proved. |
+| `Website-raffle-leaderboard-foundation-20260728` | `9f68986d3ad8bca5940f6a0f74a9329e9ac97210` | Superseded candidate; retain until integrated raffle parity is proved. |
+| `Website-raffle-reward-relay-20260728` | `645b6796111042e1e653edadbca4d71fb5c5e10f` | Superseded reward-relay candidate; retain until disabled-foundation parity is proved. |
+| `Website-raffle-ssr-boundary-20260728` | `2d89eb3c057c96b72d39ff1571755d750e3e2846` | Superseded SSR-boundary candidate; retain until disabled-foundation parity is proved. |
 
-- `Website-reliability-20260727` at
-  `2b78b228de33c78dad548a12557e7e953d009005`: superseded local preparation;
-  the reviewed reliability lane merged through PR #534 and must pass final
-  patch-parity proof before this worktree is removed.
-- `Website-social-hardening-replacement-20260727`: active Social replacement
-  PR #535 based on current `main` at
-  `21f195458a87ae96eea84af51d0e1420b770ca74`. Use the pull request head as the
-  authoritative release identity and rerun every exact-head gate after changes.
-- `Website` at `b41fb46b987bde86a70add27e612a0a492e441cb`: intentionally dirty
-  Social OAuth source material; preserve until the Social replacement is
-  reviewed and merged.
-- `Website-identity-cleanup` at
-  `5b2ad686c9c4bf47035893b170ea8d3d659fd4ea`: temporary clean `main`
-  holder; remove only after the canonical `Website` path safely becomes the
-  clean `main` checkout.
+The other registered paths are also classified as preserved local evidence,
+source, or rehearsal lanes, even where their intent is present in the union:
 
-### Proven merged or superseded
+`Website-auth-replay-rehearsal-20260729`,
+`Website-discord-gallery-ingest-hmac-20260729`,
+`Website-full-stack-completion-governance-20260729`,
+`Website-gallery-finalization-20260729`,
+`Website-integration-exposure-catalog-20260729`,
+`Website-meta-gallery-snapshot-rehearsal-20260729`,
+`Website-node-validation-16f923d`,
+`Website-phone-otp-abuse-controls-20260729`,
+`Website-raffle-final-hardening-rehearsal-20260729`,
+`Website-raffle-sql-hardening-20260729`,
+`Website-repository-governance-salvage-20260729`,
+`Website-route-inventory-20260729`,
+`Website-server-auth-boundaries-20260729`,
+`Website-social-private-media-auth-assurance-reconciled-20260729`,
+`Website-social-private-media-bootstrap-reconciled-20260729`,
+`Website-social-private-media-combined-final-20260729`,
+`Website-social-private-media-hardening-20260729`,
+`Website-social-private-media-replay-rehearsal-20260729`,
+`Website-stack-auth-final-rehearsal-20260729`,
+`Website-stack-discord-gallery-hmac-20260729`,
+`Website-stack-integration-catalog-20260729`,
+`Website-stack-phone-otp-20260729`,
+`Website-stack-route-inventory-20260729`,
+`Website-stack-server-auth-csp-20260729`,
+`Website-stacked-gallery-delivery-hardening-20260729`,
+`Website-stacked-raffle-consolidation-20260729`, and
+`Website-stacked-shopify-prepayment-safety-20260729`.
 
-These worktrees have recorded exact-tree or patch-parity evidence and are
-eligible for cleanup only after the owning replacement release is complete:
+Final cleanup requires the complete 51-worktree inventory, exact patch/tree
+comparison, clean status, recorded head, and proof that no unique source,
+asset, test, or documentation would be lost. Destructive worktree or branch
+removal is separately approval-gated.
 
-- `Website-branded-404` — `d268f96bf7785799718e5d2ee329017740af63df`.
-- `Website-ci-toolchain` — `5c47ef49a3e01421f7039b15ff89ecbe750f2fbf`.
-- `Website-gallery-performance-20260727` — `73e17b945b09f7ba4806880c0182b50b943e8de5`.
-- `Website-mochi-pets-doorway` — `6c8ecc1350a2b8836b6702f04053d95f3ce3c76f`.
-- `Website-playwright-1.62` — `c3bebace81788c2249ee9e4c90159b9ff537af46`.
-- `Website-playwright-1.62-reviewed` — `630a1bd86ff48ca05947de57386cacd8bb8d966d`.
-- `Website-profile-links-20260727` — `36c27cf9608f9620ecb2035ddef0297d4c4b1a6b`.
-- `Website-public-pages-release` — `7697f46a3151aac1cf332e13af3090d52fad6a26`.
-- `Website-raffle-public` — `f2feb1c10fa97bf56a2da8682f14e7677ebc7ee1`.
-- `Website-raffle-public-final` — `ece6640243d2254b795415ff428d9e80dea197cd`.
-- `Website-raffle-winner-flair-20260727` — `7cbda0d81eadbbebf52f77e36a859292c0cda764`.
-- `Website-recovery-tooling` — `fbe03bd3c8dc5ab432f286177bea3e9090022817`.
-- `Website-release-integration-20260727` — `c048073b4108d40c099c843dcc702b8ef47d1dda`.
-- `Website-social-release-integration-20260727` — `2cd4c63f3a709aa63e44f6cdf69556627e2b354f`.
-- `Website-social-reliability-20260727` — `4f157d7c1adc7ba530044c35a83c12c102fd9810`.
-- `Website-supabase-edge-lock` — `b16064a4b76a2b50af7fccdc16afeece1a8e2960`.
-- `Website-tooling-security` — `a0d1fa0367c1bcf29827fca2f9ac6e22fe2373a8`.
-- `Website-universal-lightbox` — `38d31f1ce2e6e62c462ccc5eb54d576dccb5ef20`.
-- `Website-web-runtime-20260727` — `4c9ff637e455984b5bb8776eb2f6c2fae6354e1c`.
+## Provider Connection Readback
 
-The superseded Social reliability remote branch is deleted, but its local
-worktree remains preserved until PR #535 completes its production release and
-the final cleanup packet revalidates the exact target list.
+- An authenticated read-only Vercel Settings -> Git readback on 2026-07-30
+  confirms that project `mochirii` is connected to
+  `Mochirii-Wushu/Mochirii-Website`, with the canonical GitHub repository URL.
+  The project overview identifies `main/apps/web` as the production source.
+  Historical deployment metadata may retain contemporary legacy text; no
+  provider mutation was made or is required for the active binding.
+- The last verified hosted Supabase baseline, recorded before the 2026-08-01
+  local candidate, contained 34 applied migrations and 33 ACTIVE functions with
+  20 `verify_jwt=true` / 13 false. It is dated and requires fresh readback. Its GitHub
+  integration was visibly connected to
+  `Mochirii-Wushu/Mochirii-Website`, working directory `.`, production branch
+  `main`, and production deployment enabled.
+- The local union contains 53 migrations and 49 declared functions with 31/18
+  source parity. It has not been pushed, previewed, or deployed and therefore
+  does not alter the hosted readback. Its isolated 53/53 migration reset and
+  603/603 pgTAP result are local evidence only. Warning-level database lint and
+  security findings were zero; the foreign-key audit found zero unindexed
+  foreign keys. Sixty fresh-empty-database `unused_index` INFO observations are
+  not deletion evidence. The shared local stack and all hosted providers were
+  untouched.
+- The source-only Meta lanes retain
+  `FACEBOOK_PAGE_PUBLISH_ENABLED=false` and
+  `INSTAGRAM_PUBLISH_ENABLED=false`; no post was created. No provider identity,
+  secret, or readiness claim is inferred from local source validation.
+- Public read-only probes at 2026-07-30T02:25Z returned Cloudflare `522` for
+  Social root, login, security metadata, and installer paths after about 20
+  seconds. The origin cause is unverified and no DigitalOcean, Cloudflare, DNS,
+  image, database, or secret mutation was made.
+- The 2026-07-30 alert readback is historical and must not be treated as the
+  current alert count. The 2026-08-01 PR snapshot includes Dependabot PRs
+  #542–#551, which require independent review. Alert APIs unavailable for
+  private repositories are never recorded as zero. Website private
+  vulnerability reporting is enabled, and the repository advisory form is the
+  primary vulnerability contact; the unverified support mailbox is not used as
+  a fallback.
+- The separate Vercel project named `web` is not Git-connected. It is only a
+  cleanup candidate until domains, deployments, environment dependencies, and
+  rollback impact are proved. Do not delete it without a separate exact packet.
+- Reaper, DigitalOcean, Cloudflare, DNS, Spaces, Shopify, Apple, Unity, Discord,
+  payments, and ActivityPub are not changed by this documentation release.
 
-The dirty universal-lightbox worktree contains only two stale generated Mochi
-Pets hygiene reports, not unique implementation. Preserve those files until an
-approved cleanup packet names them exactly.
+## Public Brand and Technical Identity
 
-### Inactive source that must be sealed before removal
+- Public guild name: `Mōchirīī`.
+- Public short name: `Mōchī`.
+- Public Social product: `Mōchirīī Social`.
+- Cosmetics commerce: `Mochirii Cosmetics`.
+- Repositories, domains, code symbols, migrations, environment variables,
+  logs, containers, OAuth identifiers, and other technical surfaces: ASCII
+  `Mochirii` and the canonical repository names in this ledger.
+- Game product: `Mochi Pets`.
 
-- `Website-monthly-prize-draw` at
-  `b41fb46b987bde86a70add27e612a0a492e441cb`: unique historical full-stack
-  raffle work.
-- `Website-raffle-core-foundation` at
-  `da564dc542cdb93e3f1ce663c085abcca07bb2ce`: disabled raffle foundation.
-- `Website-raffle-reward-relay` at
-  `f46dd425fbf30b2044f641e474add28dd26579e3`: disabled reward-relay
-  extension.
-- `Website-mochi-pets-hosted-auth` at
-  `9a0340ff36aa29747122861a90a811ab7b3cc47e`: unique inactive hosted-auth
-  source.
-- `Website-social-guild-chat` at
-  `6ffb542049adf15fdab950f1cd116ff92f55ab21`: unique inactive guild-chat
-  source plus untracked middleware/configuration work.
+Do not perform blind global replacement. Required upstream names remain in
+licenses, dependencies, source-compatibility notes, and internal provider
+documentation. Public/customer surfaces remain Mōchirīī-branded.
 
-Before removing any of these, secret-scan its patch, create one source-only
-archive commit or ignored Git bundle per logical feature, verify its readback
-and SHA-256, and classify it `Archived — not active`. Never place these archives
-in `Mochi Creds`, inspect credential values, restore the retired Mochi Pets
-prototype, or activate a provider/runtime.
+## Release and Rollback Boundaries
 
-## Release And Rollback Boundaries
+- Re-read repository names, base/head SHAs, required checks, open PRs, function
+  inventory/JWT parity, migration list, provider previews, and rollback target
+  immediately before every merge.
+- A Website protected-`main` merge can publish through Vercel and invoke the
+  Supabase Git integration even when its patch has no Supabase source changes.
+  Exact authorization must name those effects.
+- Social source publication to GHCR and any DigitalOcean deployment are
+  distinct approvals. Shopify publication, payment activation, Discord sends,
+  Apple/Unity work, Cloudflare/DNS changes, ActivityPub, and paid resources are
+  not implied.
+- Credentials stay in provider secret stores and the private `Mochi Creds`
+  recovery boundary. Never print, hash, summarize, commit, relocate, or inspect
+  those values.
+- Stop on head drift, unexpected provider effects, changed migration or
+  function inventory, JWT-parity drift, failed required checks, missing
+  rollback evidence, or cleanup-target mismatch.
 
-- Reaper PR #7 merged after accountable exact-head authorization. The merge and
-  successful `main` CI did not authorize or perform a Discord send or runtime
-  deployment; any future runtime change remains separately gated.
-- Website reliability PR #534 completed as
-  `21f195458a87ae96eea84af51d0e1420b770ca74`. Vercel production is exactly
-  bound to that SHA; only the two approved migrations applied; and the same 33
-  ACTIVE functions advanced once with 20 JWT-verified and 13 non-JWT
-  functions. No manual Supabase deployment occurred.
-- The Social hardening PR follows only after the reliability production binding
-  is verified. It is expected to add no migration and make no function-inventory
-  or JWT-configuration change. Its merge still requires separate authorization
-  for Vercel, the unavoidable redeployment of the same 33 functions with 20/13
-  parity, and GHCR effects; inventory or parity drift stops the release.
-  Deploying its immutable image to DigitalOcean is a later, separately approved
-  packet.
-- Shopify, payments, ActivityPub, Apple, Unity, Discord sends, Cloudflare, DNS,
-  Spaces, secrets, schedules, and paid resources remain unchanged.
-- Stop on any head drift, unexpected provider effect, changed function inventory
-  or JWT parity, failed required context, missing rollback evidence, or archive
-  target mismatch.
+## Completion Standard
 
-Final acceptance requires zero open pull requests, every remaining issue and
-branch classified, only clean canonical Website and Social Mobile checkouts,
-no obsolete Website worktrees, exact Vercel/Supabase source binding, and no
-unapproved provider or credential change.
+- Zero unclassified repositories, pull requests, issues, branches, worktrees,
+  provider connections, or production effects.
+- Zero open scoped implementation PRs after every approved release completes;
+  classified future-risk issues may remain open.
+- Canonical Website and Social Mobile checkouts are clean.
+- Final Vercel production metadata equals final Website `main`; Supabase source,
+  migrations, function inventory, enablement, and JWT parity equal final source.
+- README, architecture, integration, current-state, and release records match
+  the verified live state without rewriting immutable history.
+- No credential exposure and no unapproved provider or paid-resource change.

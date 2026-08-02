@@ -1,5 +1,5 @@
 /* =========================================================
-   RECRUITMENT â€” Visual readability pilot
+   RECRUITMENT — Visual readability pilot
    ========================================================= */
 body[data-page="recruitment"]{
   --recruit-lantern:rgba(218,181,94,.68);
@@ -387,7 +387,7 @@ body[data-page="recruitment"] #recruitmentConclusion p{
 }
 
 /* =========================================================
-   TWILLS â€” Profile avatar presentation (page-scoped)
+   TWILLS — Profile avatar presentation (page-scoped)
    ========================================================= */
 body[data-page="twills"]{
   --twills-moon:rgba(218,235,255,.66);
@@ -771,7 +771,7 @@ body[data-page="member-profile"] #memberProfileBio p{
 }
 
 /* =========================================================
-   LEADERS â€” Council intro container (background plate)
+   LEADERS — Council intro container (background plate)
    ========================================================= */
 body[data-page="leaders"] .leaders-council-intro{
   margin-top:24px;

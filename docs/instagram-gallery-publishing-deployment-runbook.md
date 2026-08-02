@@ -1,356 +1,371 @@
-# Instagram Gallery Publishing Deployment Runbook
+# Meta Gallery Publishing Deployment Runbook
 
-This runbook deploys the moderator-controlled Instagram publishing workflow for approved member Gallery images. Current launch mode is manual sharing through the Leader Dashboard. Direct API publishing remains diagnostic-gated until Meta credentials are present in Supabase secrets and the moderator-only Meta status check passes.
-
-Tracking PR: <https://github.com/Mochirii-Wushu/Mochirii/pull/198>
-
-Do not paste secrets, access tokens, signed Storage URLs, private payloads, or dashboard screenshots with sensitive values into GitHub, Discord, public docs, or reports. No real Instagram post may be created without explicit action-time owner approval.
-
-## Deployment Status - 2026-06-08
-
-Completed:
-
-- PR #198 merged to `main`.
-- Vercel production deployed the Next app changes.
-- Supabase production migration `add_instagram_gallery_publishing` is applied.
-- Supabase production has active `list-instagram-publish-queue`, `mark-instagram-gallery-submission-shared`, `check-instagram-api-status`, and `publish-instagram-gallery-submission` functions with JWT verification enabled.
-- The private Reaper bot source repository exists at <https://github.com/Mochirii-Wushu/Reaper>.
-- Reaper has an initial Node/TypeScript Discord command scaffold that matches the Supabase ingest contract.
-- Reaper CI is green on `main` for typecheck, tests, and build.
-- Production Reaper is now implemented as a Supabase-hosted Discord Interactions webhook at:
+This compatibility-path runbook governs the Facebook Page and Instagram Gallery publisher. It replaces the retired June manual-share procedure. The release flow is:
 
 ```text
-https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
+member upload -> Gallery moderation -> destination queue -> second moderator confirmation -> provider -> audited result
 ```
-- Supabase production has active `reaper-discord-interactions` function with JWT verification disabled and Discord signature verification in the function body.
-- Supabase secret names now include `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, and `DISCORD_BOT_TOKEN`.
-- Discord Developer Portal accepted the Interactions Endpoint URL after a signed PING.
-- The guild-scoped `/submit` command is registered with optional boolean `share_to_instagram`.
 
-Still pending:
+The source release does not authorize a hosted migration, Edge Function deployment, Website production deployment, credential change, feature-flag change, or public post. Obtain the action-specific owner approval described below immediately before each mutation.
 
-- Deploy the manual share status migration and `mark-instagram-gallery-submission-shared` function if this packet is not yet live.
-- Set real Instagram production secrets in Supabase later, after Meta developer verification is available.
-- Complete Meta for Developers SMS verification for the owner account before app/token setup can continue.
-- Run Discord command dry-runs through the webhook after Meta setup, or earlier with a non-sensitive test image if the owner approves that upload.
-- For now, moderators may post manually from the official Instagram account or Meta Business Suite, then paste the permalink and mark the job `shared_manually`.
-- Publish one live Instagram API test post only after explicit action-time owner approval.
+## Current release posture
 
-## Public Interface
+- Both destination opt-ins default to `false` and are independent.
+- New submissions use the server-attested website consent v3 contract; earlier consent and legacy jobs are not silently upgraded.
+- Initial upload and Gallery approval never call Meta.
+- Public publication is a separate, moderator-confirmed action.
+- Facebook targets the official Mochirii Page. Sharing a verified Page post into the Guild group is manual; no Groups API path exists.
+- Instagram uses the professional-account container, one immediate bounded status read, and the `media_publish` sequence only when that read is already `FINISHED`. `IN_PROGRESS` stops in reconciliation; the Edge invocation never runs a rapid polling loop.
+- Graph requests are pinned to `v26.0`; no request may float to Meta's default version.
+- Both publishing flags remain `false` through migration, function, Website, and credential validation.
+- The legacy Instagram manual-completion endpoint remains only as an authenticated `409` compatibility stub. Legacy jobs are never silently upgraded for API publication.
+- Facebook and Instagram public profile link fields remain empty. Automated publication copy for either destination must not contain a URL. `support@mochirii.com` remains the public contact where an email is relevant.
 
-Website uploads add an optional Instagram consent checkbox:
+No credential, private provider identifier, signed media URL, member object path, raw Graph response, or private image evidence belongs in source, logs, screenshots, pull requests, or deployment records.
+
+## Current provider evidence and blockers
+
+The following evidence was reviewed on 2026-07-29 and is descriptive only. It
+does not authorize activation:
+
+- The official Instagram account is a Professional Business account and is
+  assigned with the Facebook Page to the dedicated employee system user.
+- That employee identity has Content-only asset access and partial Develop-app
+  access. It has no full app management, ad account, or ad scope.
+- The Marketing API use case exists only because Meta's documented system-user
+  installation flow requires Ads Management API Standard Access.
+- A 60-day token with exactly `pages_manage_posts`,
+  `pages_read_engagement`, and `pages_show_list` was revoked after every Graph
+  request returned OAuthException 200 `API access blocked` behind the unresolved
+  `Account confirmation needed` checkpoint.
+- No successful Page-task, linked Instagram Graph identity, Instagram subtype,
+  or current token-binding proof exists.
+- The retired administrator publisher has no assigned assets, installed app,
+  or usable token and remains clearly labeled as legacy.
+- Both publishing flags remain false, no live Meta publication was created, and
+  no secret value or private provider identifier is documented here.
+- The Facebook and Instagram website/profile link fields remain empty. Meta
+  profile and publication copy must not include or link `mochirii.com`.
+
+Resolve the account-confirmation checkpoint through Meta's human owner flow.
+Never bypass it, automate a challenge, or treat elapsed time, an asset listing,
+or an inventory identifier as successful Graph identity proof.
+
+## Authoritative release artifacts
+
+- Migration allowlist: [`META-GALLERY-PUBLISHING-RELEASE-MANIFEST-2026-07-29.json`](operations/META-GALLERY-PUBLISHING-RELEASE-MANIFEST-2026-07-29.json)
+- Facebook contract: [`facebook-page-gallery-publishing.md`](integrations/facebook-page-gallery-publishing.md)
+- Instagram contract: [`instagram-gallery-publishing.md`](integrations/instagram-gallery-publishing.md)
+- Public privacy notice: `https://mochirii.com/privacy`
+- Public deletion instructions: `https://mochirii.com/meta-data-deletion`
+
+Validate the migration artifact before any database action:
+
+```sh
+npm run check:meta-gallery-release-manifest
+```
+
+The manifest contains exactly 13 ordered migrations within an authoritative
+50-migration repository history. Never use `--include-all`, migration-history
+repair, or a broad production push to conceal an ordering mismatch. If hosted
+history does not end at the expected base migration, stop and reconcile the
+release branch without modifying hosted history. The database-first order is a
+compatibility boundary: cached older clients may remain Gallery-capable, but
+their earlier consent evidence stays historical and API-ineligible rather than
+being silently upgraded.
+
+## Required approvals
+
+Record separate, current approval for each action:
+
+1. publishing the privacy and deletion pages;
+2. applying the exact migration manifest;
+3. deploying the named Edge Functions;
+4. deploying the reviewed Website commit;
+5. installing fresh Meta credentials in Supabase secrets;
+6. enabling Facebook Page publication;
+7. enabling Instagram publication;
+8. the first genuine Facebook Page publication; and
+9. the first genuine Instagram publication.
+
+Approval for one item does not authorize another. Never use a synthetic production upload or legacy job as a publication canary.
+
+## Pre-deployment evidence
+
+Capture read-only, redacted evidence immediately before the release window:
+
+- exact production Website commit and rollback deployment;
+- hosted migration names and ordering;
+- active Edge Function names, versions, and JWT settings;
+- aggregate Gallery and legacy-job counts only;
+- secret names only;
+- both current publishing-flag values; and
+- current backup and point-in-time-recovery status.
+
+Do not retain raw provider responses, debugger screenshots, member rows, provider numeric identifiers, tokens, or signed URLs.
+
+Trace the reviewed legal/readiness, Gallery/Meta backend, and Website UI source
+packets into one authoritative union branch. Release only the final exact union
+head after conflict resolution, full validation, immutable preview readback, and
+fresh owner approval. Superseded packet branches and pull requests are
+provenance, not separately deployable release units. Supabase Preview and
+Vercel Preview may use mocks or read-only diagnostics only. Both publication
+flags remain false.
+
+## Member, moderator, and Reaper interface contract
+
+Website submission presents two independent, unchecked destination choices.
+The exact current consent copy is:
 
 ```text
-Allow Mōchirīī to share this image on our official Instagram if approved.
+I authorize Mōchirīī moderators to publish this image and its moderator-approved caption on the public official Mōchirīī Instagram account after gallery approval.
 ```
-
-Reaper's Gallery command must match this interface:
 
 ```text
-/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]
+I authorize Mōchirīī moderators to publish this image and its moderator-approved caption on the public official Mōchirīī Facebook Page after gallery approval, and optionally share that Page post manually to the private official Mōchirīī Guild group.
 ```
 
-`image` is required. `title`, `subtitle`, and `share_to_instagram` are optional. `share_to_instagram` defaults to `false` and maps to the Supabase ingest payload field:
+Each choice is submitted with its exact server-recognized v3 handshake:
+`2026-07-website-public-instagram-publish-v3` or
+`2026-07-website-public-facebook-page-group-v3`. The upload-rights attestation
+is also required. Missing, stale, Discord-v1, or arbitrary client claims remain
+historical and API-ineligible; the server stamps the evidence and never silently
+upgrades it.
 
-```json
-{
-  "instagramOptIn": false
-}
-```
+Gallery approval may create an exact-once destination job but never publishes.
+The destination queue requires a second moderator confirmation bound to the
+current job revision, attempt, final copy, and authenticated moderator. Editing
+copy or state disarms confirmation. The browser receives only a credential-free
+approved Gallery thumbnail, never the private derivative, its object path, its
+digest, or a signed URL.
 
-`subtitle` continues to map to the website Gallery `caption` field. Approval for the public website Gallery does not publish to Instagram; it only creates an Instagram Queue item when the member opted in.
+The guild-scoped Reaper `/submit` contract remains
+`/submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]`.
+`image` is required. `title`, `subtitle`, and `share_to_instagram` are optional.
+Its existing Discord-v1 attestation is not API-eligible and must not be relabeled
+or upgraded without a separately reviewed visible-consent contract.
 
-Current manual flow:
+## Meta asset and permission prerequisites
 
-1. Moderator approves an opted-in JPEG submission.
-2. The Leader Dashboard creates and shows a queued Instagram job.
-3. Moderator downloads the image through the signed preview URL.
-4. Moderator copies the caption and alt text.
-5. Moderator posts manually from the official Instagram account or Meta Business Suite.
-6. Moderator optionally pastes the Instagram permalink and adds a private note.
-7. Moderator clicks `Mark shared manually`, reviews the in-card confirmation prompt, then clicks `Confirm manual share`.
+Confirm read-only that the business portfolio owns the app and Facebook Page, the new Instagram professional account is linked to that exact Page, and the dedicated employee system user and app are in the same portfolio. The employee identity must have Content-only asset access and the Page content-creation task. The retired admin publisher must have no publishing asset or usable token.
 
-## Preconditions
-
-Complete these checks before any production mutation or future redeployment:
-
-1. The scoped code PR is approved for deployment and merged to `main`. For the first release, this was PR #198.
-2. GitHub checks are green: `validate`, `validate-next`, CodeQL, Vercel, and Supabase Preview when present.
-3. Vercel production for `mochirii/mochirii` is Ready after the merge.
-4. Supabase project is confirmed as `deyvmtncimmcinldjyqe`.
-5. The official Instagram account is a Professional account controlled by Mōchirīī.
-6. Reaper's code repository is available at <https://github.com/Mochirii-Wushu/Reaper>; production command handling is hosted by Supabase Edge Function `reaper-discord-interactions`, while the repo remains the command/contract helper and rollback reference.
-7. The Discord submission channel remains `1508077313965817856`.
-
-## Deployment Sequence
-
-### 1. Capture Baseline Evidence
-
-Run read-only checks:
-
-```sh
-git status --short --branch
-gh pr view 198 --json number,state,isDraft,mergeStateStatus,headRefName,baseRefName,url,statusCheckRollup
-gh pr checks 198
-supabase migration list --project-ref deyvmtncimmcinldjyqe
-supabase functions list --project-ref deyvmtncimmcinldjyqe
-supabase secrets list --project-ref deyvmtncimmcinldjyqe
-```
-
-Record only secret names and presence. Do not record secret values.
-
-### 2. Merge The Scoped Code PR
-
-For the first release, PR #198 was merged on 2026-06-07. For future redeployments, merge only the current scoped PR after owner approval for the deployment window and current green checks.
-
-After merge, wait for the Vercel production deployment from `main` to be Ready and verify:
-
-```sh
-curl -I -L https://mochirii.com/
-curl -I -L https://www.mochirii.com/
-```
-
-### 3. Apply Supabase Database Migration
-
-Apply the migration that adds Instagram consent fields, publish jobs, and publish events:
-
-```sh
-supabase db push --project-ref deyvmtncimmcinldjyqe
-```
-
-Confirm tables and columns exist without exposing row data:
-
-```sh
-supabase db diff --project-ref deyvmtncimmcinldjyqe
-```
-
-If the migration fails, stop. Do not manually edit rows or constraints during the deployment window.
-
-### 4. Deploy Edge Functions
-
-Deploy the new queue and publishing functions plus the updated Gallery workflow functions:
-
-```sh
-supabase functions deploy submit-discord-gallery-image --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy list-gallery-review-queue --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy moderate-gallery-submission --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy list-instagram-publish-queue --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy mark-instagram-gallery-submission-shared --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy check-instagram-api-status --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy publish-instagram-gallery-submission --project-ref deyvmtncimmcinldjyqe
-supabase functions deploy reaper-discord-interactions --project-ref deyvmtncimmcinldjyqe
-```
-
-Verify deployed function names:
-
-```sh
-supabase functions list --project-ref deyvmtncimmcinldjyqe
-```
-
-### 5. Set Supabase Secrets
-
-Set secrets only inside Supabase. Do not put Instagram credentials in Vercel, browser code, GitHub variables, docs, PR comments, or logs.
-
-Required production secret names:
+Begin with only these permissions:
 
 ```text
+pages_show_list
+pages_read_engagement
+pages_manage_posts
+instagram_basic
+instagram_content_publish
+```
+
+Do not add business-wide management, advertising, full Page management, or unrelated permissions. Meta's current publishing documentation says a Page role granted through Business Manager also requires `ads_read` or `ads_management`. Because this release uses that assignment model, stop for explicit permission-expansion approval before requesting the least-privilege `ads_read` scope, and assign no ad account assets. Never add `ads_management` pre-emptively.
+
+Do not bypass an unusual-activity or account-confirmation checkpoint. Complete human review from a stable non-VPN owner session and use Meta support if offered. Facebook source work may continue while Instagram stays disabled.
+
+## Server-only configuration
+
+Install values only as Supabase Edge Function secrets and in the approved private recovery boundary. Do not place them in Vercel, browser variables, repositories, documentation, terminal transcripts, or pull-request comments.
+
+```text
+GALLERY_PREVIEW_VERCEL_OWNER
+GALLERY_PREVIEW_VERCEL_OWNER_ID
+GALLERY_PREVIEW_VERCEL_PROJECT
+GALLERY_PREVIEW_VERCEL_PROJECT_ID
+
+META_APP_ID
+META_EXPECTED_APP_ID
+META_APP_SECRET
+
+FACEBOOK_PAGE_ID
+FACEBOOK_EXPECTED_PAGE_ID
+FACEBOOK_PAGE_ACCESS_TOKEN
+FACEBOOK_API_VERSION=v26.0
+FACEBOOK_PAGE_PUBLISH_ENABLED=false
+
 INSTAGRAM_ACCOUNT_ID
+INSTAGRAM_EXPECTED_ACCOUNT_ID
 INSTAGRAM_ACCESS_TOKEN
-INSTAGRAM_API_VERSION
-DISCORD_PUBLIC_KEY
-DISCORD_APPLICATION_ID
-DISCORD_BOT_TOKEN
-DISCORD_GALLERY_CHANNEL_ID
-DISCORD_GALLERY_INGEST_SECRET
+INSTAGRAM_API_VERSION=v26.0
+INSTAGRAM_PUBLISH_ENABLED=false
 ```
 
-Optional test-only secret name:
+The four Gallery preview pins must identify the exact Vercel owner and Website
+project. The Edge verifier rejects missing or malformed pins and derives the
+team-mode issuer, fixed Vercel JWKS URL, audience, and subject from them; do not
+store those expected identifiers in tracked source or Vercel browser variables.
 
-```text
-INSTAGRAM_API_BASE_URL
-```
+Use a dedicated employee-system-user credential with a 60-day maximum lifetime. The raw system-user token is an administrative bootstrap credential, not the assumed runtime Page token: use it to retrieve the access token for the independently pinned Page, then install and validate that derived Page token in the Facebook and Instagram runtime secret slots with both flags false. Rotate by day 45: create the replacement system-user token, derive the replacement Page token, install and validate it read-only, then revoke the prior credential. Send normal Graph tokens only in the `Authorization` header. Normal Graph requests must use a fresh five-minute-bounded `appsecret_time` and HMAC-SHA256 proof.
 
-Use `INSTAGRAM_API_BASE_URL` only for a Meta-compatible mock during tests. Production should use Meta's real API base.
+## Coordinated hosted rollout
 
-After setting `INSTAGRAM_*` secrets, run the Leader Dashboard `Check Meta API` diagnostic before enabling or attempting direct publishing. The diagnostic checks account reachability only; it must not call Meta media creation or publish endpoints.
+### 1. Publish legal readiness
 
-After setting secrets, confirm only names are present:
+Deploy the first reviewed PR and verify the canonical HTTPS privacy and deletion routes. Confirm that the pages accurately describe Gallery uploads, consent, moderation, provider processing, public copies, withdrawal, removal requests, retention, and the possibility that third-party shares persist.
 
-```sh
-supabase secrets list --project-ref deyvmtncimmcinldjyqe
-```
+Configure Meta's User Data Deletion Instructions URL to the deletion page. If the dashboard requires a callback instead, stop until a separately reviewed callback verifies bounded `signed_request` input, expiry, and HMAC-SHA256 in constant time and returns only an opaque confirmation code plus non-sensitive status URL.
 
-### 6. Set Discord Interactions Endpoint
+### 2. Freeze moderator mutations
 
-In Discord Developer Portal > Reaper > General Information, set the Discord Interactions Endpoint URL to:
+Begin a temporary moderator mutation freeze before backend cutover. Do not approve, reject, prepare derivatives, publish, or reconcile during the freeze. Member uploads and public Gallery reads may remain available.
+
+### 3. Apply the database allowlist
+
+One coordinated Supabase operator applies only the manifest-listed migrations
+from the final exact reviewed union commit. Confirm all 50 repository migrations
+are present exactly once and in timestamp order, and that the 13 manifest
+migrations are the only new hosted changes. Read back aggregate invariants and
+explicit RLS/grants; do not inspect production member content as validation.
+
+Database migrations are forward-only. Correct a defect with a reviewed forward-fix migration rather than history repair or rollback SQL.
+
+### 4. Deploy the hardened Edge boundary
+
+Replace the unsafe historical Instagram publisher and manual-completion path before installing a usable credential. Deploy the reviewed Gallery and destination endpoints in this order:
+
+1. Instagram and Facebook status, list, publish, and reconciliation endpoints;
+2. the authenticated Instagram compatibility stub;
+3. consent withdrawal;
+4. Gallery list, public-feed, ingest, cleanup, and derivative preparation; and
+5. `moderate-gallery-submission` last.
+
+Read back the exact deployed function versions. These 10 destination and
+withdrawal endpoints must have `verify_jwt=true`; no exception is permitted:
+
+1. `check-facebook-page-api-status`
+2. `list-facebook-page-publish-queue`
+3. `publish-facebook-page-gallery-submission`
+4. `resolve-facebook-page-publish-reconciliation`
+5. `check-instagram-api-status`
+6. `list-instagram-publish-queue`
+7. `publish-instagram-gallery-submission`
+8. `resolve-instagram-publish-reconciliation`
+9. `mark-instagram-gallery-submission-shared`
+10. `withdraw-gallery-publication-consent`
+
+Each moderator endpoint must also perform the live, bounded Discord
+moderator-role check and fail closed on timeout, rate limiting, incomplete
+onboarding, missing roles, or configuration drift. The withdrawal endpoint
+revalidates the authenticated member and accepts only that member's own
+submission and destination.
+
+### 5. Deploy the Website UI
+
+Deploy the final exact reviewed union commit to the existing Vercel `mochirii`
+project with root `apps/web`. Require `READY`, exact commit readback, and the
+expected `mochirii.com` content. Verify canonical source binding, authenticated
+routing, two unchecked destination checkboxes, upload-rights attestation,
+withdrawal controls, queue pagination, confirmation disarming, mobile and 200%
+reflow, and disabled publication diagnostics without creating production test
+data or requesting a private derivative.
+
+Require moderators to reauthenticate, load all queues read-only, and only then lift the mutation freeze.
+
+### 6. Install credentials with both flags disabled
+
+Only after the hardened functions are active may the approved operator install fresh Meta credentials. Keep both publication flags false. Supabase secrets become available to Edge Functions without a redeployment, so a valid token must never be installed while a historical publisher is still active.
+
+Run the read-only diagnostic. It must verify the pinned app and Page chain, required Page task, resolve `instagram_business_account` from the pinned Page with exactly one bearer-authenticated Graph request and a fresh timed proof, match that identity to the independently pinned Instagram account, verify the exact Instagram username, and read back API version and quota. Professional Business subtype, credential expiry, and data-access expiry remain separate prerequisites until their documented provider surfaces are available. Persist only safe booleans, API version, expiry window, timestamp, and bounded error category; never persist the Page or Instagram identifiers or raw Graph response.
+
+The current diagnostic intentionally remains `ready: false` until an owner-approved token-debugger transport can prove token binding, type, scopes, expiry, and data-access expiry without leaking the credential. Meta's documented debugger requires the inspected `input_token` in its query string, so this is an explicit exception to the normal bearer-only transport rule and requires a separately reviewed redaction boundary. Instagram Business subtype also remains a manual/provider prerequisite. Do not enable either destination while those requirements are unresolved.
+
+Standard Access is sufficient only while the app serves Mochirii-owned and managed assets. Before moving the app to Live, complete the Basic Settings fields, privacy/deletion information, icon, category, contact information, and every requirement the current App Dashboard actually presents. Business Verification, App Review, Data Use Checkup, and Advanced Access are not blanket Standard Access requirements; if the dashboard or a later third-party-account scope requires any of them, stop and satisfy that specific gate before continuing.
+
+## Preserved Reaper interaction boundary
+
+This Meta release does not change or deploy the existing `reaper-discord-interactions` function. Its Discord Interactions Endpoint URL remains:
 
 ```text
 https://deyvmtncimmcinldjyqe.supabase.co/functions/v1/reaper-discord-interactions
 ```
 
-Discord validates this endpoint with a signed PING. If the save fails, verify `DISCORD_PUBLIC_KEY`, function deployment, and signature handling before retrying.
+`DISCORD_PUBLIC_KEY` remains a server-only secret. Any later, separately approved deployment uses `supabase functions deploy reaper-discord-interactions`; this release does not run that command or alter Discord configuration. The guild-scoped `/submit` command retains its existing contract: `image` is required. `title`, `subtitle`, and `share_to_instagram` are optional.
 
-### 7. Update Reaper Slash Command
+## Validation contract
 
-Register the guild-scoped `/submit` command with the new optional boolean:
+Before requesting any activation, require:
 
-```text
-share_to_instagram
-```
+- the immutable migration manifest check;
+- a fresh isolated 50-migration replay on a unique port family, never the shared local stack;
+- all focused pgTAP suites;
+- zero packet-attributable database lint warnings;
+- explicit grants and RLS for every new table;
+- denial of queue, event, derivative, consent, confirmation, withdrawal, and removal ledgers to `anon` and ordinary authenticated roles;
+- all Edge type, authorization, request-bound, provider-fixture, secret-redaction, and DTO tests;
+- independent opt-in combinations with no duplicate jobs;
+- stale-confirmation and consent-withdrawal races;
+- missing/false flag prevention before every Graph call;
+- reconciliation on timeout, network loss, 5xx, rate limiting, missing IDs, or unknown container state;
+- one immediate container-status read, with `IN_PROGRESS` entering reconciliation before `media_publish` and no in-request sleep or rapid polling loop;
+- no automatic retry after an ambiguous provider request;
+- provider ownership and canonical permalink verification;
+- no Groups API code path; and
+- no URL-like Facebook or Instagram publication copy.
+- no secret values, private provider identifiers, raw Graph messages, member
+  object paths, hashes, signed URLs, or private derivatives in browser DTOs,
+  logs, screenshots, or release evidence;
+- exact v3 consent, stale-client, withdrawal, quarantine, and removal-request
+  coverage; and
+- exact final Website commit, migration inventory, Edge Function versions, JWT
+  settings, and destination flags in post-release readback.
 
-Description:
+No validation step may publish, deploy, modify infrastructure, mutate public content, alter a forum, or change a Unity project.
 
-```text
-Allow Mōchirīī to share this image on our official Instagram if approved.
-```
+## Destination activation
 
-The guild-scoped `/submit` command must:
+### Facebook Page
 
-- reject submissions outside channel `1508077313965817856`
-- require only `image`; keep `title`, `subtitle`, and `share_to_instagram` optional so the command matches the pinned channel instructions
-- default `share_to_instagram` to `false`
-- send `instagramOptIn: true` only when the user explicitly selects true
-- preserve Discord message/attachment idempotency
-- show the member whether Instagram sharing was enabled for that submission
+After explicit flag approval, enable only `FACEBOOK_PAGE_PUBLISH_ENABLED`. Use
+the first genuine, newly consented v3 submission. Before the one publication
+attempt, confirm the member's current consent, immutable source and derivative
+bindings, exact final message, unchanged confirmation fingerprint, available
+lease, pinned `v26.0` identity, required Page task, and zero URL-like copy. After
+the request, verify Page ownership, returned identifiers, canonical permalink,
+job state, and redacted audit evidence. Sharing the verified Page post into the
+Guild group is a separate manual moderator action.
 
-## Dry-Run Payloads
+Observe the destination for 24 hours before normal operation. Any ambiguous result immediately disables the flag and enters reconciliation.
 
-Use a dry-run or staging-safe test harness first. Do not call Meta's live publish endpoint during this phase.
+### Instagram
 
-Default false:
+Activate separately after account confirmation, identity, scope, Business
+subtype, quota, restriction, human review, and expiry checks pass. After
+explicit flag approval, enable only `INSTAGRAM_PUBLISH_ENABLED`. Use a different
+genuine, newly consented v3 submission. Confirm the immutable source and
+derivative bindings, final caption and required alt text, unchanged fingerprint,
+pinned `v26.0` account, and available provider quota. If the one immediate
+container read is `IN_PROGRESS`, stop before `media_publish`, inspect the
+official account, and resolve the job without an automatic retry. For a
+`FINISHED` container, verify one published media object, ownership by the pinned
+account, exact username and media type, canonical permalink, and absence of URLs
+in publication copy.
 
-```json
-{
-  "guildId": "1078630751077142608",
-  "channelId": "1508077313965817856",
-  "messageId": "DRY_RUN_MESSAGE_FALSE",
-  "attachmentId": "DRY_RUN_ATTACHMENT_FALSE",
-  "userId": "DRY_RUN_USER",
-  "username": "dry-run-user",
-  "attachmentUrl": "https://example.invalid/dry-run.jpg",
-  "mimeType": "image/jpeg",
-  "size": 12345,
-  "filename": "dry-run.jpg",
-  "title": "Dry run upload",
-  "caption": "Consent omitted.",
-  "instagramOptIn": false
-}
-```
+Observe for 24 hours. An ambiguous result disables only Instagram and enters reconciliation; never retry automatically.
 
-Explicit true:
+## Withdrawal and removal handling
 
-```json
-{
-  "guildId": "1078630751077142608",
-  "channelId": "1508077313965817856",
-  "messageId": "DRY_RUN_MESSAGE_TRUE",
-  "attachmentId": "DRY_RUN_ATTACHMENT_TRUE",
-  "userId": "DRY_RUN_USER",
-  "username": "dry-run-user",
-  "attachmentUrl": "https://example.invalid/dry-run.jpg",
-  "mimeType": "image/jpeg",
-  "size": 12345,
-  "filename": "dry-run.jpg",
-  "title": "Dry run upload",
-  "caption": "Consent enabled.",
-  "instagramOptIn": true
-}
-```
+- Queued, failed, or ineligible destination jobs cancel atomically when consent is withdrawn.
+- Publishing or reconciliation-required jobs are quarantined for moderator inspection.
+- Published jobs create a removal request; the system does not claim that an external copy was removed.
+- Original consent and withdrawal events remain immutable.
+- Removing an external post is a separate, owner-approved public action and must be recorded without sensitive content.
 
-wrong channel fail-closed:
+## Incident response and rollback
 
-```json
-{
-  "guildId": "1078630751077142608",
-  "channelId": "000000000000000000",
-  "messageId": "DRY_RUN_WRONG_CHANNEL",
-  "attachmentId": "DRY_RUN_WRONG_CHANNEL_ATTACHMENT",
-  "userId": "DRY_RUN_USER",
-  "username": "dry-run-user",
-  "attachmentUrl": "https://example.invalid/dry-run.jpg",
-  "mimeType": "image/jpeg",
-  "size": 12345,
-  "filename": "dry-run.jpg",
-  "title": "Wrong channel dry run",
-  "caption": "This must be rejected.",
-  "instagramOptIn": true
-}
-```
+Stop before the next mutation if the release head or preview changes, a
+migration is missing or out of order, any required check fails, a function has
+the wrong JWT setting or version, a flag is unexpectedly true, a moderator or
+member boundary is bypassed, provider identity or ownership is ambiguous, a
+confirmation is stale, a private artifact reaches a browser, or a provider
+outcome is unknown.
 
-## Verification Checklist
+1. Set the affected destination flag to false.
+2. Preserve jobs, consent, confirmation, withdrawal, removal, and audit evidence.
+3. Inspect the official account and reconcile before any retry.
+4. If credentials may be exposed, disable both flags, revoke the token at Meta, rotate Supabase secrets, inspect redacted logs, and validate the replacement before reactivation.
+5. For a Website regression, use the recorded Vercel rollback deployment but keep moderation frozen because the prior UI may not match the hardened backend.
+6. Never redeploy the historical Instagram publisher against the hardened schema.
 
-Run repository checks after merge and before provider deployment where possible:
+Monitor queue age, leases, reconciliation demand, repeated authorization/rate-limit/server errors, identity drift, quota use, and credentials expiring within 14 days. Re-run compatibility fixtures before any Graph API-version upgrade.
 
-```sh
-npm run check
-git diff --check
-cd apps/web && npm run lint && npm run build
-```
-
-Run feature checks:
-
-- missing Instagram secrets fail closed
-- invalid moderator JWT fails
-- non-moderator request fails
-- non-opted-in approval creates no Instagram job
-- opted-in JPEG approval creates a queued job
-- opted-in PNG/WebP approval creates an ineligible job
-- duplicate Discord message/attachment does not change stored consent
-- Meta API diagnostic can fail without mutating a job or creating a media container
-- Meta API publishing failure records a failed job/event without duplicate publishing
-- Leader Dashboard requires visible in-card confirmation before manual sharing or API publishing
-
-Run browser checks:
-
-- website upload checkbox is visible, optional, and unselected by default
-- Leader Dashboard shows the Instagram Queue to moderators only
-- public Gallery behavior is unchanged
-- signed-out users cannot access protected member or moderation surfaces
-
-## Live Test Post
-
-Perform one live Instagram test post only after explicit owner approval in the deployment window.
-
-Before publishing, confirm:
-
-- the member image is approved for public website Gallery display
-- the submission has `instagram_opt_in = true`
-- the job is `queued`
-- image MIME type is `image/jpeg`
-- caption and alt text were reviewed by a moderator
-- the official Instagram account is selected
-
-After publishing, record:
-
-- job ID
-- submission ID
-- published timestamp
-- Instagram permalink
-- moderator who published
-- visible result on Instagram
-
-Do not include access tokens, signed URLs, or private Storage paths in the record.
-
-## Rollback And Stop Conditions
-
-Stop the deployment and do not continue if:
-
-- GitHub checks fail after merge
-- Vercel production is not Ready
-- Supabase migration fails
-- any Edge Function deploy fails
-- required secrets are missing
-- non-moderator access succeeds
-- Reaper sends `instagramOptIn: true` without explicit user selection
-- the queue can publish without final confirmation
-- Meta returns unexpected authorization or account ownership errors
-
-Rollback options:
-
-- Disable Reaper's `share_to_instagram` option or stop sending `instagramOptIn: true`.
-- Leave existing Instagram jobs in place; do not delete queue/event rows during incident response.
-- Rotate Instagram access token if a token exposure is suspected.
-- Revert the website UI in a scoped follow-up PR if the dashboard blocks normal moderation.
-- Restore the previous Supabase function versions only through an approved admin task.
-
-If an accidental live post occurs, remove it from Instagram manually in the official account, preserve the Supabase job/event audit trail, rotate credentials if needed, and write a private incident note without secrets.
+Official references: [Graph API v26 changelog](https://developers.facebook.com/docs/graph-api/changelog/version26.0/), [Graph API v19 Groups removal](https://developers.facebook.com/docs/graph-api/changelog/version19.0/), [Instagram API collection](https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api), [Instagram content publishing](https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login/content-publishing/), [Instagram publishing limit](https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/content_publishing_limit/), [Facebook Page photos](https://developers.facebook.com/docs/graph-api/reference/page/photos/), [Meta Login security](https://developers.facebook.com/docs/facebook-login/security/), [Access Levels](https://developers.facebook.com/docs/graph-api/overview/access-levels), [App Modes](https://developers.facebook.com/docs/development/build-and-test/app-modes/), [Debug Token](https://developers.facebook.com/docs/graph-api/reference/debug_token/), [system-user Page calls](https://developers.facebook.com/docs/marketing-api/businessmanager/systemuser/api-calls/), [data-deletion callback](https://developers.facebook.com/docs/development/create-an-app/app-dashboard/data-deletion-callback/), [Supabase migrations](https://supabase.com/docs/guides/deployment/database-migrations), [Supabase Edge secrets](https://supabase.com/docs/guides/functions/secrets), and [Vercel deployments](https://vercel.com/docs/deployments).

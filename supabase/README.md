@@ -28,20 +28,64 @@ Functions, and schema changes migration-based. Do not commit real secrets or
 Every deployed function owns a local `deno.json` with exact direct dependency
 versions, following [Supabase's function dependency guidance](https://supabase.com/docs/guides/functions/dependencies).
 The Supabase CLI uses that file as Deno configuration when bundling a function;
-it does not upload the repository root `deno.lock`. Accordingly,
-`npm run check:supabase-edge-types` checks all 31 entrypoints with their real
-function-local configuration and no deployment lock, records and audits each
-entrypoint's current resolution in its own temporary lock, and separately audits
-the repository lock used by local tooling. Never describe the root lock as
-freezing the deployed transitive graph.
+it does not use the repository root `deno.lock` as the deployment lock.
+Accordingly, `npm run check:supabase-edge-types` checks all 49 entrypoints with
+their real function-local configuration. It requires the exact reviewed set of
+21 committed function-local locks:
 
-## Pixelfed Guild Social Mapping
+```text
+check-facebook-page-api-status
+get-current-raffle
+list-approved-gallery-submissions
+list-facebook-page-publish-queue
+list-gallery-review-queue
+manage-event-social-publication
+manage-raffle-claim
+manage-raffle-entry
+moderate-gallery-submission
+moderate-raffle
+publish-facebook-page-gallery-submission
+reaper-spinner-dispatch
+resolve-facebook-page-publish-reconciliation
+resolve-event-social-publication-reconciliation
+resolve-instagram-publish-reconciliation
+reward-provider-webhook
+run-event-social-publication
+run-raffle-fulfillment
+run-raffle-schedule
+spinner-live-session
+submit-discord-gallery-image
+```
 
-Pixelfed is planned as a separate `social.mochirii.com` runtime, not as code inside this website repo. Supabase remains the identity and membership authority for the doorway and OAuth consent flow. The staging runtime exists outside Vercel; first authenticated testing is admin-only until the source-control, OIDC, media, backup, and moderation gates pass.
+Those entrypoints are checked against their committed locks. The remaining
+entrypoints have their current resolution recorded and audited in temporary
+function-local locks, and the repository lock used by local tooling is audited
+separately. Never describe the root lock as freezing the deployed transitive
+graph.
 
-`social_accounts` maps a signed-in website member to a future Pixelfed account. Trusted server/operator workflows own Pixelfed identity fields such as `provider_subject`, `provider_user_id`, `username`, `profile_url`, `status`, and sync timestamps. Authenticated members may read only their own rows and may update only `profile_link_visible`; that field is retained for backend compatibility while website member profile publishing is retired.
+## Mochirii Social Account Mapping
 
-The table intentionally does not grant direct insert/delete access to `authenticated`. The trusted write path is the `sync-pixelfed-social-account` Edge Function, which keeps the service-role key inside Supabase and accepts only a narrow Pixelfed host sync secret. Production SSO, federation enablement, broad member uploads, Spaces media migration, and any remote database/Auth/Function setting changes remain approval-gated provider work. See [`../docs/pixelfed-guild-social-adr.md`](../docs/pixelfed-guild-social-adr.md), [`../docs/pixelfed-first-login-testing.md`](../docs/pixelfed-first-login-testing.md), and [`../docs/pixelfed-staging-ops.md`](../docs/pixelfed-staging-ops.md).
+`services/social` is the canonical application source for the private
+`social.mochirii.com` runtime hosted on DigitalOcean and Spaces. Supabase remains
+the identity and membership authority for the website doorway and OAuth consent
+flow. ActivityPub federation remains disabled, and runtime or provider changes
+remain separately approval-gated.
+
+`social_accounts` maps a signed-in website member to their current Mochirii
+Social account. Trusted server/operator workflows own provider identity fields
+such as `provider_subject`, `provider_user_id`, `username`, `profile_url`,
+`status`, and sync timestamps. Authenticated members may read only their own rows
+and may update only `profile_link_visible`; that field is retained for backend
+compatibility while website member profile publishing is retired.
+
+The table intentionally does not grant direct insert/delete access to
+`authenticated`. The trusted write path is the
+`sync-pixelfed-social-account` Edge Function, which keeps the service-role key
+inside Supabase and accepts only the narrow Social-host sync secret. Current
+source, deployment, recovery, and runtime boundaries are defined in the
+[`Mochirii Social Delivery Contract`](../docs/integrations/mochirii-social-delivery.md).
+The older Pixelfed planning, spike, and first-login packets are retained only as
+superseded historical evidence.
 
 ## Member-Owned Profile Links
 
@@ -98,7 +142,65 @@ It also exposes Auth/profile/gallery helpers:
 - `publishInstagramGallerySubmission(options)`
 - `listApprovedGallerySubmissions()`
 
-Instagram production migration and Edge Functions are deployed. Reaper rollout, Instagram secret setup, dry-run payloads, and any live Instagram post are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
+The hardened Facebook Page and Instagram publishing packet in this source tree has not been deployed to the hosted Website or Supabase project. Both publishing flags remain `false`, no Meta credential or private Instagram Graph account ID is stored in source, and no live Meta post was created. The current Employee System User has Content access only to the Page and linked Instagram asset plus partial Develop-app access; it has no full app management, ad account, or ad scope. The Marketing API use case exists only because Meta's System User installation flow requires Ads Management API Standard Access. A 60-day token with exactly `pages_manage_posts`, `pages_read_engagement`, and `pages_show_list` was revoked after every Graph request returned OAuthException 200 `API access blocked` behind the unresolved `Account confirmation needed` checkpoint. No Page-task, Instagram identity/account-type, or Instagram Graph-ID verification is current evidence. The former Admin System User has no assets, installed apps, or tokens and is retained as `Mochirii Gallery Publisher Legacy`. Hosted secret values are not documented or assumed; activation requires fresh name-only secret-inventory evidence and a successful read-only provider identity check. Release gates are tracked in [`../docs/instagram-gallery-publishing-deployment-runbook.md`](../docs/instagram-gallery-publishing-deployment-runbook.md).
+
+## Event Social Publication Scheduler
+
+The source-only event scheduler projects timing from the committed
+`apps/web/public/data/guild-schedule.json` into service-only occurrence and
+destination-job records. It permits a public mutation only from the exact
+one-hour reminder instant through a strict two-minute late-tolerance window.
+First-Wednesday Gathering and first-Saturday Raffle occurrences own their
+same-time Guild Party slot in one materialization transaction; canceling the
+monthly occurrence preserves that ownership and does not revive the Party job.
+
+Facebook Page, Instagram, and Discord each have an independent reusable
+event-template approval, template switch, database destination switch, and
+Edge secret flag; every switch defaults to false. A template uses the exact
+hash-attested bundled content packet, renders only the occurrence date/time
+tokens from the authoritative schedule, and pins one reviewed static asset per
+event and destination. Schedule, content, or asset drift revokes the reusable
+approval. Browser or per-occurrence copy overrides are not supported. Meta
+also requires the existing provider-wide flag, pinned
+identities, credentials, and exact Graph `v26.0`. The scheduler has no Facebook
+Groups API path and rejects URL-like text from publication copy. Discord sends
+the attested image as a multipart attachment, never as a public image embed.
+Instagram creates and validates its non-public media container 15 to 10 minutes
+before the reminder, then calls `media_publish` only after the same atomic
+one-hour gate used by Facebook and Discord. Provider mutations are
+single-attempt. An uncertain non-public container creation fails terminally
+without retrying or disabling Instagram; only a result that could already be
+public enters `reconcile_required` and is never leased again automatically.
+Credentials live only in Supabase Vault/Edge Function secrets; the repository
+stores names and false defaults only.
+
+The moderator endpoint exposes a bounded, redacted queue and permits a
+confirmed emergency disable. It deliberately refuses every enable request;
+destination and reusable-template activation remain owner/operator release
+actions outside that endpoint.
+The separate JWT-protected reconciliation endpoint loads the job destination
+server-side and verifies an exact supplied provider object against the pinned
+Facebook Page, Instagram account, or Discord bot/channel before recording a
+published resolution. A confirmed-not-published resolution requires an
+explicit bounded owner-inspection note, is terminal, cannot retry the missed
+reminder, and never re-enables a disabled destination. Raw provider responses,
+tokens, private identifiers, paths, hashes, and notes are excluded from public
+responses and logs.
+
+Active destination, template, job-approval, and reconciliation actors use
+restricting foreign keys so account deletion cannot erase or invalidate a live
+authorization or historical publication decision. Operator offboarding must
+first disable every destination and revoke every active template; any account
+deletion that still conflicts with retained publication evidence requires a
+separately reviewed retention/deletion decision rather than a cascading write.
+
+The migration installs the service-only scheduler foundation but creates no
+active cron job. A separately reviewed activation must install the one-minute
+job only after `project_url` is exactly
+`https://deyvmtncimmcinldjyqe.supabase.co` and
+`event_social_scheduler_secret` exists in Vault. Deploying the migration or
+functions, installing secrets, creating the cron job, enabling any switch, or
+publishing remains a separately approved provider/production action.
 
 Migration history note: keep `supabase/migrations/20260607094500_restore_instagram_gallery_publishing_history.sql` and `supabase/migrations/20260608093407_restore_manual_instagram_share_history.sql` in place. The Instagram publishing schema now lives in `supabase/migrations/20260607125027_add_instagram_gallery_publishing.sql`, and the manual sharing status schema now lives in `supabase/migrations/20260608173000_add_manual_instagram_share_status.sql`, but Supabase Preview compares remote migration versions to local files and needs the original timestamps represented locally.
 
@@ -134,12 +236,19 @@ The Account page does not expose private Storage URLs. It shows submission text 
 
 ## Multi-Provider Auth Setup
 
-The current live sign-in set is Discord, Google, Twitch, and Apple. Apple is active identity evidence only and must keep its generated OAuth client secret on a six-month rotation cadence. Facebook, Kakao, Spotify, and Phone are deferred and should stay disabled in Supabase Auth production until a scoped provider lane is reopened.
+Supabase Auth remains the sole OAuth broker. Source now registers six reviewed
+sign-in options while the runtime allowlist exposes only the four configured
+providers and Account identity linking remains a separate, narrower policy. A public
+source or environment entry does not enable a Supabase provider and is not
+evidence that its consent/callback/session flow works.
 
 | State | Providers | Operational rule |
 | --- | --- | --- |
-| Active | Discord, Google, Twitch, Apple | Keep enabled in Supabase Auth production and keep the public website allowlist at `NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple`. Apple is active identity evidence and still requires moderator review for member-only privileges. |
-| Deferred | Facebook, Kakao, Spotify, Phone | Keep disabled and hidden from public activation until a scoped provider lane is reopened. |
+| Approved source registry | Apple, Facebook, Google, Discord, Twitch, Spotify | All six have reviewed button definitions and checksum-verified local official marks. Registration does not render or enable a provider. |
+| Production-enabled initiation | Discord, Google, Twitch, Apple | Current read-only evidence proves Supabase initiation reaches each official provider, not that consent, hosted callback, cookie session, and return path complete. Re-prove that full flow for releases that change authentication. Apple is identity evidence only and must keep its generated OAuth client secret on a six-month rotation cadence. |
+| Production-disabled broker lanes | Facebook, Spotify | Keep disabled and absent from the runtime sign-in allowlist until provider configuration, end-to-end callback evidence, app review where required, and provider-specific brand approval are complete. Source presence does not authorize activation. |
+| Account identity linking | Discord, Google, Twitch, Apple | Keep `NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple`. Facebook and Spotify must not become one-click Account linking options automatically. |
+| Deferred outside the approved six | Kakao, Phone | Keep disabled and hidden until a separately approved readiness lane is complete. |
 
 Social or phone sign-in through Supabase Auth proves account control only. It
 does not automatically prove guild membership, role ownership, gallery access,
@@ -155,8 +264,9 @@ In Supabase Dashboard:
 2. Enable only the providers that are ready for live callbacks.
 3. Add each provider's Client ID / public app identifier.
 4. Add each provider's Client Secret in Supabase only.
-5. Enable Supabase Auth Manual Linking so signed-in users can link Discord,
-   Google, Twitch, and Apple identities from Account with `linkIdentity`.
+5. Enable Supabase Auth Manual Linking so signed-in users can link only the
+   separately reviewed Discord, Google, Twitch, and Apple identities exposed by
+   Account with `linkIdentity`.
 6. Set the production Site URL to the public site URL.
 7. Add production redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
 8. Add local development redirect URLs for Account, Auth, Submit Image, and Leader Dashboard.
@@ -169,11 +279,45 @@ https://deyvmtncimmcinldjyqe.supabase.co/auth/v1/callback
 The browser/provider allowlist is controlled separately with public-safe env only:
 
 ```text
-NEXT_PUBLIC_AUTH_PROVIDER_IDS=discord,google,twitch,apple
+NEXT_PUBLIC_AUTH_PROVIDER_IDS=apple,google,discord,twitch
+NEXT_PUBLIC_AUTH_IDENTITY_LINK_PROVIDER_IDS=discord,google,twitch,apple
 NEXT_PUBLIC_AUTH_PROVIDER_PLACEHOLDER_IDS=
 NEXT_PUBLIC_PHONE_AUTH_READY=false
 NEXT_PUBLIC_AUTH_CAPTCHA_ENABLED=false
+NEXT_PUBLIC_AUTH_CAPTCHA_PROVIDER=
+NEXT_PUBLIC_AUTH_CAPTCHA_SITE_KEY=
 ```
+
+These two provider lists are public presentation/client-policy controls. The
+website checks each list before calling the browser client, but Supabase Manual
+Linking is a global project setting rather than a per-provider server policy.
+Review the dashboard provider state and Manual Linking together in every
+activation packet. Never treat the Account UI as the sole security boundary.
+
+Exact source button labels are `Continue with Apple`, `Continue with Facebook`,
+`Continue with Google`, `Sign in with Discord`, `Log in with Twitch`, and
+`Log in with Spotify`. Official marks are served locally from
+`apps/web/public/assets/auth-providers`; the directory `README.md` records the
+official sources and hashes and excludes the files from the Mochirii project
+license. Do not introduce runtime logo downloads or a second provider SDK that
+bypasses Supabase. Facebook and Spotify stay production-disabled until their
+provider and brand-policy gates pass.
+
+After both disabled lanes pass their provider, callback, session, return-path,
+and brand-policy gates, the same approved activation packet may extend the
+runtime value to `apple,facebook,google,discord,twitch,spotify`. Do not expose a
+button before its Supabase provider can complete the flow.
+
+Phone is additionally fail-closed in source. A phone code can be requested
+only when every public readiness field is complete, the CAPTCHA provider is
+`turnstile`, Supabase browser configuration exists, and the caller supplies a
+fresh bounded CAPTCHA token. Sends always set `shouldCreateUser` to false and
+the browser applies a 60-second session-scoped resend cooldown without storing
+the phone number. Supabase Auth CAPTCHA verification and Auth rate limits are
+the authoritative abuse controls. The Turnstile secret belongs only in
+Supabase Auth; the browser/Vercel surface receives the public site key only.
+Keep Phone disabled until an exact provider packet also verifies SMS sender,
+supported countries, costs, rate limits, monitoring, and rollback.
 
 Apple activation uses the Supabase Auth callback only:
 
@@ -208,7 +352,7 @@ from Account. The equivalent Management API field is
 `security_manual_linking_enabled`; never print the bearer token or raw auth
 config response while checking it.
 
-Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider lanes are intentionally reopened.
+Phone must stay disabled until SMS provider, CAPTCHA, rate limits, country/cost expectations, and abuse handling are configured in a separate Phone lane. Kakao must stay disabled until the app is approved as a Kakao Biz App for `account_email` or leadership approves a profile-only manual-review path. Facebook and Spotify must stay disabled until their provider configuration, full callback, app-review, and provider-specific brand-approval gates are complete.
 
 Preview-only member verification smoke:
 
@@ -329,16 +473,30 @@ DISCORD_PUBLIC_KEY=<from Discord Developer Portal General Information, never com
 DISCORD_APPLICATION_ID=1156448856565887066
 DISCORD_BOT_TOKEN=<set manually, never commit>
 DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
-DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+DISCORD_GALLERY_INGEST_HMAC_KEYS_JSON=<JSON object of key IDs to 32+ byte secrets, never commit>
+DISCORD_GALLERY_INGEST_HMAC_ACTIVE_KEY_ID=<one configured key ID>
 DISCORD_VOTE_CHANNEL_ID=1082802012095266866
 VOTE_REMINDER_TIME_ZONE=America/Los_Angeles
 VOTE_REMINDER_CRON_SECRET=<set manually, never commit>
 # DISCORD_VOTE_LINKS_JSON=<optional JSON links secret, never commit real private targets if sensitive>
 GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
+GALLERY_PREVIEW_VERCEL_OWNER=<independent server-side owner slug pin, never commit a real value>
+GALLERY_PREVIEW_VERCEL_OWNER_ID=<independent server-side owner id pin, never commit a real value>
+GALLERY_PREVIEW_VERCEL_PROJECT=<independent server-side project name pin, never commit a real value>
+GALLERY_PREVIEW_VERCEL_PROJECT_ID=<independent server-side project id pin, never commit a real value>
 INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
+INSTAGRAM_EXPECTED_ACCOUNT_ID=<set independently to the same verified Graph user ID, never commit>
 INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
-INSTAGRAM_API_VERSION=<set manually, never commit>
-INSTAGRAM_API_BASE_URL=<optional Meta-compatible test base URL>
+INSTAGRAM_API_VERSION=v26.0
+INSTAGRAM_PUBLISH_ENABLED=false
+META_APP_ID=<set manually, never commit>
+META_EXPECTED_APP_ID=<set independently to the same verified app ID, never commit>
+META_APP_SECRET=<set manually, never commit>
+FACEBOOK_PAGE_ID=<set manually, never commit>
+FACEBOOK_EXPECTED_PAGE_ID=<set independently to the same verified Page ID, never commit>
+FACEBOOK_PAGE_ACCESS_TOKEN=<set manually, never commit>
+FACEBOOK_API_VERSION=v26.0
+FACEBOOK_PAGE_PUBLISH_ENABLED=false
 DISCORD_WEBHOOK_GALLERY_APPROVED=<set manually, never commit>
 DISCORD_WEBHOOK_MOD_LOG=<set manually, never commit>
 DISCORD_EVENTS_CHANNEL_ID=<set per environment>
@@ -363,6 +521,12 @@ supabase functions serve list-instagram-publish-queue --env-file supabase/functi
 supabase functions serve mark-instagram-gallery-submission-shared --env-file supabase/functions/.env.local
 supabase functions serve check-instagram-api-status --env-file supabase/functions/.env.local
 supabase functions serve publish-instagram-gallery-submission --env-file supabase/functions/.env.local
+supabase functions serve resolve-instagram-publish-reconciliation --env-file supabase/functions/.env.local
+supabase functions serve list-facebook-page-publish-queue --env-file supabase/functions/.env.local
+supabase functions serve check-facebook-page-api-status --env-file supabase/functions/.env.local
+supabase functions serve publish-facebook-page-gallery-submission --env-file supabase/functions/.env.local
+supabase functions serve resolve-facebook-page-publish-reconciliation --env-file supabase/functions/.env.local
+supabase functions serve withdraw-gallery-publication-consent --env-file supabase/functions/.env.local
 ```
 
 Production secret examples:
@@ -377,19 +541,34 @@ supabase secrets set DISCORD_PUBLIC_KEY=<set manually, never commit>
 supabase secrets set DISCORD_APPLICATION_ID=1156448856565887066
 supabase secrets set DISCORD_BOT_TOKEN=<set manually, never commit>
 supabase secrets set DISCORD_GALLERY_CHANNEL_ID=1508077313965817856
-supabase secrets set DISCORD_GALLERY_INGEST_SECRET=<set manually, never commit>
+supabase secrets set DISCORD_GALLERY_INGEST_HMAC_KEYS_JSON=<set manually, never commit>
+supabase secrets set DISCORD_GALLERY_INGEST_HMAC_ACTIVE_KEY_ID=<one configured key ID>
 supabase secrets set DISCORD_VOTE_CHANNEL_ID=1082802012095266866
 supabase secrets set VOTE_REMINDER_TIME_ZONE=America/Los_Angeles
 supabase secrets set VOTE_REMINDER_CRON_SECRET=<set manually, never commit>
 supabase secrets set GUILD_SCHEDULE_URL=https://mochirii.com/data/guild-schedule.json
+supabase secrets set GALLERY_PREVIEW_VERCEL_OWNER=<set manually, never commit>
+supabase secrets set GALLERY_PREVIEW_VERCEL_OWNER_ID=<set manually, never commit>
+supabase secrets set GALLERY_PREVIEW_VERCEL_PROJECT=<set manually, never commit>
+supabase secrets set GALLERY_PREVIEW_VERCEL_PROJECT_ID=<set manually, never commit>
 supabase secrets set INSTAGRAM_ACCOUNT_ID=<set manually, never commit>
+supabase secrets set INSTAGRAM_EXPECTED_ACCOUNT_ID=<set independently to the same verified Graph user ID, never commit>
 supabase secrets set INSTAGRAM_ACCESS_TOKEN=<set manually, never commit>
-supabase secrets set INSTAGRAM_API_VERSION=<set manually, never commit>
+supabase secrets set INSTAGRAM_API_VERSION=v26.0
+supabase secrets set INSTAGRAM_PUBLISH_ENABLED=false
+supabase secrets set META_APP_ID=<set manually, never commit>
+supabase secrets set META_EXPECTED_APP_ID=<set independently to the same verified app ID, never commit>
+supabase secrets set META_APP_SECRET=<set manually, never commit>
+supabase secrets set FACEBOOK_PAGE_ID=<set manually, never commit>
+supabase secrets set FACEBOOK_EXPECTED_PAGE_ID=<set independently to the same verified Page ID, never commit>
+supabase secrets set FACEBOOK_PAGE_ACCESS_TOKEN=<set manually, never commit>
+supabase secrets set FACEBOOK_API_VERSION=v26.0
+supabase secrets set FACEBOOK_PAGE_PUBLISH_ENABLED=false
 ```
 
-`supabase secrets set ...` writes remote project secrets. Run it only from a trusted shell and never paste tokens into tracked files.
+`supabase secrets set ...` writes remote project secrets. Run it only from a trusted shell and never paste tokens or private identity pins into tracked files. All four `GALLERY_PREVIEW_VERCEL_*` values are required; the preview endpoint fails closed when any pin is missing or malformed and derives its issuer, JWKS URL, audience, and subject only from those validated pins.
 
-Instagram credentials live only in Supabase secrets. Do not place Instagram access tokens, account IDs, API base URLs, or API versions in Vercel, browser code, GitHub Actions logs, issue comments, PR text, or public docs with real values.
+Meta credentials and private identity pins live only in Supabase secrets and the approved private recovery boundary. Do not place access tokens, Graph identifiers, app secrets, proofs, or environment values in Vercel, browser code, GitHub Actions logs, issue comments, PR text, or public docs with real values.
 
 Verify remote secrets without printing secret values:
 
@@ -528,11 +707,32 @@ The website does not assign Discord roles in this phase.
 - upload source (`website` or `discord`)
 - Discord guild/channel/message/attachment/user IDs for Discord submissions
 - Instagram opt-in boolean, timestamp, source, and copy version
-- private bounded WebP derivative path, MIME type, and byte size
+- stable Gallery publication ID plus the currently selected thumbnail-revision metadata
 - moderation status
 - review fields for moderator approval or decline actions
 
-Uploads stay `pending` and do not appear in the public Gallery in this phase.
+Uploads stay private while `pending`. Approval alone does not make a legacy row
+public: the moderation transaction must also create a complete immutable
+publication revision.
+
+`private.gallery_source_validations` stores immutable trusted evidence for the
+exact private source selected by a moderator or accepted through the trusted
+Discord ingest. Evidence is bound to the submission revision and Storage
+  object ID, version, timestamp, MIME type, byte size, dimensions, SHA-256, and
+  validator class. Ordinary evidence is `gallery-source-v1`; an approved
+  pre-foundation source above 8 MiB may use only the separately authorized,
+  operator-attributed `gallery-historical-source-v1` path while cutover is
+  closed. Direct table privileges are revoked, and a
+publication commit fails closed unless current matching evidence exists.
+
+`private.gallery_publication_revisions` is the service-only public-delivery
+ledger. Each immutable revision freezes the reviewed title, caption, category,
+internal attribution, source timestamps, stable publication ID, exact
+Storage object identities/versions/timestamps and SHA-256 digests, bounded
+metadata-stripped display image, and per-revision thumbnail. Only
+`visible_until` may move once from null to a retirement timestamp. Browser roles
+receive no table privileges, and anonymous public responses expose neither
+attribution nor either Storage path.
 
 `gallery_moderation_events` stores privileged moderation audit records:
 
@@ -550,10 +750,15 @@ Browser clients do not receive direct insert, update, or delete privileges for m
 - job status: `queued`, `ineligible`, `publishing`, `published`, `failed`, `canceled`, or `shared_manually`
 - eligibility reason for unsupported v1 media
 - moderator-editable Instagram caption and alt text
-- Meta container/media/permalink IDs after an API publish attempt, or a manually pasted permalink after moderator sharing
+- Meta container/media/permalink IDs after an API publish attempt; historical
+  manual-share records may retain their old permalink evidence
 - attempt count, last error, queued/published actors, and timestamps
 
-`gallery_instagram_publish_events` stores service-role audit events for Instagram publishing jobs. Browser clients receive no direct table privileges for either Instagram publishing table.
+`gallery_instagram_publish_events` stores audit events for Instagram publishing
+jobs. Browser clients receive no direct table privileges for either Instagram
+publishing table. Edge service-role access is SELECT-only; lifecycle mutations
+run only through the reviewed service-only security-definer RPCs. No
+manual-share mutation RPC is exposed.
 
 ## Storage Bucket Plan
 
@@ -563,7 +768,9 @@ The migration creates a private bucket:
 member-gallery
 ```
 
-The bucket is restricted to image uploads only:
+The bucket is private and restricted to image MIME types. During the additive
+publication transition its historical ceiling remains 50 MiB so existing
+approved sources are not stranded:
 
 ```text
 file_size_limit = 52428800
@@ -576,7 +783,10 @@ Upload paths begin with the signed-in user id:
 {auth.uid()}/{timestamp-or-random-safe-filename}
 ```
 
-No public read access is granted.
+The browser, submission functions, and ordinary source validator still enforce
+an 8 MiB policy. The bucket ceiling is not an application permission. A later
+cutover migration may lower it only after all reviewed historical sources have
+bounded immutable derivatives. No public read access is granted.
 
 ## RLS And Storage Policy Summary
 
@@ -604,11 +814,40 @@ No public read access is granted.
 - anon and authenticated browser clients receive no direct table privileges.
 - service_role can manage rows from trusted Edge Functions.
 
+`private.gallery_publication_revisions`:
+
+- RLS is enabled as defense in depth.
+- `public`, `anon`, `authenticated`, and direct `service_role` table privileges are revoked.
+- only reviewed service-only functions may create or query immutable publication revisions.
+- approved legacy rows without a publication revision remain private until an explicit moderator republication.
+
+`private.gallery_source_validations`:
+
+- RLS is enabled as defense in depth.
+- `public`, `anon`, `authenticated`, and direct `service_role` table privileges are revoked.
+- ordinary service-only validation accepts static JPEG, PNG, or WebP sources no larger than 8 MiB, 4096 pixels per edge, or 12.6 megapixels.
+- a separate historical operator function accepts only already-approved pre-foundation sources above 8 MiB while cutover is closed, requires exact Storage compare-and-set evidence and operator attribution, and remains bounded by 50 MiB, 8192 pixels per edge, and 40 megapixels.
+- only evidence matching the current submission and Storage object can authorize a preview or publication.
+
+`private.gallery_public_feed_transition`:
+
+- defaults closed and has no direct API grants;
+- returns a valid empty schema-v2 feed and no media resolution while closed;
+- may be enabled only by a separately reviewed migration after aggregate readiness proves every approved source has one exact active publication and no unknown category;
+- may be disabled for application rollback without deleting immutable publication evidence.
+
 `gallery_instagram_publish_jobs` and `gallery_instagram_publish_events`:
 
 - RLS is enabled.
 - anon and authenticated browser clients receive no direct table privileges.
 - service_role can manage rows from trusted Edge Functions after moderator verification.
+
+`gallery_facebook_page_publish_jobs` and `gallery_facebook_page_publish_events`:
+
+- RLS is enabled with an explicit restrictive client-role deny policy.
+- anon and authenticated browser clients receive no direct table privileges.
+- direct service_role table access is SELECT-only; all state changes must use the reviewed security-definer RPCs after moderator verification.
+- each job freezes the validated source MIME, byte count, and SHA-256 used by the Page publisher.
 
 `discord_managed_permission_overwrites`:
 
@@ -626,6 +865,8 @@ The following tables are service-role-only audit, sync, moderation, or poll inte
 - `discord_sync_log`
 - `gallery_instagram_publish_events`
 - `gallery_instagram_publish_jobs`
+- `gallery_facebook_page_publish_events`
+- `gallery_facebook_page_publish_jobs`
 - `gallery_moderation_events`
 - `member_auth_identities`
 - `member_verifications`
@@ -643,7 +884,8 @@ Storage `member-gallery`:
 
 - authenticated active verified members can upload only into their own first path segment.
 - authenticated users can read only their own objects.
-- authenticated active verified members can update/delete only their own objects.
+- referenced source objects are immutable; authenticated members cannot replace them.
+- authenticated members may delete only an orphaned object in their own path before a submission references it.
 - anon receives no access.
 - bucket remains private.
 
@@ -656,13 +898,13 @@ Leader moderation uses two Edge Functions:
 
 Both functions require a signed-in Supabase user JWT and then verify Discord server membership against guild `1078630751077142608`. The moderator check requires role ID `1078630751165222984` from `DISCORD_MODERATOR_ROLE_IDS`. The role name secret is documentation only; role names are never trusted for enforcement. If moderation secrets are missing or do not match the expected guild or role ID, the functions fail closed.
 
-`list-gallery-review-queue` is moderator-only. It supports `pending`, `approved`, `rejected`, and `archived` queue filters, returns dashboard counts, joins safe uploader/moderator profile display fields, includes recent `gallery_moderation_events`, and creates short-lived signed URLs for private `member-gallery` objects. The Storage bucket stays private and no public read policy is added.
+`list-gallery-review-queue` is moderator-only. It supports `pending`, `approved`, `rejected`, and `archived` queue filters, returns dashboard counts, joins safe uploader/moderator profile display fields, and includes recent `gallery_moderation_events`. It never signs or returns a raw source to the browser. A moderator explicitly prepares one selected preview through the same-origin Website route. For that action only, the function requires both the verified moderator JWT and Vercel's signed, short-lived workload OIDC token bound to the exact team issuer, audience, owner and project IDs, preview/production environment, and lifetime. A moderator bearer alone receives an opaque denial before source evidence or Storage is read. After attestation, the function reserves the exact source bytes in a separate moderator capacity pool, downloads that exact object, fully decodes and validates it, commits current service-only evidence, and sends the bytes only to the Node sanitizer. The browser receives only the bounded metadata-stripped WebP produced by that sanitizer. Normal queue responses contain no preview capability. The Storage bucket stays private and no public read policy is added.
 
-`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission and `thumbnail` for an approved historical submission. Approval requires a client-prepared WebP derivative that the function validates structurally and fully decodes with pinned libwebp 1.6.0. It must be static, at most 720 pixels on either edge, and at most 80 KiB. Each attempt uses a unique immutable revision under the service-only `_approved/thumbs/{submission}/{revision}.webp` prefix. The row change and `gallery_moderation_events` insert commit through one service-only database function, so an audit failure rolls back moderation. Approved submissions with a validated derivative become eligible for the approved public Gallery feed; they are not written into `data/gallery.json`.
+`moderate-gallery-submission` accepts `approved` or `rejected` for a pending submission and `thumbnail` for explicit republication of an approved historical submission. Approval re-encodes the signed private review image into two metadata-stripped WebP assets: a display image no larger than 2560 pixels on either edge and 2 MiB, and a thumbnail no larger than 720 pixels on either edge and 80 KiB. The function structurally validates and fully decodes both with pinned libwebp 1.6.0. The display image uses the stable `_approved/publications/{publication}/display.webp` path; each immutable thumbnail revision uses `_approved/publications/{publication}/revisions/{revision}/thumbnail.webp`. The source-row change, moderation event, prior-revision retirement, and new immutable publication revision commit through one service-only database function, so an audit or evidence failure rolls back the database transition. Published submissions are not written into `data/gallery.json`.
 
-`list-gallery-review-queue` paginates and filters historical approved rows by thumbnail state. `list-approved-gallery-submissions` asks a service-only database function to filter complete rows and matching Storage metadata before applying its limit, then signs paths in bounded batches. Member policies allow updates and deletes only for pending originals; moderated originals and the service-owned derivative prefix are immutable to member sessions.
+`list-gallery-review-queue` paginates and filters historical approved rows by publication-media state. `list-approved-gallery-submissions` asks service-only database functions to read a stable ten-minute snapshot from `private.gallery_publication_revisions`, reconcile exact Storage object evidence, and apply a 24-item keyset page. It returns stable credential-free thumbnail Edge URLs and never a bearer capability. The browser derives the matching display URL from the opaque publication ID without a resolver request. A media `GET` performs one database call that first selects only the indexed immutable revision identity and exact byte count, reserves those bytes, and returns immediately on denial. Only an allowed reservation proceeds to the Storage evidence joins that can reveal the private derivative path to the Edge Function. The function then verifies exact size and SHA-256 before returning WebP with a five-minute private browser cache. Public list/media traffic shares one serialized 64 MiB daily pool; moderator source previews use a physically separate ledger and lock so anonymous traffic cannot exhaust moderation capacity. The member-owned source original remains private and is never a public viewer asset. Member policies allow updates and deletes only for pending source originals; members cannot access the service-owned publication prefix.
 
-The website Leader Dashboard uses those functions to show queue tabs, submission details, signed private previews, source metadata, rejection reasons, and compact moderation history. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
+The website Leader Dashboard uses those functions to show queue tabs, submission details, explicitly prepared private previews, source metadata, rejection reasons, and compact moderation history. The browser reuses its single validated preview download when creating the bounded publication derivatives. Regular browser clients still do not receive direct privileges to update review fields or insert moderation events.
 
 For the human moderator workflow, see `docs/member-gallery-moderation-runbook.md`.
 
@@ -684,7 +926,9 @@ The private Gateway member-event endpoint for the second pending-verification re
 reaper-discord-member-sync
 ```
 
-That function has `verify_jwt = false` because Discord calls it directly. It validates `x-signature-ed25519` and `x-signature-timestamp` with `DISCORD_PUBLIC_KEY`, answers PING, enforces guild `1078630751077142608`, channel `1508077313965817856`, and required roles, then defers the interaction and calls `submit-discord-gallery-image` in a background task. The ingest function also has `verify_jwt = false` because it is called by the trusted Reaper bridge rather than by a signed-in browser session. It fails closed unless `DISCORD_GALLERY_INGEST_SECRET`, `DISCORD_GALLERY_CHANNEL_ID`, `DISCORD_GUILD_ID`, and `DISCORD_REQUIRED_ROLE_IDS` match the expected server configuration. The ingest function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
+That function has `verify_jwt = false` because Discord calls it directly. It streams at most 64 KiB of exact request bytes, validates `x-signature-ed25519` and `x-signature-timestamp` with `DISCORD_PUBLIC_KEY` before JSON parsing, answers PING, enforces guild `1078630751077142608`, channel `1508077313965817856`, and required roles, then defers the interaction and calls `submit-discord-gallery-image` in a background task. Declared or streamed oversized bodies fail closed without caching. The ingest function also has `verify_jwt = false` because it is called by the trusted Reaper bridge rather than by a signed-in browser session. The bridge signs the exact POST path and raw JSON body with HMAC-SHA256, a versioned key ID, a 60-second timestamp window, and a random one-use nonce. The receiver verifies the signature before JSON parsing and atomically consumes the nonce through a service-role-only RPC. Requests fail closed when the bounded key set, active key ID, nonce store, guild, channel, or required-role configuration is unavailable. The ingest function then requires an existing linked `member_profiles.discord_user_id`, active status, stored required roles, and recent website Discord verification before downloading the Discord attachment into the private `member-gallery` bucket and inserting a pending `gallery_submissions` row.
+
+The HMAC release is activation-gated. Before either function is deployed, provision one shared key set in `DISCORD_GALLERY_INGEST_HMAC_KEYS_JSON`, select one member of that set with `DISCORD_GALLERY_INGEST_HMAC_ACTIVE_KEY_ID`, apply the nonce migration, and prove one signed non-production submission plus a rejected replay. Key rotation adds the next key to the bounded receiver set first, switches the active key only after both function versions can read it, then retires the previous key after the maximum request window. Do not retain the former static-secret header as a fallback.
 
 The same Reaper Interactions endpoint also supports:
 
@@ -709,7 +953,7 @@ Manual vote reminders use two Edge Functions:
 - `send-vote-reminder`: scheduled sender for channel `1082802012095266866`.
 - `reaper-discord-interactions`: Discord interaction endpoint for `Done voting`, `/vote-status`, `/vote-leaderboard`, `/vote-reminder-preview`, and moderator-approved `/photo-day-poll`.
 
-The feature presents HTTPS vote links and records a member's manual confirmation after they click `Done voting`. It does not automate third-party voting. The reminder uses `allowed_mentions: { parse: [] }` and creates link buttons plus a single `vote_done:<YYYY-MM-DD>` confirmation button.
+The feature presents HTTPS vote links and records a member's manual confirmation after they click `Done voting`. It does not automate third-party voting. The reminder uses `allowed_mentions: { parse: [] }` and creates link buttons plus a single `vote_done:<YYYY-MM-DD>` confirmation button. Its bounded cron credential is SHA-256 digested and compared as a fixed-length value rather than with ordinary string equality.
 
 Vote links come from `DISCORD_VOTE_LINKS_JSON` when set, otherwise from a pinned vote-channel message containing `[vote-links]`. See [`../docs/vote-reminder-runbook.md`](../docs/vote-reminder-runbook.md) for the pin format, Supabase Cron setup, rollout, rollback, and validation checklist.
 
@@ -728,7 +972,7 @@ Monthly member spotlight polls use Discord native polls and Supabase-owned winne
 - `publish-member-spotlight-winner`: scheduled finalizer that waits for Discord finalized poll results after 7 days.
 - `get-current-spotlight-winner`: public-safe website lookup that returns only the published winner name and month.
 
-Native Discord polls are limited to 10 answers, so Reaper snapshots up to 10 randomly selected active, recently verified, Discord-linked website members per cycle. If there are 10 or fewer eligible members, all eligible members are included. The poll is single-choice, lasts 168 hours, and uses `allowed_mentions: { parse: [] }`.
+Native Discord polls are limited to 10 answers, so Reaper snapshots up to 10 randomly selected active, recently verified, Discord-linked website members per cycle. If there are 10 or fewer eligible members, all eligible members are included. The poll is single-choice, lasts 168 hours, and uses `allowed_mentions: { parse: [] }`. Sender and finalizer cron credentials use the same bounded fixed-digest comparison and fail closed when missing, mismatched, or oversized.
 
 The linked Twills account is intentionally excluded from spotlight poll eligibility so owner/admin participation never occupies member poll slots.
 
@@ -747,9 +991,9 @@ The database stores:
 
 All three tables have RLS enabled and service-role-only grants. Browser clients receive no direct candidate, Discord ID, voter, or vote-count access. The website Home and Spotlight pages may replace the configured fallback title with the finalized winner name only; they do not expose the winner's Discord handle, profile link, avatar, raw vote totals, or candidate list.
 
-Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved. Discord attachment `content_type` is advisory because Discord may omit or mislabel it; `submit-discord-gallery-image` downloads the approved Discord CDN URL and accepts only JPEG, PNG, or WebP byte signatures under 50 MB before storing the sniffed MIME type.
+Discord uploads are idempotent by message/attachment ID. They go through the same moderator approval queue as website uploads and do not appear publicly until approved. Discord attachment `content_type` is advisory because Discord may omit or mislabel it; `submit-discord-gallery-image` streams the approved Discord CDN URL through an 8 MiB hard ceiling, structurally validates a static JPEG, PNG, or WebP within the 4096-edge and 12.6-megapixel limits, stores the sniffed MIME type, and commits matching trusted source evidence. A missing or conflicting evidence commit removes the inserted row and object and fails closed.
 
-The private Reaper source repo exists at `Mochirii-Wushu/Reaper` as the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command requires only `image`; `title`, `subtitle`, and the Discord boolean opt-in stay optional:
+The private Reaper source repo is `Mochirii-Wushu/Reaper-Discord-Bot`, which remains the command/contract helper and rollback runtime reference. Production Reaper is Supabase-hosted Discord Interactions. Its gallery slash command requires only `image`; `title`, `subtitle`, and the Discord boolean opt-in stay optional:
 
 ```text
 /submit image:<file> [title:<title>] [subtitle:<subtitle>] [share_to_instagram:<true|false>]
@@ -809,43 +1053,80 @@ See [`../docs/member-profiles-and-rank-roles.md`](../docs/member-profiles-and-ra
 
 ## Instagram Publishing Queue
 
-Instagram publishing uses three moderator-only Edge Functions:
+Instagram publishing uses five moderator-only Edge Functions:
 
 - `list-instagram-publish-queue`
 - `check-instagram-api-status`
 - `publish-instagram-gallery-submission`
+- `resolve-instagram-publish-reconciliation`
 - `mark-instagram-gallery-submission-shared`
 
-All four require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. Current launch mode is manual sharing: moderators download the signed preview, copy caption and alt text, post through the official Instagram account or Meta Business Suite, optionally paste the permalink, and mark the job `shared_manually`. The Meta API status function is diagnostic-only and must not create media containers or publish posts. The API publishing function remains available only after the diagnostic passes; it creates a short-lived signed URL only when sending the image URL to Meta.
+All five require a signed-in Supabase user JWT and server-side Discord Moderator verification. They use service-role credentials only inside the Edge runtime. The `member-gallery` bucket remains private. The Meta API status function is diagnostic-only and must not create media containers or publish posts. The API publisher uses only the fixed `https://graph.facebook.com` origin and Graph `v26.0`, requires independently matching runtime and expected app/account pins, and requires the exact `INSTAGRAM_PUBLISH_ENABLED=true` server flag. Every normal token-bearing request uses bearer authorization plus a fresh five-minute-bounded HMAC-SHA256 `appsecret_time`/`appsecret_proof`; redirects, retries, unbounded responses, and raw provider diagnostics fail closed. The publisher verifies the configured Graph id and username before reading or locking a job. It creates a short-lived signed URL only for Meta after verifying the frozen metadata-stripped social JPEG's exact object evidence, bytes, dimensions, MIME, and SHA-256. Tokens, secrets, proofs, object paths, transient container identifiers, hashes, signed URLs, and raw provider responses are never returned to the browser.
 
 Approval behavior:
 
 - Non-opted-in approved images do not create an Instagram job.
-- Opted-in JPEG images create a `queued` Instagram job.
-- Opted-in PNG or WebP images create an `ineligible` job with a clear reason.
-- Existing submissions are not retroactively opted in.
+- New website opt-ins send the boolean plus the exact non-secret `2026-07-website-public-instagram-publish-v2` contract handshake; the database authors the timestamp/source/copy provenance. Missing, stale, or arbitrary handshakes remain historical and API-ineligible instead of being silently upgraded.
+- Historical v1 website and Discord opt-ins remain accurately labeled and API-ineligible until separately re-consented.
+- New website social opt-ins require a JPEG already within the 8 MiB provider limit, 320–1440 pixels wide, no more than 1800 pixels high, and within the 4:5 through 1.91:1 feed ratio. Moderation never accepts browser-supplied social bytes. The Edge boundary binds the validated consented source SHA/object evidence, permits at most one strict minimal first-segment JFIF APP0 marker, rejects every APP1–APP15 segment, strips comments without changing the JPEG frame or entropy-coded data, and freezes the resulting private derivative. PNG, WebP, out-of-ratio, EXIF-bearing, ICC-profiled, SPIFF, HDR, Photoshop, Adobe-transform, arbitrary APP0/JFXX, or other APP-bearing sources can still be Gallery-approved but their social jobs are explicitly ineligible.
 
-The Leader Dashboard shows the Instagram Queue with preview, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after publish or manual share. Moderators can edit caption and alt text, download the image, copy caption and alt text, enter a manual permalink/note, and mark a job shared manually. The dashboard must show a visible in-card confirmation before calling `mark-instagram-gallery-submission-shared` or future `publish-instagram-gallery-submission` because both record an external publishing decision.
+The Leader Dashboard shows the Instagram Queue with a credential-free approved thumbnail, title, caption/subtitle, uploader, consent, eligibility, job state, last error, and permalink after Graph publishing or on a historical record. The queue uses status-bound stable keyset pagination, not a fixed-row cap, and never exposes storage paths or signed object URLs. Manual completion is disabled: the compatibility Edge route returns a moderator-gated `409`, both database RPC signatures are dropped, and `shared_manually` remains historical read state only. Network failures or 5xx results from `/media_publish`, missing media ids, failed success audits, and stale leases enter `reconcile_required`; retry is blocked until a moderator inspects the official account and records either published (media id, Instagram permalink, note, and confirmation) or not published (note and confirmation). Every later publish still requires separate visible confirmation.
 
-V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Any future live Meta setup, Supabase secret change, Edge Function redeployment, slash-command registration, or real Instagram post requires explicit owner approval.
+V1 supports single-image Instagram feed posts only. Reels, Stories, carousels, hashtags automation, scheduling, and image conversion are out of scope. Keep the activation flag false while the provider link restriction and human review gate remain incomplete. Any live Meta setup, Supabase secret change, Edge Function redeployment, slash-command registration, activation-flag change, or real Instagram post requires explicit owner approval. See [`../docs/integrations/instagram-gallery-publishing.md`](../docs/integrations/instagram-gallery-publishing.md).
+
+Members use `withdraw-gallery-publication-consent` to record a destination-specific withdrawal. Queued, failed, or ineligible work is canceled atomically; ambiguous in-flight work is quarantined for moderator inspection; already-published work creates a removal request without claiming that an external copy was deleted. Original consent and withdrawal evidence remain immutable.
+
+## Facebook Page Publishing Queue
+
+Facebook Page publishing uses four moderator-only Edge Functions:
+
+- `list-facebook-page-publish-queue`
+- `check-facebook-page-api-status`
+- `publish-facebook-page-gallery-submission`
+- `resolve-facebook-page-publish-reconciliation`
+
+All four require a signed-in Supabase user JWT plus current Discord Moderator verification. The website sends the unchecked-by-default Facebook consent boolean and exact non-secret `2026-07-website-public-facebook-page-group-v2` contract claim. An insert trigger accepts only that exact website handshake for current publishable consent, authors its timestamp/source/copy provenance, and marks missing or stale claims unverified instead of silently upgrading them; a second trigger makes the contract immutable. Explicit member consent and gallery approval create exactly one service-only Page job in the same database transaction as the moderation and Instagram outbox records. New opt-ins require an already feed-compatible JPEG. Gallery-only JPEG, PNG, and WebP uploads remain accepted; unsupported or legacy opted-in sources create an ineligible audited job instead of falling back to browser media. Existing submissions remain opted out.
+
+The publisher requires the exact server-only `FACEBOOK_PAGE_PUBLISH_ENABLED=true` activation flag before it locks a job. It also requires independently matching runtime and expected app/Page pins and Graph `v26.0`. It locks only `queued` or `failed` jobs, resolves the immutable source-bound social derivative at its unpredictable `_social/submissions/{submission UUID}/{revision UUID}.jpg` path, downloads that private derivative server-side, verifies its exact object identity, version, timestamp, size, MIME, dimensions, and SHA-256, and uploads multipart bytes to the configured Facebook Page. Page id, Page access token, Graph API version, and the activation flag stay in Supabase Edge configuration; the flag starts false. Network failures, Meta server errors, responses without an external id, and attempts left `publishing` beyond their 15-minute lease enter `reconcile_required`; they must be inspected on the Page before any retry because the Graph photo endpoint has no client idempotency key. The automatic lease event has no moderator actor. Any returned provider ids remain on the reconciliation audit record as lookup evidence without marking the job published. A moderator can explicitly resolve the inspected result as published only after a read-only Graph lookup proves every supplied photo/post ID belongs to the pinned Page and yields a canonical HTTPS Facebook post/photo permalink. A not-published resolution rejects provider IDs and permalinks and returns the job to retryable `failed`. Both outcomes require a note and durable actor audit. The status function performs a read-only Page identity check; Page task evidence is optional and never substitutes for the server activation gate. Raw Meta error messages and payloads are not returned; only fixed operator-safe messages and allowlisted non-secret classifications cross the Edge boundary.
+
+If the moderation RPC has a definite non-commit, the provisional social derivative is removed. A transport failure with an unknown commit outcome returns `moderation_commit_outcome_unknown`, preserves the provisional object, and requires a state reload/reconciliation before cleanup so a committed derivative is never deleted speculatively.
 
 ## Approved Public Gallery Feed
 
-Approved member submissions appear on `gallery.html` through the public Edge Function:
+Approved member submissions appear on canonical `/gallery` through the public Edge Function:
 
 - `list-approved-gallery-submissions`
 
-This Gallery Edge Function also has `verify_jwt = false`. It is publicly callable because the public Gallery page needs to load without sign-in, but it uses server-side credentials only inside the Edge runtime and queries only `gallery_submissions` rows where `status = 'approved'`.
+This Gallery Edge Function has the reviewed `verify_jwt = false` classification because `/gallery` loads without sign-in. It uses service credentials only inside the Edge runtime and exposes a public-safe, read-only DTO. The migration revokes every Gallery delivery `security definer` helper from `public`, `anon`, and `authenticated`, then grants only the exact Edge-facing functions to `service_role`; PostgreSQL function execution must never rely on default `PUBLIC` privileges.
 
-The function returns public-safe fields, safe uploader display names, and distinct short-lived URLs for the private bounded thumbnail and original `member-gallery` object. The grid receives the derivative and the viewer receives the original. The Storage bucket remains private; no public bucket or anonymous Storage read policy is added.
+Schema version 2 returns public-safe text, decoded thumbnail geometry, totals/facets, and one stable credential-free thumbnail Edge URL per item. It deliberately omits uploader identity. The item identity is the stable opaque publication ID; refreshing a thumbnail creates a new immutable revision without changing that public identity. A list response never contains a display URL. The SDK-free browser derives the exact credential-free display endpoint only when a visitor opens a runtime item; no preliminary resolver POST or database lookup occurs. That `GET` atomically reserves the immutable byte count while resolving the current publication, then delivers only its bounded metadata-stripped display derivative through the same Edge boundary. The member-owned source original is never delivered for public viewing. The Storage bucket remains private; no public bucket or anonymous Storage read policy is added.
 
-Pending, rejected, archived, and historical approved submissions without a validated derivative are not returned by the approved feed. If either private object cannot receive a signed URL, the function returns a safe per-item preview error and the browser skips that item.
+During the bounded application rollback window, the current function recognizes
+only the former browser's exact empty-object POST. It returns the historical DTO
+field names with current quota-enforced Edge media URLs, never signed Storage
+URLs or object paths. The retained service-role-only
+`gallery_publishable_submissions(integer, integer)` signature is deliberately
+list-budgeted and empty so separately restoring the retired Edge source cannot
+reintroduce replayable media capabilities.
 
-The Next Gallery browser normalizes approved member submissions into the same item model as the static `data/gallery.json` Gallery before rendering. The default Random mix keeps its server-rendered static order stable and appends runtime submissions, preventing a late feed response from reshuffling cards already on screen. Newest and Oldest sort all matching static and member items together, while the Member Submissions filter provides the direct runtime album. Member submissions use their submitted title and/or caption in the existing lightbox, followed by the uploader's public Discord display name when available. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions.
+Pending, rejected, archived, and historical approved submissions without an active immutable publication revision are not returned by the feed. Legacy null, noncanonical, incomplete, or source-only rows remain private until a moderator explicitly reviews and republishes them. A publishable revision requires complete display/thumbnail geometry plus exact object identity, version, timestamp, size, MIME, and digest evidence. Malformed database evidence and delivery-budget denial fail closed. The function never partially delivers a page, skips an item, advances a cursor past a failed item, or exposes object paths or provider errors.
+
+The Next Gallery browser normalizes published member submissions into the same item model as the static `data/gallery.json` Gallery before rendering. It traverses sequential opaque cursors instead of applying a fixed 80-row cap. The first page establishes a stable snapshot over immutable revisions; later publications and revisions wait for the next traversal. Retired revisions remain available for at least the cursor delivery overlap so an in-flight snapshot does not drift. Server totals and facets represent the complete filtered snapshot. Every runtime item belongs to Member Submissions and one moderator-reviewed canonical visual category. Historical null or noncanonical source categories never create a public category or item; source fields are not fallbacks.
+
+The default Random mix keeps its server-rendered static order stable and appends runtime submissions, preventing a late feed response from reshuffling cards already on screen. Newest and Oldest combine sources only through the runtime keyset prefix proven complete. Member submissions use their reviewed title and/or caption in the existing lightbox without public uploader attribution. Existing static Gallery captions remain owned by `data/gallery.json` and should not be edited to publish member submissions.
 
 If an older approved `gallery_submissions` row has blank `title` and `caption` values, the public lightbox will use the `Member submission` fallback until a Moderator or operator updates that row in Supabase. Future uploads preserve non-empty title and caption values from `gallery-submit.html` into `gallery_submissions`.
 
-Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; approved member uploads use their Supabase `created_at` value. The default Gallery order is `Random mix`, using a deterministic content-derived seed so server output and hydration do not reshuffle after paint. Visitors may choose `Newest first` or `Oldest first`; static images and approved member submissions are sorted together. Approved member submissions still render through signed URLs from the private `member-gallery` bucket, and pending or rejected submissions remain hidden.
+Public Gallery ordering uses one normalized timestamp model. Static curated images use `galleryAddedAt` in `data/gallery.json`; published member items use their frozen reviewed and created timestamps with the stable publication ID as the final key. The default Gallery order is computed before first paint and runtime cards append without moving rendered static cards. Visitors may choose `Newest first` or `Oldest first`; cross-source results are exposed only through the proven keyset boundary. Runtime thumbnails and display derivatives use stable credential-free Edge URLs backed by private, immutable media evidence; source originals and unpublished submissions remain private.
+
+The integrated source contract contains exactly 49 configured Edge Functions with 31 `verify_jwt=true` and 18 false. The current total includes the fail-closed social-publication consent-withdrawal boundary, the independently gated event-social manager, scheduler, and reconciliation resolver, and the separately disabled monthly-raffle and social-publishing foundations. Recalculate that parity from the final exact release head before provider approval.
+
+Before release, run `operations/reconcile_gallery_public_feed_v2.sql` from a
+trusted read-only session. It reports only public-safe counts and verifies that
+eligible totals, category facets, and complete keyset traversal reconcile; it
+does not expose object paths or mutate data.
+
+See [`../docs/integrations/gallery-public-media-delivery.md`](../docs/integrations/gallery-public-media-delivery.md) for the versioned DTO, keyset cursor, bounded Edge media, global quota, retry, and rollout boundaries.
 
 ## Local Testing Flow
 

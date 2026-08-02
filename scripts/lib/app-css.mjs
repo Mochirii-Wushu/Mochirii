@@ -18,7 +18,9 @@ export const appCssFiles = [
   "apps/web/app/styles/public-profile-cards.css",
   "apps/web/app/styles/public-ceremony.css",
   "apps/web/app/styles/public-gallery.css",
+  "apps/web/app/styles/shell-gallery-media.css",
   "apps/web/app/styles/public-not-found.css",
+  "apps/web/app/styles/public-legal.css",
   "apps/web/app/styles/member-workflow.css",
   "apps/web/app/styles/member-account.css",
   "apps/web/app/styles/member-forms.css",
@@ -28,6 +30,7 @@ export const appCssFiles = [
   "apps/web/app/styles/shell-header-nav.css",
   "apps/web/app/styles/shell-mobile-menu.css",
   "apps/web/app/styles/shell-footer.css",
+  "apps/web/app/styles/shell-official-guild-profiles.css",
   "apps/web/app/styles/mochi-pets.css",
 ];
 

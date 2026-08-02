@@ -2,6 +2,7 @@ import { withProtectedCors } from "../_shared/cors.ts";
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "@supabase/supabase-js";
 import { discordFetch } from "../_shared/discord-api.ts";
+import { constantTimeSecretEqual } from "../_shared/secret-auth.ts";
 import { getServiceRoleKey } from "../_shared/supabase-service-role.ts";
 import {
   asRecord,
@@ -115,7 +116,7 @@ async function handleRequest(req: Request): Promise<Response> {
     return jsonResponse({ ok: false, message: "Vote reminder cron secret is not configured." }, 500);
   }
 
-  if (bearerOrHeaderSecret(req) !== cronSecret) {
+  if (!await constantTimeSecretEqual(bearerOrHeaderSecret(req), cronSecret)) {
     return jsonResponse({ ok: false, message: "Unauthorized." }, 401);
   }
 

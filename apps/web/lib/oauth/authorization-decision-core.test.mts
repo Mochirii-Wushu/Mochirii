@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  isDiscordVerifiedSocialMember,
   isApprovedSocialAuthorization,
   runSocialAuthorizationDecision,
 } from "./authorization-decision-core.ts";
@@ -11,6 +12,27 @@ const approvedAuthorization = {
   redirect_uri: "https://social.mochirii.com/auth/oidc/callback",
   client: { id: "social-client-id" },
 };
+
+test("requires active Discord verification for Social access", () => {
+  assert.equal(isDiscordVerifiedSocialMember({
+    discordVerified: true,
+    profile: { member_status: "active" },
+  }), true);
+  assert.equal(isDiscordVerifiedSocialMember({
+    discordVerified: false,
+    galleryEligible: true,
+    manualApproved: true,
+    profile: { member_status: "active" },
+  }), false);
+  assert.equal(isDiscordVerifiedSocialMember({
+    discordVerified: true,
+    profile: { member_status: "suspended" },
+  }), false);
+  assert.equal(isDiscordVerifiedSocialMember({
+    discordVerified: true,
+    profile: null,
+  }), false);
+});
 
 test("accepts only the exact authorization id, client, and Social callback", () => {
   assert.equal(isApprovedSocialAuthorization(approvedAuthorization, "authorization-id", "social-client-id"), true);
